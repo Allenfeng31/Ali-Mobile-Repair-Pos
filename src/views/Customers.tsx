@@ -143,6 +143,14 @@ export function CustomersView() {
   const [isConfirmingDeleteRepair, setIsConfirmingDeleteRepair] = useState(false);
   const [showQR, setShowQR] = useState(false);
   
+  const getPortalUrl = () => {
+    const origin = window.location.origin;
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return origin.replace(/localhost|127\.0\.0\.1/, '192.168.1.121') + '/portal';
+    }
+    return origin + '/portal';
+  };
+  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -1523,7 +1531,7 @@ export function CustomersView() {
                <p className="text-center text-sm font-medium text-on-surface-variant mb-8 leading-relaxed">Customers can scan this code to drop-off a new repair or track their live ticket status.</p>
                
                <div className="p-4 bg-white rounded-3xl shadow-lg border border-outline-variant/10 mb-8 transform hover:scale-105 transition-transform">
-                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + '/portal')}`} alt="Portal QR" className="w-48 h-48 rounded-2xl" />
+                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-48 h-48 rounded-2xl" />
                </div>
 
                <p className="text-[10px] font-black text-primary uppercase tracking-widest text-center bg-primary/10 px-4 py-2 rounded-full">Point phone camera here</p>
