@@ -45,6 +45,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [showInvoice, setShowInvoice] = useState(false);
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, activeBrand, searchQuery]);
 
   const filteredItems = inventory.filter(item => {
     const itemCat = item.category || '';
@@ -65,7 +70,16 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     );
     
     return matchesCategory && matchesBrand && matchesSearch;
+  }).sort((a, b) => {
+    // Treat string/number IDs implicitly casting correctly natively
+    const idA = typeof a.id === 'string' ? parseInt(a.id, 10) || 0 : a.id;
+    const idB = typeof b.id === 'string' ? parseInt(b.id, 10) || 0 : b.id;
+    return idB - idA;
   });
+
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const currentItems = filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const displayBrands = ['All Brands', ...brands];
   const displayCategories = ['All Items', ...categories];
@@ -310,7 +324,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
         {/* Items Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 auto-rows-fr">
-          {filteredItems.map(item => (
+          {currentItems.map(item => (
             <div 
               key={item.id}
               onClick={() => addToCart(item)}
@@ -342,6 +356,29 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/10">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-surface-container text-on-surface rounded-lg font-bold text-sm disabled:opacity-50 hover:bg-surface-container-high transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-sm font-bold text-on-surface-variant">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-primary text-on-primary rounded-lg font-bold text-sm disabled:opacity-50 hover:opacity-90 transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right Column: Cart */}
