@@ -1,6 +1,7 @@
-import React, { StrictMode, Component, ErrorInfo, ReactNode } from 'react';
+import { StrictMode, Component, ErrorInfo, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { PortalView } from './views/Portal';
 import './index.css';
 
 interface Props {
@@ -46,10 +47,22 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </StrictMode>,
-);
+const rootElement = document.getElementById('root')!;
+
+if (window.location.pathname === '/portal') {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <PortalView />
+      </ErrorBoundary>
+    </StrictMode>
+  );
+} else {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StrictMode>
+  );
+}

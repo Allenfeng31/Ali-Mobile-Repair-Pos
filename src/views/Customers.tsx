@@ -15,7 +15,8 @@ import {
   Droplets,
   Mail,
   Phone,
-  Trash2
+  Trash2,
+  QrCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -140,6 +141,7 @@ export function CustomersView() {
   const [isEditingRepair, setIsEditingRepair] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isConfirmingDeleteRepair, setIsConfirmingDeleteRepair] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -1499,6 +1501,51 @@ export function CustomersView() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* QR Modal */}
+      <AnimatePresence>
+        {showQR && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setShowQR(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+              className="relative w-full max-w-sm bg-surface-container-lowest rounded-[2rem] shadow-2xl p-8 flex flex-col items-center"
+            >
+               <h3 className="text-xl font-black text-on-surface mb-2 tracking-tight">Client Portal QR</h3>
+               <p className="text-center text-sm font-medium text-on-surface-variant mb-8 leading-relaxed">Customers can scan this code to drop-off a new repair or track their live ticket status.</p>
+               
+               <div className="p-4 bg-white rounded-3xl shadow-lg border border-outline-variant/10 mb-8 transform hover:scale-105 transition-transform">
+                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + '/portal')}`} alt="Portal QR" className="w-48 h-48 rounded-2xl" />
+               </div>
+
+               <p className="text-[10px] font-black text-primary uppercase tracking-widest text-center bg-primary/10 px-4 py-2 rounded-full">Point phone camera here</p>
+
+               <button 
+                  onClick={() => setShowQR(false)}
+                  className="absolute top-4 right-4 p-2 bg-surface-container-high rounded-full hover:bg-surface-container-highest transition-colors text-on-surface-variant"
+               >
+                 <X size={20} />
+               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* FAB */}
+      <button 
+        onClick={() => setShowQR(true)}
+        className="fixed right-6 bottom-24 md:bottom-8 bg-primary text-on-primary w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[90] ring-4 ring-primary/20 hover:ring-primary/40"
+      >
+        <QrCode size={24} />
+      </button>
     </div>
   );
 }
