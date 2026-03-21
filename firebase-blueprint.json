@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "A sales or repair order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "items": { "type": "array", "items": { "$ref": "OrderItem" } },
+        "subtotal": { "type": "number" },
+        "tax": { "type": "number" },
+        "total": { "type": "number" },
+        "profit": { "type": "number" },
+        "type": { "type": "string", "enum": ["repair", "sale", "service"] }
+      },
+      "required": ["id", "timestamp", "items", "subtotal", "tax", "total", "profit", "type"]
+    },
+    "OrderItem": {
+      "title": "OrderItem",
+      "description": "An item in an order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "sku": { "type": "string" },
+        "price": { "type": "number" },
+        "qty": { "type": "number" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "name", "sku", "price", "qty", "category"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "An item in the inventory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "name": { "type": "string" },
+        "model": { "type": "string" },
+        "sku": { "type": "string" },
+        "stock": { "type": "number" },
+        "minStock": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "price": { "type": "number" },
+        "margin": { "type": "number" },
+        "status": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "name", "model", "stock", "minStock", "costPrice", "price", "margin", "status", "category"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "A customer profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "repairs": { "type": "array", "items": { "$ref": "RepairRecord" } },
+        "totalSpent": { "type": "number" },
+        "status": { "type": "string" },
+        "statusColor": { "type": "string" },
+        "lastVisit": { "type": "string" },
+        "initials": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "email", "repairs", "totalSpent", "status", "statusColor", "lastVisit", "initials"]
+    },
+    "RepairRecord": {
+      "title": "RepairRecord",
+      "description": "A record of a repair",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "repairItem": { "type": "string" },
+        "modelNumber": { "type": "string" },
+        "price": { "type": "number" },
+        "liquidDamage": { "type": "boolean" },
+        "password": { "type": "string" },
+        "imei": { "type": "string" },
+        "remark": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "timestamp", "repairItem", "modelNumber", "price", "liquidDamage", "status"]
+    }
+  },
+  "firestore": {
+    "/orders": {
+      "schema": "Order",
+      "description": "Collection of orders"
+    },
+    "/inventory": {
+      "schema": "InventoryItem",
+      "description": "Collection of inventory items"
+    },
+    "/customers": {
+      "schema": "Customer",
+      "description": "Collection of customers"
+    }
+  }
+}

@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "xyncka999@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidOrder(data) {
+      return data.id is string &&
+             data.timestamp is string &&
+             data.items is list &&
+             data.subtotal is number &&
+             data.tax is number &&
+             data.total is number &&
+             data.profit is number &&
+             data.type in ['repair', 'sale', 'service'];
+    }
+
+    function isValidInventoryItem(data) {
+      return data.id is number &&
+             data.name is string &&
+             data.model is string &&
+             data.stock is number &&
+             data.minStock is number &&
+             data.costPrice is number &&
+             data.price is number &&
+             data.margin is number &&
+             data.status is string &&
+             data.category is string;
+    }
+
+    function isValidRepairRecord(data) {
+      return data.id is string &&
+             data.timestamp is string &&
+             data.repairItem is string &&
+             data.modelNumber is string &&
+             data.price is number &&
+             data.liquidDamage is bool &&
+             (data.status in ['In Processing', 'Urgent', 'Completed']) &&
+             (!('password' in data) || data.password is string) &&
+             (!('imei' in data) || data.imei is string) &&
+             (!('remark' in data) || data.remark is string);
+    }
+
+    function isValidCustomer(data) {
+      return data.id is string &&
+             data.name is string &&
+             data.phone is string &&
+             data.email is string &&
+             data.repairs is list &&
+             data.repairs.all(r, isValidRepairRecord(r)) &&
+             data.totalSpent is number &&
+             data.status is string &&
+             data.statusColor is string &&
+             data.lastVisit is string &&
+             data.initials is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidOrder(request.resource.data);
+      allow update: if isAdmin() && isValidOrder(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /inventory/{itemId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidInventoryItem(request.resource.data);
+      allow update: if isAuthenticated() && isValidInventoryItem(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /customers/{customerId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidCustomer(request.resource.data);
+      allow update: if isAuthenticated() && isValidCustomer(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,1504 @@
+import React, { useState } from 'react';
+import { 
+  Search, 
+  UserPlus, 
+  Edit3, 
+  MessageSquare, 
+  Laptop, 
+  Smartphone, 
+  ChevronRight,
+  MoreVertical,
+  Star,
+  X,
+  Check,
+  Clock,
+  Droplets,
+  Mail,
+  Phone,
+  Trash2
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Customer } from '../types';
+import { motion, AnimatePresence } from 'motion/react';
+import { useEffect } from 'react';
+
+const INITIAL_CUSTOMERS: Customer[] = [
+  { 
+    id: '1', 
+    name: 'Elias Henderson', 
+    phone: '+1 (555) 012-4492', 
+    email: 'elias.h@example.com',
+    repairs: [
+      {
+        id: 'R1',
+        timestamp: new Date().toISOString(),
+        repairItem: 'Screen Replacement',
+        modelNumber: 'iPhone 14 Pro Max',
+        price: 450.00,
+        liquidDamage: false,
+        password: '1234',
+        imei: '358293049283741',
+        status: 'Completed'
+      }
+    ],
+    status: 'Completed', 
+    statusColor: 'surface', 
+    lastVisit: '2 days ago', 
+    initials: 'EH',
+    totalSpent: 450.00
+  },
+  { 
+    id: '2', 
+    name: 'Adeline Miller', 
+    phone: '+1 (555) 019-8831', 
+    email: 'a.miller@design.co',
+    repairs: [
+      {
+        id: 'R2',
+        timestamp: new Date().toISOString(),
+        repairItem: 'Logic Board Repair',
+        modelNumber: 'MacBook Pro M1',
+        price: 1492.00,
+        liquidDamage: false,
+        password: 'admin',
+        imei: 'C02F9X8YMD6M',
+        status: 'Completed'
+      }
+    ],
+    status: 'Completed', 
+    statusColor: 'surface', 
+    lastVisit: '3 weeks ago', 
+    initials: 'AM',
+    totalSpent: 1492.00
+  },
+  { 
+    id: '3', 
+    name: 'Julian Weaver', 
+    phone: '+1 (555) 014-2209', 
+    email: 'j.weaver@tech.io',
+    repairs: [
+      {
+        id: 'R3',
+        timestamp: new Date().toISOString(),
+        repairItem: 'Battery Replacement',
+        modelNumber: 'Galaxy S22 Ultra',
+        price: 120.00,
+        liquidDamage: true,
+        password: 'pattern',
+        imei: '990000862471854',
+        status: 'Urgent'
+      }
+    ],
+    status: 'Urgent', 
+    statusColor: 'error', 
+    lastVisit: 'Today', 
+    initials: 'JW',
+    totalSpent: 120.00
+  },
+];
+
+const getCustomerOverallStatus = (customer: Customer) => {
+  if (customer.repairs.some(r => r.status === 'Urgent')) return 'Urgent';
+  if (customer.repairs.some(r => r.status === 'In Processing')) return 'In Processing';
+  return 'Completed';
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Urgent': return 'error';
+    case 'In Processing': return 'tertiary';
+    case 'Completed': return 'surface';
+    default: return 'surface';
+  }
+};
+
+export function CustomersView() {
+  const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
+  
+  // Fetch initial data from backend API
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const { api } = await import('../lib/api');
+        const data = await api.getCustomers();
+        if (data && data.length > 0) {
+          setCustomers(data);
+        }
+      } catch (err) {
+        console.error('Failed to load customers:', err);
+      }
+    };
+    loadData();
+  }, []);
+
+  const [selectedId, setSelectedId] = useState<string>('2');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isViewingAllOrders, setIsViewingAllOrders] = useState(false);
+  const [selectedRepair, setSelectedRepair] = useState<any>(null);
+  const [isEditingRepair, setIsEditingRepair] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isConfirmingDeleteRepair, setIsConfirmingDeleteRepair] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    repairItem: '',
+    modelNumber: '',
+    price: '',
+    liquidDamage: false,
+    password: '',
+    imei: '',
+    remark: ''
+  });
+
+  const [repairFormData, setRepairFormData] = useState({
+    repairItem: '',
+    modelNumber: '',
+    price: '',
+    liquidDamage: false,
+    password: '',
+    imei: '',
+    remark: '',
+    status: 'In Processing'
+  });
+
+  const getLatestTimestamp = (customer: Customer) => {
+    if (customer.repairs.length === 0) return 0;
+    return Math.max(...customer.repairs.map(r => new Date(r.timestamp).getTime()));
+  };
+
+  const sortedCustomers = [...customers].map(c => ({
+    ...c,
+    repairs: [...c.repairs].sort((a, b) => {
+      const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'Completed': 2 };
+      if (priority[a.status] !== priority[b.status]) {
+        return priority[a.status] - priority[b.status];
+      }
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+    })
+  })).sort((a, b) => {
+    const statusA = getCustomerOverallStatus(a);
+    const statusB = getCustomerOverallStatus(b);
+    
+    const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'Completed': 2 };
+    
+    if (priority[statusA] !== priority[statusB]) {
+      return priority[statusA] - priority[statusB];
+    }
+    
+    if (statusA === 'Completed') {
+      return getLatestTimestamp(b) - getLatestTimestamp(a);
+    }
+    
+    return getLatestTimestamp(b) - getLatestTimestamp(a);
+  });
+
+  const filteredCustomers = sortedCustomers.filter(c => {
+    const query = searchQuery.toLowerCase();
+    const hasRepairMatch = c.repairs.some(r => 
+      r.repairItem.toLowerCase().includes(query) || 
+      r.modelNumber.toLowerCase().includes(query)
+    );
+    return (
+      c.name.toLowerCase().includes(query) ||
+      c.phone.toLowerCase().includes(query) ||
+      c.email.toLowerCase().includes(query) ||
+      c.id.toLowerCase().includes(query) ||
+      hasRepairMatch
+    );
+  });
+
+  const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || sortedCustomers[0];
+
+  const handleAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const existingCustomerIndex = customers.findIndex(c => c.phone === formData.phone);
+    const { api } = await import('../lib/api');
+    
+    try {
+      if (existingCustomerIndex !== -1) {
+        // Existing customer
+        const existingCustomer = customers[existingCustomerIndex];
+        const newRepairForApi = {
+          id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+          customer_id: existingCustomer.id,
+          timestamp: new Date().toISOString(),
+          repairItem: formData.repairItem,
+          modelNumber: formData.modelNumber,
+          price: parseFloat(formData.price) || 0,
+          liquidDamage: formData.liquidDamage,
+          password: formData.password,
+          imei: formData.imei,
+          remark: formData.remark,
+          status: 'In Processing'
+        };
+
+        const createdRepair = await api.createRepair(newRepairForApi);
+        const updatedRepairs = [createdRepair, ...existingCustomer.repairs];
+        const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
+        const newStatus = getCustomerOverallStatus({...existingCustomer, repairs: updatedRepairs});
+        
+        await api.updateCustomer(existingCustomer.id, {
+          totalSpent: newTotalSpent,
+          status: newStatus,
+          statusColor: getStatusColor(newStatus),
+          lastVisit: 'Today'
+        });
+
+        const updatedCustomer = {
+          ...existingCustomer,
+          repairs: updatedRepairs,
+          totalSpent: newTotalSpent,
+          status: newStatus,
+          statusColor: getStatusColor(newStatus),
+          lastVisit: 'Today'
+        };
+
+        const updatedCustomers = [...customers];
+        updatedCustomers[existingCustomerIndex] = updatedCustomer;
+        setCustomers(updatedCustomers);
+        setSelectedId(existingCustomer.id);
+      } else {
+        // New customer
+        const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        const price = parseFloat(formData.price) || 0;
+        
+        const customerForApi = {
+          id: Math.random().toString(36).substr(2, 9).toUpperCase(),
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          initials,
+          status: 'In Processing',
+          statusColor: 'tertiary',
+          lastVisit: 'Today',
+          totalSpent: price
+        };
+
+        const createdCustomer = await api.createCustomer(customerForApi);
+
+        const newRepairForApi = {
+          id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+          customer_id: createdCustomer.id,
+          timestamp: new Date().toISOString(),
+          repairItem: formData.repairItem,
+          modelNumber: formData.modelNumber,
+          price: price,
+          liquidDamage: formData.liquidDamage,
+          password: formData.password,
+          imei: formData.imei,
+          remark: formData.remark,
+          status: 'In Processing'
+        };
+
+        const createdRepair = await api.createRepair(newRepairForApi);
+        createdCustomer.repairs = [createdRepair];
+
+        setCustomers([createdCustomer, ...customers]);
+        setSelectedId(createdCustomer.id);
+      }
+
+      setIsAdding(false);
+      resetForm();
+    } catch (err) {
+      console.error('Failed to add customer/repair:', err);
+      alert('Failed to save to database. Check console for details.');
+    }
+  };
+
+  const handleEditCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    
+    const updateData = {
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      initials
+    };
+    
+    try {
+      const { api } = await import('../lib/api');
+      await api.updateCustomer(selectedId, updateData);
+      
+      const updatedCustomers = customers.map(c => {
+        if (c.id === selectedId) {
+          return { ...c, ...updateData };
+        }
+        return c;
+      });
+      setCustomers(updatedCustomers);
+      setIsEditing(false);
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update customer');
+    }
+  };
+
+  const handleDeleteCustomer = async () => {
+    try {
+      const { api } = await import('../lib/api');
+      await api.deleteCustomer(selectedId);
+      
+      const updatedCustomers = customers.filter(c => c.id !== selectedId);
+      setCustomers(updatedCustomers);
+      setIsConfirmingDelete(false);
+      setIsEditing(false);
+      if (updatedCustomers.length > 0) {
+        setSelectedId(updatedCustomers[0].id);
+      } else {
+        setSelectedId('');
+      }
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete customer');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
+      repairItem: '',
+      modelNumber: '',
+      price: '',
+      liquidDamage: false,
+      password: '',
+      imei: '',
+      remark: ''
+    });
+  };
+
+  const openEditModal = () => {
+    setFormData({
+      name: selectedCustomer.name,
+      phone: selectedCustomer.phone,
+      email: selectedCustomer.email,
+      repairItem: '',
+      modelNumber: '',
+      price: '',
+      liquidDamage: false,
+      password: '',
+      imei: '',
+      remark: ''
+    });
+    setIsEditing(true);
+  };
+
+  const openEditRepairModal = (repair: any) => {
+    setRepairFormData({
+      repairItem: repair.repairItem,
+      modelNumber: repair.modelNumber,
+      price: repair.price.toString(),
+      liquidDamage: repair.liquidDamage,
+      password: repair.password || '',
+      imei: repair.imei || '',
+      remark: repair.remark || '',
+      status: repair.status
+    });
+    setIsEditingRepair(true);
+  };
+
+  const toggleRepairStatus = async (customerId: string, repairId: string, currentStatus: string) => {
+    if (currentStatus !== 'In Processing') return;
+
+    try {
+      const { api } = await import('../lib/api');
+      await api.updateRepair(repairId, { status: 'Completed' });
+      
+      const updatedCustomers = customers.map(c => {
+        if (c.id === customerId) {
+          const updatedRepairs = c.repairs.map(r => {
+            if (r.id === repairId) {
+              const updatedRepair = { ...r, status: 'Completed' as const };
+              if (selectedRepair && selectedRepair.id === repairId) {
+                setSelectedRepair(updatedRepair);
+              }
+              return updatedRepair;
+            }
+            return r;
+          });
+          
+          const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
+          
+          api.updateCustomer(customerId, {
+            status: newStatus,
+            statusColor: getStatusColor(newStatus)
+          }).catch(console.error);
+          
+          return {
+            ...c,
+            repairs: updatedRepairs,
+            status: newStatus,
+            statusColor: getStatusColor(newStatus)
+          };
+        }
+        return c;
+      });
+
+      setCustomers(updatedCustomers);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update repair status');
+    }
+  };
+
+  const handleUpdateRepair = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRepair) return;
+
+    const updateData = {
+      repairItem: repairFormData.repairItem,
+      modelNumber: repairFormData.modelNumber,
+      price: parseFloat(repairFormData.price) || 0,
+      liquidDamage: repairFormData.liquidDamage,
+      password: repairFormData.password,
+      imei: repairFormData.imei,
+      remark: repairFormData.remark,
+      status: repairFormData.status
+    };
+
+    try {
+      const { api } = await import('../lib/api');
+      await api.updateRepair(selectedRepair.id, updateData);
+      
+      const updatedCustomers = customers.map(c => {
+        if (c.id === selectedId) {
+          const updatedRepairs = c.repairs.map(r => {
+            if (r.id === selectedRepair.id) {
+              return { ...r, ...updateData };
+            }
+            return r;
+          });
+          
+          const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
+          const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
+          
+          api.updateCustomer(selectedId, {
+            totalSpent: newTotalSpent,
+            status: newStatus,
+            statusColor: getStatusColor(newStatus)
+          }).catch(console.error);
+          
+          return {
+            ...c,
+            repairs: updatedRepairs,
+            totalSpent: newTotalSpent,
+            status: newStatus,
+            statusColor: getStatusColor(newStatus)
+          };
+        }
+        return c;
+      });
+
+      setCustomers(updatedCustomers);
+      setIsEditingRepair(false);
+      setSelectedRepair(null);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update repair');
+    }
+  };
+
+  const handleDeleteRepair = async () => {
+    if (!selectedRepair) return;
+
+    try {
+      const { api } = await import('../lib/api');
+      await api.deleteRepair(selectedRepair.id);
+      
+      const updatedCustomers = customers.map(c => {
+        if (c.id === selectedId) {
+          const updatedRepairs = c.repairs.filter(r => r.id !== selectedRepair.id);
+          const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
+          const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
+          
+          api.updateCustomer(selectedId, {
+            totalSpent: newTotalSpent,
+            status: newStatus,
+            statusColor: getStatusColor(newStatus)
+          }).catch(console.error);
+          
+          return {
+            ...c,
+            repairs: updatedRepairs,
+            totalSpent: newTotalSpent,
+            status: newStatus,
+            statusColor: getStatusColor(newStatus)
+          };
+        }
+        return c;
+      });
+
+      setCustomers(updatedCustomers);
+      setIsConfirmingDeleteRepair(false);
+      setIsEditingRepair(false);
+      setSelectedRepair(null);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete repair');
+    }
+  };
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-10 relative">
+      {/* Left Column: List */}
+      <section className="flex-1 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-primary">Customers</h2>
+            <p className="text-on-surface-variant text-sm font-medium">Manage your technical client database</p>
+          </div>
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-md active:scale-95 transition-all"
+          >
+            <UserPlus size={18} />
+            Add New Customer
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
+          <input 
+            className="w-full bg-surface-container-high border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-highest transition-all outline-none text-on-surface font-medium" 
+            placeholder="Search by name, phone, email or repair item..." 
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* List */}
+        <div className="space-y-4">
+          {filteredCustomers.length > 0 ? (
+            filteredCustomers.map(customer => {
+              const isExpanded = selectedId === customer.id;
+              const overallStatus = getCustomerOverallStatus(customer);
+              const statusColor = getStatusColor(overallStatus);
+
+              return (
+                <div 
+                  key={customer.id}
+                  className={cn(
+                    "rounded-2xl overflow-hidden transition-all duration-300 border border-outline-variant/10",
+                    isExpanded 
+                      ? "bg-surface-container-low shadow-lg ring-1 ring-primary/20" 
+                      : "bg-surface-container-lowest hover:bg-surface-container-high"
+                  )}
+                >
+                  <div 
+                    onClick={() => setSelectedId(isExpanded ? '' : customer.id)}
+                    className="p-5 flex items-center justify-between cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-colors",
+                        isExpanded ? "bg-primary text-on-primary" : "bg-secondary-container text-on-secondary-container"
+                      )}>
+                        {customer.initials}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-on-surface">{customer.name}</h3>
+                        <p className="text-xs text-on-surface-variant font-bold">{customer.phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right hidden sm:block">
+                        <span className={cn(
+                          "text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest",
+                          statusColor === 'tertiary' ? "bg-tertiary-container text-on-tertiary-container" :
+                          statusColor === 'error' ? "bg-error-container text-on-error-container" :
+                          "bg-surface-container-highest text-on-surface-variant"
+                        )}>
+                          {overallStatus}
+                        </span>
+                        <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Spent: ${customer.totalSpent.toFixed(2)}</p>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 90 : 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ChevronRight size={20} className="text-on-surface-variant" />
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <div className="px-5 pb-6 pt-2 border-t border-outline-variant/5">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div>
+                                <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Contact Information</p>
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+                                    <Mail size={14} className="text-primary" />
+                                    {customer.email}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+                                    <Phone size={14} className="text-primary" />
+                                    {customer.phone}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); openEditModal(); }}
+                                  className="flex-1 bg-surface-container-highest text-on-surface-variant py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-primary hover:text-on-primary transition-all"
+                                >
+                                  <Edit3 size={14} />
+                                  Edit Profile
+                                </button>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); setIsViewingAllOrders(true); }}
+                                  className="flex-1 bg-secondary-container text-on-secondary-container py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                                >
+                                  History
+                                </button>
+                              </div>
+                            </div>
+
+                            <div>
+                              <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Recent Repairs</p>
+                              <div className="space-y-2">
+                                {customer.repairs.slice(0, 2).map(repair => (
+                                  <div 
+                                    key={repair.id}
+                                    onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
+                                    className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all cursor-pointer flex justify-between items-center group"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="p-2 bg-primary/5 rounded-lg text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                                        <Smartphone size={16} />
+                                      </div>
+                                      <div>
+                                        <p className="text-xs font-bold text-on-surface">{repair.repairItem}</p>
+                                        <p className="text-[10px] font-bold text-on-surface-variant">{repair.modelNumber}</p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-xs font-black text-primary">${repair.price.toFixed(2)}</p>
+                                      <span 
+                                        onClick={(e) => { e.stopPropagation(); toggleRepairStatus(customer.id, repair.id, repair.status); }}
+                                        className={cn(
+                                          "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all",
+                                          repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
+                                          repair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
+                                          repair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container" :
+                                          "bg-surface-container-highest text-on-surface-variant"
+                                        )}
+                                      >
+                                        {repair.status}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                                {customer.repairs.length > 2 && (
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); setIsViewingAllOrders(true); }}
+                                    className="w-full text-[10px] font-black text-primary uppercase tracking-widest text-center py-1 hover:underline"
+                                  >
+                                    + {customer.repairs.length - 2} more records
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-center py-20 bg-surface-container-lowest rounded-3xl border border-dashed border-outline-variant">
+              <p className="text-on-surface-variant font-bold">No customers found matching your search.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Right Column: Detail */}
+      <aside className="w-full lg:w-[450px] space-y-6">
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={selectedCustomer.id}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="bg-surface-container-low rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/5"
+          >
+            {/* Header Gradient */}
+            <div className="h-32 signature-gradient relative p-6 flex items-end">
+              <div className="absolute top-4 right-4 flex gap-2">
+                <button 
+                  onClick={openEditModal}
+                  className="bg-white/10 backdrop-blur-md text-white p-2 rounded-xl hover:bg-white/20 transition-colors"
+                >
+                  <Edit3 size={16} />
+                </button>
+                <button className="bg-white/10 backdrop-blur-md text-white p-2 rounded-xl hover:bg-white/20 transition-colors">
+                  <MoreVertical size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="px-8 pb-10 -mt-12 relative">
+              <div className="w-24 h-24 rounded-3xl bg-white p-1.5 shadow-xl flex items-center justify-center font-black text-3xl text-primary">
+                {selectedCustomer.initials}
+              </div>
+              <div className="mt-6">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-black text-on-surface tracking-tight">{selectedCustomer.name}</h2>
+                  <Star size={16} className="text-tertiary fill-tertiary" />
+                </div>
+                <p className="text-on-surface-variant font-bold text-sm">Customer ID: {selectedCustomer.id}</p>
+              </div>
+
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Email</p>
+                  <p className="text-xs font-bold truncate text-on-surface">{selectedCustomer.email}</p>
+                </div>
+                <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Total Spent</p>
+                  <p className="text-sm font-black text-primary">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center gap-3 text-on-surface-variant">
+                  <Phone size={16} className="text-primary" />
+                  <span className="text-sm font-bold">{selectedCustomer.phone}</span>
+                </div>
+              </div>
+
+              <div className="mt-10">
+                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-5">Repair History</h3>
+                <div className="space-y-3">
+                  {selectedCustomer.repairs.map(item => (
+                    <div 
+                      key={item.id} 
+                      onClick={() => setSelectedRepair(item)}
+                      className="bg-surface-container-lowest p-4 rounded-2xl flex gap-4 items-start border border-outline-variant/5 hover:border-primary/20 transition-colors cursor-pointer group"
+                    >
+                      <div className="bg-secondary-container/30 p-2.5 rounded-xl text-secondary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                        <Smartphone size={20} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-sm text-on-surface leading-tight">{item.repairItem}</h4>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black text-on-surface-variant">
+                              {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase()}
+                            </span>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedRepair(item);
+                                setIsConfirmingDeleteRepair(true);
+                              }}
+                              className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              title="Delete Repair Record"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center mt-1.5">
+                          <p className="text-[11px] font-bold text-on-surface-variant">Model: {item.modelNumber}</p>
+                          <p className="text-[11px] font-black text-primary">${item.price.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-10 flex gap-3">
+                <button 
+                  onClick={() => setIsViewingAllOrders(true)}
+                  className="flex-1 bg-secondary-container text-on-secondary-container py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all"
+                >
+                  View All Orders
+                </button>
+                <button className="bg-primary text-on-primary px-5 py-3.5 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                  <MessageSquare size={20} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </aside>
+
+      {/* Add/Edit Customer Modal */}
+      <AnimatePresence>
+        {(isAdding || isEditing) && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
+              className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h3 className="text-2xl font-black text-primary tracking-tight">
+                      {isEditing ? 'Edit Customer' : 'Add New Customer'}
+                    </h3>
+                    <p className="text-on-surface-variant text-sm font-bold">
+                      {isEditing ? 'Update client information' : 'Register a new repair ticket'}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
+                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <form onSubmit={isEditing ? handleEditCustomer : handleAddCustomer} className="space-y-6 max-h-[70vh] overflow-y-auto px-1">
+                  <div className="grid grid-cols-1 gap-6">
+                    {!isEditing && (
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Repair Time</label>
+                        <div className="bg-surface-container-high p-4 rounded-2xl flex items-center gap-3 text-on-surface-variant border border-outline-variant/5">
+                          <Clock size={18} />
+                          <span className="text-sm font-bold">{new Date().toLocaleString()}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Customer Name</label>
+                      <input 
+                        type="text"
+                        placeholder="Full Name"
+                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Phone</label>
+                        <input 
+                          type="tel"
+                          placeholder="+1 (555) 000-0000"
+                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Email</label>
+                        <input 
+                          type="email"
+                          placeholder="email@example.com"
+                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    {!isEditing && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Repair Item</label>
+                            <input 
+                              type="text"
+                              placeholder="e.g. Screen"
+                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              value={formData.repairItem}
+                              onChange={(e) => setFormData({...formData, repairItem: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Model Number</label>
+                            <input 
+                              type="text"
+                              placeholder="e.g. iPhone 14"
+                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              value={formData.modelNumber}
+                              onChange={(e) => setFormData({...formData, modelNumber: e.target.value})}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Price ($)</label>
+                            <input 
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              value={formData.price}
+                              onChange={(e) => setFormData({...formData, price: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Password</label>
+                            <input 
+                              type="text"
+                              placeholder="Device Passcode"
+                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              value={formData.password}
+                              onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI / Serial Number</label>
+                          <input 
+                            type="text"
+                            placeholder="IMEI Number"
+                            className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                            value={formData.imei}
+                            onChange={(e) => setFormData({...formData, imei: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Remark</label>
+                          <textarea 
+                            placeholder="Special notes or instructions..."
+                            className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold min-h-[100px] resize-none"
+                            value={formData.remark}
+                            onChange={(e) => setFormData({...formData, remark: e.target.value})}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/10">
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "p-2 rounded-xl transition-colors",
+                              formData.liquidDamage ? "bg-error/10 text-error" : "bg-surface-container-high text-on-surface-variant"
+                            )}>
+                              <Droplets size={20} />
+                            </div>
+                            <div>
+                              <p className="text-xs font-black text-on-surface">Liquid Damage</p>
+                              <p className="text-[10px] font-bold text-on-surface-variant">Has the device been in water?</p>
+                            </div>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => setFormData({...formData, liquidDamage: !formData.liquidDamage})}
+                            className={cn(
+                              "w-12 h-6 rounded-full relative transition-colors duration-300",
+                              formData.liquidDamage ? "bg-error" : "bg-surface-container-highest"
+                            )}
+                          >
+                            <div className={cn(
+                              "absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300",
+                              formData.liquidDamage ? "left-7" : "left-1"
+                            )} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="pt-4 flex flex-col gap-3">
+                    <div className="flex gap-4">
+                      <button 
+                        type="button"
+                        onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
+                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="submit"
+                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-on-primary bg-primary shadow-lg shadow-primary/20 hover:opacity-90 transition-all"
+                      >
+                        {isEditing ? 'Update Info' : 'Save Customer'}
+                      </button>
+                    </div>
+                    {isEditing && (
+                      <button 
+                        type="button"
+                        onClick={() => setIsConfirmingDelete(true)}
+                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Trash2 size={16} />
+                        Delete Customer Profile
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Repair Detail Modal */}
+      <AnimatePresence>
+        {selectedRepair && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }}
+              className="absolute inset-0 bg-on-surface/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative w-full max-w-md bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-black text-primary">
+                    {isEditingRepair ? 'Edit Repair Record' : 'Repair Details'}
+                  </h3>
+                  <button onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="p-2 hover:bg-surface-container-high rounded-full">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {isEditingRepair ? (
+                  <form onSubmit={handleUpdateRepair} className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Repair Item</label>
+                      <input 
+                        type="text"
+                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                        value={repairFormData.repairItem}
+                        onChange={(e) => setRepairFormData({...repairFormData, repairItem: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Model Number</label>
+                      <input 
+                        type="text"
+                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                        value={repairFormData.modelNumber}
+                        onChange={(e) => setRepairFormData({...repairFormData, modelNumber: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Price ($)</label>
+                        <input 
+                          type="number"
+                          step="0.01"
+                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          value={repairFormData.price}
+                          onChange={(e) => setRepairFormData({...repairFormData, price: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Status</label>
+                        <select 
+                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold appearance-none"
+                          value={repairFormData.status}
+                          onChange={(e) => setRepairFormData({...repairFormData, status: e.target.value})}
+                        >
+                          <option value="In Processing">In Processing</option>
+                          <option value="Urgent">Urgent</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Password</label>
+                        <input 
+                          type="text"
+                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          value={repairFormData.password}
+                          onChange={(e) => setRepairFormData({...repairFormData, password: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI</label>
+                        <input 
+                          type="text"
+                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          value={repairFormData.imei}
+                          onChange={(e) => setRepairFormData({...repairFormData, imei: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Remark</label>
+                      <textarea 
+                        placeholder="Special notes or instructions..."
+                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold min-h-[100px] resize-none"
+                        value={repairFormData.remark}
+                        onChange={(e) => setRepairFormData({...repairFormData, remark: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/10">
+                      <div className="flex items-center gap-3">
+                        <Droplets size={18} className={repairFormData.liquidDamage ? "text-error" : "text-on-surface-variant"} />
+                        <span className="text-xs font-bold text-on-surface">Liquid Damage</span>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => setRepairFormData({...repairFormData, liquidDamage: !repairFormData.liquidDamage})}
+                        className={cn(
+                          "w-10 h-5 rounded-full relative transition-colors",
+                          repairFormData.liquidDamage ? "bg-error" : "bg-surface-container-highest"
+                        )}
+                      >
+                        <div className={cn(
+                          "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all",
+                          repairFormData.liquidDamage ? "left-5.5" : "left-0.5"
+                        )} />
+                      </button>
+                    </div>
+
+                    <div className="pt-4 flex flex-col gap-3">
+                      <div className="flex gap-3">
+                        <button 
+                          type="button"
+                          onClick={() => setIsEditingRepair(false)}
+                          className="flex-1 py-3.5 bg-surface-container-high text-on-surface-variant rounded-2xl font-black text-xs uppercase tracking-widest"
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          type="submit"
+                          className="flex-1 py-3.5 bg-primary text-on-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20"
+                        >
+                          Save Changes
+                        </button>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => setIsConfirmingDeleteRepair(true)}
+                        className="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Trash2 size={16} />
+                        Delete Repair Record
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="bg-primary/10 p-3 rounded-2xl text-primary">
+                          <Smartphone size={24} />
+                        </div>
+                        <div>
+                          <h4 className="font-black text-on-surface">{selectedRepair.repairItem}</h4>
+                          <p className="text-xs font-bold text-on-surface-variant">{selectedRepair.modelNumber}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Status</p>
+                        <span 
+                          onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, selectedRepair.id, selectedRepair.status); }}
+                          className={cn(
+                            "text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest transition-all",
+                            selectedRepair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
+                            selectedRepair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
+                            selectedRepair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container" :
+                            "bg-surface-container-highest text-on-surface-variant"
+                          )}
+                        >
+                          {selectedRepair.status}
+                        </span>
+                      </div>
+                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Price</p>
+                        <p className="text-sm font-black text-primary">${selectedRepair.price.toFixed(2)}</p>
+                      </div>
+                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Date</p>
+                        <p className="text-sm font-bold text-on-surface">{new Date(selectedRepair.timestamp).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Password</p>
+                        <p className="text-sm font-bold text-on-surface">{selectedRepair.password || 'None'}</p>
+                      </div>
+                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">IMEI</p>
+                        <p className="text-sm font-bold text-on-surface truncate">{selectedRepair.imei || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className={cn(
+                      "p-4 rounded-2xl flex items-center gap-3",
+                      selectedRepair.liquidDamage ? "bg-error/10 text-error" : "bg-success/10 text-success"
+                    )}>
+                      <Droplets size={18} />
+                      <span className="text-xs font-black uppercase tracking-widest">
+                        {selectedRepair.liquidDamage ? 'Liquid Damage Detected' : 'No Liquid Damage'}
+                      </span>
+                    </div>
+
+                    {selectedRepair.remark && (
+                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Remark</p>
+                        <p className="text-sm font-bold text-on-surface whitespace-pre-wrap">{selectedRepair.remark}</p>
+                      </div>
+                    )}
+
+                    <div className="pt-4 flex flex-col gap-3">
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => openEditRepairModal(selectedRepair)}
+                          className="flex-1 py-4 bg-secondary-container text-on-secondary-container rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                          <Edit3 size={16} />
+                          Edit Record
+                        </button>
+                        <button 
+                          onClick={() => setSelectedRepair(null)}
+                          className="flex-1 py-4 bg-primary text-on-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20"
+                        >
+                          Close Details
+                        </button>
+                      </div>
+                      <button 
+                        onClick={() => setIsConfirmingDeleteRepair(true)}
+                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Trash2 size={16} />
+                        Delete Repair Record
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* View All Orders Modal */}
+      <AnimatePresence>
+        {isViewingAllOrders && (
+          <div className="fixed inset-0 z-[105] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsViewingAllOrders(false)}
+              className="absolute inset-0 bg-on-surface/50 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h3 className="text-2xl font-black text-primary tracking-tight">Order History</h3>
+                    <p className="text-on-surface-variant text-sm font-bold">All repairs for {selectedCustomer.name}</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsViewingAllOrders(false)}
+                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                  {selectedCustomer.repairs.map((repair) => (
+                    <div 
+                      key={repair.id}
+                      onClick={() => {
+                        setSelectedRepair(repair);
+                        setIsViewingAllOrders(false);
+                      }}
+                      className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between border border-outline-variant/5 hover:border-primary/30 transition-all cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="bg-primary/10 p-3 rounded-xl text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                          <Smartphone size={20} />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-on-surface">{repair.repairItem}</h4>
+                          <p className="text-xs font-bold text-on-surface-variant">{repair.modelNumber}</p>
+                        </div>
+                      </div>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-3">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRepair(repair);
+                              setIsConfirmingDeleteRepair(true);
+                            }}
+                            className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                            title="Delete Repair Record"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <p className="font-black text-primary text-lg">${repair.price.toFixed(2)}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 mt-1">
+                          <span 
+                            onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, repair.id, repair.status); }}
+                            className={cn(
+                              "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all",
+                              repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
+                              repair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
+                              repair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container" :
+                              "bg-surface-container-highest text-on-surface-variant"
+                            )}
+                          >
+                            {repair.status}
+                          </span>
+                          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                            {new Date(repair.timestamp).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Lifetime Value</p>
+                    <p className="text-2xl font-black text-primary">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsViewingAllOrders(false)}
+                    className="px-8 py-3.5 bg-surface-container-highest text-on-surface font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-outline-variant/20 transition-all"
+                  >
+                    Close History
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isConfirmingDelete && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsConfirmingDelete(false)}
+              className="absolute inset-0 bg-on-surface/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative w-full max-w-sm bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 p-8 text-center"
+            >
+              <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-6">
+                <Trash2 size={40} />
+              </div>
+              <h3 className="text-2xl font-black text-on-surface mb-2">Delete Profile?</h3>
+              <p className="text-on-surface-variant font-medium mb-8">
+                This action is permanent and will delete all repair history for <strong>{selectedCustomer.name}</strong>.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsConfirmingDelete(false)}
+                  className="flex-1 py-4 bg-surface-container-high text-on-surface-variant rounded-2xl font-black text-xs uppercase tracking-widest"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteCustomer}
+                  className="flex-1 py-4 bg-error text-on-error rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-error/20"
+                >
+                  Delete Now
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Delete Repair Confirmation Modal */}
+      <AnimatePresence>
+        {isConfirmingDeleteRepair && (
+          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsConfirmingDeleteRepair(false)}
+              className="absolute inset-0 bg-on-surface/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative w-full max-w-sm bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 p-8 text-center"
+            >
+              <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-6">
+                <Trash2 size={40} />
+              </div>
+              <h3 className="text-2xl font-black text-on-surface mb-2">Delete Record?</h3>
+              <p className="text-on-surface-variant font-medium mb-8">
+                Are you sure you want to delete this specific repair record? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsConfirmingDeleteRepair(false)}
+                  className="flex-1 py-4 bg-surface-container-high text-on-surface-variant rounded-2xl font-black text-xs uppercase tracking-widest"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteRepair}
+                  className="flex-1 py-4 bg-error text-on-error rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-error/20"
+                >
+                  Delete Now
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
