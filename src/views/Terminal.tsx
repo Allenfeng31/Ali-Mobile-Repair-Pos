@@ -51,6 +51,16 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     setCurrentPage(1);
   }, [activeCategory, activeBrand, searchQuery]);
 
+  const handleCategoryClick = (cat: string) => {
+    setActiveCategory(cat === 'All Items' || activeCategory === cat ? 'All Items' : cat);
+    setCurrentPage(1);
+  };
+
+  const handleBrandClick = (br: string) => {
+    setActiveBrand(br === 'All Brands' || activeBrand === br ? 'All Brands' : br);
+    setCurrentPage(1);
+  };
+
   const filteredItems = inventory.filter(item => {
     const itemCat = item.category || '';
     const matchesCategory = activeCategory === 'All Items' || itemCat === activeCategory;
@@ -84,9 +94,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const displayBrands = ['All Brands', ...brands];
   const displayCategories = ['All Items', ...categories];
 
-  const handleCategoryClick = (cat: string) => {
-    setActiveCategory(cat);
-  };
 
   const addToCart = (item: any) => {
     setCart(prev => {
@@ -128,23 +135,37 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       // Calculate totals
       let grossMSRP = 0;
       let rawTotal = 0;
+      let percentDiscountableTotal = 0;
+      
       cart.forEach(item => {
+        let currentPrice = item.price;
+        let isMarkupOrZero = false;
+
         if (item.overridePrice !== undefined) {
           if (item.overridePrice < item.price) {
             grossMSRP += item.price * item.qty;
             rawTotal += item.overridePrice * item.qty;
+            currentPrice = item.overridePrice;
           } else {
             grossMSRP += item.overridePrice * item.qty;
             rawTotal += item.overridePrice * item.qty;
+            currentPrice = item.overridePrice;
+            if (item.overridePrice > item.price) isMarkupOrZero = true;
           }
         } else {
           grossMSRP += item.price * item.qty;
           rawTotal += item.price * item.qty;
         }
+
+        if (item.price === 0 || isMarkupOrZero) {
+          // Exempt from global % discount
+        } else {
+          percentDiscountableTotal += currentPrice * item.qty;
+        }
       });
 
       const lineDiscountAmount = grossMSRP - rawTotal;
-      const percentDiscountAmount = rawTotal * (discountPercent / 100);
+      const percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
       const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
 
       const baseTotal = rawTotal - percentDiscountAmount;
@@ -239,23 +260,37 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   let grossMSRP = 0;
   let rawTotal = 0;
+  let percentDiscountableTotal = 0;
+
   cart.forEach(item => {
+    let currentPrice = item.price;
+    let isMarkupOrZero = false;
+
     if (item.overridePrice !== undefined) {
       if (item.overridePrice < item.price) {
         grossMSRP += item.price * item.qty;
         rawTotal += item.overridePrice * item.qty;
+        currentPrice = item.overridePrice;
       } else {
         grossMSRP += item.overridePrice * item.qty;
         rawTotal += item.overridePrice * item.qty;
+        currentPrice = item.overridePrice;
+        if (item.overridePrice > item.price) isMarkupOrZero = true;
       }
     } else {
       grossMSRP += item.price * item.qty;
       rawTotal += item.price * item.qty;
     }
+
+    if (item.price === 0 || isMarkupOrZero) {
+      // Exempt from global % discount
+    } else {
+      percentDiscountableTotal += currentPrice * item.qty;
+    }
   });
 
   const lineDiscountAmount = grossMSRP - rawTotal;
-  const percentDiscountAmount = rawTotal * (discountPercent / 100);
+  const percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
   const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
 
   const baseTotal = rawTotal - percentDiscountAmount;
@@ -308,7 +343,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             {displayBrands.map(br => (
               <button
                 key={br}
-                onClick={() => setActiveBrand(br)}
+                onClick={() => handleBrandClick(br)}
                 className={cn(
                   "px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all",
                   activeBrand === br 
