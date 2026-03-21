@@ -20,6 +20,62 @@ export function SettingsView({ onLogout }: { onLogout?: () => void }) {
   const [header, setHeader] = React.useState(`Precision Tech Repairs\n123 Artisan Way, Ste 4\nSan Francisco, CA 94103\nTel: (555) 012-3456`);
   const [footer, setFooter] = React.useState(`Warranty: 90 days on parts and labor. No refunds on water damage repairs. Thank you for choosing Precision!`);
   const [isSaved, setIsSaved] = React.useState(false);
+  const [printers, setPrinters] = React.useState<any[]>([]);
+  const [networkInfo, setNetworkInfo] = React.useState<{type: string, downlink: number, ping: number, online: boolean}>({
+    type: 'wifi', downlink: 0, ping: 0, online: navigator.onLine
+  });
+
+  React.useEffect(() => {
+    // Network Diagnostics
+    const updateNetInfo = () => {
+      const conn = (navigator as any).connection;
+      setNetworkInfo({
+        type: conn?.effectiveType || 'wifi',
+        downlink: conn?.downlink || 0,
+        ping: conn?.rtt || 0,
+        online: navigator.onLine
+      });
+    };
+    updateNetInfo();
+    window.addEventListener('online', updateNetInfo);
+    window.addEventListener('offline', updateNetInfo);
+    if ((navigator as any).connection) {
+      (navigator as any).connection.addEventListener('change', updateNetInfo);
+    }
+
+    // USB Printers
+    if ('usb' in navigator) {
+      (navigator as any).usb.getDevices().then(setPrinters).catch(console.error);
+      const handleConnect = (e: any) => setPrinters((prev: any[]) => [...prev, e.device]);
+      const handleDisconnect = (e: any) => setPrinters((prev: any[]) => prev.filter(d => d !== e.device));
+      (navigator as any).usb.addEventListener('connect', handleConnect);
+      (navigator as any).usb.addEventListener('disconnect', handleDisconnect);
+      
+      return () => {
+        (navigator as any).usb.removeEventListener('connect', handleConnect);
+        (navigator as any).usb.removeEventListener('disconnect', handleDisconnect);
+        window.removeEventListener('online', updateNetInfo);
+        window.removeEventListener('offline', updateNetInfo);
+        if ((navigator as any).connection) {
+          (navigator as any).connection.removeEventListener('change', updateNetInfo);
+        }
+      };
+    }
+  }, []);
+
+  const handleAddPrinter = async () => {
+    if (!('usb' in navigator)) {
+      alert("WebUSB API is not supported in this browser. Please use Chrome/Edge.");
+      return;
+    }
+    try {
+      await (navigator as any).usb.requestDevice({ filters: [] });
+      const devices = await (navigator as any).usb.getDevices();
+      setPrinters(devices);
+    } catch (err) {
+      console.error("Printer selection cancelled", err);
+    }
+  };
 
   React.useEffect(() => {
     api.getSettings().then(settings => {
@@ -56,65 +112,79 @@ export function SettingsView({ onLogout }: { onLogout?: () => void }) {
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <Printer className="text-primary" size={24} />
-                <h3 className="text-lg font-bold text-primary">Printers</h3>
+                <div>
+                  <h3 className="text-lg font-bold text-primary leading-tight">Hardware Printers</h3>
+                  <p className="text-[10px] font-medium text-on-surface-variant uppercase tracking-wider mt-0.5">System Default & USB</p>
+                </div>
               </div>
-              <button className="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-all flex items-center gap-2">
+              <button 
+                onClick={handleAddPrinter}
+                className="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-all flex items-center gap-2"
+              >
                 <Plus size={14} />
-                ADD NEW
+                SCAN USB
               </button>
             </div>
 
             <div className="space-y-4">
+              {/* System Default Printer (always available via window.print) */}
               <div className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group border border-outline-variant/5 hover:border-primary/20 transition-all">
                 <div className="flex items-center gap-4">
                   <div className="bg-teal-50 p-3 rounded-xl">
-                    <Bluetooth className="text-teal-700" size={20} />
+                    <Printer className="text-teal-700" size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-on-surface">Star Micronics mPOP</p>
+                    <p className="text-sm font-bold text-on-surface">System Default Printer</p>
                     <div className="flex items-center gap-1.5 mt-1">
                       <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                      <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Connected</span>
+                      <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">OS Managed (SAM4S ready)</span>
                     </div>
                   </div>
                 </div>
                 <MoreVertical className="text-outline-variant group-hover:text-primary cursor-pointer transition-colors" size={20} />
               </div>
 
-              <div className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group border border-outline-variant/5 hover:border-primary/20 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="bg-slate-100 p-3 rounded-xl">
-                    <Network className="text-slate-500" size={20} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-on-surface">Epson TM-T88VI</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className="w-2 h-2 rounded-full bg-slate-300"></div>
-                      <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Offline</span>
+              {/* Dynamic USB Printers */}
+              {printers.map((printer, idx) => (
+                <div key={idx} className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group border border-outline-variant/5 hover:border-primary/20 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-blue-50 p-3 rounded-xl">
+                      <Bluetooth className="text-blue-700" size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-on-surface">{printer.productName || `USB Device (${printer.vendorId})`}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Direct USB Connected</span>
+                      </div>
                     </div>
                   </div>
+                  <MoreVertical className="text-outline-variant group-hover:text-primary cursor-pointer transition-colors" size={20} />
                 </div>
-                <MoreVertical className="text-outline-variant group-hover:text-primary cursor-pointer transition-colors" size={20} />
-              </div>
+              ))}
             </div>
           </section>
 
           {/* Diagnostics */}
           <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
             <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em] mb-6">Diagnostics</h3>
-            <div className="flex items-center justify-between bg-surface-container-lowest p-5 rounded-2xl border-l-4 border-primary shadow-sm">
+            <div className={cn("flex items-center justify-between p-5 rounded-2xl border-l-4 shadow-sm", networkInfo.online ? "bg-surface-container-lowest border-primary" : "bg-error/5 border-error")}>
               <div className="flex items-center gap-4">
-                <div className="p-2.5 bg-primary-container/10 rounded-xl">
-                  <Router className="text-primary" size={24} />
+                <div className={cn("p-2.5 rounded-xl", networkInfo.online ? "bg-primary-container/10 text-primary" : "bg-error/10 text-error")}>
+                  <Router size={24} />
                 </div>
                 <div>
                   <p className="text-xs font-black text-on-surface uppercase tracking-wider">Shop Network Gateway</p>
-                  <p className="text-[11px] font-bold text-on-surface-variant mt-0.5">Lat: 12ms | Down: 150Mbps</p>
+                  <p className="text-[11px] font-bold text-on-surface-variant mt-0.5">
+                    {networkInfo.online ? `Type: ${networkInfo.type.toUpperCase()} | Ping: ${networkInfo.ping}ms | Down: ${networkInfo.downlink}Mbps` : 'Disconnected'}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-full">
-                <CheckCircle2 size={12} className="text-emerald-600" />
-                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">OPTIMAL</span>
+              <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full", networkInfo.online ? "bg-emerald-50" : "bg-error/10")}>
+                {networkInfo.online ? <CheckCircle2 size={12} className="text-emerald-600" /> : <Network size={12} className="text-error" />}
+                <span className={cn("text-[10px] font-black uppercase tracking-widest", networkInfo.online ? "text-emerald-600" : "text-error")}>
+                  {networkInfo.online ? 'OPTIMAL' : 'OFFLINE'}
+                </span>
               </div>
             </div>
           </section>

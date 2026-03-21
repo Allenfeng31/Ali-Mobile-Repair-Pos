@@ -74,20 +74,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   };
 
   const addToCart = (item: any) => {
-    if (item.stock !== undefined && item.stock <= 0) {
-      setSuccessMessage(`${t('term', 'outofstock')} ${item.name}`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-      return;
-    }
-
     setCart(prev => {
       const existing = prev.find(i => i.name === item.name);
       if (existing) {
-        if (item.stock !== undefined && existing.qty + 1 > item.stock) {
-          setSuccessMessage(`${t('term', 'limit')} ${item.name}`);
-          setTimeout(() => setSuccessMessage(null), 3000);
-          return prev;
-        }
         return prev.map(i => i.name === item.name ? { ...i, qty: i.qty + 1 } : i);
       }
       return [...prev, { 
@@ -108,13 +97,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const updateQty = (id: string, delta: number) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
-        const invItem = inventory.find(i => i.name === item.name);
         const newQty = Math.max(1, item.qty + delta);
-        if (delta > 0 && invItem && invItem.stock !== undefined && newQty > invItem.stock) {
-          setSuccessMessage(`${t('term', 'stockLimit')} ${item.name}`);
-          setTimeout(() => setSuccessMessage(null), 3000);
-          return item;
-        }
         return { ...item, qty: newQty };
       }
       return item;
