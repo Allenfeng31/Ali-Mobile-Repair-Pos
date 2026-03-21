@@ -44,6 +44,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [searchQuery, setSearchQuery] = useState('');
   const [showInvoice, setShowInvoice] = useState(false);
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
 
   const filteredItems = inventory.filter(item => {
     const itemCat = item.category || '';
@@ -110,21 +111,70 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     setSuccessMessage(null);
     
     try {
+      // Calculate totals
+      let grossMSRP = 0;
+      let rawTotal = 0;
+      cart.forEach(item => {
+        if (item.overridePrice !== undefined) {
+          if (item.overridePrice < item.price) {
+            grossMSRP += item.price * item.qty;
+            rawTotal += item.overridePrice * item.qty;
+          } else {
+            grossMSRP += item.overridePrice * item.qty;
+            rawTotal += item.overridePrice * item.qty;
+          }
+        } else {
+          grossMSRP += item.price * item.qty;
+          rawTotal += item.price * item.qty;
+        }
+      });
+
+      const lineDiscountAmount = grossMSRP - rawTotal;
+      const percentDiscountAmount = rawTotal * (discountPercent / 100);
+      const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
+
+      const baseTotal = rawTotal - percentDiscountAmount;
+      const gst = baseTotal / 11;
+      const surcharge = paymentMethod === 'eftpos' ? baseTotal * 0.015 : 0;
+      const finalTotal = baseTotal + surcharge;
+
       // Calculate profit for the order
-      let totalProfit = 0;
+      let totalProfit = -totalDiscountAmount;
       const orderItems: OrderItem[] = cart.map(item => {
         const invItem = inventory.find(i => i.name === item.name);
         const cost = invItem ? invItem.costPrice : 0;
-        totalProfit += (item.price - cost) * item.qty;
+        
+        let loggedPrice = item.price;
+        if (item.overridePrice !== undefined && item.overridePrice > item.price) {
+          loggedPrice = item.overridePrice; // Log at bumped price
+        }
+
+        totalProfit += (loggedPrice - cost) * item.qty;
         return {
           id: item.id,
           name: item.name,
           sku: item.sku,
-          price: item.price,
+          price: loggedPrice,
           qty: item.qty,
           category: invItem ? invItem.category : 'General'
         };
       });
+
+      if (totalDiscountAmount > 0) {
+        let discountName = `Discount`;
+        if (percentDiscountAmount > 0 && lineDiscountAmount > 0) discountName = `Combined Discounts & Savings`;
+        else if (lineDiscountAmount > 0) discountName = `Line Item Savings`;
+        else discountName = `Discount (${discountPercent}%)`;
+
+        orderItems.push({
+          id: `DISC-${Math.random().toString(36).substr(2, 9)}`,
+          name: discountName,
+          sku: 'DISCOUNT',
+          price: -totalDiscountAmount,
+          qty: 1,
+          category: 'Adjustment'
+        });
+      }
 
       const newOrder: Order = {
         id: `TK-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -161,6 +211,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       setShowInvoice(true);
       setInventory(updatedInventory);
       setCart([]);
+      setDiscountPercent(0);
       
       setSuccessMessage(t('term', 'success'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -172,7 +223,28 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     }
   };
 
-  const baseTotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  let grossMSRP = 0;
+  let rawTotal = 0;
+  cart.forEach(item => {
+    if (item.overridePrice !== undefined) {
+      if (item.overridePrice < item.price) {
+        grossMSRP += item.price * item.qty;
+        rawTotal += item.overridePrice * item.qty;
+      } else {
+        grossMSRP += item.overridePrice * item.qty;
+        rawTotal += item.overridePrice * item.qty;
+      }
+    } else {
+      grossMSRP += item.price * item.qty;
+      rawTotal += item.price * item.qty;
+    }
+  });
+
+  const lineDiscountAmount = grossMSRP - rawTotal;
+  const percentDiscountAmount = rawTotal * (discountPercent / 100);
+  const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
+
+  const baseTotal = rawTotal - percentDiscountAmount;
   const gst = baseTotal / 11;
   const surcharge = paymentMethod === 'eftpos' ? baseTotal * 0.015 : 0;
   const finalTotal = baseTotal + surcharge;
@@ -296,9 +368,26 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 <item.icon className="text-primary" size={20} />
               </div>
               <div className="flex-grow">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-start">
                   <h4 className="font-bold text-sm text-on-surface leading-tight">{item.name}</h4>
-                  <span className="font-bold text-sm">${item.price.toFixed(2)}</span>
+                  <div className="flex flex-col items-end">
+                    {item.overridePrice !== undefined && item.overridePrice < item.price && (
+                      <span className="text-[10px] text-on-surface-variant line-through mb-0.5">${item.price.toFixed(2)}</span>
+                    )}
+                    <span 
+                      className="font-bold text-sm cursor-pointer hover:text-primary hover:underline transition-colors px-1 -mr-1 rounded bg-primary/5 border border-primary/10"
+                      title="Click to override price"
+                      onClick={() => {
+                        const currentVal = item.overridePrice !== undefined ? item.overridePrice : item.price;
+                        const newPrice = window.prompt(`Enter discounted/override price for ${item.name}:`, currentVal.toString());
+                        if (newPrice !== null && !isNaN(Number(newPrice)) && Number(newPrice) >= 0) {
+                          setCart(prev => prev.map(i => i.id === item.id ? { ...i, overridePrice: Number(newPrice) } : i));
+                        }
+                      }}
+                    >
+                      ${(item.overridePrice !== undefined ? item.overridePrice : item.price).toFixed(2)}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-[10px] text-on-surface-variant mt-1 uppercase tracking-wider font-semibold">SKU: {item.sku}</p>
                 <div className="flex items-center gap-3 mt-2">
@@ -333,7 +422,25 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           )}
         </div>
 
-        <div className="mt-8 pt-8 border-t border-outline-variant/20">
+        {cart.length > 0 && (
+          <div className="mt-4 flex items-center justify-between bg-surface-container-high p-3 rounded-xl border border-outline-variant/10">
+            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Apply Discount (%)</span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="number" 
+                min="0"
+                max="100"
+                value={discountPercent === 0 ? '' : discountPercent}
+                onChange={(e) => setDiscountPercent(Math.min(100, Math.max(0, Number(e.target.value))))}
+                placeholder="0"
+                className="w-16 bg-surface-container-lowest border border-outline-variant/20 rounded-lg py-1.5 px-2 text-center text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <span className="text-sm font-bold text-on-surface">%</span>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-4 pt-6 border-t border-outline-variant/20">
           <div className="space-y-2 mb-8">
             <div className="flex justify-between">
               <span className="text-on-surface-variant text-sm font-medium">{t('term', 'subtotalExclGST')}</span>
@@ -401,15 +508,26 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
                 {/* Item List */}
                 <div className="max-h-48 overflow-y-auto space-y-3 pr-2 no-scrollbar border-y border-outline-variant/10 py-4">
-                  {cart.map(item => (
-                    <div key={item.id} className="flex justify-between items-center text-sm">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-on-surface">{item.name}</span>
-                        <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">{t('term', 'qty')}: {item.qty} × ${item.price.toFixed(2)}</span>
+                  {cart.map(item => {
+                    const loggedPrice = (item.overridePrice !== undefined && item.overridePrice > item.price) ? item.overridePrice : item.price;
+                    return (
+                      <div key={item.id} className="flex justify-between items-center text-sm">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-on-surface">{item.name}</span>
+                          <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">{t('term', 'qty')}: {item.qty} × ${loggedPrice.toFixed(2)}</span>
+                        </div>
+                        <span className="font-bold text-primary">${(loggedPrice * item.qty).toFixed(2)}</span>
                       </div>
-                      <span className="font-bold text-primary">${(item.price * item.qty).toFixed(2)}</span>
+                    );
+                  })}
+                  {totalDiscountAmount > 0 && (
+                    <div className="flex justify-between items-center text-sm pt-2 border-t border-outline-variant/5">
+                      <span className="font-bold text-on-surface italic">
+                        {percentDiscountAmount > 0 && lineDiscountAmount > 0 ? `Combined Discounts & Savings` : lineDiscountAmount > 0 ? `Line Item Savings` : `Discount (${discountPercent}%)`}
+                      </span>
+                      <span className="font-bold text-error">-${totalDiscountAmount.toFixed(2)}</span>
                     </div>
-                  ))}
+                  )}
                 </div>
 
                 {/* Payment Selection */}

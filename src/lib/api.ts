@@ -1,13 +1,13 @@
 const getApiUrl = () => {
   // If compiled securely onto Vercel servers
-  if (import.meta.env && import.meta.env.PROD) {
+  if ((typeof import.meta !== 'undefined') && (import.meta as any).env && (import.meta as any).env.PROD) {
     return '/api';
   }
   // If accessing from a mobile device or another computer on the local network
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
     return `http://${window.location.hostname}:3001/api`;
   }
-  return import.meta.env?.VITE_API_URL || 'http://localhost:3001/api';
+  return (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
 };
 
 const API_URL = getApiUrl();
