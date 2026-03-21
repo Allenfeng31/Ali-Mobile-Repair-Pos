@@ -188,6 +188,10 @@ app.put('/api/settings/:key', async (req, res) => {
 // ----------------------------------------------------------------------
 // START SERVER
 // ----------------------------------------------------------------------
-app.listen(port, () => {
-  console.log(`Backend server running on http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Backend server running on http://localhost:${port}`);
+  });
+}
+
+module.exports = app;
