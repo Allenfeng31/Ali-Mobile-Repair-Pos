@@ -32,6 +32,13 @@ interface InventoryViewProps {
 export function InventoryView({ inventory, setInventory, categories, setCategories, brands, setBrands, t }: InventoryViewProps) {
   const [filter, setFilter] = useState('All Parts');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeBrandFilter, setActiveBrandFilter] = useState('All Brands');
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('All Categories');
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filter, activeBrandFilter, activeCategoryFilter]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
@@ -191,10 +198,39 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   };
 
   const filteredInventory = inventory.filter(item => {
-    if (filter === 'Low Stock') return item.status === 'low-stock';
-    if (filter === 'Devices') return item.status === 'device';
-    return true;
+    let match = true;
+    if (filter === 'Low Stock') match = item.status === 'low-stock';
+    if (filter === 'Devices') match = item.status === 'device';
+    
+    if (match && activeBrandFilter !== 'All Brands') {
+      match = item.brand === activeBrandFilter;
+    }
+    
+    if (match && activeCategoryFilter !== 'All Categories') {
+      match = item.category === activeCategoryFilter;
+    }
+
+    if (match && searchQuery.trim() !== '') {
+      const terms = searchQuery.toLowerCase().split(' ').filter(Boolean);
+      match = terms.every(t => 
+        item.name.toLowerCase().includes(t) || 
+        item.model.toLowerCase().includes(t) || 
+        (item.brand || '').toLowerCase().includes(t) ||
+        (item.sku || '').toLowerCase().includes(t) ||
+        (item.category || '').toLowerCase().includes(t)
+      );
+    }
+    
+    return match;
+  }).sort((a, b) => {
+    const idA = typeof a.id === 'string' ? parseInt(a.id, 10) || 0 : a.id;
+    const idB = typeof b.id === 'string' ? parseInt(b.id, 10) || 0 : b.id;
+    return idB - idA;
   });
+
+  const itemsPerPage = 20;
+  const totalPages = Math.max(1, Math.ceil(filteredInventory.length / itemsPerPage));
+  const currentItems = filteredInventory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="space-y-8">
@@ -446,9 +482,29 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
             </button>
           ))}
         </div>
-            <div className="flex items-center gap-2 text-on-surface-variant cursor-pointer hover:text-primary transition-colors">
-              <Filter size={16} />
-              <span className="text-xs font-bold uppercase tracking-widest">Filter By Model</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-3 py-2">
+                <Filter size={14} className="text-primary" />
+                <select 
+                  className="bg-transparent border-none text-xs font-bold text-on-surface focus:outline-none w-28"
+                  value={activeBrandFilter}
+                  onChange={e => setActiveBrandFilter(e.target.value)}
+                >
+                  <option value="All Brands">{t('term', 'brandAll') || 'All Brands'}</option>
+                  {brands.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-3 py-2">
+                <Filter size={14} className="text-primary" />
+                <select 
+                  className="bg-transparent border-none text-xs font-bold text-on-surface focus:outline-none w-32"
+                  value={activeCategoryFilter}
+                  onChange={e => setActiveCategoryFilter(e.target.value)}
+                >
+                  <option value="All Categories">{t('term', 'categoryAll') || 'All Categories'}</option>
+                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -460,7 +516,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               <div className="col-span-3 text-right">Actions</div>
             </div>
             <div className="divide-y divide-outline-variant/10">
-              {filteredInventory.map(item => (
+              {currentItems.map(item => (
                 <div key={item.id} className="grid grid-cols-12 px-6 py-5 items-center bg-surface-container-lowest hover:bg-surface-container/30 transition-colors group">
                   <div className="col-span-5 flex items-center gap-4">
                     <div className={cn(
@@ -513,12 +569,28 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 </div>
               ))}
             </div>
-            <div className="px-6 py-4 flex items-center justify-between bg-surface-container/50">
-              <span className="text-xs font-medium text-on-surface-variant">Showing {filteredInventory.length} of {inventory.length} items</span>
+            <div className="px-6 py-4 flex items-center justify-between bg-surface-container/50 border-t border-outline-variant/10">
+              <span className="text-xs font-medium text-on-surface-variant">
+                Showing {filteredInventory.length === 0 ? 0 : Math.min((currentPage - 1) * itemsPerPage + 1, filteredInventory.length)} - {Math.min(currentPage * itemsPerPage, filteredInventory.length)} of {filteredInventory.length} items (Total: {inventory.length})
+              </span>
               <div className="flex gap-2">
-                <button className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-white transition-all border border-outline-variant/10"><ChevronLeft size={14} /></button>
-                <button className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary text-xs font-bold">1</button>
-                <button className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-white transition-all border border-outline-variant/10"><ChevronRight size={14} /></button>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-white transition-all border border-outline-variant/10 disabled:opacity-50"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <button className="px-3 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary text-xs font-bold shadow-sm">
+                  Page {currentPage} of {totalPages}
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-lowest text-on-surface hover:bg-white transition-all border border-outline-variant/10 disabled:opacity-50"
+                >
+                  <ChevronRight size={14} />
+                </button>
               </div>
             </div>
           </div>
