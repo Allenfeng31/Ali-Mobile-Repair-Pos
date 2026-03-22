@@ -11,6 +11,12 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Log requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // Initialize Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project-url.supabase.co';
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
@@ -211,8 +217,8 @@ app.put('/api/settings/:key', async (req, res) => {
 // START SERVER
 // ----------------------------------------------------------------------
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
-    console.log(`Backend server running on http://localhost:${port}`);
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Backend server running on http://0.0.0.0:${port}`);
   });
 }
 
