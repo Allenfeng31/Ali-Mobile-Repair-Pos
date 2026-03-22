@@ -45,9 +45,31 @@ app.post('/api/login', async (req, res) => {
 // INVENTORY
 // ----------------------------------------------------------------------
 app.get('/api/inventory', async (req, res) => {
-  const { data, error } = await supabase.from('inventory').select('*').order('id', { ascending: true });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    let allData = [];
+    let from = 0;
+    const step = 1000;
+    
+    while (true) {
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('*')
+        .order('id', { ascending: true })
+        .range(from, from + step - 1);
+        
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      
+      allData = allData.concat(data);
+      if (data.length < step) break;
+      
+      from += step;
+    }
+    
+    res.json(allData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.post('/api/inventory', async (req, res) => {
