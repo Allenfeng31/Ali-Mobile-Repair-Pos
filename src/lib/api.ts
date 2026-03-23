@@ -140,5 +140,11 @@ export const api = {
       body: JSON.stringify({ value }),
     });
     return handleResponse(res);
+  },
+  
+  // System
+  getIp: async () => {
+    const res = await fetch(`${API_URL}/ip`);
+    return handleResponse(res);
   }
 };

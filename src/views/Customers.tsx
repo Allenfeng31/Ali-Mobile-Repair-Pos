@@ -116,17 +116,26 @@ const getStatusColor = (status: string) => {
 export function CustomersView() {
   const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
   
+  const [hostIp, setHostIp] = useState('localhost');
+  
   // Fetch initial data from backend API
   useEffect(() => {
     const loadData = async () => {
       try {
         const { api } = await import('../lib/api');
-        const data = await api.getCustomers();
+        const [data, ipRes] = await Promise.all([
+          api.getCustomers(),
+          api.getIp().catch(() => ({ ip: 'localhost' }))
+        ]);
+
         if (data && data.length > 0) {
           setCustomers(data);
         }
+        if (ipRes && ipRes.ip) {
+          setHostIp(ipRes.ip);
+        }
       } catch (err) {
-        console.error('Failed to load customers:', err);
+        console.error('Failed to load data:', err);
       }
     };
     loadData();
@@ -146,7 +155,8 @@ export function CustomersView() {
   const getPortalUrl = () => {
     const origin = window.location.origin;
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      return origin.replace(/localhost|127\.0\.0\.1/, '192.168.1.121') + '/portal';
+      // Use the dynamically detected host IP instead of hardcoded loopback
+      return origin.replace(/localhost|127\.0\.0\.1/, hostIp) + '/portal';
     }
     return origin + '/portal';
   };

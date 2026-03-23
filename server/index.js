@@ -22,6 +22,26 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project-url.s
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const getLocalIp = () => {
+  const os = require('os');
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+};
+
+// ----------------------------------------------------------------------
+// SYSTEM
+// ----------------------------------------------------------------------
+app.get('/api/ip', (req, res) => {
+  res.json({ ip: getLocalIp() });
+});
+
 // ----------------------------------------------------------------------
 // AUTHENTICATION
 // ----------------------------------------------------------------------
