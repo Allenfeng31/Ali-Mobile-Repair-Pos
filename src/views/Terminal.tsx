@@ -46,6 +46,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [numpadItem, setNumpadItem] = useState<any | null>(null);
+  const [numpadValue, setNumpadValue] = useState('');
 
   React.useEffect(() => {
     setCurrentPage(1);
@@ -441,7 +443,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               </div>
               <div className="flex-grow">
                 <div className="flex justify-between items-start">
-                  <h4 className="font-bold text-sm text-on-surface leading-tight">{item.name}</h4>
+                  <h4 className="font-bold text-base text-on-surface leading-tight">{item.name}</h4>
                   <div className="flex flex-col items-end">
                     {item.overridePrice !== undefined && item.overridePrice < item.price && (
                       <span className="text-[10px] text-on-surface-variant line-through mb-0.5">${item.price.toFixed(2)}</span>
@@ -451,10 +453,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       title="Click to override price"
                       onClick={() => {
                         const currentVal = item.overridePrice !== undefined ? item.overridePrice : item.price;
-                        const newPrice = window.prompt(`Enter discounted/override price for ${item.name}:`, currentVal.toString());
-                        if (newPrice !== null && !isNaN(Number(newPrice)) && Number(newPrice) >= 0) {
-                          setCart(prev => prev.map(i => i.id === item.id ? { ...i, overridePrice: Number(newPrice) } : i));
-                        }
+                        setNumpadValue(currentVal.toString());
+                        setNumpadItem(item);
                       }}
                     >
                       ${(item.overridePrice !== undefined ? item.overridePrice : item.price).toFixed(2)}
@@ -677,6 +677,108 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         order={lastOrder} 
         t={t}
       />
+
+      {/* Numeric Keypad Price Override Modal */}
+      <AnimatePresence>
+        {numpadItem && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => { setNumpadItem(null); setNumpadValue(''); }}
+            />
+
+            <motion.div
+              className="relative w-full max-w-sm bg-surface-container rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 z-10"
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs text-on-surface-variant font-semibold uppercase tracking-widest">Override Price</p>
+                  <p className="font-bold text-on-surface text-sm truncate max-w-[220px]">{numpadItem.name}</p>
+                </div>
+                <button
+                  onClick={() => { setNumpadItem(null); setNumpadValue(''); }}
+                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Display */}
+              <div className="bg-surface-container-high rounded-2xl px-5 py-4 mb-5 text-right">
+                <p className="text-3xl font-black tracking-tight text-on-surface">
+                  ${numpadValue || '0'}
+                </p>
+              </div>
+
+              {/* Keypad */}
+              <div className="grid grid-cols-3 gap-3">
+                {['7','8','9','4','5','6','1','2','3'].map(k => (
+                  <button
+                    key={k}
+                    onClick={() => setNumpadValue(prev => (prev === '0' ? k : prev + k))}
+                    className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary hover:text-on-primary active:scale-95 transition-all"
+                  >
+                    {k}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setNumpadValue(prev => {
+                    if (prev.includes('.')) return prev;
+                    return prev + '.';
+                  })}
+                  className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-surface-container-highest active:scale-95 transition-all"
+                >
+                  .
+                </button>
+                <button
+                  onClick={() => setNumpadValue(prev => (prev === '0' ? '0' : prev + '0'))}
+                  className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary hover:text-on-primary active:scale-95 transition-all"
+                >
+                  0
+                </button>
+                <button
+                  onClick={() => setNumpadValue(prev => prev.length > 1 ? prev.slice(0, -1) : '0')}
+                  className="py-4 rounded-2xl bg-surface-container-high text-error text-xl font-bold hover:bg-error-container active:scale-95 transition-all"
+                >
+                  ⌫
+                </button>
+
+                {/* Clear + Confirm spanning full row */}
+                <button
+                  onClick={() => setNumpadValue('0')}
+                  className="col-span-1 py-4 rounded-2xl bg-surface-container-highest text-on-surface-variant text-base font-bold hover:bg-error-container hover:text-on-error-container active:scale-95 transition-all"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => {
+                    const val = parseFloat(numpadValue);
+                    if (!isNaN(val) && val >= 0) {
+                      setCart(prev => prev.map(i => i.id === numpadItem.id ? { ...i, overridePrice: val } : i));
+                    }
+                    setNumpadItem(null);
+                    setNumpadValue('');
+                  }}
+                  className="col-span-2 py-4 rounded-2xl bg-primary text-on-primary text-base font-black shadow-lg shadow-primary/30 hover:opacity-90 active:scale-95 transition-all"
+                >
+                  ✓ Confirm
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
