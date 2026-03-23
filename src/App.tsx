@@ -39,13 +39,12 @@ export default function App() {
 
   // Fetch initial data from backend API
   useEffect(() => {
-    // Check local storage for persistent login and validate date
+    // Check local storage for persistent login and validate expiry
     const savedSessionString = localStorage.getItem('pos_session');
     if (savedSessionString) {
       try {
-        const { user, date } = JSON.parse(savedSessionString);
-        const today = new Date().toLocaleDateString();
-        if (date === today) {
+        const { user, expiresAt } = JSON.parse(savedSessionString);
+        if (expiresAt && Date.now() < expiresAt) {
           setCurrentUser(user);
           setIsAuthenticated(true);
         } else {
@@ -120,21 +119,32 @@ export default function App() {
     loadData();
   }, []);
 
-  // Automatic Midnight Logout Effect
+  // Automatic Session Expiry Effect
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    const msUntilMidnight = midnight.getTime() - now.getTime();
+    const savedSessionString = localStorage.getItem('pos_session');
+    if (!savedSessionString) return;
 
-    const timer = setTimeout(() => {
-      handleLogout();
-      alert('Your session has expired. It is a new day!');
-    }, msUntilMidnight);
+    try {
+      const { expiresAt } = JSON.parse(savedSessionString);
+      const msUntilExpiry = expiresAt - Date.now();
 
-    return () => clearTimeout(timer);
+      if (msUntilExpiry <= 0) {
+        handleLogout();
+        alert('Your session has expired.');
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        handleLogout();
+        alert('Your session has expired. Please log in again.');
+      }, msUntilExpiry);
+
+      return () => clearTimeout(timer);
+    } catch (e) {
+      console.error('Failed to parse session for auto-logout', e);
+    }
   }, [isAuthenticated]);
 
   const handleLogout = () => {
@@ -151,9 +161,12 @@ export default function App() {
   const handleLogin = (user: any) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
+    const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+    const expiresAt = Date.now() + SESSION_DURATION;
+    
     localStorage.setItem('pos_session', JSON.stringify({
       user,
-      date: new Date().toDateString()
+      expiresAt
     }));
   };
 
