@@ -15,6 +15,9 @@ export function PortalView() {
   const [email, setEmail] = useState('');
   const [deviceModel, setDeviceModel] = useState('');
   const [problem, setProblem] = useState('');
+  const [password, setPassword] = useState('');
+  const [referralSource, setReferralSource] = useState('');
+  const [referralOther, setReferralOther] = useState('');
 
   // Polling for live status
   useEffect(() => {
@@ -86,6 +89,9 @@ export function PortalView() {
         });
       }
 
+      const source = referralSource === 'Other' ? referralOther : referralSource;
+      const finalRemark = source ? `Where did you hear about us: ${source}. Client Self-Service Drop-off` : 'Client Self-Service Drop-off';
+
       await api.createRepair({
         id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
         customer_id: targetCustomer.id,
@@ -94,9 +100,9 @@ export function PortalView() {
         modelNumber: deviceModel,
         price: 0,
         liquidDamage: false,
-        password: '',
+        password: password,
         imei: '',
-        remark: 'Client Self-Service Drop-off',
+        remark: finalRemark,
         status: 'In Processing'
       });
 
@@ -269,9 +275,42 @@ export function PortalView() {
                 />
                 <textarea 
                   placeholder="Describe the issue... *" required rows={3}
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium resize-none"
+                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium resize-none text-sm"
                   value={problem} onChange={e => setProblem(e.target.value)}
                 />
+
+                <input 
+                  type="text" placeholder="Phone Password (Optional)"
+                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm"
+                  value={password} onChange={e => setPassword(e.target.value)}
+                />
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Where did you hear about us? *</label>
+                  <select
+                    required
+                    value={referralSource}
+                    onChange={(e) => setReferralSource(e.target.value)}
+                    className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm"
+                  >
+                    <option value="" disabled>Select an option</option>
+                    <option value="Google">Google</option>
+                    <option value="Walk in">Walk in</option>
+                    <option value="Friend referral">Friend referral</option>
+                    <option value="Regular customer">Regular customer</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Website">Website</option>
+                    <option value="Other">Other (Please specify)</option>
+                  </select>
+                </div>
+
+                {referralSource === 'Other' && (
+                  <input 
+                    type="text" placeholder="Please specify... *" required
+                    className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm animate-in fade-in slide-in-from-top-1"
+                    value={referralOther} onChange={e => setReferralOther(e.target.value)}
+                  />
+                )}
                 {errorMsg && <p className="text-error text-center text-sm font-bold">{errorMsg}</p>}
                 <button 
                   disabled={loading}
