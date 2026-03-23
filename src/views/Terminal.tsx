@@ -550,7 +550,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       {/* Confirmation Modal */}
       <AnimatePresence>
         {isConfirming && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-28 md:pb-4">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -688,7 +688,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       <AnimatePresence>
         {numpadItem && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pb-20 sm:pb-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

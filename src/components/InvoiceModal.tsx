@@ -136,7 +136,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 pb-24 md:pb-4">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
