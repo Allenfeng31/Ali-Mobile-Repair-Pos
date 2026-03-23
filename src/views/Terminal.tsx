@@ -375,7 +375,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant opacity-60 bg-surface-container px-1.5 py-0.5 rounded">{item.category.split(' ')[0]}</span>
                 </div>
                 <div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm leading-tight line-clamp-2">{item.name}</h3>
+                  <h3 className="font-headline font-bold text-on-surface text-base leading-tight line-clamp-2">{item.name}</h3>
                 </div>
               </div>
               <div className="flex justify-between items-center mt-3 pt-2 border-t border-outline-variant/5">
