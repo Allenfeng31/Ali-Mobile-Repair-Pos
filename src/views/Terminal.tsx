@@ -83,6 +83,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     
     return matchesCategory && matchesBrand && matchesSearch;
   }).sort((a, b) => {
+    // When showing all items, Accessories always floats to top
+    if (activeCategory === 'All Items') {
+      const aIsAcc = (a.category || '') === 'Accessories';
+      const bIsAcc = (b.category || '') === 'Accessories';
+      if (aIsAcc && !bIsAcc) return -1;
+      if (!aIsAcc && bIsAcc) return 1;
+    }
     // Treat string/number IDs implicitly casting correctly natively
     const idA = typeof a.id === 'string' ? parseInt(a.id, 10) || 0 : a.id;
     const idB = typeof b.id === 'string' ? parseInt(b.id, 10) || 0 : b.id;
