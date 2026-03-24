@@ -700,7 +700,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             />
 
             <motion.div
-              className="relative w-full max-w-sm bg-surface-container rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 z-10"
+              className="relative w-full max-w-sm bg-surface-container rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 z-10 select-none"
               initial={{ y: 60, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 60, opacity: 0 }}
@@ -713,62 +713,62 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   <p className="font-bold text-on-surface text-sm truncate max-w-[220px]">{numpadItem.name}</p>
                 </div>
                 <button
-                  onClick={() => { setNumpadItem(null); setNumpadValue(''); }}
-                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+                  onPointerDown={() => { setNumpadItem(null); setNumpadValue(''); }}
+                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors active:scale-90"
                 >
                   <X size={16} />
                 </button>
               </div>
 
               {/* Display */}
-              <div className="bg-surface-container-high rounded-2xl px-5 py-4 mb-5 text-right">
+              <div className="bg-surface-container-high rounded-2xl px-5 py-4 mb-5 text-right border border-outline-variant/10">
                 <p className="text-3xl font-black tracking-tight text-on-surface">
                   ${numpadValue || '0'}
                 </p>
               </div>
 
               {/* Keypad */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3 touch-action-manipulation">
                 {['7','8','9','4','5','6','1','2','3'].map(k => (
                   <button
                     key={k}
-                    onClick={() => setNumpadValue(prev => (prev === '0' ? k : prev + k))}
-                    className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary hover:text-on-primary active:scale-95 transition-all"
+                    onPointerDown={() => setNumpadValue(prev => (prev === '0' ? k : prev + k))}
+                    className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary sm:hover:text-on-primary active:scale-95 active:bg-primary active:text-on-primary transition-all duration-75"
                   >
                     {k}
                   </button>
                 ))}
                 <button
-                  onClick={() => setNumpadValue(prev => {
+                  onPointerDown={() => setNumpadValue(prev => {
                     if (prev.includes('.')) return prev;
                     return prev + '.';
                   })}
-                  className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-surface-container-highest active:scale-95 transition-all"
+                  className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-surface-container-highest active:scale-95 active:bg-surface-container-highest transition-all duration-75"
                 >
                   .
                 </button>
                 <button
-                  onClick={() => setNumpadValue(prev => (prev === '0' ? '0' : prev + '0'))}
-                  className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary hover:text-on-primary active:scale-95 transition-all"
+                  onPointerDown={() => setNumpadValue(prev => (prev === '0' ? '0' : prev + '0'))}
+                  className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary sm:hover:text-on-primary active:scale-95 active:bg-primary active:text-on-primary transition-all duration-75"
                 >
                   0
                 </button>
                 <button
-                  onClick={() => setNumpadValue(prev => prev.length > 1 ? prev.slice(0, -1) : '0')}
-                  className="py-4 rounded-2xl bg-surface-container-high text-error text-xl font-bold hover:bg-error-container active:scale-95 transition-all"
+                  onPointerDown={() => setNumpadValue(prev => prev.length > 1 ? prev.slice(0, -1) : '0')}
+                  className="py-4 rounded-2xl bg-surface-container-high text-error text-xl font-bold hover:bg-error-container active:scale-95 active:bg-error-container transition-all duration-75"
                 >
                   ⌫
                 </button>
 
                 {/* Clear + Confirm spanning full row */}
                 <button
-                  onClick={() => setNumpadValue('0')}
-                  className="col-span-1 py-4 rounded-2xl bg-surface-container-highest text-on-surface-variant text-base font-bold hover:bg-error-container hover:text-on-error-container active:scale-95 transition-all"
+                  onPointerDown={() => setNumpadValue('0')}
+                  className="col-span-1 py-4 rounded-2xl bg-surface-container-highest text-on-surface-variant text-base font-bold hover:bg-error-container hover:text-on-error-container active:scale-95 active:bg-error-container active:text-on-error-container transition-all duration-75"
                 >
                   Clear
                 </button>
                 <button
-                  onClick={() => {
+                  onPointerDown={() => {
                     const val = parseFloat(numpadValue);
                     if (!isNaN(val) && val >= 0) {
                       setCart(prev => prev.map(i => i.id === numpadItem.id ? { ...i, overridePrice: val } : i));
@@ -776,7 +776,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     setNumpadItem(null);
                     setNumpadValue('');
                   }}
-                  className="col-span-2 py-4 rounded-2xl bg-primary text-on-primary text-base font-black shadow-lg shadow-primary/30 hover:opacity-90 active:scale-95 transition-all"
+                  className="col-span-2 py-4 rounded-2xl bg-primary text-on-primary text-base font-black shadow-lg shadow-primary/30 hover:opacity-90 active:scale-[0.98] transition-all duration-75"
                 >
                   ✓ Confirm
                 </button>
