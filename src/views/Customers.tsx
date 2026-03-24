@@ -628,7 +628,19 @@ export function CustomersView() {
                       </div>
                       <div>
                         <h3 className="font-bold text-on-surface">{customer.name}</h3>
-                        <p className="text-xs text-on-surface-variant font-bold">{customer.phone}</p>
+                        <div className="flex flex-col gap-1.5 mt-0.5">
+                          <p className="text-xs text-on-surface-variant font-bold">{customer.phone}</p>
+                          {customer.repairs.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                                {new Date(customer.repairs[0].timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                              </span>
+                              <span className="text-[10px] font-bold text-on-surface-variant/80 italic">
+                                {customer.repairs[0].modelNumber}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
