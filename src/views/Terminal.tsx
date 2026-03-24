@@ -64,6 +64,18 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   };
 
   const filteredItems = inventory.filter(item => {
+    const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      item.name.toLowerCase().includes(term) || 
+      item.model.toLowerCase().includes(term) ||
+      (item.sku && item.sku.toLowerCase().includes(term))
+    );
+
+    // If there's a search query, prioritize it and ignore category/brand filters (Global Search)
+    if (searchQuery.trim() !== '') {
+      return matchesSearch;
+    }
+
     const itemCat = item.category || '';
     const matchesCategory = activeCategory === 'All Items' || itemCat === activeCategory;
     
@@ -74,14 +86,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                           (item.name.toLowerCase().includes(activeBrand.toLowerCase()) || 
                            item.model.toLowerCase().includes(activeBrand.toLowerCase())));
                            
-    const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean);
-    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
-      item.name.toLowerCase().includes(term) || 
-      item.model.toLowerCase().includes(term) ||
-      (item.sku && item.sku.toLowerCase().includes(term))
-    );
-    
-    return matchesCategory && matchesBrand && matchesSearch;
+    return matchesCategory && matchesBrand;
   }).sort((a, b) => {
     // When showing all items, Accessories always floats to top
     if (activeCategory === 'All Items') {
@@ -105,6 +110,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
 
   const addToCart = (item: any) => {
+    if (searchQuery) setSearchQuery('');
     setCart(prev => {
       const existing = prev.find(i => i.name === item.name);
       if (existing) {
@@ -324,6 +330,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               placeholder={t('term', 'searchProducts')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                  setSearchQuery('');
+                }
+              }}
               className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl py-3 px-11 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50">
