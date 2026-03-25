@@ -86,50 +86,51 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (!invoiceRef.current) return;
-    
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    document.body.appendChild(iframe);
 
-    const doc = iframe.contentWindow?.document;
-    if (doc) {
-      doc.open();
-      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-        .map(el => el.outerHTML)
-        .join('\n');
-        
-      doc.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            ${styles}
-            <style>
-              @page { size: 80mm auto; margin: 0; }
-              body { margin: 0; padding: 0; background: white; color: black; }
-              #printable-invoice { width: 100% !important; padding: 5mm !important; margin: 0 !important; box-shadow: none !important; }
-            </style>
-          </head>
-          <body>
-            ${invoiceRef.current.outerHTML}
-          </body>
-        </html>
-      `);
-      doc.close();
-      
-      setTimeout(() => {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
+    try {
+      // Capture the invoice element as a high-res PNG — same as the PDF pipeline
+      const imgData = await toPng(invoiceRef.current, {
+        pixelRatio: 3,
+        backgroundColor: '#ffffff'
+      });
+
+      // Create a hidden iframe and print the PNG image at full width
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow?.document;
+      if (doc) {
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                @page { size: 80mm auto; margin: 0; }
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { background: white; }
+                img { width: 100%; display: block; }
+              </style>
+            </head>
+            <body>
+              <img src="${imgData}" />
+            </body>
+          </html>
+        `);
+        doc.close();
+
         setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      }, 500);
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+          setTimeout(() => document.body.removeChild(iframe), 1000);
+        }, 400);
+      }
+    } catch (err: any) {
+      console.error('Print error:', err);
+      alert('Failed to print: ' + err.message);
     }
   };
 
