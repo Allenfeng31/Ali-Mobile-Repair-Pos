@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   List,
-  Printer
+  Printer,
+  Package
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -52,6 +53,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const [endDate, setEndDate] = useState<string>(todayStr);
   
   const [showRevenueModal, setShowRevenueModal] = useState(false);
+  const [showSurchargeModal, setShowSurchargeModal] = useState(false);
+  const [showTaxModal, setShowTaxModal] = useState(false);
+  const [breakdownType, setBreakdownType] = useState<'all' | 'repair' | 'accessory'>('all');
   
   // Search and Pagination states
   const [searchOrderQuery, setSearchOrderQuery] = useState('');
@@ -82,7 +86,11 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
     const totalProfit = validOrders.reduce((acc, o) => acc + o.profit, 0);
     const cashTotal = validOrders.reduce((acc, o) => acc + (o.paymentMethod === 'cash' || !o.paymentMethod ? o.total : 0), 0);
     const eftposTotal = validOrders.reduce((acc, o) => acc + (o.paymentMethod === 'eftpos' ? o.total : 0), 0);
+    const surchargeTotal = validOrders.reduce((acc, o) => acc + (o.surcharge || 0), 0);
+    const taxTotal = validOrders.reduce((acc, o) => acc + (o.tax || 0), 0);
     const repairsCount = validOrders.filter(o => o.type === 'repair').length;
+    const repairRevenue = validOrders.filter(o => o.type === 'repair').reduce((acc, o) => acc + o.total, 0);
+    const accessoryRevenue = validOrders.filter(o => o.type !== 'repair').reduce((acc, o) => acc + o.total, 0);
     const avgTicket = validOrders.length > 0 ? totalRevenue / validOrders.length : 0;
 
     return {
@@ -90,6 +98,10 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       totalProfit,
       cashTotal,
       eftposTotal,
+      surchargeTotal,
+      taxTotal,
+      repairRevenue,
+      accessoryRevenue,
       repairsCount,
       avgTicket
     };
@@ -98,7 +110,12 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const revenueBreakdown = useMemo(() => {
     const itemsMap: Record<string, {name: string, qty: number, total: number}> = {};
     validOrders.forEach(order => {
+      // If breakdownType is set, ignore orders that don't match the top-level type
+      if (breakdownType === 'repair' && order.type !== 'repair') return;
+      if (breakdownType === 'accessory' && order.type === 'repair') return;
+
       order.items.forEach(item => {
+        // Double check item level category if needed, but order.type is usually sufficient
         if (!itemsMap[item.name]) {
           itemsMap[item.name] = { name: item.name, qty: 0, total: 0 };
         }
@@ -107,7 +124,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       });
     });
     return Object.values(itemsMap).sort((a,b) => b.total - a.total);
-  }, [validOrders]);
+  }, [validOrders, breakdownType]);
 
   const chartData = useMemo(() => {
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -243,40 +260,64 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div onClick={() => setShowRevenueModal(true)} className="cursor-pointer">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div onClick={() => { setBreakdownType('all'); setShowRevenueModal(true); }} className="cursor-pointer">
           <StatCard 
-            label="Total Revenue (Click for Breakdown)" 
+            label="Total Revenue" 
             value={`$${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
-            trend="" 
+            trend="Total Sales" 
             trendLabel="" 
             icon={Wallet} 
             color="primary"
           />
         </div>
+        <div onClick={() => { setBreakdownType('repair'); setShowRevenueModal(true); }} className="cursor-pointer">
+          <StatCard 
+            label="Repair Revenue" 
+            value={`$${stats.repairRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
+            trend={`${stats.repairsCount} Units`} 
+            trendLabel="" 
+            icon={Wrench} 
+            color="primary"
+          />
+        </div>
+        <div onClick={() => { setBreakdownType('accessory'); setShowRevenueModal(true); }} className="cursor-pointer">
+          <StatCard 
+            label="Accessory Revenue" 
+            value={`$${stats.accessoryRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
+            trend="Parts & Add-ons" 
+            trendLabel="" 
+            icon={Package} 
+            color="primary"
+          />
+        </div>
+        <div onClick={() => setShowSurchargeModal(true)} className="cursor-pointer">
+          <StatCard 
+            label="Surcharge (Card Fees)" 
+            value={`$${stats.surchargeTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
+            trend="1.5% EFTPOS" 
+            trendLabel="" 
+            icon={CreditCard} 
+            color="secondary"
+          />
+        </div>
+        <div onClick={() => setShowTaxModal(true)} className="cursor-pointer">
+          <StatCard 
+            label="Total GST (Tax)" 
+            value={`$${stats.taxTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
+            trend="10% Applied" 
+            trendLabel="" 
+            icon={Receipt} 
+            color="tertiary"
+          />
+        </div>
         <StatCard 
-          label="Cash Revenue" 
+          label="Cash Total" 
           value={`$${stats.cashTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
-          trend="" 
+          trend="In Drawer" 
           trendLabel="" 
           icon={Banknote} 
           color="primary"
-        />
-        <StatCard 
-          label="EFTPOS Revenue" 
-          value={`$${stats.eftposTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
-          trend="" 
-          trendLabel="" 
-          icon={CreditCard} 
-          color="primary"
-        />
-        <StatCard 
-          label="Repairs Done" 
-          value={stats.repairsCount.toString()} 
-          trend="" 
-          trendLabel="" 
-          icon={Wrench} 
-          color="secondary"
         />
         <StatCard 
           label="Est. Profit" 
@@ -289,9 +330,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
         <StatCard 
           label="Avg Ticket" 
           value={`$${stats.avgTicket.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
-          trend="" 
+          trend="Per Customer" 
           trendLabel="" 
-          icon={Receipt} 
+          icon={TrendingUp} 
           color="primary"
         />
       </div>
@@ -504,9 +545,11 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                     <List size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-on-surface">Revenue Breakdown</h3>
+                    <h3 className="text-2xl font-black text-on-surface">
+                      {breakdownType === 'repair' ? 'Repair Revenue' : breakdownType === 'accessory' ? 'Accessory Revenue' : 'Total Revenue'} Breakdown
+                    </h3>
                     <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                      {startDate} to {endDate}
+                      {startDate || 'All Time'} to {endDate || 'Today'}
                     </p>
                   </div>
                 </div>
@@ -540,9 +583,152 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                 )}
               </div>
 
+              <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 space-y-2">
+                <div className="flex justify-between items-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+                  <span>Gross Sales</span>
+                  <span>${(breakdownType === 'repair' ? stats.repairRevenue : breakdownType === 'accessory' ? stats.accessoryRevenue : stats.totalRevenue).toFixed(2)}</span>
+                </div>
+                {breakdownType === 'all' && (
+                  <>
+                    <div className="flex justify-between items-center text-xs font-bold text-secondary">
+                      <span>Total Surcharge (Card Fees)</span>
+                      <span>+${stats.surchargeTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs font-bold text-tertiary">
+                      <span>Total Tax (GST)</span>
+                      <span>${stats.taxTotal.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between items-center pt-2 border-t border-outline-variant/20">
+                  <span className="text-sm font-black text-on-surface uppercase tracking-widest">Net Revenue</span>
+                  <span className="text-2xl font-black text-primary">
+                    ${(breakdownType === 'repair' ? stats.repairRevenue : breakdownType === 'accessory' ? stats.accessoryRevenue : stats.totalRevenue).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Surcharge Breakdown Modal */}
+      <AnimatePresence>
+        {showSurchargeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSurchargeModal(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[85vh]"
+            >
+              <div className="p-8 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-secondary-container/30 text-secondary">
+                    <CreditCard size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-on-surface">EFTPOS Surcharge Breakdown</h3>
+                    <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Itemized Transaction Fees</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowSurchargeModal(false)} className="p-2 hover:bg-surface-container-high rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-8 bg-surface-container-lowest custom-scrollbar space-y-4">
+                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-4 mb-2">
+                  <div className="col-span-4">Order ID / Date</div>
+                  <div className="col-span-4 text-center">Base Amount</div>
+                  <div className="col-span-4 text-right">Surcharge (1.5%)</div>
+                </div>
+                {validOrders.filter(o => (o.surcharge || 0) > 0).map((order, i) => (
+                  <div key={i} className="grid grid-cols-12 bg-surface-container-low p-4 rounded-xl items-center border border-outline-variant/5">
+                    <div className="col-span-4">
+                      <p className="font-bold text-sm text-on-surface">#{order.id}</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase">{new Date(order.timestamp).toLocaleDateString()}</p>
+                    </div>
+                    <div className="col-span-4 text-center text-sm font-bold text-on-surface-variant">
+                      ${(order.total - order.surcharge).toFixed(2)}
+                    </div>
+                    <div className="col-span-4 text-right font-black text-secondary">+${order.surcharge.toFixed(2)}</div>
+                  </div>
+                ))}
+                {validOrders.filter(o => (o.surcharge || 0) > 0).length === 0 && (
+                  <div className="text-center py-10">
+                    <p className="text-on-surface-variant text-sm font-bold italic">No card surcharges in this period.</p>
+                  </div>
+                )}
+              </div>
               <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
-                <span className="text-sm font-medium text-on-surface-variant">Combined Revenue</span>
-                <span className="text-2xl font-black text-primary">${stats.totalRevenue.toFixed(2)}</span>
+                <span className="text-sm font-black text-on-surface uppercase tracking-widest">Total Surcharge</span>
+                <span className="text-2xl font-black text-secondary">${stats.surchargeTotal.toFixed(2)}</span>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Tax Breakdown Modal */}
+      <AnimatePresence>
+        {showTaxModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowTaxModal(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[85vh]"
+            >
+              <div className="p-8 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-tertiary-container/20 text-tertiary">
+                    <Receipt size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-on-surface">GST Tax Breakdown</h3>
+                    <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">10% GST Itemized</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowTaxModal(false)} className="p-2 hover:bg-surface-container-high rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-8 bg-surface-container-lowest custom-scrollbar space-y-4">
+                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-4 mb-2">
+                  <div className="col-span-4">Order ID / Date</div>
+                  <div className="col-span-4 text-center">Net Amount</div>
+                  <div className="col-span-4 text-right">GST (1/11th)</div>
+                </div>
+                {validOrders.map((order, i) => (
+                  <div key={i} className="grid grid-cols-12 bg-surface-container-low p-4 rounded-xl items-center border border-outline-variant/5">
+                    <div className="col-span-4">
+                      <p className="font-bold text-sm text-on-surface">#{order.id}</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase">{new Date(order.timestamp).toLocaleDateString()}</p>
+                    </div>
+                    <div className="col-span-4 text-center text-sm font-bold text-on-surface-variant">
+                      ${(order.total - order.surcharge - order.tax).toFixed(2)}
+                    </div>
+                    <div className="col-span-4 text-right font-black text-tertiary">${order.tax.toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
+                <span className="text-sm font-black text-on-surface uppercase tracking-widest">Total GST</span>
+                <span className="text-2xl font-black text-tertiary">${stats.taxTotal.toFixed(2)}</span>
               </div>
             </motion.div>
           </div>
@@ -602,6 +788,12 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                         <span className="text-on-surface-variant font-medium">GST (10%)</span>
                         <span className="font-bold">${selectedOrder.tax.toFixed(2)}</span>
                       </div>
+                      {selectedOrder.surcharge > 0 && (
+                        <div className="flex justify-between text-sm text-secondary">
+                          <span className="font-bold">EFTPOS Surcharge</span>
+                          <span className="font-bold">${selectedOrder.surcharge.toFixed(2)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between pt-4 border-t border-outline-variant/20">
                         <span className="text-lg font-black">Total Paid</span>
                         <span className="text-2xl font-black text-primary">${selectedOrder.total.toFixed(2)}</span>

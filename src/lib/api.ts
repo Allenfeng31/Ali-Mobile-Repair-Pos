@@ -144,6 +144,16 @@ export const api = {
     return handleResponse(res);
   },
   
+  // Users
+  updateUser: async (id: number | string, data: { username?: string, password?: string }) => {
+    const res = await fetch(`${API_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+  },
+  
   // System
   getIp: async () => {
     const res = await fetch(`${API_URL}/ip`);

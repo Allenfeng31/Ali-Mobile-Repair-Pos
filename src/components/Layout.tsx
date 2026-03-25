@@ -7,7 +7,8 @@ import {
   Settings, 
   Menu,
   Search,
-  LogOut
+  LogOut,
+  RotateCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
@@ -34,10 +35,18 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-surface-container-low flex-col items-center pt-10 pb-6 z-30 border-r border-outline-variant/10">
-        <div className="mb-4">
-          <div className="w-10 h-10 rounded-xl signature-gradient flex items-center justify-center text-white shadow-lg">
-            <span className="font-headline font-black text-xl">P</span>
-          </div>
+        <div className="mb-4 relative group/logo">
+          <button 
+            onClick={() => onViewChange('settings')}
+            className="w-10 h-10 rounded-xl signature-gradient flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+          >
+            <Menu size={20} strokeWidth={3} />
+          </button>
+          
+          {/* Tooltip for the logo/menu button */}
+          <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            Menu & Profile
+          </span>
         </div>
         <div className="flex flex-col gap-8 w-full items-center">
           {navItems.map((item) => {
@@ -63,20 +72,6 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           })}
         </div>
 
-        {/* Desktop Logout Button */}
-        {onLogout && (
-          <div className="mt-auto w-full px-4 flex justify-center">
-            <button
-              onClick={onLogout}
-              className="p-3 rounded-xl transition-all duration-200 relative group text-error hover:bg-error/10"
-            >
-              <LogOut size={24} strokeWidth={2} />
-              <span className="absolute left-full ml-4 px-2 py-1 bg-error text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                {t('nav', 'signOut')}
-              </span>
-            </button>
-          </div>
-        )}
       </aside>
 
       {/* Main Content Area */}
@@ -88,6 +83,17 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             <h1 className="text-xl font-extrabold text-primary tracking-tight">Ali Mobile Repair POS</h1>
           </div>
           <div className="flex items-center gap-3">
+            <button 
+              onClick={() => window.location.reload()}
+              className="p-2.5 rounded-xl bg-surface-container-high text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all active:rotate-180 group relative mr-2"
+              title="Refresh App"
+            >
+              <RotateCw size={18} />
+              <span className="absolute top-full right-0 mt-2 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                Refresh App
+              </span>
+            </button>
+
             <div className="hidden sm:flex flex-col items-end mr-3">
               <span className="text-xs font-black text-on-surface uppercase tracking-wide">{currentUser?.username || t('nav', 'guest')}</span>
               <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{currentUser?.role || t('nav', 'staff')}</span>
@@ -132,17 +138,6 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
               </button>
             );
           })}
-          
-          {/* Mobile Logout Button */}
-          {onLogout && (
-            <button
-              onClick={onLogout}
-              className="flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-xl text-error hover:bg-error/10"
-            >
-              <LogOut size={20} strokeWidth={2} />
-              <span className="text-[10px] font-bold uppercase tracking-wider mt-1">Exit</span>
-            </button>
-          )}
         </nav>
       </div>
     </div>

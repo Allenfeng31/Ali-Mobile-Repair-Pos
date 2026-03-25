@@ -185,7 +185,7 @@ export default function App() {
       case 'customers':
         return <CustomersView />;
       case 'settings':
-        return <SettingsView onLogout={handleLogout} />;
+        return <SettingsView onLogout={handleLogout} currentUser={currentUser} onUpdateUser={setCurrentUser} />;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }

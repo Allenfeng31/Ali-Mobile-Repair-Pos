@@ -232,6 +232,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         items: orderItems,
         subtotal: baseTotal - gst,
         tax: gst,
+        surcharge: surcharge,
         total: finalTotal,
         profit: totalProfit,
         type: orderItems.some(i => i.category.toLowerCase().includes('repair') || i.category.toLowerCase().includes('service')) ? 'repair' : 'sale',
@@ -539,9 +540,15 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               <span className="text-on-surface-variant text-sm font-medium">{t('term', 'gst')}</span>
               <span className="font-bold text-sm">${gst.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between pt-4">
+            {paymentMethod === 'eftpos' && (
+              <div className="flex justify-between animate-in fade-in slide-in-from-right-2">
+                <span className="text-primary text-sm font-bold">EFTPOS Surcharge (1.5%)</span>
+                <span className="text-primary font-bold text-sm">+${surcharge.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-4 border-t border-outline-variant/10 mt-2">
               <span className="text-lg font-extrabold">{t('term', 'totalAmount')}</span>
-              <span className="text-2xl font-black text-primary">${baseTotal.toFixed(2)}</span>
+              <span className="text-2xl font-black text-primary">${finalTotal.toFixed(2)}</span>
             </div>
           </div>
 

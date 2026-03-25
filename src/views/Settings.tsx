@@ -16,10 +16,22 @@ import { cn } from '@/lib/utils';
 import { api } from '../lib/api';
 import { LogOut } from 'lucide-react';
 
-export function SettingsView({ onLogout }: { onLogout?: () => void }) {
+export function SettingsView({ 
+  onLogout, 
+  currentUser, 
+  onUpdateUser 
+}: { 
+  onLogout?: () => void, 
+  currentUser: any, 
+  onUpdateUser: (user: any) => void 
+}) {
   const [header, setHeader] = React.useState(`Precision Tech Repairs\n123 Artisan Way, Ste 4\nSan Francisco, CA 94103\nTel: (555) 012-3456`);
   const [footer, setFooter] = React.useState(`Warranty: 90 days on parts and labor. No refunds on water damage repairs. Thank you for choosing Precision!`);
   const [isSaved, setIsSaved] = React.useState(false);
+  const [newName, setNewName] = React.useState(currentUser?.username || '');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [isSyncing, setIsSyncing] = React.useState(false);
+
   const [printers, setPrinters] = React.useState<any[]>([]);
   const [networkInfo, setNetworkInfo] = React.useState<{type: string, downlink: number, ping: number, online: boolean}>({
     type: 'wifi', downlink: 0, ping: 0, online: navigator.onLine
@@ -92,6 +104,44 @@ export function SettingsView({ onLogout }: { onLogout?: () => void }) {
       setTimeout(() => setIsSaved(false), 3000);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!currentUser) return;
+    setIsSyncing(true);
+    try {
+      const updateData: { username?: string, password?: string } = {};
+      if (newName && newName !== currentUser.username) updateData.username = newName;
+      if (newPassword) updateData.password = newPassword;
+
+      if (Object.keys(updateData).length === 0) {
+        setIsSyncing(false);
+        return;
+      }
+
+      const updatedUser = await api.updateUser(currentUser.id, updateData);
+      onUpdateUser(updatedUser);
+      
+      // Update local storage session if it exists
+      const savedSession = localStorage.getItem('pos_session');
+      if (savedSession) {
+        try {
+          const session = JSON.parse(savedSession);
+          session.user = updatedUser;
+          localStorage.setItem('pos_session', JSON.stringify(session));
+        } catch (e) {
+          console.error('Failed to update session localStorage', e);
+        }
+      }
+
+      setNewPassword('');
+      alert("Employee profile updated successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update profile: " + err.message);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -189,26 +239,70 @@ export function SettingsView({ onLogout }: { onLogout?: () => void }) {
             </div>
           </section>
 
-          {/* Account Security */}
+          {/* Account Security & Profile */}
           <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
-            <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em] mb-6">Account & Security</h3>
-            <div className="flex items-center justify-between bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10 shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-error/10 rounded-xl">
-                  <LogOut className="text-error" size={24} />
+            <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em] mb-6">Employee Information</h3>
+            
+            <div className="space-y-6">
+              <div className="flex gap-4 items-center mb-2">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-2xl border border-primary/20 shadow-inner uppercase">
+                  {(currentUser?.username || 'A').charAt(0)}
                 </div>
                 <div>
-                  <p className="text-sm font-black text-on-surface uppercase tracking-wider">End Active Session</p>
-                  <p className="text-[10px] font-bold text-on-surface-variant mt-1">Logs you out securely.</p>
+                  <p className="text-lg font-black text-on-surface leading-tight">{currentUser?.username || 'Employee'}</p>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{currentUser?.role || 'Staff'}</p>
                 </div>
               </div>
-              
-              <button 
-                onClick={onLogout}
-                className="bg-error text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 shadow-lg shadow-error/20 transition-all active:scale-95"
-              >
-                Sign Out
-              </button>
+
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Update Name</label>
+                  <input 
+                    type="text" 
+                    value={newName} 
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Enter new display name..."
+                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Change Password</label>
+                  <input 
+                    type="password" 
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password..."
+                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+                <button 
+                  onClick={handleUpdateProfile}
+                  className="w-full bg-primary text-on-primary py-3.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-95 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  {isSyncing ? <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-rotate"></div> : <Save size={14} />}
+                  Save Employee Updates
+                </button>
+              </div>
+
+              <div className="h-px bg-outline-variant/10 my-8"></div>
+
+              <div className="flex items-center justify-between bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10 shadow-sm opacity-60">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-error/10 rounded-xl text-error">
+                    <LogOut size={22} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-on-surface uppercase tracking-wider">End Session</p>
+                    <p className="text-[10px] font-bold text-on-surface-variant mt-0.5">Logout for security</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={onLogout}
+                  className="bg-surface-container-high text-error px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-error/20 hover:bg-error hover:text-white transition-all"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </section>
         </div>

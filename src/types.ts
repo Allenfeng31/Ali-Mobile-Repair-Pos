@@ -15,6 +15,7 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   tax: number;
+  surcharge?: number;
   total: number;
   profit: number;
   type: 'repair' | 'sale' | 'service';

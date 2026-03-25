@@ -238,7 +238,13 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                     <span>Tax (GST):</span>
                     <span>${order.tax.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-black pt-2">
+                  {order.surcharge > 0 && (
+                    <div className="flex justify-between">
+                      <span>Surcharge ({order.paymentMethod?.toUpperCase()}):</span>
+                      <span>${order.surcharge.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm font-black pt-2 border-t border-dashed" style={{ borderColor: '#000000' }}>
                     <span>TOTAL:</span>
                     <span>${order.total.toFixed(2)}</span>
                   </div>

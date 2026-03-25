@@ -62,9 +62,26 @@ app.post('/api/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
-  // Remove password from response
   const { password: _, ...user } = data;
   res.json({ success: true, user });
+});
+
+app.put('/api/users/:id', async (req, res) => {
+  const { username, password } = req.body;
+  const updateData = {};
+  if (username) updateData.username = username;
+  if (password) updateData.password = password;
+
+  const { data, error } = await supabase
+    .from('pos_users')
+    .update(updateData)
+    .eq('id', req.params.id)
+    .select();
+
+  if (error) return res.status(500).json({ error: error.message });
+  
+  const { password: _, ...user } = data[0];
+  res.json(user);
 });
 
 // ----------------------------------------------------------------------
