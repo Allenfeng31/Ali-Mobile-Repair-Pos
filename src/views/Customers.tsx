@@ -114,7 +114,8 @@ const getStatusColor = (status: string) => {
 };
 
 export function CustomersView() {
-  const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [hostIp, setHostIp] = useState('localhost');
   
@@ -136,6 +137,8 @@ export function CustomersView() {
         }
       } catch (err) {
         console.error('Failed to load data:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
@@ -231,7 +234,7 @@ export function CustomersView() {
     );
   });
 
-  const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || sortedCustomers[0];
+  const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || sortedCustomers[0] || null;
 
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -397,6 +400,7 @@ export function CustomersView() {
   };
 
   const openEditModal = () => {
+    if (!selectedCustomer) return;
     setFormData({
       name: selectedCustomer.name,
       phone: selectedCustomer.phone,
@@ -599,7 +603,24 @@ export function CustomersView() {
 
         {/* List */}
         <div className="space-y-4">
-          {filteredCustomers.length > 0 ? (
+          {isLoading ? (
+            // Skeleton loading state
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/10 p-5 flex items-center gap-4 animate-pulse">
+                  <div className="w-12 h-12 rounded-2xl bg-surface-container-high flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-surface-container-high rounded-lg w-1/3" />
+                    <div className="h-3 bg-surface-container-high rounded-lg w-1/4" />
+                  </div>
+                  <div className="space-y-2 text-right">
+                    <div className="h-5 bg-surface-container-high rounded-lg w-16" />
+                    <div className="h-3 bg-surface-container-high rounded-lg w-12" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredCustomers.length > 0 ? (
             filteredCustomers.map(customer => {
               const isExpanded = selectedId === customer.id;
               const overallStatus = getCustomerOverallStatus(customer);
@@ -769,6 +790,33 @@ export function CustomersView() {
       {/* Right Column: Detail */}
       <aside className="w-full lg:w-[450px] space-y-6">
         <AnimatePresence mode="wait">
+          {isLoading || !selectedCustomer ? (
+            <motion.div
+              key="skeleton"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="bg-surface-container-low rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/5"
+            >
+              <div className="h-32 bg-surface-container-high animate-pulse" />
+              <div className="px-8 pb-10 -mt-12 relative">
+                <div className="w-24 h-24 rounded-3xl bg-surface-container-high animate-pulse" />
+                <div className="mt-6 space-y-4 animate-pulse">
+                  <div className="h-6 bg-surface-container-high rounded-lg w-2/3" />
+                  <div className="h-4 bg-surface-container-high rounded-lg w-1/3" />
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="h-20 bg-surface-container-high rounded-2xl" />
+                    <div className="h-20 bg-surface-container-high rounded-2xl" />
+                  </div>
+                  <div className="h-5 bg-surface-container-high rounded-lg w-1/4 mt-4" />
+                  <div className="space-y-3">
+                    <div className="h-16 bg-surface-container-high rounded-xl" />
+                    <div className="h-16 bg-surface-container-high rounded-xl" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
           <motion.div 
             key={selectedCustomer.id}
             initial={{ opacity: 0, x: 20 }}
@@ -876,6 +924,7 @@ export function CustomersView() {
               </div>
             </div>
           </motion.div>
+          )}
         </AnimatePresence>
       </aside>
 

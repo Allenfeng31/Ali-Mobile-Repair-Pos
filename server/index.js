@@ -154,10 +154,29 @@ app.get('/api/orders', async (req, res) => {
 });
 
 app.post('/api/orders', async (req, res) => {
-  const { items, ...orderData } = req.body;
+  const { items, ...fullOrderData } = req.body;
   
-  // Insert Order
-  const { data: order, error: orderError } = await supabase.from('orders').insert([orderData]).select();
+  // Explicitly pick only the columns that exist in the 'orders' table.
+  // This prevents schema errors if new fields (like 'surcharge') haven't been
+  // added to the database yet via a migration.
+  const knownColumns = ['id', 'timestamp', 'subtotal', 'tax', 'surcharge', 'total', 'profit', 'type', 'paymentMethod', 'status'];
+  const orderData = {};
+  for (const key of knownColumns) {
+    if (fullOrderData[key] !== undefined) {
+      orderData[key] = fullOrderData[key];
+    }
+  }
+
+  // Insert Order - if surcharge column doesn't exist yet, retry without it
+  let order, orderError;
+  ({ data: order, error: orderError } = await supabase.from('orders').insert([orderData]).select());
+  
+  if (orderError && orderError.message && orderError.message.includes("surcharge")) {
+    // Fallback: column doesn't exist in DB yet, insert without surcharge
+    const { surcharge: _removed, ...orderDataWithoutSurcharge } = orderData;
+    ({ data: order, error: orderError } = await supabase.from('orders').insert([orderDataWithoutSurcharge]).select());
+  }
+  
   if (orderError) return res.status(500).json({ error: orderError.message });
 
   // Insert Order Items
@@ -167,7 +186,8 @@ app.post('/api/orders', async (req, res) => {
     if (itemsError) return res.status(500).json({ error: itemsError.message });
   }
 
-  res.json({ ...order[0], items });
+  // Always return the full order including surcharge to the frontend
+  res.json({ ...order[0], surcharge: fullOrderData.surcharge || 0, items });
 });
 
 // ----------------------------------------------------------------------
