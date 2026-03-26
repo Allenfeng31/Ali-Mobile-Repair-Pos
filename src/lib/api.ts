@@ -158,5 +158,21 @@ export const api = {
   getIp: async () => {
     const res = await fetch(`${API_URL}/ip`);
     return handleResponse(res);
-  }
+  },
+
+  // SMS Notifications
+  sendSms: async (to: string, type: 'dropoff' | 'completed' | 'review', extras?: { customerName?: string; deviceModel?: string }) => {
+    try {
+      const res = await fetch(`${API_URL}/sms/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, type, ...extras }),
+      });
+      return res.json();
+    } catch (err) {
+      // SMS is fire-and-forget — never block the main flow
+      console.warn('[SMS] Failed to send SMS:', err);
+      return { ok: false };
+    }
+  },
 };

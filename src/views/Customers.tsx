@@ -16,7 +16,8 @@ import {
   Mail,
   Phone,
   Trash2,
-  QrCode
+  QrCode,
+  Copy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -154,6 +155,25 @@ export function CustomersView() {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isConfirmingDeleteRepair, setIsConfirmingDeleteRepair] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [showPhonePopup, setShowPhonePopup] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
+  const [reviewSent, setReviewSent] = useState(false);
+
+  const handleCopyPhone = () => {
+    if (!selectedCustomer) return;
+    navigator.clipboard.writeText(selectedCustomer.phone).then(() => {
+      setPhoneCopied(true);
+      setTimeout(() => { setPhoneCopied(false); setShowPhonePopup(false); }, 1500);
+    });
+  };
+
+  const handleSendReview = async () => {
+    if (!selectedCustomer) return;
+    const { api } = await import('../lib/api');
+    await api.sendSms(selectedCustomer.phone, 'review', { customerName: selectedCustomer.name }).catch(() => {});
+    setReviewSent(true);
+    setTimeout(() => { setReviewSent(false); setShowPhonePopup(false); }, 1800);
+  };
   
   const getPortalUrl = () => {
     const origin = window.location.origin;
@@ -437,10 +457,15 @@ export function CustomersView() {
       const { api } = await import('../lib/api');
       await api.updateRepair(repairId, { status: 'Completed' });
       
+      let smsCustomer: Customer | undefined;
+      let smsRepairItem = 'your device';
+
       const updatedCustomers = customers.map(c => {
         if (c.id === customerId) {
+          smsCustomer = c;
           const updatedRepairs = c.repairs.map(r => {
             if (r.id === repairId) {
+              smsRepairItem = r.modelNumber || r.repairItem;
               const updatedRepair = { ...r, status: 'Completed' as const };
               if (selectedRepair && selectedRepair.id === repairId) {
                 setSelectedRepair(updatedRepair);
@@ -466,6 +491,14 @@ export function CustomersView() {
         }
         return c;
       });
+
+      // Fire completion SMS — non-blocking
+      if (smsCustomer?.phone) {
+        api.sendSms(smsCustomer.phone, 'completed', {
+          customerName: smsCustomer.name,
+          deviceModel: smsRepairItem
+        }).catch(() => {});
+      }
 
       setCustomers(updatedCustomers);
     } catch (err) {
@@ -863,10 +896,13 @@ export function CustomersView() {
               </div>
 
               <div className="mt-6 space-y-4">
-                <div className="flex items-center gap-3 text-on-surface-variant">
+                <button
+                  onClick={() => setShowPhonePopup(true)}
+                  className="flex items-center gap-3 text-on-surface-variant w-full hover:text-primary transition-colors group"
+                >
                   <Phone size={16} className="text-primary" />
-                  <span className="text-sm font-bold">{selectedCustomer.phone}</span>
-                </div>
+                  <span className="text-sm font-bold group-hover:underline">{selectedCustomer.phone}</span>
+                </button>
               </div>
 
               <div className="mt-10">
@@ -927,6 +963,86 @@ export function CustomersView() {
           )}
         </AnimatePresence>
       </aside>
+
+      {/* Phone Action Popup */}
+      <AnimatePresence>
+        {showPhonePopup && selectedCustomer && (
+          <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPhonePopup(false)}
+              className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+              className="relative z-10 w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/10"
+            >
+              {/* Header */}
+              <div className="signature-gradient p-6 text-white">
+                <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-1">Contact</p>
+                <p className="text-2xl font-black">{selectedCustomer.name}</p>
+                <p className="text-sm font-bold opacity-80 mt-0.5">{selectedCustomer.phone}</p>
+              </div>
+
+              <div className="p-4 space-y-3">
+                {/* Call */}
+                <a
+                  href={`tel:${selectedCustomer.phone}`}
+                  className="flex items-center gap-4 p-4 bg-surface-container-low rounded-2xl hover:bg-primary hover:text-on-primary transition-all group"
+                >
+                  <div className="w-10 h-10 bg-primary/10 group-hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors">
+                    <Phone size={20} className="text-primary group-hover:text-white" />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm">Call Customer</p>
+                    <p className="text-xs text-on-surface-variant group-hover:text-white/70">Open dialler</p>
+                  </div>
+                </a>
+
+                {/* Copy */}
+                <button
+                  onClick={handleCopyPhone}
+                  className="flex items-center gap-4 p-4 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-all w-full text-left"
+                >
+                  <div className="w-10 h-10 bg-secondary-container/40 rounded-xl flex items-center justify-center">
+                    {phoneCopied ? <Check size={20} className="text-green-600" /> : <Copy size={20} className="text-secondary" />}
+                  </div>
+                  <div>
+                    <p className="font-black text-sm">{phoneCopied ? 'Copied!' : 'Copy Number'}</p>
+                    <p className="text-xs text-on-surface-variant">Copy to clipboard</p>
+                  </div>
+                </button>
+
+                {/* Send Review SMS */}
+                <button
+                  onClick={handleSendReview}
+                  className="flex items-center gap-4 p-4 bg-amber-50 rounded-2xl hover:bg-amber-100 transition-all w-full text-left border border-amber-200/50"
+                >
+                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                    {reviewSent ? <Check size={20} className="text-green-600" /> : <Star size={20} className="text-amber-500" />}
+                  </div>
+                  <div>
+                    <p className="font-black text-sm text-amber-800">{reviewSent ? 'Review Link Sent! ⭐' : 'Request Google Review'}</p>
+                    <p className="text-xs text-amber-600">Send a review link via SMS</p>
+                  </div>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowPhonePopup(false)}
+                className="w-full p-4 text-center text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors border-t border-outline-variant/10"
+              >
+                Cancel
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Add/Edit Customer Modal */}
       <AnimatePresence>

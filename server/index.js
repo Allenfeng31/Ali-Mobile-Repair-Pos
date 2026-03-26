@@ -18,9 +18,17 @@ app.use((req, res, next) => {
 });
 
 // Initialize Supabase
+// Use service_role key if available (bypasses RLS, recommended for server-side use)
+// Get service_role key from: Supabase Dashboard → Settings → API → service_role (secret)
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project-url.supabase.co';
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.log('✅ [Security] Using service_role key — database fully protected by RLS.');
+} else {
+  console.warn('⚠️  [Security] Using anon key — add SUPABASE_SERVICE_ROLE_KEY to server/.env for maximum security.');
+}
 
 const getLocalIp = () => {
   const os = require('os');
@@ -34,6 +42,71 @@ const getLocalIp = () => {
   }
   return 'localhost';
 };
+
+// ----------------------------------------------------------------------
+// SMS via Twilio
+// ----------------------------------------------------------------------
+let twilioClient = null;
+const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+const googleReviewLink = process.env.GOOGLE_REVIEW_LINK || 'https://g.page/r/your-review-link';
+
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+  const twilio = require('twilio');
+  twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  console.log('✅ [SMS] Twilio client initialized — SMS notifications active.');
+} else {
+  console.warn('⚠️  [SMS] Twilio credentials not set — SMS notifications disabled. Add TWILIO_* to server/.env');
+}
+
+const SMS_MESSAGES = {
+  dropoff: (name) =>
+    `Hi ${name}! Thank you for choosing Ali Mobile Repair. Your device has been successfully checked in. Our technicians will assess it right away and we'll send you a text as soon as your repair is complete. We appreciate your trust! 📱`,
+
+  completed: (name, device) =>
+    `Great news, ${name}! 🎉 Your ${device} repair at Ali Mobile Repair is now complete and ready for pickup. Please visit us at your convenience. We look forward to seeing you!`,
+
+  review: (name) =>
+    `Hi ${name}! Thank you for choosing Ali Mobile Repair. We hope you're happy with the service! If you have a moment, we'd really appreciate a Google review — it means the world to us 🙏\n${googleReviewLink}`,
+};
+
+app.post('/api/sms/send', async (req, res) => {
+  const { to, type, customerName = 'Valued Customer', deviceModel = 'your device' } = req.body;
+
+  if (!twilioClient) {
+    console.warn('[SMS] Twilio not configured — skipping SMS to', to);
+    return res.json({ ok: false, reason: 'Twilio not configured' });
+  }
+
+  if (!to || !type || !SMS_MESSAGES[type]) {
+    return res.status(400).json({ error: 'Missing required fields: to, type' });
+  }
+
+  // Format AU phone numbers to E.164 if needed
+  let formattedPhone = to.replace(/\s/g, '');
+  if (formattedPhone.startsWith('0')) {
+    formattedPhone = '+61' + formattedPhone.slice(1);
+  }
+
+  try {
+    const body = type === 'dropoff'
+      ? SMS_MESSAGES.dropoff(customerName)
+      : type === 'completed'
+        ? SMS_MESSAGES.completed(customerName, deviceModel)
+        : SMS_MESSAGES.review(customerName);
+
+    const message = await twilioClient.messages.create({
+      body,
+      from: twilioPhone,
+      to: formattedPhone,
+    });
+
+    console.log(`✅ [SMS] ${type} sent to ${formattedPhone} — SID: ${message.sid}`);
+    res.json({ ok: true, sid: message.sid });
+  } catch (err) {
+    console.error('[SMS] Error sending SMS:', err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 // ----------------------------------------------------------------------
 // SYSTEM

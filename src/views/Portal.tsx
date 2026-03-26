@@ -106,6 +106,9 @@ export function PortalView() {
         status: 'In Processing'
       });
 
+      // Fire SMS confirmation — non-blocking, don't await
+      api.sendSms(phone, 'dropoff', { customerName: name }).catch(() => {});
+
       // Switch to tracking view directly!
       setView('track');
     } catch (err) {
