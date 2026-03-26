@@ -91,6 +91,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
 
     try {
       // Capture the invoice element as a high-res PNG — same as the PDF pipeline
+      // Using pixelRatio: 3 for maximum sharpness on thermal printers
       const imgData = await toPng(invoiceRef.current, {
         pixelRatio: 3,
         backgroundColor: '#ffffff'
@@ -109,10 +110,22 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
           <html>
             <head>
               <style>
-                @page { size: 80mm auto; margin: 0; }
+                @page { 
+                  size: 80mm auto; 
+                  margin: 0; 
+                }
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { background: white; }
-                img { width: 100%; display: block; }
+                body { 
+                  background: white; 
+                  display: flex;
+                  justify-content: center;
+                  align-items: flex-start;
+                }
+                img { 
+                  width: 100%; 
+                  max-width: 80mm;
+                  display: block; 
+                }
               </style>
             </head>
             <body>
@@ -126,7 +139,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
-        }, 400);
+        }, 600);
       }
     } catch (err: any) {
       console.error('Print error:', err);
@@ -176,8 +189,8 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
               <div 
                 ref={invoiceRef}
                 id="printable-invoice"
-                className="p-8 mx-auto w-[80mm] min-h-[120mm] font-mono text-[12px] leading-tight"
-                style={{ width: '80mm', backgroundColor: '#ffffff', color: '#000000' }}
+                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight"
+                style={{ width: '80mm', minHeight: '120mm', backgroundColor: '#ffffff', color: '#000000' }}
               >
                 {/* Header */}
                 <div className="text-center mb-6 space-y-1">
