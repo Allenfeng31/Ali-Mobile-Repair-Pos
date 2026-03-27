@@ -103,8 +103,11 @@ app.post('/api/sms/send', async (req, res) => {
     console.log(`✅ [SMS] ${type} sent to ${formattedPhone} — SID: ${message.sid}`);
     res.json({ ok: true, sid: message.sid });
   } catch (err) {
-    console.error('[SMS] Error sending SMS:', err.message);
-    res.status(500).json({ ok: false, error: err.message });
+    console.error('❌ [SMS] Error sending SMS:', err.message);
+    if (err.code) {
+      console.error(`❌ [SMS] Twilio Error Code: ${err.code} — Check https://www.twilio.com/docs/errors/${err.code}`);
+    }
+    res.status(500).json({ ok: false, error: err.message, code: err.code });
   }
 });
 

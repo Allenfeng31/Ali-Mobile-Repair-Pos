@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export function PortalView() {
   const [view, setView] = useState<'home' | 'dropoff' | 'track'>('home');
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [submitSuccess, setSubmitSuccess] = React.useState<string | null>(null);
+    const [backendOk, setBackendOk] = React.useState(false);
+
+    // Check backend connection
+    React.useEffect(() => {
+        api.getIp().then(() => setBackendOk(true)).catch(() => setBackendOk(false));
+    }, []);
   const [phone, setPhone] = useState('');
   const [customer, setCustomer] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -134,7 +142,13 @@ export function PortalView() {
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4">
             <Smartphone size={32} />
           </div>
-          <h1 className="text-2xl font-black text-center tracking-tight">Ali Mobile Repair</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-black text-on-surface tracking-tighter">ALI MOBILE REPAIR</h1>
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${backendOk ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${backendOk ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              {backendOk ? 'Server Active' : 'Offline'}
+            </div>
+          </div>
           <p className="text-on-surface-variant text-sm font-medium">Customer Service Portal</p>
         </div>
 
