@@ -167,12 +167,26 @@ export function CustomersView() {
     });
   };
 
-  const handleSendReview = async () => {
-    if (!selectedCustomer) return;
-    const { api } = await import('../lib/api');
-    await api.sendSms(selectedCustomer.phone, 'review', { customerName: selectedCustomer.name }).catch(() => {});
-    setReviewSent(true);
-    setTimeout(() => { setReviewSent(false); setShowPhonePopup(false); }, 1800);
+  const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
+
+  const handleSendReview = async (customer?: Customer) => {
+    const target = customer || selectedCustomer;
+    if (!target) return;
+    
+    setSendingReviewId(target.id);
+    try {
+      const { api } = await import('../lib/api');
+      await api.sendSms(target.phone, 'review', { customerName: target.name });
+      setReviewSent(true);
+      setTimeout(() => { 
+        setReviewSent(false); 
+        setShowPhonePopup(false); 
+        setSendingReviewId(null);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to send review SMS:', err);
+      setSendingReviewId(null);
+    }
   };
   
   const getPortalUrl = () => {
@@ -736,9 +750,26 @@ export function CustomersView() {
                                     <Mail size={14} className="text-primary" />
                                     {customer.email}
                                   </div>
-                                  <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                                    <Phone size={14} className="text-primary" />
-                                    {customer.phone}
+                                  <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+                                      <Phone size={14} className="text-primary" />
+                                      {customer.phone}
+                                    </div>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
+                                      className={cn(
+                                        "px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
+                                        sendingReviewId === customer.id 
+                                          ? "bg-green-100 text-green-800 border-green-200" 
+                                          : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
+                                      )}
+                                    >
+                                      {sendingReviewId === customer.id ? (
+                                        <><Check size={12} /> Sent</>
+                                      ) : (
+                                        <><Star size={12} className="fill-amber-500 text-amber-500" /> Send Review</>
+                                      )}
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -895,15 +926,30 @@ export function CustomersView() {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-4">
-                <button
-                  onClick={() => setShowPhonePopup(true)}
-                  className="flex items-center gap-3 text-on-surface-variant w-full hover:text-primary transition-colors group"
-                >
-                  <Phone size={16} className="text-primary" />
-                  <span className="text-sm font-bold group-hover:underline">{selectedCustomer.phone}</span>
-                </button>
-              </div>
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => setShowPhonePopup(true)}
+                    className="flex items-center gap-3 text-on-surface-variant hover:text-primary transition-colors group flex-1"
+                  >
+                    <Phone size={16} className="text-primary" />
+                    <span className="text-sm font-bold group-hover:underline">{selectedCustomer.phone}</span>
+                  </button>
+                  <button
+                    onClick={() => handleSendReview()}
+                    className={cn(
+                      "px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all border shadow-sm",
+                      sendingReviewId === selectedCustomer.id 
+                        ? "bg-green-100 text-green-800 border-green-200" 
+                        : "bg-amber-50 text-amber-800 border-amber-100 hover:bg-amber-100"
+                    )}
+                  >
+                    {sendingReviewId === selectedCustomer.id ? (
+                      <><Check size={14} /> SMS Sent</>
+                    ) : (
+                      <><Star size={14} className="fill-amber-500 text-amber-500" /> Send Review</>
+                    )}
+                  </button>
+                </div>
 
               <div className="mt-10">
                 <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-5">Repair History</h3>
