@@ -2,7 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
-require('dotenv').config();
+// Only load dotenv in local development (where .env file exists)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const app = express();
 const port = process.env.PORT || 3001;
