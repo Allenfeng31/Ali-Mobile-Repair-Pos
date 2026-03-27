@@ -135,20 +135,24 @@ export function PortalView() {
     <div className="min-h-screen bg-surface-container-lowest text-on-surface font-sans p-4 sm:p-8 flex flex-col items-center justify-center">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-outline-variant/10 relative overflow-hidden">
         
+        {/* Top Status Bar */}
+        <div className={`absolute top-0 left-0 w-full flex justify-center py-1.5 transition-colors z-50 ${backendOk ? 'bg-green-500/10' : 'bg-red-500/10 border-b border-red-500/20'}`}>
+           <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${backendOk ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${backendOk ? 'text-green-600' : 'text-red-600'}`}>
+                {backendOk ? 'Connection Stable' : 'Server Offline - SMS Disabled'}
+              </span>
+           </div>
+        </div>
+
         {/* Background Decorative */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
 
-        <div className="flex flex-col items-center mb-8 relative z-10">
+        <div className="flex flex-col items-center mb-8 mt-4 relative z-10">
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4">
             <Smartphone size={32} />
           </div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-black text-on-surface tracking-tighter">ALI MOBILE REPAIR</h1>
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${backendOk ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${backendOk ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-              {backendOk ? 'Server Active' : 'Offline'}
-            </div>
-          </div>
+          <h1 className="text-xl font-black text-on-surface tracking-tighter uppercase">Ali Mobile Repair</h1>
           <p className="text-on-surface-variant text-sm font-medium">Customer Service Portal</p>
         </div>
 

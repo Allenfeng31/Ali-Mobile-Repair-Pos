@@ -13,6 +13,8 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 
+import { api } from '@/lib/api';
+
 interface LayoutProps {
   children: React.ReactNode;
   currentView: string;
@@ -31,6 +33,14 @@ const navItems = [
 ];
 
 export function Layout({ children, currentView, onViewChange, onLogout, currentUser, t }: LayoutProps) {
+  const [backendOk, setBackendOk] = React.useState(false);
+
+  React.useEffect(() => {
+    const check = () => api.getIp().then(() => setBackendOk(true)).catch(() => setBackendOk(false));
+    check();
+    const interval = setInterval(check, 10000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Sidebar - Desktop */}
@@ -93,6 +103,11 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 Refresh App
               </span>
             </button>
+
+            <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest mr-4 ${backendOk ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${backendOk ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              {backendOk ? 'Server Active' : 'Server Offline'}
+            </div>
 
             <div className="hidden sm:flex flex-col items-end mr-3">
               <span className="text-xs font-black text-on-surface uppercase tracking-wide">{currentUser?.username || t('nav', 'guest')}</span>
