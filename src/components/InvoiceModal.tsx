@@ -90,14 +90,12 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
     if (!invoiceRef.current) return;
 
     try {
-      // Capture the invoice element as a high-res PNG — same as the PDF pipeline
-      // Using pixelRatio: 3 for maximum sharpness on thermal printers
+      // Capture at a high pixel ratio for thermal printer sharpness
       const imgData = await toPng(invoiceRef.current, {
         pixelRatio: 3,
         backgroundColor: '#ffffff'
       });
 
-      // Create a hidden iframe and print the PNG image at full width
       const iframe = document.createElement('iframe');
       iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
       document.body.appendChild(iframe);
@@ -114,17 +112,23 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                   size: 80mm auto; 
                   margin: 0; 
                 }
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
+                html, body { 
+                  margin: 0; 
+                  padding: 0; 
                   background: white; 
+                  width: 100%;
+                }
+                body {
                   display: flex;
-                  justify-content: center;
-                  align-items: flex-start;
+                  flex-direction: column;
+                  align-items: center;
                 }
                 img { 
                   width: 100%; 
-                  max-width: 80mm;
-                  display: block; 
+                  max-width: 80mm; /* Force to paper width */
+                  height: auto;
+                  display: block;
+                  image-rendering: -webkit-optimize-contrast;
                 }
               </style>
             </head>
@@ -135,11 +139,12 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         `);
         doc.close();
 
+        // Give extra time for the image to load in the iframe
         setTimeout(() => {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
-        }, 600);
+        }, 800);
       }
     } catch (err: any) {
       console.error('Print error:', err);
@@ -189,8 +194,8 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
               <div 
                 ref={invoiceRef}
                 id="printable-invoice"
-                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight"
-                style={{ width: '80mm', minHeight: '120mm', backgroundColor: '#ffffff', color: '#000000' }}
+                className="p-6 font-['Inter'] text-[12px] leading-snug"
+                style={{ width: '380px', backgroundColor: '#ffffff', color: '#000000', margin: '0' }}
               >
                 {/* Header */}
                 <div className="text-center mb-6 space-y-1">
@@ -221,20 +226,25 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                 <div className="border-t border-dashed my-4" style={{ borderColor: '#000000' }}></div>
 
                 {/* Items */}
-                <table className="w-full text-[10px] mb-4">
+                <table className="w-full text-[10px] mb-4" style={{ tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '60%' }} />
+                    <col style={{ width: '15%' }} />
+                    <col style={{ width: '25%' }} />
+                  </colgroup>
                   <thead>
                     <tr className="border-b border-dashed" style={{ borderColor: '#000000' }}>
                       <th className="text-left py-1 font-black">Item</th>
                       <th className="text-right py-1 font-black">Qty</th>
-                      <th className="text-right py-1 font-black">Price</th>
+                      <th className="text-right py-1 font-black pr-1">Price</th>
                     </tr>
                   </thead>
                   <tbody>
                     {order.items.map((item, i) => (
                       <tr key={i}>
-                        <td className="py-1 pr-2">{item.name}</td>
+                        <td className="py-1 pr-2 break-words">{item.name}</td>
                         <td className="py-1 text-right">{item.qty}</td>
-                        <td className="py-1 text-right">${(item.price * item.qty).toFixed(2)}</td>
+                        <td className="py-1 text-right pr-1">${(item.price * item.qty).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
