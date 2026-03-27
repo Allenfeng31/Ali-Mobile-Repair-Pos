@@ -90,12 +90,6 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
     if (!invoiceRef.current) return;
 
     try {
-      // Capture at a high pixel ratio for thermal printer sharpness
-      const imgData = await toPng(invoiceRef.current, {
-        pixelRatio: 3,
-        backgroundColor: '#ffffff'
-      });
-
       const iframe = document.createElement('iframe');
       iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
       document.body.appendChild(iframe);
@@ -103,48 +97,97 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
       const doc = iframe.contentWindow?.document;
       if (doc) {
         doc.open();
+        // Clone the content to extract its HTML and styles
+        const contentHtml = invoiceRef.current.innerHTML;
+        const width = '76mm'; // Use slightly less than 80mm to allow for physical printer margins
+
         doc.write(`
           <!DOCTYPE html>
           <html>
             <head>
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
               <style>
                 @page { 
                   size: 80mm auto; 
                   margin: 0; 
                 }
-                html, body { 
+                * { 
                   margin: 0; 
                   padding: 0; 
+                  box-sizing: border-box; 
+                }
+                body { 
                   background: white; 
-                  width: 100%;
+                  padding: 4mm;
+                  width: ${width};
+                  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  -webkit-font-smoothing: antialiased;
                 }
+                /* Utility classes from Tailwind to be replicated for the print doc */
+                .text-center { text-align: center; }
+                .text-left { text-align: left; }
+                .text-right { text-align: right; }
+                .mb-1 { margin-bottom: 0.25rem; }
+                .mb-2 { margin-bottom: 0.5rem; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .mt-3 { margin-top: 0.75rem; }
+                .mt-4 { margin-top: 1rem; }
+                .mt-6 { margin-top: 1.5rem; }
+                .flex { display: flex; }
+                .justify-between { justify-content: space-between; }
+                .items-center { align-items: center; }
+                .font-black { font-weight: 900; }
+                .font-bold { font-weight: 700; }
+                .font-black { font-weight: 900; }
+                .italic { font-style: italic; }
+                .uppercase { text-transform: uppercase; }
+                .tracking-tighter { letter-spacing: -0.05em; }
+                .tracking-widest { letter-spacing: 0.1em; }
+                .tracking-wider { letter-spacing: 0.05em; }
+                .border-t { border-top: 1px solid #000; }
+                .border-b { border-bottom: 1px solid #000; }
+                .border-dashed { border-style: dashed !important; }
+                .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+                .pb-1 { padding-bottom: 0.25rem; }
+                .pt-2 { padding-top: 0.5rem; }
+                .pt-4 { padding-top: 1rem; }
+                .pr-1 { padding-right: 0.25rem; }
+                .pr-2 { padding-right: 0.5rem; }
+                .text-xs { font-size: 10px; }
+                .text-sm { font-size: 12px; }
+                .leading-tight { line-height: 1.25; }
+                .leading-relaxed { line-height: 1.625; }
+                .w-full { width: 100%; }
+                .h-8 { height: 2rem; }
+                .h-6 { height: 1.5rem; }
+                .h-4 { height: 1rem; }
+                .w-0.5 { width: 2px; }
+                .gap-0.5 { gap: 2px; }
+                .gap-1 { gap: 4px; }
+                .inline-block { display: inline-block; }
+                .break-words { overflow-wrap: break-word; }
+                table { width: 100%; border-collapse: collapse; }
+                
+                /* Specific fix for text quality on thermal printers */
                 body {
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                }
-                img { 
-                  width: 100%; 
-                  max-width: 80mm; /* Force to paper width */
-                  height: auto;
-                  display: block;
-                  image-rendering: -webkit-optimize-contrast;
+                  color: #000;
+                  print-color-adjust: exact;
                 }
               </style>
             </head>
             <body>
-              <img src="${imgData}" />
+              ${contentHtml}
             </body>
           </html>
         `);
         doc.close();
 
-        // Give extra time for the image to load in the iframe
         setTimeout(() => {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
-        }, 800);
+        }, 500);
       }
     } catch (err: any) {
       console.error('Print error:', err);
@@ -194,17 +237,17 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
               <div 
                 ref={invoiceRef}
                 id="printable-invoice"
-                className="p-6 font-['Inter'] text-[12px] leading-snug"
-                style={{ width: '380px', backgroundColor: '#ffffff', color: '#000000', margin: '0' }}
+                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight"
+                style={{ width: '80mm', backgroundColor: '#ffffff', color: '#000000' }}
               >
                 {/* Header */}
                 <div className="text-center mb-6 space-y-1">
-                  <p className="font-black text-sm uppercase tracking-tighter">{invoiceHeader.split('\n')[0]}</p>
-                  {invoiceHeader.split('\n').slice(1).map((line, i) => (
-                    <p key={i} className="text-[10px]">{line}</p>
-                  ))}
+                  <p className="font-black text-[13px] uppercase tracking-tighter leading-none mb-2">{invoiceHeader.split('\n')[0]}</p>
+                  <div className="text-[10px] leading-tight px-2 whitespace-pre-wrap">
+                    {invoiceHeader.split('\n').slice(1).join('\n')}
+                  </div>
                   <p 
-                    className="font-black text-[11px] uppercase tracking-widest mt-3 border-t border-dashed pt-2 pb-1 inline-block"
+                    className="font-black text-[11px] uppercase tracking-widest mt-4 border-t border-dashed pt-2 pb-1 inline-block"
                     style={{ borderColor: '#000000' }}
                   >Tax Invoice #{order.id}</p>
                 </div>
