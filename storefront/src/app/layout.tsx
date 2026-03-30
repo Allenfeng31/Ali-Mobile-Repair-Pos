@@ -54,7 +54,7 @@ export default function RootLayout({
         <main>{children}</main>
         <footer className="footer">
           <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-            <a href="http://localhost:3002/login">POS System Login</a>
+            <a href="/pos/login">POS System Login</a>
             <a href="/privacy-policy">Privacy Policy</a>
           </div>
           <p>Contact Number: 0481 058 514</p>
