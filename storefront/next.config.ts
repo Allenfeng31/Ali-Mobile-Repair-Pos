@@ -5,16 +5,20 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   async rewrites() {
-    // Force https:// if not present in the URL
     let apiBase = process.env.NEXT_PUBLIC_POS_API_URL || 'http://localhost:3001';
-    if (apiBase.startsWith('ali-mobile-repair')) {
+    
+    // Ensure the URL starts with a protocol
+    if (apiBase && !apiBase.startsWith('http://') && !apiBase.startsWith('https://')) {
       apiBase = `https://${apiBase}`;
     }
+
+    // Clean up trailing slashes
+    apiBase = apiBase.replace(/\/+$/, '');
     
     return [
       {
         source: '/pos/:path*',
-        destination: 'https://ali-mobile-repair-pos-g2by.vercel.app/:path*',
+        destination: 'https://ali-mobile-repair-pos-g2by.vercel.app/pos/:path*',
       },
       {
         source: '/api/:path*',
