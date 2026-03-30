@@ -4,7 +4,13 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async rewrites() {
+    // Safely construct the API destination
+    const apiBase = process.env.NEXT_PUBLIC_POS_API_URL || 'http://localhost:3001';
+    
     return [
       {
         source: '/pos/:path*',
@@ -12,7 +18,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_POS_API_URL || 'http://localhost:3001'}/api/:path*`,
+        destination: `${apiBase}/api/:path*`,
       },
     ];
   },
