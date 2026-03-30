@@ -1,0 +1,276 @@
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #007aff;
+  --primary-glow: rgba(0, 122, 255, 0.4);
+  --secondary: #1c1c1e;
+  --accent: #ff2d55;
+  --layer: rgba(255, 255, 255, 0.05);
+  --layer-border: rgba(255, 255, 255, 0.1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #f5f5f7;
+    --foreground: #1d1d1f;
+    --primary: #007aff;
+    --primary-glow: rgba(0, 122, 255, 0.2);
+    --secondary: #ffffff;
+    --accent: #ff3b30;
+    --layer: rgba(255, 255, 255, 0.7);
+    --layer-border: rgba(0, 0, 0, 0.05);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+/* Premium Navigation Glassmorphism */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: var(--layer);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--layer-border);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--primary), #00c6ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* Hero Section with Animations */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 6rem 1rem 2rem;
+  background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 60%);
+  animation: fadeIn 1s ease-out;
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -1px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  max-width: 600px;
+  margin-bottom: 2.5rem;
+}
+
+.primary-btn {
+  background: var(--primary);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--primary-glow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.secondary-btn {
+  background: transparent;
+  color: var(--foreground);
+  padding: 1rem 2.5rem;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: 2px solid var(--layer-border);
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: var(--layer);
+  border-color: var(--foreground);
+}
+
+/* Services Grid Component */
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 4rem auto;
+  padding: 0 2rem;
+}
+
+.serviceCard {
+  background: var(--secondary);
+  border: 1px solid var(--layer-border);
+  border-radius: 20px;
+  padding: 2.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.serviceCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, var(--primary-glow), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.serviceCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.serviceCard:hover::before {
+  opacity: 1;
+}
+
+.serviceCard h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.serviceCard p {
+  opacity: 0.7;
+  position: relative;
+}
+
+/* Footer structure */
+.footer {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--secondary);
+  border-top: 1px solid var(--layer-border);
+  margin-top: auto;
+}
+
+.footer p {
+  opacity: 0.6;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Forms structure */
+.form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: var(--secondary);
+  padding: 2.5rem;
+  border-radius: 20px;
+  border: 1px solid var(--layer-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--layer-border);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
