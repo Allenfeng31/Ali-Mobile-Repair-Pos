@@ -4,12 +4,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   async rewrites() {
-    // Safely construct the API destination
-    const apiBase = process.env.NEXT_PUBLIC_POS_API_URL || 'http://localhost:3001';
+    // Force https:// if not present in the URL
+    let apiBase = process.env.NEXT_PUBLIC_POS_API_URL || 'http://localhost:3001';
+    if (apiBase.startsWith('ali-mobile-repair')) {
+      apiBase = `https://${apiBase}`;
+    }
     
     return [
       {
