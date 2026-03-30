@@ -42,7 +42,7 @@ a {
   transition: color 0.3s ease;
 }
 
-/* Premium Navigation Glassmorphism */
+/* ─── Navigation ─────────────────────────────────── */
 .navbar {
   position: fixed;
   top: 0;
@@ -70,12 +70,15 @@ a {
   letter-spacing: -0.5px;
   background: linear-gradient(90deg, var(--primary), #00c6ff);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  flex-shrink: 0;
 }
 
 .nav-links {
   display: flex;
   gap: 2rem;
+  align-items: center;
 }
 
 .nav-links a {
@@ -83,6 +86,7 @@ a {
   font-weight: 600;
   letter-spacing: 0.5px;
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-links a::after {
@@ -100,45 +104,56 @@ a {
   width: 100%;
 }
 
-/* Hero Section with Animations */
+/* ─── Hero ─────────────────────────────────────────── */
 .hero {
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 6rem 1rem 2rem;
+  padding: 6rem 1.5rem 3rem;
   background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 60%);
   animation: fadeIn 1s ease-out;
 }
 
 .hero h1 {
-  font-size: clamp(3rem, 5vw, 5rem);
+  font-size: clamp(2.2rem, 6vw, 5rem);
   font-weight: 800;
   line-height: 1.1;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   letter-spacing: -1px;
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
   opacity: 0.8;
   max-width: 600px;
   margin-bottom: 2.5rem;
+  padding: 0 0.5rem;
+}
+
+/* Hero CTA button group */
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
 }
 
 .primary-btn {
   background: var(--primary);
   color: white;
-  padding: 1rem 2.5rem;
+  padding: 0.9rem 2rem;
   border-radius: 30px;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 15px var(--primary-glow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
 }
 
 .primary-btn:hover {
@@ -149,14 +164,14 @@ a {
 .secondary-btn {
   background: transparent;
   color: var(--foreground);
-  padding: 1rem 2.5rem;
+  padding: 0.9rem 2rem;
   border-radius: 30px;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
   border: 2px solid var(--layer-border);
   cursor: pointer;
-  margin-left: 1rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .secondary-btn:hover {
@@ -164,21 +179,21 @@ a {
   border-color: var(--foreground);
 }
 
-/* Services Grid Component */
+/* ─── Services Grid ─────────────────────────────── */
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
   max-width: 1200px;
   margin: 4rem auto;
-  padding: 0 2rem;
+  padding: 0 1.5rem;
 }
 
 .serviceCard {
   background: var(--secondary);
   border: 1px solid var(--layer-border);
   border-radius: 20px;
-  padding: 2.5rem;
+  padding: 2rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   position: relative;
@@ -207,37 +222,81 @@ a {
 }
 
 .serviceCard h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
   position: relative;
 }
 
 .serviceCard p {
   opacity: 0.7;
   position: relative;
+  font-size: 0.95rem;
 }
 
-/* Footer structure */
+/* ─── Map Section ────────────────────────────────── */
+.map-section {
+  max-width: 1200px;
+  margin: 3rem auto 4rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.map-section h2 {
+  margin-bottom: 1.5rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.map-wrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--layer-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  height: 450px;
+}
+
+.map-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* ─── Footer ─────────────────────────────────────── */
 .footer {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 2.5rem 1.5rem;
   background: var(--secondary);
   border-top: 1px solid var(--layer-border);
   margin-top: auto;
 }
 
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.footer-links a {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+}
+
 .footer p {
   opacity: 0.6;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Forms structure */
+/* ─── Forms ──────────────────────────────────────── */
 .form-container {
   max-width: 600px;
   margin: 2rem auto;
@@ -273,4 +332,151 @@ a {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* ─── Animations ─────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Tablet (768px – 1024px) ────────────────────── */
+@media (max-width: 1024px) {
+  .nav-container {
+    padding: 0.9rem 1.5rem;
+  }
+
+  .nav-links {
+    gap: 1.25rem;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+  }
+
+  .servicesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 1.5rem;
+  }
+
+  .map-wrapper {
+    height: 380px;
+  }
+}
+
+/* ─── Mobile (≤ 767px) ───────────────────────────── */
+@media (max-width: 767px) {
+  /* Navbar: tighter on mobile */
+  .nav-container {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+
+  .nav-logo {
+    font-size: 1.25rem;
+  }
+
+  .nav-links {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .nav-links a {
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  /* Hero: comfortable vertical padding */
+  .hero {
+    padding: 7rem 1.25rem 2.5rem;
+    min-height: auto;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    letter-spacing: -0.5px;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Stack CTA buttons on mobile */
+  .hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0 0.5rem;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+    text-align: center;
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    margin-left: 0;
+  }
+
+  /* Services: single column on mobile */
+  .servicesGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 2.5rem auto;
+    padding: 0 1rem;
+  }
+
+  .serviceCard {
+    padding: 1.5rem;
+  }
+
+  .serviceCard h3 {
+    font-size: 1.2rem;
+  }
+
+  /* Map: shorter on mobile */
+  .map-section {
+    margin: 2rem auto 3rem;
+    padding: 0 1rem;
+  }
+
+  .map-wrapper {
+    height: 260px;
+    border-radius: 16px;
+  }
+
+  /* Footer: tighter */
+  .footer {
+    padding: 2rem 1rem;
+  }
+
+  .footer-links {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer p {
+    font-size: 0.8rem;
+  }
+
+  /* Forms full-width on mobile */
+  .form-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}
+
+/* ─── Very small phones (≤ 380px) ───────────────── */
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .nav-links a {
+    font-size: 0.7rem;
+  }
 }
