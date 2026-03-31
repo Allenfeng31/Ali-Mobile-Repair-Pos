@@ -14,7 +14,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }) {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "http://localhost:5173";
+    const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "http://localhost:3001";
     const path = params.path.join("/");
     
     const searchParams = request.nextUrl.search;

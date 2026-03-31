@@ -4,8 +4,8 @@
   "description": "Express Backend for Ali POS with Supabase",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
