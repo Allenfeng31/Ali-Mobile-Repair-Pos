@@ -27,6 +27,9 @@ const API_BASE = (() => {
   return env?.VITE_API_URL || 'http://localhost:3001/api';
 })();
 
+// Must match the prefix used in ChatWidget.tsx
+const INTRO_PREFIX = '[CUSTOMER_INFO]';
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatInbox() {
@@ -122,12 +125,12 @@ export function ChatInbox() {
   const getLastMessage = (session: ChatSession) => {
     const msgs = session.chat_messages || [];
     // Exclude intro message from last message preview
-    const visible = msgs.filter(m => !m.content.startsWith('📋 New customer'));
+    const visible = msgs.filter(m => !m.content.startsWith(INTRO_PREFIX));
     return visible[visible.length - 1];
   };
 
   const getCustomerInfo = (session: ChatSession) => {
-    const introMsg = (session.chat_messages || []).find(m => m.content.startsWith('📋 New customer'));
+    const introMsg = (session.chat_messages || []).find(m => m.content.startsWith(INTRO_PREFIX));
     if (!introMsg) return null;
     const lines = introMsg.content.split('\n');
     const name = lines.find(l => l.startsWith('Name:'))?.replace('Name:', '').trim();
@@ -150,7 +153,7 @@ export function ChatInbox() {
   if (activeSession) {
     const sessionIdx = sessions.findIndex(s => s.id === activeSession.id);
     const customerInfo = getCustomerInfo(activeSession);
-    const visibleMessages = messages.filter(m => !m.content.startsWith('📋 New customer'));
+    const visibleMessages = messages.filter(m => !m.content.startsWith(INTRO_PREFIX));
     return (
       <div className="flex flex-col h-full max-w-3xl mx-auto" style={{ height: 'calc(100vh - 160px)' }}>
         {/* Header */}
@@ -184,9 +187,10 @@ export function ChatInbox() {
                 maxWidth: '70%',
                 padding: '0.6rem 0.9rem',
                 borderRadius: msg.sender === 'staff' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                // Staff = blue gradient, Customer = dark slate (readable)
                 background: msg.sender === 'staff'
                   ? 'linear-gradient(135deg, #007aff, #0051ff)'
-                  : 'rgba(255,255,255,0.06)',
+                  : '#1e293b',
                 color: 'white',
                 fontSize: '0.875rem',
                 lineHeight: 1.5,

@@ -9,6 +9,7 @@ const SESSION_EXPIRY_KEY = 'ali_chat_token_expiry';
 const CUSTOMER_NAME_KEY = 'ali_chat_name';
 const CUSTOMER_PHONE_KEY = 'ali_chat_phone';
 const CUSTOMER_INTRO_SENT_KEY = 'ali_chat_intro_sent';
+const INTRO_PREFIX = '[CUSTOMER_INFO]'; // plain text prefix - no emoji encoding issues
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
 
@@ -137,7 +138,8 @@ export default function ChatWidget() {
     // Send an intro message to the backend so staff can see who the customer is
     const token = tokenRef.current;
     if (token) {
-      const introContent = `📋 New customer inquiry\nName: ${name}\nPhone: ${phone}`;
+      // Use plain text prefix to avoid emoji encoding issues across environments
+      const introContent = `${INTRO_PREFIX}\nName: ${name}\nPhone: ${phone}`;
       await fetch(`${getApiBase()}/chat/session/${token}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,8 +156,9 @@ export default function ChatWidget() {
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || sending || !tokenRef.current) return;
-    setSending(true);
+    // Clear input immediately (before async ops) so UI feels instant
     setInput('');
+    setSending(true);
     try {
       await fetch(`${getApiBase()}/chat/session/${tokenRef.current}/message`, {
         method: 'POST',
@@ -337,13 +340,13 @@ export default function ChatWidget() {
                 flex: 1, overflowY: 'auto',
                 padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem',
               }}>
-                {messages.filter(m => !m.content.startsWith('📋 New customer')).length === 0 && (
+                {messages.filter(m => !m.content.startsWith(INTRO_PREFIX)).length === 0 && (
                   <div style={{ textAlign: 'center', opacity: 0.5, fontSize: '0.85rem', marginTop: '2rem', padding: '0 1rem' }}>
                     How can we help you today?
                   </div>
                 )}
                 {messages
-                  .filter(m => !m.content.startsWith('📋 New customer'))
+                  .filter(m => !m.content.startsWith(INTRO_PREFIX))
                   .map(msg => (
                     <div key={msg.id} style={{ display: 'flex', justifyContent: msg.sender === 'customer' ? 'flex-end' : 'flex-start' }}>
                       <div style={{
