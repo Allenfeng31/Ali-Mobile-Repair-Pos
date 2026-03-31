@@ -46,6 +46,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     setCurrentPage(1);
   }, [searchQuery, filter, activeBrandFilter, activeCategoryFilter]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -142,8 +143,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     });
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!formData.name || !formData.sellingPrice) return;
 
     const cost = parseFloat(formData.costPrice) || 0;
@@ -200,6 +201,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       const errorMsg = err?.message || 'Failed to save item. Check your database settings.';
       setSuccessMessage(`Error: ${errorMsg}`);
       setTimeout(() => setSuccessMessage(null), 5000);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -451,10 +454,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               Cancel
                             </button>
                             <button 
-                              onClick={handleSave}
-                              className="px-6 py-2 bg-primary text-on-primary rounded-xl text-xs font-bold shadow-lg shadow-primary/20"
+                              onClick={() => handleSave()}
+                              disabled={saving}
+                              className="px-6 py-2 bg-primary text-on-primary rounded-xl text-xs font-bold shadow-lg shadow-primary/20 disabled:opacity-50"
                             >
-                              Quick Save
+                              {saving ? 'Saving...' : 'Quick Save'}
                             </button>
                           </div>
                         </div>
