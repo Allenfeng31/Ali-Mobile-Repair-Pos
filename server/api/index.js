@@ -429,6 +429,12 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       // Normalize phone for storage (optional, but good for matching)
       const cleanPhone = phone.replace(/\D/g, ''); 
       
+      // Calculate initials safely
+      const names = name.trim().split(/\s+/).filter(Boolean);
+      let initials = names[0]?.[0] || 'C';
+      if (names.length > 1) {
+        initials += names[names.length - 1]?.[0] || '';
+      }
       initials = initials.toUpperCase().slice(0, 2);
 
       const customerId = crypto.randomUUID();
@@ -451,8 +457,67 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       } else {
         console.log(`✅ [Appointment] Customer record successfully created for ${name}`);
       }
+
+      // 3. Create Repair Record
+      // Extract brand/model from the appointment
+      const brand = appointment.brand || '';
+      const model = appointment.model || '';
+      const service = appointment.service || 'Repair';
+      const scheduledTime = appointment.datetime || '';
+      
+      const dateObj = new Date(scheduledTime);
+      const displayTime = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+
+      const repairId = `R-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      console.log(`🛠️ [Appointment] Creating linked repair record ${repairId} for ${brand} ${model}`);
+
+      const { error: repairError } = await supabase.from('repairs').insert({
+        id: repairId,
+        customer_id: customerId,
+        timestamp: new Date().toISOString(),
+        repairItem: service,
+        modelNumber: `${brand} ${model}`.trim(),
+        price: 0,
+        status: 'In Processing',
+        remark: `预约时间: ${displayTime}`,
+        liquidDamage: false,
+        password: '',
+        imei: ''
+      });
+
+      if (repairError) {
+        console.error(`❌ [Appointment] Failed to create repair record: ${repairError.message}`);
+      } else {
+        console.log(`✅ [Appointment] Repair record successfully linked for ${name}`);
+      }
     } else {
       console.log(`ℹ️ [Appointment] Customer ${name} already exists (ID: ${existing[0].id})`);
+      
+      // Still create a repair record for existing customer
+      const existingCustomerId = existing[0].id;
+      const brand = appointment.brand || '';
+      const model = appointment.model || '';
+      const service = appointment.service || 'Repair';
+      const scheduledTime = appointment.datetime || '';
+      const dateObj = new Date(scheduledTime);
+      const displayTime = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+      
+      const repairId = `R-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+      const { error: repairError } = await supabase.from('repairs').insert({
+        id: repairId,
+        customer_id: existingCustomerId,
+        timestamp: new Date().toISOString(),
+        repairItem: service,
+        modelNumber: `${brand} ${model}`.trim(),
+        price: 0,
+        status: 'In Processing',
+        remark: `预约时间: ${displayTime}`,
+        liquidDamage: false,
+        password: '',
+        imei: ''
+      });
+      if (repairError) console.error(`❌ [Appointment] Failed to create repair for existing customer: ${repairError.message}`);
     }
   }
 

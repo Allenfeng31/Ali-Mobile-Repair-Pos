@@ -57,17 +57,28 @@ function parseItem(raw: RawItem): ParsedItem | null {
   // Skip items with "other" brand
   if (!brand || brand.toLowerCase() === "other") return null;
 
+  // Fix for MacBooks and iPads where model field might contain service name
+  const COMMON_SERVICES = [
+    "Screen Replacement", "Battery Replacement", "Charging Port Repair", 
+    "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", 
+    "Front Camera", "Charging Port", "Logic Board"
+  ];
+
+  for (const service of COMMON_SERVICES) {
+    if (modelName.toLowerCase().endsWith(service.toLowerCase())) {
+      const regex = new RegExp(`\\s+${service.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+      modelName = modelName.replace(regex, "").trim();
+      serviceName = raw.name.includes(service) ? service : raw.name;
+    }
+  }
+
   // If we have a model name, try to extract the service part from the full name
-  // Example: name "iPhone 13 Pro Screen Replacement", modelName "iPhone 13 Pro"
-  // result: service "Screen Replacement"
-  if (modelName && serviceName.toLowerCase().includes(modelName.toLowerCase())) {
+  if (modelName && serviceName.toLowerCase().includes(modelName.toLowerCase()) && !modelName.toLowerCase().includes("service")) {
     const regex = new RegExp(modelName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
     serviceName = serviceName.replace(regex, "").trim();
-    // Capitalize first letter of service if needed
     serviceName = serviceName.charAt(0).toUpperCase() + serviceName.slice(1);
   }
 
-  // Fallback for names: if serviceName ends up empty or too short, use original name or a generic "Repair Service"
   if (!serviceName || serviceName.length < 3) {
     serviceName = raw.name || "Repair Service";
   }
@@ -148,6 +159,13 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
     return () => { cancelled = true; clearInterval(interval); };
   }, []);
 
+  // ── Manual Fallback Models ───────────────────────────────────────────────
+  // Add models that might be missing from the database
+  const MANUAL_MODELS: Record<string, string[]> = {
+    "tablet": ["iPad Pro 12.9-inch 1st Generation", "iPad Pro 12.9-inch 2nd Generation", "iPad Pro 11-inch 5th Generation"],
+    "computer": ["MacBook Pro 14-inch M3", "MacBook Pro 16-inch M3", "MacBook Air 15-inch M2"]
+  };
+
   // Update parent when selection changes
   useEffect(() => {
     if (!onSelectionChange) return;
@@ -182,11 +200,12 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
   // Levels: Brand -> Model -> Service
   const brands = Array.from(new Set(tabItems.map(i => i.brand))).sort();
   
-  const models = Array.from(new Set(
-    tabItems
+  const models = Array.from(new Set([
+    ...tabItems
       .filter(i => i.brand === selectedBrand)
-      .map(i => i.deviceModel)
-  )).sort();
+      .map(i => i.deviceModel),
+    ...(MANUAL_MODELS[activeTab] || [])
+  ])).sort();
   
   const services = tabItems.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
 

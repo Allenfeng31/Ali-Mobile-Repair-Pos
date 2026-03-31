@@ -59,7 +59,7 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
         border: "1px solid rgba(255,255,255,0.1)"
       }}>
         <h3 style={{ fontSize: "1rem", marginBottom: "1rem", color: "var(--primary)" }}>Appointment Details</h3>
-        <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>📅 <strong>Time:</strong> {new Date(booking.datetime).toLocaleString('en-AU', { dateStyle: 'long', timeStyle: 'short' })}</p>
+        <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>📅 <strong>Time:</strong> {booking.displayDate}</p>
         <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>🔧 <strong>Service:</strong> {booking.service}</p>
         <p style={{ fontSize: "0.9rem" }}>📍 <strong>Location:</strong> Kiosk C1, Ringwood Square Shopping Centre</p>
       </div>
@@ -84,7 +84,7 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
       <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
         <h4 style={{ marginBottom: "0.5rem" }}>Ali Mobile Repair Ringwood</h4>
         <p style={{ fontSize: "0.85rem", opacity: 0.6 }}>📞 0481 058 514</p>
-        <p style={{ fontSize: "0.85rem", opacity: 0.6 }}>✉️ info@alimobile.com.au</p>
+        <p style={{ fontSize: "0.85rem", opacity: 0.6 }}>✉️ alimobileshop32@gmail.com</p>
       </div>
     </div>
   );
@@ -95,20 +95,37 @@ export default function BookRepairPage() {
   const [formData, setFormData] = useState({ name: "", phone: "", datetime: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<any>(null);
+  
+  // Date/Time Selection
+  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState("");
+
+  const TIME_SLOTS = [
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selection) return alert("Please select a device and service first!");
+    if (!selectedDay || !selectedSlot) return alert("Please choose a date and time!");
     
     setIsSubmitting(true);
     try {
+      // Create a date object in local time
+      const datetime = `${selectedDay}T${selectedSlot}:00`;
+      const dateObj = new Date(datetime);
+      
+      // Format as DD/MM/YYYY HH:mm for display
+      const displayDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${selectedSlot}`;
+      
       const payload = {
         customer_name: formData.name,
         phone: formData.phone,
         brand: selection.brand,
         model: selection.model,
         service: selection.service,
-        datetime: formData.datetime,
+        datetime: dateObj.toISOString(),
+        displayDate: displayDate,
         notes: formData.notes,
         session_token: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null 
       };
@@ -187,15 +204,44 @@ export default function BookRepairPage() {
               />
             </div>
             <div className="form-group">
-              <label>Preferred Date &amp; Time</label>
+              <label>Select Date</label>
               <input 
-                type="datetime-local" 
+                type="date" 
                 className="form-control" 
                 required 
-                value={formData.datetime}
-                onChange={e => setFormData({ ...formData, datetime: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                value={selectedDay}
+                onChange={e => setSelectedDay(e.target.value)}
               />
             </div>
+
+            {selectedDay && (
+              <div className="form-group" style={{ animation: "fadeIn 0.3s ease" }}>
+                <label>Select Time Slot</label>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  {TIME_SLOTS.map(slot => (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => setSelectedSlot(slot)}
+                      style={{
+                        padding: "0.5rem",
+                        borderRadius: "8px",
+                        border: selectedSlot === slot ? "2px solid var(--primary)" : "1px solid rgba(255,255,255,0.1)",
+                        background: selectedSlot === slot ? "var(--primary)" : "rgba(255,255,255,0.05)",
+                        color: "white",
+                        fontSize: "0.85rem",
+                        fontWeight: selectedSlot === slot ? 700 : 400,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      {slot}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="form-group">
               <label>Device / Issue (Confirmation)</label>
               <div 

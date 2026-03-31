@@ -41,7 +41,6 @@ export function ChatInbox() {
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [processedAppts, setProcessedAppts] = useState<Record<string, 'confirmed' | 'declined'>>({});
   const [apptStatusCache, setApptStatusCache] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -308,17 +307,19 @@ export function ChatInbox() {
                           <p><span className="opacity-50">Phone:</span> <strong>{data.phone}</strong></p>
                           <p><span className="opacity-50">Device:</span> <strong>{data.device}</strong></p>
                           <p><span className="opacity-50">Service:</span> <strong>{data.service}</strong></p>
-                          <p><span className="opacity-50">Time:</span> <strong>{new Date(data.time).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}</strong></p>
-                          {data.notes && <p className="mt-1 p-2 bg-black/20 rounded-lg text-xs italic">{data.notes}</p>}
+                          <p><span className="opacity-50">Time:</span> <strong>{(() => {
+                            const d = new Date(data.time);
+                            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                          })()}</strong></p>
                         </div>
                         
-                        {(apptStatusCache[data.appointmentId] || processedAppts[data.appointmentId]) ? (
+                        {(apptStatusCache[data.appointmentId] === 'confirmed' || apptStatusCache[data.appointmentId] === 'declined') ? (
                           <div className={`mt-2 py-2 px-3 rounded-lg text-center font-bold text-xs ${
-                            (apptStatusCache[data.appointmentId] || processedAppts[data.appointmentId]) === 'confirmed' 
+                            apptStatusCache[data.appointmentId] === 'confirmed' 
                             ? 'bg-green-500/20 text-green-400' 
                             : 'bg-red-500/20 text-red-400'
                           }`}>
-                            {(apptStatusCache[data.appointmentId] || processedAppts[data.appointmentId]) === 'confirmed' 
+                            {apptStatusCache[data.appointmentId] === 'confirmed' 
                             ? 'Confirmed & Member Added ✅' 
                             : 'Appointment Declined ❌'}
                           </div>
