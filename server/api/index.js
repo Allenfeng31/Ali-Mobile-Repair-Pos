@@ -349,6 +349,141 @@ app.put('/api/settings/:key', async (req, res) => {
   res.json(data[0]);
 });
 
+
+// ----------------------------------------------------------------------
+// CHAT SYSTEM
+// ----------------------------------------------------------------------
+
+// Customer: create or retrieve a session by token
+app.post('/api/chat/session', async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'token required' });
+
+  // Try to find existing session
+  let { data: existing } = await supabase
+    .from('chat_sessions')
+    .select('*')
+    .eq('session_token', token)
+    .single();
+
+  if (existing) return res.json(existing);
+
+  // Create new session
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .insert({ session_token: token })
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// Customer: get messages for their own session
+app.get('/api/chat/session/:token/messages', async (req, res) => {
+  const { data: session } = await supabase
+    .from('chat_sessions')
+    .select('id')
+    .eq('session_token', req.params.token)
+    .single();
+
+  if (!session) return res.status(404).json({ error: 'session not found' });
+
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('*')
+    .eq('session_id', session.id)
+    .order('created_at', { ascending: true });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+// Customer: send a message
+app.post('/api/chat/session/:token/message', async (req, res) => {
+  const { content } = req.body;
+  if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
+
+  const { data: session } = await supabase
+    .from('chat_sessions')
+    .select('id')
+    .eq('session_token', req.params.token)
+    .single();
+
+  if (!session) return res.status(404).json({ error: 'session not found' });
+
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .insert({ session_id: session.id, sender: 'customer', content: content.trim() })
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Update last_message_at
+  await supabase
+    .from('chat_sessions')
+    .update({ last_message_at: new Date().toISOString() })
+    .eq('id', session.id);
+
+  res.json(data);
+});
+
+// Staff: get all sessions (conversation list)
+app.get('/api/chat/sessions', async (req, res) => {
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .select(`
+      id, session_token, created_at, last_message_at,
+      chat_messages (id, sender, content, created_at, is_read)
+    `)
+    .order('last_message_at', { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+// Staff: get all messages in a specific session
+app.get('/api/chat/session/id/:id/messages', async (req, res) => {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('*')
+    .eq('session_id', req.params.id)
+    .order('created_at', { ascending: true });
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Mark all customer messages as read
+  await supabase
+    .from('chat_messages')
+    .update({ is_read: true })
+    .eq('session_id', req.params.id)
+    .eq('sender', 'customer');
+
+  res.json(data || []);
+});
+
+// Staff: reply to a customer session
+app.post('/api/chat/session/id/:id/reply', async (req, res) => {
+  const { content } = req.body;
+  if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
+
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .insert({ session_id: req.params.id, sender: 'staff', content: content.trim() })
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  await supabase
+    .from('chat_sessions')
+    .update({ last_message_at: new Date().toISOString() })
+    .eq('id', req.params.id);
+
+  res.json(data);
+});
+
 // ----------------------------------------------------------------------
 // START SERVER
 // ----------------------------------------------------------------------

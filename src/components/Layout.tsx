@@ -4,7 +4,7 @@ import {
   Package, 
   BarChart3, 
   Users, 
-  Settings, 
+  MessageSquare,
   Menu,
   Search,
   LogOut,
@@ -29,7 +29,7 @@ const navItems = [
   { id: 'inventory', label: 'Inventory', icon: Package },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
   { id: 'customers', label: 'Customers', icon: Users },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'chat', label: 'Chat', icon: MessageSquare },
 ];
 
 export function Layout({ children, currentView, onViewChange, onLogout, currentUser, t }: LayoutProps) {
@@ -47,15 +47,15 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-surface-container-low flex-col items-center pt-10 pb-6 z-30 border-r border-outline-variant/10">
         <div className="mb-4 relative group/logo">
           <button 
-            onClick={() => onViewChange('settings')}
+            onClick={() => onViewChange('chat')}
             className="w-10 h-10 rounded-xl signature-gradient flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
           >
-            <Menu size={20} strokeWidth={3} />
+            <MessageSquare size={20} strokeWidth={2.5} />
           </button>
           
-          {/* Tooltip for the logo/menu button */}
+          {/* Tooltip */}
           <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-            Menu & Profile
+            Customer Chat
           </span>
         </div>
         <div className="flex flex-col gap-8 w-full items-center">

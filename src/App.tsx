@@ -5,6 +5,7 @@ import { InventoryView } from './views/Inventory';
 import { ReportsView } from './views/Reports';
 import { CustomersView } from './views/Customers';
 import { SettingsView } from './views/Settings';
+import { ChatInbox } from './views/ChatInbox';
 import { LoginView } from './views/Login';
 import { AnimatePresence } from 'motion/react';
 import { Smartphone, Battery, Zap, Wrench, ShieldCheck } from 'lucide-react';
@@ -184,6 +185,8 @@ export default function App() {
         return <ReportsView orders={orders} setOrders={setOrders} t={t} />;
       case 'customers':
         return <CustomersView />;
+      case 'chat':
+        return <ChatInbox />;
       case 'settings':
         return <SettingsView onLogout={handleLogout} currentUser={currentUser} onUpdateUser={setCurrentUser} />;
       default:

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ChatWidget from "./ChatWidget";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -52,6 +53,7 @@ export default function RootLayout({
           </div>
         </nav>
         <main>{children}</main>
+        <ChatWidget />
         <footer className="footer">
           <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
             <a href="https://ali-mobile-repair-pos-g2by.vercel.app/login">POS System Login</a>
