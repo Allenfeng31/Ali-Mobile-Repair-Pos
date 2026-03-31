@@ -158,13 +158,49 @@ function SettingsPanel({
 export function Layout({ children, currentView, onViewChange, onLogout, currentUser, t }: LayoutProps) {
   const [backendOk, setBackendOk] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [unreadChats, setUnreadChats] = React.useState(0);
 
+  // Poll backend server health
   React.useEffect(() => {
     const check = () => api.getIp().then(() => setBackendOk(true)).catch(() => setBackendOk(false));
     check();
     const interval = setInterval(check, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Poll for unread customer messages — shows red dot on Chat icon
+  React.useEffect(() => {
+    const API_BASE = (() => {
+      // @ts-ignore
+      const env = import.meta.env;
+      if (env?.PROD) return '/api';
+      return env?.VITE_API_URL || 'http://localhost:3001/api';
+    })();
+
+    const checkUnread = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/chat/sessions`);
+        if (!res.ok) return;
+        const sessions: any[] = await res.json();
+        const total = sessions.reduce((acc, s) => {
+          const unread = (s.chat_messages || []).filter(
+            (m: any) => m.sender === 'customer' && !m.is_read
+          ).length;
+          return acc + unread;
+        }, 0);
+        setUnreadChats(total);
+      } catch (_) {}
+    };
+
+    checkUnread();
+    const interval = setInterval(checkUnread, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Clear badge when user navigates to chat
+  React.useEffect(() => {
+    if (currentView === 'chat') setUnreadChats(0);
+  }, [currentView]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -188,6 +224,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
+            const showBadge = item.id === 'chat' && unreadChats > 0;
             return (
               <button
                 key={item.id}
@@ -200,6 +237,9 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 )}
               >
                 <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                {showBadge && (
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 border border-surface-container-low" />
+                )}
                 <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                   {item.label}
                 </span>
@@ -270,18 +310,22 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
+            const showBadge = item.id === 'chat' && unreadChats > 0;
             return (
               <button
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
                 className={cn(
-                  "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-xl",
+                  "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-xl relative",
                   isActive
                     ? "bg-primary-container/10 text-primary scale-110"
                     : "text-on-surface-variant"
                 )}
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                {showBadge && (
+                  <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-red-500" />
+                )}
                 <span className="text-[10px] font-bold uppercase tracking-wider mt-1">{item.label}</span>
               </button>
             );

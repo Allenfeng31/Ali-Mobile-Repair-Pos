@@ -225,9 +225,10 @@ export default function ChatWidget() {
             position: 'fixed', bottom: '5rem', right: '1.5rem',
             width: 'min(360px, calc(100vw - 2rem))',
             height: '480px', borderRadius: '20px',
-            background: 'var(--secondary, #1c1c1e)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            // Always dark — prevents white-text-on-white-bg bug in light mode
+            background: '#0f172a',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden', zIndex: 9998,
             animation: 'chatSlideIn 0.25s ease',
@@ -352,10 +353,12 @@ export default function ChatWidget() {
                       <div style={{
                         maxWidth: '75%', padding: '0.6rem 0.9rem',
                         borderRadius: msg.sender === 'customer' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                        // Customer = blue, Staff = solid dark gray (always readable on dark bg)
                         background: msg.sender === 'customer'
                           ? 'linear-gradient(135deg, #007aff, #00c6ff)'
-                          : 'rgba(255,255,255,0.08)',
-                        color: 'white', fontSize: '0.875rem', lineHeight: 1.5,
+                          : '#334155',
+                        color: 'white',
+                        fontSize: '0.875rem', lineHeight: 1.5,
                       }}>
                         <div>{msg.content}</div>
                         <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.25rem', textAlign: 'right' }}>

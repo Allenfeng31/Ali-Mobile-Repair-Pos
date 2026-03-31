@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ArrowLeft, Send, RefreshCw, Circle } from 'lucide-react';
+import { MessageSquare, ArrowLeft, Send, RefreshCw, Circle, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -38,6 +38,7 @@ export function ChatInbox() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -110,6 +111,21 @@ export function ChatInbox() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }
   };
 
+  const deleteSession = async () => {
+    if (!activeSession) return;
+    const confirmed = window.confirm('Delete this conversation? This cannot be undone.');
+    if (!confirmed) return;
+    setDeleting(true);
+    try {
+      await fetch(`${API_BASE}/chat/session/id/${activeSession.id}`, { method: 'DELETE' });
+      // Remove from local list and return to inbox
+      setSessions(prev => prev.filter(s => s.id !== activeSession.id));
+      setActiveSession(null);
+      setMessages([]);
+    } catch (_) {}
+    setDeleting(false);
+  };
+
   const formatTime = (iso: string) => {
     const d = new Date(iso);
     const now = new Date();
@@ -174,6 +190,15 @@ export function ChatInbox() {
             <Circle size={8} className="fill-green-500" />
             Live
           </div>
+          {/* Delete button */}
+          <button
+            onClick={deleteSession}
+            disabled={deleting}
+            className="p-2 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all disabled:opacity-40"
+            title="Delete conversation"
+          >
+            <Trash2 size={17} />
+          </button>
         </div>
 
         {/* Messages */}
