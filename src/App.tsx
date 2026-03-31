@@ -84,7 +84,9 @@ export default function App() {
             let parsedModel = item.model;
             if (typeof parsedModel === 'string' && parsedModel.includes('||')) {
               const parts = parsedModel.split('||');
-              parsedBrand = parts[0];
+              // Strip P/T/C prefix for clean display (e.g. "P iPhone" → "iPhone")
+              const rawBrand = parts[0];
+              parsedBrand = /^[PTCptc] .+/.test(rawBrand) ? rawBrand.slice(2).trim() : rawBrand;
               parsedModel = parts[1];
             }
             return {

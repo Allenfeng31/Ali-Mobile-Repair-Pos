@@ -24,28 +24,28 @@ interface ParsedItem {
   deviceType: "phone" | "tablet" | "computer" | "other";
 }
 
-// ─── Device type detection ────────────────────────────────────────────────────
-// Uses category field first (most reliable), then brand name as fallback.
-// In your POS backend, set categories to: "Phone Repair", "Tablet Repair", "Computer Repair"
+// ─── Prefix-based device type detection ─────────────────────────────────────
+// Rules:
+//   P <brand>  →  phone
+//   T <brand>  →  tablet
+//   C <brand>  →  computer
+//   other      →  other (no grouping)
+//   anything else (legacy, no prefix) → phone
 
-const PHONE_BRANDS   = ["iphone", "samsung", "google", "oppo", "huawei", "oneplus", "xiaomi", "nokia", "motorola", "sony", "lg", "realme", "vivo"];
-const TABLET_BRANDS  = ["ipad", "samsung tab", "galaxy tab", "surface", "lenovo tab"];
-const COMPUTER_BRANDS = ["macbook", "imac", "mac mini", "mac pro", "dell", "hp", "lenovo", "asus", "acer", "toshiba", "msi", "gigabyte", "microsoft", "chromebook"];
+function detectDeviceType(brand: string): ParsedItem["deviceType"] {
+  if (brand.toLowerCase() === "other") return "other";
+  const firstChar = brand.charAt(0).toUpperCase();
+  if (firstChar === "P") return "phone";
+  if (firstChar === "T") return "tablet";
+  if (firstChar === "C") return "computer";
+  // Legacy data without prefix: default to phone
+  return "phone";
+}
 
-function detectDeviceType(category: string, brand: string): ParsedItem["deviceType"] {
-  const cat = category.toLowerCase();
-  const br  = brand.toLowerCase();
-
-  if (cat.includes("computer") || cat.includes("laptop") || cat.includes("pc") || cat.includes("mac")) return "computer";
-  if (cat.includes("tablet") || cat.includes("ipad")) return "tablet";
-  if (cat.includes("phone")) return "phone";
-
-  // Brand fallback
-  if (TABLET_BRANDS.some(t => br.includes(t)))   return "tablet";
-  if (COMPUTER_BRANDS.some(t => br.includes(t))) return "computer";
-  if (PHONE_BRANDS.some(t => br.includes(t)))    return "phone";
-
-  return "other";
+// Strip prefix for customer-facing display: "P iPhone" → "iPhone"
+function getDisplayBrand(brand: string): string {
+  if (/^[PTCptc] .+/.test(brand)) return brand.slice(2).trim();
+  return brand;
 }
 
 function parseItem(raw: RawItem): ParsedItem {
@@ -65,7 +65,7 @@ function parseItem(raw: RawItem): ParsedItem {
     service,
     price: raw.price ?? 0,
     category: raw.category ?? "",
-    deviceType: detectDeviceType(raw.category ?? "", brand),
+    deviceType: detectDeviceType(brand),
   };
 }
 
@@ -191,7 +191,7 @@ export default function LiveQuoteCalculator() {
         >
           <option value="">-- Choose Brand --</option>
           {brands.map(b => (
-            <option key={b} value={b}>{b}</option>
+            <option key={b} value={b}>{getDisplayBrand(b)}</option>
           ))}
           <option value="__other__">Other (not listed)</option>
         </select>
