@@ -23,11 +23,13 @@ function getChatToken(): string {
   if (existing && expiry && Date.now() < parseInt(expiry, 10)) {
     return existing;
   }
+  // Token expired — clear ALL chat data so customer restarts intro step
   const token = crypto.randomUUID();
   localStorage.setItem(SESSION_KEY, token);
   localStorage.setItem(SESSION_EXPIRY_KEY, String(Date.now() + SEVEN_DAYS_MS));
-  // Reset intro flag for new token
   localStorage.removeItem(CUSTOMER_INTRO_SENT_KEY);
+  localStorage.removeItem(CUSTOMER_NAME_KEY);
+  localStorage.removeItem(CUSTOMER_PHONE_KEY);
   return token;
 }
 
@@ -87,11 +89,58 @@ export default function ChatWidget() {
   const scrollToBottom = () =>
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
+  // ── Session recovery ───────────────────────────────────────────────────────
+  // Recreates the session on the backend if staff deleted it, and resends
+  // the customer intro message so the staff still knows who this customer is.
+  const ensureSession = useCallback(async (): Promise<boolean> => {
+    const token = tokenRef.current;
+    if (!token) return false;
+    try {
+      const res = await fetch(`${getApiBase()}/chat/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) return false;
+
+      // If we have saved customer info, check whether intro is present
+      const savedName  = localStorage.getItem(CUSTOMER_NAME_KEY);
+      const savedPhone = localStorage.getItem(CUSTOMER_PHONE_KEY);
+      const introSent  = localStorage.getItem(CUSTOMER_INTRO_SENT_KEY);
+
+      if (savedName && savedPhone && introSent) {
+        const msgsRes = await fetch(`${getApiBase()}/chat/session/${token}/messages`);
+        if (msgsRes.ok) {
+          const msgs: Message[] = await msgsRes.json();
+          const hasIntro = msgs.some(m => m.content.startsWith(INTRO_PREFIX));
+          if (!hasIntro) {
+            // Session was deleted and just recreated — resend customer info
+            await fetch(`${getApiBase()}/chat/session/${token}/message`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                content: `${INTRO_PREFIX}\nName: ${savedName}\nPhone: ${savedPhone}`,
+              }),
+            });
+          }
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }, []);
+
   const fetchMessages = useCallback(async () => {
     const token = tokenRef.current;
     if (!token) return;
     try {
       const res = await fetch(`${getApiBase()}/chat/session/${token}/messages`);
+      if (res.status === 404) {
+        // Session was deleted on backend — auto-recover if customer still has valid token
+        await ensureSession();
+        return; // Next poll will load fresh messages
+      }
       if (!res.ok) return;
       const data: Message[] = await res.json();
       setMessages(data);
@@ -100,7 +149,7 @@ export default function ChatWidget() {
         setHasUnread(true);
       }
     } catch (_) {}
-  }, [isOpen]);
+  }, [isOpen, ensureSession]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -156,10 +205,12 @@ export default function ChatWidget() {
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || sending || !tokenRef.current) return;
-    // Clear input immediately (before async ops) so UI feels instant
+    // Clear input immediately so UI feels instant
     setInput('');
     setSending(true);
     try {
+      // Ensure session exists — recreates it if staff deleted it on the backend
+      await ensureSession();
       await fetch(`${getApiBase()}/chat/session/${tokenRef.current}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
