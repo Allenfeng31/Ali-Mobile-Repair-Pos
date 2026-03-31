@@ -71,9 +71,9 @@ export default function Home() {
           <h3>iPad Repair</h3>
           <p>Fast, reliable repairs for all iPad models. Get it fixed in under 1 hour.</p>
         </Link>
-        <Link href="/services/drone-repair-near-me" className="serviceCard">
-          <h3>Drone Repair</h3>
-          <p>Specialized diagnostic and repair services for commercial and consumer drones.</p>
+        <Link href="/services/computer-repair" className="serviceCard">
+          <h3>Computer &amp; MacBook Repair</h3>
+          <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
         </Link>
       </section>
 

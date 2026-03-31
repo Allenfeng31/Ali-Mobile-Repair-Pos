@@ -15,7 +15,7 @@ export default function ServicesPage() {
               "@type": "LocalBusiness",
               "name": "Ali Mobile Repair"
             },
-            "serviceType": ["Phone Repair", "Tablet Repair", "Drone Repair"],
+            "serviceType": ["Phone Repair", "Tablet Repair", "Computer Repair"],
             "areaServed": {
               "@type": "City",
               "name": "Melbourne"
@@ -34,9 +34,9 @@ export default function ServicesPage() {
             <h3>iPad & Tablet Repair</h3>
             <p>Expert glass and LCD replacement for all iPad generations. Most fixed in 1 hour.</p>
           </Link>
-          <Link href="/services/drone-repair-near-me" className="serviceCard">
-            <h3>Drone Repair</h3>
-            <p>DJI and commercial drone diagnosis, parts replacement, and recalibration.</p>
+          <Link href="/services/computer-repair" className="serviceCard">
+            <h3>Computer &amp; MacBook Repair</h3>
+            <p>Screen, battery, charging port &amp; logic board repairs for all MacBook models. Same-day diagnosis.</p>
           </Link>
         </div>
       </div>

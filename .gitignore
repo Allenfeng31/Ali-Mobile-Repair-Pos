@@ -8,3 +8,4 @@ coverage/
 !.env.example
 seed-macbook.js
 seed-*.js
+migrate-*
