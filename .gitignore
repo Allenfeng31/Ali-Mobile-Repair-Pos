@@ -6,3 +6,5 @@ coverage/
 *.log
 .env*
 !.env.example
+seed-macbook.js
+seed-*.js
