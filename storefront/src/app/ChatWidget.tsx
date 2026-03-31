@@ -76,14 +76,13 @@ export default function ChatWidget() {
       setStep('intro');
     }
 
-    // Create/recover session
-    fetch(`${getApiBase()}/chat/session`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    })
-      .then(() => setInitialized(true))
-      .catch(() => setInitialized(true));
+    if (savedName && savedPhone && introSent) {
+      setStep('chat');
+      setInitialized(true); 
+    } else {
+      setStep('intro');
+      setInitialized(true); 
+    }
   }, []);
 
   const scrollToBottom = () =>

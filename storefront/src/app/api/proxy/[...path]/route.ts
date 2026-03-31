@@ -12,6 +12,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   return handleProxyRequest(request, await params);
 }
 
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  return handleProxyRequest(request, await params);
+}
+
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "http://localhost:3001";

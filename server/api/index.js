@@ -389,51 +389,85 @@ app.post('/api/appointments', async (req, res) => {
 
 app.patch('/api/appointments/:id/status', async (req, res) => {
   const { status } = req.body;
+  const { id } = req.params;
+  
   if (!['confirmed', 'declined'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
+
+  console.log(`📅 [Appointment] Updating status for ID ${id} to: ${status}`);
 
   // 1. Update Appointment
   const { data: appointment, error } = await supabase
     .from('appointments')
     .update({ status })
-    .eq('id', req.params.id)
+    .eq('id', id)
     .select()
     .single();
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    console.error(`❌ [Appointment] Failed to update: ${error.message}`);
+    return res.status(500).json({ error: error.message });
+  }
 
   // 2. If confirmed, ensure customer is in the record list
   if (status === 'confirmed') {
-    // Check if customer exists by name and phone
-    const { data: existing } = await supabase
-      .from('customers')
-      .select('id')
-      .eq('phone', appointment.phone)
-      .limit(1);
+    const phone = appointment.phone;
+    const name = appointment.customer_name;
+    
+    console.log(`🔍 [Appointment] Checking/Creating customer for ${name} (${phone})`);
+
+    // Check if customer exists by phone
+    const { data: existing, error: checkError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('phone', phone);
+
+    if (checkError) console.error(`⚠️ [Appointment] Error checking existing customer: ${checkError.message}`);
 
     if (!existing || existing.length === 0) {
-      const initials = appointment.customer_name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+      // Normalize phone for storage (optional, but good for matching)
+      const cleanPhone = phone.replace(/\D/g, ''); 
+      
+      initials = initials.toUpperCase().slice(0, 2);
 
-      await supabase.from('customers').insert({
-        name: appointment.customer_name,
-        phone: appointment.phone,
-        email: '', // Optional from appointment if we add it
+      const customerId = crypto.randomUUID();
+      console.log(`✨ [Appointment] Creating new customer record with ID ${customerId}: ${name} (${cleanPhone})`);
+
+      const { error: insertError } = await supabase.from('customers').insert({
+        id: customerId,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: '',
         totalSpent: 0,
         status: 'Active',
         statusColor: 'green',
         lastVisit: new Date().toISOString().split('T')[0],
         initials
       });
+
+      if (insertError) {
+        console.error(`❌ [Appointment] Failed to create customer: ${insertError.message}`);
+      } else {
+        console.log(`✅ [Appointment] Customer record successfully created for ${name}`);
+      }
+    } else {
+      console.log(`ℹ️ [Appointment] Customer ${name} already exists (ID: ${existing[0].id})`);
     }
   }
 
   res.json(appointment);
+});
+
+app.get('/api/appointments/:id', async (req, res) => {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id, status')
+    .eq('id', req.params.id)
+    .single();
+
+  if (error) return res.status(404).json({ error: 'Not found' });
+  res.json(data);
 });
 
 // ----------------------------------------------------------------------
@@ -567,7 +601,10 @@ app.get('/api/chat/sessions', async (req, res) => {
     .order('last_message_at', { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data || []);
+  
+  // Filter out sessions that have no messages (ghost sessions)
+  const activeSessions = (data || []).filter(s => s.chat_messages && s.chat_messages.length > 0);
+  res.json(activeSessions);
 });
 
 // Staff: get all messages in a specific session

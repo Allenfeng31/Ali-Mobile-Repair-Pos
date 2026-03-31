@@ -41,6 +41,8 @@ export function ChatInbox() {
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [processedAppts, setProcessedAppts] = useState<Record<string, 'confirmed' | 'declined'>>({});
+  const [apptStatusCache, setApptStatusCache] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -57,16 +59,44 @@ export function ChatInbox() {
     }
   }, []);
 
+  const fetchBookingStatuses = useCallback(async (ids: string[]) => {
+    for (const id of ids) {
+      if (apptStatusCache[id]) continue; // Skip if already known
+      try {
+        const res = await fetch(`${API_BASE}/appointments/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setApptStatusCache(prev => ({ ...prev, [id]: data.status }));
+        }
+      } catch (_) {}
+    }
+  }, [apptStatusCache]);
+
   const loadMessages = useCallback(async (sessionId: string) => {
     try {
       const res = await fetch(`${API_BASE}/chat/session/id/${sessionId}/messages`);
       if (res.ok) {
-        setMessages(await res.json());
+        const data = await res.json();
+        setMessages(data);
+        
+        // Fetch statuses for any booking messages
+        const bookingIds = data
+          .filter((m: any) => m.content.startsWith(BOOKING_PREFIX))
+          .map((m: any) => {
+            try { return JSON.parse(m.content.replace(BOOKING_PREFIX, '').trim()).appointmentId; }
+            catch { return null; }
+          })
+          .filter(Boolean);
+          
+        if (bookingIds.length > 0) {
+          fetchBookingStatuses(bookingIds);
+        }
+
         // Refresh sessions to update unread counts
         loadSessions();
       }
     } catch (_) {}
-  }, [loadSessions]);
+  }, [loadSessions, fetchBookingStatuses]);
 
   // Poll sessions list
   useEffect(() => {
@@ -143,13 +173,26 @@ export function ChatInbox() {
     const msgs = session.chat_messages || [];
     // Exclude special prefixes from last message preview
     const visible = msgs.filter(m => !m.content.startsWith(INTRO_PREFIX) && !m.content.startsWith(BOOKING_PREFIX));
-    if (visible.length > 0) return visible[visible.length - 1];
+    if (visible.length > 0) {
+      const msg = visible[visible.length - 1];
+      return { ...msg, content: msg.content.substring(0, 60) + (msg.content.length > 60 ? '...' : '') };
+    }
     
     // Fallback to booking preview if that's all we have
     const booking = msgs.find(m => m.content.startsWith(BOOKING_PREFIX));
     if (booking) return { ...booking, content: '📅 New Booking Request' };
     
     return msgs[msgs.length - 1];
+  };
+
+  const getBookingInfo = (session: ChatSession) => {
+    const bookingMsg = (session.chat_messages || []).find(m => m.content.startsWith(BOOKING_PREFIX));
+    if (!bookingMsg) return null;
+    try {
+      return JSON.parse(bookingMsg.content.replace(BOOKING_PREFIX, '').trim());
+    } catch (_) {
+      return null;
+    }
   };
 
   const getCustomerInfo = (session: ChatSession) => {
@@ -164,12 +207,16 @@ export function ChatInbox() {
   const getSessionLabel = (session: ChatSession, idx: number) => {
     const info = getCustomerInfo(session);
     if (info?.name) return info.name;
+    const bInfo = getBookingInfo(session);
+    if (bInfo?.name) return bInfo.name;
     return `Customer #${String(idx + 1).padStart(3, '0')}`;
   };
 
   const getSessionSubLabel = (session: ChatSession) => {
     const info = getCustomerInfo(session);
-    return info?.phone || null;
+    if (info?.phone) return info.phone;
+    const bInfo = getBookingInfo(session);
+    return bInfo?.phone || null;
   };
 
   // ── Conversation view ──────────────────────────────────────────────────────
@@ -186,7 +233,7 @@ export function ChatInbox() {
           body: JSON.stringify({ status }),
         });
         if (res.ok) {
-          alert(`Booking ${status}!`);
+          setApptStatusCache(prev => ({ ...prev, [apptId]: status }));
           loadMessages(activeSession.id);
         }
       } catch (_) {
@@ -257,25 +304,40 @@ export function ChatInbox() {
                           New Booking Request
                         </div>
                         <div className="grid grid-cols-1 gap-1 text-sm">
+                          <p><span className="opacity-50">Customer:</span> <strong>{data.name}</strong></p>
+                          <p><span className="opacity-50">Phone:</span> <strong>{data.phone}</strong></p>
                           <p><span className="opacity-50">Device:</span> <strong>{data.device}</strong></p>
                           <p><span className="opacity-50">Service:</span> <strong>{data.service}</strong></p>
                           <p><span className="opacity-50">Time:</span> <strong>{new Date(data.time).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}</strong></p>
                           {data.notes && <p className="mt-1 p-2 bg-black/20 rounded-lg text-xs italic">{data.notes}</p>}
                         </div>
-                        <div className="flex gap-2 pt-2">
-                          <button 
-                            onClick={() => handleStatusUpdate(data.appointmentId, 'confirmed')}
-                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-xs transition-colors"
-                          >
-                            Confirm
-                          </button>
-                          <button 
-                            onClick={() => handleStatusUpdate(data.appointmentId, 'declined')}
-                            className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold py-2 px-3 rounded-lg text-xs transition-colors"
-                          >
-                            Decline
-                          </button>
-                        </div>
+                        
+                        {(apptStatusCache[data.appointmentId] || processedAppts[data.appointmentId]) ? (
+                          <div className={`mt-2 py-2 px-3 rounded-lg text-center font-bold text-xs ${
+                            (apptStatusCache[data.appointmentId] || processedAppts[data.appointmentId]) === 'confirmed' 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {(apptStatusCache[data.appointmentId] || processedAppts[data.appointmentId]) === 'confirmed' 
+                            ? 'Confirmed & Member Added ✅' 
+                            : 'Appointment Declined ❌'}
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 pt-2">
+                            <button 
+                              onClick={() => handleStatusUpdate(data.appointmentId, 'confirmed')}
+                              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-xs transition-colors"
+                            >
+                              Confirm
+                            </button>
+                            <button 
+                              onClick={() => handleStatusUpdate(data.appointmentId, 'declined')}
+                              className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold py-2 px-3 rounded-lg text-xs transition-colors"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   } catch (_) {
