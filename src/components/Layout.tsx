@@ -6,13 +6,15 @@ import {
   Users, 
   MessageSquare,
   Menu,
-  Search,
+  Settings,
   LogOut,
-  RotateCw
+  RotateCw,
+  Save,
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
-
+import { motion, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
 
 interface LayoutProps {
@@ -32,8 +34,130 @@ const navItems = [
   { id: 'chat', label: 'Chat', icon: MessageSquare },
 ];
 
+// ─── Slim Settings Panel ──────────────────────────────────────────────────────
+function SettingsPanel({
+  open,
+  onClose,
+  onLogout,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onLogout: () => void;
+}) {
+  const [header, setHeader] = React.useState('');
+  const [footer, setFooter] = React.useState('');
+  const [saved, setSaved] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!open) return;
+    api.getSettings().then((s: any) => {
+      if (s.ali_pos_invoice_header) setHeader(s.ali_pos_invoice_header);
+      if (s.ali_pos_invoice_footer) setFooter(s.ali_pos_invoice_footer);
+    }).catch(console.error);
+  }, [open]);
+
+  const handleSave = async () => {
+    await api.updateSetting('ali_pos_invoice_header', header);
+    await api.updateSetting('ali_pos_invoice_footer', footer);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+          />
+          {/* Slide-out panel from right */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+            className="fixed right-0 top-0 h-full w-80 bg-surface-container-low border-l border-outline-variant/10 z-50 flex flex-col shadow-2xl"
+          >
+            {/* Panel header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/10">
+              <div className="flex items-center gap-2.5">
+                <Settings size={18} className="text-primary" />
+                <span className="font-black text-on-surface tracking-tight">Settings</span>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-all"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+              {/* Invoice header */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">
+                  Invoice Header
+                </label>
+                <textarea
+                  rows={4}
+                  value={header}
+                  onChange={e => setHeader(e.target.value)}
+                  placeholder="Store name, address, phone..."
+                  className="w-full bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                />
+              </div>
+
+              {/* Invoice footer */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">
+                  Invoice Footer / Disclaimer
+                </label>
+                <textarea
+                  rows={4}
+                  value={footer}
+                  onChange={e => setFooter(e.target.value)}
+                  placeholder="Warranty terms, return policy..."
+                  className="w-full bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                />
+              </div>
+
+              {/* Save */}
+              <button
+                onClick={handleSave}
+                className="w-full signature-gradient text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
+              >
+                {saved ? <CheckCircle2 size={15} /> : <Save size={15} />}
+                {saved ? 'Saved!' : 'Save Changes'}
+              </button>
+            </div>
+
+            {/* Logout at bottom */}
+            <div className="px-6 py-5 border-t border-outline-variant/10">
+              <button
+                onClick={onLogout}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-all font-black text-xs uppercase tracking-widest"
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
 export function Layout({ children, currentView, onViewChange, onLogout, currentUser, t }: LayoutProps) {
   const [backendOk, setBackendOk] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   React.useEffect(() => {
     const check = () => api.getIp().then(() => setBackendOk(true)).catch(() => setBackendOk(false));
@@ -41,23 +165,25 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
     const interval = setInterval(check, 10000);
     return () => clearInterval(interval);
   }, []);
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Sidebar - Desktop */}
+      {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-surface-container-low flex-col items-center pt-10 pb-6 z-30 border-r border-outline-variant/10">
+        {/* Settings button top-left (desktop) */}
         <div className="mb-4 relative group/logo">
-          <button 
-            onClick={() => onViewChange('chat')}
+          <button
+            onClick={() => setSettingsOpen(true)}
             className="w-10 h-10 rounded-xl signature-gradient flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
           >
-            <MessageSquare size={20} strokeWidth={2.5} />
+            <Settings size={20} strokeWidth={2} />
           </button>
-          
-          {/* Tooltip */}
           <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-            Customer Chat
+            Settings
           </span>
         </div>
+
+        {/* Nav items */}
         <div className="flex flex-col gap-8 w-full items-center">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -68,8 +194,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 onClick={() => onViewChange(item.id)}
                 className={cn(
                   "p-3 rounded-xl transition-all duration-200 relative group",
-                  isActive 
-                    ? "text-primary bg-primary-container/10 ring-1 ring-primary/20" 
+                  isActive
+                    ? "text-primary bg-primary-container/10 ring-1 ring-primary/20"
                     : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
                 )}
               >
@@ -81,19 +207,26 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             );
           })}
         </div>
-
       </aside>
 
-      {/* Main Content Area */}
+      {/* ── Main Content ─────────────────────────────────────────────── */}
       <div className="flex-1 md:ml-20 flex flex-col min-h-screen">
         {/* Top Bar */}
         <header className="bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex justify-between items-center border-b border-outline-variant/10">
           <div className="flex items-center gap-4">
-            <Menu className="text-primary md:hidden cursor-pointer" />
+            {/* Mobile: hamburger opens settings panel */}
+            <button
+              className="md:hidden text-primary cursor-pointer p-1"
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Settings"
+            >
+              <Menu size={24} />
+            </button>
             <h1 className="text-xl font-extrabold text-primary tracking-tight">Ali Mobile Repair POS</h1>
           </div>
+
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="p-2.5 rounded-xl bg-surface-container-high text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all active:rotate-180 group relative mr-2"
               title="Refresh App"
@@ -143,8 +276,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 onClick={() => onViewChange(item.id)}
                 className={cn(
                   "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-xl",
-                  isActive 
-                    ? "bg-primary-container/10 text-primary scale-110" 
+                  isActive
+                    ? "bg-primary-container/10 text-primary scale-110"
                     : "text-on-surface-variant"
                 )}
               >
@@ -155,6 +288,13 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           })}
         </nav>
       </div>
+
+      {/* Settings slide-out panel (shared between mobile & desktop) */}
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onLogout={onLogout}
+      />
     </div>
   );
 }

@@ -121,15 +121,36 @@ export function ChatInbox() {
 
   const getLastMessage = (session: ChatSession) => {
     const msgs = session.chat_messages || [];
-    return msgs[msgs.length - 1];
+    // Exclude intro message from last message preview
+    const visible = msgs.filter(m => !m.content.startsWith('📋 New customer'));
+    return visible[visible.length - 1];
   };
 
-  const getSessionLabel = (session: ChatSession, idx: number) =>
-    `Customer #${String(idx + 1).padStart(3, '0')}`;
+  const getCustomerInfo = (session: ChatSession) => {
+    const introMsg = (session.chat_messages || []).find(m => m.content.startsWith('📋 New customer'));
+    if (!introMsg) return null;
+    const lines = introMsg.content.split('\n');
+    const name = lines.find(l => l.startsWith('Name:'))?.replace('Name:', '').trim();
+    const phone = lines.find(l => l.startsWith('Phone:'))?.replace('Phone:', '').trim();
+    return { name, phone };
+  };
+
+  const getSessionLabel = (session: ChatSession, idx: number) => {
+    const info = getCustomerInfo(session);
+    if (info?.name) return info.name;
+    return `Customer #${String(idx + 1).padStart(3, '0')}`;
+  };
+
+  const getSessionSubLabel = (session: ChatSession) => {
+    const info = getCustomerInfo(session);
+    return info?.phone || null;
+  };
 
   // ── Conversation view ──────────────────────────────────────────────────────
   if (activeSession) {
     const sessionIdx = sessions.findIndex(s => s.id === activeSession.id);
+    const customerInfo = getCustomerInfo(activeSession);
+    const visibleMessages = messages.filter(m => !m.content.startsWith('📋 New customer'));
     return (
       <div className="flex flex-col h-full max-w-3xl mx-auto" style={{ height: 'calc(100vh - 160px)' }}>
         {/* Header */}
@@ -142,9 +163,9 @@ export function ChatInbox() {
           </button>
           <div className="flex-1">
             <h2 className="font-bold text-on-surface">{getSessionLabel(activeSession, sessionIdx)}</h2>
-            <p className="text-xs text-on-surface-variant">
-              Started {new Date(activeSession.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long' })}
-            </p>
+            {customerInfo?.phone && (
+              <p className="text-xs text-on-surface-variant">📞 {customerInfo.phone}</p>
+            )}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-green-500">
             <Circle size={8} className="fill-green-500" />
@@ -154,10 +175,10 @@ export function ChatInbox() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 px-1 pb-4">
-          {messages.length === 0 && (
+          {visibleMessages.length === 0 && (
             <p className="text-center text-on-surface-variant text-sm mt-10">No messages yet</p>
           )}
-          {messages.map(msg => (
+          {visibleMessages.map(msg => (
             <div key={msg.id} className={`flex ${msg.sender === 'staff' ? 'justify-end' : 'justify-start'}`}>
               <div style={{
                 maxWidth: '70%',
@@ -263,6 +284,9 @@ export function ChatInbox() {
                       {lastMsg ? formatTime(lastMsg.created_at) : formatTime(session.created_at)}
                     </span>
                   </div>
+                  {getSessionSubLabel(session) && (
+                    <p className="text-[11px] text-on-surface-variant/70">📞 {getSessionSubLabel(session)}</p>
+                  )}
                   <div className="flex items-center gap-2 mt-0.5">
                     <p className="text-xs text-on-surface-variant truncate flex-1">
                       {lastMsg
