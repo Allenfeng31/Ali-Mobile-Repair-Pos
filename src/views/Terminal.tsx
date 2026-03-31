@@ -37,6 +37,13 @@ interface TerminalViewProps {
 export function TerminalView({ inventory, setInventory, orders, setOrders, cart, setCart, categories, brands, t }: TerminalViewProps) {
   const [activeCategory, setActiveCategory] = useState('All Items');
   const [activeBrand, setActiveBrand] = useState('All Brands');
+
+  // Strip P/T/C prefix for display ("C MacBook" → "MacBook", "P iPhone" → "iPhone")
+  const getDisplayBrand = (br: string) => {
+    if (br === 'All Brands') return t('term', 'brandAll');
+    if (/^[PTCptc] .+/.test(br)) return br.slice(2).trim();
+    return br;
+  };
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -372,7 +379,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/5 hover:text-on-surface"
                 )}
               >
-                {br === 'All Brands' ? t('term', 'brandAll') : br}
+                {br === 'All Brands' ? t('term', 'brandAll') : getDisplayBrand(br)}
               </button>
             ))}
           </div>

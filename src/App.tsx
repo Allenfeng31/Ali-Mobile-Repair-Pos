@@ -84,9 +84,8 @@ export default function App() {
             let parsedModel = item.model;
             if (typeof parsedModel === 'string' && parsedModel.includes('||')) {
               const parts = parsedModel.split('||');
-              // Strip P/T/C prefix for clean display (e.g. "P iPhone" → "iPhone")
-              const rawBrand = parts[0];
-              parsedBrand = /^[PTCptc] .+/.test(rawBrand) ? rawBrand.slice(2).trim() : rawBrand;
+              // Keep full brand including P/T/C prefix so Terminal.tsx filter works
+              parsedBrand = parts[0];
               parsedModel = parts[1];
             }
             return {

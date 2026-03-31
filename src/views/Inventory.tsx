@@ -36,6 +36,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const [activeBrandFilter, setActiveBrandFilter] = useState('All Brands');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('All Categories');
 
+  // Strip P/T/C prefix for display: "C MacBook" → "MacBook"
+  const getDisplayBrand = (br: string) => {
+    if (/^[PTCptc] .+/.test(br)) return br.slice(2).trim();
+    return br;
+  };
+
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filter, activeBrandFilter, activeCategoryFilter]);
@@ -292,7 +298,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   onChange={e => setActiveBrandFilter(e.target.value)}
                 >
                   <option value="All Brands">{t('term', 'brandAll') || 'All Brands'}</option>
-                  {brands.map(b => <option key={b} value={b}>{b}</option>)}
+                  {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
                 </select>
               </div>
               <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-3 py-2 flex-1 sm:flex-none">
@@ -334,7 +340,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-on-surface leading-tight text-sm sm:text-base truncate">{item.name}</p>
-                          <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium truncate">{item.brand ? `${item.brand} • ` : ''}{item.model}</p>
+                          <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium truncate">{item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model}</p>
                         </div>
                       </div>
                       <div className="col-span-4 sm:col-span-2 text-right sm:text-center">
@@ -556,7 +562,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       value={formData.brand}
                       onChange={e => setFormData({...formData, brand: e.target.value})}
                     >
-                      {brands.map(b => <option key={b} value={b}>{b}</option>)}
+                      {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
                     </select>
                   </div>
                   <button 
