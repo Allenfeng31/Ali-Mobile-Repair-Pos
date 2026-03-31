@@ -160,10 +160,18 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
   }, []);
 
   // ── Manual Fallback Models ───────────────────────────────────────────────
-  // Add models that might be missing from the database
+  // Add inclusive models to ensure coverage even if not in stock
   const MANUAL_MODELS: Record<string, string[]> = {
-    "tablet": ["iPad Pro 12.9-inch 1st Generation", "iPad Pro 12.9-inch 2nd Generation", "iPad Pro 11-inch 5th Generation"],
-    "computer": ["MacBook Pro 14-inch M3", "MacBook Pro 16-inch M3", "MacBook Air 15-inch M2"]
+    "tablet": [
+      "iPad mini 4", "iPad mini 5", "iPad mini 6", "iPad mini 7 (A17 Pro)",
+      "iPad 5th Generation", "iPad 6th Generation", "iPad 7th Generation", "iPad 8th Generation", "iPad 9th Generation", "iPad 10th Generation",
+      "iPad Air 4", "iPad Air 5", "iPad Air M2 (11-inch)", "iPad Air M2 (13-inch)",
+      "iPad Pro 11-inch (M4)", "iPad Pro 13-inch (M4)", "iPad Pro 11-inch (Gen 1-4)", "iPad Pro 12.9-inch (Gen 3-6)"
+    ],
+    "computer": [
+      "MacBook Pro 14 (M1/M2/M3)", "MacBook Pro 16 (M1/M2/M3)", "MacBook Pro 13 (M1/M2)",
+      "MacBook Air 13 (M1/M2/M3)", "MacBook Air 15 (M2/M3)", "MacBook (12-inch Retina)"
+    ]
   };
 
   // Update parent when selection changes
@@ -207,7 +215,30 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
     ...(MANUAL_MODELS[activeTab] || [])
   ])).sort();
   
-  const services = tabItems.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
+  const services = [
+    ...tabItems.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel),
+  ];
+  
+  // Guarantee core services are always available for Tablet/Computer
+  if (activeTab === "tablet" || activeTab === "computer") {
+    const CORE_SERVICES = [
+      { name: "Screen Repair", category: activeTab.toUpperCase() },
+      { name: "Battery Replacement", category: activeTab.toUpperCase() },
+      { name: "Charging Port Replacement", category: activeTab.toUpperCase() }
+    ];
+
+    CORE_SERVICES.forEach(core => {
+      const exists = services.some(s => s.service.toLowerCase().includes(core.name.toLowerCase()));
+      if (!exists) {
+        services.push({ 
+          id: -(Math.floor(Math.random() * 1000) + 100), 
+          service: `${core.name} (Request Quote)`, 
+          price: 0, 
+          category: core.category 
+        } as ParsedItem);
+      }
+    });
+  }
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 

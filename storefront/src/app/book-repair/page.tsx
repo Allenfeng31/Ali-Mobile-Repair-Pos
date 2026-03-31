@@ -204,33 +204,66 @@ export default function BookRepairPage() {
               />
             </div>
             <div className="form-group">
-              <label>Select Date</label>
-              <input 
-                type="date" 
-                className="form-control" 
-                required 
-                min={new Date().toISOString().split('T')[0]}
-                value={selectedDay}
-                onChange={e => setSelectedDay(e.target.value)}
-              />
+              <label>1. Select Date</label>
+              <div style={{ 
+                display: "flex", 
+                gap: "0.6rem", 
+                overflowX: "auto", 
+                padding: "0.5rem 0",
+                msOverflowStyle: "none",
+                scrollbarWidth: "none"
+              }} className="no-scrollbar">
+                {Array.from({ length: 14 }).map((_, i) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + i);
+                  const dayStr = d.toISOString().split('T')[0];
+                  const isSelected = selectedDay === dayStr;
+                  const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+                  const dateNum = d.getDate();
+                  const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+
+                  return (
+                    <button
+                      key={dayStr}
+                      type="button"
+                      onClick={() => { setSelectedDay(dayStr); setSelectedSlot(""); }}
+                      style={{
+                        flex: "0 0 70px",
+                        padding: "0.8rem 0.5rem",
+                        borderRadius: "12px",
+                        border: isSelected ? "2px solid var(--primary)" : "1px solid rgba(255,255,255,0.1)",
+                        background: isSelected ? "rgba(0,122,255,0.15)" : "rgba(255,255,255,0.03)",
+                        color: isSelected ? "var(--primary)" : "white",
+                        textAlign: "center",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      <div style={{ fontSize: "0.7rem", opacity: 0.6, textTransform: "uppercase" }}>{dayName}</div>
+                      <div style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0.2rem 0" }}>{dateNum}</div>
+                      <div style={{ fontSize: "0.7rem", opacity: 0.6 }}>{monthName}</div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {selectedDay && (
               <div className="form-group" style={{ animation: "fadeIn 0.3s ease" }}>
-                <label>Select Time Slot</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <label>2. Select Time ({new Date(selectedDay).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })})</label>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(90px, 1fr))", gap: "0.6rem", marginTop: "0.8rem" }}>
                   {TIME_SLOTS.map(slot => (
                     <button
                       key={slot}
                       type="button"
                       onClick={() => setSelectedSlot(slot)}
                       style={{
-                        padding: "0.5rem",
-                        borderRadius: "8px",
+                        padding: "0.7rem",
+                        borderRadius: "10px",
                         border: selectedSlot === slot ? "2px solid var(--primary)" : "1px solid rgba(255,255,255,0.1)",
                         background: selectedSlot === slot ? "var(--primary)" : "rgba(255,255,255,0.05)",
                         color: "white",
-                        fontSize: "0.85rem",
+                        fontSize: "0.9rem",
                         fontWeight: selectedSlot === slot ? 700 : 400,
                         cursor: "pointer",
                         transition: "all 0.2s ease"
@@ -276,6 +309,16 @@ export default function BookRepairPage() {
           </form>
         </div>
       </div>
+
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </>
   );
 }
