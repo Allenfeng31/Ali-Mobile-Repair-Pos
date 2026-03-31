@@ -293,9 +293,12 @@ export function ChatInbox() {
                   {msg.sender === 'staff' ? 'You' : 'Customer'}
                 </div>
                 
-                {msg.content.startsWith(BOOKING_PREFIX) ? (() => {
+                {msg.content.includes(BOOKING_PREFIX) ? (() => {
                   try {
-                    const data = JSON.parse(msg.content.replace(BOOKING_PREFIX, '').trim());
+                    const startIndex = msg.content.indexOf('{');
+                    const endIndex = msg.content.lastIndexOf('}');
+                    if (startIndex === -1 || endIndex === -1) throw new Error('Invalid JSON');
+                    const data = JSON.parse(msg.content.substring(startIndex, endIndex + 1));
                     return (
                       <div className="bg-white/5 rounded-xl p-3 border border-white/10 mt-1 space-y-2">
                         <div className="flex items-center gap-2 text-primary-light font-bold text-xs uppercase tracking-wider">
