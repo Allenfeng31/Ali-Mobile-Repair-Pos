@@ -101,7 +101,7 @@ export default function BookRepairPage() {
   const [selectedSlot, setSelectedSlot] = useState("");
 
   const TIME_SLOTS = [
-    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
+    "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -216,6 +216,7 @@ export default function BookRepairPage() {
                 {Array.from({ length: 14 }).map((_, i) => {
                   const d = new Date();
                   d.setDate(d.getDate() + i);
+                  const isSunday = d.getDay() === 0;
                   const dayStr = d.toISOString().split('T')[0];
                   const isSelected = selectedDay === dayStr;
                   const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
@@ -226,22 +227,23 @@ export default function BookRepairPage() {
                     <button
                       key={dayStr}
                       type="button"
+                      disabled={isSunday}
                       onClick={() => { setSelectedDay(dayStr); setSelectedSlot(""); }}
                       style={{
                         flex: "0 0 70px",
                         padding: "0.8rem 0.5rem",
                         borderRadius: "12px",
                         border: isSelected ? "2px solid var(--primary)" : "1px solid rgba(255,255,255,0.1)",
-                        background: isSelected ? "rgba(0,122,255,0.15)" : "rgba(255,255,255,0.03)",
-                        color: isSelected ? "var(--primary)" : "white",
+                        background: isSunday ? "rgba(255,255,255,0.02)" : (isSelected ? "rgba(0,122,255,0.15)" : "rgba(255,255,255,0.03)"),
+                        color: isSunday ? "rgba(255,255,255,0.15)" : (isSelected ? "var(--primary)" : "white"),
                         textAlign: "center",
-                        cursor: "pointer",
+                        cursor: isSunday ? "not-allowed" : "pointer",
                         transition: "all 0.2s ease"
                       }}
                     >
-                      <div style={{ fontSize: "0.7rem", opacity: 0.6, textTransform: "uppercase" }}>{dayName}</div>
+                      <div style={{ fontSize: "0.7rem", opacity: isSunday ? 0.3 : 0.6, textTransform: "uppercase" }}>{dayName}</div>
                       <div style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0.2rem 0" }}>{dateNum}</div>
-                      <div style={{ fontSize: "0.7rem", opacity: 0.6 }}>{monthName}</div>
+                      <div style={{ fontSize: "0.7rem", opacity: isSunday ? 0.3 : 0.6 }}>{monthName}</div>
                     </button>
                   );
                 })}
