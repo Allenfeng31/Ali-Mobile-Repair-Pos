@@ -67,22 +67,14 @@ export default function ChatWidget() {
     tokenRef.current = token;
 
     const savedName = localStorage.getItem(CUSTOMER_NAME_KEY);
-    const savedPhone = localStorage.getItem(CUSTOMER_PHONE_KEY);
     const introSent = localStorage.getItem(CUSTOMER_INTRO_SENT_KEY);
 
-    if (savedName && savedPhone && introSent) {
+    if (savedName && introSent) {
       setStep('chat');
     } else {
       setStep('intro');
     }
-
-    if (savedName && savedPhone && introSent) {
-      setStep('chat');
-      setInitialized(true); 
-    } else {
-      setStep('intro');
-      setInitialized(true); 
-    }
+    setInitialized(true);
   }, []);
 
   const scrollToBottom = () =>
@@ -171,8 +163,9 @@ export default function ChatWidget() {
     const phone = phoneInput.trim();
 
     if (!name) { setIntroError('Please enter your name.'); return; }
-    if (!phone) { setIntroError('Please enter your phone number.'); return; }
-    if (!/^[\d\s\+\-\(\)]{6,20}$/.test(phone)) {
+    
+    // Validate phone ONLY if provided
+    if (phone && !/^[\d\s\+\-\(\)]{6,20}$/.test(phone)) {
       setIntroError('Please enter a valid phone number.');
       return;
     }
@@ -181,7 +174,7 @@ export default function ChatWidget() {
 
     // Save locally
     localStorage.setItem(CUSTOMER_NAME_KEY, name);
-    localStorage.setItem(CUSTOMER_PHONE_KEY, phone);
+    if (phone) localStorage.setItem(CUSTOMER_PHONE_KEY, phone);
 
     // Send an intro message to the backend so staff can see who the customer is
     const token = tokenRef.current;
@@ -341,7 +334,7 @@ export default function ChatWidget() {
 
                 <div>
                   <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
-                    Phone Number
+                    Phone Number (Optional)
                   </label>
                   <input
                     id="chat-phone-input"
