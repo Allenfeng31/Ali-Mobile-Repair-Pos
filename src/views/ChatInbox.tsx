@@ -29,6 +29,7 @@ const API_BASE = (() => {
 
 // Must match the prefix used in ChatWidget.tsx
 const INTRO_PREFIX = '[CUSTOMER_INFO]';
+const BOOKING_PREFIX = '[BOOKING_DATA]';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -140,9 +141,15 @@ export function ChatInbox() {
 
   const getLastMessage = (session: ChatSession) => {
     const msgs = session.chat_messages || [];
-    // Exclude intro message from last message preview
-    const visible = msgs.filter(m => !m.content.startsWith(INTRO_PREFIX));
-    return visible[visible.length - 1];
+    // Exclude special prefixes from last message preview
+    const visible = msgs.filter(m => !m.content.startsWith(INTRO_PREFIX) && !m.content.startsWith(BOOKING_PREFIX));
+    if (visible.length > 0) return visible[visible.length - 1];
+    
+    // Fallback to booking preview if that's all we have
+    const booking = msgs.find(m => m.content.startsWith(BOOKING_PREFIX));
+    if (booking) return { ...booking, content: '📅 New Booking Request' };
+    
+    return msgs[msgs.length - 1];
   };
 
   const getCustomerInfo = (session: ChatSession) => {
@@ -170,6 +177,23 @@ export function ChatInbox() {
     const sessionIdx = sessions.findIndex(s => s.id === activeSession.id);
     const customerInfo = getCustomerInfo(activeSession);
     const visibleMessages = messages.filter(m => !m.content.startsWith(INTRO_PREFIX));
+
+    const handleStatusUpdate = async (apptId: string, status: 'confirmed' | 'declined') => {
+      try {
+        const res = await fetch(`${API_BASE}/appointments/${apptId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        });
+        if (res.ok) {
+          alert(`Booking ${status}!`);
+          loadMessages(activeSession.id);
+        }
+      } catch (_) {
+        alert('Failed to update status');
+      }
+    };
+
     return (
       <div className="flex flex-col h-full max-w-3xl mx-auto" style={{ height: 'calc(100vh - 160px)' }}>
         {/* Header */}
@@ -209,10 +233,9 @@ export function ChatInbox() {
           {visibleMessages.map(msg => (
             <div key={msg.id} className={`flex ${msg.sender === 'staff' ? 'justify-end' : 'justify-start'}`}>
               <div style={{
-                maxWidth: '70%',
+                maxWidth: '85%',
                 padding: '0.6rem 0.9rem',
                 borderRadius: msg.sender === 'staff' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                // Staff = blue gradient, Customer = dark slate (readable)
                 background: msg.sender === 'staff'
                   ? 'linear-gradient(135deg, #007aff, #0051ff)'
                   : '#1e293b',
@@ -223,7 +246,45 @@ export function ChatInbox() {
                 <div style={{ fontSize: '0.65rem', opacity: 0.6, marginBottom: '0.2rem', fontWeight: 600, textTransform: 'uppercase' }}>
                   {msg.sender === 'staff' ? 'You' : 'Customer'}
                 </div>
-                <div>{msg.content}</div>
+                
+                {msg.content.startsWith(BOOKING_PREFIX) ? (() => {
+                  try {
+                    const data = JSON.parse(msg.content.replace(BOOKING_PREFIX, '').trim());
+                    return (
+                      <div className="bg-white/5 rounded-xl p-3 border border-white/10 mt-1 space-y-2">
+                        <div className="flex items-center gap-2 text-primary-light font-bold text-xs uppercase tracking-wider">
+                          <Circle size={8} className="fill-primary" />
+                          New Booking Request
+                        </div>
+                        <div className="grid grid-cols-1 gap-1 text-sm">
+                          <p><span className="opacity-50">Device:</span> <strong>{data.device}</strong></p>
+                          <p><span className="opacity-50">Service:</span> <strong>{data.service}</strong></p>
+                          <p><span className="opacity-50">Time:</span> <strong>{new Date(data.time).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}</strong></p>
+                          {data.notes && <p className="mt-1 p-2 bg-black/20 rounded-lg text-xs italic">{data.notes}</p>}
+                        </div>
+                        <div className="flex gap-2 pt-2">
+                          <button 
+                            onClick={() => handleStatusUpdate(data.appointmentId, 'confirmed')}
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-xs transition-colors"
+                          >
+                            Confirm
+                          </button>
+                          <button 
+                            onClick={() => handleStatusUpdate(data.appointmentId, 'declined')}
+                            className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold py-2 px-3 rounded-lg text-xs transition-colors"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  } catch (_) {
+                    return <div>{msg.content}</div>;
+                  }
+                })() : (
+                  <div>{msg.content}</div>
+                )}
+
                 <div style={{ fontSize: '0.65rem', opacity: 0.5, marginTop: '0.25rem', textAlign: 'right' }}>
                   {formatTime(msg.created_at)}
                 </div>

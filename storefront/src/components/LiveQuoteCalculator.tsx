@@ -92,9 +92,17 @@ const TABS = [
   { key: "computer" as const, emoji: "💻", label: "Computer Repair" },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
+interface LiveQuoteCalculatorProps {
+  onSelectionChange?: (data: {
+    brand: string;
+    model: string;
+    service: string;
+    price: number | null;
+    category: string;
+  } | null) => void;
+}
 
-export default function LiveQuoteCalculator() {
+export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalculatorProps) {
   const [items, setItems]     = useState<ParsedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(false);
@@ -139,6 +147,32 @@ export default function LiveQuoteCalculator() {
     const interval = setInterval(load, 60_000); // refresh every 60s
     return () => { cancelled = true; clearInterval(interval); };
   }, []);
+
+  // Update parent when selection changes
+  useEffect(() => {
+    if (!onSelectionChange) return;
+
+    if (selectedService || otherBrand || otherModel || otherService) {
+      onSelectionChange({
+        brand: otherBrand || displayBrand(selectedBrand),
+        model: otherModel || selectedModel,
+        service: otherService || (selectedService?.service || ""),
+        price: selectedService?.price ?? null,
+        category: selectedService?.category || activeTab.toUpperCase(),
+      });
+    } else {
+      onSelectionChange(null);
+    }
+  }, [
+    selectedService, 
+    selectedBrand, 
+    selectedModel, 
+    otherBrand, 
+    otherModel, 
+    otherService, 
+    activeTab, 
+    onSelectionChange
+  ]);
 
   // ── Derived data ────────────────────────────────────────────────────────────
 

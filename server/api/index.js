@@ -310,6 +310,133 @@ app.delete('/api/customers/:id', async (req, res) => {
 });
 
 // ----------------------------------------------------------------------
+// APPOINTMENTS
+// ----------------------------------------------------------------------
+app.post('/api/appointments', async (req, res) => {
+  const { customer_name, phone, brand, model, service, datetime, notes, session_token } = req.body;
+
+  if (!customer_name || !phone || !datetime) {
+    return res.status(400).json({ error: 'Name, phone, and datetime are required' });
+  }
+
+  // 1. Create Appointment Record
+  const { data: appointment, error: apptError } = await supabase
+    .from('appointments')
+    .insert([{
+      customer_name,
+      phone,
+      brand,
+      model,
+      service,
+      datetime,
+      notes,
+      status: 'pending'
+    }])
+    .select()
+    .single();
+
+  if (apptError) return res.status(500).json({ error: apptError.message });
+
+  // 2. Identify or Create Chat Session
+  let sessionId = null;
+  if (session_token) {
+    const { data: session } = await supabase
+      .from('chat_sessions')
+      .select('id')
+      .eq('session_token', session_token)
+      .single();
+    if (session) sessionId = session.id;
+  }
+
+  if (!sessionId) {
+    const newToken = crypto.randomBytes(16).toString('hex');
+    const { data: newSession } = await supabase
+      .from('chat_sessions')
+      .insert({ session_token: newToken })
+      .select()
+      .single();
+    if (newSession) sessionId = newSession.id;
+  }
+
+  // 3. Send Internal Notification Message
+  // Using [BOOKING_DATA] prefix to help POS UI identify this special message
+  const bookingData = JSON.stringify({
+    appointmentId: appointment.id,
+    name: customer_name,
+    phone,
+    device: `${brand} ${model}`.trim(),
+    service,
+    time: datetime,
+    notes
+  });
+
+  await supabase
+    .from('chat_messages')
+    .insert({
+      session_id: sessionId,
+      sender: 'customer',
+      content: `[BOOKING_DATA] ${bookingData}`
+    });
+
+  // Update session activity
+  await supabase
+    .from('chat_sessions')
+    .update({ last_message_at: new Date().toISOString() })
+    .eq('id', sessionId);
+
+  res.json({ success: true, appointment });
+});
+
+app.patch('/api/appointments/:id/status', async (req, res) => {
+  const { status } = req.body;
+  if (!['confirmed', 'declined'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  // 1. Update Appointment
+  const { data: appointment, error } = await supabase
+    .from('appointments')
+    .update({ status })
+    .eq('id', req.params.id)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // 2. If confirmed, ensure customer is in the record list
+  if (status === 'confirmed') {
+    // Check if customer exists by name and phone
+    const { data: existing } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('phone', appointment.phone)
+      .limit(1);
+
+    if (!existing || existing.length === 0) {
+      const initials = appointment.customer_name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+
+      await supabase.from('customers').insert({
+        name: appointment.customer_name,
+        phone: appointment.phone,
+        email: '', // Optional from appointment if we add it
+        totalSpent: 0,
+        status: 'Active',
+        statusColor: 'green',
+        lastVisit: new Date().toISOString().split('T')[0],
+        initials
+      });
+    }
+  }
+
+  res.json(appointment);
+});
+
+// ----------------------------------------------------------------------
 // REPAIRS
 // ----------------------------------------------------------------------
 app.post('/api/repairs', async (req, res) => {
