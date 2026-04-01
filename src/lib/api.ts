@@ -175,4 +175,22 @@ export const api = {
       return { ok: false };
     }
   },
+
+  // Blog AI
+  generateBlog: async (topic: string) => {
+    const res = await fetch(`${API_URL}/blog/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic }),
+    });
+    return handleResponse(res);
+  },
+  confirmBlog: async (slug: string, content: string, image: string) => {
+    const res = await fetch(`${API_URL}/blog/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, content, image }),
+    });
+    return handleResponse(res);
+  },
 };

@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 // Only load dotenv in local development (where .env file exists)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -575,6 +578,64 @@ app.put('/api/settings/:key', async (req, res) => {
   res.json(data[0]);
 });
 
+// ----------------------------------------------------------------------
+// BLOG GENERATION (AI)
+// ----------------------------------------------------------------------
+app.post('/api/blog/generate', (req, res) => {
+  const { topic } = req.body;
+  if (!topic) return res.status(400).json({ error: 'Topic required' });
+
+  try {
+    const scriptPath = path.join(__dirname, '../../scripts/generate-blog.mjs');
+    console.log(`🤖 [AI Blog] Generating draft for topic: ${topic}`);
+    
+    // Run the script with --json flag
+    const result = execSync(`node "${scriptPath}" --json "${topic}"`, { encoding: 'utf-8' });
+    const draft = JSON.parse(result);
+    
+    res.json(draft);
+  } catch (err) {
+    console.error('❌ [AI Blog] Generation failed:', err.message);
+    res.status(500).json({ error: 'Failed to generate blog draft' });
+  }
+});
+
+app.post('/api/blog/confirm', async (req, res) => {
+  const { slug, content, image: cloudImageUrl } = req.body;
+  if (!slug || !content) return res.status(400).json({ error: 'Slug and content required' });
+
+  try {
+    const blogDraftDir = path.join(__dirname, '../../storefront/src/content/blog');
+    const publicAssetsDir = path.join(__dirname, '../../storefront/public/blog');
+    const markdownPath = path.join(blogDraftDir, `${slug}.md`);
+    const imagePath = path.join(publicAssetsDir, `${slug}.png`);
+
+    // 1. Ensure directories exist
+    if (!fs.existsSync(blogDraftDir)) fs.mkdirSync(blogDraftDir, { recursive: true });
+    if (!fs.existsSync(publicAssetsDir)) fs.mkdirSync(publicAssetsDir, { recursive: true });
+
+    // 2. Download Image if cloud URL is provided
+    if (cloudImageUrl && cloudImageUrl.startsWith('http')) {
+      console.log(`📥 [AI Blog] Dowloading AI image for: ${slug}`);
+      const response = await fetch(cloudImageUrl);
+      if (!response.ok) throw new Error(`Failed to download image: ${response.statusText}`);
+      
+      const buffer = Buffer.from(await response.arrayBuffer());
+      fs.writeFileSync(imagePath, buffer);
+      console.log(`🖼️ [AI Blog] Saved local image: ${imagePath}`);
+    }
+
+    // 3. Write Markdown file
+    fs.writeFileSync(markdownPath, content);
+    
+    console.log(`✅ [AI Blog] Published new post: ${slug}`);
+    res.json({ success: true, slug });
+  } catch (err) {
+    console.error('❌ [AI Blog] Publish failed:', err.message);
+    res.status(500).json({ error: 'Failed to save blog post and image' });
+  }
+});
+
 
 // ----------------------------------------------------------------------
 // CHAT SYSTEM
@@ -719,9 +780,30 @@ app.delete('/api/chat/session/id/:id', async (req, res) => {
   const { error } = await supabase
     .from('chat_sessions')
     .delete()
-    .eq('id', req.params.id);
-  if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+// Proxy for AI Images (fixes CORS and loading issues in preview)
+app.get('/api/blog/proxy-image', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('URL required');
+
+  try {
+    const rawUrl = decodeURIComponent(url.toString());
+    const response = await fetch(rawUrl);
+    if (!response.ok) throw new Error('Failed to fetch image');
+
+    const contentType = response.headers.get('content-type') || 'image/png';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    res.send(buffer);
+  } catch (err) {
+    console.error('❌ [Proxy] Image fetch failed:', err.message);
+    res.status(500).send('Failed to proxy image');
+  }
 });
 
 // ----------------------------------------------------------------------

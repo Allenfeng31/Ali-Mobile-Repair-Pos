@@ -11,7 +11,11 @@ import {
   RotateCw,
   Save,
   CheckCircle2,
-  X
+  X,
+  Sparkles,
+  PenTool,
+  Trash2,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -48,6 +52,11 @@ function SettingsPanel({
   const [footer, setFooter] = React.useState('');
   const [saved, setSaved] = React.useState(false);
 
+  // AI Blog States
+  const [blogTopic, setBlogTopic] = React.useState('');
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [blogDraft, setBlogDraft] = React.useState<any>(null);
+
   React.useEffect(() => {
     if (!open) return;
     api.getSettings().then((s: any) => {
@@ -61,6 +70,31 @@ function SettingsPanel({
     await api.updateSetting('ali_pos_invoice_footer', footer);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleGenerateBlog = async () => {
+    if (!blogTopic.trim()) return;
+    setIsGenerating(true);
+    try {
+      const draft = await api.generateBlog(blogTopic);
+      setBlogDraft(draft);
+    } catch (err: any) {
+      alert("Failed to generate: " + err.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handlePublishBlog = async () => {
+    if (!blogDraft) return;
+    try {
+      await api.confirmBlog(blogDraft.slug, blogDraft.content, blogDraft.image);
+      alert("Article published to storefront!");
+      setBlogDraft(null);
+      setBlogTopic('');
+    } catch (err: any) {
+      alert("Failed to publish: " + err.message);
+    }
   };
 
   return (
@@ -135,6 +169,78 @@ function SettingsPanel({
                 {saved ? <CheckCircle2 size={15} /> : <Save size={15} />}
                 {saved ? 'Saved!' : 'Save Changes'}
               </button>
+
+              <div className="h-px bg-outline-variant/10 !my-8" />
+
+              {/* AI BLOG GEN */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-purple-500" />
+                  <span className="text-xs font-black text-on-surface uppercase tracking-tight">AI Blog Marketing</span>
+                </div>
+
+                {!blogDraft ? (
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-bold text-on-surface-variant leading-relaxed">
+                      Transform a topic into an SEO-ready repair guide for your website.
+                    </p>
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        value={blogTopic}
+                        onChange={e => setBlogTopic(e.target.value)}
+                        placeholder="e.g. iPhone 17 Screen Care"
+                        className="w-full bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
+                      />
+                      <PenTool size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40" />
+                    </div>
+                    <button
+                      onClick={handleGenerateBlog}
+                      disabled={isGenerating || !blogTopic.trim()}
+                      className="w-full bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all disabled:opacity-50"
+                    >
+                      {isGenerating ? <RotateCw size={14} className="animate-spin" /> : <Sparkles size={14} className="text-purple-400" />}
+                      {isGenerating ? 'Generating...' : 'Generate Draft'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="bg-surface-container-high rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
+                      <div className="aspect-video relative">
+                        <img 
+                          src={`http://localhost:3001/api/blog/proxy-image?url=${encodeURIComponent(blogDraft.image)}`} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                          <h4 className="text-white font-black text-xs leading-tight line-clamp-2">{blogDraft.title}</h4>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <p className="text-[9px] text-on-surface-variant font-medium line-clamp-2 leading-relaxed italic">
+                          "{blogDraft.description}"
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                       <button
+                         onClick={() => setBlogDraft(null)}
+                         className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-surface-container-highest text-on-surface-variant"
+                       >
+                         <Trash2 size={12} />
+                         Discard
+                       </button>
+                       <button
+                         onClick={handlePublishBlog}
+                         className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-200"
+                       >
+                         <CheckCircle2 size={12} />
+                         Publish
+                       </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Logout at bottom */}
