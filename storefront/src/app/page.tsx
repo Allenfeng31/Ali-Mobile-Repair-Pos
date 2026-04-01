@@ -20,7 +20,7 @@ export default function Home() {
             "priceRange": "$$",
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "Kiosk C1, Ringwood Square Shopping Centre",
+              "streetAddress": "Shop 28, Ringwood Square Shopping Centre",
               "addressLocality": "Ringwood",
               "addressRegion": "VIC",
               "postalCode": "3134",
@@ -28,20 +28,14 @@ export default function Home() {
             },
             "geo": {
               "@type": "GeoCoordinates",
-              "latitude": -37.813637,
-              "longitude": 145.228892
+              "latitude": -37.8154441,
+              "longitude": 145.222375
             },
             "openingHoursSpecification": [
               {
                 "@type": "OpeningHoursSpecification",
-                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-                "opens": "09:00",
-                "closes": "17:30"
-              },
-              {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": "Saturday",
-                "opens": "09:00",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "opens": "10:00",
                 "closes": "17:00"
               }
             ],
@@ -81,7 +75,7 @@ export default function Home() {
         <h2>Visit Us in Melbourne</h2>
         <div className="map-wrapper">
           <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.789139268676!2d145.22631161584485!3d-37.81363717975249!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad63943f7a400bd%3A0xcfabcde123456789!2sRingwood%20Square%20Shopping%20Centre!5e0!3m2!1sen!2sau!4v1628123456789!5m2!1sen!2sau" 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6303.831349042814!2d145.222375!3d-37.8154441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad63bd4323d01bd%3A0x1b936dbf4a8db011!2sAli%20Mobile%20%26%20Repair!5e0!3m2!1sen!2sau!4v1775003205754!5m2!1sen!2sau" 
             width="100%" 
             height="100%" 
             style={{ border: 0 }} 
