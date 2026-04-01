@@ -19,7 +19,7 @@ export interface BlogPost {
 export async function getSortedPostsData() {
   // Get file names under /content/blog
   if (!fs.existsSync(postsDirectory)) return [];
-  const fileNames = fs.readdirSync(postsDirectory);
+  const fileNames = fs.readdirSync(postsDirectory).filter(fileName => fileName.endsWith('.md'));
   const allPostsData = fileNames.map((fileName) => {
     // Remove ".md" from file name to get slug
     const slug = fileName.replace(/\.md$/, '');
