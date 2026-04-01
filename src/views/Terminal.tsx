@@ -73,8 +73,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const filteredItems = inventory.filter(item => {
     const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean);
     const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
-      item.name.toLowerCase().includes(term) || 
-      item.model.toLowerCase().includes(term) ||
+      (item.name || '').toLowerCase().includes(term) || 
+      (item.model || '').toLowerCase().includes(term) ||
       (item.sku && item.sku.toLowerCase().includes(term))
     );
 
@@ -90,8 +90,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     const matchesBrand = activeBrand === 'All Brands' || 
                          item.brand === activeBrand || 
                          ((!item.brand || item.brand === 'Other') && 
-                          (item.name.toLowerCase().includes(activeBrand.toLowerCase()) || 
-                           item.model.toLowerCase().includes(activeBrand.toLowerCase())));
+                          ((item.name || '').toLowerCase().includes(activeBrand.toLowerCase()) || 
+                           (item.model || '').toLowerCase().includes(activeBrand.toLowerCase())));
                            
     return matchesCategory && matchesBrand;
   }).sort((a, b) => {
@@ -242,7 +242,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         surcharge: surcharge,
         total: finalTotal,
         profit: totalProfit,
-        type: orderItems.some(i => i.category.toLowerCase().includes('repair') || i.category.toLowerCase().includes('service')) ? 'repair' : 'sale',
+        type: orderItems.some(i => (i.category || '').toLowerCase().includes('repair') || (i.category || '').toLowerCase().includes('service')) ? 'repair' : 'sale',
         paymentMethod: paymentMethod
       };
 
@@ -398,7 +398,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   <div className="p-1.5 rounded-lg bg-primary-container/10 text-primary">
                     <item.icon size={18} />
                   </div>
-                  <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant opacity-60 bg-surface-container px-1.5 py-0.5 rounded">{item.category.split(' ')[0]}</span>
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant opacity-60 bg-surface-container px-1.5 py-0.5 rounded">{(item.category || '').split(' ')[0]}</span>
                 </div>
                 <div>
                   <h3 className="font-headline font-bold text-on-surface text-base leading-tight line-clamp-2">{item.name}</h3>

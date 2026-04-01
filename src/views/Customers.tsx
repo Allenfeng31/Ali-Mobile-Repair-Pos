@@ -256,14 +256,14 @@ export function CustomersView() {
   const filteredCustomers = sortedCustomers.filter(c => {
     const query = searchQuery.toLowerCase();
     const hasRepairMatch = c.repairs.some(r => 
-      r.repairItem.toLowerCase().includes(query) || 
-      r.modelNumber.toLowerCase().includes(query)
+      (r.repairItem || '').toLowerCase().includes(query) || 
+      (r.modelNumber || '').toLowerCase().includes(query)
     );
     return (
-      c.name.toLowerCase().includes(query) ||
-      c.phone.toLowerCase().includes(query) ||
-      c.email.toLowerCase().includes(query) ||
-      c.id.toLowerCase().includes(query) ||
+      (c.name || '').toLowerCase().includes(query) ||
+      (c.phone || '').toLowerCase().includes(query) ||
+      (c.email || '').toLowerCase().includes(query) ||
+      (c.id || '').toLowerCase().includes(query) ||
       hasRepairMatch
     );
   });

@@ -224,8 +224,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     if (match && searchQuery.trim() !== '') {
       const terms = searchQuery.toLowerCase().split(' ').filter(Boolean);
       match = terms.every(t => 
-        item.name.toLowerCase().includes(t) || 
-        item.model.toLowerCase().includes(t) || 
+        (item.name || '').toLowerCase().includes(t) || 
+        (item.model || '').toLowerCase().includes(t) || 
         (item.brand || '').toLowerCase().includes(t) ||
         (item.sku || '').toLowerCase().includes(t) ||
         (item.category || '').toLowerCase().includes(t)
@@ -240,8 +240,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       
       const calculateScore = (item: InventoryItem) => {
         let score = 0;
-        const name = item.name.toLowerCase();
-        const model = item.model.toLowerCase();
+        const name = (item.name || '').toLowerCase();
+        const model = (item.model || '').toLowerCase();
         const brand = (item.brand || '').toLowerCase();
         const fullName = `${brand} ${model} ${name}`.toLowerCase();
         const fullWords = fullName.split(/[\s-]+/).filter(Boolean);

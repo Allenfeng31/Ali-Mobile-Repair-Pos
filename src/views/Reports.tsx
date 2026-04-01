@@ -204,7 +204,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const searchedOrders = useMemo(() => {
     if (!searchOrderQuery.trim()) return orders;
     return orders.filter(o => 
-      o.id.toLowerCase().includes(searchOrderQuery.toLowerCase())
+      (o.id || '').toLowerCase().includes(searchOrderQuery.toLowerCase())
     );
   }, [orders, searchOrderQuery]);
 
