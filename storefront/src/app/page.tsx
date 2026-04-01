@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Script from "next/script";
+import ReviewsSection from "@/components/ReviewsSection";
 
 export default function Home() {
   return (
@@ -70,6 +71,8 @@ export default function Home() {
           <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
         </Link>
       </section>
+
+      <ReviewsSection />
 
       <section className="map-section">
         <h2>Visit Us in Melbourne</h2>

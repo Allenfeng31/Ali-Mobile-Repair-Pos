@@ -638,6 +638,65 @@ app.post('/api/blog/confirm', async (req, res) => {
 
 
 // ----------------------------------------------------------------------
+// REVIEWS SYSTEM
+// ----------------------------------------------------------------------
+
+const googleReviewsData = [
+  {
+    id: 1,
+    name: "Nina Meow",
+    rating: 5,
+    text: "Ali Mobile Repair is honest and affordable. No hidden fees, just clear and fair pricing. I compared with other nearby shops and this one is definitely cheaper. Great service and fast repair – highly recommended!",
+    date: "8 months ago",
+    avatar: "N"
+  },
+  {
+    id: 2,
+    name: "John Williamson",
+    rating: 5,
+    text: "This is about the fourth or fifth time I have used Ali Express. He has always been helpful, prompt and fairly priced. Pleased to have gone to him. Highly recommended.",
+    date: "8 months ago",
+    avatar: "J"
+  },
+  {
+    id: 3,
+    name: "BBQs-R-US",
+    rating: 5,
+    text: "Extremely friendly and competent, fixed all my little issues and I basically have a new phone for $200. Thanks",
+    date: "6 months ago",
+    avatar: "B"
+  },
+  {
+    id: 4,
+    name: "Janine B",
+    rating: 5,
+    text: "Allen replaced my screen within an hour - very honest and polite, and great rate! Amazed and grateful! Best Samsung Note 2 repair experience.",
+    date: "7 years ago",
+    avatar: "J"
+  },
+  {
+    id: 5,
+    name: "Bumzigan Yebet",
+    rating: 5,
+    text: "Dropped my Samsung tablet in to have the battery replaced. Was done in time stated and works like a new one now. Highly recommended. Thanks",
+    date: "9 months ago",
+    avatar: "B"
+  },
+  {
+    id: 6,
+    name: "Jay Taplin",
+    rating: 5,
+    text: "Great service, very helpful and friendly. Highly recommend for any phone repairs in Ringwood.",
+    date: "A month ago",
+    avatar: "J"
+  }
+];
+
+app.get('/api/reviews', (req, res) => {
+  res.json(googleReviewsData);
+});
+
+// ----------------------------------------------------------------------
 // CHAT SYSTEM
 // ----------------------------------------------------------------------
 
