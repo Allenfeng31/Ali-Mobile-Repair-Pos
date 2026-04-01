@@ -8,16 +8,18 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const postData = await getPostData(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const postData = await getPostData(slug);
   return {
     title: `${postData.title} | Ali Mobile Repair Blog`,
     description: postData.description,
   };
 }
 
-export default async function PostDetail({ params }: { params: { slug: string } }) {
-  const postData = await getPostData(params.slug);
+export default async function PostDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const postData = await getPostData(slug);
 
   return (
     <article className="max-w-3xl mx-auto px-6 py-12">
