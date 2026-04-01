@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Filter,
   QrCode,
+  RefreshCw,
   Wrench
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -181,6 +182,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       return { ...raw, brand: b, model: m, icon: getIconComponent(raw.iconName) };
     };
 
+    setSaving(true);
     try {
       if (editingId) {
         const updatedItem = await api.updateInventoryItem(editingId, itemData);
@@ -232,6 +234,55 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     
     return match;
   }).sort((a, b) => {
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      const terms = q.split(' ').filter(t => t.length > 0);
+      
+      const calculateScore = (item: InventoryItem) => {
+        let score = 0;
+        const name = item.name.toLowerCase();
+        const model = item.model.toLowerCase();
+        const brand = (item.brand || '').toLowerCase();
+        const fullName = `${brand} ${model} ${name}`.toLowerCase();
+        const fullWords = fullName.split(/[\s-]+/).filter(Boolean);
+
+        // 1. Exact or Prefix Matches (High Priority)
+        if (model === q || name === q) score += 500;
+        if (model.startsWith(q) || name.startsWith(q)) score += 200;
+
+        // 2. Term Matches
+        terms.forEach(t => {
+          if (model.includes(t)) score += 50;
+          if (name.includes(t)) score += 30;
+          
+          // Number matching (e.g. "7" matches "7th")
+          if (/^\d+$/.test(t)) {
+            if (model.includes(`${t}th`) || name.includes(`${t}th`)) score += 40;
+          }
+        });
+
+        // 3. Penalty for "Distractors" (Crucial for iPad vs iPad mini)
+        // If user didn't type "mini", but item contains "mini", subtract points
+        const modifiers = ['mini', 'air', 'pro', 'max', 'plus', 'ultra'];
+        modifiers.forEach(m => {
+          if (!q.includes(m) && fullName.includes(m)) {
+            score -= 100; // Heavy penalty to push secondary models down
+          }
+        });
+
+        // 4. Exact word count match (Reward shorter/more precise names)
+        if (fullWords.length <= terms.length + 1) score += 20;
+
+        return score;
+      };
+
+      const scoreA = calculateScore(a);
+      const scoreB = calculateScore(b);
+
+      if (scoreA !== scoreB) return scoreB - scoreA;
+    }
+
+    // Default: Sort by ID (Newest first)
     const idA = typeof a.id === 'string' ? parseInt(a.id, 10) || 0 : a.id;
     const idB = typeof b.id === 'string' ? parseInt(b.id, 10) || 0 : b.id;
     return idB - idA;
@@ -242,8 +293,22 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const currentItems = filteredInventory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-8">
-      {/* Header & Search */}    <div className="h-full flex flex-col pt-6 pb-2 px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="space-y-8 relative">
+      {/* Toast Notification */}
+      {successMessage && (
+        <div className={cn(
+          "fixed top-6 right-6 md:right-12 z-[100] px-6 py-4 rounded-2xl shadow-2xl font-bold animate-in fade-in slide-in-from-top-6 flex items-center gap-3 border",
+          successMessage.startsWith('Error') 
+            ? "bg-error-container text-on-error-container border-error/20" 
+            : "bg-primary text-on-primary border-white/20"
+        )}>
+          {successMessage.startsWith('Error') ? <AlertTriangle size={20} /> : <Zap size={20} />}
+          {successMessage}
+        </div>
+      )}
+
+      {/* Header & Search */}
+      <div className="h-full flex flex-col pt-6 pb-2 px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
         <div>
           <h1 className="text-3xl font-black text-on-surface tracking-tight mb-2">{t('inv', 'title')}</h1>
@@ -661,10 +726,18 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
               <div className="pt-4 flex gap-3">
                 <button 
-                  onClick={handleSave}
-                  className="flex-1 bg-primary text-on-primary py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98]"
+                  onClick={() => handleSave()}
+                  disabled={saving || !formData.name || !formData.sellingPrice}
+                  className="flex-1 bg-primary text-on-primary py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
                 >
-                  {editingId ? t('inv', 'update') : t('inv', 'save')}
+                  <span className={cn(saving ? "opacity-0" : "opacity-100")}>
+                    {editingId ? t('inv', 'update') : t('inv', 'save')}
+                  </span>
+                  {saving && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <RefreshCw size={20} className="animate-spin" />
+                    </div>
+                  )}
                 </button>
                 {editingId && (
                   <button 
