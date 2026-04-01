@@ -2,7 +2,7 @@
 title: "Expert iPhone 17 Pro Screen Replacement in Ringwood"
 description: "Recently completed a flawless screen replacement for the new iPhone 17 Pro in Ringwood. Fast, friendly, and reliable service at Ali Mobile Repair."
 date: "2026-03-31"
-image: "https://www.alimobile.com.au/blog/iphone-screen.webp"
+image: "/blog/iphone-screen.png"
 ---
 
 Cracked or damaged screens can slow you down, but **Ali Mobile & Repair** is here to keep devices in top shape for customers across **Ringwood**.

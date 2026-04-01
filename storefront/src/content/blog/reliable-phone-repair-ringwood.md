@@ -2,6 +2,7 @@
 title: "Reliable Phone Repair Services in Ringwood"
 description: "Looking for reliable phone repair services in Ringwood? We specialize in fixing iPhone, Samsung, and more."
 date: "2025-12-15"
+image: "/blog/phone-repair.png"
 ---
 
 Looking for reliable **phone repair services in Ringwood**? Ali Mobile & Repair specialises in fixing a wide range of mobile phone issues, from screen replacements to battery problems.

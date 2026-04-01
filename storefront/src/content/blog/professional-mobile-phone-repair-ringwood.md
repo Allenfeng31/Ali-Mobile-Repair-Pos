@@ -2,6 +2,7 @@
 title: "Professional Mobile Phone Repair in Ringwood"
 description: "Ali Mobile & Repair brings fast, friendly, and professional service to mobile phone repair in Ringwood."
 date: "2025-11-20"
+image: "/blog/phone-repair.png"
 ---
 
 **Ali Mobile & Repair** brings fast, friendly, and professional service to **mobile phone repair in Ringwood**, making sure your devices are back to full functionality in no time.
