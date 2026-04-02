@@ -64,6 +64,7 @@ export default function RootLayout({
           <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
             <a href="https://ali-mobile-repair-pos-g2by.vercel.app/login">POS System Login</a>
             <a href="/privacy-policy">Privacy Policy</a>
+            <a href="/about-us">About Us</a>
           </div>
           <p>Contact Number: 0481 058 514</p>
           <p>Address: Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</p>
