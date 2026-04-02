@@ -159,24 +159,26 @@ export default function ReviewsSection() {
 
   return (
     <section style={{
-      padding: '40px 20px',
-      background: '#f8fafc',
+      padding: '60px 20px',
+      background: 'var(--background)',
       textAlign: 'center',
+      borderTop: '1px solid var(--layer-border)',
     }}>
       {/* Title */}
       <h2 style={{
-        fontSize: '28px',
+        fontSize: '32px',
         fontWeight: 800,
-        color: '#0f172a',
-        marginBottom: '6px',
+        color: 'var(--foreground)',
+        marginBottom: '8px',
+        letterSpacing: '-0.5px',
       }}>
         Customer Reviews
       </h2>
       <div style={{
-        width: '40px',
-        height: '3px',
-        background: '#2563eb',
-        margin: '0 auto 30px auto',
+        width: '50px',
+        height: '4px',
+        background: 'var(--primary)',
+        margin: '0 auto 40px auto',
         borderRadius: '2px',
       }} />
 
@@ -244,25 +246,27 @@ export default function ReviewsSection() {
               {/* Speech Bubble */}
               <div style={{
                 position: 'relative',
-                background: 'white',
-                border: '1.5px solid #1e3a8a',
-                borderRadius: '20px',
-                padding: '16px 20px',
+                background: 'var(--layer)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid var(--layer-border)',
+                borderRadius: '24px',
+                padding: '20px 24px',
                 marginBottom: '20px',
-                boxShadow: '4px 4px 0px rgba(30, 58, 138, 0.05)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                 width: '100%',
-                minHeight: '160px',
+                minHeight: '180px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
               }}>
                 <div>
                   <p style={{
-                    color: '#334155',
-                    fontSize: '12.5px',
-                    lineHeight: '1.5',
+                    color: 'var(--foreground)',
+                    opacity: 0.9,
+                    fontSize: '13px',
+                    lineHeight: '1.6',
                     fontStyle: 'italic',
-                    margin: '0 0 12px 0',
+                    margin: '0 0 15px 0',
                     textAlign: 'left',
                   }}>
                     &ldquo;{review.text}&rdquo;
@@ -286,8 +290,8 @@ export default function ReviewsSection() {
                             width: '60px',
                             height: '60px',
                             objectFit: 'cover',
-                            borderRadius: '8px',
-                            border: '1px solid #f1f5f9'
+                            borderRadius: '10px',
+                            border: '1px solid var(--layer-border)'
                           }}
                         />
                       ))}
@@ -299,9 +303,9 @@ export default function ReviewsSection() {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  borderTop: '1px solid #f1f5f9',
-                  paddingTop: '10px',
+                  gap: '8px',
+                  borderTop: '1px solid var(--layer-border)',
+                  paddingTop: '12px',
                 }}>
                   <GoogleLogo />
                   <StarRating />
@@ -311,12 +315,13 @@ export default function ReviewsSection() {
                 <div style={{
                   position: 'absolute',
                   bottom: '-8px',
-                  left: '28px',
-                  width: '14px',
-                  height: '14px',
-                  background: 'white',
-                  borderLeft: '1.5px solid #1e3a8a',
-                  borderBottom: '1.5px solid #1e3a8a',
+                  left: '32px',
+                  width: '16px',
+                  height: '16px',
+                  background: 'var(--layer)',
+                  backdropFilter: 'blur(8px)',
+                  borderLeft: '1px solid var(--layer-border)',
+                  borderBottom: '1px solid var(--layer-border)',
                   transform: 'rotate(-45deg)',
                 }} />
               </div>
@@ -330,31 +335,32 @@ export default function ReviewsSection() {
                 marginLeft: '16px',
               }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '10px',
-                  background: '#1e3a8a',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '12px',
+                  background: 'var(--primary)',
                   color: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 700,
-                  fontSize: '13px',
+                  fontSize: '14px',
                 }}>
                   {review.avatar}
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <span style={{
                     display: 'block',
-                    fontSize: '12px',
+                    fontSize: '13px',
                     fontWeight: 700,
-                    color: '#0f172a',
+                    color: 'var(--foreground)',
                   }}>
                     {review.name}
                   </span>
                   <span style={{
-                    fontSize: '10px',
-                    color: '#64748b',
+                    fontSize: '11px',
+                    color: 'var(--foreground)',
+                    opacity: 0.6,
                   }}>
                     {review.date}
                   </span>
@@ -383,15 +389,15 @@ export default function ReviewsSection() {
               width: '44px',
               height: '44px',
               borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(4px)',
+              border: '1px solid var(--layer-border)',
+              background: 'var(--layer)',
+              backdropFilter: 'blur(12px)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '20px',
-              color: '#1e3a8a',
+              color: 'var(--primary)',
               boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
               pointerEvents: 'auto',
               transition: 'all 0.3s ease',
@@ -407,15 +413,15 @@ export default function ReviewsSection() {
               width: '44px',
               height: '44px',
               borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(4px)',
+              border: '1px solid var(--layer-border)',
+              background: 'var(--layer)',
+              backdropFilter: 'blur(12px)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '20px',
-              color: '#1e3a8a',
+              color: 'var(--primary)',
               boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
               pointerEvents: 'auto',
               transition: 'all 0.3s ease',
@@ -426,9 +432,9 @@ export default function ReviewsSection() {
           </button>
           <style jsx>{`
             .nav-btn:hover {
-              background: white;
+              background: var(--secondary);
               transform: scale(1.1);
-              box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+              border-color: var(--primary);
             }
             .nav-btn:active {
               transform: scale(0.95);
@@ -458,7 +464,7 @@ export default function ReviewsSection() {
               width: i === activeIndex ? '24px' : '8px',
               height: '8px',
               borderRadius: '4px',
-              background: i === activeIndex ? '#1e3a8a' : '#cbd5e1',
+              background: i === activeIndex ? 'var(--primary)' : 'var(--layer-border)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
@@ -476,17 +482,18 @@ export default function ReviewsSection() {
           rel="noopener noreferrer"
           style={{
             display: 'inline-block',
-            padding: '8px 20px',
-            border: '1px solid #e2e8f0',
-            borderRadius: '10px',
-            fontSize: '11px',
+            padding: '10px 24px',
+            border: '1px solid var(--layer-border)',
+            borderRadius: '12px',
+            fontSize: '12px',
             fontWeight: 700,
-            color: '#64748b',
+            color: 'var(--foreground)',
             textDecoration: 'none',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            background: 'white',
-            transition: 'all 0.2s ease',
+            background: 'var(--layer)',
+            backdropFilter: 'blur(4px)',
+            transition: 'all 0.3s ease',
           }}
         >
           View All Good Reviews →
