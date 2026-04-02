@@ -32,7 +32,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 1.05rem;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -427,32 +428,73 @@ a {
 
 /* ─── Mobile (≤ 767px) ───────────────────────────── */
 @media (max-width: 767px) {
-  /* Navbar: tighter on mobile */
+  /* Navbar: Optimize for mobile with wrapping */
   .nav-container {
-    padding: 0.75rem 1rem;
-    flex-direction: column;
-    gap: 0.6rem;
-    align-items: flex-start;
+    padding: 0.8rem 1.2rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto; /* Two rows */
+    align-items: center;
+    gap: 0.5rem 1rem;
   }
 
   .nav-logo {
-    font-size: 1.25rem;
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.5rem;
+  }
+
+  .call-now-btn {
+    grid-column: 2;
+    grid-row: 1;
+    width: 44px;
+    height: 44px;
+    justify-self: end;
   }
 
   .nav-links {
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap; /* Ensure wrapping */
+    gap: 0.8rem 1.2rem;
+    justify-content: center;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--layer-border);
+    margin-top: 0.2rem;
   }
 
   .nav-links a {
-    font-size: 0.75rem;
+    font-size: 1.15rem; /* Significantly increased */
+    font-weight: 700;
     letter-spacing: 0;
+    padding: 0.4rem 0.2rem;
+    white-space: normal; /* Allow text wrap if single link is long, though unlikely here */
   }
 
-  /* Hero: comfortable vertical padding */
+  /* Hero: Adjust for dual-row navbar */
   .hero {
-    padding: 7rem 1.25rem 2.5rem;
+    padding: 13rem 1.25rem 3rem; /* Further increased top padding for 2-row navbar */
     min-height: auto;
+  }
+
+  /* Hero Contact Pill: Stack on mobile */
+  .hero-contact-pill {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 20px;
+    padding: 1.2rem 1.5rem;
+    width: 100%;
+    max-width: 340px;
+    margin-bottom: 2rem;
+    background: var(--layer);
+  }
+
+  .contact-item {
+    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
   }
 
   .hero h1 {
@@ -534,10 +576,14 @@ a {
 /* ─── Very small phones (≤ 380px) ───────────────── */
 @media (max-width: 380px) {
   .hero h1 {
-    font-size: 1.7rem;
+    font-size: 1.8rem;
   }
 
   .nav-links a {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .nav-logo {
+    font-size: 1.2rem;
   }
 }

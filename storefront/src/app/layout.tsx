@@ -66,7 +66,7 @@ export default function RootLayout({
             <a href="/privacy-policy">Privacy Policy</a>
           </div>
           <p>Contact Number: 0481 058 514</p>
-          <p>Address: Shop 28, Ringwood Square Shopping Centre, Ringwood (Opposite to Bunnings Entrance)</p>
+          <p>Address: Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</p>
           <p>&copy; {new Date().getFullYear()} Ali Mobile Repair. All rights reserved.</p>
         </footer>
       </body>
