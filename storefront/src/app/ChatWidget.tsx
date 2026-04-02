@@ -14,7 +14,7 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
 
 function getApiBase() {
-  return '/api';
+  return '/api/proxy';
 }
 
 function getChatToken(): string {
@@ -203,13 +203,17 @@ export default function ChatWidget() {
     try {
       // Ensure session exists — recreates it if staff deleted it on the backend
       await ensureSession();
-      await fetch(`${getApiBase()}/chat/session/${tokenRef.current}/message`, {
+      const res = await fetch(`${getApiBase()}/chat/session/${tokenRef.current}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text }),
       });
+      if (!res.ok) throw new Error('Failed to send');
       await fetchMessages();
-    } catch (_) {}
+    } catch (_) {
+      alert('Network error: Message could not be sent. Please try again.');
+      setInput(text); // Restore text on failure
+    }
     setSending(false);
   };
 
@@ -323,7 +327,7 @@ export default function ChatWidget() {
                       borderRadius: '10px',
                       background: 'rgba(255,255,255,0.09)',
                       border: '1px solid rgba(255,255,255,0.15)',
-                      color: '#000000',
+                      color: 'white',
                       fontSize: '0.9rem',
                       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
                       outline: 'none',
@@ -348,7 +352,7 @@ export default function ChatWidget() {
                       borderRadius: '10px',
                       background: 'rgba(255,255,255,0.09)',
                       border: '1px solid rgba(255,255,255,0.15)',
-                      color: '#000000',
+                      color: 'white',
                       fontSize: '0.9rem',
                       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
                       outline: 'none',
@@ -428,18 +432,22 @@ export default function ChatWidget() {
                   placeholder="Type a message..."
                   style={{
                     flex: 1,
-                    background: 'rgba(255,255,255,0.92)',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '12px',
-                    color: '#111111',
-                    padding: '0.6rem 0.8rem',
-                    fontSize: '0.875rem',
+                    color: 'white',
+                    padding: '0.7rem 0.9rem',
+                    fontSize: '0.9rem',
+                    lineHeight: '1.4',
                     resize: 'none',
                     outline: 'none',
                     fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
                     maxHeight: '100px',
                     overflowY: 'auto',
+                    transition: 'border-color 0.2s ease',
                   }}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#007aff')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
                 />
                 <button
                   id="chat-send-btn"
@@ -469,8 +477,8 @@ export default function ChatWidget() {
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         #chat-name-input::placeholder,
-        #chat-phone-input::placeholder { color: rgba(0,0,0,0.4); }
-        #chat-input::placeholder { color: rgba(0,0,0,0.4); }
+        #chat-phone-input::placeholder { color: rgba(255,255,255,0.3); }
+        #chat-input::placeholder { color: rgba(255,255,255,0.3); }
       `}</style>
     </>
   );
