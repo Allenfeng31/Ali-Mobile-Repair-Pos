@@ -28,6 +28,13 @@
   margin: 0;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -456,20 +463,24 @@ a {
     grid-column: 1 / span 2;
     grid-row: 2;
     display: flex;
-    flex-wrap: wrap; /* Ensure wrapping */
-    gap: 0.8rem 1.2rem;
+    flex-wrap: wrap; 
+    gap: 0.8rem 0.5rem;
     justify-content: center;
-    padding-top: 0.8rem;
+    align-items: center;
+    padding: 0.8rem 0;
     border-top: 1px solid var(--layer-border);
     margin-top: 0.2rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .nav-links a {
-    font-size: 1.15rem; /* Significantly increased */
+    font-size: 1.1rem; 
     font-weight: 700;
     letter-spacing: 0;
-    padding: 0.4rem 0.2rem;
-    white-space: normal; /* Allow text wrap if single link is long, though unlikely here */
+    padding: 0.4rem 0.6rem;
+    text-align: center;
+    white-space: nowrap;
   }
 
   /* Hero: Adjust for dual-row navbar */
@@ -478,17 +489,18 @@ a {
     min-height: auto;
   }
 
-  /* Hero Contact Pill: Stack on mobile */
+  /* Hero Contact Pill: Stack and Center on mobile */
   .hero-contact-pill {
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
     border-radius: 20px;
-    padding: 1.2rem 1.5rem;
-    width: 100%;
+    padding: 1.25rem;
+    width: 90%;
     max-width: 340px;
-    margin-bottom: 2rem;
+    margin: 0 auto 1.5rem;
     background: var(--layer);
+    box-sizing: border-box;
   }
 
   .contact-item {
@@ -505,7 +517,12 @@ a {
 
   .hero p {
     font-size: 0.95rem;
-    margin-bottom: 2rem;
+    margin: 0 auto 2rem;
+    max-width: 100%;
+    padding: 0 1rem;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
   }
 
   /* Stack CTA buttons on mobile */
