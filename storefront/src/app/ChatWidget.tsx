@@ -218,7 +218,10 @@ export default function ChatWidget() {
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      sendMessage();
+    }
   };
 
   const formatTime = (iso: string) => {
@@ -322,6 +325,7 @@ export default function ChatWidget() {
                     value={nameInput}
                     onChange={e => setNameInput(e.target.value)}
                     placeholder="e.g. John Smith"
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) submitIntro(); }}
                     style={{
                       width: '100%', padding: '0.7rem 0.9rem',
                       borderRadius: '10px',
@@ -346,7 +350,7 @@ export default function ChatWidget() {
                     value={phoneInput}
                     onChange={e => setPhoneInput(e.target.value)}
                     placeholder="e.g. 0412 345 678"
-                    onKeyDown={e => { if (e.key === 'Enter') submitIntro(); }}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) submitIntro(); }}
                     style={{
                       width: '100%', padding: '0.7rem 0.9rem',
                       borderRadius: '10px',
