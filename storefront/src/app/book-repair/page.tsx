@@ -233,12 +233,13 @@ export default function BookRepairPage() {
                         flex: "0 0 70px",
                         padding: "0.8rem 0.5rem",
                         borderRadius: "12px",
-                        border: isSelected ? "2px solid var(--primary)" : "1px solid rgba(255,255,255,0.1)",
-                        background: isSunday ? "rgba(255,255,255,0.02)" : (isSelected ? "rgba(0,122,255,0.15)" : "rgba(255,255,255,0.03)"),
-                        color: isSunday ? "rgba(255,255,255,0.15)" : (isSelected ? "var(--primary)" : "white"),
+                        border: isSelected ? "2px solid var(--primary)" : "1px solid var(--layer-border)",
+                        background: isSunday ? "transparent" : (isSelected ? "var(--primary)" : "var(--layer)"),
+                        color: isSelected ? "white" : "var(--foreground)",
                         textAlign: "center",
                         cursor: isSunday ? "not-allowed" : "pointer",
-                        transition: "all 0.2s ease"
+                        transition: "all 0.2s ease",
+                        opacity: isSunday ? 0.3 : 1
                       }}
                     >
                       <div style={{ fontSize: "0.7rem", opacity: isSunday ? 0.3 : 0.6, textTransform: "uppercase" }}>{dayName}</div>
@@ -262,11 +263,11 @@ export default function BookRepairPage() {
                       style={{
                         padding: "0.7rem",
                         borderRadius: "10px",
-                        border: selectedSlot === slot ? "2px solid var(--primary)" : "1px solid rgba(255,255,255,0.1)",
-                        background: selectedSlot === slot ? "var(--primary)" : "rgba(255,255,255,0.05)",
-                        color: "white",
-                        fontSize: "0.9rem",
-                        fontWeight: selectedSlot === slot ? 700 : 400,
+                        border: selectedSlot === slot ? "2px solid var(--primary)" : "1px solid var(--layer-border)",
+                        background: selectedSlot === slot ? "var(--primary)" : "var(--layer)",
+                        color: selectedSlot === slot ? "white" : "var(--foreground)",
+                        fontSize: "0.91rem",
+                        fontWeight: selectedSlot === slot ? 700 : 500,
                         cursor: "pointer",
                         transition: "all 0.2s ease"
                       }}
@@ -281,7 +282,7 @@ export default function BookRepairPage() {
               <label>Device / Issue (Confirmation)</label>
               <div 
                 className="form-control" 
-                style={{ background: "rgba(255,255,255,0.05)", height: "auto", minHeight: "2.8rem", color: "var(--primary)", fontWeight: 600 }}
+                style={{ background: "var(--layer)", height: "auto", minHeight: "2.8rem", color: "var(--primary)", fontWeight: 700, border: "1px solid var(--layer-border)" }}
               >
                 {selection ? `${selection.brand} ${selection.model} - ${selection.service}` : "Please select above..."}
               </div>
