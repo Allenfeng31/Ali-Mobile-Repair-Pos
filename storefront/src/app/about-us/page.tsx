@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 export default function AboutUsPage() {
@@ -36,7 +38,7 @@ export default function AboutUsPage() {
               zIndex: 0 
             }} />
             <img 
-              src="/images/about-us.jpg" 
+              src="/images/about-us-new.jpg" 
               alt="Ali Mobile & Repair Store Front" 
               style={{ 
                 width: '100%', 
@@ -97,13 +99,12 @@ export default function AboutUsPage() {
       <section style={{ paddingBottom: '100px', textAlign: 'center' }}>
         <div style={{ 
           maxWidth: '900px', 
-          margin: '0 auto', 
+          margin: '0 auto 100px', 
           padding: '60px 40px', 
           background: 'linear-gradient(135deg, #007aff, #00c6ff)', 
           borderRadius: '40px', 
           color: 'white',
           boxShadow: '0 20px 40px rgba(0,122,255,0.3)',
-          margin: '0 20px 0'
         }}>
           <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>Need an Assessment?</h2>
           <p style={{ opacity: 0.9, fontSize: '1.1rem', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
