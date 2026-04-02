@@ -95,17 +95,67 @@ function GoogleLogo() {
 }
 
 export default function ReviewsSection() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const cardsPerPage = 3;
-  const totalPages = Math.ceil(hardcodedReviews.length / cardsPerPage);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const visibleReviews = hardcodedReviews.slice(
-    currentPage * cardsPerPage,
-    currentPage * cardsPerPage + cardsPerPage
-  );
+  const scrollToIndex = (index: number) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const card = container.children[index] as HTMLElement;
+      if (card) {
+        const targetX = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
+        container.scrollTo({
+          left: targetX,
+          behavior: 'smooth'
+        });
+      }
+    }
+    setActiveIndex(index);
+  };
 
-  const goNext = () => setCurrentPage((p) => (p + 1) % totalPages);
-  const goPrev = () => setCurrentPage((p) => (p - 1 + totalPages) % totalPages);
+  const goNext = () => {
+    const nextIndex = (activeIndex + 1) % hardcodedReviews.length;
+    scrollToIndex(nextIndex);
+  };
+
+  const goPrev = () => {
+    const prevIndex = (activeIndex - 1 + hardcodedReviews.length) % hardcodedReviews.length;
+    scrollToIndex(prevIndex);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollRef.current) {
+        const container = scrollRef.current;
+        const scrollLeft = container.scrollLeft;
+        const containerWidth = container.offsetWidth;
+        
+        // Find which card is closest to the center
+        let closestIndex = 0;
+        let minDiff = Infinity;
+        
+        Array.from(container.children).forEach((child, index) => {
+          const card = child as HTMLElement;
+          const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+          const containerCenter = scrollLeft + containerWidth / 2;
+          const diff = Math.abs(cardCenter - containerCenter);
+          
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = index;
+          }
+        });
+        
+        setActiveIndex(closestIndex);
+      }
+    };
+
+    const container = scrollRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   return (
     <section style={{
@@ -132,51 +182,65 @@ export default function ReviewsSection() {
 
       {/* Carousel Container */}
       <div style={{
+        position: 'relative', // Added for absolute arrows
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '12px',
-        maxWidth: '1000px',
+        maxWidth: '1200px', // Slightly wider
         margin: '0 auto',
+        padding: '0 20px',
       }}>
-        {/* Left Arrow */}
-        <button
-          onClick={goPrev}
-          aria-label="Previous reviews"
+        {/* Cards container */}
+        <div 
+          ref={scrollRef}
           style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            border: '1px solid #e2e8f0',
-            background: 'white',
-            cursor: 'pointer',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '16px',
-            color: '#64748b',
-            flexShrink: 0,
-            transition: 'all 0.2s ease',
+            gap: '16px',
+            flex: 1,
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollBehavior: 'smooth',
+            WebkitOverflowScrolling: 'touch',
+            padding: '20px 0',
+            msOverflowStyle: 'none',  /* IE and Edge */
+            scrollbarWidth: 'none',   /* Firefox */
           }}
+          className="reviews-scroll-container"
         >
-          ←
-        </button>
-
-        {/* Cards */}
-        <div style={{
-          display: 'flex',
-          gap: '16px',
-          flex: 1,
-          justifyContent: 'center',
-        }}>
-          {visibleReviews.map((review) => (
+          {/* Responsive Card Width and Hover effect */}
+          <style jsx>{`
+            .reviews-scroll-container::-webkit-scrollbar {
+              display: none;
+            }
+            .review-card {
+              flex: 0 0 85%;
+              max-width: 340px;
+            }
+            @media (min-width: 768px) {
+              .review-card {
+                flex: 0 0 calc(50% - 16px);
+              }
+            }
+            @media (min-width: 1024px) {
+              .review-card {
+                flex: 0 0 calc(33.333% - 16px);
+              }
+            }
+            .review-card:hover {
+              transform: translateY(-5px);
+            }
+          `}</style>
+          
+          {hardcodedReviews.map((review, index) => (
             <div key={review.id} style={{
-              flex: '1 1 0',
-              maxWidth: '300px',
+              scrollSnapAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-            }}>
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              opacity: index === activeIndex ? 1 : 0.6,
+              transform: index === activeIndex ? 'scale(1.02)' : 'scale(0.98)',
+            }} className="review-card">
               {/* Speech Bubble */}
               <div style={{
                 position: 'relative',
@@ -300,47 +364,101 @@ export default function ReviewsSection() {
           ))}
         </div>
 
-        {/* Right Arrow */}
-        <button
-          onClick={goNext}
-          aria-label="Next reviews"
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            border: '1px solid #e2e8f0',
-            background: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '16px',
-            color: '#64748b',
-            flexShrink: 0,
-            transition: 'all 0.2s ease',
-          }}
-        >
-          →
-        </button>
+        {/* Navigation Buttons (Floating on top or beside) */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '-20px',
+          right: '-20px',
+          transform: 'translateY(-50%)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          pointerEvents: 'none',
+          zIndex: 10,
+        }}>
+          <button
+            onClick={goPrev}
+            aria-label="Previous reviews"
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(4px)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              color: '#1e3a8a',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+              pointerEvents: 'auto',
+              transition: 'all 0.3s ease',
+            }}
+            className="nav-btn"
+          >
+            ←
+          </button>
+          <button
+            onClick={goNext}
+            aria-label="Next reviews"
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(4px)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              color: '#1e3a8a',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+              pointerEvents: 'auto',
+              transition: 'all 0.3s ease',
+            }}
+            className="nav-btn"
+          >
+            →
+          </button>
+          <style jsx>{`
+            .nav-btn:hover {
+              background: white;
+              transform: scale(1.1);
+              box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            }
+            .nav-btn:active {
+              transform: scale(0.95);
+            }
+            @media (max-width: 768px) {
+              .nav-btn {
+                display: none; /* Hide on mobile to favor touch */
+              }
+            }
+          `}</style>
+        </div>
       </div>
 
       {/* Pagination Dots */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        gap: '6px',
-        marginTop: '24px',
+        gap: '8px',
+        marginTop: '10px',
       }}>
-        {[...Array(totalPages)].map((_, i) => (
+        {hardcodedReviews.map((_, i) => (
           <button
             key={i}
-            onClick={() => setCurrentPage(i)}
-            aria-label={`Go to page ${i + 1}`}
+            onClick={() => scrollToIndex(i)}
+            aria-label={`Go to review ${i + 1}`}
             style={{
-              width: i === currentPage ? '20px' : '6px',
-              height: '6px',
-              borderRadius: '3px',
-              background: i === currentPage ? '#1e3a8a' : '#cbd5e1',
+              width: i === activeIndex ? '24px' : '8px',
+              height: '8px',
+              borderRadius: '4px',
+              background: i === activeIndex ? '#1e3a8a' : '#cbd5e1',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
