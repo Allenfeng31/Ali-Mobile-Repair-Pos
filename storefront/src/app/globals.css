@@ -104,6 +104,31 @@ a {
   width: 100%;
 }
 
+.call-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px var(--primary-glow);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex-shrink: 0;
+}
+
+.call-now-btn:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 6px 15px var(--primary-glow);
+  background: #0084ff;
+}
+
+.call-now-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* ─── Hero ─────────────────────────────────────────── */
 .hero {
   min-height: 100svh;
@@ -123,6 +148,42 @@ a {
   line-height: 1.1;
   margin-bottom: 1.25rem;
   letter-spacing: -1px;
+}
+
+.hero-contact-pill {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  background: var(--layer);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--layer-border);
+  border-radius: 50px;
+  margin-bottom: 2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: fadeIn 0.8s ease-out 0.2s both;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--foreground);
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.contact-item:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.contact-item svg {
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
 }
 
 .hero p {
