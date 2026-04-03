@@ -18,7 +18,13 @@ import {
   Laptop,
   Watch,
   Headphones,
-  Package
+  Package,
+  Camera,
+  Cpu,
+  Layout as LayoutIcon,
+  Volume2,
+  Mic,
+  Wifi
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
@@ -167,20 +173,26 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       costPrice: cost,
       price: selling,
       margin: margin,
-      iconName: formData.category.toLowerCase().includes('battery') ? 'Battery' : 
+      iconName: formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' : 
+                formData.name.toLowerCase().includes('battery') ? 'Battery' :
+                formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
+                formData.name.toLowerCase().includes('camera') ? 'Camera' :
+                formData.name.toLowerCase().includes('housing') || formData.name.toLowerCase().includes('glass') || formData.name.toLowerCase().includes('back cover') ? 'Layout' :
+                formData.name.toLowerCase().includes('logic board') || formData.name.toLowerCase().includes('motherboard') || formData.name.toLowerCase().includes('ic ') ? 'Cpu' :
+                formData.name.toLowerCase().includes('speaker') || formData.name.toLowerCase().includes('buzzer') ? 'Volume2' :
                 formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
                 formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
                 formData.category.toLowerCase().includes('watch') ? 'Watch' :
                 formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
-                formData.category.toLowerCase().includes('phone') || formData.category.toLowerCase().includes('screen') ? 'Smartphone' : 
-                formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Zap',
+                formData.category.toLowerCase().includes('phone') ? 'Smartphone' : 
+                formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package',
       status: stock <= minStock ? 'low-stock' : 'in-stock',
       category: formData.category
     };
 
     const getIconComponent = (name: string) => {
       const icons: Record<string, any> = {
-        Battery, Tablet, Laptop, Watch, Headphones, Smartphone, Wrench, Zap, Package
+        Battery, Tablet, Laptop, Watch, Headphones, Smartphone, Wrench, Zap, Package, Camera, Cpu, LayoutIcon, Volume2, Mic, Wifi
       };
       return icons[name] || Package;
     };

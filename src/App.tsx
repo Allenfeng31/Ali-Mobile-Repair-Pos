@@ -21,8 +21,13 @@ import {
   Speaker,
   Mic,
   Wifi,
-  Package
+  Package,
+  Camera,
+  Cpu,
+  Layout as LayoutIcon,
+  Volume2
 } from 'lucide-react';
+
 import { InventoryItem, Order } from './types';
 import { Language, getTranslation } from './lib/i18n';
 
@@ -39,21 +44,38 @@ const iconMap: Record<string, any> = {
   Speaker,
   Mic,
   Wifi,
-  Package
+  Package,
+  Camera,
+  Cpu,
+  LayoutIcon,
+  Volume2
 };
 
-const getCategoryIcon = (category: string) => {
-  if (!category) return Package;
-  const cat = category.toLowerCase();
-  if (cat.includes('phone')) return Smartphone;
-  if (cat.includes('tablet') || cat.includes('ipad')) return Tablet;
-  if (cat.includes('laptop') || cat.includes('macbook')) return Laptop;
-  if (cat.includes('watch')) return Watch;
-  if (cat.includes('accessory') || cat.includes('accessories')) return Headphones;
-  if (cat.includes('battery')) return Battery;
-  if (cat.includes('screen')) return Smartphone;
-  if (cat.includes('service') || cat.includes('repair')) return Wrench;
-  if (cat.includes('part')) return Zap;
+const getCategoryIcon = (name: string, category: string) => {
+  if (!name) return Package;
+  const n = name.toLowerCase();
+  const c = (category || '').toLowerCase();
+
+  // 1. Specific Repair Component Keywords (Highest Priority)
+  if (n.includes('screen') || n.includes('lcd') || n.includes('display')) return Smartphone;
+  if (n.includes('battery')) return Battery;
+  if (n.includes('charging') || n.includes('port') || n.includes('charge')) return Zap;
+  if (n.includes('camera')) return Camera;
+  if (n.includes('housing') || n.includes('glass') || n.includes('back cover')) return LayoutIcon;
+  if (n.includes('logic board') || n.includes('motherboard') || n.includes('ic ')) return Cpu;
+  if (n.includes('speaker') || n.includes('buzzer')) return Volume2;
+  if (n.includes('mic')) return Mic;
+  if (n.includes('wifi') || n.includes('signal') || n.includes('antenna')) return Wifi;
+
+  // 2. Category Fallbacks (If no specific component is found)
+  if (c.includes('phone')) return Smartphone;
+  if (c.includes('tablet') || c.includes('ipad')) return Tablet;
+  if (c.includes('laptop') || c.includes('macbook')) return Laptop;
+  if (c.includes('watch')) return Watch;
+  if (c.includes('accessory') || c.includes('accessories')) return Headphones;
+  if (c.includes('service') || c.includes('repair')) return Wrench;
+  if (c.includes('part')) return Zap;
+
   return Package;
 };
 
@@ -127,7 +149,7 @@ export default function App() {
               ...item,
               brand: parsedBrand,
               model: parsedModel,
-              icon: getCategoryIcon(item.category)
+              icon: getCategoryIcon(item.name, item.category)
             };
           }));
         }
