@@ -13,7 +13,12 @@ import {
   Filter,
   QrCode,
   RefreshCw,
-  Wrench
+  Wrench,
+  Tablet,
+  Laptop,
+  Watch,
+  Headphones,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
@@ -162,14 +167,22 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       costPrice: cost,
       price: selling,
       margin: margin,
-      iconName: formData.category.includes('Battery') ? 'Battery' : 
-                formData.name.includes('Screen') ? 'Smartphone' : 'Zap',
+      iconName: formData.category.toLowerCase().includes('battery') ? 'Battery' : 
+                formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
+                formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
+                formData.category.toLowerCase().includes('watch') ? 'Watch' :
+                formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
+                formData.category.toLowerCase().includes('phone') || formData.category.toLowerCase().includes('screen') ? 'Smartphone' : 
+                formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Zap',
       status: stock <= minStock ? 'low-stock' : 'in-stock',
       category: formData.category
     };
 
     const getIconComponent = (name: string) => {
-      return name === 'Battery' ? Battery : name === 'Smartphone' ? Smartphone : Zap;
+      const icons: Record<string, any> = {
+        Battery, Tablet, Laptop, Watch, Headphones, Smartphone, Wrench, Zap, Package
+      };
+      return icons[name] || Package;
     };
 
     const normalizeItem = (raw: any) => {

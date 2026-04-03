@@ -8,18 +8,51 @@ import { SettingsView } from './views/Settings';
 import { ChatInbox } from './views/ChatInbox';
 import { LoginView } from './views/Login';
 import { AnimatePresence } from 'motion/react';
-import { Smartphone, Battery, Zap, Wrench, ShieldCheck } from 'lucide-react';
-import { InventoryItem, Order } from './types';
-import { Language, getTranslation } from './lib/i18n';
+import { 
+  Smartphone, 
+  Battery, 
+  Zap, 
+  Wrench, 
+  ShieldCheck,
+  Tablet,
+  Laptop,
+  Watch,
+  Headphones,
+  Speaker,
+  Mic,
+  Wifi,
+  Package
+} from 'lucide-react';
 
-// Helper to map icon names to components if needed, 
-// but since we store components in state, we need to handle serialization.
 const iconMap: Record<string, any> = {
   Smartphone,
   Battery,
   Zap,
   Wrench,
-  ShieldCheck
+  ShieldCheck,
+  Tablet,
+  Laptop,
+  Watch,
+  Headphones,
+  Speaker,
+  Mic,
+  Wifi,
+  Package
+};
+
+const getCategoryIcon = (category: string) => {
+  if (!category) return Package;
+  const cat = category.toLowerCase();
+  if (cat.includes('phone')) return Smartphone;
+  if (cat.includes('tablet') || cat.includes('ipad')) return Tablet;
+  if (cat.includes('laptop') || cat.includes('macbook')) return Laptop;
+  if (cat.includes('watch')) return Watch;
+  if (cat.includes('accessory') || cat.includes('accessories')) return Headphones;
+  if (cat.includes('battery')) return Battery;
+  if (cat.includes('screen')) return Smartphone;
+  if (cat.includes('service') || cat.includes('repair')) return Wrench;
+  if (cat.includes('part')) return Zap;
+  return Package;
 };
 
 export default function App() {
@@ -92,7 +125,7 @@ export default function App() {
               ...item,
               brand: parsedBrand,
               model: parsedModel,
-              icon: iconMap[item.iconName] || Smartphone
+              icon: getCategoryIcon(item.category)
             };
           }));
         }
