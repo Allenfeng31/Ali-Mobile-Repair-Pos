@@ -23,6 +23,8 @@ import {
   Wifi,
   Package
 } from 'lucide-react';
+import { InventoryItem, Order } from './types';
+import { Language, getTranslation } from './lib/i18n';
 
 const iconMap: Record<string, any> = {
   Smartphone,
