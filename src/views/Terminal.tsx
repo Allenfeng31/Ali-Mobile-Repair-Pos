@@ -55,6 +55,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [currentPage, setCurrentPage] = useState(1);
   const [numpadItem, setNumpadItem] = useState<any | null>(null);
   const [numpadValue, setNumpadValue] = useState('');
+  const [isFirstStroke, setIsFirstStroke] = useState(true);
 
   React.useEffect(() => {
     setCurrentPage(1);
@@ -480,6 +481,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                         const currentVal = item.overridePrice !== undefined ? item.overridePrice : item.price;
                         setNumpadValue(currentVal.toString());
                         setNumpadItem(item);
+                        setIsFirstStroke(true);
                       }}
                     >
                       ${(item.overridePrice !== undefined ? item.overridePrice : item.price).toFixed(2)}
@@ -757,29 +759,42 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 {['7','8','9','4','5','6','1','2','3'].map(k => (
                   <button
                     key={k}
-                    onPointerDown={() => setNumpadValue(prev => (prev === '0' ? k : prev + k))}
+                  onPointerDown={() => {
+                    setNumpadValue(prev => (isFirstStroke ? k : (prev === '0' ? k : prev + k)));
+                    setIsFirstStroke(false);
+                  }}
                     className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary sm:hover:text-on-primary active:scale-95 active:bg-primary active:text-on-primary transition-all duration-75"
                   >
                     {k}
                   </button>
                 ))}
                 <button
-                  onPointerDown={() => setNumpadValue(prev => {
-                    if (prev.includes('.')) return prev;
-                    return prev + '.';
-                  })}
+                  onPointerDown={() => {
+                    if (isFirstStroke) {
+                      setNumpadValue('0.');
+                    } else {
+                      setNumpadValue(prev => prev.includes('.') ? prev : prev + '.');
+                    }
+                    setIsFirstStroke(false);
+                  }}
                   className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-surface-container-highest active:scale-95 active:bg-surface-container-highest transition-all duration-75"
                 >
                   .
                 </button>
                 <button
-                  onPointerDown={() => setNumpadValue(prev => (prev === '0' ? '0' : prev + '0'))}
+                  onPointerDown={() => {
+                    setNumpadValue(prev => (isFirstStroke ? '0' : (prev === '0' ? '0' : prev + '0')));
+                    setIsFirstStroke(false);
+                  }}
                   className="py-4 rounded-2xl bg-surface-container-high text-on-surface text-xl font-bold hover:bg-primary sm:hover:text-on-primary active:scale-95 active:bg-primary active:text-on-primary transition-all duration-75"
                 >
                   0
                 </button>
                 <button
-                  onPointerDown={() => setNumpadValue(prev => prev.length > 1 ? prev.slice(0, -1) : '0')}
+                  onPointerDown={() => {
+                    setNumpadValue(prev => (prev.length > 1 ? prev.slice(0, -1) : '0'));
+                    setIsFirstStroke(false);
+                  }}
                   className="py-4 rounded-2xl bg-surface-container-high text-error text-xl font-bold hover:bg-error-container active:scale-95 active:bg-error-container transition-all duration-75"
                 >
                   ⌫
@@ -787,7 +802,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
                 {/* Clear + Confirm spanning full row */}
                 <button
-                  onPointerDown={() => setNumpadValue('0')}
+                  onPointerDown={() => { setNumpadValue('0'); setIsFirstStroke(true); }}
                   className="col-span-1 py-4 rounded-2xl bg-surface-container-highest text-on-surface-variant text-base font-bold hover:bg-error-container hover:text-on-error-container active:scale-95 active:bg-error-container active:text-on-error-container transition-all duration-75"
                 >
                   Clear
