@@ -66,7 +66,7 @@ export default async function BlogPage() {
 
         /* Hero Styling */
         .featured-hero {
-          padding: 2rem 5% 4rem;
+          padding: 160px 5% 4rem;
           background: linear-gradient(to bottom, #ffffff, #f8fafc);
         }
 

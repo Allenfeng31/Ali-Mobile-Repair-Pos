@@ -22,7 +22,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   const postData = await getPostData(slug);
 
   return (
-    <article className="max-w-3xl mx-auto px-6 py-12">
+    <article className="max-w-3xl mx-auto px-6 pt-[160px] pb-12">
       <Link href="/blog" className="text-blue-600 font-bold mb-8 inline-block hover:-translate-x-1 transition-transform">
         ← Back to Blog
       </Link>

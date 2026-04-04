@@ -168,7 +168,7 @@ export default function BookRepairPage() {
         }}
       />
       
-      <div style={{ paddingTop: '100px', paddingBottom: '100px', minHeight: '80vh' }}>
+      <div className="page-container">
         <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Book Your Repair</h1>
         <p style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 2rem', opacity: 0.8 }}>
           Get a real-time quote and schedule your repair with our experts. Walk-ins are also welcome!

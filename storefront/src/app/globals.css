@@ -596,6 +596,16 @@ a {
   }
 }
 
+.page-container {
+  padding-top: 160px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: 80vh;
+}
+
 /* ─── Very small phones (≤ 380px) ───────────────── */
 @media (max-width: 380px) {
   .hero h1 {

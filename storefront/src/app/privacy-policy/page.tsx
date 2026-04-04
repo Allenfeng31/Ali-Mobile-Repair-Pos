@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div style={{ paddingTop: '120px', paddingBottom: '60px', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
+    <div className="page-container" style={{ paddingTop: '160px' }}>
       <h1>Privacy Policy</h1>
       <p style={{ opacity: 0.7 }}>Last Updated: March 2026</p>
       

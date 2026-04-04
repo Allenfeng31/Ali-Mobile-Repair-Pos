@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function ComputerRepairPage() {
   return (
     <>
-      <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', minHeight: '80vh', maxWidth: '800px' }}>
+      <div className="page-container">
         <link rel="canonical" href="https://www.alimobile.com.au/services/computer-repair" />
         
         <Script

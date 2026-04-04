@@ -30,7 +30,7 @@ export default function TrackStatusPage() {
   };
 
   return (
-    <div style={{ paddingTop: '100px', minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h1 style={{ marginBottom: '1rem' }}>Track Repair Status</h1>
       <p style={{ maxWidth: '500px', textAlign: 'center', marginBottom: '2rem', opacity: 0.8 }}>
         Enter your Order ID (found on your receipt) to check the real-time status of your device repair.

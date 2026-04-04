@@ -66,7 +66,7 @@ export default function IPadRepairPage() {
           })
         }}
       />
-      <div style={{ paddingTop: '100px', padding: '0 2rem', maxWidth: '800px', margin: '0 auto', minHeight: '80vh' }}>
+      <div className="page-container">
         <h1 style={{ marginBottom: '1.5rem', fontSize: '2.5rem' }}>Professional iPad Repair in Melbourne</h1>
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8' }}>
           Cracked your iPad screen? Battery not holding a charge? Ali Mobile Repair provides 
