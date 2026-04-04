@@ -87,8 +87,6 @@ a {
   height: 100%;
   width: auto;
   display: block;
-  transform: scale(2.2);
-  transform-origin: left center;
 }
 
 .nav-links {
