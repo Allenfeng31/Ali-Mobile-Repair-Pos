@@ -47,7 +47,7 @@ export default function RootLayout({
         <nav className="navbar">
           <div className="nav-container">
             <a href="/" className="nav-logo">
-              <img src="/images/logo.png" alt="Ali Mobile Repairs" style={{ height: '45px', width: 'auto' }} />
+              <img src="/images/logo.png" alt="Ali Mobile Repairs" style={{ height: '100%', width: 'auto' }} />
             </a>
             <div className="nav-links">
               <a href="/">HOME</a>

@@ -76,7 +76,7 @@ a {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  height: 45px;
+  height: 90px;
 }
 
 .nav-logo img {
@@ -450,7 +450,7 @@ a {
   .nav-logo {
     grid-column: 1;
     grid-row: 1;
-    height: 38px;
+    height: 76px;
   }
 
   .call-now-btn {
@@ -603,6 +603,6 @@ a {
   }
 
   .nav-logo {
-    height: 32px;
+    height: 64px;
   }
 }
