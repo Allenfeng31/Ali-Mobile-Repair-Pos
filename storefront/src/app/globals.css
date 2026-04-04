@@ -89,6 +89,12 @@ a {
   display: block;
 }
 
+@media (prefers-color-scheme: dark) {
+  .nav-logo img {
+    mix-blend-mode: screen;
+  }
+}
+
 .nav-links {
   display: flex;
   gap: 2rem;
