@@ -37,7 +37,10 @@ export default function Header() {
     <nav className={`navbar ${!isVisible ? 'navbar--hidden' : ''}`}>
       <div className="nav-container">
         <a href="/" className="nav-logo">
-          <img src="/images/logo.png" alt="Ali Mobile Repairs" style={{ height: '100%', width: 'auto' }} />
+          <picture style={{ height: '100%', display: 'block' }}>
+            <source srcSet="/images/logo-dark.png" media="(prefers-color-scheme: dark)" />
+            <img src="/images/logo.png" alt="Ali Mobile Repairs" style={{ height: '100%', width: 'auto' }} />
+          </picture>
         </a>
         <div className="nav-links">
           <a href="/">HOME</a>
