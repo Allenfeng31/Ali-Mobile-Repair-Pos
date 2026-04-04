@@ -38,8 +38,8 @@ export default function Header() {
       <div className="nav-container">
         <a href="/" className="nav-logo">
           <picture style={{ height: '100%', display: 'block' }}>
-            <source srcSet="/images/logo-dark.png" media="(prefers-color-scheme: dark)" />
-            <img src="/images/logo.png" alt="Ali Mobile Repairs" style={{ height: '100%', width: 'auto' }} />
+            <source srcSet="/images/logo-dark.png?v=3" media="(prefers-color-scheme: dark)" />
+            <img src="/images/logo.png?v=3" alt="Ali Mobile Repairs" style={{ height: '100%', width: 'auto' }} />
           </picture>
         </a>
         <div className="nav-links">
