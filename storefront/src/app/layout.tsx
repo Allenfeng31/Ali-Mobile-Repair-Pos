@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     locale: "en_AU",
     type: "website",
   },
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -43,7 +46,9 @@ export default function RootLayout({
       <body>
         <nav className="navbar">
           <div className="nav-container">
-            <a href="/" className="nav-logo">Ali Mobile</a>
+            <a href="/" className="nav-logo">
+              <img src="/images/logo.png" alt="Ali Mobile Repairs" style={{ height: '45px', width: 'auto' }} />
+            </a>
             <div className="nav-links">
               <a href="/">HOME</a>
               <a href="/services">SERVICES</a>

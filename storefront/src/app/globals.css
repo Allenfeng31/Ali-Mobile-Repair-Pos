@@ -73,14 +73,16 @@ a {
 }
 
 .nav-logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(90deg, var(--primary), #00c6ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
+  height: 45px;
+}
+
+.nav-logo img {
+  height: 100%;
+  width: auto;
+  display: block;
 }
 
 .nav-links {
@@ -448,7 +450,7 @@ a {
   .nav-logo {
     grid-column: 1;
     grid-row: 1;
-    font-size: 1.5rem;
+    height: 38px;
   }
 
   .call-now-btn {
@@ -601,6 +603,6 @@ a {
   }
 
   .nav-logo {
-    font-size: 1.2rem;
+    height: 32px;
   }
 }
