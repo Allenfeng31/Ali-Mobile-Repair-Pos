@@ -23,7 +23,7 @@ export default function ServicesPage() {
           })
         }}
       />
-      <div className="container" style={{ paddingTop: '100px', minHeight: '80vh' }}>
+      <div className="container" style={{ paddingTop: '160px', minHeight: '80vh' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Our Repair Services</h1>
         <div className="servicesGrid">
           <Link href="/services/iphone-screen-repair-melbourne" className="serviceCard">

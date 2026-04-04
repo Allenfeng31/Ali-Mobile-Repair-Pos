@@ -7,7 +7,7 @@ export default function AboutUsPage() {
     <div style={{ background: 'var(--background)', color: 'var(--foreground)', minHeight: '100vh', fontFamily: '"Inter", sans-serif' }}>
       {/* Dynamic Hero Section */}
       <section style={{ 
-        padding: '120px 20px 60px', 
+        padding: '160px 20px 60px', 
         textAlign: 'center', 
         background: 'radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%)' 
       }}>
