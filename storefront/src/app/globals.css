@@ -80,19 +80,15 @@ a {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  height: 120px;
+  height: 60px;
 }
 
 .nav-logo img {
   height: 100%;
   width: auto;
   display: block;
-}
-
-@media (prefers-color-scheme: dark) {
-  .nav-logo img {
-    mix-blend-mode: screen;
-  }
+  transform: scale(2.2);
+  transform-origin: left center;
 }
 
 .nav-links {
@@ -460,7 +456,7 @@ a {
   .nav-logo {
     grid-column: 1;
     grid-row: 1;
-    height: 85px;
+    height: 45px;
   }
 
   .call-now-btn {
@@ -623,6 +619,6 @@ a {
   }
 
   .nav-logo {
-    height: 65px;
+    height: 35px;
   }
 }
