@@ -57,7 +57,7 @@ export default function Header() {
       <div className="nav-container">
         <a href="/" className="nav-logo">
           <img 
-            src={(!mounted || theme === 'dark') ? "/images/logo-dark.png?v=3" : "/images/logo.png?v=3"} 
+            src={(!mounted || theme === 'dark') ? "/images/logo-dark.png?v=4" : "/images/logo.png?v=4"} 
             alt="Ali Mobile Repairs" 
             style={{ height: '100%', width: 'auto' }} 
           />
