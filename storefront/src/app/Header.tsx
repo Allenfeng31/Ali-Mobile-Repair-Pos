@@ -3,19 +3,19 @@
 import { useState, useEffect } from 'react';
 
 export default function Header() {
+  const [mounted, setMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
     
     setTheme(initialTheme);
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
+    document.documentElement.setAttribute('data-theme', initialTheme);
   }, []);
 
   useEffect(() => {
@@ -52,15 +52,12 @@ export default function Header() {
     localStorage.setItem('theme', newTheme);
   };
 
-  // Avoid hydration mismatch by rendering a skeleton or placeholder if theme is null
-  if (theme === null) return <nav className="navbar" style={{ height: '70px' }}></nav>;
-
   return (
     <nav className={`navbar ${!isVisible ? 'navbar--hidden' : ''}`}>
       <div className="nav-container">
         <a href="/" className="nav-logo">
           <img 
-            src={theme === 'dark' ? "/images/logo-dark.png?v=3" : "/images/logo.png?v=3"} 
+            src={(!mounted || theme === 'dark') ? "/images/logo-dark.png?v=3" : "/images/logo.png?v=3"} 
             alt="Ali Mobile Repairs" 
             style={{ height: '100%', width: 'auto' }} 
           />
@@ -74,8 +71,8 @@ export default function Header() {
           <a href="/track-status">TRACK STATUS</a>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div className="theme-toggle-container">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', minWidth: '100px', justifyContent: 'flex-end' }}>
+          <div className="theme-toggle-container" style={{ visibility: mounted ? 'visible' : 'hidden' }}>
             <label className="theme-switch" title="Toggle Light/Dark Mode">
               <input 
                 type="checkbox" 
