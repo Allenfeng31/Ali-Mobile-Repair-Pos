@@ -29,9 +29,10 @@ export default function Home() {
             },
             "geo": {
               "@type": "GeoCoordinates",
-              "latitude": -37.8154441,
+              "latitude": -37.815444,
               "longitude": 145.222375
             },
+            "hasMap": "https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7",
             "openingHoursSpecification": [
               {
                 "@type": "OpeningHoursSpecification",
@@ -40,11 +41,16 @@ export default function Home() {
                 "closes": "17:00"
               }
             ],
+            "areaServed": [
+              { "@type": "City", "name": "Ringwood" },
+              { "@type": "City", "name": "Melbourne" },
+              { "@type": "State", "name": "Victoria" }
+            ],
             "sameAs": [
               "https://www.facebook.com/alimobilerepair",
               "https://www.instagram.com/alimobilerepair"
             ],
-            "description": "Expert mobile phone and iPad repair in Melbourne. Specializing in screen replacement, battery fixing, and system recovery."
+            "description": "Expert mobile phone and tablet repair in Melbourne. Specializing in iPhone, Samsung, iPad, and Google Pixel screen replacement, battery fixing, and system recovery."
           })
         }}
       />
@@ -74,12 +80,12 @@ export default function Home() {
 
       <section className="servicesGrid">
         <Link href="/services/iphone-screen-repair-melbourne" className="serviceCard">
-          <h3>iPhone Repair</h3>
-          <p>Broken screen? Battery draining fast? We fix it on the spot in 15-60 minutes.</p>
+          <h3>Phone Repair</h3>
+          <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
         </Link>
         <Link href="/services/ipad-repair" className="serviceCard">
-          <h3>iPad Repair</h3>
-          <p>Fast, reliable repairs for all iPad models. Get it fixed in under 1 hour.</p>
+          <h3>Tablet Repair</h3>
+          <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
         </Link>
         <Link href="/services/computer-repair" className="serviceCard">
           <h3>Computer &amp; MacBook Repair</h3>

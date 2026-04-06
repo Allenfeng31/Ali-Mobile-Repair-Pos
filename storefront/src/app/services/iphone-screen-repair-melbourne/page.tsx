@@ -2,8 +2,8 @@ import Link from "next/link";
 import Script from "next/script";
 
 export const metadata = {
-  title: "iPhone Screen Repair Melbourne | Fast & Cheap | Ali Mobile",
-  description: "Get your iPhone screen fixed in Melbourne within 30 minutes! High-quality parts, no fix no charge. Walk in to our Ringwood store today.",
+  title: "Phone Repair Melbourne | iPhone Screen Replacement | Ali Mobile",
+  description: "Expert phone repair in Ringwood, Melbourne. We specialize in iPhone screen replacement, battery fixing, and all brand repairs. Most fixed in 15-30 minutes.",
 };
 
 export default function IPhoneRepairPage() {
@@ -19,8 +19,8 @@ export default function IPhoneRepairPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Service",
-            "name": "iPhone Screen Repair Melbourne",
-            "serviceType": "iPhone Screen Repair",
+            "name": "Phone & iPhone Repair Melbourne",
+            "serviceType": "Phone Repair",
             "provider": {
               "@type": "LocalBusiness",
               "name": "Ali Mobile Repair",
@@ -58,7 +58,7 @@ export default function IPhoneRepairPage() {
               {
                 "@type": "ListItem",
                 "position": 3,
-                "name": "iPhone Repair",
+                "name": "Phone Repair",
                 "item": "https://www.alimobile.com.au/services/iphone-screen-repair-melbourne"
               }
             ]
@@ -66,7 +66,7 @@ export default function IPhoneRepairPage() {
         }}
       />
       <div className="page-container">
-        <h1 style={{ marginBottom: '1.5rem', fontSize: '2.5rem' }}>iPhone Screen Repair in Melbourne</h1>
+        <h1 style={{ marginBottom: '1.5rem', fontSize: '2.5rem' }}>Phone &amp; iPhone Repair in Melbourne</h1>
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8' }}>
           At Ali Mobile Repair, we specialize in high-quality iPhone screen replacements. 
           Whether you dropped your brand new iPhone 15 or need a quick fix for an older model, 
@@ -82,7 +82,7 @@ export default function IPhoneRepairPage() {
         </ul>
 
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <Link href="/book-repair" className="primary-btn">Book Your iPhone Repair</Link>
+          <Link href="/book-repair" className="primary-btn">Book Your Phone Repair</Link>
         </div>
       </div>
     </>

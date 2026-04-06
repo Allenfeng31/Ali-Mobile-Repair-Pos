@@ -15,11 +15,11 @@ export default function ServicesPage() {
               "@type": "LocalBusiness",
               "name": "Ali Mobile Repair"
             },
-            "serviceType": ["Phone Repair", "Tablet Repair", "Computer Repair"],
-            "areaServed": {
-              "@type": "City",
-              "name": "Melbourne"
-            }
+            "serviceType": ["Phone Repair", "Tablet Repair", "Computer Repair", "Smart Watch Repair"],
+            "areaServed": [
+              { "@type": "City", "name": "Ringwood" },
+              { "@type": "City", "name": "Melbourne" }
+            ]
           })
         }}
       />
@@ -27,16 +27,20 @@ export default function ServicesPage() {
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Our Repair Services</h1>
         <div className="servicesGrid">
           <Link href="/services/iphone-screen-repair-melbourne" className="serviceCard">
-            <h3>iPhone Screen Repair</h3>
-            <p>Premium quality screens replaced in 15-30 minutes. Lifetime warranty on parts.</p>
+            <h3>Phone Repair</h3>
+            <p>Premium quality screen and battery replacement for iPhone, Samsung, Oppo, and Google Pixel. Most fixed in 15-30 minutes.</p>
           </Link>
           <Link href="/services/ipad-repair" className="serviceCard">
-            <h3>iPad & Tablet Repair</h3>
-            <p>Expert glass and LCD replacement for all iPad generations. Most fixed in 1 hour.</p>
+            <h3>Tablet Repair</h3>
+            <p>Expert glass and LCD replacement for all iPad generations and Samsung Tab models. Reliable service in under 1 hour.</p>
           </Link>
           <Link href="/services/computer-repair" className="serviceCard">
             <h3>Computer &amp; MacBook Repair</h3>
-            <p>Screen, battery, charging port &amp; logic board repairs for all MacBook models. Same-day diagnosis.</p>
+            <p>Screen, battery, and logic board repairs for all MacBook and laptop models. Professional diagnosis.</p>
+          </Link>
+          <Link href="/book-repair" className="serviceCard">
+            <h3>Smart Watch Repair</h3>
+            <p>Apple Watch screen replacement and battery fixing. Fast service for all Series and Ultra models.</p>
           </Link>
         </div>
       </div>

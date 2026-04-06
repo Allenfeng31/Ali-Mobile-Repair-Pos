@@ -15,11 +15,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Phone & iPad Repair | Ali Mobile Repair | System Recovery",
-  description: "Expert phone and iPad repair in Melbourne. We also do system recovery, data backup and water damage fixing. No FIX no CHARGE.",
+  title: "Phone & Tablet Repair Melbourne | Ali Mobile Repair | System Recovery",
+  description: "Expert phone and tablet repair in Ringwood, Melbourne. We specialize in iPhone, iPad, Samsung, and Google Pixel screen replacements, battery fixing, and system recovery. No FIX no CHARGE.",
   openGraph: {
-    title: "Phone Repair | Ali Mobile Repair",
-    description: "Expert phone and iPad repair in Melbourne.",
+    title: "Phone & Tablet Repair Melbourne | Ali Mobile Repair",
+    description: "Expert phone and tablet repair in Ringwood, Melbourne.",
     url: "https://www.alimobile.com.au",
     siteName: "Ali Mobile Repair",
     locale: "en_AU",
@@ -41,8 +41,8 @@ export default function RootLayout({
         <link rel="canonical" href="https://www.alimobile.com.au" />
         <meta name="geo.region" content="AU-VIC" />
         <meta name="geo.placename" content="Ringwood, Melbourne" />
-        <meta name="geo.position" content="-37.813637;145.228892" />
-        <meta name="ICBM" content="-37.813637, 145.228892" />
+        <meta name="geo.position" content="-37.815444;145.222375" />
+        <meta name="ICBM" content="-37.815444, 145.222375" />
       </head>
       <body>
         <Header />
