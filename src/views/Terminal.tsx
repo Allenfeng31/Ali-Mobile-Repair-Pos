@@ -38,12 +38,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [activeCategory, setActiveCategory] = useState('All Items');
   const [activeBrand, setActiveBrand] = useState('All Brands');
 
-  // Strip P/T/C prefix for display ("C MacBook" → "MacBook", "P iPhone" → "iPhone")
+  // Strip P/T/C/W prefix for display ("C MacBook" → "MacBook", "P iPhone" → "iPhone")
   const getDisplayBrand = (br: string) => {
     if (br === 'All Brands') return t('term', 'brandAll');
-    if (/^[PTCptc] .+/.test(br)) return br.slice(2).trim();
+    if (/^[PTCWptcw] .+/.test(br)) return br.slice(2).trim();
     return br;
   };
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);

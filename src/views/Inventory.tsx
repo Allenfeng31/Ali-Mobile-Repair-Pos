@@ -48,11 +48,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const [activeBrandFilter, setActiveBrandFilter] = useState('All Brands');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('All Categories');
 
-  // Strip P/T/C prefix for display: "C MacBook" → "MacBook"
+  // Strip P/T/C/W prefix for display: "C MacBook" → "MacBook"
   const getDisplayBrand = (br: string) => {
-    if (/^[PTCptc] .+/.test(br)) return br.slice(2).trim();
+    if (/^[PTCWptcw] .+/.test(br)) return br.slice(2).trim();
     return br;
   };
+
 
   React.useEffect(() => {
     setCurrentPage(1);

@@ -85,7 +85,12 @@ export default function Home() {
           <h3>Computer &amp; MacBook Repair</h3>
           <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
         </Link>
+        <Link href="/book-repair" className="serviceCard">
+          <h3>Smart Watch Repair</h3>
+          <p>Apple Watch screen and battery repairs. Professional service for all series.</p>
+        </Link>
       </section>
+
 
       <ReviewsSection />
 

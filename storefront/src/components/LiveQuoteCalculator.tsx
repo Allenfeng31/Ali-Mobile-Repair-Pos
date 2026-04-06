@@ -21,7 +21,7 @@ interface ParsedItem {
   service: string;     // The service part (e.g. "Screen Replacement")
   price: number;
   category: string;
-  deviceType: "phone" | "tablet" | "computer";
+  deviceType: "phone" | "tablet" | "computer" | "watch";
 }
 
 // ─── Prefix-based device type detection ──────────────────────────────────────
@@ -29,12 +29,13 @@ function detectDeviceType(brand: string): ParsedItem["deviceType"] {
   const first = brand.trim().charAt(0).toUpperCase();
   if (first === "T") return "tablet";
   if (first === "C") return "computer";
+  if (first === "W") return "watch";
   return "phone"; // P prefix OR legacy no-prefix brands default to phone
 }
 
 // Strip prefix for display: "P iPhone" → "iPhone", "C MacBook" → "MacBook"
 function displayBrand(brand: string): string {
-  if (/^[PTCptc] .+/.test(brand)) return brand.slice(2).trim();
+  if (/^[PTCWptcw] .+/.test(brand)) return brand.slice(2).trim();
   return brand;
 }
 
@@ -101,6 +102,7 @@ const TABS = [
   { key: "phone"    as const, emoji: "📱", label: "Phone Repair"    },
   { key: "tablet"   as const, emoji: "📟", label: "Tablet Repair"   },
   { key: "computer" as const, emoji: "💻", label: "Computer Repair" },
+  { key: "watch"    as const, emoji: "⌚", label: "Watch Repair"    },
 ];
 
 interface LiveQuoteCalculatorProps {
@@ -171,6 +173,11 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
     "computer": [
       "MacBook Pro 14 (M1/M2/M3)", "MacBook Pro 16 (M1/M2/M3)", "MacBook Pro 13 (M1/M2)",
       "MacBook Air 13 (M1/M2/M3)", "MacBook Air 15 (M2/M3)", "MacBook (12-inch Retina)"
+    ],
+    "watch": [
+      "Apple Watch Series 3", "Apple Watch Series 4", "Apple Watch Series 5", "Apple Watch Series 6",
+      "Apple Watch SE (1st Gen)", "Apple Watch Series 7", "Apple Watch Series 8", "Apple Watch Ultra",
+      "Apple Watch SE (2nd Gen)", "Apple Watch Series 9", "Apple Watch Ultra 2", "Apple Watch Series 10"
     ]
   };
 
@@ -219,11 +226,11 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
     ...tabItems.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel),
   ];
   
-  // Guarantee core services are always available for Tablet/Computer
-  if (activeTab === "tablet" || activeTab === "computer") {
+  // Guarantee core services are always available for Tablet/Computer/Watch
+  if (activeTab === "tablet" || activeTab === "computer" || activeTab === "watch") {
     const CORE_SERVICES = [
-      { name: "Screen Repair", category: activeTab.toUpperCase() },
-      { name: "Battery Replacement", category: activeTab.toUpperCase() },
+      { name: activeTab === "watch" ? "Screen Repair" : "Screen Repair", category: activeTab.toUpperCase() },
+      { name: activeTab === "watch" ? "Battery Replacement" : "Battery Replacement", category: activeTab.toUpperCase() },
       { name: "Charging Port Replacement", category: activeTab.toUpperCase() }
     ];
 
