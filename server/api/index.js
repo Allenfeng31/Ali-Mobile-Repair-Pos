@@ -79,7 +79,7 @@ const SMS_MESSAGES = {
 };
 
 app.post('/api/sms/send', async (req, res) => {
-  const { to, type, customerName = 'Valued Customer', deviceModel = 'your device' } = req.body;
+  const { to, type, customerName = 'Valued Customer', deviceModel = 'your device', customerId } = req.body;
 
   if (!twilioClient) {
     console.warn('[SMS] Twilio not configured — skipping SMS to', to);
@@ -116,11 +116,17 @@ app.post('/api/sms/send', async (req, res) => {
     // If it's a review request, update the customer's lastReviewSent date in the database
     if (type === 'review') {
       const timestamp = new Date().toISOString();
-      await supabase
+      const updateFilter = customerId ? { id: customerId } : { phone: to };
+      
+      const { error: updateError } = await supabase
         .from('customers')
         .update({ lastReviewSent: timestamp })
-        .eq('phone', to); // Using 'to' as it's the original phone passed from frontend
+        .match(updateFilter);
       
+      if (updateError) {
+        console.error(`❌ [SMS] Failed to update lastReviewSent: ${updateError.message}`);
+      }
+
       return res.json({ ok: true, sid: message.sid, lastReviewSent: timestamp });
     }
 

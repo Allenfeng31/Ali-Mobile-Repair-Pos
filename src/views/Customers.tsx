@@ -250,7 +250,10 @@ export function CustomersView() {
     setSendingReviewId(target.id);
     try {
       const { api } = await import('../lib/api');
-      const response = await api.sendSms(target.phone, 'review', { customerName: target.name });
+      const response = await api.sendSms(target.phone, 'review', { 
+        customerName: target.name,
+        customerId: target.id
+      });
       
       if (response && response.lastReviewSent) {
         // Update local state with the new timestamp
