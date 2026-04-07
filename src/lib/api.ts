@@ -161,7 +161,7 @@ export const api = {
   },
 
   // SMS Notifications
-  sendSms: async (to: string, type: 'dropoff' | 'completed' | 'review', extras?: { customerName?: string; deviceModel?: string }) => {
+  sendSms: async (to: string, type: 'dropoff' | 'completed' | 'review' | 'partArrived', extras?: { customerName?: string; deviceModel?: string }) => {
     try {
       const res = await fetch(`${API_URL}/sms/send`, {
         method: 'POST',

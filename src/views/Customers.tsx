@@ -17,7 +17,8 @@ import {
   Phone,
   Trash2,
   QrCode,
-  Copy
+  Copy,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -158,45 +159,9 @@ export function CustomersView() {
   const [showPhonePopup, setShowPhonePopup] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [reviewSent, setReviewSent] = useState(false);
-
-  const handleCopyPhone = () => {
-    if (!selectedCustomer) return;
-    navigator.clipboard.writeText(selectedCustomer.phone).then(() => {
-      setPhoneCopied(true);
-      setTimeout(() => { setPhoneCopied(false); setShowPhonePopup(false); }, 1500);
-    });
-  };
-
+  const [partNotifiedId, setPartNotifiedId] = useState<string | null>(null);
   const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
 
-  const handleSendReview = async (customer?: Customer) => {
-    const target = customer || selectedCustomer;
-    if (!target) return;
-    
-    setSendingReviewId(target.id);
-    try {
-      const { api } = await import('../lib/api');
-      await api.sendSms(target.phone, 'review', { customerName: target.name });
-      setReviewSent(true);
-      setTimeout(() => { 
-        setReviewSent(false); 
-        setShowPhonePopup(false); 
-        setSendingReviewId(null);
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to send review SMS:', err);
-      setSendingReviewId(null);
-    }
-  };
-  
-  const getPortalUrl = () => {
-    const origin = window.location.origin;
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      // Use the dynamically detected host IP instead of hardcoded loopback
-      return origin.replace(/localhost|127\.0\.0\.1/, hostIp) + '/portal';
-    }
-    return origin + '/portal';
-  };
   
   const [formData, setFormData] = useState({
     name: '',
@@ -269,6 +234,60 @@ export function CustomersView() {
   });
 
   const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || sortedCustomers[0] || null;
+
+  const handleCopyPhone = () => {
+    if (!selectedCustomer) return;
+    navigator.clipboard.writeText(selectedCustomer.phone).then(() => {
+      setPhoneCopied(true);
+      setTimeout(() => { setPhoneCopied(false); setShowPhonePopup(false); }, 1500);
+    });
+  };
+
+  const handleSendReview = async (customer?: Customer) => {
+    const target = customer || selectedCustomer;
+    if (!target) return;
+    
+    setSendingReviewId(target.id);
+    try {
+      const { api } = await import('../lib/api');
+      await api.sendSms(target.phone, 'review', { customerName: target.name });
+      setReviewSent(true);
+      setTimeout(() => { 
+        setReviewSent(false); 
+        setShowPhonePopup(false); 
+        setSendingReviewId(null);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to send review SMS:', err);
+      setSendingReviewId(null);
+    }
+  };
+
+  const handleNotifyPart = async (repair: any, customer: Customer) => {
+    if (!repair || !customer) return;
+    
+    setPartNotifiedId(repair.id);
+    try {
+      const { api } = await import('../lib/api');
+      await api.sendSms(customer.phone, 'partArrived', { 
+        customerName: customer.name,
+        deviceModel: repair.modelNumber 
+      });
+      setTimeout(() => setPartNotifiedId(null), 3000);
+    } catch (err) {
+      console.error('Failed to send part arrival SMS:', err);
+      setPartNotifiedId(null);
+    }
+  };
+  
+  const getPortalUrl = () => {
+    const origin = window.location.origin;
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      // Use the dynamically detected host IP instead of hardcoded loopback
+      return origin.replace(/localhost|127\.0\.0\.1/, hostIp) + '/portal';
+    }
+    return origin + '/portal';
+  };
 
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1538,6 +1557,31 @@ export function CustomersView() {
                           Close Details
                         </button>
                       </div>
+                      
+                      {/* Notify Part Arrival Button */}
+                      <button 
+                        onClick={() => handleNotifyPart(selectedRepair, selectedCustomer)}
+                        disabled={partNotifiedId === selectedRepair.id}
+                        className={cn(
+                          "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all",
+                          partNotifiedId === selectedRepair.id 
+                            ? "bg-green-500 text-white" 
+                            : "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                        )}
+                      >
+                        {partNotifiedId === selectedRepair.id ? (
+                          <>
+                            <Check size={16} />
+                            Notification Sent
+                          </>
+                        ) : (
+                          <>
+                            <Package size={16} />
+                            Notify Part Arrival
+                          </>
+                        )}
+                      </button>
+
                       <button 
                         onClick={() => setIsConfirmingDeleteRepair(true)}
                         className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"

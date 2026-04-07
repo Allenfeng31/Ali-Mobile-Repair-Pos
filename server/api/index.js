@@ -73,6 +73,9 @@ const SMS_MESSAGES = {
 
   review: (name) =>
     `Hi ${name}! Thank you for choosing Ali Mobile Repair. We hope you're happy with the service! If you have a moment, we'd really appreciate a Google review — it means the world to us 🙏\n${googleReviewLink}`,
+
+  partArrived: (name, device) =>
+    `Hi ${name}, good news! The parts for your ${device} have arrived at Ali Mobile Repair. Please come in for pickup or repair at your convenience. See you soon! 🎉`,
 };
 
 app.post('/api/sms/send', async (req, res) => {
@@ -98,7 +101,9 @@ app.post('/api/sms/send', async (req, res) => {
       ? SMS_MESSAGES.dropoff(customerName)
       : type === 'completed'
         ? SMS_MESSAGES.completed(customerName, deviceModel)
-        : SMS_MESSAGES.review(customerName);
+        : type === 'partArrived'
+          ? SMS_MESSAGES.partArrived(customerName, deviceModel)
+          : SMS_MESSAGES.review(customerName);
 
     const message = await twilioClient.messages.create({
       body,
