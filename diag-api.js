@@ -1,25 +1,29 @@
-const http = require('http');
 
-const options = {
-  hostname: '127.0.0.1',
-  port: 3001,
-  path: '/api/inventory',
-  method: 'GET'
-};
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config({ path: './server/.env' });
 
-const req = http.request(options, (res) => {
-  let data = '';
-  console.log('Status Code:', res.statusCode);
-  console.log('Headers:', res.headers);
-  res.on('data', (chunk) => { data += chunk; });
-  res.on('end', () => {
-    console.log('Body Preview (200 chars):', data.substring(0, 200));
-    console.log('Total Length:', data.length);
-  });
-});
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
-req.on('error', (err) => {
-  console.error('Error:', err.message);
-});
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase credentials');
+  process.exit(1);
+}
 
-req.end();
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function checkColumns() {
+  const { data, error } = await supabase.from('customers').select('*').limit(1);
+  if (error) {
+    console.error('Error fetching customers:', error.message);
+    return;
+  }
+  if (data && data.length > 0) {
+    console.log('Columns in customers table:', Object.keys(data[0]));
+  } else {
+    console.log('No customers found to check columns.');
+  }
+}
+
+checkColumns();
