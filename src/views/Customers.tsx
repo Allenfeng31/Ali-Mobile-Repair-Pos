@@ -782,21 +782,28 @@ export function CustomersView() {
                                       <Phone size={14} className="text-primary" />
                                       {customer.phone}
                                     </div>
-                                    <button 
-                                      onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
-                                      className={cn(
-                                        "px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
-                                        sendingReviewId === customer.id 
-                                          ? "bg-green-100 text-green-800 border-green-200" 
-                                          : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
+                                    <div className="flex flex-col items-end gap-1">
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
+                                        className={cn(
+                                          "px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
+                                          sendingReviewId === customer.id 
+                                            ? "bg-green-100 text-green-800 border-green-200" 
+                                            : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
+                                        )}
+                                      >
+                                        {sendingReviewId === customer.id ? (
+                                          <><Check size={12} /> Sent</>
+                                        ) : (
+                                          <><Star size={12} className="fill-amber-500 text-amber-500" /> Send Review</>
+                                        )}
+                                      </button>
+                                      {customer.lastReviewSent && (
+                                        <p className="text-[9px] font-black text-amber-600 mt-0.5 whitespace-nowrap">
+                                          Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
+                                        </p>
                                       )}
-                                    >
-                                      {sendingReviewId === customer.id ? (
-                                        <><Check size={12} /> Sent</>
-                                      ) : (
-                                        <><Star size={12} className="fill-amber-500 text-amber-500" /> Send Review</>
-                                      )}
-                                    </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -961,21 +968,28 @@ export function CustomersView() {
                     <Phone size={16} className="text-primary" />
                     <span className="text-sm font-bold group-hover:underline">{selectedCustomer.phone}</span>
                   </button>
-                  <button
-                    onClick={() => handleSendReview()}
-                    className={cn(
-                      "px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all border shadow-sm",
-                      sendingReviewId === selectedCustomer.id 
-                        ? "bg-green-100 text-green-800 border-green-200" 
-                        : "bg-amber-50 text-amber-800 border-amber-100 hover:bg-amber-100"
+                  <div className="flex flex-col items-end gap-1">
+                    <button
+                      onClick={() => handleSendReview()}
+                      className={cn(
+                        "px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all border shadow-sm",
+                        sendingReviewId === selectedCustomer.id 
+                          ? "bg-green-100 text-green-800 border-green-200" 
+                          : "bg-amber-50 text-amber-800 border-amber-100 hover:bg-amber-100"
+                      )}
+                    >
+                      {sendingReviewId === selectedCustomer.id ? (
+                        <><Check size={14} /> SMS Sent</>
+                      ) : (
+                        <><Star size={14} className="fill-amber-500 text-amber-500" /> Send Review</>
+                      )}
+                    </button>
+                    {selectedCustomer.lastReviewSent && (
+                      <p className="text-[10px] font-black text-amber-600 mt-1 pr-1 whitespace-nowrap">
+                        Last Sent: {new Date(selectedCustomer.lastReviewSent).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
+                      </p>
                     )}
-                  >
-                    {sendingReviewId === selectedCustomer.id ? (
-                      <><Check size={14} /> SMS Sent</>
-                    ) : (
-                      <><Star size={14} className="fill-amber-500 text-amber-500" /> Send Review</>
-                    )}
-                  </button>
+                  </div>
                 </div>
 
               <div className="mt-10">
