@@ -250,7 +250,15 @@ export function CustomersView() {
     setSendingReviewId(target.id);
     try {
       const { api } = await import('../lib/api');
-      await api.sendSms(target.phone, 'review', { customerName: target.name });
+      const response = await api.sendSms(target.phone, 'review', { customerName: target.name });
+      
+      if (response && response.lastReviewSent) {
+        // Update local state with the new timestamp
+        setCustomers(prev => prev.map(c => 
+          c.id === target.id ? { ...c, lastReviewSent: response.lastReviewSent } : c
+        ));
+      }
+
       setReviewSent(true);
       setTimeout(() => { 
         setReviewSent(false); 
@@ -1094,6 +1102,11 @@ export function CustomersView() {
                   <div>
                     <p className="font-black text-sm text-amber-800">{reviewSent ? 'Review Link Sent! ⭐' : 'Request Google Review'}</p>
                     <p className="text-xs text-amber-600">Send a review link via SMS</p>
+                    {selectedCustomer.lastReviewSent && (
+                      <p className="text-[10px] font-bold text-amber-700/50 mt-1">
+                        Last Sent: {new Date(selectedCustomer.lastReviewSent).toLocaleDateString('en-GB')}
+                      </p>
+                    )}
                   </div>
                 </button>
               </div>

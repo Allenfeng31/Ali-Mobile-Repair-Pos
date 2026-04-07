@@ -63,4 +63,5 @@ export interface Customer {
   statusColor: string;
   lastVisit: string;
   initials: string;
+  lastReviewSent?: string;
 }

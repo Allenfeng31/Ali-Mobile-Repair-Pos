@@ -112,6 +112,18 @@ app.post('/api/sms/send', async (req, res) => {
     });
 
     console.log(`✅ [SMS] ${type} sent to ${formattedPhone} — SID: ${message.sid}`);
+
+    // If it's a review request, update the customer's lastReviewSent date in the database
+    if (type === 'review') {
+      const timestamp = new Date().toISOString();
+      await supabase
+        .from('customers')
+        .update({ lastReviewSent: timestamp })
+        .eq('phone', to); // Using 'to' as it's the original phone passed from frontend
+      
+      return res.json({ ok: true, sid: message.sid, lastReviewSent: timestamp });
+    }
+
     res.json({ ok: true, sid: message.sid });
   } catch (err) {
     console.error('❌ [SMS] Error sending SMS:', err.message);

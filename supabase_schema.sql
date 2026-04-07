@@ -51,7 +51,8 @@ CREATE TABLE public.customers (
     status TEXT NOT NULL DEFAULT 'Active',
     "statusColor" TEXT NOT NULL DEFAULT 'bg-green-100 text-green-800',
     "lastVisit" TEXT,
-    initials TEXT NOT NULL
+    initials TEXT NOT NULL,
+    "lastReviewSent" TIMESTAMPTZ
 );
 
 -- 5. Repairs Table
