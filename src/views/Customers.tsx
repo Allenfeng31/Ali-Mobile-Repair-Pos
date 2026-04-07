@@ -233,6 +233,9 @@ export function CustomersView() {
     );
   });
 
+  const inProcessingCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed');
+  const completedCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) === 'Completed');
+
   const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || sortedCustomers[0] || null;
 
   const handleCopyPhone = () => {
@@ -648,6 +651,189 @@ export function CustomersView() {
     }
   };
 
+  const renderCustomerCard = (customer: Customer) => {
+    const isExpanded = selectedId === customer.id;
+    const overallStatus = getCustomerOverallStatus(customer);
+    const statusColor = getStatusColor(overallStatus);
+
+    return (
+      <div 
+        key={customer.id}
+        className={cn(
+          "rounded-2xl overflow-hidden transition-all duration-300 border border-outline-variant/10 shadow-sm",
+          isExpanded 
+            ? "bg-surface-container-low shadow-xl ring-1 ring-primary/20 scale-[1.01]" 
+            : "bg-surface-container-lowest hover:bg-surface-container-high hover:shadow-md"
+        )}
+      >
+        <div 
+          onClick={() => setSelectedId(isExpanded ? '' : customer.id)}
+          className="p-5 flex items-center justify-between cursor-pointer group/card"
+        >
+          <div className="flex items-center gap-4">
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all",
+              isExpanded ? "bg-primary text-on-primary rotate-3" : "bg-secondary-container text-on-secondary-container group-hover/card:rotate-3"
+            )}>
+              {customer.initials}
+            </div>
+            <div>
+              <h3 className="font-bold text-on-surface">{customer.name}</h3>
+              <div className="flex flex-col gap-1.5 mt-0.5">
+                <p className="text-xs text-on-surface-variant font-bold">{customer.phone}</p>
+                {customer.repairs.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                      {new Date(customer.repairs[0].timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span className="text-[10px] font-bold text-on-surface-variant/80 italic">
+                      {customer.repairs[0].modelNumber}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <span className={cn(
+                "text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest transition-colors",
+                statusColor === 'tertiary' ? "bg-tertiary-container text-on-tertiary-container border border-tertiary/10" :
+                statusColor === 'error' ? "bg-error-container text-on-error-container border border-error/10" :
+                "bg-surface-container-highest text-on-surface-variant border border-outline-variant/10"
+              )}>
+                {overallStatus}
+              </span>
+              <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Spent: ${customer.totalSpent.toFixed(2)}</p>
+            </div>
+            <motion.div
+              animate={{ rotate: isExpanded ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronRight size={20} className="text-on-surface-variant" />
+            </motion.div>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <div className="px-5 pb-6 pt-2 border-t border-outline-variant/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Contact Details</p>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-sm font-bold text-on-surface bg-surface-container-low/50 p-2 rounded-lg">
+                          <Mail size={16} className="text-primary" />
+                          <span className="truncate">{customer.email}</span>
+                        </div>
+                        <div className="flex items-center justify-between w-full bg-surface-container-low/50 p-2 rounded-lg">
+                          <div className="flex items-center gap-3 text-sm font-bold text-on-surface">
+                            <Phone size={16} className="text-primary" />
+                            {customer.phone}
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
+                              className={cn(
+                                "px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
+                                sendingReviewId === customer.id 
+                                  ? "bg-green-100 text-green-800 border-green-200" 
+                                  : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
+                              )}
+                            >
+                              {sendingReviewId === customer.id ? (
+                                <><Check size={12} /> Sent</>
+                              ) : (
+                                <><Star size={12} className="fill-amber-500 text-amber-500" /> Send Review</>
+                              )}
+                            </button>
+                            {customer.lastReviewSent && (
+                              <p className="text-[9px] font-black text-amber-600 mt-0.5 whitespace-nowrap">
+                                Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); openEditModal(); }}
+                        className="flex-1 bg-surface-container-highest text-on-surface-variant py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-primary hover:text-on-primary transition-all shadow-sm"
+                      >
+                        <Edit3 size={14} />
+                        Edit Profile
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); setIsViewingAllOrders(true); }}
+                        className="flex-1 bg-secondary-container text-on-secondary-container py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-sm"
+                      >
+                        Recent Activity
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Live Repairs</p>
+                    <div className="space-y-2">
+                      {customer.repairs.slice(0, 2).map(repair => (
+                        <div 
+                          key={repair.id}
+                          onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
+                          className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 hover:border-primary/40 transition-all cursor-pointer flex justify-between items-center group/repair shadow-sm"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/5 rounded-lg text-primary group-hover/repair:bg-primary group-hover/repair:text-on-primary transition-colors">
+                              <Smartphone size={16} />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-on-surface">{repair.repairItem}</p>
+                              <p className="text-[10px] font-bold text-on-surface-variant">{repair.modelNumber}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-black text-primary">${repair.price.toFixed(2)}</p>
+                            <span 
+                              onClick={(e) => { e.stopPropagation(); toggleRepairStatus(customer.id, repair.id, repair.status); }}
+                              className={cn(
+                                "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all shadow-sm block mt-1",
+                                repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
+                                repair.status === 'Urgent' ? "bg-error-container text-on-error-container border border-error/5" :
+                                repair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container border border-tertiary/5" :
+                                "bg-surface-container-highest text-on-surface-variant border border-outline-variant/5"
+                              )}
+                            >
+                              {repair.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      {customer.repairs.length > 2 && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); setIsViewingAllOrders(true); }}
+                          className="w-full text-[10px] font-black text-primary uppercase tracking-widest text-center py-2 hover:underline bg-primary/5 rounded-lg"
+                        >
+                          + {customer.repairs.length - 2} more records
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-10 relative">
       {/* Left Column: List */}
@@ -698,188 +884,39 @@ export function CustomersView() {
               ))}
             </div>
           ) : filteredCustomers.length > 0 ? (
-            filteredCustomers.map(customer => {
-              const isExpanded = selectedId === customer.id;
-              const overallStatus = getCustomerOverallStatus(customer);
-              const statusColor = getStatusColor(overallStatus);
-
-              return (
-                <div 
-                  key={customer.id}
-                  className={cn(
-                    "rounded-2xl overflow-hidden transition-all duration-300 border border-outline-variant/10",
-                    isExpanded 
-                      ? "bg-surface-container-low shadow-lg ring-1 ring-primary/20" 
-                      : "bg-surface-container-lowest hover:bg-surface-container-high"
-                  )}
-                >
-                  <div 
-                    onClick={() => setSelectedId(isExpanded ? '' : customer.id)}
-                    className="p-5 flex items-center justify-between cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-colors",
-                        isExpanded ? "bg-primary text-on-primary" : "bg-secondary-container text-on-secondary-container"
-                      )}>
-                        {customer.initials}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-on-surface">{customer.name}</h3>
-                        <div className="flex flex-col gap-1.5 mt-0.5">
-                          <p className="text-xs text-on-surface-variant font-bold">{customer.phone}</p>
-                          {customer.repairs.length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-black text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-                                {new Date(customer.repairs[0].timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                              </span>
-                              <span className="text-[10px] font-bold text-on-surface-variant/80 italic">
-                                {customer.repairs[0].modelNumber}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right hidden sm:block">
-                        <span className={cn(
-                          "text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest",
-                          statusColor === 'tertiary' ? "bg-tertiary-container text-on-tertiary-container" :
-                          statusColor === 'error' ? "bg-error-container text-on-error-container" :
-                          "bg-surface-container-highest text-on-surface-variant"
-                        )}>
-                          {overallStatus}
-                        </span>
-                        <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Spent: ${customer.totalSpent.toFixed(2)}</p>
-                      </div>
-                      <motion.div
-                        animate={{ rotate: isExpanded ? 90 : 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <ChevronRight size={20} className="text-on-surface-variant" />
-                      </motion.div>
-                    </div>
+            <>
+              {/* In Processing Section */}
+              {inProcessingCustomers.length > 0 && (
+                <div className="mb-8 space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                    <h3 className="text-sm font-black text-on-surface uppercase tracking-widest">In Processing</h3>
+                    <div className="h-px flex-1 bg-outline-variant/10" />
+                    <span className="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-lg uppercase">
+                      {inProcessingCustomers.length} Orders
+                    </span>
                   </div>
-
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                      >
-                        <div className="px-5 pb-6 pt-2 border-t border-outline-variant/5">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                              <div>
-                                <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Contact Information</p>
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                                    <Mail size={14} className="text-primary" />
-                                    {customer.email}
-                                  </div>
-                                  <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                                      <Phone size={14} className="text-primary" />
-                                      {customer.phone}
-                                    </div>
-                                    <div className="flex flex-col items-end gap-1">
-                                      <button 
-                                        onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
-                                        className={cn(
-                                          "px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
-                                          sendingReviewId === customer.id 
-                                            ? "bg-green-100 text-green-800 border-green-200" 
-                                            : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
-                                        )}
-                                      >
-                                        {sendingReviewId === customer.id ? (
-                                          <><Check size={12} /> Sent</>
-                                        ) : (
-                                          <><Star size={12} className="fill-amber-500 text-amber-500" /> Send Review</>
-                                        )}
-                                      </button>
-                                      {customer.lastReviewSent && (
-                                        <p className="text-[9px] font-black text-amber-600 mt-0.5 whitespace-nowrap">
-                                          Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); openEditModal(); }}
-                                  className="flex-1 bg-surface-container-highest text-on-surface-variant py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-primary hover:text-on-primary transition-all"
-                                >
-                                  <Edit3 size={14} />
-                                  Edit Profile
-                                </button>
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); setIsViewingAllOrders(true); }}
-                                  className="flex-1 bg-secondary-container text-on-secondary-container py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all"
-                                >
-                                  History
-                                </button>
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Recent Repairs</p>
-                              <div className="space-y-2">
-                                {customer.repairs.slice(0, 2).map(repair => (
-                                  <div 
-                                    key={repair.id}
-                                    onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
-                                    className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/5 hover:border-primary/20 transition-all cursor-pointer flex justify-between items-center group"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-primary/5 rounded-lg text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
-                                        <Smartphone size={16} />
-                                      </div>
-                                      <div>
-                                        <p className="text-xs font-bold text-on-surface">{repair.repairItem}</p>
-                                        <p className="text-[10px] font-bold text-on-surface-variant">{repair.modelNumber}</p>
-                                      </div>
-                                    </div>
-                                    <div className="text-right">
-                                      <p className="text-xs font-black text-primary">${repair.price.toFixed(2)}</p>
-                                      <span 
-                                        onClick={(e) => { e.stopPropagation(); toggleRepairStatus(customer.id, repair.id, repair.status); }}
-                                        className={cn(
-                                          "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all",
-                                          repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
-                                          repair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
-                                          repair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container" :
-                                          "bg-surface-container-highest text-on-surface-variant"
-                                        )}
-                                      >
-                                        {repair.status}
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                                {customer.repairs.length > 2 && (
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); setIsViewingAllOrders(true); }}
-                                    className="w-full text-[10px] font-black text-primary uppercase tracking-widest text-center py-1 hover:underline"
-                                  >
-                                    + {customer.repairs.length - 2} more records
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className="space-y-4">
+                    {inProcessingCustomers.map(customer => renderCustomerCard(customer))}
+                  </div>
                 </div>
-              );
-            })
+              )}
+
+              {/* Completed Section */}
+              {completedCustomers.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                    <h3 className="text-sm font-black text-on-surface uppercase tracking-widest opacity-60">Completed</h3>
+                    <div className="h-px flex-1 bg-outline-variant/10" />
+                    <span className="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-[10px] font-black rounded-lg uppercase">
+                      {completedCustomers.length} Done
+                    </span>
+                  </div>
+                  <div className="space-y-4">
+                    {completedCustomers.map(customer => renderCustomerCard(customer))}
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-20 bg-surface-container-lowest rounded-3xl border border-dashed border-outline-variant">
               <p className="text-on-surface-variant font-bold">No customers found matching your search.</p>
