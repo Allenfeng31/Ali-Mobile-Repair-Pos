@@ -24,8 +24,8 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   const disclaimerTerms = [
     { en: "Data Backup: Data loss is not covered. Please backup your device." },
     { en: "Liquid Damage: No warranty on liquid damage repairs once they leave the shop." },
-    { en: "Warranty: 90 days warranty on parts and labor." },
-    { en: "Unclaimed Goods: Items not collected within 90 days will be disposed of." }
+    { en: "Warranty: 180 days warranty on parts and labor." },
+    { en: "Unclaimed Goods: Items not collected within 180 days will be disposed of." }
   ];
 
   React.useEffect(() => {
@@ -163,14 +163,14 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 .pb-1 { padding-bottom: 0.25rem; }
                 
                 /* Precise Print Typography */
-                .text-\\[14px\\] { font-size: 16px; } /* Slightly larger headers */
-                .text-\\[13px\\] { font-size: 14px; } 
-                .text-\\[12px\\] { font-size: 13px; }
-                .text-\\[11px\\] { font-size: 12px; }
-                .text-\\[10px\\] { font-size: 11px; }
-                .text-\\[9px\\] { font-size: 10px; }
-                .text-\\[8px\\] { font-size: 9px; }
-                .text-\\[7px\\] { font-size: 8px; }
+                .text-\\[14px\\] { font-size: 22px; } /* Main Headers */
+                .text-\\[13px\\] { font-size: 20px; } 
+                .text-\\[12px\\] { font-size: 18px; }
+                .text-\\[11px\\] { font-size: 17px; }
+                .text-\\[10px\\] { font-size: 16px; }
+                .text-\\[9px\\] { font-size: 14px; }
+                .text-\\[8px\\] { font-size: 13px; }
+                .text-\\[7px\\] { font-size: 12px; } /* Smallest readable terms */
                 
                 .text-xl { font-size: 18px; }
                 
@@ -267,8 +267,11 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   <pre className="text-[10px] leading-tight whitespace-pre-wrap font-sans opacity-80">
                     {ticketHeader.split('\n').slice(1).join('\n')}
                   </pre>
-                  <p className="font-black text-[11px] uppercase tracking-widest mt-4 border-t border-b border-dashed py-2 inline-block w-full">
+                  <p className="font-black text-[11px] uppercase tracking-widest mt-4 border-t border-dashed pt-3 inline-block w-full">
                     REPAIR WORK ORDER
+                  </p>
+                  <p className="font-bold text-[9px] text-black border-dashed border-b pb-3 uppercase tracking-widest">
+                    Time: {new Date(repair.timestamp).toLocaleString()}
                   </p>
                 </div>
 
@@ -336,7 +339,6 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   <div className="border-t border-gray-400 w-2/3 mx-auto mb-2"></div>
                   <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-10">Customer Signature</p>
                   <p className="text-[10px] font-black tracking-[0.2em]">THANK YOU</p>
-                  <p className="text-[7px] opacity-40 mt-2">{new Date(repair.timestamp).toLocaleString()}</p>
                 </div>
               </div>
             </div>
