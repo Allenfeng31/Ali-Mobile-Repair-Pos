@@ -261,10 +261,11 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 style={{ width: '80mm' }}
               >
                 <div className="text-center mb-6">
-                  <p className="font-black text-[14px] uppercase tracking-tighter mb-1">{ticketHeader.split('\n')[0]}</p>
-                  <pre className="font-black text-[11px] leading-tight whitespace-pre-wrap uppercase tracking-tighter">
-                    {ticketHeader.split('\n').slice(1).join('\n')}
-                  </pre>
+                  <p className="font-black text-[14px] uppercase tracking-tighter mb-2">ALI MOBILE REPAIRS</p>
+                  <div className="font-black text-[10px] leading-tight uppercase tracking-tighter space-y-1">
+                    <p>Address: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134</p>
+                    <p>Phone: 0481 058 514</p>
+                  </div>
                   <p className="font-black text-[11px] uppercase tracking-widest mt-4 border-t border-dashed pt-3 inline-block w-full">
                     REPAIR WORK ORDER
                   </p>
