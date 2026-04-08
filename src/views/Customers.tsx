@@ -18,12 +18,14 @@ import {
   Trash2,
   QrCode,
   Copy,
-  Package
+  Package,
+  Printer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect } from 'react';
+import { RepairTicketModal } from '../components/RepairTicketModal';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   { 
@@ -116,6 +118,7 @@ const getStatusColor = (status: string) => {
 };
 
 export function CustomersView() {
+  const t = (section: string, key: string) => key; // Simplified for now
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -151,6 +154,7 @@ export function CustomersView() {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingAllOrders, setIsViewingAllOrders] = useState(false);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [selectedRepair, setSelectedRepair] = useState<any>(null);
   const [isEditingRepair, setIsEditingRepair] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -1551,6 +1555,14 @@ export function CustomersView() {
                           <h4 className="font-black text-on-surface">{selectedRepair.repairItem}</h4>
                           <p className="text-xs font-bold text-on-surface-variant">{selectedRepair.modelNumber}</p>
                         </div>
+                        <button 
+                          onClick={() => setIsTicketModalOpen(true)}
+                          className="ml-auto p-3 bg-primary/10 text-primary rounded-2xl hover:bg-primary hover:text-on-primary transition-all flex items-center gap-2"
+                          title="Print Repair Ticket"
+                        >
+                          <Printer size={18} />
+                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Ticket</span>
+                        </button>
                       </div>
                       
                       <div className="grid grid-cols-3 gap-4">
@@ -1898,6 +1910,14 @@ export function CustomersView() {
       >
         <QrCode size={24} />
       </button>
+
+      <RepairTicketModal
+        isOpen={isTicketModalOpen}
+        onClose={() => setIsTicketModalOpen(false)}
+        repair={selectedRepair}
+        customer={selectedCustomer}
+        t={t}
+      />
     </div>
   );
 }
