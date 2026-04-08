@@ -264,7 +264,7 @@ app.post('/api/orders', async (req, res) => {
   // Explicitly pick only the columns that exist in the 'orders' table.
   // This prevents schema errors if new fields (like 'surcharge') haven't been
   // added to the database yet via a migration.
-  const knownColumns = ['id', 'timestamp', 'subtotal', 'tax', 'surcharge', 'total', 'profit', 'type', 'paymentMethod', 'status'];
+  const knownColumns = ['id', 'timestamp', 'subtotal', 'tax', 'surcharge', 'total', 'profit', 'type', 'paymentMethod', 'status', 'mixedCash', 'mixedEftpos'];
   const orderData = {};
   for (const key of knownColumns) {
     if (fullOrderData[key] !== undefined) {

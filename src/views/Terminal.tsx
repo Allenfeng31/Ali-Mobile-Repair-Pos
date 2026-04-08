@@ -48,7 +48,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'eftpos'>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'eftpos' | 'mixed'>('cash');
+  const [mixedCash, setMixedCash] = useState<number>(0);
+  const [mixedEftpos, setMixedEftpos] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [showInvoice, setShowInvoice] = useState(false);
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
@@ -194,7 +196,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
       const baseTotal = rawTotal - percentDiscountAmount;
       const gst = baseTotal / 11;
-      const surcharge = paymentMethod === 'eftpos' ? baseTotal * 0.015 : 0;
+      
+      let surcharge = 0;
+      if (paymentMethod === 'eftpos') {
+        surcharge = baseTotal * 0.015;
+      } else if (paymentMethod === 'mixed') {
+        surcharge = mixedEftpos * 0.015;
+      }
+      
       const finalTotal = baseTotal + surcharge;
 
       // Calculate profit for the order
@@ -245,7 +254,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         total: finalTotal,
         profit: totalProfit,
         type: orderItems.some(i => (i.category || '').toLowerCase().includes('repair') || (i.category || '').toLowerCase().includes('service')) ? 'repair' : 'sale',
-        paymentMethod: paymentMethod
+        paymentMethod: paymentMethod,
+        mixedCash: paymentMethod === 'mixed' ? mixedCash : undefined,
+        mixedEftpos: paymentMethod === 'mixed' ? mixedEftpos : undefined
       };
 
       await api.createOrder(newOrder);
@@ -320,8 +331,23 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   const baseTotal = rawTotal - percentDiscountAmount;
   const gst = baseTotal / 11;
-  const surcharge = paymentMethod === 'eftpos' ? baseTotal * 0.015 : 0;
+  
+  let surcharge = 0;
+  if (paymentMethod === 'eftpos') {
+    surcharge = baseTotal * 0.015;
+  } else if (paymentMethod === 'mixed') {
+    surcharge = mixedEftpos * 0.015;
+  }
+  
   const finalTotal = baseTotal + surcharge;
+
+  // Sync mixed values when total changes or mode changes to mixed
+  React.useEffect(() => {
+    if (paymentMethod === 'mixed' && mixedCash === 0 && mixedEftpos === 0) {
+      setMixedCash(baseTotal);
+      setMixedEftpos(0);
+    }
+  }, [paymentMethod, baseTotal]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -639,11 +665,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 {/* Payment Selection */}
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">{t('term', 'paymentMethod')}</span>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <button
                       onClick={() => setPaymentMethod('cash')}
                       className={cn(
-                        "py-3 rounded-xl font-bold text-sm transition-all border-2",
+                        "py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all border-2",
                         paymentMethod === 'cash' 
                           ? "bg-primary/10 border-primary text-primary" 
                           : "bg-surface-container-low border-transparent text-on-surface-variant hover:bg-surface-container-high"
@@ -654,15 +680,73 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     <button
                       onClick={() => setPaymentMethod('eftpos')}
                       className={cn(
-                        "py-3 rounded-xl font-bold text-sm transition-all border-2",
+                        "py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all border-2",
                         paymentMethod === 'eftpos' 
                           ? "bg-primary/10 border-primary text-primary" 
                           : "bg-surface-container-low border-transparent text-on-surface-variant hover:bg-surface-container-high"
                       )}
                     >
-                      {t('term', 'eftpos')} (+1.5%)
+                      {t('term', 'eftpos')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPaymentMethod('mixed');
+                        if (mixedCash === 0 && mixedEftpos === 0) {
+                          setMixedCash(baseTotal);
+                          setMixedEftpos(0);
+                        }
+                      }}
+                      className={cn(
+                        "py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all border-2",
+                        paymentMethod === 'mixed' 
+                          ? "bg-primary/10 border-primary text-primary" 
+                          : "bg-surface-container-low border-transparent text-on-surface-variant hover:bg-surface-container-high"
+                      )}
+                    >
+                      {t('term', 'mixed')}
                     </button>
                   </div>
+
+                  {paymentMethod === 'mixed' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="grid grid-cols-2 gap-4 pt-2"
+                    >
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Cash Amount</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
+                          <input 
+                            type="number"
+                            value={mixedCash || ''}
+                            onChange={(e) => {
+                              const val = Math.min(baseTotal, Math.max(0, Number(e.target.value)));
+                              setMixedCash(val);
+                              setMixedEftpos(Number((baseTotal - val).toFixed(2)));
+                            }}
+                            className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl py-3 pl-7 pr-3 text-sm font-black focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Card Amount</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
+                          <input 
+                            type="number"
+                            value={mixedEftpos || ''}
+                            onChange={(e) => {
+                              const val = Math.min(baseTotal, Math.max(0, Number(e.target.value)));
+                              setMixedEftpos(val);
+                              setMixedCash(Number((baseTotal - val).toFixed(2)));
+                            }}
+                            className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl py-3 pl-7 pr-3 text-sm font-black focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="bg-surface-container-low rounded-2xl p-5 space-y-2">
@@ -675,6 +759,24 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       <span>EFTPOS Surcharge (1.5%)</span>
                       <span>${surcharge.toFixed(2)}</span>
                     </div>
+                  )}
+                  {paymentMethod === 'mixed' && (
+                    <>
+                      <div className="flex justify-between items-center text-[10px] font-bold text-on-surface-variant opacity-70">
+                        <span>Cash Portion</span>
+                        <span>${mixedCash.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] font-bold text-on-surface-variant opacity-70">
+                        <span>Card Portion (Subtotal)</span>
+                        <span>${mixedEftpos.toFixed(2)}</span>
+                      </div>
+                      {surcharge > 0 && (
+                        <div className="flex justify-between items-center text-[10px] font-bold text-primary">
+                          <span>Card Surcharge (1.5%)</span>
+                           <span>${surcharge.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </>
                   )}
                   <div className="flex justify-between items-center pt-2 border-t border-outline-variant/10">
                     <span className="text-sm font-bold text-on-surface uppercase tracking-widest">Total Amount</span>

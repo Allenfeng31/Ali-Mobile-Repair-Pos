@@ -19,7 +19,9 @@ export interface Order {
   total: number;
   profit: number;
   type: 'repair' | 'sale' | 'service';
-  paymentMethod?: 'cash' | 'eftpos';
+  paymentMethod?: 'cash' | 'eftpos' | 'mixed';
+  mixedCash?: number;
+  mixedEftpos?: number;
   status?: 'completed' | 'refunded';
 }
 
