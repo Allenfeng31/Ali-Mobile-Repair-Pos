@@ -46,23 +46,23 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
     setIsGeneratingPDF(true);
     
     try {
+      // Temporarily remove max-content restrictions if any to let it render fully
       const imgData = await toPng(ticketRef.current, {
-        pixelRatio: 2,
+        pixelRatio: 3, // Higher resolution
         backgroundColor: '#ffffff',
-        width: 302, // ~80mm at 96dpi
         style: {
           transform: 'scale(1)',
-          transformOrigin: 'top left'
+          transformOrigin: 'top left',
+          margin: '0', 
+          padding: '24px' // Match the p-6 we render
         }
       });
     
-      // Create a dummy PDF to calculate properties
       const tempPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 500] });
       const imgProps = tempPdf.getImageProperties(imgData);
-      const pdfWidth = 80; // Fixed width for thermal
+      const pdfWidth = 80;
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      // Final PDF with dynamic height to prevent horizontal/vertical cutoff
       const finalPdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -96,7 +96,6 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
       if (doc) {
         doc.open();
         const contentHtml = ticketRef.current.innerHTML;
-        const width = '76mm';
 
         doc.write(`
           <!DOCTYPE html>
@@ -106,37 +105,108 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
               <style>
                 @page { size: 80mm auto; margin: 0; }
                 * { margin: 0; padding: 0; box-sizing: border-box; }
+                
                 body { 
                   background: white; 
-                  padding: 2mm 4mm;
-                  width: 72mm;
+                  padding: 2mm; /* Very small padding to maximize space */
+                  width: 76mm; /* Almost full 80mm */
                   font-family: 'Inter', sans-serif;
                   -webkit-font-smoothing: antialiased;
                   color: #000;
-                  line-height: 1.4;
+                  line-height: 1.5;
                 }
+                
+                .ticket-container {
+                  padding: 0; /* Override on-screen padding */
+                }
+
                 .text-center { text-align: center; }
-                .mb-1 { margin-bottom: 0.2rem; }
-                .mb-2 { margin-bottom: 0.6rem; }
-                .mb-4 { margin-bottom: 1.2rem; }
-                .mt-4 { margin-top: 1.2rem; }
+                .mb-1 { margin-bottom: 0.25rem; }
+                .mb-2 { margin-bottom: 0.5rem; }
+                .mb-3 { margin-bottom: 0.75rem; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .mt-2 { margin-top: 0.5rem; }
+                .mt-4 { margin-top: 1rem; }
+                .mt-6 { margin-top: 1.5rem; }
+                .mt-8 { margin-top: 2rem; }
+                .mt-10 { margin-top: 2.5rem; }
+                
                 .flex { display: flex; }
+                .flex-col { flex-direction: column; }
+                .items-center { align-items: center; }
+                .items-start { align-items: flex-start; }
                 .justify-between { justify-content: space-between; }
+                .flex-1 { flex: 1; }
+                .gap-2 { gap: 0.5rem; }
+                
                 .font-black { font-weight: 900; }
                 .font-bold { font-weight: 700; }
                 .uppercase { text-transform: uppercase; }
-                .border-t { border-top: 1px solid #000; }
-                .border-dashed { border-style: dashed !important; }
-                .py-2 { padding-top: 0.6rem; padding-bottom: 0.6rem; }
-                .text-xs { font-size: 9px; }
-                .text-sm { font-size: 11px; }
-                .leading-tight { line-height: 1.3; }
                 .italic { font-style: italic; }
+                .underline { text-decoration: underline; }
+                
+                .border-t { border-top: 1px solid #000; }
+                .border-b { border-bottom: 1px solid #000; }
+                .border-dashed { border-style: dashed !important; }
+                .border-gray-100 { border-color: #f3f4f6; }
+                .border-gray-200 { border-color: #e5e7eb; }
+                .border-gray-400 { border-color: #9ca3af; }
+                
+                .bg-gray-50 { background-color: #f9fafb; }
+                .bg-white { background-color: #ffffff; }
+                .rounded-lg { border-radius: 0.5rem; }
+                .rounded-xl { border-radius: 0.75rem; }
+                .p-2 { padding: 0.5rem; }
+                .pt-2 { padding-top: 0.5rem; }
+                .pt-4 { padding-top: 1rem; }
+                .pb-1 { padding-bottom: 0.25rem; }
+                
+                /* Precise Print Typography */
+                .text-\\[14px\\] { font-size: 16px; } /* Slightly larger headers */
+                .text-\\[13px\\] { font-size: 14px; } 
+                .text-\\[12px\\] { font-size: 13px; }
+                .text-\\[11px\\] { font-size: 12px; }
+                .text-\\[10px\\] { font-size: 11px; }
+                .text-\\[9px\\] { font-size: 10px; }
+                .text-\\[8px\\] { font-size: 9px; }
+                .text-\\[7px\\] { font-size: 8px; }
+                
+                .text-xl { font-size: 18px; }
+                
+                .tracking-tighter { letter-spacing: -0.05em; }
+                .tracking-tight { letter-spacing: -0.025em; }
+                .tracking-widest { letter-spacing: 0.1em; }
+                .tracking-\\[0\\.2em\\] { letter-spacing: 0.2em; }
+                
+                .leading-tight { line-height: 1.25; }
+                .leading-normal { line-height: 1.5; }
+                
+                .opacity-80 { opacity: 0.8; }
+                .opacity-60 { opacity: 0.6; }
+                .opacity-40 { opacity: 0.4; }
+                
+                .text-primary { color: #000; } /* Force to black on print */
+                
+                .w-full { width: 100%; }
+                .w-20 { width: 5rem; }
+                .h-20 { height: 5rem; }
+                .w-16 { width: 4rem; }
+                .h-16 { height: 4rem; }
+                .w-2\\/3 { width: 66.666667%; }
+                .mx-auto { margin-left: auto; margin-right: auto; }
+                
+                /* Layout overrides to prevent crushing */
                 .word-break { word-break: break-word; }
+                .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.25rem; }
+                .space-y-2\\\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.625rem; }
+                .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
               </style>
             </head>
             <body>
-              ${contentHtml}
+              <div class="ticket-container">
+                ${contentHtml}
+              </div>
             </body>
           </html>
         `);
