@@ -3,6 +3,7 @@
 import { useState } from "react";
 import LiveQuoteCalculator from "@/components/LiveQuoteCalculator";
 import Script from "next/script";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -95,6 +96,7 @@ export default function BookRepairPage() {
   const [formData, setFormData] = useState({ name: "", phone: "", datetime: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<any>(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   
   // Date/Time Selection
   const [selectedDay, setSelectedDay] = useState("");
@@ -104,11 +106,15 @@ export default function BookRepairPage() {
     "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selection) return alert("Please select a device and service first!");
     if (!selectedDay || !selectedSlot) return alert("Please choose a date and time!");
-    
+    setShowDisclaimer(true);
+  };
+
+  const handleFinalSubmit = async () => {
+    setShowDisclaimer(false);
     setIsSubmitting(true);
     try {
       // Create a date object in local time
@@ -312,6 +318,98 @@ export default function BookRepairPage() {
           </form>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showDisclaimer && (
+          <div style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1rem"
+          }}>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDisclaimer(false)}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0,0,0,0.8)",
+                backdropFilter: "blur(10px)"
+              }}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: "500px",
+                background: "var(--layer)",
+                borderRadius: "24px",
+                border: "1px solid var(--layer-border)",
+                padding: "2rem",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+              }}
+            >
+              <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+                <div style={{ 
+                  width: "60px", 
+                  height: "60px", 
+                  background: "rgba(var(--primary-rgb), 0.1)", 
+                  borderRadius: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem",
+                  margin: "0 auto 1.5rem"
+                }}>
+                  ℹ️
+                </div>
+                <h3 style={{ fontSize: "1.5rem", fontWeight: 900, marginBottom: "1rem" }}>Important Booking Note</h3>
+                <p style={{ 
+                  fontSize: "0.95rem", 
+                  lineHeight: "1.6", 
+                  opacity: 0.9,
+                  textAlign: "left",
+                  background: "rgba(255,255,255,0.03)",
+                  padding: "1.2rem",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255,255,255,0.05)"
+                }}>
+                  Please be advised that certain device parts and accessories may not be immediately in stock and can take 1-2 business days to arrive. 
+                  <br /><br />
+                  You may still proceed with this booking; our technicians will notify you promptly if any items need to be ordered. 
+                  <br /><br />
+                  If your device is damaged and unable to receive calls, please reach out via the chat support in the bottom-right corner. Thank you for your understanding.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <button 
+                  onClick={() => setShowDisclaimer(false)}
+                  className="secondary-btn"
+                  style={{ flex: 1, padding: "1rem" }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleFinalSubmit}
+                  className="primary-btn"
+                  style={{ flex: 2, padding: "1rem" }}
+                >
+                  Confirm & Book
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style jsx>{`
         .no-scrollbar::-webkit-scrollbar {
