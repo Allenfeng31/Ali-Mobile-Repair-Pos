@@ -217,7 +217,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                         <span className="font-bold italic">{repair.password || 'None'}</span>
                       </div>
                     </div>
-                   section>
+                  </section>
 
                   <section className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                     <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-60">Repair Task</p>
