@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function TrackStatusPage() {
+function TrackStatusContent() {
   const [orderId, setOrderId] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
 
-  const checkStatus = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orderId) return;
-    
+  const performCheck = async (id: string) => {
+    if (!id) return;
     setLoading(true);
     setStatus(null);
     try {
-      const res = await fetch(`/api/proxy/repair-status?id=${encodeURIComponent(orderId)}`);
-      
+      const res = await fetch(`/api/proxy/repair-status?id=${encodeURIComponent(id)}`);
       if (res.ok) {
         const data = await res.json();
         setStatus(data.status || "In Progress");
@@ -29,6 +28,19 @@ export default function TrackStatusPage() {
     }
   };
 
+  useEffect(() => {
+    const queryId = searchParams.get('id');
+    if (queryId) {
+      setOrderId(queryId);
+      performCheck(queryId);
+    }
+  }, [searchParams]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    performCheck(orderId);
+  };
+
   return (
     <div className="page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h1 style={{ marginBottom: '1rem' }}>Track Repair Status</h1>
@@ -37,7 +49,7 @@ export default function TrackStatusPage() {
       </p>
 
       <div className="form-container" style={{ width: '100%', maxWidth: '500px', margin: '0' }}>
-        <form onSubmit={checkStatus}>
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Order ID or Phone Number</label>
             <input 
@@ -62,5 +74,13 @@ export default function TrackStatusPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TrackStatusPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TrackStatusContent />
+    </Suspense>
   );
 }

@@ -22,10 +22,10 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   const [ticketHeader, setTicketHeader] = React.useState(`Ali Mobile Repair\nKiosk C1, Ringwood Square\nRingwood VIC 3134\nTel: 0481 058 514`);
   
   const disclaimerTerms = [
-    { en: "Data Backup: Data loss is not covered. Please backup your device.", zh: "数据备份：数据丢失不在保修范围内，请提前备份。" },
-    { en: "Liquid Damage: No warranty on liquid damage repairs.", zh: "进水维修：进水机器修复后不提供保修。" },
-    { en: "Warranty: 90 days warranty on parts and labor.", zh: "保修条款：所更换零件及人工提供90天保修。" },
-    { en: "Unclaimed Goods: Items not collected within 90 days will be disposed of.", zh: "逾期处理：超过90天未领取的机器，本店将自行处理。" }
+    { en: "Data Backup: Data loss is not covered. Please backup your device." },
+    { en: "Liquid Damage: No warranty on liquid damage repairs once they leave the shop." },
+    { en: "Warranty: 90 days warranty on parts and labor." },
+    { en: "Unclaimed Goods: Items not collected within 90 days will be disposed of." }
   ];
 
   React.useEffect(() => {
@@ -232,21 +232,30 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 </div>
 
                 <div className="mt-8 pt-4 border-t border-dashed border-black">
-                  <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-center underline">Terms & Conditions / 维修条款</p>
-                  <div className="space-y-3">
+                  <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-center underline">Terms & Conditions</p>
+                  <div className="space-y-2">
                     {disclaimerTerms.map((term, i) => (
-                      <div key={i} className="space-y-0.5">
+                      <div key={i} className="flex gap-2">
+                        <span className="text-[8px] font-bold opacity-40">{i+1}.</span>
                         <p className="text-[8px] font-bold leading-tight uppercase tracking-tight">{term.en}</p>
-                        <p className="text-[8px] leading-tight">{term.zh}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 flex flex-col items-center text-center">
+                  <div className="bg-white p-2 border border-gray-100 rounded-xl mb-3">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`https://alimobile.com.au/track-status?id=${repair.id}`)}`} 
+                      alt="Status Tracking QR" 
+                      className="w-20 h-20"
+                    />
+                  </div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-6">Scan to track your repair status</p>
+                  
                   <div className="border-t border-gray-400 w-2/3 mx-auto mb-1"></div>
                   <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-8">Customer Signature</p>
-                  <p className="text-[10px] font-black">THANK YOU / 谢谢</p>
+                  <p className="text-[10px] font-black">THANK YOU</p>
                   <p className="text-[8px] opacity-40 mt-1">{new Date(repair.timestamp).toLocaleString()}</p>
                 </div>
               </div>
