@@ -108,8 +108,10 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 
                 body { 
                   background: white; 
-                  padding: 2mm; /* Very small padding to maximize space */
-                  width: 76mm; /* Almost full 80mm */
+                  padding: 0 2mm; 
+                  width: 100%;
+                  max-width: 80mm;
+                  margin: 0 auto;
                   font-family: 'Inter', sans-serif;
                   -webkit-font-smoothing: antialiased;
                   color: #000;
@@ -181,10 +183,6 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 
                 .leading-tight { line-height: 1.25; }
                 .leading-normal { line-height: 1.5; }
-                
-                .opacity-80 { opacity: 0.8; }
-                .opacity-60 { opacity: 0.6; }
-                .opacity-40 { opacity: 0.4; }
                 
                 .text-primary { color: #000; } /* Force to black on print */
                 
@@ -264,7 +262,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
               >
                 <div className="text-center mb-6">
                   <p className="font-black text-[14px] uppercase tracking-tighter mb-1">{ticketHeader.split('\n')[0]}</p>
-                  <pre className="text-[10px] leading-tight whitespace-pre-wrap font-sans opacity-80">
+                  <pre className="font-black text-[11px] leading-tight whitespace-pre-wrap uppercase tracking-tighter">
                     {ticketHeader.split('\n').slice(1).join('\n')}
                   </pre>
                   <p className="font-black text-[11px] uppercase tracking-widest mt-4 border-t border-dashed pt-3 inline-block w-full">
@@ -277,7 +275,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
 
                 <div className="space-y-4">
                   <section>
-                    <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-60">Customer Details</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest mb-1 border-b border-black inline-block pb-0.5">Customer Details</p>
                     <div className="flex justify-between border-b border-gray-100 pb-1">
                       <span className="font-bold">{customer.name}</span>
                       <span>{customer.phone}</span>
@@ -285,7 +283,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   </section>
 
                   <section>
-                    <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-60">Device Information</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest mb-1 border-b border-black inline-block pb-0.5">Device Information</p>
                     <div className="space-y-1">
                       <div className="flex justify-between">
                         <span>Model:</span>
@@ -303,9 +301,9 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   </section>
 
                   <section className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                    <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-60">Repair Task</p>
-                    <p className="font-bold text-[13px]">{repair.repairItem}</p>
-                    {repair.remark && <p className="text-[10px] mt-1 opacity-80 italic">Notes: {repair.remark}</p>}
+                    <p className="text-[9px] font-black uppercase tracking-widest mb-1 border-b border-black inline-block pb-0.5">Repair Task</p>
+                    <p className="font-black text-[13px]">{repair.repairItem}</p>
+                    {repair.remark && <p className="text-[10px] font-bold mt-1 italic">Notes: {repair.remark}</p>}
                   </section>
 
                   <div className="flex justify-between items-center pt-2 border-t border-dashed border-black">
@@ -319,8 +317,8 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   <div className="space-y-2.5">
                     {disclaimerTerms.map((term, i) => (
                       <div key={i} className="flex gap-2 items-start">
-                        <span className="text-[7px] font-bold opacity-40 mt-0.5">{i+1}.</span>
-                        <p className="text-[7px] font-bold leading-normal uppercase tracking-tight flex-1">{term.en}</p>
+                        <span className="text-[7px] font-black mt-0.5">{i+1}.</span>
+                        <p className="text-[7px] font-black leading-normal uppercase tracking-tight flex-1">{term.en}</p>
                       </div>
                     ))}
                   </div>
@@ -337,7 +335,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   <p className="text-[8px] font-black uppercase tracking-widest text-primary mb-10">Scan to track your repair status</p>
                   
                   <div className="border-t border-gray-400 w-2/3 mx-auto mb-2"></div>
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-10">Customer Signature</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest mb-10">Customer Signature</p>
                   <p className="text-[10px] font-black tracking-[0.2em]">THANK YOU</p>
                 </div>
               </div>
