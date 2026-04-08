@@ -48,21 +48,29 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
     try {
       const imgData = await toPng(ticketRef.current, {
         pixelRatio: 2,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        width: 302, // ~80mm at 96dpi
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left'
+        }
       });
     
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [80, 200]
-      });
-    
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      // Create a dummy PDF to calculate properties
+      const tempPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 500] });
+      const imgProps = tempPdf.getImageProperties(imgData);
+      const pdfWidth = 80; // Fixed width for thermal
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      setPdfInstance(pdf);
+      // Final PDF with dynamic height to prevent horizontal/vertical cutoff
+      const finalPdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [80, Math.max(pdfHeight, 100)]
+      });
+    
+      finalPdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      setPdfInstance(finalPdf);
     } catch (err: any) {
       console.error("PDF Generate Error:", err);
       alert("Failed to generate PDF: " + err.message);
@@ -100,17 +108,18 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body { 
                   background: white; 
-                  padding: 4mm;
-                  width: ${width};
+                  padding: 2mm 4mm;
+                  width: 72mm;
                   font-family: 'Inter', sans-serif;
                   -webkit-font-smoothing: antialiased;
                   color: #000;
+                  line-height: 1.4;
                 }
                 .text-center { text-align: center; }
-                .mb-1 { margin-bottom: 0.1rem; }
-                .mb-2 { margin-bottom: 0.5rem; }
-                .mb-4 { margin-bottom: 1rem; }
-                .mt-4 { margin-top: 1rem; }
+                .mb-1 { margin-bottom: 0.2rem; }
+                .mb-2 { margin-bottom: 0.6rem; }
+                .mb-4 { margin-bottom: 1.2rem; }
+                .mt-4 { margin-top: 1.2rem; }
                 .flex { display: flex; }
                 .justify-between { justify-content: space-between; }
                 .font-black { font-weight: 900; }
@@ -118,11 +127,12 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 .uppercase { text-transform: uppercase; }
                 .border-t { border-top: 1px solid #000; }
                 .border-dashed { border-style: dashed !important; }
-                .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-                .text-xs { font-size: 10px; }
-                .text-sm { font-size: 12px; }
-                .leading-tight { line-height: 1.2; }
+                .py-2 { padding-top: 0.6rem; padding-bottom: 0.6rem; }
+                .text-xs { font-size: 9px; }
+                .text-sm { font-size: 11px; }
+                .leading-tight { line-height: 1.3; }
                 .italic { font-style: italic; }
+                .word-break { word-break: break-word; }
               </style>
             </head>
             <body>
@@ -231,13 +241,13 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   </div>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-dashed border-black">
-                  <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-center underline">Terms & Conditions</p>
-                  <div className="space-y-2">
+                <div className="mt-6 pt-4 border-t border-dashed border-black">
+                  <p className="text-[8px] font-black uppercase tracking-widest mb-3 text-center underline">Terms & Conditions</p>
+                  <div className="space-y-2.5">
                     {disclaimerTerms.map((term, i) => (
-                      <div key={i} className="flex gap-2">
-                        <span className="text-[8px] font-bold opacity-40">{i+1}.</span>
-                        <p className="text-[8px] font-bold leading-tight uppercase tracking-tight">{term.en}</p>
+                      <div key={i} className="flex gap-2 items-start">
+                        <span className="text-[7px] font-bold opacity-40 mt-0.5">{i+1}.</span>
+                        <p className="text-[7px] font-bold leading-normal uppercase tracking-tight flex-1">{term.en}</p>
                       </div>
                     ))}
                   </div>
@@ -246,17 +256,17 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 <div className="mt-8 flex flex-col items-center text-center">
                   <div className="bg-white p-2 border border-gray-100 rounded-xl mb-3">
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`https://alimobile.com.au/track-status?id=${repair.id}`)}`} 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://alimobile.com.au/track-status?id=${repair.id}`)}`} 
                       alt="Status Tracking QR" 
-                      className="w-20 h-20"
+                      className="w-16 h-16"
                     />
                   </div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-primary mb-6">Scan to track your repair status</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest text-primary mb-10">Scan to track your repair status</p>
                   
-                  <div className="border-t border-gray-400 w-2/3 mx-auto mb-1"></div>
-                  <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-8">Customer Signature</p>
-                  <p className="text-[10px] font-black">THANK YOU</p>
-                  <p className="text-[8px] opacity-40 mt-1">{new Date(repair.timestamp).toLocaleString()}</p>
+                  <div className="border-t border-gray-400 w-2/3 mx-auto mb-2"></div>
+                  <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-10">Customer Signature</p>
+                  <p className="text-[10px] font-black tracking-[0.2em]">THANK YOU</p>
+                  <p className="text-[7px] opacity-40 mt-2">{new Date(repair.timestamp).toLocaleString()}</p>
                 </div>
               </div>
             </div>
