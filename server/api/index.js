@@ -163,7 +163,12 @@ app.post('/api/login', async (req, res) => {
     .eq('password', password)
     .single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('Login error:', error);
+    return res.status(401).json({ error: `Database error: ${error.message || 'Access denied'}` });
+  }
+
+  if (!data) {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
