@@ -36,19 +36,6 @@ if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
   console.warn('⚠️  [Security] Using anon key — add SUPABASE_SERVICE_ROLE_KEY to server/.env for maximum security.');
 }
 
-// TEMPORARY diagnostic endpoint — DELETE after debugging
-app.get('/api/debug-keys', (req, res) => {
-  const srvKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '(not set)';
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY || '(not set)';
-  const url = process.env.VITE_SUPABASE_URL || '(not set)';
-  res.json({
-    supabaseUrl: url,
-    serviceRoleKeyFormat: srvKey.startsWith('eyJ') ? 'JWT ✅' : `Legacy/Other: ${srvKey.substring(0, 10)}...`,
-    anonKeyFormat: anonKey.startsWith('eyJ') ? 'JWT ✅' : `Legacy/Other: ${anonKey.substring(0, 10)}...`,
-    activeKeyFormat: supabaseKey.startsWith('eyJ') ? 'JWT ✅' : `Legacy/Other: ${supabaseKey.substring(0, 10)}...`,
-  });
-});
-
 const getLocalIp = () => {
   const os = require('os');
   const interfaces = os.networkInterfaces();
