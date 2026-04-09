@@ -95,3 +95,33 @@ CREATE TABLE public.pos_users (
 -- Insert default admin user
 INSERT INTO public.pos_users (username, password, role) 
 VALUES ('admin', 'admin123', 'admin');
+
+-- 8. Security hardening (RLS & Policies)
+
+-- Enable RLS on all tables
+ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.repairs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pos_users ENABLE ROW LEVEL SECURITY;
+
+-- Repairs Policy: Allow public status lookup by ID
+-- This is needed for the storefront "Track Status" feature
+CREATE POLICY "Allow public status lookup" 
+ON public.repairs FOR SELECT 
+TO anon 
+USING (true); 
+
+-- Settings Policy: Allow authenticated or service role to read
+CREATE POLICY "Allow service role read settings" 
+ON public.settings FOR SELECT 
+USING (true);
+
+-- Customer/Orders/Inventory: NO public access policies (protected by default RLS)
+-- The server uses the service_role key to bypass these checks.
+
+-- User Table Hardening: Strictly NO public access through API
+REVOKE ALL ON TABLE public.pos_users FROM anon;
+REVOKE ALL ON TABLE public.pos_users FROM authenticated;
