@@ -36,7 +36,7 @@ export interface CustomerReservation {
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
-  status: 'active' | 'completed';
+  status: 'active' | 'completed' | 'hidden';
 }
 
 export interface InventoryItem {

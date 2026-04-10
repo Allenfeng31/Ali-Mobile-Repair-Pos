@@ -120,6 +120,27 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   const createReservation = async () => {
     if (selectedCusts.length === 0) return;
+    
+    let existingRes = reservations.find(r => 
+      r.status !== 'completed' && 
+      r.customers.some(rc => selectedCusts.some(sc => sc.id === rc.id))
+    );
+
+    let updated = [...reservations];
+    
+    if (existingRes) {
+       if (existingRes.status === 'hidden') {
+         const resurrected = { ...existingRes, status: 'active' as const };
+         updated = updated.map(r => r.id === resurrected.id ? resurrected : r);
+         setReservations(updated);
+         await api.updateSetting('ali_pos_reservations', JSON.stringify(updated));
+       }
+       setShowReservationModal(false);
+       setSelectedCusts([]);
+       switchContext(existingRes.id);
+       return;
+    }
+
     const newRes: CustomerReservation = {
       id: `RES-${Math.random().toString(36).substring(2,9).toUpperCase()}`,
       customers: selectedCusts,
@@ -130,12 +151,22 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       updatedAt: new Date().toISOString(),
       status: 'active'
     };
-    const updated = [newRes, ...reservations];
+    updated = [newRes, ...reservations];
     setReservations(updated);
     await api.updateSetting('ali_pos_reservations', JSON.stringify(updated));
     setShowReservationModal(false);
     setSelectedCusts([]);
     switchContext(newRes.id);
+  };
+
+  const removeReservation = async (e: React.MouseEvent, resId: string) => {
+    e.stopPropagation();
+    const updatedRes = reservations.map(r => r.id === resId ? { ...r, status: 'hidden' as const } : r);
+    setReservations(updatedRes);
+    await api.updateSetting('ali_pos_reservations', JSON.stringify(updatedRes));
+    if (activeReservationId === resId) {
+      switchContext(null);
+    }
   };
 
 
@@ -273,7 +304,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       const percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
       const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
 
-      const baseTotal = rawTotal - percentDiscountAmount;
+      const activeRes = reservations.find(r => r.id === activeReservationId);
+      const isFinalCheckoutForRes = (!isDepositPayment && activeRes && activeRes.depositPaid > 0);
+      const depositDiscount = isFinalCheckoutForRes ? activeRes!.depositPaid : 0;
+
+      let baseTotal = rawTotal - percentDiscountAmount;
+      const originalBaseTotal = baseTotal;
+      baseTotal = Math.max(0, baseTotal - depositDiscount);
+
       const gst = baseTotal / 11;
       
       let surcharge = 0;
@@ -323,8 +361,17 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         });
       }
 
-      const activeRes = reservations.find(r => r.id === activeReservationId);
-      
+      if (isFinalCheckoutForRes && depositDiscount > 0) {
+        orderItems.push({
+          id: `DEP-APPLY-${Math.random().toString(36).substring(2, 6)}`,
+          name: `Previous Deposit Applied`,
+          sku: `DEP-APPLIED`,
+          price: -depositDiscount,
+          qty: 1,
+          category: 'Adjustment'
+        });
+      }
+
       let newOrder: Order;
 
       if (isDepositPayment) {
@@ -362,22 +409,20 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
            for (const cust of activeRes.customers) {
               const fullCustomer = customers.find(c => c.id === cust.id);
               if (fullCustomer) {
-                  const repairId = `R-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
                   const cartItemNames = cart.map(i => i.name).join(', ');
-                  const newRepair = {
-                    id: repairId,
-                    customer_id: cust.id,
-                    timestamp: new Date().toISOString(),
-                    repairItem: cartItemNames || 'Pre-order Items',
-                    modelNumber: 'Layaway',
-                    price: finalTotal,
-                    liquidDamage: false,
-                    password: '',
-                    imei: '',
-                    status: 'In Processing',
-                    remark: `Deposit: $${newPaid.toFixed(2)}, Outstanding: $${(finalTotal - newPaid).toFixed(2)}`
-                  };
-                  await api.createRepair(newRepair);
+                  
+                  const inProcRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
+                  if (inProcRepair) {
+                     const updatedRepairItem = inProcRepair.repairItem + (cartItemNames ? ` + Part Booking: ${cartItemNames}` : '');
+                     const existingRemark = inProcRepair.remark ? inProcRepair.remark + '\n' : '';
+                     const newRemark = existingRemark + `Layaway booked. Added parts: ${cartItemNames}. Deposit Paid: $${depositAmount.toFixed(2)}, Outstanding: $${(finalTotal - newPaid).toFixed(2)}`;
+                     
+                     await api.updateRepair(inProcRepair.id, {
+                        repairItem: updatedRepairItem,
+                        remark: newRemark
+                     });
+                  }
+                  
                   await api.updateCustomer(cust.id, {
                      totalSpent: fullCustomer.totalSpent + depositAmount
                   });
@@ -644,10 +689,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           </div>
           
           <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
-            {reservations.length === 0 ? (
+            {reservations.filter(r => r.status !== 'hidden').length === 0 ? (
               <p className="text-[10px] text-on-surface-variant italic text-center py-2">No active reservations.</p>
             ) : (
-              reservations.map(res => (
+              reservations.filter(r => r.status !== 'hidden').map(res => (
                 <div 
                   key={res.id} 
                   onClick={() => switchContext(res.id)}
@@ -664,8 +709,16 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     </span>
                     <span className="text-[9px] opacity-80">{res.items.length} items</span>
                   </div>
-                  <div className="text-right">
+                  <div className="flex items-center gap-3">
                     <span className="font-black text-xs">${res.depositPaid.toFixed(2)} paid</span>
+                    <button 
+                      onClick={(e) => removeReservation(e, res.id)}
+                      className={cn("p-1 rounded-full opacity-60 hover:opacity-100 transition-opacity", 
+                        activeReservationId === res.id ? "hover:bg-primary-container text-on-primary" : "hover:bg-error/10 text-error"
+                      )}
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 </div>
               ))
