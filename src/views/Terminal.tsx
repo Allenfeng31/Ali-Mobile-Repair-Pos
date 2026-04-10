@@ -19,6 +19,7 @@ import {
   UserCircle,
   ChevronDown
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { CustomerReservation, Customer, InventoryItem, Order, OrderItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
