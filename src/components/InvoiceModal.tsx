@@ -352,19 +352,6 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                     <span>TOTAL:</span>
                     <span>${order.total.toFixed(2)}</span>
                   </div>
-                  {order.type === 'deposit' && order.depositAmount !== undefined && order.outstandingAmount !== undefined && (
-                    <>
-                      <div className="border-t border-dashed mt-2 mb-2" style={{ borderColor: '#000000' }}></div>
-                      <div className="flex justify-between font-bold">
-                        <span>Deposit Paid:</span>
-                        <span>${order.depositAmount.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between font-black text-[12px] mt-1">
-                        <span>Outstanding:</span>
-                        <span>${order.outstandingAmount.toFixed(2)}</span>
-                      </div>
-                    </>
-                  )}
                 </div>
 
                 <div className="border-t border-dashed my-6" style={{ borderColor: '#000000' }}></div>

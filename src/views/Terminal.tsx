@@ -458,22 +458,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
            for (const cust of activeRes.customers) {
               const fullCustomer = customers.find(c => c.id === cust.id);
               if (fullCustomer) {
-                  const cartItemNames = cart.map(i => i.name).join(', ');
-                  
-                  const inProcRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
-                  if (inProcRepair) {
-                     const updatedRepairItem = inProcRepair.repairItem + (cartItemNames ? ` + Part Booking: ${cartItemNames}` : '');
-                     const existingRemark = inProcRepair.remark ? inProcRepair.remark + '\n' : '';
-                     const newRemark = existingRemark + `Layaway booked. Added parts: ${cartItemNames}. Deposit Paid: $${depositAmount.toFixed(2)}, Outstanding: $${(finalTotal - newPaid).toFixed(2)}`;
-                     
-                     await api.updateRepair(inProcRepair.id, {
-                        repairItem: updatedRepairItem,
-                        remark: newRemark
+                  const targetRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
+                  if (targetRepair) {
+                     await api.updateRepair(targetRepair.id, {
+                        ...targetRepair,
+                        status: 'waiting for pay'
                      });
                   }
-                  await api.updateCustomer(cust.id, {
-                     totalSpent: (fullCustomer.totalSpent || 0) + depositAmount
-                  });
               }
            }
         }
@@ -505,18 +496,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               if (fullCustomer) {
                   const targetRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing' || r.status === 'waiting for pay');
                   if (targetRepair) {
-                     const existingRemark = targetRepair.remark ? targetRepair.remark + '\n' : '';
-                     const newRemark = existingRemark + `Final Balance Paid: $${finalTotal.toFixed(2)}. Total paid: $${(activeRes.depositPaid + finalTotal).toFixed(2)}. Fully Paid.`;
-                     
                      await api.updateRepair(targetRepair.id, {
                         ...targetRepair,
-                        status: 'Completed',
-                        remark: newRemark
+                        status: 'Completed'
                      });
                   }
-                  await api.updateCustomer(cust.id, {
-                     totalSpent: (fullCustomer.totalSpent || 0) + finalTotal
-                  });
               }
            }
         }
@@ -542,17 +526,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
       setOrders(prev => [newOrder, ...prev]);
       setLastOrder(newOrder);
-      setShowInvoice(true);
-      
-      // Re-attach icons to inventory after update to prevent React crash #130
-      // We know App.tsx has getCategoryIcon but we don't have it here.
-      // However, we preserve the objects we had locally which already have icons.
       setInventory(updatedInventory);
       setCart([]);
       setDiscountPercent(0);
       setActiveReservationId(null);
       setIsDepositPayment(false);
       setDepositAmount(0);
+      setShowInvoice(true);
       
       setSuccessMessage(t('term', 'success'));
       setTimeout(() => setSuccessMessage(null), 3000);
