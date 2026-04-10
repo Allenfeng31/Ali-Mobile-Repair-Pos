@@ -457,14 +457,18 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               if (fullCustomer) {
                   const inProcRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
                   if (inProcRepair) {
-                     // Check if this payment covers the remainder
-                     const isFullyPaid = finalTotal >= (originalBaseTotal - activeRes.depositPaid);
+                     // Determine status based on deposit history
+                     let nextStatus = 'Completed';
+                     if (activeRes.depositPaid > 0) {
+                       nextStatus = 'waiting for pay';
+                     }
+
                      const existingRemark = inProcRepair.remark ? inProcRepair.remark + '\n' : '';
-                     const newRemark = existingRemark + `Final Balance Paid: $${finalTotal.toFixed(2)}. Total paid: $${(activeRes.depositPaid + finalTotal).toFixed(2)}. Fully Paid.`;
+                     const newRemark = existingRemark + `Final Balance Paid: $${finalTotal.toFixed(2)}. Total paid: $${(activeRes.depositPaid + finalTotal).toFixed(2)}. ${nextStatus === 'Completed' ? 'Fully Paid.' : 'Balance Cleared.'}`;
                      
                      await api.updateRepair(inProcRepair.id, {
                         ...inProcRepair,
-                        status: isFullyPaid ? 'Ready for Pickup' : 'In Processing',
+                        status: nextStatus,
                         remark: newRemark
                      });
                   }

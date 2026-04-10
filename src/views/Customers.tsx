@@ -104,14 +104,17 @@ const INITIAL_CUSTOMERS: Customer[] = [
 
 const getCustomerOverallStatus = (customer: Customer) => {
   if (customer.repairs.some(r => r.status === 'Urgent')) return 'Urgent';
-  if (customer.repairs.some(r => r.status === 'In Processing')) return 'In Processing';
+  if (customer.repairs.some(r => r.status === 'In Processing' || r.status === 'waiting for pay')) return 'In Processing';
+  if (customer.repairs.some(r => r.status === 'Ready for Pickup')) return 'Ready for Pickup';
   return 'Completed';
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'Urgent': return 'error';
-    case 'In Processing': return 'tertiary';
+    case 'In Processing':
+    case 'waiting for pay': return 'tertiary';
+    case 'Ready for Pickup': return 'success';
     case 'Completed': return 'surface';
     default: return 'surface';
   }
@@ -199,7 +202,7 @@ export function CustomersView() {
   const sortedCustomers = [...customers].map(c => ({
     ...c,
     repairs: [...c.repairs].sort((a, b) => {
-      const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'Completed': 2 };
+      const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'waiting for pay': 1, 'Ready for Pickup': 1, 'Completed': 2 };
       if (priority[a.status] !== priority[b.status]) {
         return priority[a.status] - priority[b.status];
       }
@@ -209,7 +212,7 @@ export function CustomersView() {
     const statusA = getCustomerOverallStatus(a);
     const statusB = getCustomerOverallStatus(b);
     
-    const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'Completed': 2 };
+    const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'waiting for pay': 1, 'Ready for Pickup': 1, 'Completed': 2 };
     
     if (priority[statusA] !== priority[statusB]) {
       return priority[statusA] - priority[statusB];
@@ -502,7 +505,7 @@ export function CustomersView() {
   };
 
   const toggleRepairStatus = async (customerId: string, repairId: string, currentStatus: string) => {
-    if (currentStatus !== 'In Processing') return;
+    if (currentStatus !== 'In Processing' && currentStatus !== 'waiting for pay') return;
 
     try {
       const { api } = await import('../lib/api');
@@ -1743,17 +1746,18 @@ export function CustomersView() {
                           <p className="font-black text-primary text-lg">${repair.price.toFixed(2)}</p>
                         </div>
                         <div className="flex flex-col items-end gap-1 mt-1">
-                          <span 
+                           <span 
                             onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, repair.id, repair.status); }}
                             className={cn(
                               "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all",
-                              repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
+                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') && "cursor-pointer hover:opacity-70 active:scale-95",
                               repair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
-                              repair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container" :
+                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-tertiary-container text-on-tertiary-container" :
+                              repair.status === 'Ready for Pickup' ? "bg-success-container text-on-success-container" :
                               "bg-surface-container-highest text-on-surface-variant"
                             )}
                           >
-                            {repair.status}
+                            {repair.status === 'waiting for pay' ? 'Waiting Part/Pay' : repair.status}
                           </span>
                           <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
                             {new Date(repair.timestamp).toLocaleDateString()}
