@@ -1099,11 +1099,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
                 {/* List */}
                 <div className="space-y-2 mt-4">
-                  <p className="text-[10px] font-black uppercase text-on-surface-variant tracking-widest pl-1">Matching Customers</p>
+                  <p className="text-[10px] font-black uppercase text-on-surface-variant tracking-widest pl-1">In-Processing Customers</p>
                   {customers
+                    .filter(c => c.repairs?.some(r => r.status === 'In Processing'))
                     .filter(c => c.name.toLowerCase().includes(reservationSearch.toLowerCase()) || c.phone.includes(reservationSearch))
-                    .slice(0, 10).map(c => {
+                    .slice(0, 15).map(c => {
                       const isSel = selectedCusts.some(sc => sc.id === c.id);
+                      const inProcRepairs = c.repairs?.filter(r => r.status === 'In Processing') || [];
                       return (
                         <div 
                           key={c.id} 
@@ -1119,11 +1121,20 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                           <div>
                             <p className="font-bold text-sm text-on-surface">{c.name}</p>
                             <p className="text-xs text-on-surface-variant">{c.phone}</p>
+                            {inProcRepairs.length > 0 && (
+                              <p className="text-[10px] text-primary/80 mt-1 font-semibold flex items-center gap-1">
+                                <Wrench size={10} />
+                                {inProcRepairs.map(r => r.modelNumber && r.modelNumber !== 'N/A' && r.modelNumber !== 'Layaway' ? r.modelNumber : r.repairItem).join(', ')}
+                              </p>
+                            )}
                           </div>
                           {isSel && <CheckCircle2 size={18} className="text-primary" />}
                         </div>
                       )
                   })}
+                  {customers.filter(c => c.repairs?.some(r => r.status === 'In Processing')).length === 0 && (
+                    <p className="text-xs text-on-surface-variant italic p-2">No customers are currently in processing.</p>
+                  )}
                 </div>
               </div>
 
