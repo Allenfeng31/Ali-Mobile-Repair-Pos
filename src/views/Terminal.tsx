@@ -17,13 +17,18 @@ import {
   Search,
   UserPlus,
   UserCircle,
-  ChevronDown
+  ChevronDown,
+  ChevronUp,
+  Package,
+  UserCircle2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CustomerReservation, Customer, InventoryItem, Order, OrderItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { api } from '../lib/api';
+
+import { Zap } from 'lucide-react';
 
 interface TerminalViewProps {
   inventory: InventoryItem[];
@@ -501,6 +506,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       setOrders(prev => [newOrder, ...prev]);
       setLastOrder(newOrder);
       setShowInvoice(true);
+      
+      // Re-attach icons to inventory after update to prevent React crash #130
+      // We know App.tsx has getCategoryIcon but we don't have it here.
+      // However, we preserve the objects we had locally which already have icons.
       setInventory(updatedInventory);
       setCart([]);
       setDiscountPercent(0);
@@ -598,7 +607,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl py-3 px-11 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50">
-              <Search size={18} />
+              {(() => {
+                const SearchIcon = (typeof Search !== 'undefined') ? Search : Package;
+                return <SearchIcon size={18} />;
+              })()}
             </div>
           </div>
 
@@ -648,7 +660,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               <div className="space-y-2">
                 <div className="flex justify-between items-start">
                   <div className="p-1.5 rounded-lg bg-primary-container/10 text-primary">
-                    <item.icon size={18} />
+                    {(() => {
+                      const Icon = item.icon || Package;
+                      return <Icon size={18} />;
+                    })()}
                   </div>
                   <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant opacity-60 bg-surface-container px-1.5 py-0.5 rounded">{(item.category || '').split(' ')[0]}</span>
                 </div>
@@ -786,7 +801,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           {cart.map(item => (
             <div key={item.id} className="flex items-start gap-4 group">
               <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0">
-                <item.icon className="text-primary" size={20} />
+                {(() => {
+                  const Icon = item.icon || Package;
+                  return <Icon className="text-primary" size={20} />;
+                })()}
               </div>
               <div className="flex-grow">
                 <div className="flex justify-between items-start">
