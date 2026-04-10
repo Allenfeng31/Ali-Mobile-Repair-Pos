@@ -494,7 +494,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             updatedInventory[invItemIndex] = { ...invItem, ...updateData };
           }
         }
-        }
       }
 
       await api.createOrder(newOrder);
