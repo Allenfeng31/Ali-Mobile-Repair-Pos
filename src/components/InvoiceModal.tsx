@@ -244,12 +244,14 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                 <div className="text-center mb-6 space-y-1">
                   <p className="font-black text-[13px] uppercase tracking-tighter leading-none mb-2">{invoiceHeader.split('\n')[0]}</p>
                   <div className="text-[10px] leading-tight px-2 whitespace-pre-wrap">
-                    {invoiceHeader.split('\n').slice(1).join('\n')}
+                    {invoiceHeader.split('\n').slice(1)
+                      .filter(line => order.type !== 'deposit' || !line.toUpperCase().includes('ABN'))
+                      .join('\n')}
                   </div>
                   <p 
                     className="font-black text-[11px] uppercase tracking-widest mt-4 border-t border-dashed pt-2 pb-1 inline-block"
                     style={{ borderColor: '#000000' }}
-                  >Tax Invoice #{order.id}</p>
+                  >{order.type === 'deposit' ? 'Deposit Receipt' : 'Tax Invoice'} #{order.id}</p>
                 </div>
 
                 <div className="border-t border-dashed my-4" style={{ borderColor: '#000000' }}></div>
@@ -264,6 +266,12 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                     <span>Date:</span>
                     <span>{new Date(order.timestamp).toLocaleString()}</span>
                   </div>
+                  {order.type === 'deposit' && order.reservationCustomers && order.reservationCustomers.length > 0 && (
+                    <div className="flex justify-between">
+                      <span>Customer:</span>
+                      <span className="font-bold">{order.reservationCustomers.map(c => c.name).join(', ')}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t border-dashed my-4" style={{ borderColor: '#000000' }}></div>
@@ -297,14 +305,18 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
 
                 {/* Totals */}
                 <div className="space-y-1 text-[10px]">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${order.subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax (GST):</span>
-                    <span>${order.tax.toFixed(2)}</span>
-                  </div>
+                  {order.type !== 'deposit' && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>${order.subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax (GST):</span>
+                        <span>${order.tax.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
                   {order.paymentMethod === 'mixed' ? (
                     <>
                       <div className="flex justify-between">
@@ -332,6 +344,19 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                     <span>TOTAL:</span>
                     <span>${order.total.toFixed(2)}</span>
                   </div>
+                  {order.type === 'deposit' && order.depositAmount !== undefined && order.outstandingAmount !== undefined && (
+                    <>
+                      <div className="border-t border-dashed mt-2 mb-2" style={{ borderColor: '#000000' }}></div>
+                      <div className="flex justify-between font-bold">
+                        <span>Deposit Paid:</span>
+                        <span>${order.depositAmount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-black text-[12px] mt-1">
+                        <span>Outstanding:</span>
+                        <span>${order.outstandingAmount.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="border-t border-dashed my-6" style={{ borderColor: '#000000' }}></div>

@@ -18,11 +18,25 @@ export interface Order {
   surcharge?: number;
   total: number;
   profit: number;
-  type: 'repair' | 'sale' | 'service';
+  type: 'repair' | 'sale' | 'service' | 'deposit';
   paymentMethod?: 'cash' | 'eftpos' | 'mixed';
   mixedCash?: number;
   mixedEftpos?: number;
-  status?: 'completed' | 'refunded';
+  status?: 'completed' | 'refunded' | 'layaway';
+  depositAmount?: number;
+  outstandingAmount?: number;
+  reservationCustomers?: { id: string; name: string }[];
+}
+
+export interface CustomerReservation {
+  id: string;
+  customers: { id: string; name: string; phone: string }[];
+  items: any[];
+  depositPaid: number;
+  totalAmount: number;
+  createdAt: string;
+  updatedAt: string;
+  status: 'active' | 'completed';
 }
 
 export interface InventoryItem {
