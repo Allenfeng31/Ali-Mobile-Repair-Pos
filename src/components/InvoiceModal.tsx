@@ -291,13 +291,21 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {order.items.map((item, i) => (
-                      <tr key={i}>
-                        <td className="py-1 pr-2 break-words">{item.name}</td>
-                        <td className="py-1 text-right">{item.qty}</td>
-                        <td className="py-1 text-right pr-1">${(item.price * item.qty).toFixed(2)}</td>
-                      </tr>
-                    ))}
+                    {order.items.map((item, i) => {
+                      const itemTotal = item.price * item.qty;
+                      const isDeduction = itemTotal < 0;
+                      return (
+                        <tr key={i} className={cn(isDeduction && "font-bold italic")}>
+                          <td className="py-1 pr-2 break-words text-[9px]">
+                            {isDeduction ? `(DEDUCTION) ${item.name}` : item.name}
+                          </td>
+                          <td className="py-1 text-right">{isDeduction ? '-' : item.qty}</td>
+                          <td className="py-1 text-right pr-1">
+                            {isDeduction ? `-$${Math.abs(itemTotal).toFixed(2)}` : `$${itemTotal.toFixed(2)}`}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
 

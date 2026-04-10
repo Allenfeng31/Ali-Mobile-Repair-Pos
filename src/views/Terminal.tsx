@@ -73,6 +73,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [generalCart, setGeneralCart] = useState<any[]>(cart);
   const [reservationSearch, setReservationSearch] = useState('');
   const [selectedCusts, setSelectedCusts] = useState<{id:string, name:string, phone:string}[]>([]);
+  const [isReservationsExpanded, setIsReservationsExpanded] = useState(true);
 
   // Load settings on mount
   React.useEffect(() => {
@@ -422,9 +423,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                         remark: newRemark
                      });
                   }
-                  
                   await api.updateCustomer(cust.id, {
-                     totalSpent: fullCustomer.totalSpent + depositAmount
+                     totalSpent: (fullCustomer.totalSpent || 0) + depositAmount
                   });
               }
            }
@@ -445,6 +445,36 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           mixedEftpos: paymentMethod === 'mixed' ? mixedEftpos : undefined
         };
 
+        // IF FINAL PAYMENT FOR RESERVATION -> Auto-Complete
+        if (activeRes) {
+           const updatedRes = reservations.map(r => r.id === activeRes.id ? { ...r, status: 'completed' as const } : r);
+           setReservations(updatedRes);
+           await api.updateSetting('ali_pos_reservations', JSON.stringify(updatedRes));
+           
+           // Synchronize CRM
+           for (const cust of activeRes.customers) {
+              const fullCustomer = customers.find(c => c.id === cust.id);
+              if (fullCustomer) {
+                  const inProcRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
+                  if (inProcRepair) {
+                     // Check if this payment covers the remainder
+                     const isFullyPaid = finalTotal >= (originalBaseTotal - activeRes.depositPaid);
+                     const existingRemark = inProcRepair.remark ? inProcRepair.remark + '\n' : '';
+                     const newRemark = existingRemark + `Final Balance Paid: $${finalTotal.toFixed(2)}. Total paid: $${(activeRes.depositPaid + finalTotal).toFixed(2)}. Fully Paid.`;
+                     
+                     await api.updateRepair(inProcRepair.id, {
+                        ...inProcRepair,
+                        status: isFullyPaid ? 'Ready for Pickup' : 'In Processing',
+                        remark: newRemark
+                     });
+                  }
+                  await api.updateCustomer(cust.id, {
+                     totalSpent: (fullCustomer.totalSpent || 0) + finalTotal
+                  });
+              }
+           }
+        }
+
         // Deduct stock from inventory
         const updatedInventory = [...inventory];
         for (const cartItem of cart) {
@@ -460,14 +490,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             updatedInventory[invItemIndex] = { ...invItem, ...updateData };
           }
         }
-        setInventory(updatedInventory);
-        
-        // If it was a layaway payout, mark it completed or remove it
-        if (activeRes) {
-          const updatedRes = reservations.filter(r => r.id !== activeRes.id);
-          setReservations(updatedRes);
-          await api.updateSetting('ali_pos_reservations', JSON.stringify(updatedRes));
-          setActiveReservationId(null);
         }
       }
 
@@ -475,13 +497,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
       setOrders(prev => [newOrder, ...prev]);
       setLastOrder(newOrder);
-
-      setOrders(prev => [newOrder, ...prev]);
-      setLastOrder(newOrder);
       setShowInvoice(true);
       setInventory(updatedInventory);
       setCart([]);
       setDiscountPercent(0);
+      setActiveReservationId(null);
+      setIsDepositPayment(false);
+      setDepositAmount(0);
       
       setSuccessMessage(t('term', 'success'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -674,56 +696,70 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       <aside className="lg:col-span-4 bg-surface-container-lowest lg:border-l border-outline-variant/10 p-6 flex flex-col rounded-3xl lg:rounded-none">
         
         {/* Reservations Box */}
-        <div className="mb-6 bg-secondary-container/20 rounded-2xl p-4 border border-secondary/10">
-          <div className="flex items-center justify-between mb-3">
+        <div className="mb-6 bg-secondary-container/20 rounded-2xl border border-secondary/10 overflow-hidden">
+          <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors" onClick={() => setIsReservationsExpanded(!isReservationsExpanded)}>
             <h3 className="text-sm font-black text-on-surface flex items-center gap-2">
               <UserCircle size={16} className="text-primary" />
               Customer Reservations
             </h3>
-            <button 
-              onClick={() => setShowReservationModal(true)}
-              className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all"
-            >
-              <Plus size={16} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowReservationModal(true); }}
+                className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all"
+              >
+                <Plus size={16} />
+              </button>
+              <div className={cn("transition-transform duration-300", !isReservationsExpanded ? "rotate-[-90deg]" : "")}>
+                <ChevronDown size={16} className="text-on-surface-variant" />
+              </div>
+            </div>
           </div>
           
-          <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
-            {reservations.filter(r => r.status !== 'hidden').length === 0 ? (
-              <p className="text-[10px] text-on-surface-variant italic text-center py-2">No active reservations.</p>
-            ) : (
-              reservations.filter(r => r.status !== 'hidden').map(res => (
-                <div 
-                  key={res.id} 
-                  onClick={() => switchContext(res.id)}
-                  className={cn(
-                    "p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all",
-                    activeReservationId === res.id 
-                      ? "bg-primary text-on-primary border-primary shadow-sm"
-                      : "bg-surface-container hover:bg-surface-container-high border-outline-variant/10"
-                  )}
-                >
-                  <div className="flex flex-col gap-0.5 max-w-[65%]">
-                    <span className="font-bold text-xs truncate">
-                      {res.customers.length > 0 ? res.customers.map(c => c.name).join(', ') : 'Unnamed'}
-                    </span>
-                    <span className="text-[9px] opacity-80">{res.items.length} items</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-xs">${res.depositPaid.toFixed(2)} paid</span>
-                    <button 
-                      onClick={(e) => removeReservation(e, res.id)}
-                      className={cn("p-1 rounded-full opacity-60 hover:opacity-100 transition-opacity", 
-                        activeReservationId === res.id ? "hover:bg-primary-container text-on-primary" : "hover:bg-error/10 text-error"
+          <AnimatePresence>
+            {isReservationsExpanded && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="px-4 pb-4 space-y-2 max-h-48 overflow-y-auto no-scrollbar"
+              >
+                {reservations.filter(r => r.status === 'active' || r.id === activeReservationId).length === 0 ? (
+                  <p className="text-[10px] text-on-surface-variant italic text-center py-2">No active reservations.</p>
+                ) : (
+                  reservations.filter(r => r.status === 'active' || r.id === activeReservationId).map(res => (
+                    <div 
+                      key={res.id} 
+                      onClick={() => switchContext(res.id)}
+                      className={cn(
+                        "p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all",
+                        activeReservationId === res.id 
+                          ? "bg-primary text-on-primary border-primary shadow-sm"
+                          : "bg-surface-container hover:bg-surface-container-high border-outline-variant/10"
                       )}
                     >
-                      <X size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))
+                      <div className="flex flex-col gap-0.5 max-w-[65%]">
+                        <span className="font-bold text-xs truncate">
+                          {res.customers.length > 0 ? res.customers.map(c => c.name).join(', ') : 'Unnamed'}
+                        </span>
+                        <span className="text-[9px] opacity-80">{res.items.length} items</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-xs">${res.depositPaid.toFixed(2)} paid</span>
+                        <button 
+                          onClick={(e) => removeReservation(e, res.id)}
+                          className={cn("p-1 rounded-full opacity-60 hover:opacity-100 transition-opacity", 
+                            activeReservationId === res.id ? "hover:bg-primary-container text-on-primary" : "hover:bg-error/10 text-error"
+                          )}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
 
         <div className="flex items-center justify-between mb-8">
