@@ -20,15 +20,23 @@ import {
   ChevronDown,
   ChevronUp,
   Package,
-  UserCircle2
+  UserCircle2,
+  Tablet,
+  Laptop,
+  Watch,
+  Headphones,
+  Volume2,
+  Mic,
+  Wifi,
+  Cpu,
+  Layout as LayoutIcon,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CustomerReservation, Customer, InventoryItem, Order, OrderItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { api } from '../lib/api';
-
-import { Zap } from 'lucide-react';
 
 interface TerminalViewProps {
   inventory: InventoryItem[];
@@ -41,6 +49,39 @@ interface TerminalViewProps {
   brands: string[];
   t: (section: string, key: string) => string;
 }
+
+const getCategoryIcon = (name: string, category: string) => {
+  if (!name) return Package;
+  const n = name.toLowerCase();
+  const c = (category || '').toLowerCase();
+
+  if (n.includes('screen') || n.includes('lcd') || n.includes('display')) return Smartphone;
+  if (n.includes('battery')) return Battery;
+  if (n.includes('charging') || n.includes('port') || n.includes('charge')) return Zap;
+  if (n.includes('camera')) return Camera;
+  if (n.includes('housing') || n.includes('glass') || n.includes('back cover')) return LayoutIcon;
+  if (n.includes('logic board') || n.includes('motherboard') || n.includes('ic ')) return Cpu;
+  if (n.includes('speaker') || n.includes('buzzer')) return Volume2;
+  if (n.includes('mic')) return Mic;
+  if (n.includes('wifi') || n.includes('signal') || n.includes('antenna')) return Wifi;
+
+  if (c.includes('phone')) return Smartphone;
+  if (c.includes('tablet') || c.includes('ipad')) return Tablet;
+  if (c.includes('laptop') || c.includes('macbook')) return Laptop;
+  if (c.includes('watch')) return Watch;
+  if (c.includes('accessory') || c.includes('accessories')) return Headphones;
+  if (c.includes('service') || c.includes('repair')) return Wrench;
+  if (c.includes('part')) return Zap;
+
+  return Package;
+};
+
+const attachIcons = (items: any[]) => {
+  return items.map(item => ({
+    ...item,
+    icon: getCategoryIcon(item.name, item.category || '')
+  }));
+};
 
 export function TerminalView({ inventory, setInventory, orders, setOrders, cart, setCart, categories, brands, t }: TerminalViewProps) {
   const [activeCategory, setActiveCategory] = useState('All Items');
@@ -120,7 +161,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     } else {
       setActiveReservationId(resId);
       const res = reservations.find(r => r.id === resId);
-      if (res) setCart(res.items);
+      if (res) {
+        setCart(attachIcons(res.items));
+      }
     }
   };
 
@@ -460,20 +503,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
            for (const cust of activeRes.customers) {
               const fullCustomer = customers.find(c => c.id === cust.id);
               if (fullCustomer) {
-                  const inProcRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
-                  if (inProcRepair) {
-                     // Determine status based on deposit history
-                     let nextStatus = 'Completed';
-                     if (activeRes.depositPaid > 0) {
-                       nextStatus = 'waiting for pay';
-                     }
-
-                     const existingRemark = inProcRepair.remark ? inProcRepair.remark + '\n' : '';
-                     const newRemark = existingRemark + `Final Balance Paid: $${finalTotal.toFixed(2)}. Total paid: $${(activeRes.depositPaid + finalTotal).toFixed(2)}. ${nextStatus === 'Completed' ? 'Fully Paid.' : 'Balance Cleared.'}`;
+                  const targetRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing' || r.status === 'waiting for pay');
+                  if (targetRepair) {
+                     const existingRemark = targetRepair.remark ? targetRepair.remark + '\n' : '';
+                     const newRemark = existingRemark + `Final Balance Paid: $${finalTotal.toFixed(2)}. Total paid: $${(activeRes.depositPaid + finalTotal).toFixed(2)}. Fully Paid.`;
                      
-                     await api.updateRepair(inProcRepair.id, {
-                        ...inProcRepair,
-                        status: nextStatus,
+                     await api.updateRepair(targetRepair.id, {
+                        ...targetRepair,
+                        status: 'Completed',
                         remark: newRemark
                      });
                   }

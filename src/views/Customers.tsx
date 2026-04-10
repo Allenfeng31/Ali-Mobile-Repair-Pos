@@ -127,14 +127,18 @@ export function CustomersView() {
   
   const [hostIp, setHostIp] = useState('localhost');
   
+  const [selectedId, setSelectedId] = useState<string>('2');
+  const [reservations, setReservations] = useState<any[]>([]);
+  
   // Fetch initial data from backend API
   useEffect(() => {
     const loadData = async () => {
       try {
         const { api } = await import('../lib/api');
-        const [data, ipRes] = await Promise.all([
+        const [data, ipRes, settingsRes] = await Promise.all([
           api.getCustomers(),
-          api.getIp().catch(() => ({ ip: 'localhost' }))
+          api.getIp().catch(() => ({ ip: 'localhost' })),
+          api.getSettings()
         ]);
 
         if (data && data.length > 0) {
@@ -142,6 +146,11 @@ export function CustomersView() {
         }
         if (ipRes && ipRes.ip) {
           setHostIp(ipRes.ip);
+        }
+        if (settingsRes && settingsRes.ali_pos_reservations) {
+          try {
+            setReservations(JSON.parse(settingsRes.ali_pos_reservations));
+          } catch (e) { console.error('Failed to parse reservations', e); }
         }
       } catch (err) {
         console.error('Failed to load data:', err);
@@ -152,7 +161,9 @@ export function CustomersView() {
     loadData();
   }, []);
 
-  const [selectedId, setSelectedId] = useState<string>('2');
+  const isReservationCustomer = (customerId: string) => {
+    return reservations.some(r => r.status === 'active' && r.customers.some(c => c.id === customerId));
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -509,7 +520,8 @@ export function CustomersView() {
 
     try {
       const { api } = await import('../lib/api');
-      await api.updateRepair(repairId, { status: 'Completed' });
+      const nextStatus = isReservationCustomer(customerId) ? 'waiting for pay' : 'Completed';
+      await api.updateRepair(repairId, { status: nextStatus });
       
       let smsCustomer: Customer | undefined;
       let smsRepairItem = 'your device';
@@ -520,7 +532,7 @@ export function CustomersView() {
           const updatedRepairs = c.repairs.map(r => {
             if (r.id === repairId) {
               smsRepairItem = r.modelNumber || r.repairItem;
-              const updatedRepair = { ...r, status: 'Completed' as const };
+              const updatedRepair = { ...r, status: nextStatus as any };
               if (selectedRepair && selectedRepair.id === repairId) {
                 setSelectedRepair(updatedRepair);
               }
@@ -709,9 +721,9 @@ export function CustomersView() {
                 statusColor === 'error' ? "bg-error-container text-on-error-container border border-error/10" :
                 "bg-surface-container-highest text-on-surface-variant border border-outline-variant/10"
               )}>
-                {overallStatus}
+                {overallStatus === 'waiting for pay' ? 'Waiting Pay' : overallStatus}
               </span>
-              <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Spent: ${customer.totalSpent.toFixed(2)}</p>
+              <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Price: ${customer.totalSpent.toFixed(2)}</p>
             </div>
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -1002,7 +1014,7 @@ export function CustomersView() {
                   <p className="text-xs font-bold truncate text-on-surface">{selectedCustomer.email}</p>
                 </div>
                 <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Total Spent</p>
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Total Price</p>
                   <p className="text-sm font-black text-primary">${selectedCustomer.totalSpent.toFixed(2)}</p>
                 </div>
               </div>
@@ -1770,7 +1782,7 @@ export function CustomersView() {
 
                 <div className="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
                   <div>
-                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Lifetime Value</p>
+                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Total Price</p>
                     <p className="text-2xl font-black text-primary">${selectedCustomer.totalSpent.toFixed(2)}</p>
                   </div>
                   <button 
