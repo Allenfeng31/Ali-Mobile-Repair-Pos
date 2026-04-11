@@ -15,7 +15,8 @@ import {
   Sparkles,
   PenTool,
   Trash2,
-  FileText
+  FileText,
+  Copy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -56,6 +57,30 @@ function SettingsPanel({
   const [blogTopic, setBlogTopic] = React.useState('');
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [blogDraft, setBlogDraft] = React.useState<any>(null);
+
+  // SMS Generator States
+  const [smsModel, setSmsModel] = React.useState('');
+  const [smsRepair, setSmsRepair] = React.useState('');
+  const [smsAmount, setSmsAmount] = React.useState('');
+  const [isCopied, setIsCopied] = React.useState(false);
+
+  const handleCopySMS = async () => {
+    if (!smsModel || !smsRepair || !smsAmount) {
+      alert('Please fill in Model, Repair Item, and Amount.');
+      return;
+    }
+    
+    const text = `Ali Mobile Repair\n\n型号 (Model): ${smsModel}\n维修项目 (Repair): ${smsRepair}\n金额 (Price): $${smsAmount}\n\n预约网址 (Booking): https://alimobile.com.au\n店面地址 (Address): Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\n联系电话 (Phone): 0481 058 514`;
+    
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to copy text.');
+    }
+  };
 
   React.useEffect(() => {
     if (!open) return;
@@ -169,6 +194,68 @@ function SettingsPanel({
                 {saved ? <CheckCircle2 size={15} /> : <Save size={15} />}
                 {saved ? 'Saved!' : 'Save Changes'}
               </button>
+
+              <div className="h-px bg-outline-variant/10 !my-8" />
+
+              {/* QUICK SMS GENERATOR */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare size={16} className="text-blue-500" />
+                  <span className="text-xs font-black text-on-surface uppercase tracking-tight">Quick SMS</span>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-on-surface-variant leading-relaxed">
+                    Generate an SMS quote instantly.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <input 
+                      type="text" 
+                      value={smsModel}
+                      onChange={(e) => setSmsModel(e.target.value)}
+                      placeholder="型号 (e.g. iPhone 13)"
+                      className="w-full bg-surface-container-high rounded-xl px-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    />
+                    <input 
+                      type="text" 
+                      value={smsRepair}
+                      onChange={(e) => setSmsRepair(e.target.value)}
+                      placeholder="维修项目 (e.g. Screen)"
+                      className="w-full bg-surface-container-high rounded-xl px-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-xs">$</span>
+                      <input 
+                        type="number" 
+                        value={smsAmount}
+                        onChange={(e) => setSmsAmount(e.target.value)}
+                        placeholder="金额 (Amount)"
+                        className="w-full bg-surface-container-high rounded-xl pl-7 pr-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleCopySMS}
+                    className={cn(
+                      "w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98]",
+                      isCopied 
+                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200" 
+                        : "bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-500"
+                    )}
+                  >
+                    {isCopied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+                    {isCopied ? 'Copied!' : 'Generate & Copy'}
+                  </button>
+
+                  {(smsModel || smsRepair || smsAmount) && (
+                    <div className="p-3 bg-surface-container-highest rounded-xl text-[9px] whitespace-pre-wrap font-medium text-on-surface-variant border border-outline-variant/10 leading-relaxed mt-2">
+                      {`Ali Mobile Repair\n\n型号: ${smsModel}\n维修项目: ${smsRepair}\n金额: $${smsAmount || '0'}\n\n预约网址: https://alimobile.com.au\n店面地址: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\n联系电话: 0481 058 514`}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="h-px bg-outline-variant/10 !my-8" />
 
