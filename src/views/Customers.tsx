@@ -27,6 +27,7 @@ import { Customer } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect } from 'react';
 import { RepairTicketModal } from '../components/RepairTicketModal';
+import { api } from '../lib/api';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   { 
@@ -129,42 +130,27 @@ export function CustomersView() {
   const [hostIp, setHostIp] = useState('localhost');
   
   const [selectedId, setSelectedId] = useState<string>('2');
-  const [reservations, setReservations] = useState<any[]>([]);
   
-  // Fetch initial data from backend API
+  // Fetch customer data — load customers first (critical), then IP in background
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { api } = await import('../lib/api');
-        const [data, ipRes, settingsRes] = await Promise.all([
-          api.getCustomers(),
-          api.getIp().catch(() => ({ ip: 'localhost' })),
-          api.getSettings()
-        ]);
-
+        const data = await api.getCustomers();
         if (data && data.length > 0) {
           setCustomers(data);
         }
-        if (ipRes && ipRes.ip) {
-          setHostIp(ipRes.ip);
-        }
-        if (settingsRes && settingsRes.ali_pos_reservations) {
-          try {
-            setReservations(JSON.parse(settingsRes.ali_pos_reservations));
-          } catch (e) { console.error('Failed to parse reservations', e); }
-        }
       } catch (err) {
-        console.error('Failed to load data:', err);
+        console.error('Failed to load customers:', err);
       } finally {
         setIsLoading(false);
       }
     };
     loadData();
+    // Load IP in background (non-blocking)
+    api.getIp().then(ipRes => {
+      if (ipRes?.ip) setHostIp(ipRes.ip);
+    }).catch(() => {});
   }, []);
-
-  const isReservationCustomer = (customerId: string) => {
-    return reservations.some(r => r.status === 'active' && r.customers.some(c => c.id === customerId));
-  };
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -273,8 +259,7 @@ export function CustomersView() {
     
     setSendingReviewId(target.id);
     try {
-      const { api } = await import('../lib/api');
-      const response = await api.sendSms(target.phone, 'review', { 
+            const response = await api.sendSms(target.phone, 'review', { 
         customerName: target.name,
         customerId: target.id
       });
@@ -303,8 +288,7 @@ export function CustomersView() {
     
     setPartNotifiedId(repair.id);
     try {
-      const { api } = await import('../lib/api');
-      await api.sendSms(customer.phone, 'partArrived', { 
+            await api.sendSms(customer.phone, 'partArrived', { 
         customerName: customer.name,
         deviceModel: repair.modelNumber 
       });
@@ -328,7 +312,6 @@ export function CustomersView() {
     e.preventDefault();
     
     const existingCustomerIndex = customers.findIndex(c => c.phone === formData.phone);
-    const { api } = await import('../lib/api');
     
     try {
       if (existingCustomerIndex !== -1) {
@@ -435,8 +418,7 @@ export function CustomersView() {
     };
     
     try {
-      const { api } = await import('../lib/api');
-      await api.updateCustomer(selectedId, updateData);
+            await api.updateCustomer(selectedId, updateData);
       
       const updatedCustomers = customers.map(c => {
         if (c.id === selectedId) {
@@ -455,8 +437,7 @@ export function CustomersView() {
 
   const handleDeleteCustomer = async () => {
     try {
-      const { api } = await import('../lib/api');
-      await api.deleteCustomer(selectedId);
+            await api.deleteCustomer(selectedId);
       
       const updatedCustomers = customers.filter(c => c.id !== selectedId);
       setCustomers(updatedCustomers);
@@ -527,8 +508,7 @@ export function CustomersView() {
     if (currentStatus !== 'In Processing' && currentStatus !== 'waiting for pay') return;
 
     try {
-      const { api } = await import('../lib/api');
-      const nextStatus = isReservationCustomer(customerId) ? 'waiting for pay' : 'Completed';
+            const nextStatus = 'Completed';
       await api.updateRepair(repairId, { status: nextStatus });
       
       let smsCustomer: Customer | undefined;
@@ -598,8 +578,7 @@ export function CustomersView() {
     };
 
     try {
-      const { api } = await import('../lib/api');
-      await api.updateRepair(selectedRepair.id, updateData);
+            await api.updateRepair(selectedRepair.id, updateData);
       
       const updatedCustomers = customers.map(c => {
         if (c.id === selectedId) {
@@ -643,8 +622,7 @@ export function CustomersView() {
     if (!selectedRepair) return;
 
     try {
-      const { api } = await import('../lib/api');
-      await api.deleteRepair(selectedRepair.id);
+            await api.deleteRepair(selectedRepair.id);
       
       const updatedCustomers = customers.map(c => {
         if (c.id === selectedId) {
@@ -730,7 +708,7 @@ export function CustomersView() {
                 statusColor === 'error' ? "bg-error-container text-on-error-container border border-error/10" :
                 "bg-surface-container-highest text-on-surface-variant border border-outline-variant/10"
               )}>
-                {overallStatus === 'waiting for pay' ? 'Waiting Pay' : overallStatus}
+                {overallStatus}
               </span>
               <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Price: ${customer.totalSpent.toFixed(2)}</p>
             </div>

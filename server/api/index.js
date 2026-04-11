@@ -304,15 +304,27 @@ app.post('/api/orders', async (req, res) => {
 // CUSTOMERS
 // ----------------------------------------------------------------------
 app.get('/api/customers', async (req, res) => {
-  const { data: customers, error } = await supabase.from('customers').select('*').order('name', { ascending: true });
-  if (error) return res.status(500).json({ error: error.message });
+  // Run both queries in parallel for faster response
+  const [customersResult, repairsResult] = await Promise.all([
+    supabase.from('customers').select('*').order('name', { ascending: true }),
+    supabase.from('repairs').select('*')
+  ]);
 
-  const { data: repairs, error: repairsError } = await supabase.from('repairs').select('*');
-  if (repairsError) return res.status(500).json({ error: repairsError.message });
+  if (customersResult.error) return res.status(500).json({ error: customersResult.error.message });
+  if (repairsResult.error) return res.status(500).json({ error: repairsResult.error.message });
 
-  const customersWithRepairs = customers.map(customer => ({
+  // Use a Map for O(n) join instead of O(n*m) filter per customer
+  const repairsByCustomer = new Map();
+  for (const r of repairsResult.data) {
+    if (!repairsByCustomer.has(r.customer_id)) {
+      repairsByCustomer.set(r.customer_id, []);
+    }
+    repairsByCustomer.get(r.customer_id).push(r);
+  }
+
+  const customersWithRepairs = customersResult.data.map(customer => ({
     ...customer,
-    repairs: repairs.filter(r => r.customer_id === customer.id)
+    repairs: repairsByCustomer.get(customer.id) || []
   }));
 
   res.json(customersWithRepairs);
