@@ -266,12 +266,6 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                     <span>Date:</span>
                     <span>{new Date(order.timestamp).toLocaleString()}</span>
                   </div>
-                  {order.type === 'deposit' && order.reservationCustomers && order.reservationCustomers.length > 0 && (
-                    <div className="flex justify-between">
-                      <span>Customer:</span>
-                      <span className="font-bold">{order.reservationCustomers.map(c => c.name).join(', ')}</span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="border-t border-dashed my-4" style={{ borderColor: '#000000' }}></div>

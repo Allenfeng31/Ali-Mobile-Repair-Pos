@@ -311,6 +311,18 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                     <span className="font-black uppercase tracking-widest">Est. Total:</span>
                     <span className="text-xl font-black">${repair.price.toFixed(2)}</span>
                   </div>
+                  {repair.deposit && repair.deposit > 0 && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded-lg border border-gray-300">
+                      <div className="flex justify-between items-center">
+                        <span className="font-black text-[10px] uppercase tracking-widest">Deposit Paid:</span>
+                        <span className="font-black text-[12px]">${repair.deposit.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center mt-1 pt-1 border-t border-gray-200">
+                        <span className="font-black text-[10px] uppercase tracking-widest">Balance Due:</span>
+                        <span className="font-black text-[13px]">${(repair.price - repair.deposit).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-dashed border-black">

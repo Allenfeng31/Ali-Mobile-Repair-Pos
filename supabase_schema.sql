@@ -63,6 +63,7 @@ CREATE TABLE public.repairs (
     "repairItem" TEXT NOT NULL,
     "modelNumber" TEXT NOT NULL,
     price NUMERIC NOT NULL DEFAULT 0,
+    deposit NUMERIC DEFAULT 0,
     "liquidDamage" BOOLEAN NOT NULL DEFAULT FALSE,
     password TEXT,
     imei TEXT,

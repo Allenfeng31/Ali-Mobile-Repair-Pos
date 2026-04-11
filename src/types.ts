@@ -23,21 +23,8 @@ export interface Order {
   mixedCash?: number;
   mixedEftpos?: number;
   status?: 'completed' | 'refunded' | 'layaway';
-  depositAmount?: number;
-  outstandingAmount?: number;
-  reservationCustomers?: { id: string; name: string }[];
 }
 
-export interface CustomerReservation {
-  id: string;
-  customers: { id: string; name: string; phone: string }[];
-  items: any[];
-  depositPaid: number;
-  totalAmount: number;
-  createdAt: string;
-  updatedAt: string;
-  status: 'active' | 'completed' | 'hidden';
-}
 
 export interface InventoryItem {
   id: number;
@@ -65,6 +52,7 @@ export interface RepairRecord {
   password?: string;
   imei?: string;
   remark?: string;
+  deposit?: number;
   status: string;
 }
 

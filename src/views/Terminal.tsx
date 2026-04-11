@@ -15,12 +15,7 @@ import {
   AlertCircle,
   X,
   Search,
-  UserPlus,
-  UserCircle,
-  ChevronDown,
-  ChevronUp,
   Package,
-  UserCircle2,
   Tablet,
   Laptop,
   Watch,
@@ -33,7 +28,7 @@ import {
   Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CustomerReservation, Customer, InventoryItem, Order, OrderItem } from '../types';
+import { InventoryItem, Order, OrderItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { api } from '../lib/api';
@@ -108,115 +103,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [numpadItem, setNumpadItem] = useState<any | null>(null);
   const [numpadValue, setNumpadValue] = useState('');
   const [isFirstStroke, setIsFirstStroke] = useState(true);
-
-  // RESERVATIONS STATE
-  const [reservations, setReservations] = useState<CustomerReservation[]>([]);
-  const [activeReservationId, setActiveReservationId] = useState<string | null>(null);
-  const [showReservationModal, setShowReservationModal] = useState(false);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [isDepositPayment, setIsDepositPayment] = useState(false);
-  const [depositAmount, setDepositAmount] = useState<number>(0);
-  const [generalCart, setGeneralCart] = useState<any[]>(cart);
-  const [reservationSearch, setReservationSearch] = useState('');
-  const [selectedCusts, setSelectedCusts] = useState<{id:string, name:string, phone:string}[]>([]);
-  const [isReservationsExpanded, setIsReservationsExpanded] = useState(true);
-
-  // Load settings on mount
-  React.useEffect(() => {
-    api.getSettings().then(settings => {
-      if (settings.ali_pos_reservations) {
-        try {
-          setReservations(JSON.parse(settings.ali_pos_reservations));
-        } catch(e) {}
-      }
-    });
-    api.getCustomers().then(custs => {
-      setCustomers(custs);
-    });
-  }, []);
-
-  const prevReservationIdRef = React.useRef(activeReservationId);
-  React.useEffect(() => {
-    if (prevReservationIdRef.current === activeReservationId) {
-      if (activeReservationId) {
-         const updated = reservations.map(r => r.id === activeReservationId ? { ...r, items: cart } : r);
-         setReservations(updated);
-         api.updateSetting('ali_pos_reservations', JSON.stringify(updated)).catch(console.error);
-      } else {
-         setGeneralCart(cart);
-      }
-    }
-    prevReservationIdRef.current = activeReservationId;
-  }, [cart, activeReservationId]);
-
-  const switchContext = (resId: string | null) => {
-    if (resId === activeReservationId) {
-      setActiveReservationId(null);
-      setCart(generalCart);
-      return;
-    }
-    if (resId === null) {
-      setActiveReservationId(null);
-      setCart(generalCart);
-    } else {
-      setActiveReservationId(resId);
-      const res = reservations.find(r => r.id === resId);
-      if (res) {
-        setCart(attachIcons(res.items));
-      }
-    }
-  };
-
-  const createReservation = async () => {
-    if (selectedCusts.length === 0) return;
-    
-    let existingRes = reservations.find(r => 
-      r.status !== 'completed' && 
-      r.customers.some(rc => selectedCusts.some(sc => sc.id === rc.id))
-    );
-
-    let updated = [...reservations];
-    
-    if (existingRes) {
-       if (existingRes.status === 'hidden') {
-         const resurrected = { ...existingRes, status: 'active' as const };
-         updated = updated.map(r => r.id === resurrected.id ? resurrected : r);
-         setReservations(updated);
-         await api.updateSetting('ali_pos_reservations', JSON.stringify(updated));
-       }
-       setShowReservationModal(false);
-       setSelectedCusts([]);
-       switchContext(existingRes.id);
-       return;
-    }
-
-    const newRes: CustomerReservation = {
-      id: `RES-${Math.random().toString(36).substring(2,9).toUpperCase()}`,
-      customers: selectedCusts,
-      items: [],
-      depositPaid: 0,
-      totalAmount: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: 'active'
-    };
-    updated = [newRes, ...reservations];
-    setReservations(updated);
-    await api.updateSetting('ali_pos_reservations', JSON.stringify(updated));
-    setShowReservationModal(false);
-    setSelectedCusts([]);
-    switchContext(newRes.id);
-  };
-
-  const removeReservation = async (e: React.MouseEvent, resId: string) => {
-    e.stopPropagation();
-    const updatedRes = reservations.map(r => r.id === resId ? { ...r, status: 'hidden' as const } : r);
-    setReservations(updatedRes);
-    await api.updateSetting('ali_pos_reservations', JSON.stringify(updatedRes));
-    if (activeReservationId === resId) {
-      switchContext(null);
-    }
-  };
 
 
   React.useEffect(() => {
@@ -353,13 +239,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       const percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
       const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
 
-      const activeRes = reservations.find(r => r.id === activeReservationId);
-      const isFinalCheckoutForRes = (!isDepositPayment && activeRes && activeRes.depositPaid > 0);
-      const depositDiscount = isFinalCheckoutForRes ? activeRes!.depositPaid : 0;
-
       let baseTotal = rawTotal - percentDiscountAmount;
-      const originalBaseTotal = baseTotal;
-      baseTotal = Math.max(0, baseTotal - depositDiscount);
 
       const gst = baseTotal / 11;
       
@@ -410,115 +290,34 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         });
       }
 
-      if (isFinalCheckoutForRes && depositDiscount > 0) {
-        orderItems.push({
-          id: `DEP-APPLY-${Math.random().toString(36).substring(2, 6)}`,
-          name: `Previous Deposit Applied`,
-          sku: `DEP-APPLIED`,
-          price: -depositDiscount,
-          qty: 1,
-          category: 'Adjustment'
-        });
-      }
+      const newOrder: Order = {
+        id: `TK-${Math.floor(1000 + Math.random() * 9000)}`,
+        timestamp: new Date().toISOString(),
+        items: orderItems,
+        subtotal: baseTotal - gst,
+        tax: gst,
+        surcharge: surcharge,
+        total: finalTotal,
+        profit: totalProfit,
+        type: orderItems.some(i => (i.category || '').toLowerCase().includes('repair') || (i.category || '').toLowerCase().includes('service')) ? 'repair' : 'sale',
+        paymentMethod: paymentMethod,
+        mixedCash: paymentMethod === 'mixed' ? mixedCash : undefined,
+        mixedEftpos: paymentMethod === 'mixed' ? mixedEftpos : undefined
+      };
 
-      let newOrder: Order;
-
-      if (isDepositPayment) {
-        newOrder = {
-          id: `DEP-${Math.floor(1000 + Math.random() * 9000)}`,
-          timestamp: new Date().toISOString(),
-          items: [{
-            id: `DEP-ITEM`,
-            name: `Deposit Payment${activeRes ? ` - ${activeRes.customers.map(c => c.name).join(', ')}` : ''}`,
-            sku: 'DEPOSIT',
-            price: depositAmount,
-            qty: 1,
-            category: 'Adjustment'
-          }],
-          subtotal: depositAmount,
-          tax: 0,
-          surcharge: surcharge,
-          total: depositAmount + surcharge,
-          profit: depositAmount,
-          type: 'deposit',
-          paymentMethod: paymentMethod,
-          mixedCash: paymentMethod === 'mixed' ? mixedCash : undefined,
-          mixedEftpos: paymentMethod === 'mixed' ? mixedEftpos : undefined,
-          depositAmount: depositAmount,
-          outstandingAmount: activeRes ? (finalTotal - (activeRes.depositPaid + depositAmount)) : 0,
-          reservationCustomers: activeRes ? activeRes.customers : []
-        };
-
-        if (activeRes) {
-           const newPaid = activeRes.depositPaid + depositAmount;
-           const updatedRes = reservations.map(r => r.id === activeRes.id ? { ...r, depositPaid: newPaid, totalAmount: finalTotal } : r);
-           setReservations(updatedRes);
-           await api.updateSetting('ali_pos_reservations', JSON.stringify(updatedRes));
-           
-           for (const cust of activeRes.customers) {
-              const fullCustomer = customers.find(c => c.id === cust.id);
-              if (fullCustomer) {
-                  const targetRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing');
-                  if (targetRepair) {
-                     await api.updateRepair(targetRepair.id, {
-                        ...targetRepair,
-                        status: 'waiting for pay'
-                     });
-                  }
-              }
-           }
-        }
-      } else {
-        newOrder = {
-          id: `TK-${Math.floor(1000 + Math.random() * 9000)}`,
-          timestamp: new Date().toISOString(),
-          items: orderItems,
-          subtotal: baseTotal - gst,
-          tax: gst,
-          surcharge: surcharge,
-          total: finalTotal,
-          profit: totalProfit,
-          type: orderItems.some(i => (i.category || '').toLowerCase().includes('repair') || (i.category || '').toLowerCase().includes('service')) ? 'repair' : 'sale',
-          paymentMethod: paymentMethod,
-          mixedCash: paymentMethod === 'mixed' ? mixedCash : undefined,
-          mixedEftpos: paymentMethod === 'mixed' ? mixedEftpos : undefined
-        };
-
-        // IF FINAL PAYMENT FOR RESERVATION -> Auto-Complete
-        if (activeRes) {
-           const updatedRes = reservations.map(r => r.id === activeRes.id ? { ...r, status: 'completed' as const } : r);
-           setReservations(updatedRes);
-           await api.updateSetting('ali_pos_reservations', JSON.stringify(updatedRes));
-           
-           // Synchronize CRM
-           for (const cust of activeRes.customers) {
-              const fullCustomer = customers.find(c => c.id === cust.id);
-              if (fullCustomer) {
-                  const targetRepair = fullCustomer.repairs?.find(r => r.status === 'In Processing' || r.status === 'waiting for pay');
-                  if (targetRepair) {
-                     await api.updateRepair(targetRepair.id, {
-                        ...targetRepair,
-                        status: 'Completed'
-                     });
-                  }
-              }
-           }
-        }
-
-        // Deduct stock from inventory
-        const updatedInventory = [...inventory];
-        for (const cartItem of cart) {
-          const invItemIndex = updatedInventory.findIndex(i => i.name === cartItem.name);
-          if (invItemIndex !== -1) {
-            const invItem = updatedInventory[invItemIndex];
-            const newStock = Math.max(0, invItem.stock - cartItem.qty);
-            const updateData = { 
-              stock: newStock, 
-              status: newStock <= invItem.minStock ? 'low-stock' : invItem.status 
-            };
-            await api.updateInventoryItem(invItem.id, updateData);
-            updatedInventory[invItemIndex] = { ...invItem, ...updateData };
-          }
+      // Deduct stock from inventory
+      const updatedInventory = [...inventory];
+      for (const cartItem of cart) {
+        const invItemIndex = updatedInventory.findIndex(i => i.name === cartItem.name);
+        if (invItemIndex !== -1) {
+          const invItem = updatedInventory[invItemIndex];
+          const newStock = Math.max(0, invItem.stock - cartItem.qty);
+          const updateData = { 
+            stock: newStock, 
+            status: newStock <= invItem.minStock ? 'low-stock' : invItem.status 
+          };
+          await api.updateInventoryItem(invItem.id, updateData);
+          updatedInventory[invItemIndex] = { ...invItem, ...updateData };
         }
       }
 
@@ -529,9 +328,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       setInventory(updatedInventory);
       setCart([]);
       setDiscountPercent(0);
-      setActiveReservationId(null);
-      setIsDepositPayment(false);
-      setDepositAmount(0);
       setShowInvoice(true);
       
       setSuccessMessage(t('term', 'success'));
@@ -730,76 +526,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       {/* Right Column: Cart */}
       <aside className="lg:col-span-4 bg-surface-container-lowest lg:border-l border-outline-variant/10 p-6 flex flex-col rounded-3xl lg:rounded-none">
         
-        {/* Reservations Box */}
-        <div className="mb-6 bg-secondary-container/20 rounded-2xl border border-secondary/10 overflow-hidden">
-          <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors" onClick={() => setIsReservationsExpanded(!isReservationsExpanded)}>
-            <h3 className="text-sm font-black text-on-surface flex items-center gap-2">
-              <UserCircle size={16} className="text-primary" />
-              Customer Reservations
-            </h3>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={(e) => { e.stopPropagation(); setShowReservationModal(true); }}
-                className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all"
-              >
-                <Plus size={16} />
-              </button>
-              <div className={cn("transition-transform duration-300", !isReservationsExpanded ? "rotate-[-90deg]" : "")}>
-                <ChevronDown size={16} className="text-on-surface-variant" />
-              </div>
-            </div>
-          </div>
-          
-          <AnimatePresence>
-            {isReservationsExpanded && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="px-4 pb-4 space-y-2 max-h-48 overflow-y-auto no-scrollbar"
-              >
-                {reservations.filter(r => r.status === 'active' || r.id === activeReservationId).length === 0 ? (
-                  <p className="text-[10px] text-on-surface-variant italic text-center py-2">No active reservations.</p>
-                ) : (
-                  reservations.filter(r => r.status === 'active' || r.id === activeReservationId).map(res => (
-                    <div 
-                      key={res.id} 
-                      onClick={() => switchContext(res.id)}
-                      className={cn(
-                        "p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all",
-                        activeReservationId === res.id 
-                          ? "bg-primary text-on-primary border-primary shadow-sm"
-                          : "bg-surface-container hover:bg-surface-container-high border-outline-variant/10"
-                      )}
-                    >
-                      <div className="flex flex-col gap-0.5 max-w-[65%]">
-                        <span className="font-bold text-xs truncate">
-                          {res.customers.length > 0 ? res.customers.map(c => c.name).join(', ') : 'Unnamed'}
-                        </span>
-                        <span className="text-[9px] opacity-80">{res.items.length} items</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-black text-xs">${res.depositPaid.toFixed(2)} paid</span>
-                        <button 
-                          onClick={(e) => removeReservation(e, res.id)}
-                          className={cn("p-1 rounded-full opacity-60 hover:opacity-100 transition-opacity", 
-                            activeReservationId === res.id ? "hover:bg-primary-container text-on-primary" : "hover:bg-error/10 text-error"
-                          )}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+
 
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-extrabold tracking-tight">
-            {activeReservationId ? 'Reservation Cart' : t('term', 'currentCart')}
+            {t('term', 'currentCart')}
           </h2>
           <div className="flex items-center gap-2 text-on-surface-variant">
             <ShoppingCart size={16} />
@@ -1077,43 +808,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     </motion.div>
                   )}
 
-                  {/* Deposit Payment Toggle (only if active reservation) */}
-                  {activeReservationId && (
-                    <div className="pt-3 border-t border-outline-variant/10">
-                      <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-surface-container transition-colors">
-                        <input 
-                          type="checkbox" 
-                          checked={isDepositPayment} 
-                          onChange={(e) => setIsDepositPayment(e.target.checked)}
-                          className="w-4 h-4 rounded border-outline-variant/30 text-primary focus:ring-primary"
-                        />
-                        <span className="text-sm font-bold text-on-surface">Process as Deposit Payment</span>
-                      </label>
-                      
-                      <AnimatePresence>
-                        {isDepositPayment && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-3 space-y-1.5 overflow-hidden"
-                          >
-                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Deposit Amount to Pay</label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary font-black">$</span>
-                              <input 
-                                type="number"
-                                value={depositAmount || ''}
-                                onChange={(e) => setDepositAmount(Math.max(0, Number(e.target.value)))}
-                                className="w-full bg-primary/5 border border-primary/20 rounded-xl py-3 pl-7 pr-3 text-sm font-black focus:outline-none focus:ring-2 focus:ring-primary/40 text-primary"
-                                placeholder="0.00"
-                              />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  )}
+
                 </div>
 
                 <div className="bg-surface-container-low rounded-2xl p-5 space-y-2">
@@ -1174,110 +869,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         )}
       </AnimatePresence>
 
-      {/* Reservation Creation Modal */}
-      <AnimatePresence>
-        {showReservationModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowReservationModal(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 p-6 flex flex-col max-h-[80vh]"
-            >
-              <div className="flex items-center justify-between border-b border-outline-variant/10 pb-4 mb-4">
-                <h3 className="font-black text-xl text-on-surface flex items-center gap-2">
-                  <UserPlus className="text-primary" size={20} />
-                  New Customer Reservation
-                </h3>
-                <button onClick={() => setShowReservationModal(false)} className="w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center hover:bg-surface-container-highest transition-colors">
-                  <X size={16} />
-                </button>
-              </div>
 
-              <div className="space-y-4 overflow-y-auto pr-2 no-scrollbar">
-                {/* Search */}
-                <div className="relative">
-                  <input 
-                    type="text"
-                    placeholder="Search existing customers..."
-                    value={reservationSearch}
-                    onChange={(e) => setReservationSearch(e.target.value)}
-                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl py-3 px-11 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50">
-                    <Search size={16} />
-                  </div>
-                </div>
-
-                {/* Selected */}
-                {selectedCusts.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {selectedCusts.map(sc => (
-                      <div key={sc.id} className="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 border border-primary/20">
-                        {sc.name}
-                        <X size={12} className="cursor-pointer hover:scale-125 transition-transform" onClick={() => setSelectedCusts(p => p.filter(c => c.id !== sc.id))} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* List */}
-                <div className="space-y-2 mt-4">
-                  <p className="text-[10px] font-black uppercase text-on-surface-variant tracking-widest pl-1">In-Processing Customers</p>
-                  {customers
-                    .filter(c => c.repairs?.some(r => r.status === 'In Processing'))
-                    .filter(c => c.name.toLowerCase().includes(reservationSearch.toLowerCase()) || c.phone.includes(reservationSearch))
-                    .slice(0, 15).map(c => {
-                      const isSel = selectedCusts.some(sc => sc.id === c.id);
-                      const inProcRepairs = c.repairs?.filter(r => r.status === 'In Processing') || [];
-                      return (
-                        <div 
-                          key={c.id} 
-                          onClick={() => {
-                            if (isSel) setSelectedCusts(p => p.filter(sc => sc.id !== c.id));
-                            else setSelectedCusts(p => [...p, { id: c.id, name: c.name, phone: c.phone }]);
-                          }}
-                          className={cn(
-                            "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all",
-                            isSel ? "border-primary bg-primary/5" : "border-outline-variant/10 bg-surface-container hover:border-primary/30"
-                          )}
-                        >
-                          <div>
-                            <p className="font-bold text-sm text-on-surface">{c.name}</p>
-                            <p className="text-xs text-on-surface-variant">{c.phone}</p>
-                            {inProcRepairs.length > 0 && (
-                              <p className="text-[10px] text-primary/80 mt-1 font-semibold flex items-center gap-1">
-                                <Wrench size={10} />
-                                {inProcRepairs.map(r => r.modelNumber && r.modelNumber !== 'N/A' && r.modelNumber !== 'Layaway' ? r.modelNumber : r.repairItem).join(', ')}
-                              </p>
-                            )}
-                          </div>
-                          {isSel && <CheckCircle2 size={18} className="text-primary" />}
-                        </div>
-                      )
-                  })}
-                  {customers.filter(c => c.repairs?.some(r => r.status === 'In Processing')).length === 0 && (
-                    <p className="text-xs text-on-surface-variant italic p-2">No customers are currently in processing.</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-4 mt-auto border-t border-outline-variant/10">
-                <button 
-                  onClick={createReservation}
-                  disabled={selectedCusts.length === 0}
-                  className="w-full py-4 bg-primary text-on-primary rounded-xl font-bold shadow-lg disabled:opacity-50 transition-all hover:opacity-90"
-                >
-                  Create Reservation Setup
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       <InvoiceModal 
         isOpen={showInvoice} 

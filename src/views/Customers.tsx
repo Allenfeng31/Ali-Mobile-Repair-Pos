@@ -19,7 +19,8 @@ import {
   QrCode,
   Copy,
   Package,
-  Printer
+  Printer,
+  DollarSign
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -191,7 +192,8 @@ export function CustomersView() {
     liquidDamage: false,
     password: '',
     imei: '',
-    remark: ''
+    remark: '',
+    deposit: ''
   });
 
   const [repairFormData, setRepairFormData] = useState({
@@ -202,6 +204,7 @@ export function CustomersView() {
     password: '',
     imei: '',
     remark: '',
+    deposit: '',
     status: 'In Processing'
   });
 
@@ -342,6 +345,7 @@ export function CustomersView() {
           password: formData.password,
           imei: formData.imei,
           remark: formData.remark,
+          deposit: parseFloat(formData.deposit) || 0,
           status: 'In Processing'
         };
 
@@ -400,6 +404,7 @@ export function CustomersView() {
           password: formData.password,
           imei: formData.imei,
           remark: formData.remark,
+          deposit: parseFloat(formData.deposit) || 0,
           status: 'In Processing'
         };
 
@@ -480,7 +485,8 @@ export function CustomersView() {
       liquidDamage: false,
       password: '',
       imei: '',
-      remark: ''
+      remark: '',
+      deposit: ''
     });
   };
 
@@ -496,7 +502,8 @@ export function CustomersView() {
       liquidDamage: false,
       password: '',
       imei: '',
-      remark: ''
+      remark: '',
+      deposit: ''
     });
     setIsEditing(true);
   };
@@ -510,6 +517,7 @@ export function CustomersView() {
       password: repair.password || '',
       imei: repair.imei || '',
       remark: repair.remark || '',
+      deposit: (repair.deposit || 0).toString(),
       status: repair.status
     });
     setIsEditingRepair(true);
@@ -585,6 +593,7 @@ export function CustomersView() {
       password: repairFormData.password,
       imei: repairFormData.imei,
       remark: repairFormData.remark,
+      deposit: parseFloat(repairFormData.deposit) || 0,
       status: repairFormData.status
     };
 
@@ -819,6 +828,11 @@ export function CustomersView() {
                           </div>
                           <div className="text-right">
                             <p className="text-xs font-black text-primary">${repair.price.toFixed(2)}</p>
+                            {repair.deposit && repair.deposit > 0 && (
+                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-200 block mt-0.5">
+                                💰 Deposit: ${repair.deposit.toFixed(2)}
+                              </span>
+                            )}
                             <span 
                               onClick={(e) => { e.stopPropagation(); toggleRepairStatus(customer.id, repair.id, repair.status); }}
                               className={cn(
@@ -1085,7 +1099,12 @@ export function CustomersView() {
                         </div>
                         <div className="flex justify-between items-center mt-1.5">
                           <p className="text-[11px] font-bold text-on-surface-variant">Model: {item.modelNumber}</p>
-                          <p className="text-[11px] font-black text-primary">${item.price.toFixed(2)}</p>
+                          <div className="text-right">
+                            <p className="text-[11px] font-black text-primary">${item.price.toFixed(2)}</p>
+                            {item.deposit && item.deposit > 0 && (
+                              <p className="text-[9px] font-black text-green-600">💰 ${item.deposit.toFixed(2)}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1337,6 +1356,24 @@ export function CustomersView() {
                         </div>
 
                         <div className="space-y-2">
+                          <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                            <DollarSign size={12} className="text-green-600" />
+                            Deposit / 订金 (Optional)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 font-black text-sm">$</span>
+                            <input 
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-on-surface font-bold"
+                              value={formData.deposit}
+                              onChange={(e) => setFormData({...formData, deposit: e.target.value})}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
                           <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Remark</label>
                           <textarea 
                             placeholder="Special notes or instructions..."
@@ -1504,6 +1541,24 @@ export function CustomersView() {
                     </div>
 
                     <div className="space-y-2">
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                        <DollarSign size={12} className="text-green-600" />
+                        Deposit / 订金
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 font-black text-sm">$</span>
+                        <input 
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-on-surface font-bold"
+                          value={repairFormData.deposit}
+                          onChange={(e) => setRepairFormData({...repairFormData, deposit: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Remark</label>
                       <textarea 
                         placeholder="Special notes or instructions..."
@@ -1607,6 +1662,23 @@ export function CustomersView() {
                     </div>
                   </div>
 
+                    {selectedRepair.deposit && selectedRepair.deposit > 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-2xl border-2 border-green-300 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-md shadow-green-200">
+                            <DollarSign size={22} />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">Deposit Paid / 订金</p>
+                            <p className="text-lg font-black text-green-700">${selectedRepair.deposit.toFixed(2)}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Remaining</p>
+                          <p className="text-lg font-black text-green-700">${(selectedRepair.price - selectedRepair.deposit).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
                         <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Password</p>
@@ -1757,6 +1829,11 @@ export function CustomersView() {
                           </button>
                           <p className="font-black text-primary text-lg">${repair.price.toFixed(2)}</p>
                         </div>
+                        {repair.deposit && repair.deposit > 0 && (
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-lg bg-green-100 text-green-700 border border-green-200">
+                            💰 Deposit: ${repair.deposit.toFixed(2)}
+                          </span>
+                        )}
                         <div className="flex flex-col items-end gap-1 mt-1">
                            <span 
                             onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, repair.id, repair.status); }}
