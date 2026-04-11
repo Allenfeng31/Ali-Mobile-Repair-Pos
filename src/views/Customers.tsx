@@ -806,7 +806,7 @@ export function CustomersView() {
                           </div>
                           <div className="text-right">
                             <p className="text-xs font-black text-primary">${repair.price.toFixed(2)}</p>
-                            {repair.deposit && repair.deposit > 0 && (
+                            {(repair.deposit || 0) > 0 && (
                               <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-200 block mt-0.5">
                                 💰 Deposit: ${repair.deposit.toFixed(2)}
                               </span>
@@ -1079,7 +1079,7 @@ export function CustomersView() {
                           <p className="text-[11px] font-bold text-on-surface-variant">Model: {item.modelNumber}</p>
                           <div className="text-right">
                             <p className="text-[11px] font-black text-primary">${item.price.toFixed(2)}</p>
-                            {item.deposit && item.deposit > 0 && (
+                            {(item.deposit || 0) > 0 && (
                               <p className="text-[9px] font-black text-green-600">💰 ${item.deposit.toFixed(2)}</p>
                             )}
                           </div>
@@ -1640,7 +1640,7 @@ export function CustomersView() {
                     </div>
                   </div>
 
-                    {selectedRepair.deposit && selectedRepair.deposit > 0 && (
+                    {(selectedRepair.deposit || 0) > 0 && (
                       <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-2xl border-2 border-green-300 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-md shadow-green-200">
@@ -1807,7 +1807,7 @@ export function CustomersView() {
                           </button>
                           <p className="font-black text-primary text-lg">${repair.price.toFixed(2)}</p>
                         </div>
-                        {repair.deposit && repair.deposit > 0 && (
+                        {(repair.deposit || 0) > 0 && (
                           <span className="text-[9px] font-black px-2 py-0.5 rounded-lg bg-green-100 text-green-700 border border-green-200">
                             💰 Deposit: ${repair.deposit.toFixed(2)}
                           </span>

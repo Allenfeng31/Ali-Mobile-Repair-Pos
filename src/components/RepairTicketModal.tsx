@@ -311,7 +311,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                     <span className="font-black uppercase tracking-widest">Est. Total:</span>
                     <span className="text-xl font-black">${repair.price.toFixed(2)}</span>
                   </div>
-                  {repair.deposit && repair.deposit > 0 && (
+                  {(repair.deposit || 0) > 0 && (
                     <div className="mt-2 p-2 bg-gray-50 rounded-lg border border-gray-300">
                       <div className="flex justify-between items-center">
                         <span className="font-black text-[10px] uppercase tracking-widest">Deposit Paid:</span>
