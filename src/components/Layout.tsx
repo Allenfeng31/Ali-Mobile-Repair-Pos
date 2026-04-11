@@ -75,6 +75,9 @@ function SettingsPanel({
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
+      setSmsModel('');
+      setSmsRepair('');
+      setSmsAmount('');
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error(err);
