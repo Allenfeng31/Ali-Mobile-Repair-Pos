@@ -70,7 +70,7 @@ function SettingsPanel({
       return;
     }
     
-    const text = `Ali Mobile Repair\n\n型号 (Model): ${smsModel}\n维修项目 (Repair): ${smsRepair}\n金额 (Price): $${smsAmount}\n\n预约网址 (Booking): https://alimobile.com.au\n店面地址 (Address): Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\n联系电话 (Phone): 0481 058 514`;
+    const text = `Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair} for ${smsModel} is $${smsAmount}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\nPhone: 0481 058 514`;
     
     try {
       await navigator.clipboard.writeText(text);
@@ -214,14 +214,14 @@ function SettingsPanel({
                       type="text" 
                       value={smsModel}
                       onChange={(e) => setSmsModel(e.target.value)}
-                      placeholder="型号 (e.g. iPhone 13)"
+                      placeholder="Model (e.g. iPhone 13)"
                       className="w-full bg-surface-container-high rounded-xl px-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <input 
                       type="text" 
                       value={smsRepair}
                       onChange={(e) => setSmsRepair(e.target.value)}
-                      placeholder="维修项目 (e.g. Screen)"
+                      placeholder="Repair (e.g. Screen)"
                       className="w-full bg-surface-container-high rounded-xl px-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <div className="relative">
@@ -230,7 +230,7 @@ function SettingsPanel({
                         type="number" 
                         value={smsAmount}
                         onChange={(e) => setSmsAmount(e.target.value)}
-                        placeholder="金额 (Amount)"
+                        placeholder="Price (Amount)"
                         className="w-full bg-surface-container-high rounded-xl pl-7 pr-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                       />
                     </div>
@@ -251,7 +251,7 @@ function SettingsPanel({
 
                   {(smsModel || smsRepair || smsAmount) && (
                     <div className="p-3 bg-surface-container-highest rounded-xl text-[9px] whitespace-pre-wrap font-medium text-on-surface-variant border border-outline-variant/10 leading-relaxed mt-2">
-                      {`Ali Mobile Repair\n\n型号: ${smsModel}\n维修项目: ${smsRepair}\n金额: $${smsAmount || '0'}\n\n预约网址: https://alimobile.com.au\n店面地址: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\n联系电话: 0481 058 514`}
+                      {`Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair || '[Repair]'} for ${smsModel || '[Model]'} is $${smsAmount || '0'}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood\nPhone: 0481 058 514`}
                     </div>
                   )}
                 </div>

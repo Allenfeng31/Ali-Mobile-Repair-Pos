@@ -53,7 +53,7 @@ export function SettingsView({
       return;
     }
     
-    const text = `Ali Mobile Repair\n\n型号 (Model): ${smsModel}\n维修项目 (Repair): ${smsRepair}\n金额 (Price): $${smsAmount}\n\n预约网址 (Booking): https://alimobile.com.au\n店面地址 (Address): Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\n联系电话 (Phone): 0481 058 514`;
+    const text = `Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair} for ${smsModel} is $${smsAmount}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\nPhone: 0481 058 514`;
     
     try {
       await navigator.clipboard.writeText(text);
@@ -545,7 +545,7 @@ export function SettingsView({
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">型号 (Model)</label>
+                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Model</label>
                   <input 
                     type="text" 
                     value={smsModel}
@@ -555,7 +555,7 @@ export function SettingsView({
                   />
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">维修项目 (Repair Item)</label>
+                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Repair</label>
                   <input 
                     type="text" 
                     value={smsRepair}
@@ -567,14 +567,14 @@ export function SettingsView({
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">金额 (Amount)</label>
+                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Price (Amount)</label>
                 <div className="relative">
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
                   <input 
                     type="number" 
                     value={smsAmount}
                     onChange={(e) => setSmsAmount(e.target.value)}
-                    placeholder="150"
+                    placeholder="200"
                     className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-2xl pl-9 pr-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
@@ -598,7 +598,7 @@ export function SettingsView({
               {/* Preview Box */}
               {(smsModel || smsRepair || smsAmount) && (
                 <div className="mt-6 p-4 bg-surface-container-highest rounded-xl border border-outline-variant/10 text-sm whitespace-pre-wrap font-medium text-on-surface-variant">
-                  {`Ali Mobile Repair\n\n型号 (Model): ${smsModel}\n维修项目 (Repair): ${smsRepair}\n金额 (Price): $${smsAmount || '0'}\n\n预约网址 (Booking): https://alimobile.com.au\n店面地址 (Address): Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\n联系电话 (Phone): 0481 058 514`}
+                  {`Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair || '[Repair]'} for ${smsModel || '[Model]'} is $${smsAmount || '0'}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\nPhone: 0481 058 514`}
                 </div>
               )}
             </div>
