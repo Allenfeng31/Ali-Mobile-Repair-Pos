@@ -167,20 +167,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   const addToCart = (item: any) => {
     if (searchQuery) setSearchQuery('');
-    setCart(prev => {
-      const existing = prev.find(i => i.name === item.name);
-      if (existing) {
-        return prev.map(i => i.name === item.name ? { ...i, qty: i.qty + 1 } : i);
-      }
-      return [...prev, { 
-        id: Math.random().toString(36).substr(2, 9), 
-        name: item.name, 
-        sku: `SKU-${item.name.substring(0, 3).toUpperCase()}`, 
-        price: item.price, 
-        qty: 1, 
-        icon: item.icon 
-      }];
-    });
+    setCart(prev => [...prev, { 
+      id: Math.random().toString(36).substr(2, 9), 
+      name: item.name, 
+      sku: `SKU-${item.name.substring(0, 3).toUpperCase()}`, 
+      price: item.price, 
+      qty: 1, 
+      icon: item.icon 
+    }]);
   };
 
   const removeFromCart = (id: string) => {
@@ -468,7 +462,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             <div 
               key={item.id}
               onClick={() => addToCart(item)}
-              className="bg-surface-container-lowest p-3 rounded-xl transition-all hover:ring-2 hover:ring-primary/20 group cursor-pointer relative overflow-hidden border border-outline-variant/5 flex flex-col justify-between h-full min-h-[140px]"
+              className="bg-surface-container-lowest p-3 rounded-xl transition-all hover:ring-2 hover:ring-primary/20 group cursor-pointer relative overflow-hidden border border-outline-variant/5 flex flex-col justify-between h-full min-h-[140px] active:scale-[0.93] active:ring-2 active:ring-primary/40 active:shadow-inner duration-150"
             >
               <div className="space-y-2">
                 <div className="flex justify-between items-start">
