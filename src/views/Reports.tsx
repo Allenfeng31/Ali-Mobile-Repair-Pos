@@ -202,11 +202,11 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   };
 
   const searchedOrders = useMemo(() => {
-    if (!searchOrderQuery.trim()) return orders;
-    return orders.filter(o => 
+    if (!searchOrderQuery.trim()) return filteredOrders;
+    return filteredOrders.filter(o => 
       (o.id || '').toLowerCase().includes(searchOrderQuery.toLowerCase())
     );
-  }, [orders, searchOrderQuery]);
+  }, [filteredOrders, searchOrderQuery]);
 
   const totalPages = Math.ceil(searchedOrders.length / ITEMS_PER_PAGE);
   const displayedOrders = searchedOrders.slice((orderPage - 1) * ITEMS_PER_PAGE, orderPage * ITEMS_PER_PAGE);
