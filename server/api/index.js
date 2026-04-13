@@ -879,6 +879,9 @@ app.delete('/api/chat/session/id/:id', async (req, res) => {
   const { error } = await supabase
     .from('chat_sessions')
     .delete()
+    .eq('id', req.params.id);
+  
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
 
