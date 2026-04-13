@@ -416,7 +416,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-[10px] font-black text-on-surface-variant uppercase mb-1 flex items-center gap-2">
-                      {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • <span className="text-primary">{order.paymentMethod ? order.paymentMethod.toUpperCase() : 'CASH'}</span>
+                      {new Date(order.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • <span className="text-primary">{order.paymentMethod ? order.paymentMethod.toUpperCase() : 'CASH'}</span>
                       {order.status === 'refunded' && <span className="bg-error/10 text-error px-1.5 py-0.5 rounded text-[8px] tracking-widest">REFUNDED</span>}
                     </p>
                     <p className={cn("text-sm font-bold leading-tight", order.status === 'refunded' ? "text-on-surface-variant line-through" : "text-on-surface")}>
