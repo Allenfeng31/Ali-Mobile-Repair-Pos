@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   UserPlus, 
@@ -20,14 +20,15 @@ import {
   Copy,
   Package,
   Printer,
-  DollarSign
+  DollarSign,
+  Scan
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { useEffect } from 'react';
 import { RepairTicketModal } from '../components/RepairTicketModal';
 import { api } from '../lib/api';
+import { OCRImeiScanner } from '../components/OCRImeiScanner';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   { 
@@ -166,6 +167,7 @@ export function CustomersView() {
   const [reviewSent, setReviewSent] = useState(false);
   const [partNotifiedId, setPartNotifiedId] = useState<string | null>(null);
   const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
+  const [scannerTarget, setScannerTarget] = useState<'add' | 'repair' | null>(null);
 
   
   const [formData, setFormData] = useState({
@@ -1324,13 +1326,23 @@ export function CustomersView() {
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI / Serial Number</label>
-                          <input 
-                            type="text"
-                            placeholder="IMEI Number"
-                            className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
-                            value={formData.imei}
-                            onChange={(e) => setFormData({...formData, imei: e.target.value})}
-                          />
+                          <div className="flex gap-2">
+                            <input 
+                              type="text"
+                              placeholder="IMEI Number"
+                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              value={formData.imei}
+                              onChange={(e) => setFormData({...formData, imei: e.target.value})}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setScannerTarget('add')}
+                              className="bg-primary/10 text-primary p-4 rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center shrink-0"
+                              title="Scan IMEI using Camera"
+                            >
+                              <Scan size={20} />
+                            </button>
+                          </div>
                         </div>
 
                         <div className="space-y-2">
@@ -1508,13 +1520,23 @@ export function CustomersView() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI</label>
-                        <input 
-                          type="text"
-                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
-                          value={repairFormData.imei}
-                          onChange={(e) => setRepairFormData({...repairFormData, imei: e.target.value})}
-                        />
+                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI / Serial Number</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text"
+                            className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                            value={repairFormData.imei}
+                            onChange={(e) => setRepairFormData({...repairFormData, imei: e.target.value})}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setScannerTarget('repair')}
+                            className="bg-primary/10 text-primary p-4 rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center shrink-0"
+                            title="Scan IMEI using Camera"
+                          >
+                            <Scan size={20} />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -1989,6 +2011,22 @@ export function CustomersView() {
         customer={selectedCustomer}
         t={t}
       />
+
+      {/* IMEI Camera Scanner Overlay */}
+      <AnimatePresence>
+        {scannerTarget && (
+          <OCRImeiScanner
+            onScan={(text) => {
+              if (scannerTarget === 'add') {
+                setFormData(prev => ({ ...prev, imei: text }));
+              } else if (scannerTarget === 'repair') {
+                setRepairFormData(prev => ({ ...prev, imei: text }));
+              }
+            }}
+            onClose={() => setScannerTarget(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
