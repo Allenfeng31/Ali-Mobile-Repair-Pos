@@ -66,16 +66,16 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 
 const SMS_MESSAGES = {
   dropoff: (name) =>
-    `Hi ${name}! Thank you for choosing Ali Mobile Repair. Your device has been successfully checked in. Our technicians will assess it right away and we'll send you a text as soon as your repair is complete. We appreciate your trust! 📱`,
+    `Hi ${name}, your device is safely checked in at Ali Mobile Repair. We'll text you as soon as the repair is complete. Thank you!`,
 
   completed: (name, device) =>
-    `Great news, ${name}! 🎉 Your ${device} repair at Ali Mobile Repair is now complete and ready for pickup. Please visit us at your convenience. We look forward to seeing you!`,
+    `Great news ${name}! Your ${device} repair at Ali Mobile Repair is complete. It is ready for pickup at your earliest convenience.`,
 
   review: (name) =>
-    `Hi ${name}! Thank you for choosing Ali Mobile Repair. We hope you're happy with the service! If you have a moment, we'd really appreciate a Google review — it means the world to us 🙏\n${googleReviewLink}`,
+    `Hi ${name}, thanks for picking Ali Mobile Repair! Please leave us a quick review here:\n${googleReviewLink}`,
 
   partArrived: (name, device) =>
-    `Hi ${name}, good news! The parts for your ${device} have arrived at Ali Mobile Repair. Please come in for pickup or repair at your convenience. See you soon! 🎉`,
+    `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Please visit us soon for your repair.`,
 };
 
 app.post('/api/sms/send', async (req, res) => {
