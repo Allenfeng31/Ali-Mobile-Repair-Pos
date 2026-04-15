@@ -86,6 +86,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
     } else {
       pdfInstance.save(`invoice-${order.id}.pdf`);
     }
+    onClose();
   };
 
   const handlePrint = async () => {
@@ -189,6 +190,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
+          onClose();
         }, 500);
       }
     } catch (err: any) {

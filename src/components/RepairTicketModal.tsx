@@ -84,6 +84,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   const handleSavePDF = async () => {
     if (!pdfInstance || !repair) return;
     pdfInstance.save(`repair-ticket-${repair.id}.pdf`);
+    onClose();
   };
 
   const handlePrint = async () => {
@@ -216,6 +217,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
+          onClose();
         }, 500);
       }
     } catch (err: any) {
