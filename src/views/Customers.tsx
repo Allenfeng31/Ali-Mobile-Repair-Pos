@@ -1467,9 +1467,9 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-md bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+              className="relative w-full max-w-md bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[90vh]"
             >
-              <div className="p-8">
+              <div className="p-8 pb-4">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-black text-primary">
                     {isEditingRepair ? 'Edit Repair Record' : 'Repair Details'}
@@ -1478,6 +1478,9 @@ export function CustomersView() {
                     <X size={20} />
                   </button>
                 </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-8 pb-8 custom-scrollbar">
 
                 {isEditingRepair ? (
                   <form onSubmit={handleUpdateRepair} className="space-y-5">

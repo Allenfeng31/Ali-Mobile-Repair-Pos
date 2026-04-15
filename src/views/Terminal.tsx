@@ -674,9 +674,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+              className="relative w-full max-w-lg bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[90vh]"
             >
-              <div className="p-8 space-y-6">
+              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                 <div className="flex justify-between items-start">
                   <div className="w-12 h-12 rounded-2xl bg-primary-container/10 flex items-center justify-center text-primary">
                     <ShoppingCart size={24} />
