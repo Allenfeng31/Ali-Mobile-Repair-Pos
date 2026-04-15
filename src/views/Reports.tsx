@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils';
 import { Order } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface ReportsViewProps {
   orders: Order[];
@@ -61,6 +62,15 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const [searchOrderQuery, setSearchOrderQuery] = useState('');
   const [orderPage, setOrderPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  // Lock body scroll when any modal is open
+  useScrollLock(
+    !!selectedOrder || 
+    showInvoiceModal || 
+    showRevenueModal || 
+    showSurchargeModal || 
+    showTaxModal
+  );
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {

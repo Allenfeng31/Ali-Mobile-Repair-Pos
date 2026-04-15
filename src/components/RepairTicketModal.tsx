@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Printer, FileDown, CheckCircle2, QrCode } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RepairRecord, Customer } from '../types';
+import { useScrollLock } from '../hooks/useScrollLock';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 
@@ -15,6 +16,7 @@ interface RepairTicketModalProps {
 }
 
 export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: RepairTicketModalProps) {
+  useScrollLock(isOpen);
   const ticketRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [pdfInstance, setPdfInstance] = React.useState<jsPDF | null>(null);

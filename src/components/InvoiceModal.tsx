@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Order } from '../types';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface InvoiceModalProps {
 }
 
 export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
+  useScrollLock(isOpen);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [pdfInstance, setPdfInstance] = React.useState<jsPDF | null>(null);

@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const { callModelWithRetry } = require('../utils/api-utils.js');
 // Only load dotenv in local development (where .env file exists)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -117,12 +118,12 @@ app.post('/api/sms/send', async (req, res) => {
     if (type === 'review') {
       const timestamp = new Date().toISOString();
       const updateFilter = customerId ? { id: customerId } : { phone: to };
-      
+
       const { error: updateError } = await supabase
         .from('customers')
         .update({ lastReviewSent: timestamp })
         .match(updateFilter);
-      
+
       if (updateError) {
         console.error(`❌ [SMS] Failed to update lastReviewSent: ${updateError.message}`);
       }
@@ -155,7 +156,7 @@ app.post('/api/login', async (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
-  
+
   const { data, error } = await supabase
     .from('pos_users')
     .select('*')
@@ -189,7 +190,7 @@ app.put('/api/users/:id', async (req, res) => {
     .select();
 
   if (error) return res.status(500).json({ error: error.message });
-  
+
   const { password: _, ...user } = data[0];
   res.json(user);
 });
@@ -202,23 +203,23 @@ app.get('/api/inventory', async (req, res) => {
     let allData = [];
     let from = 0;
     const step = 1000;
-    
+
     while (true) {
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
         .order('id', { ascending: true })
         .range(from, from + step - 1);
-        
+
       if (error) throw error;
       if (!data || data.length === 0) break;
-      
+
       allData = allData.concat(data);
       if (data.length < step) break;
-      
+
       from += step;
     }
-    
+
     res.json(allData);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -265,7 +266,7 @@ app.get('/api/orders', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   const { items, ...fullOrderData } = req.body;
-  
+
   // Explicitly pick only the columns that exist in the 'orders' table.
   // This prevents schema errors if new fields (like 'surcharge') haven't been
   // added to the database yet via a migration.
@@ -280,13 +281,13 @@ app.post('/api/orders', async (req, res) => {
   // Insert Order - if surcharge column doesn't exist yet, retry without it
   let order, orderError;
   ({ data: order, error: orderError } = await supabase.from('orders').insert([orderData]).select());
-  
+
   if (orderError && orderError.message && orderError.message.includes("surcharge")) {
     // Fallback: column doesn't exist in DB yet, insert without surcharge
     const { surcharge: _removed, ...orderDataWithoutSurcharge } = orderData;
     ({ data: order, error: orderError } = await supabase.from('orders').insert([orderDataWithoutSurcharge]).select());
   }
-  
+
   if (orderError) return res.status(500).json({ error: orderError.message });
 
   // Insert Order Items
@@ -433,7 +434,7 @@ app.post('/api/appointments', async (req, res) => {
 app.patch('/api/appointments/:id/status', async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
-  
+
   if (!['confirmed', 'declined'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
@@ -457,21 +458,21 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
   if (status === 'confirmed') {
     const phone = appointment.phone;
     const name = appointment.customer_name;
-    
+
     console.log(`🔍 [Appointment] Checking/Creating customer for ${name} (${phone})`);
 
     // Check if customer exists by phone
     const { data: existing, error: checkError } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('phone', phone);
+      .from('customers')
+      .select('id')
+      .eq('phone', phone);
 
     if (checkError) console.error(`⚠️ [Appointment] Error checking existing customer: ${checkError.message}`);
 
     if (!existing || existing.length === 0) {
       // Normalize phone for storage (optional, but good for matching)
-      const cleanPhone = phone.replace(/\D/g, ''); 
-      
+      const cleanPhone = phone.replace(/\D/g, '');
+
       // Calculate initials safely
       const names = name.trim().split(/\s+/).filter(Boolean);
       let initials = names[0]?.[0] || 'C';
@@ -507,7 +508,7 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       const model = appointment.model || '';
       const service = appointment.service || 'Repair';
       const scheduledTime = appointment.datetime || '';
-      
+
       const dateObj = new Date(scheduledTime);
       const displayTime = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
 
@@ -535,7 +536,7 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       }
     } else {
       console.log(`ℹ️ [Appointment] Customer ${name} already exists (ID: ${existing[0].id})`);
-      
+
       // Still create a repair record for existing customer
       const existingCustomerId = existing[0].id;
       const brand = appointment.brand || '';
@@ -544,7 +545,7 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       const scheduledTime = appointment.datetime || '';
       const dateObj = new Date(scheduledTime);
       const displayTime = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
-      
+
       const repairId = `R-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
       const { error: repairError } = await supabase.from('repairs').insert({
@@ -605,7 +606,7 @@ app.delete('/api/repairs/:id', async (req, res) => {
 app.get('/api/settings', async (req, res) => {
   const { data, error } = await supabase.from('settings').select('*');
   if (error) return res.status(500).json({ error: error.message });
-  
+
   const settingsMap = {};
   data.forEach(item => { settingsMap[item.key] = item.value; });
   res.json(settingsMap);
@@ -628,11 +629,11 @@ app.post('/api/blog/generate', (req, res) => {
   try {
     const scriptPath = path.join(__dirname, '../../scripts/generate-blog.mjs');
     console.log(`🤖 [AI Blog] Generating draft for topic: ${topic}`);
-    
+
     // Run the script with --json flag
     const result = execSync(`node "${scriptPath}" --json "${topic}"`, { encoding: 'utf-8' });
     const draft = JSON.parse(result);
-    
+
     res.json(draft);
   } catch (err) {
     console.error('❌ [AI Blog] Generation failed:', err.message);
@@ -659,7 +660,7 @@ app.post('/api/blog/confirm', async (req, res) => {
       console.log(`📥 [AI Blog] Dowloading AI image for: ${slug}`);
       const response = await fetch(cloudImageUrl);
       if (!response.ok) throw new Error(`Failed to download image: ${response.statusText}`);
-      
+
       const buffer = Buffer.from(await response.arrayBuffer());
       fs.writeFileSync(imagePath, buffer);
       console.log(`🖼️ [AI Blog] Saved local image: ${imagePath}`);
@@ -667,7 +668,7 @@ app.post('/api/blog/confirm', async (req, res) => {
 
     // 3. Write Markdown file
     fs.writeFileSync(markdownPath, content);
-    
+
     console.log(`✅ [AI Blog] Published new post: ${slug}`);
     res.json({ success: true, slug });
   } catch (err) {
@@ -826,7 +827,7 @@ app.get('/api/chat/sessions', async (req, res) => {
     .order('last_message_at', { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
-  
+
   // Filter out sessions that have no messages (ghost sessions)
   const activeSessions = (data || []).filter(s => s.chat_messages && s.chat_messages.length > 0);
   res.json(activeSessions);
@@ -880,7 +881,7 @@ app.delete('/api/chat/session/id/:id', async (req, res) => {
     .from('chat_sessions')
     .delete()
     .eq('id', req.params.id);
-  
+
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });

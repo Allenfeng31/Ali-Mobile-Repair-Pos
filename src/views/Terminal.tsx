@@ -32,6 +32,7 @@ import { InventoryItem, Order, OrderItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { api } from '../lib/api';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface TerminalViewProps {
   inventory: InventoryItem[];
@@ -103,6 +104,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [numpadItem, setNumpadItem] = useState<any | null>(null);
   const [numpadValue, setNumpadValue] = useState('');
   const [isFirstStroke, setIsFirstStroke] = useState(true);
+
+  // Lock body scroll when any modal is open
+  useScrollLock(isConfirming || showInvoice || !!numpadItem);
 
 
   React.useEffect(() => {

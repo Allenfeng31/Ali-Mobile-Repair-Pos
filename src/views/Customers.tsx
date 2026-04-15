@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { RepairTicketModal } from '../components/RepairTicketModal';
 import { api } from '../lib/api';
 import { OCRImeiScanner } from '../components/OCRImeiScanner';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   { 
@@ -168,6 +169,19 @@ export function CustomersView() {
   const [partNotifiedId, setPartNotifiedId] = useState<string | null>(null);
   const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
   const [scannerTarget, setScannerTarget] = useState<'add' | 'repair' | null>(null);
+
+  // Lock body scroll when any modal is open
+  useScrollLock(
+    isAdding || 
+    isEditing || 
+    isViewingAllOrders || 
+    !!selectedRepair || 
+    isConfirmingDelete || 
+    isConfirmingDeleteRepair || 
+    showQR || 
+    isTicketModalOpen || 
+    !!scannerTarget
+  );
 
   
   const [formData, setFormData] = useState({
