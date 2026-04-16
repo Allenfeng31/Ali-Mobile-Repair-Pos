@@ -187,21 +187,6 @@ export default function Home() {
           CALL US
         </a>
       </div>
-      
-      <style jsx>{`
-        .mobile-fab {
-          display: none;
-          position: fixed;
-          bottom: 24px;
-          right: 24px;
-          z-index: 1000;
-        }
-        @media (max-width: 768px) {
-          .mobile-fab {
-            display: block;
-          }
-        }
-      `}</style>
     </>
   );
 }

@@ -723,12 +723,19 @@ input:checked + .toggle-slider:before {
   .hero h1 {
     font-size: 1.8rem;
   }
+}
 
-  .nav-links a {
-    font-size: 0.85rem;
-  }
+/* ─── Mobile FAB ────────────────────────────────── */
+.mobile-fab {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
 
-  .nav-logo {
-    height: 35px;
+@media (max-width: 768px) {
+  .mobile-fab {
+    display: block;
   }
 }
