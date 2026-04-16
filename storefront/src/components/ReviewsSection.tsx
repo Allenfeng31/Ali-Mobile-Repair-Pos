@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Review {
   id: number;
@@ -282,18 +283,27 @@ export default function ReviewsSection() {
                       paddingBottom: '4px'
                     }}>
                       {review.photos.map((photo, idx) => (
-                        <img 
+                        <div 
                           key={idx}
-                          src={photo}
-                          alt="Review attachment"
                           style={{
+                            position: 'relative',
                             width: '60px',
                             height: '60px',
-                            objectFit: 'cover',
+                            flexShrink: 0,
                             borderRadius: '10px',
+                            overflow: 'hidden',
                             border: '1px solid var(--layer-border)'
                           }}
-                        />
+                        >
+                          <Image 
+                            src={photo}
+                            alt="Review attachment"
+                            fill
+                            style={{
+                              objectFit: 'cover'
+                            }}
+                          />
+                        </div>
                       ))}
                     </div>
                   )}
