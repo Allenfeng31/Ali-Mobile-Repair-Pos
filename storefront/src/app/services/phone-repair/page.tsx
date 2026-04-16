@@ -10,17 +10,15 @@ export const metadata: Metadata = {
 };
 
 const defaultPhonePricing = [
-  { model: "iPhone 17 / 17 Pro", service: "Premium Screen replacement", price: 499 },
-  { model: "iPhone 13", service: "Screen replacement", price: 189 },
-  { model: "iPhone 11", service: "Screen replacement", price: 149 },
-  { model: "Samsung S23 Ultra", service: "Genuine Screen + Frame", price: 499 },
-  { model: "Google Pixel 7 Pro", service: "OLED Screen Repair", price: 299 },
+  { model: "iPhone 17 / 17 Pro", service: "Premium Screen replacement", price: 499, search: "iphone 17 screen" },
+  { model: "iPhone 13 / 13 Pro", service: "Screen replacement", price: 189, search: "iphone 13 screen" },
+  { model: "iPhone 11", service: "Screen replacement", price: 149, search: "iphone 11 screen" }
 ];
 
 const phoneFAQs = [
   {
     question: "Do you offer same-day phone repairs?",
-    answer: "Absolutely! During any weekday, we have immediate access to parts and guarantee same-day repairs to get you back online fast."
+    answer: "Absolutely! During any weekday, if we have the parts in stock, repairs take just 15-30 minutes. If we need to source a specific component from our local suppliers, we still guarantee the repair will be completed on the exact same day!"
   },
   {
     question: "How long does a typical phone screen repair take at your Ringwood store?",
@@ -58,12 +56,12 @@ export default function PhoneRepairPage() {
         </p>
         
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--primary)', fontWeight: 'bold' }}>
-          Take advantage of our Weekday Same-Day repair service! We have immediate access to parts and guarantee 15-30 minute same-day repairs on all weekdays!
+          Take advantage of our Weekday Same-Day repair service! If we have the parts in stock, your phone will be fixed in just 15-30 minutes. Even if we need to quickly source a part locally, we still guarantee it will be completed the exact same day!
         </p>
 
         <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
         <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.1rem' }}>
-          <li><strong>Weekday Same-Day Repair Guarantee:</strong> Immediate access to components.</li>
+          <li><strong>Weekday Same-Day Repair Guarantee:</strong> We ensure same-day completion.</li>
           <li>Premium Quality Screens & Parts Available</li>
           <li>On-the-spot Repair (15-30 min typically for phones)</li>
           <li>No Fix, No Charge Policy</li>

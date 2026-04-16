@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 };
 
 const defaultTabletPricing = [
-  { model: "iPad Pro 12.9\" (6th Gen)", service: "Screen & Digitizer Repair", price: 399 },
-  { model: "iPad Air 5 / 4", service: "LCD & Glass Replacement", price: 229 },
-  { model: "iPad 10th / 9th Gen", service: "Glass (Digitizer) Replacement", price: 129 },
-  { model: "Samsung Tab S9 Ultra", service: "Genuine Display Assembly", price: 449 },
-  { model: "All Tablets", service: "Battery replacement", price: 99 },
+  { model: "iPad 10th Gen", service: "Screen replacement", price: 170, search: "ipad 10 screen" },
+  { model: "iPad 7 / 8 / 9", service: "Screen replacement", price: 130, search: "ipad 7 screen" },
+  { model: "iPad 6", service: "Screen replacement", price: 120, search: "ipad 6 screen" },
+  { model: "iPad 7 / 8 / 9", service: "Battery replacement", price: 110, search: "ipad 7 battery" },
+  { model: "iPad 6", service: "Battery replacement", price: 90, search: "ipad 6 battery" },
 ];
 
 const tabletFAQs = [

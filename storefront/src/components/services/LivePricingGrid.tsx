@@ -67,15 +67,24 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
         const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
         const filtered = parsed.filter(i => i.deviceType === deviceType && i.price > 0);
         
-        // Group by model, take a few popular ones
-        const uniqueModels = Array.from(new Set(filtered.map(i => i.deviceModel))).slice(0, 5);
-        const displayItems = uniqueModels.map(model => {
-          const serviceItem = filtered.find(i => i.deviceModel === model && i.service.toLowerCase().includes("screen"));
-          return serviceItem || filtered.find(i => i.deviceModel === model)!;
-        }).filter(Boolean);
+        // Map over defaultItems to explicitly show what the page requested, but update the price if we find it in the DB.
+        const updatedItems = defaultItems.map(item => {
+           if (item.search) {
+             const searchTerms = item.search.toLowerCase().split(' ');
+             const match = filtered.find(i => {
+                const combined = `${i.deviceModel} ${i.service}`.toLowerCase();
+                // Every term in the search string must be found in the POS inventory item
+                return searchTerms.every((term: string) => combined.includes(term));
+             });
+             if (match && match.price > 0) {
+               return { ...item, price: match.price };
+             }
+           }
+           return item;
+        });
 
-        if (displayItems.length > 0) {
-          setItems(displayItems);
+        if (updatedItems.length > 0) {
+          setItems(updatedItems);
         }
       } catch (error) {
         console.error("Error fetching live prices:", error);
