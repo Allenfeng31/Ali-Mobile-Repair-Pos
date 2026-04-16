@@ -1,9 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { Tablet, CheckCircle2 } from 'lucide-react';
-import { PricingGrid } from '@/components/services/PricingGrid';
-import { FAQAccordion } from '@/components/services/FAQAccordion';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
+import LivePricingGrid from '@/components/services/LivePricingGrid';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -11,12 +9,12 @@ export const metadata: Metadata = {
   description: 'Fast iPad and Samsung Tab repairs in Melbourne. Screen replacement, battery fixing, and charging port repair for all tablet models.',
 };
 
-const tabletPricing = [
-  { model: "iPad Pro 12.9\" (6th Gen)", service: "Screen & Digitizer Repair", price: "$399" },
-  { model: "iPad Air 5 / 4", service: "LCD & Glass Replacement", price: "$229" },
-  { model: "iPad 10th / 9th Gen", service: "Glass (Digitizer) Replacement", price: "$129" },
-  { model: "Samsung Tab S9 Ultra", service: "Genuine Display Assembly", price: "$449" },
-  { model: "All Tablets", service: "Battery replacement", price: "$99" },
+const defaultTabletPricing = [
+  { model: "iPad Pro 12.9\" (6th Gen)", service: "Screen & Digitizer Repair", price: 399 },
+  { model: "iPad Air 5 / 4", service: "LCD & Glass Replacement", price: 229 },
+  { model: "iPad 10th / 9th Gen", service: "Glass (Digitizer) Replacement", price: 129 },
+  { model: "Samsung Tab S9 Ultra", service: "Genuine Display Assembly", price: 449 },
+  { model: "All Tablets", service: "Battery replacement", price: 99 },
 ];
 
 const tabletFAQs = [
@@ -36,56 +34,52 @@ const tabletFAQs = [
 
 export default function TabletRepairPage() {
   return (
-    <div className="min-h-screen bg-surface pt-32 pb-20">
+    <>
       <ServiceSchema 
         serviceName="Tablet & iPad Repair Services Melbourne"
         description="Professional iPad and tablet repair services in Ringwood, Melbourne. Expert screen and battery replacements for all makes and models."
         faqs={tabletFAQs}
       />
 
-      <div className="container max-w-5xl mx-auto px-6">
-        <div className="flex flex-col md:row items-center gap-12 mb-20">
-          <div className="flex-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-full text-xs font-black uppercase tracking-widest mb-6">
-              <Tablet size={16} /> Tablet Specialist
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black text-on-surface mb-6 tracking-tight leading-tight">
-              Professional Tablet & <span className="text-primary italic">iPad</span> Repairs
-            </h1>
-            <p className="text-on-surface-variant text-lg font-medium leading-relaxed mb-8">
-              From shattered iPad screens to unresponsive Samsung Tabs, we provide expert level hardware repairs to get your tablet back in your hands quickly.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                <CheckCircle2 size={18} className="text-success" /> Quality Components
-              </div>
-              <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                <CheckCircle2 size={18} className="text-success" /> Same Day Service
-              </div>
-            </div>
-          </div>
-          <div className="w-full md:w-1/3 aspect-[4/5] bg-surface-container-low rounded-[3rem] border border-outline-variant/10 relative overflow-hidden flex items-center justify-center p-8">
-            <Tablet size={120} className="text-primary/10" />
-            <div className="absolute bottom-8 left-8 right-8 p-4 bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl">
-              <p className="text-xs font-black uppercase tracking-widest text-primary mb-1">Starting Price</p>
-              <p className="text-2xl font-black text-on-surface">$129 <span className="text-sm font-medium text-on-surface-variant">/ screen</span></p>
-            </div>
-          </div>
+      <div className="page-container">
+        <div style={{ display: 'inline-block', padding: '0.4rem 1.2rem', background: 'rgba(0,122,255,0.1)', color: 'var(--primary)', borderRadius: '30px', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          Tablet Specialist
         </div>
-
-        <PricingGrid title="Popular Tablet Repair Pricing" items={tabletPricing} />
-        <FAQAccordion items={tabletFAQs} />
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Professional Tablet & iPad Repairs</h1>
         
-        <div className="mt-20 p-12 bg-surface-container-low rounded-[3.5rem] text-center border border-outline-variant/10">
-          <h2 className="text-3xl font-black text-on-surface mb-4">Tablet acting up?</h2>
-          <p className="text-on-surface-variant font-medium mb-10 max-w-xl mx-auto">
-            Book a session with our Ringwood expert today and get a full health check for your device.
-          </p>
-          <Link href="/book-repair" className="inline-flex items-center gap-4 bg-primary text-on-primary px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8' }}>
+          From shattered iPad touch glasses to unresponsive Samsung Tabs displays, we provide expert level hardware repairs to get your tablet back in your hands quickly. We use premium components to ensure your tablet functions perfectly.
+        </p>
+
+        <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
+        <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.1rem' }}>
+          <li>Quality Components for iPads & Tabs</li>
+          <li>Most screen replacements done the same day</li>
+          <li>Detailed diagnostic checks prior to repair</li>
+          <li>180-Day Comprehensive Warranty</li>
+        </ul>
+
+        {/* Live Pricing Section */}
+        <LivePricingGrid 
+          title="Popular Tablet Repair Pricing"
+          deviceType="tablet"
+          defaultItems={defaultTabletPricing}
+        />
+
+        <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Frequently Asked Questions</h2>
+        {tabletFAQs.map((faq, index) => (
+          <div key={index} style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{faq.question}</h3>
+            <p style={{ opacity: 0.8, lineHeight: '1.6' }}>{faq.answer}</p>
+          </div>
+        ))}
+
+        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+          <Link href="/book-repair" className="primary-btn">
             Book Appointment
           </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 }

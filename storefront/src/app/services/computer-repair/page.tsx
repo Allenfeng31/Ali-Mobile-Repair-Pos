@@ -1,9 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { Laptop, CheckCircle2 } from 'lucide-react';
-import { PricingGrid } from '@/components/services/PricingGrid';
-import { FAQAccordion } from '@/components/services/FAQAccordion';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
+import LivePricingGrid from '@/components/services/LivePricingGrid';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -11,12 +9,12 @@ export const metadata: Metadata = {
   description: 'Expert MacBook Air, MacBook Pro, and PC laptop repairs in Melbourne. Screen replacement, battery fixing, and logic board repair.',
 };
 
-const computerPricing = [
-  { model: "MacBook Air (M1/M2)", service: "LCD Screen Replacement", price: "$549" },
-  { model: "MacBook Pro 13\"", service: "Battery replacement", price: "$199" },
-  { model: "Windows Gaming Laptop", service: "Fan / Thermal Maintenance", price: "$89" },
-  { model: "Universal Laptop", service: "Keyboard / Trackpad Repair", price: "$149" },
-  { model: "Desktop / Mac", service: "OS Reinstall & Data Recovery", price: "$120" },
+const defaultComputerPricing = [
+  { model: "MacBook Air (M1/M2)", service: "LCD Screen Replacement", price: 549 },
+  { model: "MacBook Pro 13\"", service: "Battery replacement", price: 199 },
+  { model: "Windows Gaming Laptop", service: "Fan / Thermal Maintenance", price: 89 },
+  { model: "Universal Laptop", service: "Keyboard / Trackpad Repair", price: 149 },
+  { model: "Desktop / Mac", service: "OS Reinstall & Data Recovery", price: 120 },
 ];
 
 const computerFAQs = [
@@ -32,52 +30,51 @@ const computerFAQs = [
 
 export default function ComputerRepairPage() {
   return (
-    <div className="min-h-screen bg-surface pt-32 pb-20">
+    <>
       <ServiceSchema 
         serviceName="Computer & MacBook Repair Services Melbourne"
         description="Professional MacBook and laptop repair services in Ringwood, Melbourne. Expert hardware and software troubleshooting."
         faqs={computerFAQs}
       />
 
-      <div className="container max-w-5xl mx-auto px-6">
-        <div className="flex flex-col md:row items-center gap-12 mb-20">
-          <div className="flex-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-full text-xs font-black uppercase tracking-widest mb-6">
-              <Laptop size={16} /> Certified Technicians
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black text-on-surface mb-6 tracking-tight leading-tight">
-              Expert <span className="text-primary italic">MacBook</span> & Laptop Repairs
-            </h1>
-            <p className="text-on-surface-variant text-lg font-medium leading-relaxed mb-8">
-              Hardware failures or software glitches, we fix them all. Specializing in component-level logic board repairs and high-quality screen replacements.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                <CheckCircle2 size={18} className="text-success" /> Data Preservation
-              </div>
-              <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
-                <CheckCircle2 size={18} className="text-success" /> Local Melbourne Shop
-              </div>
-            </div>
-          </div>
-          <div className="w-full md:w-1/3 aspect-[4/5] bg-surface-container-low rounded-[3rem] border border-outline-variant/10 flex items-center justify-center">
-            <Laptop size={120} className="text-primary/10" />
-          </div>
+      <div className="page-container">
+        <div style={{ display: 'inline-block', padding: '0.4rem 1.2rem', background: 'rgba(255,149,0,0.1)', color: '#ff9500', borderRadius: '30px', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          Certified Technicians
         </div>
-
-        <PricingGrid title="Popular Computer Repair Pricing" items={computerPricing} />
-        <FAQAccordion items={computerFAQs} />
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Expert MacBook & Laptop Repairs</h1>
         
-        <div className="mt-20 p-12 bg-primary text-on-primary rounded-[3.5rem] text-center shadow-xl">
-          <h2 className="text-3xl font-black mb-4">Laptop not booting up?</h2>
-          <p className="opacity-80 font-medium mb-10 max-w-xl mx-auto">
-            Get a professional diagnosis and a transparent repair quote from our Melbourne team.
-          </p>
-          <Link href="/book-repair" className="bg-white text-primary px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest">
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8' }}>
+          Whether it's hardware failures or software glitches, we fix them all. We specialize in component-level logic board repairs, high-quality screen replacements, and data recovery for all major laptop brands.
+        </p>
+
+        <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
+        <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.1rem' }}>
+          <li>Expert Data Preservation protocols</li>
+          <li>Component-level motherboard repairs</li>
+          <li>Comprehensive diagnosis before any work</li>
+          <li>Convenient Local Melbourne Shop in Ringwood</li>
+        </ul>
+
+        <LivePricingGrid 
+          title="Popular Computer Repair Pricing"
+          deviceType="computer"
+          defaultItems={defaultComputerPricing}
+        />
+
+        <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Frequently Asked Questions</h2>
+        {computerFAQs.map((faq, index) => (
+          <div key={index} style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{faq.question}</h3>
+            <p style={{ opacity: 0.8, lineHeight: '1.6' }}>{faq.answer}</p>
+          </div>
+        ))}
+
+        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+          <Link href="/book-repair" className="primary-btn">
             Book My Service
           </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 }
