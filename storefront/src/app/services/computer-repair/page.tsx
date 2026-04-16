@@ -60,7 +60,7 @@ export default function ComputerRepairPage() {
         </p>
 
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--primary)', fontWeight: 'bold' }}>
-          Don't wait for days—take advantage of our Weekday Same-Day repair service for most hardware upgrades and screen repairs!
+          Take advantage of our Weekday Same-Day repair service! Screen and battery replacements are completed in just a few hours. Other hardware repairs are also completed quickly!
         </p>
 
         <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>

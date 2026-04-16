@@ -60,7 +60,7 @@ export default function SmartWatchRepairPage() {
         </p>
 
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--accent)', fontWeight: 'bold' }}>
-          Drop off your watch on a weekday and get it back the same day! Our fast turnaround keeps you connected without the long wait.
+          Drop off your watch on a weekday and get it back the same day! Screen and battery replacements take just 2-4 hours, and other fixes are completed quickly. Our fast turnaround keeps you connected!
         </p>
 
         <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>

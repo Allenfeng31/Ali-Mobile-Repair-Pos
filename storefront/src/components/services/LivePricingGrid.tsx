@@ -67,24 +67,27 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
         const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
         const filtered = parsed.filter(i => i.deviceType === deviceType && i.price > 0);
         
-        // Map over defaultItems to explicitly show what the page requested, but update the price if we find it in the DB.
-        const updatedItems = defaultItems.map(item => {
-           if (item.search) {
-             const searchTerms = item.search.toLowerCase().split(' ');
-             const match = filtered.find(i => {
-                const combined = `${i.deviceModel} ${i.service}`.toLowerCase();
-                // Every term in the search string must be found in the POS inventory item
-                return searchTerms.every((term: string) => combined.includes(term));
-             });
-             if (match && match.price > 0) {
-               return { ...item, price: match.price };
-             }
-           }
-           return item;
-        });
+        let eligibleItems = filtered;
+        if (deviceType === "phone") {
+           eligibleItems = filtered.filter(i => {
+              const lower = i.deviceModel.toLowerCase();
+              if (lower.includes("iphone 5") || lower.includes("iphone 6") || lower.includes("iphone 7") || lower.includes("iphone 8")) {
+                 return false;
+              }
+              return true;
+           });
+        }
+        
+        // Query the most serviced models dynamically
+        const uniqueModels = Array.from(new Set(eligibleItems.map(i => i.deviceModel))).slice(0, 5);
+        const dynamicDisplayList = uniqueModels.map(model => {
+          const screenItem = eligibleItems.find(i => i.deviceModel === model && i.service.toLowerCase().includes("screen"));
+          const batteryItem = eligibleItems.find(i => i.deviceModel === model && i.service.toLowerCase().includes("battery"));
+          return screenItem || batteryItem || eligibleItems.find(i => i.deviceModel === model)!;
+        }).filter(Boolean);
 
-        if (updatedItems.length > 0) {
-          setItems(updatedItems);
+        if (dynamicDisplayList.length > 0) {
+          setItems(dynamicDisplayList);
         }
       } catch (error) {
         console.error("Error fetching live prices:", error);

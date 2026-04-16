@@ -56,14 +56,14 @@ export default function PhoneRepairPage() {
         </p>
         
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--primary)', fontWeight: 'bold' }}>
-          Take advantage of our Weekday Same-Day repair service! If we have the parts in stock, your phone will be fixed in just 15-30 minutes. Even if we need to quickly source a part locally, we still guarantee it will be completed the exact same day!
+          Take advantage of our Weekday Same-Day repair service! If we have the parts in stock, screen and battery replacements take just 15-30 minutes, and all other repairs are completed quickly! Even if we need to quickly source a part locally, we still guarantee it will be completed the exact same day!
         </p>
 
         <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
         <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.1rem' }}>
           <li><strong>Weekday Same-Day Repair Guarantee:</strong> We ensure same-day completion.</li>
           <li>Premium Quality Screens & Parts Available</li>
-          <li>On-the-spot Repair (15-30 min typically for phones)</li>
+          <li>On-the-spot Repair (15-30 min for screens and batteries)</li>
           <li>No Fix, No Charge Policy</li>
           <li>180-Day Comprehensive Warranty</li>
         </ul>

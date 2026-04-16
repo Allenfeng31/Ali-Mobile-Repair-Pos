@@ -60,7 +60,7 @@ export default function TabletRepairPage() {
         </p>
 
         <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--primary)', fontWeight: 'bold' }}>
-          Take advantage of our Weekday Same-Day repair service! We carry OEM-grade parts and can return your iPad the exact same day.
+          Take advantage of our Weekday Same-Day repair service! If we have the parts in stock, screen and battery replacements take just 1-2 hours, and all other repairs are completed quickly! We carry OEM-grade parts and can return your iPad the exact same day.
         </p>
 
         <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
