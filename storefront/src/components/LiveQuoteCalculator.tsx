@@ -48,11 +48,19 @@ function parseItem(raw: RawItem): ParsedItem | null {
   let modelName = "";
   let serviceName = raw.name;
 
-  // Split standardized model field: "P Brand||ModelName"
-  if (typeof raw.model === "string" && raw.model.includes("||")) {
-    const parts = raw.model.split("||");
-    brand = parts[0]?.trim() || "";
-    modelName = parts[1]?.trim() || "";
+  // Split standardized model field: "P Brand||ModelName" or "Other||Brand|ModelName"
+  if (typeof raw.model === "string") {
+    let parts = raw.model.split(/\|\||\|/).map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+       brand = parts[0];
+       modelName = parts.slice(1).join(" ");
+       if (brand.toLowerCase() === "other" && parts.length >= 3) {
+          brand = parts[1];
+          modelName = parts.slice(2).join(" ");
+       }
+    } else if (parts.length === 1) {
+       brand = parts[0];
+    }
   }
 
   // Skip items with "other" brand

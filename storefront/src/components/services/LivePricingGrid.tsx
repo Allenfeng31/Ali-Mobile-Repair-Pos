@@ -34,10 +34,18 @@ function parseItem(raw: RawItem): ParsedItem | null {
   let brand = "";
   let modelName = "";
   
-  if (typeof raw.model === "string" && raw.model.includes("||")) {
-    const parts = raw.model.split("||");
-    brand = parts[0]?.trim() || "";
-    modelName = parts[1]?.trim() || "";
+  if (typeof raw.model === "string") {
+    let parts = raw.model.split(/\|\||\|/).map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+       brand = parts[0];
+       modelName = parts.slice(1).join(" ");
+       if (brand.toLowerCase() === "other" && parts.length >= 3) {
+          brand = parts[1];
+          modelName = parts.slice(2).join(" ");
+       }
+    } else if (parts.length === 1) {
+       brand = parts[0];
+    }
   }
 
   if (!brand || brand.toLowerCase() === "other") return null;
