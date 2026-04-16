@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import ChatWidget from "./ChatWidget";
-import Header from "./Header";
+import "../globals.css";
+import ChatWidget from "../ChatWidget";
+import Header from "../Header";
 
 const inter = Inter({
   variable: "--font-inter",
