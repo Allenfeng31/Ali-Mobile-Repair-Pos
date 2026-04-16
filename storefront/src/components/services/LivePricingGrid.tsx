@@ -67,24 +67,46 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
         const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
         const filtered = parsed.filter(i => i.deviceType === deviceType && i.price > 0);
         
-        // Map over defaultItems to explicitly show what the page requested, but update the price if we find it in the DB.
-        const updatedItems = defaultItems.map(item => {
-           if (item.search) {
-             const searchTerms = item.search.toLowerCase().split(' ');
-             const match = filtered.find(i => {
-                const combined = `${i.deviceModel} ${i.service}`.toLowerCase();
-                // Every term in the search string must be found in the POS inventory item
-                return searchTerms.every((term: string) => combined.includes(term));
-             });
-             if (match && match.price > 0) {
-               return { ...item, price: match.price };
-             }
-           }
-           return item;
-        });
+        let eligibleItems = filtered.filter(i => 
+          !i.service.toLowerCase().includes("protector") &&
+          !i.service.toLowerCase().includes("case") &&
+          !i.service.toLowerCase().includes("tempered glass") &&
+          !i.service.toLowerCase().includes("cover")
+        );
 
-        if (updatedItems.length > 0) {
-          setItems(updatedItems);
+        if (deviceType === "phone") {
+           eligibleItems = eligibleItems.filter(i => {
+              const lower = i.deviceModel.toLowerCase();
+              if (lower.includes("iphone 5") || lower.includes("iphone 6") || lower.includes("iphone 7") || lower.includes("iphone 8")) {
+                 return false;
+              }
+              return true;
+           });
+        }
+        
+        const screenKeywords = ["screen", "glass", "digitizer", "display", "lcd", "oled"];
+        const batteryKeywords = ["battery"];
+
+        // Group by model, take top 5
+        const uniqueModels = Array.from(new Set(eligibleItems.map(i => i.deviceModel))).slice(0, 5);
+        
+        const dynamicDisplayList = uniqueModels.map(model => {
+          const modelItems = eligibleItems.filter(i => i.deviceModel === model);
+          
+          // 1. Try to find a screen repair
+          const screenItem = modelItems.find(i => screenKeywords.some(kw => i.service.toLowerCase().includes(kw)));
+          if (screenItem) return screenItem;
+          
+          // 2. Try to find a battery repair
+          const batteryItem = modelItems.find(i => batteryKeywords.some(kw => i.service.toLowerCase().includes(kw)));
+          if (batteryItem) return batteryItem;
+          
+          // 3. Fallback to any valid repair
+          return modelItems[0];
+        }).filter(Boolean);
+
+        if (dynamicDisplayList.length > 0) {
+          setItems(dynamicDisplayList);
         }
       } catch (error) {
         console.error("Error fetching live prices:", error);

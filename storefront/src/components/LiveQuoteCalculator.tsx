@@ -215,12 +215,21 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
   // Levels: Brand -> Model -> Service
   const brands = Array.from(new Set(tabItems.map(i => i.brand))).sort();
   
-  const models = Array.from(new Set([
-    ...tabItems
-      .filter(i => i.brand === selectedBrand)
-      .map(i => i.deviceModel),
-    ...(MANUAL_MODELS[activeTab] || [])
-  ])).sort();
+  const sanitize = (m: string) => m.toLowerCase().replace(/(th|nd|st|rd)\s*gen(?:eration)?/g, '').replace(/[-"']/g, '').replace(/\s+/g, '');
+  
+  const dbModels = tabItems.filter(i => i.brand === selectedBrand).map(i => i.deviceModel);
+  const manualModels = MANUAL_MODELS[activeTab] || [];
+  
+  const deduplicatedManual = manualModels.filter(mManual => {
+     const cleanManual = sanitize(mManual);
+     return !dbModels.some(mDb => {
+        const cleanDb = sanitize(mDb);
+        return cleanDb === cleanManual || cleanDb.includes(cleanManual) || cleanManual.includes(cleanDb);
+     });
+  });
+
+  const models = Array.from(new Set([...dbModels, ...deduplicatedManual])).sort();
+
   
   const services = [
     ...tabItems.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel),
