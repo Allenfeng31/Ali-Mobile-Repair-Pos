@@ -1,7 +1,10 @@
 import LiveQuoteCalculator from "@/components/LiveQuoteCalculator";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RawItem, ParsedItem, parseItem, slugify } from "@/lib/inventoryUtils";
+
+export const revalidate = 3600; // Incrementally regenerate pages every 1 hour
 
 interface BookingParams {
   params: {
@@ -65,6 +68,8 @@ export async function generateMetadata({ params }: BookingParams): Promise<Metad
 }
 
 export default async function DynamicRepairPage({ params }: BookingParams) {
+  let validItem: ParsedItem | null = null;
+  
   // Validate if the params actually correspond to a valid POS item
   try {
     const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "http://localhost:3001";
@@ -75,13 +80,13 @@ export default async function DynamicRepairPage({ params }: BookingParams) {
       const raw: RawItem[] = await res.json();
       const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
       
-      const isValid = parsed.some(item => 
+      validItem = parsed.find(item => 
         slugify(item.brand) === params.brand &&
         slugify(item.deviceModel) === params.model &&
         slugify(item.service) === params.service
-      );
+      ) || null;
       
-      if (!isValid) {
+      if (!validItem) {
         notFound(); // Returns 404 if someone tries to visit /repairs/fake/device/route
       }
     }
@@ -94,11 +99,53 @@ export default async function DynamicRepairPage({ params }: BookingParams) {
   const model = formatSlug(params.model);
   const service = formatSlug(params.service);
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        "serviceType": "Mobile Repair",
+        "name": validItem ? `${validItem.service} for ${validItem.brand} ${validItem.deviceModel}` : `${service} for ${brand} ${model}`,
+        "provider": {
+          "@id": "https://www.alimobilerepair.com.au/#organization"
+        },
+        "areaServed": {
+          "@type": "City",
+          "name": "Melbourne",
+          "addressCountry": "AU"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": validItem?.price ?? 0,
+          "priceCurrency": "AUD",
+          "availability": "https://schema.org/InStock",
+          "url": `https://www.alimobilerepair.com.au/repairs/${params.brand}/${params.model}/${params.service}`
+        }
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://www.alimobilerepair.com.au/#organization",
+        "name": "Ali Mobile & Repair",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Melbourne",
+          "addressCountry": "Australia"
+        },
+        "url": "https://www.alimobilerepair.com.au"
+      }
+    ]
+  };
+
   return (
-    <div className="page-container">
-      <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        {brand} {model} {service}
-      </h1>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <div className="page-container">
+        
+        <Breadcrumbs brand={params.brand} model={params.model} service={params.service} />
+
+        <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>
+          {brand} {model} {service}
+        </h1>
       <p style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 2rem', opacity: 0.8 }}>
         Check out our live pricing below for the {brand} {model}. 
         Walk-ins are always welcome at our Melbourne store, or you can proceed to book an appointment!
@@ -121,5 +168,6 @@ export default async function DynamicRepairPage({ params }: BookingParams) {
         </a>
       </div>
     </div>
+    </>
   );
 }
