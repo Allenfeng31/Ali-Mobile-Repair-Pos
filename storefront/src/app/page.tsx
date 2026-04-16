@@ -79,11 +79,11 @@ export default function Home() {
       </section>
 
       <section className="servicesGrid">
-        <Link href="/services/iphone-screen-repair-melbourne" className="serviceCard">
+        <Link href="/services/phone-repair" className="serviceCard">
           <h3>Phone Repair</h3>
           <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
         </Link>
-        <Link href="/services/ipad-repair" className="serviceCard">
+        <Link href="/services/tablet-repair" className="serviceCard">
           <h3>Tablet Repair</h3>
           <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
         </Link>
@@ -91,7 +91,7 @@ export default function Home() {
           <h3>Computer &amp; MacBook Repair</h3>
           <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
         </Link>
-        <Link href="/book-repair" className="serviceCard">
+        <Link href="/services/smart-watch-repair" className="serviceCard">
           <h3>Smart Watch Repair</h3>
           <p>Apple Watch screen and battery repairs. Professional service for all series.</p>
         </Link>
