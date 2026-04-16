@@ -1,7 +1,7 @@
 import LiveQuoteCalculator from "@/components/LiveQuoteCalculator";
 import { Metadata } from "next";
-
-export const dynamic = "force-dynamic";
+import { notFound } from "next/navigation";
+import { RawItem, ParsedItem, parseItem, slugify } from "@/lib/inventoryUtils";
 
 interface BookingParams {
   params: {
@@ -9,6 +9,36 @@ interface BookingParams {
     model: string;
     service: string;
   };
+}
+
+export async function generateStaticParams() {
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "http://localhost:3001";
+    // We fetch without store cache during build so we get the fresh list
+    const res = await fetch(`${backendUrl}/api/inventory`);
+    if (!res.ok) return [];
+    
+    const raw: RawItem[] = await res.json();
+    const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
+    
+    const paths: { brand: string; model: string; service: string }[] = [];
+    
+    parsed.forEach(item => {
+      paths.push({
+        brand: slugify(item.brand),
+        model: slugify(item.deviceModel),
+        service: slugify(item.service),
+      });
+    });
+    
+    // Deduplicate
+    const uniquePaths = Array.from(new Set(paths.map(p => JSON.stringify(p)))).map(p => JSON.parse(p));
+    
+    return uniquePaths;
+  } catch (error) {
+    console.error("Failed to generate static params for repairs:", error);
+    return [];
+  }
 }
 
 function formatSlug(slug: string) {
@@ -34,7 +64,32 @@ export async function generateMetadata({ params }: BookingParams): Promise<Metad
   };
 }
 
-export default function DynamicRepairPage({ params }: BookingParams) {
+export default async function DynamicRepairPage({ params }: BookingParams) {
+  // Validate if the params actually correspond to a valid POS item
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "http://localhost:3001";
+    // Using a short ISR revalidation cache so incoming API hits don't overwhelm POS DB
+    const res = await fetch(`${backendUrl}/api/inventory`, { next: { revalidate: 3600 } });
+    
+    if (res.ok) {
+      const raw: RawItem[] = await res.json();
+      const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
+      
+      const isValid = parsed.some(item => 
+        slugify(item.brand) === params.brand &&
+        slugify(item.deviceModel) === params.model &&
+        slugify(item.service) === params.service
+      );
+      
+      if (!isValid) {
+        notFound(); // Returns 404 if someone tries to visit /repairs/fake/device/route
+      }
+    }
+  } catch (e) {
+    // If backend is down, we choose to render the component anyway to avoid false 404s
+    console.error("Failed to validate repair route params:", e);
+  }
+
   const brand = formatSlug(params.brand);
   const model = formatSlug(params.model);
   const service = formatSlug(params.service);
