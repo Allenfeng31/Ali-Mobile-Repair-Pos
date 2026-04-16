@@ -1,76 +1,50 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 
 interface Review {
   id: number;
   name: string;
   rating: number;
   text: string;
-  date: string;
-  avatar: string;
-  photos?: string[];
+  initial: string;
 }
 
 const hardcodedReviews: Review[] = [
   {
     id: 1,
-    name: "Nina Meow",
+    name: "BBQs-R-US",
     rating: 5,
-    text: "Ali Mobile Repair is honest and affordable. No hidden fees, just clear and fair pricing. I compared with other nearby shops and this one is definitely cheaper. Great service and fast repair – highly recommended!",
-    date: "8 months ago",
-    avatar: "N",
-    photos: [
-      "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=400&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1597740985671-2a8a3b80502e?w=400&h=300&fit=crop"
-    ]
+    text: "Allen replaced my screen within an hour - very honest and polite, and great rate! Amazed and grateful! Best repair experience.",
+    initial: "B"
   },
   {
     id: 2,
-    name: "John Williamson",
+    name: "Janine B",
     rating: 5,
-    text: "This is about the fourth or fifth time I have used Ali Mobile. He has always been helpful, prompt and fairly priced. Pleased to have gone to him. Highly recommended.",
-    date: "8 months ago",
-    avatar: "J"
+    text: "Dropped my Samsung tablet in to have the battery replaced. Was done in time stated and works like a new one now. Highly recommended. Thanks",
+    initial: "J"
   },
   {
     id: 3,
-    name: "BBQs-R-US",
+    name: "Bumzigan Yebet",
     rating: 5,
-    text: "Extremely friendly and competent, fixed all my little issues and I basically have a new phone for $200. Thanks",
-    date: "6 months ago",
-    avatar: "B",
-    photos: [
-      "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400&h=300&fit=crop"
-    ]
+    text: "Great service, very helpful and friendly. Highly recommend for any phone repairs in Ringwood.",
+    initial: "B"
   },
   {
     id: 4,
-    name: "Janine B",
+    name: "John Williamson",
     rating: 5,
-    text: "Allen replaced my screen within an hour - very honest and polite, and great rate! Amazed and grateful! Best repair experience.",
-    date: "Verified",
-    avatar: "J"
+    text: "Extremely friendly and competent, fixed all my little issues and I basically have a new phone for $200. Thanks",
+    initial: "J"
   },
   {
     id: 5,
-    name: "Bumzigan Yebet",
+    name: "Nina Meow",
     rating: 5,
-    text: "Dropped my Samsung tablet in to have the battery replaced. Was done in time stated and works like a new one now. Highly recommended. Thanks",
-    date: "9 months ago",
-    avatar: "B",
-    photos: [
-      "https://images.unsplash.com/photo-1581092921461-7d6560b6fd8d?w=400&h=300&fit=crop"
-    ]
-  },
-  {
-    id: 6,
-    name: "Jay Taplin",
-    rating: 5,
-    text: "Great service, very helpful and friendly. Highly recommend for any phone repairs in Ringwood.",
-    date: "1 month ago",
-    avatar: "J"
+    text: "This is about the fourth or fifth time I have used Ali Mobile. He has always been helpful, prompt and fairly priced. Pleased to have gone to him. Highly recommended.",
+    initial: "N"
   }
 ];
 
@@ -255,7 +229,7 @@ export default function ReviewsSection() {
                 marginBottom: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                 width: '100%',
-                minHeight: '180px',
+                minHeight: '160px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -272,41 +246,6 @@ export default function ReviewsSection() {
                   }}>
                     &ldquo;{review.text}&rdquo;
                   </p>
-                  
-                  {/* Photo Gallery */}
-                  {review.photos && review.photos.length > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      gap: '6px',
-                      marginBottom: '12px',
-                      overflowX: 'auto',
-                      paddingBottom: '4px'
-                    }}>
-                      {review.photos.map((photo, idx) => (
-                        <div 
-                          key={idx}
-                          style={{
-                            position: 'relative',
-                            width: '60px',
-                            height: '60px',
-                            flexShrink: 0,
-                            borderRadius: '10px',
-                            overflow: 'hidden',
-                            border: '1px solid var(--layer-border)'
-                          }}
-                        >
-                          <Image 
-                            src={photo}
-                            alt="Review attachment"
-                            fill
-                            style={{
-                              objectFit: 'cover'
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Google + Stars row */}
@@ -356,7 +295,7 @@ export default function ReviewsSection() {
                   fontWeight: 700,
                   fontSize: '14px',
                 }}>
-                  {review.avatar}
+                  {review.initial}
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <span style={{
@@ -366,13 +305,6 @@ export default function ReviewsSection() {
                     color: 'var(--foreground)',
                   }}>
                     {review.name}
-                  </span>
-                  <span style={{
-                    fontSize: '11px',
-                    color: 'var(--foreground)',
-                    opacity: 0.6,
-                  }}>
-                    {review.date}
                   </span>
                 </div>
               </div>
@@ -463,7 +395,7 @@ export default function ReviewsSection() {
         display: 'flex',
         justifyContent: 'center',
         gap: '8px',
-        marginTop: '10px',
+        marginTop: '20px',
       }}>
         {hardcodedReviews.map((_, i) => (
           <button
@@ -506,7 +438,7 @@ export default function ReviewsSection() {
             transition: 'all 0.3s ease',
           }}
         >
-          View All Good Reviews →
+          VIEW ALL GOOD REVIEWS →
         </a>
       </div>
     </section>
