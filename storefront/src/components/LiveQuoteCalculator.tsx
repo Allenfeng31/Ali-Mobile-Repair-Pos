@@ -113,7 +113,30 @@ const TABS = [
   { key: "watch"    as const, emoji: "⌚", label: "Watch Repair"    },
 ];
 
+// ── Manual Fallback Models ───────────────────────────────────────────────
+// Add inclusive models to ensure coverage even if not in stock
+const MANUAL_MODELS: Record<string, string[]> = {
+  "tablet": [
+    "iPad mini 4", "iPad mini 5", "iPad mini 6", "iPad mini 7 (A17 Pro)",
+    "iPad 5th Generation", "iPad 6th Generation", "iPad 7th Generation", "iPad 8th Generation", "iPad 9th Generation", "iPad 10th Generation",
+    "iPad Air 4", "iPad Air 5", "iPad Air M2 (11-inch)", "iPad Air M2 (13-inch)",
+    "iPad Pro 11-inch (M4)", "iPad Pro 13-inch (M4)", "iPad Pro 11-inch (Gen 1-4)", "iPad Pro 12.9-inch (Gen 3-6)"
+  ],
+  "computer": [
+    "MacBook Pro 14 (M1/M2/M3)", "MacBook Pro 16 (M1/M2/M3)", "MacBook Pro 13 (M1/M2)",
+    "MacBook Air 13 (M1/M2/M3)", "MacBook Air 15 (M2/M3)", "MacBook (12-inch Retina)"
+  ],
+  "watch": [
+    "Apple Watch Series 3", "Apple Watch Series 4", "Apple Watch Series 5", "Apple Watch Series 6",
+    "Apple Watch SE (1st Gen)", "Apple Watch Series 7", "Apple Watch Series 8", "Apple Watch Ultra",
+    "Apple Watch SE (2nd Gen)", "Apple Watch Series 9", "Apple Watch Ultra 2", "Apple Watch Series 10"
+  ]
+};
+
 interface LiveQuoteCalculatorProps {
+  initialBrand?: string;
+  initialModel?: string;
+  initialService?: string;
   onSelectionChange?: (data: {
     brand: string;
     model: string;
@@ -123,7 +146,12 @@ interface LiveQuoteCalculatorProps {
   } | null) => void;
 }
 
-export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalculatorProps) {
+export default function LiveQuoteCalculator({ 
+  initialBrand,
+  initialModel,
+  initialService,
+  onSelectionChange 
+}: LiveQuoteCalculatorProps) {
   const [items, setItems]     = useState<ParsedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(false);
@@ -154,9 +182,74 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
         const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
         setItems(parsed);
 
-        // Auto-select the first tab that has items
-        const firstAvailable = TABS.find(t => parsed.some(i => i.deviceType === t.key));
-        if (firstAvailable) setActiveTab(firstAvailable.key);
+        // Auto-select tab and defaults
+        let defaultTab = "phone" as ParsedItem["deviceType"];
+        let defaultBrand = "";
+        let defaultModel = "";
+        let defaultServiceItem: ParsedItem | null = null;
+        let defaultOtherService = "";
+        
+        if (initialBrand) {
+          const targetBrand = decodeURIComponent(initialBrand).toLowerCase().replace(/-/g, ' ');
+          const allBrands = Array.from(new Set(parsed.map(i => i.brand)));
+          const matchedBrand = allBrands.find(b => 
+            displayBrand(b).toLowerCase().replace(/-/g, ' ') === targetBrand ||
+            b.toLowerCase().replace(/-/g, ' ') === targetBrand
+          );
+          
+          if (matchedBrand) {
+             defaultBrand = matchedBrand;
+             const itemWithBrand = parsed.find(i => i.brand === matchedBrand);
+             if (itemWithBrand) defaultTab = itemWithBrand.deviceType;
+             
+             if (initialModel) {
+               const targetModel = decodeURIComponent(initialModel).toLowerCase().replace(/-/g, ' ');
+               const dbModels = Array.from(new Set(parsed.filter(i => i.brand === matchedBrand).map(i => i.deviceModel)));
+               const matchedModel = dbModels.find(m => m.toLowerCase().replace(/-/g, ' ') === targetModel);
+               
+               let matchedManualModel = "";
+               if (!matchedModel) {
+                  const mModels = MANUAL_MODELS[defaultTab] || [];
+                  matchedManualModel = mModels.find(m => m.toLowerCase().replace(/-/g, ' ') === targetModel) || "";
+               }
+               
+               defaultModel = matchedModel || matchedManualModel;
+               
+               if (defaultModel && initialService) {
+                 const targetService = decodeURIComponent(initialService).toLowerCase().replace(/-/g, ' ');
+                 const servicesForModel = parsed.filter(i => i.brand === matchedBrand && i.deviceModel === defaultModel);
+                 
+                 const matchedService = servicesForModel.find(s => 
+                   s.service.toLowerCase().replace(/-/g, ' ') === targetService ||
+                   s.service.toLowerCase().replace(/-/g, ' ').includes(targetService) ||
+                   targetService.includes(s.service.toLowerCase().replace(/-/g, ' '))
+                 );
+                 
+                 if (matchedService) {
+                   defaultServiceItem = matchedService;
+                 } else {
+                   defaultOtherService = decodeURIComponent(initialService).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                 }
+               }
+             }
+          }
+        }
+        
+        if (defaultBrand) {
+           setActiveTab(defaultTab);
+           setSelectedBrand(defaultBrand);
+           if (defaultModel) {
+             setSelectedModel(defaultModel);
+             if (defaultServiceItem) {
+               setSelectedService(defaultServiceItem);
+             } else if (defaultOtherService) {
+               setOtherService(defaultOtherService);
+             }
+           }
+        } else {
+          const firstAvailable = TABS.find(t => parsed.some(i => i.deviceType === t.key));
+          if (firstAvailable) setActiveTab(firstAvailable.key);
+        }
       } catch (_) {
         if (!cancelled) setError(true);
       } finally {
@@ -167,27 +260,8 @@ export default function LiveQuoteCalculator({ onSelectionChange }: LiveQuoteCalc
     load();
     const interval = setInterval(load, 60_000); // refresh every 60s
     return () => { cancelled = true; clearInterval(interval); };
-  }, []);
+  }, [initialBrand, initialModel, initialService]);
 
-  // ── Manual Fallback Models ───────────────────────────────────────────────
-  // Add inclusive models to ensure coverage even if not in stock
-  const MANUAL_MODELS: Record<string, string[]> = {
-    "tablet": [
-      "iPad mini 4", "iPad mini 5", "iPad mini 6", "iPad mini 7 (A17 Pro)",
-      "iPad 5th Generation", "iPad 6th Generation", "iPad 7th Generation", "iPad 8th Generation", "iPad 9th Generation", "iPad 10th Generation",
-      "iPad Air 4", "iPad Air 5", "iPad Air M2 (11-inch)", "iPad Air M2 (13-inch)",
-      "iPad Pro 11-inch (M4)", "iPad Pro 13-inch (M4)", "iPad Pro 11-inch (Gen 1-4)", "iPad Pro 12.9-inch (Gen 3-6)"
-    ],
-    "computer": [
-      "MacBook Pro 14 (M1/M2/M3)", "MacBook Pro 16 (M1/M2/M3)", "MacBook Pro 13 (M1/M2)",
-      "MacBook Air 13 (M1/M2/M3)", "MacBook Air 15 (M2/M3)", "MacBook (12-inch Retina)"
-    ],
-    "watch": [
-      "Apple Watch Series 3", "Apple Watch Series 4", "Apple Watch Series 5", "Apple Watch Series 6",
-      "Apple Watch SE (1st Gen)", "Apple Watch Series 7", "Apple Watch Series 8", "Apple Watch Ultra",
-      "Apple Watch SE (2nd Gen)", "Apple Watch Series 9", "Apple Watch Ultra 2", "Apple Watch Series 10"
-    ]
-  };
 
   // Update parent when selection changes
   useEffect(() => {
