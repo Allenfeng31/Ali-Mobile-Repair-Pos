@@ -5,34 +5,38 @@ import LivePricingGrid from '@/components/services/LivePricingGrid';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Phone & iPhone Repair in Melbourne | Ali Mobile & Repair',
-  description: 'Fast and reliable phone repairs in Melbourne. Screen replacement, battery fixing, and water damage repair for iPhone, Samsung, Oppo, and Pixel devices.',
+  title: 'Phone Repair Ringwood | Weekday Same Day Fix | Ali Mobile & Repair',
+  description: 'Fast phone repairs in Ringwood, servicing Croydon, Mitcham, and Heathmont. Weekday same-day screen and battery replacements for iPhone, Samsung, and Pixel with 180-day warranty.',
 };
 
 const defaultPhonePricing = [
-  { model: "iPhone 15 Pro Max", service: "Premium Screen replacement", price: 449 },
-  { model: "iPhone 14 / 13", service: "Screen replacement", price: 189 },
+  { model: "iPhone 17 / 17 Pro", service: "Premium Screen replacement", price: 499 },
+  { model: "iPhone 13", service: "Screen replacement", price: 189 },
+  { model: "iPhone 11", service: "Screen replacement", price: 149 },
   { model: "Samsung S23 Ultra", service: "Genuine Screen + Frame", price: 499 },
   { model: "Google Pixel 7 Pro", service: "OLED Screen Repair", price: 299 },
-  { model: "Generic Android", service: "Battery replacement", price: 89 },
 ];
 
 const phoneFAQs = [
   {
-    question: "How long does a typical phone screen repair take in Melbourne?",
-    answer: "Most phone screen repairs at Ali Mobile & Repair are completed in 15 to 30 minutes. We understand your time is valuable, so we maintain a large stock of premium parts to ensure same-day service for almost all models."
+    question: "Do you offer same-day phone repairs?",
+    answer: "Absolutely! During any weekday, we have immediate access to parts and guarantee same-day repairs to get you back online fast."
+  },
+  {
+    question: "How long does a typical phone screen repair take at your Ringwood store?",
+    answer: "Most phone screen repairs are completed in 15 to 30 minutes while you wait. We are centrally located in Ringwood, making us a quick drive from Croydon, Mitcham, Heathmont, and Wantirna."
   },
   {
     question: "Will I lose my data during the repair process?",
     answer: "In 99% of cases, your data remains perfectly safe during screen or battery replacements. However, we always recommend performing a backup before any repair service as a standard safety precaution."
   },
   {
-    question: "Do you offer a warranty on phone repairs?",
-    answer: "Yes, we provide a 180-day warranty on all parts and labor for phone repairs. If you experience any issues related to the repair within this period, we will fix it free of charge."
+    question: "What is your warranty on phone repairs?",
+    answer: "We proudly offer a 180-day comprehensive warranty on all parts and labor. If you experience any technical faults related to the repair within this 6-month period, we will fix it completely free of charge."
   },
   {
     question: "Which phone brands do you repair?",
-    answer: "We specialize in all major brands including Apple iPhone, Samsung Galaxy, Google Pixel, Oppo, Huawei, and many others. If you have a less common model, give us a call and we'll likely be able to source the parts."
+    answer: "We specialize in all major brands including Apple iPhone, Samsung Galaxy, Google Pixel, Oppo, and Huawei. Because we stock parts locally, we can fix these brands immediately on any weekday."
   }
 ];
 
@@ -40,27 +44,30 @@ export default function PhoneRepairPage() {
   return (
     <>
       <ServiceSchema 
-        serviceName="Phone Repair Services Melbourne"
-        description="Expert phone repair services for iPhone, Samsung, Pixel, and Oppo. Same-day screen and battery replacements in Ringwood, Melbourne."
+        serviceName="Phone Repair Services Ringwood"
+        description="Expert phone repair services for iPhone, Samsung, Pixel, and Oppo serving Melbourne's Eastern Suburbs. Weekday same-day screen and battery replacements."
         faqs={phoneFAQs}
       />
       
       <div className="page-container">
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Phone & iPhone Repair in Melbourne</h1>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', lineHeight: '1.2' }}>Phone & iPhone Repair in Ringwood, Melbourne</h1>
         
-        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8' }}>
-          At Ali Mobile React, we specialize in high-quality iPhone and Android screen replacements. 
-          Whether you dropped your brand new iPhone 15 or need a quick fix for an older Samsung model, 
-          our expert technicians in Ringwood will have it looking brand new in just 15-30 minutes.
+        <p style={{ fontSize: '1.2rem', marginBottom: '1.5rem', lineHeight: '1.8' }}>
+          At Ali Mobile Repair, we specialize in high-quality iPhone and Android screen replacements. 
+          Centrally located in Ringwood, we are the go-to repair shop for the Eastern Suburbs including <strong>Croydon, Mitcham, Heathmont, and Wantirna</strong>.
+        </p>
+        
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--primary)', fontWeight: 'bold' }}>
+          Take advantage of our Weekday Same-Day repair service! We have immediate access to parts and guarantee 15-30 minute same-day repairs on all weekdays!
         </p>
 
         <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
         <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.1rem' }}>
-          <li>Premium Quality Screens & Genuine Parts Available</li>
-          <li>On-the-spot Repair (15-60 min typically)</li>
-          <li>No Fix, No Charge Guarantee</li>
+          <li><strong>Weekday Same-Day Repair Guarantee:</strong> Immediate access to components.</li>
+          <li>Premium Quality Screens & Parts Available</li>
+          <li>On-the-spot Repair (15-30 min typically for phones)</li>
+          <li>No Fix, No Charge Policy</li>
           <li>180-Day Comprehensive Warranty</li>
-          <li>Over 10 Years Industry Experience</li>
         </ul>
 
         {/* Live Pricing Section fetches from Backend */}
