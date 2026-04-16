@@ -39,7 +39,7 @@ export default function ServicesHubPage() {
         </Link>
         <Link href="/services/computer-repair" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💻</div>
-          <h3>Computer & MacBook</h3>
+          <h3>Laptop & MacBook</h3>
           <p>
             Expert logic board repairs, screen replacements, and OS recovery for MacBooks and Windows laptops.
           </p>
