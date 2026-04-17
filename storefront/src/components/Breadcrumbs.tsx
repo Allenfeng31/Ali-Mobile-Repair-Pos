@@ -21,7 +21,7 @@ export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps)
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobilerepair.com.au/" },
-      { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobilerepair.com.au/services" },
+      { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobilerepair.com.au/repairs" },
       { "@type": "ListItem", "position": 3, "name": fBrand, "item": `https://www.alimobilerepair.com.au/repairs/${brand}` },
       { "@type": "ListItem", "position": 4, "name": fModel, "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}` },
       { "@type": "ListItem", "position": 5, "name": fService, "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}/${service}` }
@@ -35,7 +35,7 @@ export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps)
         <ol style={{ listStyle: 'none', padding: 0, display: 'flex', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap', margin: 0 }}>
           <li><Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link></li>
           <li>&rsaquo;</li>
-          <li><Link href="/services" style={{ color: 'inherit', textDecoration: 'none' }}>Repairs</Link></li>
+          <li><Link href="/repairs" style={{ color: 'inherit', textDecoration: 'none' }}>Repairs</Link></li>
           <li>&rsaquo;</li>
           <li><span style={{ color: 'inherit' }}>{fBrand}</span></li>
           <li>&rsaquo;</li>

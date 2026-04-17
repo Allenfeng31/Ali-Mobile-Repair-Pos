@@ -3,6 +3,7 @@ import { BRANDS, MODELS, REPAIR_TYPES, LSI_KEYWORDS } from '@/data/seo-data';
 import { slugify, detectDeviceType } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 interface RepairPageProps {
   params: {
@@ -96,6 +97,7 @@ export default function RepairServicePage({ params }: RepairPageProps) {
         serviceName={`${displayModel} ${repairType.name} Repair in Ringwood`} 
         description={`Professional ${repairType.name} service for your ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`} 
       />
+      <Breadcrumbs brand={params.brand} model={params.model} service={params['repair-type']} />
       <h1 className="text-4xl font-bold mb-6 text-slate-900 leading-tight">
         {displayModel} {repairType.name} in Ringwood
       </h1>

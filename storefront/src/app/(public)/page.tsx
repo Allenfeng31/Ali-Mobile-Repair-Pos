@@ -54,7 +54,7 @@ export default function Home() {
       </section>
 
       <section className="servicesGrid">
-        <Link href="/services/phone-repair" className="serviceCard">
+        <Link href="/repairs/phone" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📱</div>
           <h3>Phone Repair</h3>
           <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
@@ -62,7 +62,7 @@ export default function Home() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/services/tablet-repair" className="serviceCard">
+        <Link href="/repairs/tablet" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📟</div>
           <h3>Tablet & iPad Repair</h3>
           <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
@@ -70,7 +70,7 @@ export default function Home() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/services/computer-repair" className="serviceCard">
+        <Link href="/repairs/computer" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💻</div>
           <h3>Laptop & MacBook Repair</h3>
           <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
@@ -78,7 +78,7 @@ export default function Home() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/services/smart-watch-repair" className="serviceCard">
+        <Link href="/repairs/smart-watch" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⌚</div>
           <h3>Smart Watch Repair</h3>
           <p>Apple Watch screen and battery repairs. Professional service for all series.</p>

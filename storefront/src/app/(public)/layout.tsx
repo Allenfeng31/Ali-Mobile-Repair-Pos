@@ -15,8 +15,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Phone & Tablet Repair Melbourne | Ali Mobile Repair | System Recovery",
-  description: "Expert phone and tablet repair in Ringwood, Melbourne. We specialize in iPhone, iPad, Samsung, and Google Pixel screen replacements, battery fixing, and system recovery. No FIX no CHARGE.",
+  title: "Phone & Tablet Repair in Ringwood, Melbourne | Ali Mobile & Repair",
+  description: "Expert phone and tablet repair in Ringwood, Melbourne. We specialize in iPhone, iPad, Samsung, and Google Pixel screen replacements and battery fixing. No FIX no CHARGE.",
   openGraph: {
     title: "Phone & Tablet Repair Melbourne | Ali Mobile Repair",
     description: "Expert phone and tablet repair in Ringwood, Melbourne.",
