@@ -4,23 +4,25 @@ import { slugify, detectDeviceType } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import ReviewsSection from '@/components/ReviewsSection';
+import FaqAccordion from '@/components/FaqAccordion';
 
 interface RepairPageProps {
-  params: {
+  params: Promise<{
     brand: string;
     model: string;
     'repair-type': string;
-  };
+  }>;
 }
 
 export function generateStaticParams() {
-  const params: { brand: string; model: string; 'repair-type': string }[] = [];
+  const allParams: { brand: string; model: string; 'repair-type': string }[] = [];
 
   for (const brand of BRANDS) {
     const models = MODELS[brand] || [];
     for (const model of models) {
       for (const repair of REPAIR_TYPES) {
-        params.push({
+        allParams.push({
           brand: slugify(brand),
           model: slugify(model),
           'repair-type': repair.slug,
@@ -29,137 +31,135 @@ export function generateStaticParams() {
     }
   }
 
-  return params;
+  return allParams;
 }
 
-function getLSICategoryForRepair(slug: string): { component?: string[], issue?: string[] } {
+export async function generateMetadata({ params }: RepairPageProps) {
+  const resolvedParams = await params;
+  const repairType = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
+  let displayModel = (resolvedParams.model || '').replace(/-/g, ' ');
+  for (const b of BRANDS) {
+    const m = MODELS[b]?.find(x => slugify(x) === resolvedParams.model);
+    if (m) { displayModel = m; break; }
+  }
+  const title = `${displayModel} ${repairType?.name || 'Repair'} in Ringwood | Ali Mobile`;
+  const description = `Fast, professional ${displayModel} ${repairType?.name?.toLowerCase() || 'repair'} in Ringwood, Melbourne. Under 1 hour, 6-month warranty, No Fix No Charge. Book now.`;
+  return { title, description };
+}
+
+function generateFaqs(model: string, repairType: { name: string; slug: string }, brand: string) {
+  const lsi = getLSIForRepair(repairType.slug);
+  const component = lsi.component?.[0] || repairType.name.toLowerCase();
+  const altComponent = lsi.component?.[1] || 'damaged component';
+
+  return [
+    {
+      question: `How long does the ${model} ${repairType.name} take?`,
+      answer: `Most ${model} ${repairType.name.toLowerCase()} jobs are completed in under 1 hour at our Ringwood Square location. Walk-ins are welcome on weekdays for same-day service.`,
+    },
+    {
+      question: `Do you use OEM parts for ${model} ${repairType.name.toLowerCase()}?`,
+      answer: `We use premium-quality ${component} parts that meet or exceed OEM specifications. All parts come with our 6-month warranty, so you can be confident in the quality of the ${altComponent} replacement.`,
+    },
+    {
+      question: `How much does a ${model} ${repairType.name.toLowerCase()} cost?`,
+      answer: `Pricing depends on the specific ${model} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price. Our "No Fix, No Charge" policy means you only pay if we successfully complete the repair.`,
+    },
+    {
+      question: `What if my ${model} has additional damage beyond the ${component}?`,
+      answer: `Our technicians perform a free diagnostic assessment on every device. If we discover additional issues such as ${lsi.issue?.[0] || 'internal damage'}, we'll inform you before proceeding with any extra work. You're never charged for repairs you didn't approve.`,
+    },
+    {
+      question: `Where is your ${model} repair shop located?`,
+      answer: `We're located at Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC 3134. We're easily accessible from Croydon, Mitcham, Bayswater, and the wider Melbourne eastern suburbs. Free parking is available at the shopping centre.`,
+    },
+  ];
+}
+
+function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
   if (slug === 'screen-replacement') return { component: LSI_KEYWORDS.components.screen, issue: LSI_KEYWORDS.issues.screenDamage };
   if (slug === 'battery-replacement') return { component: LSI_KEYWORDS.components.battery, issue: LSI_KEYWORDS.issues.batteryDrain };
   if (slug === 'charging-port-repair') return { component: LSI_KEYWORDS.components.chargingPort };
   if (slug === 'water-damage-repair') return { issue: LSI_KEYWORDS.issues.waterDamage };
+  if (slug === 'back-glass-repair') return { component: ['back glass', 'rear panel'] };
+  if (slug === 'camera-repair') return { component: ['camera module', 'lens assembly'] };
   return {};
 }
 
-const generateLsiContent = (model: string, repairType: { name: string, slug: string }, deviceType: "phone" | "tablet" | "computer" | "watch") => {
-  const lsi = getLSICategoryForRepair(repairType.slug);
-  const deviceWords = LSI_KEYWORDS.devices[deviceType as keyof typeof LSI_KEYWORDS.devices] || ["device", "unit"];
-  const actionWords = LSI_KEYWORDS.actions.repair;
-
-  // Select some random-ish or sequential LSI words based on string length to guarantee stability during static gen
-  const c1 = lsi.component?.[0] || repairType.name.toLowerCase();
-  const c2 = lsi.component?.[1] || "damaged part";
-  const i1 = lsi.issue?.[0] || `broken ${c1}`;
-  const d1 = deviceWords[0] || "device";
-  const d2 = deviceWords[1] || "unit";
-  const a1 = actionWords[0];
-  const a2 = actionWords[1];
-
-  return (
-    <div className="prose prose-slate max-w-none text-lg text-slate-700 leading-relaxed space-y-6">
-      <p>
-        Are you dealing with a <strong>{i1}</strong> on your {model}? You need a reliable and professional <strong>{model} {repairType.name}</strong>. 
-        Our certified technicians in Ringwood specialize in high-quality {c1} {a1}s and complete {d1} {a2} services. 
-      </p>
-      <p>
-        We know how frustrating it is when your essential {d2} isn't working perfectly. Whether you're facing issues with the {c2} or 
-        need a complete {repairType.name.toLowerCase()}, we use premium quality parts to restore your tool to factory condition.
-      </p>
-      <p>
-        At Ali Mobile & Repair, we stand by our <strong>"No FIX, No CHARGE"</strong> policy. You get a risk-free comprehensive {LSI_KEYWORDS.actions.evaluate[0]}, 
-        and all our {repairType.name.toLowerCase()}s come with a solid 6-month warranty. Most {a1}s are completed in under an hour right 
-        here at Ringwood Square Shopping Centre!
-      </p>
-    </div>
-  );
-};
-
-export default function RepairServicePage({ params }: RepairPageProps) {
-  const repairTypeSlug = params['repair-type'];
+export default async function RepairServicePage({ params }: RepairPageProps) {
+  const resolvedParams = await params;
+  const repairTypeSlug = resolvedParams['repair-type'];
   const repairType = REPAIR_TYPES.find(r => r.slug === repairTypeSlug);
-  
-  // Reverse lookup for Model and Brand to display readable names
+
+  // Reverse lookup for readable names
   let displayBrand = "Device";
-  let displayModel = decodeURIComponent(params.model).replace(/-/g, ' '); 
+  let displayModel = decodeURIComponent(resolvedParams.model).replace(/-/g, ' ');
 
   for (const b of BRANDS) {
-    if (slugify(b) === params.brand) displayBrand = b;
-    const m = MODELS[b]?.find(x => slugify(x) === params.model);
+    if (slugify(b) === resolvedParams.brand) displayBrand = b;
+    const m = MODELS[b]?.find(x => slugify(x) === resolvedParams.model);
     if (m) displayModel = m;
   }
 
-  const detectedType = detectDeviceType(displayBrand) || "phone";
+  if (!repairType) {
+    return (
+      <div className="page-container" style={{ textAlign: 'center' }}>
+        <h1>Service Not Found</h1>
+        <p>The repair service you&apos;re looking for doesn&apos;t exist.</p>
+        <Link href="/repairs" className="primary-btn" style={{ display: 'inline-block', marginTop: '2rem' }}>
+          Browse All Repairs
+        </Link>
+      </div>
+    );
+  }
 
-  if (!repairType) return <div className="p-20 text-center text-2xl font-bold">Service Not Found</div>;
+  const faqs = generateFaqs(displayModel, repairType, displayBrand);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <RepairServiceSchema 
-        serviceName={`${displayModel} ${repairType.name} Repair in Ringwood`} 
-        description={`Professional ${repairType.name} service for your ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`} 
+    <>
+      <RepairServiceSchema
+        serviceName={`${displayModel} ${repairType.name} in Ringwood`}
+        description={`Professional ${repairType.name} for ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`}
       />
-      <Breadcrumbs brand={params.brand} model={params.model} service={params['repair-type']} />
-      <h1 className="text-4xl font-bold mb-6 text-slate-900 leading-tight">
-        {displayModel} {repairType.name} in Ringwood
-      </h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-8">
-        <section>
-          {generateLsiContent(displayModel, repairType, detectedType)}
-          
-          <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8">
-            <h3 className="text-xl font-bold text-blue-900 mb-3">Why wait? Fix it today!</h3>
-            <p className="text-blue-800 mb-0">Our expert technicians have repaired thousands of {displayBrand} devices. We likely have the exact parts for your {displayModel} in stock.</p>
+
+      {/* ─── HERO SECTION ─────────────────────────────── */}
+      <div className="page-container" style={{ paddingBottom: '0' }}>
+        <Breadcrumbs brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
+
+        <div className="repair-hero">
+          <h1>{displayModel} {repairType.name} in Ringwood</h1>
+
+          <div className="trust-badges">
+            <div className="trust-badge">
+              <span className="trust-badge-icon">⚡</span>
+              Under 1 Hour
+            </div>
+            <div className="trust-badge">
+              <span className="trust-badge-icon">🛡️</span>
+              No Fix, No Charge
+            </div>
+            <div className="trust-badge">
+              <span className="trust-badge-icon">✅</span>
+              6-Month Warranty
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            <Link 
-              href="/book-repair"
-              className="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
-            >
-              Get Instant Quote
+          <div className="cta-group">
+            <Link href="/book-repair" className="cta-book">
+              Book Repair Now
             </Link>
-            <a 
-              href="tel:0481058514" 
-              className="border-2 border-slate-200 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:border-slate-300 hover:bg-slate-50 transition text-center"
-            >
-              Call 0481 058 514
+            <a href="tel:0481058514" className="cta-call">
+              📞 Call 0481 058 514
             </a>
           </div>
-        </section>
-        
-        <aside className="space-y-6">
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-16 -mt-16 z-0"></div>
-            <h2 className="text-2xl font-bold mb-6 text-slate-900 relative z-10">Our Guarantees</h2>
-            <ul className="space-y-4 relative z-10 text-slate-700 font-medium list-none p-0">
-              <li className="flex items-center gap-3">
-                <span className="bg-blue-100 text-blue-600 p-2 rounded-lg">⚡</span>
-                Under 1 Hour Repair
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="bg-blue-100 text-blue-600 p-2 rounded-lg">🛡️</span>
-                6-Month Warranty
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="bg-blue-100 text-blue-600 p-2 rounded-lg">💯</span>
-                No FIX, No CHARGE
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="bg-blue-100 text-blue-600 p-2 rounded-lg">📍</span>
-                Convenient Ringwood Square Location
-              </li>
-            </ul>
-          </div>
-          
-          <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-             <h3 className="text-lg font-bold text-slate-800 mb-3">Not the {displayModel}?</h3>
-             <p className="text-slate-600 text-sm mb-4">Check out other {displayBrand} models we repair, or contact us if you can't find your device.</p>
-             <Link href={`/repairs/${slugify(displayBrand)}`} className="text-blue-600 font-semibold hover:underline">
-               Browse all {displayBrand} repairs →
-             </Link>
-          </div>
-        </aside>
+        </div>
       </div>
-    </div>
+
+      {/* ─── SOCIAL PROOF ─────────────────────────────── */}
+      <ReviewsSection />
+
+      {/* ─── FAQ SECTION ──────────────────────────────── */}
+      <FaqAccordion faqs={faqs} />
+    </>
   );
 }
