@@ -67,7 +67,7 @@ export default function AboutUsPage() {
                 What sets us apart is our deep commitment to the Ringwood community. Being a local business for many years has allowed us to build lasting relationships with our customers. We aren't just a repair shop; we are part of the neighborhood. Our <strong style={{ color: 'var(--primary)' }}>'No Fix, No Charge'</strong> policy ensures that you only pay for results, providing you with ultimate peace of mind.
               </p>
               <p>
-                We take pride in offering the most competitive pricing in the area, often beating larger retail chains while providing a far more personalized and attentive service. From the moment you walk into our shop at Ringwood Square Shopping Centre, you will experience a professional and friendly service that puts your needs first. Your satisfaction is our greatest reward.
+                We take pride in offering the most competitive pricing in the area, often beating larger retail chains while providing a far more personalized and attentive service. From the moment you walk into our shop at <strong>Kiosk C1, Ringwood Square Shopping Centre</strong> (conveniently located inside near the main entrance with <strong>ample free parking</strong> available for our customers), you will experience a professional and friendly service that puts your needs first. Your satisfaction is our greatest reward.
               </p>
             </div>
             

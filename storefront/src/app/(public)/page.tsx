@@ -2,68 +2,12 @@ import Link from "next/link";
 import Script from "next/script";
 import ReviewsSection from "@/components/ReviewsSection";
 import HomeFAQ from "@/components/HomeFAQ";
+import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 
 export default function Home() {
   return (
     <>
-      <Script
-        id="schema-local-business"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@graph": [
-              {
-                "@type": "LocalBusiness",
-                "name": "Ali Mobile Repair",
-                "image": "https://www.alimobile.com.au/logo.png",
-                "logo": "https://www.alimobile.com.au/logo.png",
-                "@id": "https://www.alimobile.com.au",
-                "url": "https://www.alimobile.com.au",
-                "telephone": "0481058514",
-                "priceRange": "$$",
-                "address": {
-                  "@type": "PostalAddress",
-                  "streetAddress": "Kiosk c1 Ringwood Square Shopping Centre",
-                  "addressLocality": "Ringwood",
-                  "addressRegion": "VIC",
-                  "postalCode": "3134",
-                  "addressCountry": "AU"
-                },
-                "geo": {
-                  "@type": "GeoCoordinates",
-                  "latitude": -37.815444,
-                  "longitude": 145.222375
-                },
-                "hasMap": "https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7",
-                "openingHoursSpecification": [
-                  {
-                    "@type": "OpeningHoursSpecification",
-                    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-                    "opens": "10:00",
-                    "closes": "17:00"
-                  }
-                ],
-                "areaServed": [
-                  { "@type": "City", "name": "Ringwood" },
-                  { "@type": "City", "name": "Melbourne" },
-                  { "@type": "State", "name": "State of Victoria" }
-                ],
-                "sameAs": [
-                  "https://www.facebook.com/alimobilerepair",
-                  "https://www.instagram.com/alimobilerepair"
-                ],
-                "description": "Expert mobile phone and tablet repair in Melbourne. Specializing in iPhone, Samsung, iPad, and Google Pixel screen replacement, battery fixing, and system recovery.",
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": "5.0",
-                  "reviewCount": "5"
-                }
-              }
-            ]
-          })
-        }}
-      />
+      <LocalBusinessSchema />
       <section className="hero">
         <div className="hero-contact-pill">
           <a href="https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7" target="_blank" rel="noopener noreferrer" className="contact-item">
@@ -85,7 +29,7 @@ export default function Home() {
           Ali Mobile & Repair
         </div>
         <h1 style={{ marginBottom: '2rem' }}>
-          Premium Mobile Phone & Tablet Repair in Ringwood, Melbourne
+          Expert Mobile Phone & Tablet Repair in Ringwood Square, Melbourne
         </h1>
         
         <div style={{ 

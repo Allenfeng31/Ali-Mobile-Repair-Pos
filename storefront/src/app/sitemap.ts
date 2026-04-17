@@ -60,7 +60,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
       }));
 
-      return [...sitemapUrls, ...dynamicUrls];
+      // Add the new SEO Silo URLs
+      const seoSiloParams = [
+        { brand: 'apple', slug: 'iphone-screen-replacement-ringwood' },
+        { brand: 'samsung', slug: 'samsung-battery-repair-melbourne' },
+        { brand: 'google', slug: 'pixel-screen-repair-ringwood' },
+      ];
+
+      const seoSiloUrls: MetadataRoute.Sitemap = seoSiloParams.map(param => ({
+        url: `${baseUrl}/services/${param.brand}/${param.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.9,
+      }));
+
+      return [...sitemapUrls, ...dynamicUrls, ...seoSiloUrls];
     }
   } catch (error) {
     console.error("Failed to generate dynamic inventory sitemap:", error);
