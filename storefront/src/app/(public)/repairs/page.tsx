@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { BRANDS, MODELS } from "@/data/seo-data";
-import { slugify } from "@/lib/inventoryUtils";
+import { fetchRepairCatalog } from "@/lib/api";
+
+export const revalidate = 3600; // ISR: revalidate every hour
 
 export const metadata: Metadata = {
   title: "Select Your Device Brand | Ali Mobile & Repair Ringwood",
@@ -9,17 +10,9 @@ export const metadata: Metadata = {
     "Choose your device brand to find expert repair services in Ringwood. iPhone, Samsung, iPad, MacBook, Google Pixel, Oppo, and Apple Watch repairs with same-day turnaround.",
 };
 
-const BRAND_CARDS = [
-  { brand: "iPhone", icon: "📱", sub: "iPhone 11 – 15 Pro Max" },
-  { brand: "Samsung", icon: "📱", sub: "Galaxy S · Z Fold · Z Flip" },
-  { brand: "Google Pixel", icon: "📱", sub: "Pixel 6 – 8 Pro" },
-  { brand: "Oppo", icon: "📱", sub: "Find X · Reno · A Series" },
-  { brand: "iPad", icon: "📟", sub: "iPad · Air · Pro · Mini" },
-  { brand: "MacBook", icon: "💻", sub: "MacBook Pro · Air" },
-  { brand: "Apple Watch", icon: "⌚", sub: "Series 9 · Ultra 2 · SE" },
-];
+export default async function RepairsHubPage() {
+  const catalog = await fetchRepairCatalog();
 
-export default function RepairsHubPage() {
   return (
     <div className="page-container">
       <h1
@@ -46,23 +39,19 @@ export default function RepairsHubPage() {
       </p>
 
       <div className="brand-grid">
-        {BRAND_CARDS.map((card) => {
-          const brandSlug = slugify(card.brand);
-          const modelCount = MODELS[card.brand]?.length || 0;
-          return (
-            <Link
-              key={card.brand}
-              href={`/repairs/${brandSlug}`}
-              className="brand-card"
-            >
-              <span className="brand-card-icon">{card.icon}</span>
-              <span className="brand-card-name">{card.brand}</span>
-              <span className="brand-card-sub">
-                {card.sub} · {modelCount} models
-              </span>
-            </Link>
-          );
-        })}
+        {catalog.brands.map((brandEntry) => (
+          <Link
+            key={brandEntry.slug}
+            href={`/repairs/${brandEntry.slug}`}
+            className="brand-card"
+          >
+            <span className="brand-card-icon">{brandEntry.icon}</span>
+            <span className="brand-card-name">{brandEntry.brand}</span>
+            <span className="brand-card-sub">
+              {brandEntry.models.length} model{brandEntry.models.length !== 1 ? 's' : ''}
+            </span>
+          </Link>
+        ))}
       </div>
 
       <div

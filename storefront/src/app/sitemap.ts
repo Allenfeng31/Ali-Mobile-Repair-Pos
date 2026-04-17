@@ -1,10 +1,10 @@
 import { MetadataRoute } from 'next';
-import { RawItem, ParsedItem, parseItem, slugify } from '@/lib/inventoryUtils';
+import { fetchRepairCatalog } from '@/lib/api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   
-  // Blog posts - matching the discovered MD files
+  // Blog posts
   const blogPosts = [
     'iphone-17-pro-screen-replacement-ringwood',
     'fast-reliable-screen-replacement-ringwood',
@@ -22,10 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticUrls: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/repairs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/repairs/phone`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/repairs/tablet`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/repairs/computer`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${baseUrl}/repairs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/book-repair`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
   ];
@@ -33,51 +30,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapUrls = [...staticUrls, ...blogUrls];
 
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || 'http://localhost:3001';
-    // Use short cache for ISR to periodically check for new combinations without burdening DB
-    const res = await fetch(`${backendUrl}/api/inventory`, { next: { revalidate: 3600 } });
-    
-    if (res.ok) {
-      const raw: RawItem[] = await res.json();
-      const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
-      
-      const paths: { brand: string; model: string; service: string }[] = [];
-      
-      parsed.forEach(item => {
-        paths.push({
-          brand: slugify(item.brand),
-          model: slugify(item.deviceModel),
-          service: slugify(item.service),
-        });
-      });
-      
-      const uniquePaths = Array.from(new Set(paths.map(p => JSON.stringify(p)))).map(p => JSON.parse(p));
-      
-      const dynamicUrls: MetadataRoute.Sitemap = uniquePaths.map(path => ({
-        url: `${baseUrl}/repairs/${path.brand}/${path.model}/${path.service}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-      }));
+    const catalog = await fetchRepairCatalog();
 
-      // Add the new SEO Silo URLs
-      const seoSiloParams = [
-        { brand: 'apple', slug: 'iphone-screen-replacement-ringwood' },
-        { brand: 'samsung', slug: 'samsung-battery-repair-melbourne' },
-        { brand: 'google', slug: 'pixel-screen-repair-ringwood' },
-      ];
+    // Brand sub-hub URLs
+    const brandUrls: MetadataRoute.Sitemap = catalog.brands.map(brand => ({
+      url: `${baseUrl}/repairs/${brand.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
 
-      const seoSiloUrls: MetadataRoute.Sitemap = seoSiloParams.map(param => ({
-        url: `${baseUrl}/repairs/${param.brand}/${param.slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.9,
-      }));
-
-      return [...sitemapUrls, ...dynamicUrls, ...seoSiloUrls];
+    // Long-tail repair page URLs
+    const repairUrls: MetadataRoute.Sitemap = [];
+    for (const brand of catalog.brands) {
+      for (const model of brand.models) {
+        for (const repair of model.repairTypes) {
+          repairUrls.push({
+            url: `${baseUrl}/repairs/${brand.slug}/${model.slug}/${repair.slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+          });
+        }
+      }
     }
+
+    return [...sitemapUrls, ...brandUrls, ...repairUrls];
   } catch (error) {
-    console.error("Failed to generate dynamic inventory sitemap:", error);
+    console.error("Failed to generate dynamic sitemap:", error);
   }
 
   return sitemapUrls;

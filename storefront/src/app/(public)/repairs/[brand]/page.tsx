@@ -1,21 +1,24 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { BRANDS, MODELS, REPAIR_TYPES } from "@/data/seo-data";
-import { slugify } from "@/lib/inventoryUtils";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { REPAIR_TYPES } from "@/data/seo-data";
+import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
+
+export const revalidate = 3600; // ISR: revalidate every hour
+export const dynamicParams = true; // Allow on-demand generation of new brand pages
 
 interface BrandPageProps {
   params: Promise<{ brand: string }>;
 }
 
-export function generateStaticParams() {
-  return BRANDS.map((brand) => ({ brand: slugify(brand) }));
+export async function generateStaticParams() {
+  const catalog = await fetchRepairCatalog();
+  return catalog.brands.map((b) => ({ brand: b.slug }));
 }
 
 export async function generateMetadata({ params }: BrandPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const brandName =
-    BRANDS.find((b) => slugify(b) === resolvedParams.brand) || resolvedParams.brand;
+  const { brand } = await fetchBrandModels(resolvedParams.brand);
+  const brandName = brand?.brand || resolvedParams.brand.replace(/-/g, ' ');
   return {
     title: `${brandName} Repair Services in Ringwood | Ali Mobile & Repair`,
     description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Under 1 hour, 6-month warranty.`,
@@ -24,24 +27,22 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
 
 // Group models into series. E.g. "iPhone 15 Pro Max" → "iPhone 15 Series"
 function groupModelsBySeries(
-  models: string[]
-): { series: string; models: string[] }[] {
-  const groups: Record<string, string[]> = {};
+  models: { model: string; slug: string; repairTypes: { slug: string; name: string; price: number }[] }[]
+): { series: string; models: typeof models }[] {
+  const groups: Record<string, typeof models> = {};
 
-  for (const model of models) {
-    // Extract series prefix: take until the first variant keyword (Pro, Max, Ultra, Plus, etc.)
-    const seriesMatch = model.match(
+  for (const entry of models) {
+    const seriesMatch = entry.model.match(
       /^(.+?)\s+(?:Pro\s+Max|Pro|Max|Ultra|Plus|\(.*?\)|Series\s+\d+|SE|mini|Air)/i
     );
     let seriesKey: string;
     if (seriesMatch) {
       seriesKey = seriesMatch[1].trim() + " Series";
     } else {
-      // Fallback: use the model name itself as the series
-      seriesKey = model;
+      seriesKey = entry.model;
     }
     if (!groups[seriesKey]) groups[seriesKey] = [];
-    groups[seriesKey].push(model);
+    groups[seriesKey].push(entry);
   }
 
   return Object.entries(groups).map(([series, models]) => ({
@@ -52,11 +53,11 @@ function groupModelsBySeries(
 
 export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const resolvedParams = await params;
-  const brandName =
-    BRANDS.find((b) => slugify(b) === resolvedParams.brand) || resolvedParams.brand;
-  const models = MODELS[brandName as string] || [];
-  const brandSlug = resolvedParams.brand;
+  const { brand: brandEntry } = await fetchBrandModels(resolvedParams.brand);
 
+  const brandName = brandEntry?.brand || resolvedParams.brand.replace(/-/g, ' ');
+  const models = brandEntry?.models || [];
+  const brandSlug = resolvedParams.brand;
   const seriesGroups = groupModelsBySeries(models);
 
   return (
@@ -88,10 +89,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </li>
           <li>&rsaquo;</li>
           <li>
-            <Link
-              href="/repairs"
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
+            <Link href="/repairs" style={{ color: "inherit", textDecoration: "none" }}>
               Repairs
             </Link>
           </li>
@@ -131,15 +129,24 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         <div key={group.series} className="model-series-section">
           <h2 className="model-series-title">{group.series}</h2>
           <div className="model-series-grid">
-            {group.models.map((model) => {
-              const modelSlug = slugify(model);
+            {group.models.map((entry) => {
+              // Link to the first available repair type (prefer screen-replacement)
+              const defaultRepair =
+                entry.repairTypes.find((r) => r.slug === "screen-replacement") ||
+                entry.repairTypes[0];
+              const repairSlug = defaultRepair?.slug || "screen-replacement";
               return (
                 <Link
-                  key={model}
-                  href={`/repairs/${brandSlug}/${modelSlug}/screen-replacement`}
+                  key={entry.slug}
+                  href={`/repairs/${brandSlug}/${entry.slug}/${repairSlug}`}
                   className="model-card"
                 >
-                  <span>{model}</span>
+                  <span>{entry.model}</span>
+                  {defaultRepair?.price ? (
+                    <span style={{ fontSize: "0.82rem", opacity: 0.6, marginLeft: "auto", marginRight: "0.5rem" }}>
+                      from ${defaultRepair.price}
+                    </span>
+                  ) : null}
                   <span className="model-card-arrow">→</span>
                 </Link>
               );
