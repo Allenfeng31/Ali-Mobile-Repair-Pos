@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Script from 'next/script';
 
 interface Review {
   id: number;
@@ -139,6 +140,22 @@ export default function ReviewsSection() {
       textAlign: 'center',
       borderTop: '1px solid var(--layer-border)',
     }}>
+      <Script
+        id="aggregate-rating-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Ali Mobile & Repair",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "5.0",
+              "reviewCount": "128"
+            }
+          })
+        }}
+      />
       {/* Title */}
       <h2 style={{
         fontSize: '32px',

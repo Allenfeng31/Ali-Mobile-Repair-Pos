@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getSortedPostsData } from '@/lib/blog';
+import Image from 'next/image';
 
 export const metadata = {
   title: 'Repair Guides & Tech News | Ali Mobile Repair Blog',
@@ -18,7 +19,7 @@ export default async function BlogPage() {
         <section className="featured-hero">
           <div className="hero-content">
             <div className="hero-image-wrapper">
-              <img src={featuredPost.image || '/blog/phone-repair.png'} alt={featuredPost.title} />
+              <Image src={featuredPost.image || '/blog/phone-repair.png'} alt={featuredPost.title} width={800} height={450} fill={false} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div className="hero-overlay"></div>
             </div>
             <div className="hero-text">
@@ -44,7 +45,7 @@ export default async function BlogPage() {
           {remainingPosts.map(({ slug, date, title, description, image }) => (
             <Link href={`/blog/${slug}`} key={slug} className="blog-card">
               <div className="card-image">
-                <img src={image || '/blog/phone-repair.png'} alt={title} />
+                <Image src={image || '/blog/phone-repair.png'} alt={title} width={400} height={250} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div className="date-badge">{new Date(date).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}</div>
               </div>
               <div className="card-body">

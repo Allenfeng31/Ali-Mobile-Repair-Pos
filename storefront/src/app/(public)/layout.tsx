@@ -50,7 +50,6 @@ export default function RootLayout({
         <ChatWidget />
         <footer className="footer">
           <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-            <a href="https://ali-mobile-repair-pos-g2by.vercel.app/login">POS System Login</a>
             <a href="/privacy-policy">Privacy Policy</a>
             <a href="/about-us">About Us</a>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 export default function AboutUsPage() {
   return (
@@ -37,11 +38,14 @@ export default function AboutUsPage() {
               borderRadius: '30px', 
               zIndex: 0 
             }} />
-            <img 
+            <Image 
               src="/images/about-us-new.jpg" 
               alt="Ali Mobile & Repair Store Front" 
+              width={600}
+              height={400}
               style={{ 
                 width: '100%', 
+                height: 'auto',
                 borderRadius: '30px', 
                 boxShadow: '0 30px 60px rgba(0,0,0,0.3)', 
                 position: 'relative', 
