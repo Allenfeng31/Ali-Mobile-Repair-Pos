@@ -17,7 +17,7 @@ export default function ServicesHubPage() {
       </p>
 
       <div className="servicesGrid">
-        <Link href="/services/phone-repair" className="serviceCard">
+        <Link href="/repairs/phone" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📱</div>
           <h3>Phone Repair</h3>
           <p>
@@ -27,7 +27,7 @@ export default function ServicesHubPage() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/services/tablet-repair" className="serviceCard">
+        <Link href="/repairs/tablet" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📟</div>
           <h3>Tablet & iPad Repair</h3>
           <p>
@@ -37,7 +37,7 @@ export default function ServicesHubPage() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/services/computer-repair" className="serviceCard">
+        <Link href="/repairs/computer" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💻</div>
           <h3>Laptop & MacBook</h3>
           <p>
@@ -47,7 +47,7 @@ export default function ServicesHubPage() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/services/smart-watch-repair" className="serviceCard">
+        <Link href="/repairs/smart-watch" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⌚</div>
           <h3>Smart Watch Repair</h3>
           <p>

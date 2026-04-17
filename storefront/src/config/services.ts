@@ -28,5 +28,5 @@ export const DEVICE_TYPES = [
 
 // Helper to generate long-tail SEO slugs
 export function generateServicePath(brand: string, device: string, service: string, location: string) {
-  return `/services/${brand}/${device}-${service}-${location}`;
+  return `/repairs/${brand}/${device}-${service}-${location}`;
 }

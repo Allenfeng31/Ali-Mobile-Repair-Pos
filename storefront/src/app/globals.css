@@ -168,6 +168,94 @@ a {
   height: 20px;
 }
 
+/* ─── Nav Actions (right side) ───────────────────── */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ─── Hamburger Button ───────────────────────────── */
+.hamburger-btn {
+  display: none; /* Hidden on desktop */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+}
+
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 24px;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2.5px;
+  width: 100%;
+  background: var(--foreground);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger-icon--open span:nth-child(1) {
+  transform: translateY(7.5px) rotate(45deg);
+}
+
+.hamburger-icon--open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-icon--open span:nth-child(3) {
+  transform: translateY(-7.5px) rotate(-45deg);
+}
+
+/* ─── Desktop nav-links visibility ───────────────── */
+.nav-links--desktop {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* ─── Mobile Dropdown Nav ────────────────────────── */
+.mobile-nav {
+  display: none; /* Hidden on desktop */
+  flex-direction: column;
+  gap: 0;
+  background: var(--secondary);
+  border-top: 1px solid var(--layer-border);
+  padding: 0.5rem 0;
+  animation: mobileNavSlideDown 0.25s ease-out;
+}
+
+.mobile-nav a {
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--layer-border);
+  transition: background 0.2s ease;
+}
+
+.mobile-nav a:hover {
+  background: var(--layer);
+}
+
+.mobile-nav-cta {
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+  border-bottom: none !important;
+}
+
+@keyframes mobileNavSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── Theme Toggle ──────────────────────────────── */
 .theme-toggle-container {
   display: flex;
@@ -553,52 +641,39 @@ input:checked + .toggle-slider:before {
 
 /* ─── Mobile (≤ 767px) ───────────────────────────── */
 @media (max-width: 767px) {
-  /* Navbar: Optimize for mobile with wrapping */
+  /* Navbar: Simple flex row on mobile */
   .nav-container {
-    padding: 0.2rem 1.2rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto; /* Two rows */
+    padding: 0.4rem 1.2rem;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.5rem 1rem;
   }
 
   .nav-logo {
-    grid-column: 1;
-    grid-row: 1;
-    height: 65px; /* Increased mobile size */
+    height: 55px;
+    flex-shrink: 0;
   }
 
-  .call-now-btn {
-    grid-column: 2;
-    grid-row: 1;
-    width: 44px;
-    height: 44px;
-    justify-self: end;
+  /* Hide desktop nav links on mobile */
+  .nav-links--desktop {
+    display: none !important;
   }
 
-  .nav-links {
-    grid-column: 1 / span 2;
-    grid-row: 2;
+  /* Show hamburger button on mobile */
+  .hamburger-btn {
     display: flex;
-    flex-wrap: wrap; 
-    gap: 0.4rem 0.5rem;
-    justify-content: center;
     align-items: center;
-    padding: 0.4rem 0;
-    border-top: 1px solid var(--layer-border);
-    margin-top: 0.1rem;
-    width: 100%;
-    box-sizing: border-box;
+    justify-content: center;
   }
 
-  .nav-links a {
-    font-size: 0.95rem; 
-    font-weight: 700;
-    letter-spacing: 0;
-    padding: 0.2rem 0.4rem;
-    text-align: center;
-    white-space: nowrap;
+  /* Show mobile nav dropdown */
+  .mobile-nav {
+    display: flex;
+  }
+
+  /* Hide Book Repair button on mobile (it's in the dropdown) */
+  .nav-actions .primary-btn {
+    display: none;
   }
 
   /* Hero: Adjust for dual-row navbar */
