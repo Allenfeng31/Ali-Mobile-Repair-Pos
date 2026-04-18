@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { Smartphone, Tablet, Laptop, Watch } from 'lucide-react';
 import ChatNowButton from "@/components/ChatNowButton";
+import ServiceAreas from "@/components/seo/ServiceAreas";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
@@ -79,6 +80,8 @@ export default function RepairsHubPage() {
           </div>
         </Link>
       </section>
+
+      <ServiceAreas />
 
       <div
         style={{

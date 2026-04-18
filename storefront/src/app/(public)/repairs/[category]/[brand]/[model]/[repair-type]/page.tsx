@@ -82,8 +82,12 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const model = details?.model || formatDynamicParam(resolvedParams.model);
   const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const priceStr = details?.price ? ` from $${details.price}` : '';
+  const modelCode = details?.modelCode;
 
-  const title = `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
+  const title = modelCode
+    ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
+    : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
+    
   const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
   const description = META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
 

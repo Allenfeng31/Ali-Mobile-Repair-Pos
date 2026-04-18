@@ -2,6 +2,7 @@ import Link from "next/link";
 import Script from "next/script";
 import ReviewsSection from "@/components/ReviewsSection";
 import HomeFAQ from "@/components/HomeFAQ";
+import ServiceAreas from "@/components/seo/ServiceAreas";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 
 export default function Home() {
@@ -92,6 +93,8 @@ export default function Home() {
       <ReviewsSection />
       
       <HomeFAQ />
+
+      <ServiceAreas />
 
       <section className="map-section">
         <h2>Visit Us in Melbourne</h2>
