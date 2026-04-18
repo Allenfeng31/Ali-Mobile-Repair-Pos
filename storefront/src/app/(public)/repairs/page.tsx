@@ -1,18 +1,17 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { fetchRepairCatalog } from "@/lib/api";
+import { Smartphone, Tablet, Laptop, Watch } from 'lucide-react';
+import ChatNowButton from "@/components/ChatNowButton";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export const metadata: Metadata = {
-  title: "Select Your Device Brand | Ali Mobile & Repair Ringwood",
+  title: "Professional Device Repair Services in Ringwood | Ali Mobile",
   description:
-    "Choose your device brand to find expert repair services in Ringwood. iPhone, Samsung, iPad, MacBook, Google Pixel, Oppo, and Apple Watch repairs with same-day turnaround.",
+    "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day turnaround.",
 };
 
-export default async function RepairsHubPage() {
-  const catalog = await fetchRepairCatalog();
-
+export default function RepairsHubPage() {
   return (
     <div className="page-container">
       <h1
@@ -24,7 +23,7 @@ export default async function RepairsHubPage() {
           letterSpacing: "-0.5px",
         }}
       >
-        Select Your Device Brand
+        Professional Device Repair Services in Ringwood
       </h1>
       <p
         style={{
@@ -35,23 +34,81 @@ export default async function RepairsHubPage() {
           margin: "0 auto 3rem",
         }}
       >
-        We repair all major brands — pick yours to see available services and pricing.
+        We repair all major devices — select a category below to see available services and pricing.
       </p>
 
-      <div className="brand-grid">
-        {catalog.brands.map((brandEntry) => (
-          <Link
-            key={brandEntry.slug}
-            href={`/repairs/${brandEntry.slug}`}
-            className="brand-card"
-          >
-            <span className="brand-card-icon">{brandEntry.icon}</span>
-            <span className="brand-card-name">{brandEntry.brand}</span>
-            <span className="brand-card-sub">
-              {brandEntry.models.length} model{brandEntry.models.length !== 1 ? 's' : ''}
-            </span>
+      <section className="servicesGrid">
+        <Link href="/repairs/phone" className="serviceCard">
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <Smartphone size={48} strokeWidth={1.5} aria-hidden="true" color="var(--primary)" />
+          </div>
+          <h3>Phone Repair</h3>
+          <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
+          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            View Pricing →
+          </div>
+        </Link>
+        <Link href="/repairs/tablet" className="serviceCard">
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <Tablet size={48} strokeWidth={1.5} aria-hidden="true" color="var(--primary)" />
+          </div>
+          <h3>Tablet & iPad Repair</h3>
+          <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
+          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            View Pricing →
+          </div>
+        </Link>
+        <Link href="/repairs/laptop" className="serviceCard">
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <Laptop size={48} strokeWidth={1.5} aria-hidden="true" color="var(--primary)" />
+          </div>
+          <h3>Laptop & MacBook Repair</h3>
+          <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
+          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            View Pricing →
+          </div>
+        </Link>
+        <Link href="/repairs/watch" className="serviceCard">
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <Watch size={48} strokeWidth={1.5} aria-hidden="true" color="var(--primary)" />
+          </div>
+          <h3>Smart Watch Repair</h3>
+          <p>Apple Watch screen and battery repairs. Professional service for all series.</p>
+          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            View Pricing →
+          </div>
+        </Link>
+      </section>
+
+      <div
+        style={{
+          marginTop: "4rem",
+          background: "var(--secondary)",
+          borderRadius: "20px",
+          padding: "2.5rem",
+          border: "1px solid var(--layer-border)",
+          textAlign: "center",
+        }}
+      >
+        <h2 style={{ fontSize: "1.6rem", marginBottom: "0.75rem" }}>
+          Not sure which model you have?
+        </h2>
+        <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "1rem" }}>
+          Use our Live Quote tool or call us — we&apos;ll identify your device and give you an instant price.
+        </p>
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", alignItems: 'center' }}>
+          <Link href="/book-repair" className="primary-btn">
+            Get a Live Quote
           </Link>
-        ))}
+          <a href="tel:0481058514" className="secondary-btn">
+            📞 Call 0481 058 514
+          </a>
+          <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>or</span>
+          <ChatNowButton 
+            className="primary-btn" 
+            style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+          />
+        </div>
       </div>
     </div>
   );

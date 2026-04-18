@@ -23,7 +23,7 @@ export default function Header() {
 
         {/* Desktop nav links */}
         <nav className="nav-links nav-links--desktop">
-          <Link href="/repairs/phone">Service &amp; Repairs</Link>
+          <Link href="/repairs">Service &amp; Repairs</Link>
           <Link href="/about-us">About Us</Link>
           <Link href="/blog">Blog</Link>
         </nav>
@@ -57,7 +57,7 @@ export default function Header() {
       {/* Mobile dropdown menu */}
       {isMobileMenuOpen && (
         <nav className="mobile-nav">
-          <Link href="/repairs/phone" onClick={() => setIsMobileMenuOpen(false)}>Service &amp; Repairs</Link>
+          <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)}>Service &amp; Repairs</Link>
           <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)}>About Us</Link>
           <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
           <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="mobile-nav-cta">
