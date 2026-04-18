@@ -7,16 +7,16 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 interface ModelPageProps {
-  params: Promise<{ brand: string; model: string }>;
+  params: Promise<{ category: string; brand: string; model: string }>;
 }
 
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
-  const allParams: { brand: string; model: string }[] = [];
+  const allParams: { category: string; brand: string; model: string }[] = [];
 
   for (const brand of catalog.brands) {
     for (const model of brand.models) {
-      allParams.push({ brand: brand.slug, model: model.slug });
+      allParams.push({ category: brand.category, brand: brand.slug, model: model.slug });
     }
   }
 
@@ -24,8 +24,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
-  const { brand: brandSlug, model: modelSlug } = await params;
-  const data = await fetchModelRepairTypes(brandSlug, modelSlug);
+  const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
+  const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
   const modelName = data?.model || modelSlug.replace(/-/g, " ");
   const brandName = data?.brand || brandSlug.replace(/-/g, " ");
@@ -37,8 +37,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
 }
 
 export default async function ModelRepairSelectPage({ params }: ModelPageProps) {
-  const { brand: brandSlug, model: modelSlug } = await params;
-  const data = await fetchModelRepairTypes(brandSlug, modelSlug);
+  const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
+  const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
   const modelName = data?.model || modelSlug.replace(/-/g, " ");
   const brandName = data?.brand || brandSlug.replace(/-/g, " ");
@@ -46,7 +46,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
   return (
     <div className="page-container" style={{ maxWidth: "900px" }}>
-      <Breadcrumbs brand={brandSlug} model={modelSlug} />
+      <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
 
       <h1
         style={{
@@ -75,7 +75,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         {repairTypes.map((rt) => (
           <Link
             key={rt.slug}
-            href={`/repairs/${brandSlug}/${modelSlug}/${rt.slug}`}
+            href={`/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`}
             className="repair-option-card"
           >
             <span className="repair-option-icon">

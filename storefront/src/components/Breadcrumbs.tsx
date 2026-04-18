@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 interface BreadcrumbsProps {
+  category: string;
   brand: string;
   model: string;
   service?: string;
@@ -11,7 +12,8 @@ function formatWord(word: string) {
   return word.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps) {
+export default function Breadcrumbs({ category, brand, model, service }: BreadcrumbsProps) {
+  const fCategory = formatWord(category);
   const fBrand = formatWord(brand);
   const fModel = formatWord(model);
   const fService = service ? formatWord(service) : null;
@@ -19,14 +21,15 @@ export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps)
   const breadcrumbItems = [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobilerepair.com.au/" },
     { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobilerepair.com.au/repairs" },
-    { "@type": "ListItem", "position": 3, "name": fBrand, "item": `https://www.alimobilerepair.com.au/repairs/${brand}` },
-    { "@type": "ListItem", "position": 4, "name": fModel, "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}` },
+    { "@type": "ListItem", "position": 3, "name": fCategory, "item": `https://www.alimobilerepair.com.au/repairs/${category}` },
+    { "@type": "ListItem", "position": 4, "name": fBrand, "item": `https://www.alimobilerepair.com.au/repairs/${category}/${brand}` },
+    { "@type": "ListItem", "position": 5, "name": fModel, "item": `https://www.alimobilerepair.com.au/repairs/${category}/${brand}/${model}` },
   ];
 
   if (fService && service) {
     breadcrumbItems.push({
-      "@type": "ListItem", "position": 5, "name": fService,
-      "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}/${service}`
+      "@type": "ListItem", "position": 6, "name": fService,
+      "item": `https://www.alimobilerepair.com.au/repairs/${category}/${brand}/${model}/${service}`
     });
   }
 
@@ -48,13 +51,15 @@ export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps)
           <li>&rsaquo;</li>
           <li><Link href="/repairs" style={{ color: 'inherit', textDecoration: 'none' }}>Repairs</Link></li>
           <li>&rsaquo;</li>
-          <li><Link href={`/repairs/${brand}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fBrand}</Link></li>
+          <li><Link href={`/repairs/${category}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fCategory}</Link></li>
+          <li>&rsaquo;</li>
+          <li><Link href={`/repairs/${category}/${brand}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fBrand}</Link></li>
           <li>&rsaquo;</li>
           {isModelPage ? (
             <li aria-current="page"><span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fModel}</span></li>
           ) : (
             <>
-              <li><Link href={`/repairs/${brand}/${model}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fModel}</Link></li>
+              <li><Link href={`/repairs/${category}/${brand}/${model}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fModel}</Link></li>
               <li>&rsaquo;</li>
               <li aria-current="page"><span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fService}</span></li>
             </>

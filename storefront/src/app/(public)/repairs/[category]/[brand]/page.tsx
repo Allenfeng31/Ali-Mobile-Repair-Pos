@@ -8,17 +8,17 @@ export const revalidate = 3600; // ISR: revalidate every hour
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
 
 interface BrandPageProps {
-  params: Promise<{ brand: string }>;
+  params: Promise<{ category: string; brand: string }>;
 }
 
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
-  return catalog.brands.map((b) => ({ brand: b.slug }));
+  return catalog.brands.map((b) => ({ category: b.category, brand: b.slug }));
 }
 
 export async function generateMetadata({ params }: BrandPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const { brand } = await fetchBrandModels(resolvedParams.brand);
+  const { brand } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
   const brandName = brand?.brand || resolvedParams.brand.replace(/-/g, ' ');
   return {
     title: `${brandName} Repair Services in Ringwood | Ali Mobile & Repair`,
@@ -28,10 +28,11 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
 
 export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const resolvedParams = await params;
-  const { brand: brandEntry } = await fetchBrandModels(resolvedParams.brand);
+  const { brand: brandEntry } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
 
   const brandName = brandEntry?.brand || resolvedParams.brand.replace(/-/g, ' ');
   const models = brandEntry?.models || [];
+  const categorySlug = resolvedParams.category;
   const brandSlug = resolvedParams.brand;
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels);
@@ -108,7 +109,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             {group.models.map((entry) => (
               <Link
                 key={entry.slug}
-                href={`/repairs/${brandSlug}/${entry.slug}`}
+                href={`/repairs/${categorySlug}/${brandSlug}/${entry.slug}`}
                 className="model-card"
               >
                 <span>{entry.model}</span>

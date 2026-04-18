@@ -13,6 +13,7 @@ export const dynamicParams = true; // Allow on-demand generation of new pages
 
 interface RepairPageProps {
   params: Promise<{
+    category: string;
     brand: string;
     model: string;
     'repair-type': string;
@@ -21,12 +22,13 @@ interface RepairPageProps {
 
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
-  const allParams: { brand: string; model: string; 'repair-type': string }[] = [];
+  const allParams: { category: string; brand: string; model: string; 'repair-type': string }[] = [];
 
   for (const brand of catalog.brands) {
     for (const model of brand.models) {
       for (const repair of model.repairTypes) {
         allParams.push({
+          category: brand.category,
           brand: brand.slug,
           model: model.slug,
           'repair-type': repair.slug,
@@ -61,6 +63,7 @@ const META_DESCRIPTION_TEMPLATES = [
 export async function generateMetadata({ params }: RepairPageProps) {
   const resolvedParams = await params;
   const details = await fetchRepairDetails(
+    resolvedParams.category,
     resolvedParams.brand,
     resolvedParams.model,
     resolvedParams['repair-type']
@@ -122,6 +125,7 @@ function getLSIForRepair(slug: string): { component?: string[]; issue?: string[]
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
   const details = await fetchRepairDetails(
+    resolvedParams.category,
     resolvedParams.brand,
     resolvedParams.model,
     resolvedParams['repair-type']
@@ -149,7 +153,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {/* ─── HERO SECTION ─────────────────────────────── */}
       <div className="page-container" style={{ paddingBottom: '0' }}>
-        <Breadcrumbs brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
+        <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
 
         <div className="repair-hero">
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>

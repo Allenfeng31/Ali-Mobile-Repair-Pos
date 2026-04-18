@@ -70,7 +70,7 @@ export default function Home() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/repairs/computer" className="serviceCard">
+        <Link href="/repairs/laptop" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💻</div>
           <h3>Laptop & MacBook Repair</h3>
           <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
@@ -78,7 +78,7 @@ export default function Home() {
             View Pricing →
           </div>
         </Link>
-        <Link href="/repairs/smart-watch" className="serviceCard">
+        <Link href="/repairs/watch" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⌚</div>
           <h3>Smart Watch Repair</h3>
           <p>Apple Watch screen and battery repairs. Professional service for all series.</p>

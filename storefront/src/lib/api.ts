@@ -16,6 +16,7 @@ export interface ModelEntry {
 }
 
 export interface BrandEntry {
+  category: string;
   brand: string;
   slug: string;
   icon: string;
@@ -29,11 +30,20 @@ export interface RepairCatalog {
 
 // ─── Brand icon mapping ─────────────────────────────────────────────────────
 
-function getBrandIcon(brand: string): string {
-  const lower = brand.toLowerCase();
-  if (lower.includes('ipad') || lower.includes('tablet')) return '📟';
-  if (lower.includes('macbook') || lower.includes('laptop')) return '💻';
-  if (lower.includes('watch')) return '⌚';
+function getDeviceCategory(brand: string, model: string): 'phone' | 'tablet' | 'laptop' | 'watch' {
+  const b = brand.toLowerCase();
+  const m = model.toLowerCase();
+  
+  if (b.includes('ipad') || m.includes('ipad') || m.includes('tab')) return 'tablet';
+  if (b.includes('macbook') || m.includes('macbook') || b.includes('laptop') || m.includes('laptop')) return 'laptop';
+  if (b.includes('watch') || m.includes('watch')) return 'watch';
+  return 'phone';
+}
+
+function getCategoryIcon(category: string): string {
+  if (category === 'tablet') return '📟';
+  if (category === 'laptop') return '💻';
+  if (category === 'watch') return '⌚';
   return '📱';
 }
 
@@ -183,7 +193,7 @@ function ensureCoreRepairTypes(
 function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
   const parsed = rawItems.map(parseItem).filter(Boolean) as ParsedItem[];
 
-  // Group by brand → model → repair types
+  // Group by category|brand → model → repair types
   const brandMap = new Map<string, Map<string, RepairOption[]>>();
 
   for (const item of parsed) {
@@ -195,11 +205,14 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     const standardSlug = slugify(standardName);
 
     const cleanBrand = displayBrand(item.brand);
-    if (!brandMap.has(cleanBrand)) {
-      brandMap.set(cleanBrand, new Map());
+    const category = getDeviceCategory(cleanBrand, item.deviceModel);
+    const compoundKey = `${category}|${cleanBrand}`;
+
+    if (!brandMap.has(compoundKey)) {
+      brandMap.set(compoundKey, new Map());
     }
 
-    const modelMap = brandMap.get(cleanBrand)!;
+    const modelMap = brandMap.get(compoundKey)!;
     if (!modelMap.has(item.deviceModel)) {
       modelMap.set(item.deviceModel, []);
     }
@@ -228,7 +241,8 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
 
   // Convert to array, applying matrix expansion
   const brands: BrandEntry[] = [];
-  for (const [brand, modelMap] of brandMap) {
+  for (const [compoundKey, modelMap] of brandMap) {
+    const [category, brand] = compoundKey.split('|');
     const models: ModelEntry[] = [];
     for (const [model, repairTypes] of modelMap) {
       models.push({
@@ -238,9 +252,10 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
       });
     }
     brands.push({
+      category,
       brand,
       slug: slugify(brand),
-      icon: getBrandIcon(brand),
+      icon: getCategoryIcon(category),
       models,
     });
   }
@@ -251,24 +266,40 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
 // ─── Fallback: Build catalog from hardcoded seo-data.ts ─────────────────────
 
 function buildFallbackCatalog(): BrandEntry[] {
-  return BRANDS.map(brand => {
-    const models = (MODELS[brand] || []).map(model => ({
-      model,
-      slug: slugify(model),
-      repairTypes: REPAIR_TYPES.map(rt => ({
-        slug: rt.slug,
-        name: rt.name,
-        price: 0, // No price without POS
-      })),
-    }));
-
-    return {
-      brand,
-      slug: slugify(brand),
-      icon: getBrandIcon(brand),
-      models,
-    };
-  });
+  const entries: BrandEntry[] = [];
+  
+  for (const brand of BRANDS) {
+    const categoryMap = new Map<string, ModelEntry[]>();
+    
+    for (const model of MODELS[brand] || []) {
+      const category = getDeviceCategory(brand, model);
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, []);
+      }
+      
+      categoryMap.get(category)!.push({
+        model,
+        slug: slugify(model),
+        repairTypes: REPAIR_TYPES.map(rt => ({
+          slug: rt.slug,
+          name: rt.name,
+          price: 0,
+        })),
+      });
+    }
+    
+    for (const [category, models] of categoryMap) {
+      entries.push({
+        category,
+        brand,
+        slug: slugify(brand),
+        icon: getCategoryIcon(category),
+        models,
+      });
+    }
+  }
+  
+  return entries;
 }
 
 // ─── Public API ─────────────────────────────────────────────────────────────
@@ -297,12 +328,12 @@ export async function fetchRepairCatalog(): Promise<RepairCatalog> {
 /**
  * Fetch a specific brand's model list for the sub-hub page.
  */
-export async function fetchBrandModels(brandSlug: string): Promise<{
+export async function fetchBrandModels(categorySlug: string, brandSlug: string): Promise<{
   brand: BrandEntry | null;
   source: 'pos' | 'fallback';
 }> {
   const catalog = await fetchRepairCatalog();
-  const brand = catalog.brands.find(b => b.slug === brandSlug) || null;
+  const brand = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug) || null;
   return { brand, source: catalog.source };
 }
 
@@ -310,6 +341,7 @@ export async function fetchBrandModels(brandSlug: string): Promise<{
  * Fetch repair details for a specific model + repair-type combination.
  */
 export async function fetchRepairDetails(
+  categorySlug: string,
   brandSlug: string,
   modelSlug: string,
   repairSlug: string
@@ -321,7 +353,7 @@ export async function fetchRepairDetails(
   source: 'pos' | 'fallback';
 } | null> {
   const catalog = await fetchRepairCatalog();
-  const brandEntry = catalog.brands.find(b => b.slug === brandSlug);
+  const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);
   if (!brandEntry) return null;
 
   const modelEntry = brandEntry.models.find(m => m.slug === modelSlug);
@@ -342,6 +374,7 @@ export async function fetchRepairDetails(
  * Fetch repair types for a specific brand + model (for the intermediate model page).
  */
 export async function fetchModelRepairTypes(
+  categorySlug: string,
   brandSlug: string,
   modelSlug: string
 ): Promise<{
@@ -351,7 +384,7 @@ export async function fetchModelRepairTypes(
   source: 'pos' | 'fallback';
 } | null> {
   const catalog = await fetchRepairCatalog();
-  const brandEntry = catalog.brands.find(b => b.slug === brandSlug);
+  const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);
   if (!brandEntry) return null;
 
   const modelEntry = brandEntry.models.find(m => m.slug === modelSlug);
