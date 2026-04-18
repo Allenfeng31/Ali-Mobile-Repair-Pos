@@ -5,6 +5,7 @@ import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench } from 'lucide-react';
 import Link from 'next/link';
+import ChatNowButton from '@/components/ChatNowButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
@@ -201,7 +202,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 <a href="tel:0481058514" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline' }}>
                   0481 058 514
                 </a>{' '}
-                or <button onClick={() => document.getElementById('chat-widget-toggle')?.click()} style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 700, padding: 0, textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit', fontFamily: 'inherit' }}>Chat Now</button>.
+                or <ChatNowButton style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 700, padding: 0, textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit', fontFamily: 'inherit' }} />.
               </p>
             </div>
           )}

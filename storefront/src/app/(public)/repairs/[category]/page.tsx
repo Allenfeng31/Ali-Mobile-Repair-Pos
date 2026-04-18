@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Smartphone, Tablet, Laptop, Watch } from 'lucide-react';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
+import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam } from '@/lib/inventoryUtils';
 
@@ -288,13 +289,10 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               📞 Call 0481 058 514
             </a>
             <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>or</span>
-            <button 
-              onClick={() => document.getElementById('chat-widget-toggle')?.click()}
+            <ChatNowButton 
               className="primary-btn" 
               style={{ background: 'var(--foreground)', color: 'var(--background)' }}
-            >
-              Chat Now
-            </button>
+            />
           </div>
         </div>
 
