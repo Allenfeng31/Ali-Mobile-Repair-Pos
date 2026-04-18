@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { Smartphone, Tablet, Laptop, Watch } from 'lucide-react';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
 import { fetchRepairCatalog } from '@/lib/api';
@@ -9,6 +10,13 @@ import { formatDynamicParam } from '@/lib/inventoryUtils';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
+
+function getLucideIcon(category: string) {
+  if (category === 'tablet') return <Tablet size={48} strokeWidth={1.5} aria-hidden="true" />;
+  if (category === 'laptop') return <Laptop size={48} strokeWidth={1.5} aria-hidden="true" />;
+  if (category === 'watch') return <Watch size={48} strokeWidth={1.5} aria-hidden="true" />;
+  return <Smartphone size={48} strokeWidth={1.5} aria-hidden="true" />;
+}
 
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 
@@ -244,7 +252,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} style={{
               background: 'var(--layer)', border: '1px solid var(--layer-border)', borderRadius: '16px', padding: '1.5rem', textAlign: 'center', transition: 'all 0.2s', textDecoration: 'none', color: 'inherit'
             }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{b.icon}</div>
+              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>{getLucideIcon(b.category)}</div>
               <h3 style={{ fontSize: '1.1rem', margin: '0' }}>{b.brand}</h3>
             </Link>
           ))}
@@ -253,6 +261,41 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 No active brands available in this category for now.
              </div>
           )}
+        </div>
+
+        <div
+          style={{
+            marginTop: "1rem",
+            marginBottom: "3rem",
+            background: "var(--secondary)",
+            borderRadius: "20px",
+            padding: "2.5rem",
+            border: "1px solid var(--layer-border)",
+            textAlign: "center",
+          }}
+        >
+          <h2 style={{ fontSize: "1.6rem", marginBottom: "0.75rem" }}>
+            Not sure which model you have?
+          </h2>
+          <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "1rem" }}>
+            Use our Live Quote tool or call us — we'll identify your device and give you an instant price.
+          </p>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", alignItems: 'center' }}>
+            <Link href="/book-repair" className="primary-btn">
+              Get a Live Quote
+            </Link>
+            <a href="tel:0481058514" className="secondary-btn">
+              📞 Call 0481 058 514
+            </a>
+            <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>or</span>
+            <button 
+              onClick={() => document.getElementById('chat-widget-toggle')?.click()}
+              className="primary-btn" 
+              style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+            >
+              Chat Now
+            </button>
+          </div>
         </div>
 
         {/* SEO CONTENT (BOTTOM) */}

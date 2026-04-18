@@ -3,6 +3,7 @@ import { REPAIR_TYPES, LSI_KEYWORDS } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
 import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
+import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ReviewsSection from '@/components/ReviewsSection';
@@ -10,6 +11,14 @@ import FaqAccordion from '@/components/FaqAccordion';
 
 export const revalidate = 3600; // ISR: revalidate every hour
 export const dynamicParams = true; // Allow on-demand generation of new pages
+
+function getRepairIcon(slug: string, size = 48) {
+  if (slug.includes('water')) return <Droplet size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
+  if (slug.includes('battery')) return <Battery size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
+  if (slug.includes('port')) return <Plug size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
+  if (slug.includes('screen') || slug.includes('glass') || slug.includes('display')) return <Smartphone size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
+  return <Wrench size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
+}
 
 interface RepairPageProps {
   params: Promise<{
@@ -156,6 +165,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
 
         <div className="repair-hero">
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            {getRepairIcon(resolvedParams['repair-type'])}
+          </div>
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
 
           {price > 0 || resolvedParams['repair-type'] === 'water-damage-repair' ? (
@@ -189,22 +201,22 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 <a href="tel:0481058514" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline' }}>
                   0481 058 514
                 </a>{' '}
-                or <strong>Chat Now</strong>.
+                or <button onClick={() => document.getElementById('chat-widget-toggle')?.click()} style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 700, padding: 0, textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit', fontFamily: 'inherit' }}>Chat Now</button>.
               </p>
             </div>
           )}
 
           <div className="trust-badges">
             <div className="trust-badge">
-              <span className="trust-badge-icon">⚡</span>
+              <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
               Under 1 Hour
             </div>
             <div className="trust-badge">
-              <span className="trust-badge-icon">🛡️</span>
+              <span className="trust-badge-icon"><ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
               No Fix, No Charge
             </div>
             <div className="trust-badge">
-              <span className="trust-badge-icon">✅</span>
+              <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
               6-Month Warranty
             </div>
           </div>
