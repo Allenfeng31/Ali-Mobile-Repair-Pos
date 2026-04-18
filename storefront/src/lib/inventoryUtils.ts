@@ -2,6 +2,7 @@ export interface RawItem {
   id: number;
   name: string;
   model: string;   // "Brand||ServiceName" or plain "ServiceName"
+  device_model?: string; // Official AU Model Code
   price: number;
   category: string;
   sku?: string;
@@ -12,6 +13,7 @@ export interface ParsedItem {
   name: string;
   brand: string;      // raw full brand (e.g. "P iPhone", "C MacBook")
   deviceModel: string; // The model name (e.g. "iPhone 13 Pro")
+  modelCode?: string; // e.g. "SM-S931B, A3102"
   service: string;     // The service part (e.g. "Screen Replacement")
   price: number;
   category: string;
@@ -125,6 +127,7 @@ export function parseItem(raw: RawItem): ParsedItem | null {
     name: raw.name,
     brand,
     deviceModel: modelName || "Other Model",
+    modelCode: raw.device_model || undefined,
     service: serviceName,
     price: raw.price ?? 0,
     category: raw.category,

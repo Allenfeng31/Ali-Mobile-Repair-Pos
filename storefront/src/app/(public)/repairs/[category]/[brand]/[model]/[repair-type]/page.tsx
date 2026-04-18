@@ -90,13 +90,16 @@ export async function generateMetadata({ params }: RepairPageProps) {
   return { title, description };
 }
 
-function generateFaqs(model: string, repairName: string, repairSlug: string, price: number) {
+function generateFaqs(model: string, repairName: string, repairSlug: string, price: number, modelCode?: string) {
   const lsi = getLSIForRepair(repairSlug);
   const component = lsi.component?.[0] || repairName.toLowerCase();
   const altComponent = lsi.component?.[1] || 'damaged component';
+  
+  const displayModel = modelCode ? `${model} (${modelCode})` : model;
+  
   const priceInfo = price > 0
-    ? `Starting from $${price}, the exact pricing depends on the specific ${model} variant.`
-    : `Pricing depends on the specific ${model} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`;
+    ? `Starting from $${price}, the exact pricing depends on the specific ${displayModel} variant.`
+    : `Pricing depends on the specific ${displayModel} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`;
 
   return [
     {
@@ -146,12 +149,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const displayModel = details?.model || formatDynamicParam(resolvedParams.model);
   const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
+  const modelCode = details?.modelCode;
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
   const finalRepairName = knownRepair?.name || repairName;
 
-  const faqs = generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price);
+  const faqs = generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode);
 
   return (
     <>
@@ -159,6 +163,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         serviceName={`${displayModel} ${finalRepairName} in Ringwood`}
         description={`Professional ${finalRepairName} for ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`}
         price={price > 0 ? String(price) : undefined}
+        modelCode={modelCode}
       />
 
       {/* ─── HERO SECTION ─────────────────────────────── */}

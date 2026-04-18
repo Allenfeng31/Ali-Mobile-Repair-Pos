@@ -82,8 +82,8 @@ export function FAQSchema({ faqs }: { faqs: { question: string; answer: string }
   return <SchemaOrg type="FAQPage" data={faqData} />;
 }
 
-export function RepairServiceSchema({ serviceName, description, price }: { serviceName: string; description: string; price?: string }) {
-  const serviceData = {
+export function RepairServiceSchema({ serviceName, description, price, modelCode }: { serviceName: string; description: string; price?: string; modelCode?: string }) {
+  const serviceData: any = {
     "name": serviceName,
     "description": description,
     "provider": {
@@ -99,6 +99,11 @@ export function RepairServiceSchema({ serviceName, description, price }: { servi
       "description": "No Fix No Charge policy. Get a free quote."
     }
   };
+
+  if (modelCode) {
+    serviceData.model = modelCode;
+    serviceData.mpn = modelCode;
+  }
 
   return <SchemaOrg type="Service" data={serviceData} />;
 }

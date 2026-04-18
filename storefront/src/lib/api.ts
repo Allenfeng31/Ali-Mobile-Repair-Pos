@@ -12,6 +12,7 @@ export interface RepairOption {
 export interface ModelEntry {
   model: string;
   slug: string;
+  modelCode?: string;
   repairTypes: RepairOption[];
 }
 
@@ -193,8 +194,8 @@ function ensureCoreRepairTypes(
 function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
   const parsed = rawItems.map(parseItem).filter(Boolean) as ParsedItem[];
 
-  // Group by category|brand → model → repair types
-  const brandMap = new Map<string, Map<string, RepairOption[]>>();
+  // Group by category|brand → model → { repairTypes, code }
+  const brandMap = new Map<string, Map<string, { repairTypes: RepairOption[], code?: string }>>();
 
   for (const item of parsed) {
     // Data sanitization: skip invalid model names
@@ -214,10 +215,13 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
 
     const modelMap = brandMap.get(compoundKey)!;
     if (!modelMap.has(item.deviceModel)) {
-      modelMap.set(item.deviceModel, []);
+      modelMap.set(item.deviceModel, { repairTypes: [], code: item.modelCode });
+    } else if (item.modelCode && !modelMap.get(item.deviceModel)!.code) {
+      // Opportunistically pick up the code if it wasn't on the first row
+      modelMap.get(item.deviceModel)!.code = item.modelCode;
     }
 
-    const repairTypes = modelMap.get(item.deviceModel)!;
+    const { repairTypes } = modelMap.get(item.deviceModel)!;
 
     // ── Dedup: if a slug already exists, keep the entry with the higher price ──
     const existingIdx = repairTypes.findIndex(r => r.slug === standardSlug);
@@ -244,10 +248,11 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
   for (const [compoundKey, modelMap] of brandMap) {
     const [category, brand] = compoundKey.split('|');
     const models: ModelEntry[] = [];
-    for (const [model, repairTypes] of modelMap) {
+    for (const [model, { repairTypes, code }] of modelMap) {
       models.push({
         model,
         slug: slugify(model),
+        modelCode: code,
         repairTypes: ensureCoreRepairTypes(repairTypes, slugify(brand), model),
       });
     }
@@ -348,6 +353,7 @@ export async function fetchRepairDetails(
 ): Promise<{
   brand: string;
   model: string;
+  modelCode?: string;
   repairType: string;
   price: number;
   source: 'pos' | 'fallback';
@@ -364,6 +370,7 @@ export async function fetchRepairDetails(
   return {
     brand: brandEntry.brand,
     model: modelEntry.model,
+    modelCode: modelEntry.modelCode,
     repairType: repairEntry?.name || repairSlug.replace(/-/g, ' '),
     price: repairEntry?.price || 0,
     source: catalog.source,

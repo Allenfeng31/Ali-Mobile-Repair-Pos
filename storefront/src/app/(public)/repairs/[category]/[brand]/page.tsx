@@ -4,6 +4,7 @@ import { REPAIR_TYPES } from "@/data/seo-data";
 import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
+import BrandModelSearch from "@/components/BrandModelSearch";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
@@ -103,23 +104,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         Select your model below to view repair options and pricing in Ringwood.
       </p>
 
-      {seriesGroups.map((group) => (
-        <div key={group.series} className="model-series-section">
-          <h2 className="model-series-title">{group.series}</h2>
-          <div className="model-series-grid">
-            {group.models.map((entry) => (
-              <Link
-                key={entry.slug}
-                href={`/repairs/${categorySlug}/${brandSlug}/${entry.slug}`}
-                className="model-card"
-              >
-                <span>{entry.model}</span>
-                <span className="model-card-arrow">→</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ))}
+      <BrandModelSearch 
+        seriesGroups={seriesGroups} 
+        categorySlug={categorySlug} 
+        brandSlug={brandSlug} 
+      />
 
       {/* Repair types nav */}
       <div
