@@ -37,7 +37,19 @@ export function formatDynamicParam(param: string): string {
   } catch (e) {
     // ignore
   }
-  return decoded.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  const Dictionary: Record<string, string> = {
+    "iphone": "iPhone",
+    "ipad": "iPad",
+    "macbook": "MacBook",
+    "samsung": "Samsung"
+  };
+
+  return decoded.split('-').map(w => {
+    const lower = w.toLowerCase();
+    if (Dictionary[lower]) return Dictionary[lower];
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
 }
 
 // ─── Prefix-based device type detection ──────────────────────────────────────

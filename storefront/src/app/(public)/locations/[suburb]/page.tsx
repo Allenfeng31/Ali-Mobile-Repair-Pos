@@ -83,19 +83,19 @@ export default function LocationPage({ params }: LocationPageProps) {
           <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
             <h2 className="text-2xl font-bold mb-6 text-slate-900">Our Core Services</h2>
             <div className="grid grid-cols-2 gap-4">
-              <Link href="/repairs/iPhone" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
+              <Link href="/repairs/phone/iphone" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
                 <span className="text-2xl">📱</span>
                 <span>iPhone Repair</span>
               </Link>
-              <Link href="/repairs/MacBook" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
+              <Link href="/repairs/laptop/macbook" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
                 <span className="text-2xl">💻</span>
                 <span>MacBook Repair</span>
               </Link>
-              <Link href="/repairs/iPad" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
+              <Link href="/repairs/tablet/ipad" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
                 <span className="text-2xl">📟</span>
                 <span>iPad Repair</span>
               </Link>
-              <Link href="/repairs/Apple-Watch" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
+              <Link href="/repairs/watch/apple-watch" className="p-4 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 rounded-xl border border-slate-100 font-semibold transition text-center flex flex-col items-center gap-2">
                 <span className="text-2xl">⌚</span>
                 <span>Watch Repair</span>
               </Link>
