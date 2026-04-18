@@ -137,14 +137,33 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     }
 
     const itemCat = item.category || '';
-    const matchesCategory = activeCategory === 'All Items' || itemCat === activeCategory;
+    let matchesCategory = activeCategory === 'All Items' || itemCat === activeCategory;
+
+    if (!matchesCategory) {
+      const migratedNameMap: Record<string, string> = {
+        'Screen Repair': 'Screen Replacement',
+        'Battery Service': 'Battery Replacement',
+        'Charging Port': 'Charging Port Replacement',
+        'Front Camera': 'Front Camera Replacement',
+        'Back Camera': 'Back Camera Replacement',
+        'Back Glass': 'Back Housing Replacement',
+        'Back Housing': 'Back Housing Replacement'
+      };
+      if (migratedNameMap[activeCategory] && itemCat === migratedNameMap[activeCategory]) {
+        matchesCategory = true;
+      }
+    }
     
-    // For legacy items without brand string formats, we guess by seeing if brand substring is in their name or model
+    const cleanItemBrand = getDisplayBrand(item.brand || '');
+    const cleanActiveBrand = getDisplayBrand(activeBrand);
+    
+    // Check direct equality, or prefix matching (P Apple === Apple), or fuzzy name match
     const matchesBrand = activeBrand === 'All Brands' || 
                          item.brand === activeBrand || 
+                         cleanItemBrand === cleanActiveBrand ||
                          ((!item.brand || item.brand === 'Other') && 
-                          ((item.name || '').toLowerCase().includes(activeBrand.toLowerCase()) || 
-                           (item.model || '').toLowerCase().includes(activeBrand.toLowerCase())));
+                          ((item.name || '').toLowerCase().includes(cleanActiveBrand.toLowerCase()) || 
+                           (item.model || '').toLowerCase().includes(cleanActiveBrand.toLowerCase())));
                            
     return matchesCategory && matchesBrand;
   }).sort((a, b) => {
@@ -398,8 +417,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       {/* Left Column: Selection */}
       <div className="lg:col-span-8 space-y-8">
         <div>
-          <h2 className="text-3xl font-extrabold text-on-surface tracking-tight mb-2">{t('term', 'terminalConsole')}</h2>
-          <p className="text-on-surface-variant text-sm font-medium">{t('term', 'selectComponents')}</p>
+          <h2 className="text-3xl font-extrabold text-on-surface tracking-tight mb-2">{t('term', 'title')}</h2>
+          <p className="text-on-surface-variant text-sm font-medium">{t('term', 'sub')}</p>
         </div>
 
         {/* Search and Categories */}
@@ -407,7 +426,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           <div className="relative">
             <input 
               type="text"
-              placeholder={t('term', 'searchProducts')}
+              placeholder={t('term', 'search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -437,7 +456,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     : "border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                 )}
               >
-                {cat === 'All Items' ? t('term', 'categoryAll') : cat}
+                {cat === 'All Items' ? t('term', 'catAll') : cat}
               </button>
             ))}
           </div>
@@ -492,7 +511,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           ))}
           {filteredItems.length === 0 && (
             <div className="col-span-full py-10 text-center">
-              <p className="text-on-surface-variant text-sm italic">{t('term', 'noItemsFound')}</p>
+              <p className="text-on-surface-variant text-sm italic">{t('term', 'empty')}</p>
             </div>
           )}
         </div>
@@ -528,7 +547,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-extrabold tracking-tight">
-            {t('term', 'currentCart')}
+            {t('term', 'cart')}
           </h2>
           <div className="flex items-center gap-2 text-on-surface-variant">
             <ShoppingCart size={16} />
@@ -601,7 +620,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           ))}
           {cart.length === 0 && (
             <div className="text-center py-10">
-              <p className="text-on-surface-variant text-sm">{t('term', 'cartEmpty')}</p>
+              <p className="text-on-surface-variant text-sm">{t('term', 'empty')}</p>
             </div>
           )}
         </div>
@@ -627,11 +646,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         <div className="mt-4 pt-6 border-t border-outline-variant/20">
           <div className="space-y-2 mb-8">
             <div className="flex justify-between">
-              <span className="text-on-surface-variant text-sm font-medium">{t('term', 'subtotalExclGST')}</span>
+              <span className="text-on-surface-variant text-sm font-medium">{t('term', 'subtotal')}</span>
               <span className="font-bold text-sm">${(baseTotal - gst).toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-on-surface-variant text-sm font-medium">{t('term', 'gst')}</span>
+              <span className="text-on-surface-variant text-sm font-medium">{t('term', 'tax')}</span>
               <span className="font-bold text-sm">${gst.toFixed(2)}</span>
             </div>
             {paymentMethod === 'eftpos' && (
@@ -641,7 +660,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               </div>
             )}
             <div className="flex justify-between pt-4 border-t border-outline-variant/10 mt-2">
-              <span className="text-lg font-extrabold">{t('term', 'totalAmount')}</span>
+              <span className="text-lg font-extrabold">{t('term', 'total')}</span>
               <span className="text-2xl font-black text-primary">${finalTotal.toFixed(2)}</span>
             </div>
           </div>
