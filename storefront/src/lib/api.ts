@@ -66,6 +66,41 @@ async function fetchPOSInventory(): Promise<RawItem[] | null> {
   }
 }
 
+// ─── Data Sanitization ───────────────────────────────────────────────────────
+
+const VALID_SHORT_NAMES = new Set(['se', 'xr', 'xs', 'x', 'a5', 'a9', 's9', 's8']);
+
+/** Filter out dirty model names: pure numbers, or too-short strings */
+function isValidModelName(name: string): boolean {
+  if (!name || name.trim().length === 0) return false;
+  // Pure numeric → garbage (e.g. "13")
+  if (/^\d+$/.test(name.trim())) return false;
+  // Very short names must be in the allow-list
+  if (name.trim().length < 3 && !VALID_SHORT_NAMES.has(name.trim().toLowerCase())) return false;
+  return true;
+}
+
+// ─── Repair Matrix Expansion ─────────────────────────────────────────────────
+
+const CORE_REPAIR_TYPES: RepairOption[] = [
+  { slug: 'screen-replacement',   name: 'Screen Replacement',    price: 0 },
+  { slug: 'battery-replacement',  name: 'Battery Replacement',   price: 0 },
+  { slug: 'charging-port-repair', name: 'Charging Port Repair',  price: 0 },
+  { slug: 'water-damage-repair',  name: 'Water Damage Recovery', price: 0 },
+  { slug: 'back-glass-repair',    name: 'Back Glass Replacement', price: 0 },
+];
+
+/** Ensure every model has at least the 5 core repair types */
+function ensureCoreRepairTypes(repairTypes: RepairOption[]): RepairOption[] {
+  const result = [...repairTypes];
+  for (const core of CORE_REPAIR_TYPES) {
+    if (!result.some(r => r.slug === core.slug)) {
+      result.push({ ...core });
+    }
+  }
+  return result;
+}
+
 // ─── Transform POS Data → RepairCatalog ─────────────────────────────────────
 
 function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
@@ -75,7 +110,8 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
   const brandMap = new Map<string, Map<string, RepairOption[]>>();
 
   for (const item of parsed) {
-    if (item.price <= 0) continue;
+    // Data sanitization: skip invalid model names
+    if (!isValidModelName(item.deviceModel)) continue;
 
     const cleanBrand = displayBrand(item.brand);
     if (!brandMap.has(cleanBrand)) {
@@ -100,7 +136,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     }
   }
 
-  // Convert to array
+  // Convert to array, applying matrix expansion
   const brands: BrandEntry[] = [];
   for (const [brand, modelMap] of brandMap) {
     const models: ModelEntry[] = [];
@@ -108,7 +144,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
       models.push({
         model,
         slug: slugify(model),
-        repairTypes,
+        repairTypes: ensureCoreRepairTypes(repairTypes),
       });
     }
     brands.push({

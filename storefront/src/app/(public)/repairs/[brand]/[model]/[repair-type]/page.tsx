@@ -132,16 +132,40 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <div className="repair-hero">
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
 
-          {price > 0 && (
+          {price > 0 ? (
             <p style={{
-              fontSize: '1.3rem',
-              fontWeight: 700,
-              color: 'var(--primary)',
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              color: '#2563eb',
               marginBottom: '1rem',
-              marginTop: '-0.5rem',
+              marginTop: '-0.25rem',
+              letterSpacing: '-0.5px',
             }}>
               Starting from ${price}
             </p>
+          ) : (
+            <div style={{ marginBottom: '1rem', marginTop: '-0.25rem' }}>
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: 800,
+                color: '#2563eb',
+                marginBottom: '0.5rem',
+              }}>
+                Quote on Request
+              </p>
+              <p style={{
+                fontSize: '1rem',
+                fontWeight: 500,
+                color: 'var(--foreground)',
+                opacity: 0.85,
+              }}>
+                Get an instant quote for this repair! Call{' '}
+                <a href="tel:0481058514" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline' }}>
+                  0481 058 514
+                </a>{' '}
+                or <strong>Chat Now</strong>.
+              </p>
+            </div>
           )}
 
           <div className="trust-badges">

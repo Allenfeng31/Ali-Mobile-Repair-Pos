@@ -25,11 +25,48 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   };
 }
 
+// ─── Smart Sorting: newest → oldest, highest tier → lowest ──────────────────
+
+const TIER_WEIGHTS: Record<string, number> = {
+  'pro max': 4,
+  'ultra':   4,
+  'pro':     3,
+  'plus':    2,
+  'mini':    1,
+  'air':     1,
+  'se':      0,
+};
+
+function getGeneration(name: string): number {
+  // Extract the largest standalone number (e.g. "iPhone 15 Pro Max" → 15, "Galaxy S24" → 24)
+  const nums = name.match(/\b(\d{1,3})\b/g);
+  if (!nums) return 0;
+  return Math.max(...nums.map(Number));
+}
+
+function getTierWeight(name: string): number {
+  const lower = name.toLowerCase();
+  for (const [tier, weight] of Object.entries(TIER_WEIGHTS)) {
+    if (lower.includes(tier)) return weight;
+  }
+  return 0; // standard model
+}
+
+type ModelItem = { model: string; slug: string; repairTypes: { slug: string; name: string; price: number }[] };
+
+function smartSortModels(models: ModelItem[]): ModelItem[] {
+  return [...models].sort((a, b) => {
+    const genDiff = getGeneration(b.model) - getGeneration(a.model);
+    if (genDiff !== 0) return genDiff;
+    return getTierWeight(b.model) - getTierWeight(a.model);
+  });
+}
+
 // Group models into series. E.g. "iPhone 15 Pro Max" → "iPhone 15 Series"
 function groupModelsBySeries(
-  models: { model: string; slug: string; repairTypes: { slug: string; name: string; price: number }[] }[]
-): { series: string; models: typeof models }[] {
-  const groups: Record<string, typeof models> = {};
+  models: ModelItem[]
+): { series: string; models: ModelItem[] }[] {
+  const groups: Record<string, ModelItem[]> = {};
 
   for (const entry of models) {
     const seriesMatch = entry.model.match(
@@ -58,7 +95,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandName = brandEntry?.brand || resolvedParams.brand.replace(/-/g, ' ');
   const models = brandEntry?.models || [];
   const brandSlug = resolvedParams.brand;
-  const seriesGroups = groupModelsBySeries(models);
+  const sortedModels = smartSortModels(models);
+  const seriesGroups = groupModelsBySeries(sortedModels);
 
   return (
     <div className="page-container" style={{ maxWidth: "1000px" }}>
@@ -142,11 +180,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                   className="model-card"
                 >
                   <span>{entry.model}</span>
-                  {defaultRepair?.price ? (
-                    <span style={{ fontSize: "0.82rem", opacity: 0.6, marginLeft: "auto", marginRight: "0.5rem" }}>
-                      from ${defaultRepair.price}
-                    </span>
-                  ) : null}
                   <span className="model-card-arrow">→</span>
                 </Link>
               );
