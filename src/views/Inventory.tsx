@@ -66,6 +66,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     category: 'Phone Repair',
     brand: 'iPhone',
     model: '',
+    device_model: '',
     stock: '',
     minStock: '5',
     costPrice: '',
@@ -134,6 +135,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       category: 'Phone Repair',
       brand: 'iPhone',
       model: '',
+      device_model: '',
       stock: '',
       minStock: '5',
       costPrice: '',
@@ -149,6 +151,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       category: item.category,
       brand: item.brand || 'iPhone',
       model: item.model,
+      device_model: item.device_model || '',
       stock: item.stock.toString(),
       minStock: item.minStock.toString(),
       costPrice: item.costPrice.toString(),
@@ -174,6 +177,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       costPrice: cost,
       price: selling,
       margin: margin,
+      device_model: formData.device_model,
       iconName: formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' : 
                 formData.name.toLowerCase().includes('battery') ? 'Battery' :
                 formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
@@ -434,7 +438,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-on-surface leading-tight text-sm sm:text-base truncate">{item.name}</p>
-                          <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium truncate">{item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model}</p>
+                          <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium truncate">
+                            {item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model} 
+                            {item.device_model && <span className="ml-2 px-1.5 py-0.5 bg-primary/15 text-primary rounded-md text-[9px] font-bold tracking-wider">{item.device_model}</span>}
+                          </p>
                         </div>
                       </div>
                       <div className="col-span-4 sm:col-span-2 text-right sm:text-center">
@@ -688,14 +695,25 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'model')}</label>
-                <input 
-                  className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" 
-                  placeholder="iPhone 13 Pro"
-                  value={formData.model}
-                  onChange={e => setFormData({...formData, model: e.target.value})}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'model')}</label>
+                  <input 
+                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" 
+                    placeholder="iPhone 13 Pro"
+                    value={formData.model}
+                    onChange={e => setFormData({...formData, model: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">AU Model Code</label>
+                  <input 
+                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/40" 
+                    placeholder="e.g. A3102, SM-S928B"
+                    value={formData.device_model}
+                    onChange={e => setFormData({...formData, device_model: e.target.value})}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -32,6 +32,7 @@ export interface InventoryItem {
   model: string;
   brand?: string;
   sku?: string;
+  device_model?: string;
   stock: number;
   minStock: number;
   costPrice: number;
