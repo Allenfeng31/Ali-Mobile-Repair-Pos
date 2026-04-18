@@ -25,6 +25,21 @@ export function slugify(text: string): string {
     .replace(/[^a-z0-9-]/g, '');
 }
 
+/** 
+ * Safely format URL params protecting against Next.js _tree.segment leaks.
+ */
+export function formatDynamicParam(param: string): string {
+  if (!param || param.includes('_tree') || param.includes('%5BCategory%5D') || param.includes('%5Bbrand%5D')) return '';
+  // decode in case it's URI encoded
+  let decoded = param;
+  try {
+    decoded = decodeURIComponent(param);
+  } catch (e) {
+    // ignore
+  }
+  return decoded.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
 // ─── Prefix-based device type detection ──────────────────────────────────────
 export function detectDeviceType(brand: string): ParsedItem["deviceType"] {
   const first = brand.trim().charAt(0).toUpperCase();

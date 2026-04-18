@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { formatDynamicParam } from '@/lib/inventoryUtils';
 
 interface BreadcrumbsProps {
   category: string;
@@ -7,16 +8,11 @@ interface BreadcrumbsProps {
   service?: string;
 }
 
-function formatWord(word: string) {
-  if (!word) return '';
-  return word.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
-
 export default function Breadcrumbs({ category, brand, model, service }: BreadcrumbsProps) {
-  const fCategory = formatWord(category);
-  const fBrand = formatWord(brand);
-  const fModel = formatWord(model);
-  const fService = service ? formatWord(service) : null;
+  const fCategory = formatDynamicParam(category);
+  const fBrand = formatDynamicParam(brand);
+  const fModel = formatDynamicParam(model);
+  const fService = service ? formatDynamicParam(service) : null;
 
   const breadcrumbItems = [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobilerepair.com.au/" },

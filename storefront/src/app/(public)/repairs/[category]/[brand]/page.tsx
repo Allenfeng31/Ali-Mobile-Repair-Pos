@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
+import { formatDynamicParam } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 
 export const revalidate = 3600; // ISR: revalidate every hour
@@ -19,7 +20,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: BrandPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const { brand } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
-  const brandName = brand?.brand || resolvedParams.brand.replace(/-/g, ' ');
+  const brandName = brand?.brand || formatDynamicParam(resolvedParams.brand);
   return {
     title: `${brandName} Repair Services in Ringwood | Ali Mobile & Repair`,
     description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Under 1 hour, 6-month warranty.`,
@@ -30,7 +31,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const resolvedParams = await params;
   const { brand: brandEntry } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
 
-  const brandName = brandEntry?.brand || resolvedParams.brand.replace(/-/g, ' ');
+  const brandName = brandEntry?.brand || formatDynamicParam(resolvedParams.brand);
   const models = brandEntry?.models || [];
   const categorySlug = resolvedParams.category;
   const brandSlug = resolvedParams.brand;

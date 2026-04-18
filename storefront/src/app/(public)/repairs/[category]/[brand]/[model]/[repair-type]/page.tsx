@@ -1,7 +1,7 @@
 import React from 'react';
 import { REPAIR_TYPES, LSI_KEYWORDS } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
-import { slugify } from '@/lib/inventoryUtils';
+import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -69,8 +69,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     resolvedParams['repair-type']
   );
 
-  const model = details?.model || resolvedParams.model.replace(/-/g, ' ');
-  const repairName = details?.repairType || resolvedParams['repair-type'].replace(/-/g, ' ');
+  const model = details?.model || formatDynamicParam(resolvedParams.model);
+  const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const priceStr = details?.price ? ` from $${details.price}` : '';
 
   const title = `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
@@ -132,9 +132,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   );
 
   // Use POS data if available, otherwise derive from URL params
-  const displayBrand = details?.brand || resolvedParams.brand.replace(/-/g, ' ');
-  const displayModel = details?.model || resolvedParams.model.replace(/-/g, ' ');
-  const repairName = details?.repairType || resolvedParams['repair-type'].replace(/-/g, ' ');
+  const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
+  const displayModel = details?.model || formatDynamicParam(resolvedParams.model);
+  const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
 
   // Validate repair type exists in our known list, or accept POS-provided name

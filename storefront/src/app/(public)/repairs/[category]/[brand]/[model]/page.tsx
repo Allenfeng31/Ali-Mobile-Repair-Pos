@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
+import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const revalidate = 3600;
@@ -27,8 +28,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
-  const modelName = data?.model || modelSlug.replace(/-/g, " ");
-  const brandName = data?.brand || brandSlug.replace(/-/g, " ");
+  const modelName = data?.model || formatDynamicParam(modelSlug);
+  const brandName = data?.brand || formatDynamicParam(brandSlug);
 
   return {
     title: `${modelName} Repair Services in Ringwood | Ali Mobile & Repair`,
@@ -40,8 +41,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
-  const modelName = data?.model || modelSlug.replace(/-/g, " ");
-  const brandName = data?.brand || brandSlug.replace(/-/g, " ");
+  const modelName = data?.model || formatDynamicParam(modelSlug);
+  const brandName = data?.brand || formatDynamicParam(brandSlug);
   const repairTypes = data?.repairTypes || [];
 
   return (
