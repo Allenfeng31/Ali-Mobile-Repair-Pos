@@ -13,8 +13,8 @@ export const MODELS: Record<string, string[]> = {
 export const REPAIR_TYPES = [
   { slug: "screen-replacement", name: "Screen Replacement" },
   { slug: "battery-replacement", name: "Battery Replacement" },
-  { slug: "charging-port-repair", name: "Charging Port Repair" },
-  { slug: "back-glass-repair", name: "Back Glass Replacement" },
+  { slug: "charging-port-replacement", name: "Charging Port Replacement" },
+  { slug: "back-housing-replacement", name: "Back Housing Replacement" },
   { slug: "camera-repair", name: "Camera Repair" },
   { slug: "water-damage-repair", name: "Water Damage Recovery" }
 ];

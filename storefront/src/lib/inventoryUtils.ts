@@ -69,9 +69,9 @@ export function parseItem(raw: RawItem): ParsedItem | null {
 
   // Fix for MacBooks and iPads where model field might contain service name
   const COMMON_SERVICES = [
-    "Screen Replacement", "Battery Replacement", "Charging Port Repair", 
-    "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", 
-    "Front Camera", "Charging Port", "Logic Board"
+    "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
+    "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement", 
+    "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement"
   ];
 
   for (const service of COMMON_SERVICES) {

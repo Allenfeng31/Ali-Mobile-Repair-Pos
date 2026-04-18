@@ -35,13 +35,13 @@ const oppoModels = [
 ];
 
 const categories = [
-  "Screen Repair",
-  "Battery Service",
-  "Logic Board",
-  "Charging Port",
-  "Back Housing",
-  "Front Camera",
-  "Back Camera"
+  "Screen Replacement",
+  "Battery Replacement",
+  "Logic Board Repair",
+  "Charging Port Replacement",
+  "Back Housing Replacement",
+  "Front Camera Replacement",
+  "Back Camera Replacement"
 ];
 
 const items = [];

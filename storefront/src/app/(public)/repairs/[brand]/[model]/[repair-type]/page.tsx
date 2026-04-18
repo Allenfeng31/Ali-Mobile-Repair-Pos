@@ -112,10 +112,10 @@ function generateFaqs(model: string, repairName: string, repairSlug: string, pri
 function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
   if (slug === 'screen-replacement') return { component: LSI_KEYWORDS.components.screen, issue: LSI_KEYWORDS.issues.screenDamage };
   if (slug === 'battery-replacement') return { component: LSI_KEYWORDS.components.battery, issue: LSI_KEYWORDS.issues.batteryDrain };
-  if (slug === 'charging-port-repair') return { component: LSI_KEYWORDS.components.chargingPort };
+  if (slug === 'charging-port-repair' || slug === 'charging-port-replacement') return { component: LSI_KEYWORDS.components.chargingPort };
   if (slug === 'water-damage-repair') return { issue: LSI_KEYWORDS.issues.waterDamage };
-  if (slug === 'back-glass-repair') return { component: ['back glass', 'rear panel'] };
-  if (slug === 'camera-repair') return { component: ['camera module', 'lens assembly'] };
+  if (slug === 'back-glass-repair' || slug === 'back-housing-replacement') return { component: ['back housing', 'rear panel', 'back glass'] };
+  if (slug === 'camera-repair' || slug === 'front-camera-replacement' || slug === 'back-camera-replacement') return { component: ['camera module', 'lens assembly'] };
   return {};
 }
 
@@ -154,7 +154,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <div className="repair-hero">
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
 
-          {price > 0 ? (
+          {price > 0 || resolvedParams['repair-type'] === 'water-damage-repair' ? (
             <p style={{
               fontSize: '2.5rem',
               fontWeight: 800,
@@ -163,7 +163,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               marginTop: '-0.25rem',
               letterSpacing: '-0.5px',
             }}>
-              Starting from ${price}
+              Starting from ${price > 0 ? price : 50}
             </p>
           ) : (
             <div style={{ marginBottom: '1rem', marginTop: '-0.25rem' }}>

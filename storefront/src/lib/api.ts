@@ -80,18 +80,36 @@ function isValidModelName(name: string): boolean {
   return true;
 }
 
+// ─── Name Mapping & Standardization ─────────────────────────────────────────
+
+/** Canonical name map: old POS names → standard display names */
+const REPAIR_NAME_MAP: Record<string, string> = {
+  'Screen Repair':    'Screen Replacement',
+  'Battery Service':  'Battery Replacement',
+  'Charging Port':    'Charging Port Replacement',
+  'Front Camera':     'Front Camera Replacement',
+  'Back Camera':      'Back Camera Replacement',
+  'Back Glass':       'Back Housing Replacement',
+  'Back Housing':     'Back Housing Replacement',
+};
+
+/** Apply the standard name map to a raw service name */
+function standardizeRepairName(rawName: string): string {
+  return REPAIR_NAME_MAP[rawName] ?? rawName;
+}
+
 // ─── Repair Matrix Expansion ─────────────────────────────────────────────────
 
 const UNIVERSAL_REPAIR_TYPES: RepairOption[] = [
-  { slug: 'screen-replacement',   name: 'Screen Replacement',    price: 0 },
-  { slug: 'battery-replacement',  name: 'Battery Replacement',   price: 0 },
-  { slug: 'charging-port-repair', name: 'Charging Port Repair',  price: 0 },
-  { slug: 'water-damage-repair',  name: 'Water Damage Recovery', price: 0 },
+  { slug: 'screen-replacement',          name: 'Screen Replacement',          price: 0 },
+  { slug: 'battery-replacement',         name: 'Battery Replacement',         price: 0 },
+  { slug: 'charging-port-replacement',   name: 'Charging Port Replacement',   price: 0 },
+  { slug: 'water-damage-repair',         name: 'Water Damage Recovery',       price: 0 },
 ];
 
 const BACK_GLASS_REPAIR: RepairOption = {
-  slug: 'back-glass-repair',
-  name: 'Back Glass Replacement',
+  slug: 'back-housing-replacement',
+  name: 'Back Housing Replacement',
   price: 0,
 };
 
@@ -172,6 +190,10 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     // Data sanitization: skip invalid model names
     if (!isValidModelName(item.deviceModel)) continue;
 
+    // ── Name Standardization: map old POS names to canonical names ──
+    const standardName = standardizeRepairName(item.service);
+    const standardSlug = slugify(standardName);
+
     const cleanBrand = displayBrand(item.brand);
     if (!brandMap.has(cleanBrand)) {
       brandMap.set(cleanBrand, new Map());
@@ -183,13 +205,22 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     }
 
     const repairTypes = modelMap.get(item.deviceModel)!;
-    const serviceSlug = slugify(item.service);
 
-    // Avoid duplicate repair types for same model
-    if (!repairTypes.some(r => r.slug === serviceSlug)) {
+    // ── Dedup: if a slug already exists, keep the entry with the higher price ──
+    const existingIdx = repairTypes.findIndex(r => r.slug === standardSlug);
+    if (existingIdx !== -1) {
+      // Keep the entry with higher price (prefer real POS pricing)
+      if (item.price > repairTypes[existingIdx].price) {
+        repairTypes[existingIdx] = {
+          slug: standardSlug,
+          name: standardName,
+          price: item.price,
+        };
+      }
+    } else {
       repairTypes.push({
-        slug: serviceSlug,
-        name: item.service,
+        slug: standardSlug,
+        name: standardName,
         price: item.price,
       });
     }

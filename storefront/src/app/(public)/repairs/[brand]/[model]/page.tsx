@@ -84,7 +84,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             <div className="repair-option-info">
               <span className="repair-option-name">{rt.name}</span>
               <span className="repair-option-price">
-                {rt.price > 0 ? `From $${rt.price}` : "Quote on Request"}
+                {rt.price > 0
+                  ? `From $${rt.price}`
+                  : rt.slug === "water-damage-repair"
+                  ? "From $50"
+                  : "Quote on Request"}
               </span>
             </div>
             <span className="repair-option-arrow">→</span>
@@ -126,10 +130,14 @@ function getRepairIcon(slug: string): string {
   switch (slug) {
     case "screen-replacement": return "📱";
     case "battery-replacement": return "🔋";
-    case "charging-port-repair": return "🔌";
+    case "charging-port-repair":
+    case "charging-port-replacement": return "🔌";
     case "water-damage-repair": return "💧";
-    case "back-glass-repair": return "🪟";
-    case "camera-repair": return "📷";
+    case "back-glass-repair":
+    case "back-housing-replacement": return "🪟";
+    case "camera-repair":
+    case "front-camera-replacement":
+    case "back-camera-replacement": return "📷";
     default: return "🔧";
   }
 }
