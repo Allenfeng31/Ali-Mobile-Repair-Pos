@@ -3,7 +3,7 @@ import Link from 'next/link';
 interface BreadcrumbsProps {
   brand: string;
   model: string;
-  service: string;
+  service?: string;
 }
 
 function formatWord(word: string) {
@@ -14,19 +14,30 @@ function formatWord(word: string) {
 export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps) {
   const fBrand = formatWord(brand);
   const fModel = formatWord(model);
-  const fService = formatWord(service);
+  const fService = service ? formatWord(service) : null;
+
+  const breadcrumbItems = [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobilerepair.com.au/" },
+    { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobilerepair.com.au/repairs" },
+    { "@type": "ListItem", "position": 3, "name": fBrand, "item": `https://www.alimobilerepair.com.au/repairs/${brand}` },
+    { "@type": "ListItem", "position": 4, "name": fModel, "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}` },
+  ];
+
+  if (fService && service) {
+    breadcrumbItems.push({
+      "@type": "ListItem", "position": 5, "name": fService,
+      "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}/${service}`
+    });
+  }
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobilerepair.com.au/" },
-      { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobilerepair.com.au/repairs" },
-      { "@type": "ListItem", "position": 3, "name": fBrand, "item": `https://www.alimobilerepair.com.au/repairs/${brand}` },
-      { "@type": "ListItem", "position": 4, "name": fModel, "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}` },
-      { "@type": "ListItem", "position": 5, "name": fService, "item": `https://www.alimobilerepair.com.au/repairs/${brand}/${model}/${service}` }
-    ]
+    "itemListElement": breadcrumbItems
   };
+
+  // Determine which item is the current page (last in the chain)
+  const isModelPage = !fService;
 
   return (
     <>
@@ -37,11 +48,17 @@ export default function Breadcrumbs({ brand, model, service }: BreadcrumbsProps)
           <li>&rsaquo;</li>
           <li><Link href="/repairs" style={{ color: 'inherit', textDecoration: 'none' }}>Repairs</Link></li>
           <li>&rsaquo;</li>
-          <li><span style={{ color: 'inherit' }}>{fBrand}</span></li>
+          <li><Link href={`/repairs/${brand}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fBrand}</Link></li>
           <li>&rsaquo;</li>
-          <li><span style={{ color: 'inherit' }}>{fModel}</span></li>
-          <li>&rsaquo;</li>
-          <li aria-current="page"><span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fService}</span></li>
+          {isModelPage ? (
+            <li aria-current="page"><span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fModel}</span></li>
+          ) : (
+            <>
+              <li><Link href={`/repairs/${brand}/${model}`} style={{ color: 'inherit', textDecoration: 'none' }}>{fModel}</Link></li>
+              <li>&rsaquo;</li>
+              <li aria-current="page"><span style={{ color: 'var(--primary)', fontWeight: 600 }}>{fService}</span></li>
+            </>
+          )}
         </ol>
       </nav>
     </>

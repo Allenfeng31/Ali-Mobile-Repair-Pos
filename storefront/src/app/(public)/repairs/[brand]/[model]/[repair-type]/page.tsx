@@ -38,6 +38,26 @@ export async function generateStaticParams() {
   return allParams;
 }
 
+/** Stable hash: deterministic index from a string (sum of char codes mod length). */
+function stableHash(str: string, modulo: number): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash + str.charCodeAt(i) * (i + 1)) % 1_000_000;
+  }
+  return hash % modulo;
+}
+
+const META_DESCRIPTION_TEMPLATES = [
+  (m: string, r: string) =>
+    `Fast, professional ${m} ${r.toLowerCase()} in Ringwood, Melbourne. Under 1 hour, 6-month warranty, No Fix No Charge. Book now.`,
+  (m: string, r: string) =>
+    `Need a ${m} ${r.toLowerCase()}? Our Ringwood experts complete most jobs in under 60 minutes with premium-quality parts and a 6-month guarantee.`,
+  (m: string, r: string) =>
+    `Walk-in ${m} ${r.toLowerCase()} at Ali Mobile Ringwood. Same-day turnaround, transparent pricing, and a No Fix No Charge promise. Call or book online.`,
+  (m: string, r: string) =>
+    `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Quick turnaround, 6-month warranty on all parts, and free diagnostics. Get started today.`,
+];
+
 export async function generateMetadata({ params }: RepairPageProps) {
   const resolvedParams = await params;
   const details = await fetchRepairDetails(
@@ -51,7 +71,9 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const priceStr = details?.price ? ` from $${details.price}` : '';
 
   const title = `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
-  const description = `Fast, professional ${model} ${repairName.toLowerCase()} in Ringwood, Melbourne. Under 1 hour, 6-month warranty, No Fix No Charge. Book now.`;
+  const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
+  const description = META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
+
   return { title, description };
 }
 

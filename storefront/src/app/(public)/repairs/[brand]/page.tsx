@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
+import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
@@ -23,69 +24,6 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     title: `${brandName} Repair Services in Ringwood | Ali Mobile & Repair`,
     description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Under 1 hour, 6-month warranty.`,
   };
-}
-
-// ─── Smart Sorting: newest → oldest, highest tier → lowest ──────────────────
-
-const TIER_WEIGHTS: Record<string, number> = {
-  'pro max': 4,
-  'ultra':   4,
-  'pro':     3,
-  'plus':    2,
-  'mini':    1,
-  'air':     1,
-  'se':      0,
-};
-
-function getGeneration(name: string): number {
-  // Extract the largest standalone number (e.g. "iPhone 15 Pro Max" → 15, "Galaxy S24" → 24)
-  const nums = name.match(/\b(\d{1,3})\b/g);
-  if (!nums) return 0;
-  return Math.max(...nums.map(Number));
-}
-
-function getTierWeight(name: string): number {
-  const lower = name.toLowerCase();
-  for (const [tier, weight] of Object.entries(TIER_WEIGHTS)) {
-    if (lower.includes(tier)) return weight;
-  }
-  return 0; // standard model
-}
-
-type ModelItem = { model: string; slug: string; repairTypes: { slug: string; name: string; price: number }[] };
-
-function smartSortModels(models: ModelItem[]): ModelItem[] {
-  return [...models].sort((a, b) => {
-    const genDiff = getGeneration(b.model) - getGeneration(a.model);
-    if (genDiff !== 0) return genDiff;
-    return getTierWeight(b.model) - getTierWeight(a.model);
-  });
-}
-
-// Group models into series. E.g. "iPhone 15 Pro Max" → "iPhone 15 Series"
-function groupModelsBySeries(
-  models: ModelItem[]
-): { series: string; models: ModelItem[] }[] {
-  const groups: Record<string, ModelItem[]> = {};
-
-  for (const entry of models) {
-    const seriesMatch = entry.model.match(
-      /^(.+?)\s+(?:Pro\s+Max|Pro|Max|Ultra|Plus|\(.*?\)|Series\s+\d+|SE|mini|Air)/i
-    );
-    let seriesKey: string;
-    if (seriesMatch) {
-      seriesKey = seriesMatch[1].trim() + " Series";
-    } else {
-      seriesKey = entry.model;
-    }
-    if (!groups[seriesKey]) groups[seriesKey] = [];
-    groups[seriesKey].push(entry);
-  }
-
-  return Object.entries(groups).map(([series, models]) => ({
-    series,
-    models,
-  }));
 }
 
 export default async function BrandSubHubPage({ params }: BrandPageProps) {
@@ -167,23 +105,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         <div key={group.series} className="model-series-section">
           <h2 className="model-series-title">{group.series}</h2>
           <div className="model-series-grid">
-            {group.models.map((entry) => {
-              // Link to the first available repair type (prefer screen-replacement)
-              const defaultRepair =
-                entry.repairTypes.find((r) => r.slug === "screen-replacement") ||
-                entry.repairTypes[0];
-              const repairSlug = defaultRepair?.slug || "screen-replacement";
-              return (
-                <Link
-                  key={entry.slug}
-                  href={`/repairs/${brandSlug}/${entry.slug}/${repairSlug}`}
-                  className="model-card"
-                >
-                  <span>{entry.model}</span>
-                  <span className="model-card-arrow">→</span>
-                </Link>
-              );
-            })}
+            {group.models.map((entry) => (
+              <Link
+                key={entry.slug}
+                href={`/repairs/${brandSlug}/${entry.slug}`}
+                className="model-card"
+              >
+                <span>{entry.model}</span>
+                <span className="model-card-arrow">→</span>
+              </Link>
+            ))}
           </div>
         </div>
       ))}

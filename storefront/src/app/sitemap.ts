@@ -40,10 +40,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
+    // Model sub-hub URLs (intermediate page)
+    const modelUrls: MetadataRoute.Sitemap = [];
     // Long-tail repair page URLs
     const repairUrls: MetadataRoute.Sitemap = [];
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
+        modelUrls.push({
+          url: `${baseUrl}/repairs/${brand.slug}/${model.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        });
         for (const repair of model.repairTypes) {
           repairUrls.push({
             url: `${baseUrl}/repairs/${brand.slug}/${model.slug}/${repair.slug}`,
@@ -55,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    return [...sitemapUrls, ...brandUrls, ...repairUrls];
+    return [...sitemapUrls, ...brandUrls, ...modelUrls, ...repairUrls];
   } catch (error) {
     console.error("Failed to generate dynamic sitemap:", error);
   }

@@ -82,22 +82,81 @@ function isValidModelName(name: string): boolean {
 
 // ─── Repair Matrix Expansion ─────────────────────────────────────────────────
 
-const CORE_REPAIR_TYPES: RepairOption[] = [
+const UNIVERSAL_REPAIR_TYPES: RepairOption[] = [
   { slug: 'screen-replacement',   name: 'Screen Replacement',    price: 0 },
   { slug: 'battery-replacement',  name: 'Battery Replacement',   price: 0 },
   { slug: 'charging-port-repair', name: 'Charging Port Repair',  price: 0 },
   { slug: 'water-damage-repair',  name: 'Water Damage Recovery', price: 0 },
-  { slug: 'back-glass-repair',    name: 'Back Glass Replacement', price: 0 },
 ];
 
-/** Ensure every model has at least the 5 core repair types */
-function ensureCoreRepairTypes(repairTypes: RepairOption[]): RepairOption[] {
+const BACK_GLASS_REPAIR: RepairOption = {
+  slug: 'back-glass-repair',
+  name: 'Back Glass Replacement',
+  price: 0,
+};
+
+/**
+ * Check if a model qualifies for back-glass-repair.
+ * Rules:
+ * - iPhone generation >= 8 (not iPad, MacBook, Watch, or old iPhones)
+ * - Samsung Galaxy S or Galaxy Z series
+ */
+function qualifiesForBackGlass(brandSlug: string, modelName: string): boolean {
+  const brand = brandSlug.toLowerCase();
+  const model = modelName.toLowerCase();
+
+  // Apple iPhones >= 8
+  if (brand.includes('iphone') || (brand === 'apple' && model.includes('iphone'))) {
+    // Block non-phone Apple devices that might slip through
+    if (model.includes('ipad') || model.includes('macbook') || model.includes('watch')) return false;
+    // Extract generation number
+    const genMatch = model.match(/iphone\s+(\d+)/i);
+    if (genMatch) {
+      return parseInt(genMatch[1], 10) >= 8;
+    }
+    // iPhone X/XS/XR qualify (gen ~10)
+    if (/iphone\s+(x|xs|xr|x\s)/i.test(model)) return true;
+    // iPhone SE 2nd/3rd/4th gen qualify (glass back since SE2)
+    if (/se.*(?:2nd|3rd|4th|[234])/i.test(model)) return true;
+    return false;
+  }
+
+  // Samsung Galaxy S or Z series
+  if (brand.includes('samsung')) {
+    if (/galaxy\s+[sz]/i.test(model)) return true;
+    return false;
+  }
+
+  return false;
+}
+
+/** Ensure every model has core repair types, with smart back-glass filtering */
+function ensureCoreRepairTypes(
+  repairTypes: RepairOption[],
+  brandSlug: string,
+  modelName: string
+): RepairOption[] {
   const result = [...repairTypes];
-  for (const core of CORE_REPAIR_TYPES) {
+
+  // Always add universal repair types
+  for (const core of UNIVERSAL_REPAIR_TYPES) {
     if (!result.some(r => r.slug === core.slug)) {
       result.push({ ...core });
     }
   }
+
+  // Conditionally add back-glass-repair
+  if (qualifiesForBackGlass(brandSlug, modelName)) {
+    if (!result.some(r => r.slug === BACK_GLASS_REPAIR.slug)) {
+      result.push({ ...BACK_GLASS_REPAIR });
+    }
+  } else {
+    // Remove back-glass if it was in POS data but shouldn't be
+    // (keep if it came from POS with an actual price — the shop explicitly offers it)
+    const idx = result.findIndex(r => r.slug === BACK_GLASS_REPAIR.slug && r.price === 0);
+    if (idx !== -1) result.splice(idx, 1);
+  }
+
   return result;
 }
 
@@ -144,7 +203,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
       models.push({
         model,
         slug: slugify(model),
-        repairTypes: ensureCoreRepairTypes(repairTypes),
+        repairTypes: ensureCoreRepairTypes(repairTypes, slugify(brand), model),
       });
     }
     brands.push({
@@ -244,6 +303,33 @@ export async function fetchRepairDetails(
     model: modelEntry.model,
     repairType: repairEntry?.name || repairSlug.replace(/-/g, ' '),
     price: repairEntry?.price || 0,
+    source: catalog.source,
+  };
+}
+
+/**
+ * Fetch repair types for a specific brand + model (for the intermediate model page).
+ */
+export async function fetchModelRepairTypes(
+  brandSlug: string,
+  modelSlug: string
+): Promise<{
+  brand: string;
+  model: string;
+  repairTypes: RepairOption[];
+  source: 'pos' | 'fallback';
+} | null> {
+  const catalog = await fetchRepairCatalog();
+  const brandEntry = catalog.brands.find(b => b.slug === brandSlug);
+  if (!brandEntry) return null;
+
+  const modelEntry = brandEntry.models.find(m => m.slug === modelSlug);
+  if (!modelEntry) return null;
+
+  return {
+    brand: brandEntry.brand,
+    model: modelEntry.model,
+    repairTypes: modelEntry.repairTypes,
     source: catalog.source,
   };
 }
