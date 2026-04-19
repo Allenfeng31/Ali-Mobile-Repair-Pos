@@ -89,20 +89,32 @@ export function RepairServiceSchema({ serviceName, description, price, modelCode
     "provider": {
       "@id": "https://alimobile.com.au/#localbusiness"
     },
-    "offers": price ? {
+    "offers": {
       "@type": "Offer",
-      "price": price,
-      "priceCurrency": "AUD",
       "availability": "https://schema.org/InStock"
-    } : {
-      "@type": "Offer",
-      "description": "No Fix No Charge policy. Get a free quote."
     }
   };
+
+  const parsedPrice = Number(price);
+
+  if (!price || isNaN(parsedPrice) || parsedPrice <= 0) {
+    serviceData.offers.description = "No Fix No Charge policy. Get a free quote.";
+    // Ensure no zero values are added to avoid Search Console errors
+    delete serviceData.offers.price;
+    delete serviceData.offers.priceCurrency;
+  } else {
+    serviceData.offers.price = parsedPrice;
+    serviceData.offers.priceCurrency = "AUD";
+  }
 
   if (modelCode) {
     serviceData.model = modelCode;
     serviceData.mpn = modelCode;
+    serviceData.itemOffered = {
+      "@type": "Product",
+      "name": modelCode,
+      "model": modelCode
+    };
   }
 
   return <SchemaOrg type="Service" data={serviceData} />;
