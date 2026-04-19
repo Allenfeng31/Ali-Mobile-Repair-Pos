@@ -128,7 +128,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
       (item.name || '').toLowerCase().includes(term) || 
       (item.model || '').toLowerCase().includes(term) ||
-      (item.sku && item.sku.toLowerCase().includes(term))
+      (item.device_model || '').toLowerCase().includes(term) ||
+      (item.brand || '').toLowerCase().includes(term) ||
+      (item.sku || '').toLowerCase().includes(term) ||
+      (item.category || '').toLowerCase().includes(term)
     );
 
     // If there's a search query, prioritize it and ignore category/brand filters (Global Search)
@@ -167,6 +170,56 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                            
     return matchesCategory && matchesBrand;
   }).sort((a, b) => {
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      const terms = q.split(' ').filter(t => t.length > 0);
+      
+      const calculateScore = (item: InventoryItem) => {
+        let score = 0;
+        const name = (item.name || '').toLowerCase();
+        const model = (item.model || '').toLowerCase();
+        const device_model = (item.device_model || '').toLowerCase();
+        const brand = (item.brand || '').toLowerCase();
+        const fullName = `${brand} ${model} ${device_model} ${name}`.toLowerCase();
+        const fullWords = fullName.split(/[\\s-]+/).filter(Boolean);
+
+        // 1. Exact or Prefix Matches (High Priority)
+        if (device_model === q || model === q || name === q) score += 500;
+        if (device_model.startsWith(q) || model.startsWith(q) || name.startsWith(q)) score += 200;
+
+        // 2. Term Matches
+        terms.forEach(t => {
+          if (device_model.includes(t)) score += 80;
+          if (model.includes(t)) score += 50;
+          if (name.includes(t)) score += 30;
+          
+          // Number matching (e.g. "7" matches "7th")
+          if (/^\\d+$/.test(t)) {
+            if (model.includes(`${t}th`) || name.includes(`${t}th`)) score += 40;
+          }
+        });
+
+        // 3. Penalty for "Distractors" (Crucial for iPad vs iPad mini)
+        // If user didn't type "mini", but item contains "mini", subtract points
+        const modifiers = ['mini', 'air', 'pro', 'max', 'plus', 'ultra'];
+        modifiers.forEach(m => {
+          if (!q.includes(m) && fullName.includes(m)) {
+            score -= 100; // Heavy penalty to push secondary models down
+          }
+        });
+
+        // 4. Exact word count match (Reward shorter/more precise names)
+        if (fullWords.length <= terms.length + 1) score += 20;
+
+        return score;
+      };
+
+      const scoreA = calculateScore(a);
+      const scoreB = calculateScore(b);
+
+      if (scoreA !== scoreB) return scoreB - scoreA;
+    }
+
     // When showing all items, Accessories always floats to top
     if (activeCategory === 'All Items') {
       const aIsAcc = (a.category || '') === 'Accessories';

@@ -256,6 +256,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       match = terms.every(t => 
         (item.name || '').toLowerCase().includes(t) || 
         (item.model || '').toLowerCase().includes(t) || 
+        (item.device_model || '').toLowerCase().includes(t) ||
         (item.brand || '').toLowerCase().includes(t) ||
         (item.sku || '').toLowerCase().includes(t) ||
         (item.category || '').toLowerCase().includes(t)
@@ -272,16 +273,18 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         let score = 0;
         const name = (item.name || '').toLowerCase();
         const model = (item.model || '').toLowerCase();
+        const device_model = (item.device_model || '').toLowerCase();
         const brand = (item.brand || '').toLowerCase();
-        const fullName = `${brand} ${model} ${name}`.toLowerCase();
+        const fullName = `${brand} ${model} ${device_model} ${name}`.toLowerCase();
         const fullWords = fullName.split(/[\s-]+/).filter(Boolean);
 
         // 1. Exact or Prefix Matches (High Priority)
-        if (model === q || name === q) score += 500;
-        if (model.startsWith(q) || name.startsWith(q)) score += 200;
+        if (device_model === q || model === q || name === q) score += 500;
+        if (device_model.startsWith(q) || model.startsWith(q) || name.startsWith(q)) score += 200;
 
         // 2. Term Matches
         terms.forEach(t => {
+          if (device_model.includes(t)) score += 80;
           if (model.includes(t)) score += 50;
           if (name.includes(t)) score += 30;
           

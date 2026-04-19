@@ -2,7 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Smartphone, Tablet, Laptop, Watch } from 'lucide-react';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
 import ChatNowButton from '@/components/ChatNowButton';
@@ -11,13 +10,6 @@ import { formatDynamicParam } from '@/lib/inventoryUtils';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
-
-function getLucideIcon(category: string) {
-  if (category === 'tablet') return <Tablet size={48} strokeWidth={1.5} aria-hidden="true" />;
-  if (category === 'laptop') return <Laptop size={48} strokeWidth={1.5} aria-hidden="true" />;
-  if (category === 'watch') return <Watch size={48} strokeWidth={1.5} aria-hidden="true" />;
-  return <Smartphone size={48} strokeWidth={1.5} aria-hidden="true" />;
-}
 
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 
@@ -224,6 +216,20 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const catalog = await fetchRepairCatalog();
   const validBrands = catalog.brands.filter(b => b.category === category);
 
+  const topBrandsMap: Record<string, string[]> = {
+    phone: ['Apple', 'Samsung', 'Google', 'Oppo'],
+    tablet: ['Apple', 'Samsung', 'Microsoft'],
+    laptop: ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Microsoft'],
+    watch: ['Apple', 'Samsung', 'Garmin']
+  };
+
+  const currentTopBrandsList = topBrandsMap[category] || [];
+  
+  const topBrands = validBrands.filter(b => currentTopBrandsList.includes(b.brand));
+  const otherBrands = validBrands
+    .filter(b => !currentTopBrandsList.includes(b.brand))
+    .sort((a, b) => a.brand.localeCompare(b.brand));
+
   return (
     <>
       <ServiceSchema 
@@ -245,24 +251,38 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         </p>
 
         {/* BRAND GRID (NEW CORE SECTION) */}
-        <h2 style={{ marginBottom: '1.5rem', marginTop: '3rem', fontSize: '1.8rem', textAlign: 'center' }}>Select Your Brand</h2>
-        <div className="device-brand-grid" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '3rem'
-        }}>
-          {validBrands.map(b => (
-            <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} style={{
-              background: 'var(--layer)', border: '1px solid var(--layer-border)', borderRadius: '16px', padding: '1.5rem', textAlign: 'center', transition: 'all 0.2s', textDecoration: 'none', color: 'inherit'
-            }}>
-              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>{getLucideIcon(b.category)}</div>
-              <h3 style={{ fontSize: '1.1rem', margin: '0' }}>{b.brand}</h3>
-            </Link>
-          ))}
-          {validBrands.length === 0 && (
-             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--foreground)', opacity: 0.7, gridColumn: '1 / -1' }}>
-                No active brands available in this category for now.
-             </div>
-          )}
+        <div style={{ marginTop: '3rem', marginBottom: '1rem', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>Most Popular Brands</h2>
         </div>
+        
+        {topBrands.length > 0 ? (
+          <div className="brand-grid-hero">
+            {topBrands.map(b => (
+              <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} className="brand-card-hero">
+                {b.brand}
+              </Link>
+            ))}
+          </div>
+        ) : validBrands.length === 0 && (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--foreground)', opacity: 0.7 }}>
+            No active brands available in this category for now.
+          </div>
+        )}
+
+        {otherBrands.length > 0 && (
+          <>
+            <div style={{ marginTop: '2rem', marginBottom: '1rem', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '1.4rem', opacity: 0.8, marginBottom: '0.5rem' }}>Other Supported Brands</h3>
+            </div>
+            <div className="brand-grid-standard">
+              {otherBrands.map(b => (
+                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} className="brand-card-standard">
+                  {b.brand}
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
 
         <div
           style={{
