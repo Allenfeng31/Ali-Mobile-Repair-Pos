@@ -217,8 +217,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const validBrands = catalog.brands.filter(b => b.category === category);
 
   const topBrandsMap: Record<string, string[]> = {
-    phone: ['Apple', 'Samsung', 'Google', 'Oppo'],
-    tablet: ['Apple', 'Samsung', 'Microsoft'],
+    phone: ['iPhone', 'Samsung', 'Google', 'Oppo'],
+    tablet: ['Apple', 'iPad', 'Samsung', 'Microsoft'],
     laptop: ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Microsoft'],
     watch: ['Apple', 'Samsung', 'Garmin']
   };
