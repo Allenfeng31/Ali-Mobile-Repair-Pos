@@ -62,7 +62,7 @@ async function fetchPOSInventory(): Promise<RawItem[] | null> {
 
   try {
     const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
-      next: { revalidate: 3600 }, // ISR: revalidate every hour
+      next: { revalidate: 1 }, // ISR: revalidate every second for real-time updates
     });
 
     if (!res.ok) {

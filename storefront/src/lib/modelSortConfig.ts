@@ -10,14 +10,7 @@ type ModelItem = {
 // ─── Intra-Series Tier ───────────────────────────────────────────────────────
 // Within the same series, sort by tier: Ultra/Pro Max first, standard last.
 
-const INTRA_SERIES_TIER = [
-  { keywords: ['ultra', 'pro max'], weight: 0.5 },
-  { keywords: ['plus', 'pro'], weight: 0.4 },
-  { keywords: ['air'], weight: 0.3 },
-  { keywords: ['fe', 'mini', 'lite'], weight: 0.1 }
-];
-// Base weight explicitly handled below is 0.2
-// "e" suffix handled conditionally below.
+// (INTRA_SERIES_TIER map is no longer required due to explicit rules in getTierWeight)
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -30,7 +23,6 @@ export function extractGenerationNumber(model: string): number {
   if (mChip) return parseInt(mChip[1], 10) * 10;
 
   // Apple Special Models Hardcoded Generation overrides
-  // Suffixes logic handles SE generations accurately
   if (/\bse 3\b/.test(lower) || /\bse \(3/.test(lower) || /\bse 2022\b/.test(lower)) return 13.5;
   if (/\bse 2\b/.test(lower) || /\bse \(2/.test(lower) || /\bse 2020\b/.test(lower)) return 11.5;
   if (/\bse\b/.test(lower) && !/\bse \d\b/.test(lower)) return 6.5; // SE 1st Gen
@@ -45,7 +37,9 @@ export function extractGenerationNumber(model: string): number {
 
   if (/\b11\b/.test(lower)) return 11.0;
 
-  const nums = lower.match(/\b\d{1,3}\b/g);
+  // Generic extraction logic: find the highest numerical sequence.
+  // Instead of requiring \b boundaries which fail on "S20", we extract all numbers.
+  const nums = lower.match(/\d+(\.\d+)?/g);
   if (nums) {
     return Math.max(...nums.map(Number));
   }
@@ -56,28 +50,49 @@ export function extractGenerationNumber(model: string): number {
 function getTierWeight(model: string): number {
   const lower = ` ${model.toLowerCase()} `;
   
-  for (const tier of INTRA_SERIES_TIER) {
-    for (const kw of tier.keywords) {
-      if (lower.includes(` ${kw}`)) return tier.weight;
-    }
+  // Weight 4: 'ultra', 'pro max'
+  if (lower.includes(' ultra ') || lower.includes(' pro max ')) return 4;
+  
+  // Weight 3: 'plus', 'pro'
+  if (lower.includes(' plus ') || lower.includes(' pro ')) return 3;
+  
+  // Weight 1: 'fe', 'air', 'e', 'mini', 'lite', 's'
+  if (
+    lower.includes(' fe ') || 
+    lower.includes(' air ') || 
+    lower.includes(' mini ') || 
+    lower.includes(' lite ') ||
+    /\be\b/.test(model.toLowerCase()) || // Safely handle single "e"
+    /\bs\b/.test(model.toLowerCase())    // Safely handle single "s"
+  ) {
+    return 1;
   }
 
-  // Handle single character 'e' models (like 17e) safely
-  if (/\be\b/.test(model.toLowerCase())) return 0.1;
-
-  return 0.2; // Base model
+  // Weight 2: Base Model (no specific lower/higher tier suffix)
+  return 2;
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /** Sort models by generation number (highest first), then by tier (highest first). */
 export function smartSortModels(models: ModelItem[]): ModelItem[] {
-  return [...models].sort((a, b) => {
-    const genA = extractGenerationNumber(a.model);
-    const genB = extractGenerationNumber(b.model);
-    if (genA !== genB) return genB - genA;
-    return getTierWeight(b.model) - getTierWeight(a.model);
+  // Pre-calculate generation and suffixWeight to ensure stability and efficiency
+  const mappedModels = models.map(m => ({
+    ...m,
+    generation: extractGenerationNumber(m.model),
+    suffixWeight: getTierWeight(m.model)
+  }));
+
+  mappedModels.sort((a, b) => {
+    // 1. Primary condition: Sort by generation descending (larger numbers first)
+    if (b.generation !== a.generation) {
+      return b.generation - a.generation;
+    }
+    // 2. Secondary condition: If generations match, sort by suffix weight descending
+    return b.suffixWeight - a.suffixWeight;
   });
+
+  return mappedModels;
 }
 
 /** Group models into Macro-Series (e.g. "Galaxy S Series", "iPhone Series"). */
