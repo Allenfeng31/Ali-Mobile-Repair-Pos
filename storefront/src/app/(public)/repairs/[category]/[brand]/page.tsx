@@ -6,7 +6,7 @@ import { formatDynamicParam } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
 
-export const revalidate = 1; // ISR: revalidate every second for real-time updates
+export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
 
 interface BrandPageProps {

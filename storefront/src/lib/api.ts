@@ -62,7 +62,7 @@ async function fetchPOSInventory(): Promise<RawItem[] | null> {
 
   try {
     const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
-      next: { revalidate: 1 }, // ISR: revalidate every second for real-time updates
+      cache: 'no-store', // Disable caching to ensure real-time data and fix "ghost cache" issues
     });
 
     if (!res.ok) {
@@ -256,10 +256,11 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
         repairTypes: ensureCoreRepairTypes(repairTypes, slugify(brand), model),
       });
     }
+    const brandBaseName = brand.replace(/\s+(Tablet|Phone|Watch|Laptop)$/i, '');
     brands.push({
       category,
-      brand,
-      slug: slugify(brand),
+      brand: brandBaseName, 
+      slug: slugify(brandBaseName),
       icon: getCategoryIcon(category),
       models,
     });

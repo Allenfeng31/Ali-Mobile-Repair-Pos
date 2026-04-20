@@ -8,10 +8,16 @@ import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam } from '@/lib/inventoryUtils';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
+
+// Predefined priority brands for UI highlighting (Most Popular section)
+const POPULAR_BRANDS_KEYS = [
+  'iPhone', 'iPad', 'Samsung', 'Google', 'Apple', 
+  'Microsoft', 'Dell', 'HP', 'Lenovo', 'Asus'
+];
 
 export async function generateStaticParams() {
   return [];
@@ -216,18 +222,13 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const catalog = await fetchRepairCatalog();
   const validBrands = catalog.brands.filter(b => b.category === category);
 
-  const topBrandsMap: Record<string, string[]> = {
-    phone: ['iPhone', 'Samsung', 'Google', 'Oppo'],
-    tablet: ['Apple', 'iPad', 'Samsung', 'Microsoft'],
-    laptop: ['Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Microsoft'],
-    watch: ['Apple', 'Samsung', 'Garmin']
-  };
-
-  const currentTopBrandsList = topBrandsMap[category] || [];
+  // Dynamically split into Popular and Other
+  const topBrands = validBrands.filter(b => 
+    POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
+  );
   
-  const topBrands = validBrands.filter(b => currentTopBrandsList.includes(b.brand));
   const otherBrands = validBrands
-    .filter(b => !currentTopBrandsList.includes(b.brand))
+    .filter(b => !topBrands.some(tb => tb.slug === b.slug))
     .sort((a, b) => a.brand.localeCompare(b.brand));
 
   return (
