@@ -21,12 +21,11 @@ export async function POST(request: Request) {
 
     const client = twilio(accountSid, authToken);
     
-    // Truncate message to 50 chars as requested
-    const snippet = message.length > 50 ? message.substring(0, 50) + '...' : message;
-    const customerInfo = customerName ? `${customerName} (${customerPhone || 'No phone'})` : 'A customer';
+    // Truncate snippet to 30 chars for 1-segment guarantee
+    const snippet = message.length > 30 ? message.substring(0, 30) : message;
 
     await client.messages.create({
-      body: `💬 New Live Chat! ${customerInfo} says: "${snippet}". Open POS to reply now!`,
+      body: `Chat: "${snippet}". Open POS.`,
       from: fromNumber,
       to: adminNumber,
     });

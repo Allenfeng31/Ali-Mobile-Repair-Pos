@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const client = twilio(accountSid, authToken);
     
     await client.messages.create({
-      body: `🚨 New Quote Request! ${name} is asking for: ${deviceModel} - ${repairType}. Call them back at: ${phone}`,
+      body: `Quote: ${name}, ${deviceModel} ${repairType}. Ph: ${phone}`,
       from: fromNumber,
       to: adminNumber,
     });

@@ -31,7 +31,25 @@ interface RepairPageProps {
 }
 
 export async function generateStaticParams() {
-  return [];
+  const catalog = await fetchRepairCatalog();
+  const params: { category: string; brand: string; model: string; 'repair-type': string }[] = [];
+
+  // Limit to top 100 high-value landing pages
+  for (const brand of catalog.brands) {
+    for (const model of brand.models) {
+      for (const repair of REPAIR_TYPES) {
+        params.push({
+          category: brand.category,
+          brand: brand.slug,
+          model: model.slug,
+          'repair-type': repair.slug
+        });
+        if (params.length >= 100) return params;
+      }
+    }
+  }
+
+  return params;
 }
 
 /** Stable hash: deterministic index from a string (sum of char codes mod length). */
@@ -123,6 +141,9 @@ function getLSIForRepair(slug: string): { component?: string[]; issue?: string[]
   return {};
 }
 
+import { notFound } from 'next/navigation';
+import RepairTypeClient from '@/components/services/RepairTypeClient';
+
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
   const details = await fetchRepairDetails(
@@ -132,16 +153,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type']
   );
 
+  if (!details && !resolvedParams.model) {
+    notFound();
+  }
+
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
   const displayModel = details?.model || formatDynamicParam(resolvedParams.model);
-  const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
+  const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
-  const finalRepairName = knownRepair?.name || repairName;
+  const finalRepairName = knownRepair?.name || repairTypeDerived;
 
   const faqs = generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode);
 
@@ -152,6 +177,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         description={`Professional ${finalRepairName} for ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`}
         price={price > 0 ? String(price) : undefined}
         modelCode={modelCode}
+      />
+
+      <RepairTypeClient 
+        deviceModel={displayModel}
+        repairType={finalRepairName}
+        price={price}
       />
 
       {/* ─── HERO SECTION ─────────────────────────────── */}
@@ -191,11 +222,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 color: 'var(--foreground)',
                 opacity: 0.85,
               }}>
-                Get an instant quote for this repair! Call{' '}
+                Please fill out the form below or call{' '}
                 <a href="tel:0481058514" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline' }}>
                   0481 058 514
                 </a>{' '}
-                or <ChatNowButton style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 700, padding: 0, textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit', fontFamily: 'inherit' }} />.
+                for an instant quote.
               </p>
             </div>
           )}
@@ -234,3 +265,4 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     </>
   );
 }
+

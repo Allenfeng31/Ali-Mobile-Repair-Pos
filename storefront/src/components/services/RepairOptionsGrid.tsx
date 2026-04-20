@@ -44,14 +44,6 @@ export default function RepairOptionsGrid({
     }
   };
 
-  const handleRepairClick = (e: React.MouseEvent, rt: RepairOption) => {
-    if (rt.price <= 0 && rt.slug !== "water-damage-repair") {
-      e.preventDefault();
-      setSelectedRepair(rt);
-      setModalOpen(true);
-    }
-  };
-
   return (
     <>
       <div className="repair-option-grid">
@@ -60,7 +52,6 @@ export default function RepairOptionsGrid({
             key={rt.slug}
             href={`/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`}
             className="repair-option-card"
-            onClick={(e) => handleRepairClick(e, rt)}
           >
             <span className="repair-option-icon">{getRepairIcon(rt.slug)}</span>
             <div className="repair-option-info">
@@ -77,15 +68,7 @@ export default function RepairOptionsGrid({
           </Link>
         ))}
       </div>
-
-      {modalOpen && selectedRepair && (
-        <QuoteRequestModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          deviceModel={modelName}
-          repairType={selectedRepair.name}
-        />
-      )}
     </>
   );
 }
+

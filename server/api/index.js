@@ -227,7 +227,10 @@ app.get('/api/inventory', async (req, res) => {
 });
 
 app.post('/api/inventory', async (req, res) => {
-  const { data, error } = await supabase.from('inventory').insert([req.body]).select();
+  const { data, error } = await supabase
+    .from('inventory')
+    .upsert([req.body], { onConflict: 'model,category' })
+    .select();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
