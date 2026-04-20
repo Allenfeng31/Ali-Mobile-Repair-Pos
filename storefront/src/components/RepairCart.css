@@ -275,3 +275,63 @@
   color: var(--foreground);
 }
 
+/* Category Selector Pills */
+.category-selector-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding: 0.5rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+.category-selector-row::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.category-pill {
+  flex: 1;
+  min-width: 120px;
+  background: var(--background);
+  border: 1px solid var(--layer-border);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--foreground);
+}
+
+.category-pill:hover {
+  border-color: var(--primary);
+  background: var(--secondary);
+  transform: translateY(-2px);
+}
+
+.category-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.tab-emoji {
+  font-size: 1.4rem;
+}
+
+.tab-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.category-pill.active .tab-emoji,
+.category-pill.active .tab-label {
+  color: #fff;
+}
+

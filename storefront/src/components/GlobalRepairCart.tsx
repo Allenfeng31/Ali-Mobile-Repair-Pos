@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCart, RepairService, CartDevice } from '@/context/CartContext';
 import { 
-  RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS 
+  RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType 
 } from '@/lib/inventoryUtils';
 import './RepairCart.css';
 
@@ -109,11 +109,9 @@ const CartContent = () => {
         />
       ))}
 
-      <div className="add-device-section">
-        <button className="add-device-btn" onClick={() => addDevice("", "", "PHONE")}>
+        <button className="add-device-btn" onClick={() => addDevice("", "", "phone")}>
           + Add another device
         </button>
-      </div>
 
       {devices.length > 0 && (
         <div className="cart-footer animate-fade">
@@ -149,8 +147,24 @@ interface DeviceSelectorProps {
 }
 
 const DeviceSelector: React.FC<DeviceSelectorProps> = ({ device, inventory, brands, onRemove, onUpdate, isFirst }) => {
+  const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
   const [selectedModel, setSelectedModel] = useState(device.model || "");
+
+  const sortedBrands = useMemo(() => {
+    const PRIORITY_BRANDS = ['iPhone', 'Samsung', 'Google', 'Oppo'];
+    const filtered = brands.filter(b => detectDeviceType(b) === selectedCategory);
+    
+    const priority = filtered
+      .filter(b => PRIORITY_BRANDS.includes(displayBrand(b)))
+      .sort((a, b) => PRIORITY_BRANDS.indexOf(displayBrand(a)) - PRIORITY_BRANDS.indexOf(displayBrand(b)));
+      
+    const others = filtered
+      .filter(b => !PRIORITY_BRANDS.includes(displayBrand(b)))
+      .sort((a, b) => displayBrand(a).localeCompare(displayBrand(b)));
+      
+    return { priority, others };
+  }, [brands, selectedCategory]);
 
   const models = useMemo(() => {
     if (!selectedBrand) return [];
@@ -181,6 +195,24 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({ device, inventory, bran
         {!isFirst && <button className="remove-device-btn" onClick={onRemove}>Remove</button>}
       </div>
 
+      <div className="category-selector-row">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            className={`category-pill ${selectedCategory === tab.key ? 'active' : ''}`}
+            onClick={() => {
+              setSelectedCategory(tab.key);
+              setSelectedBrand("");
+              setSelectedModel("");
+              onUpdate([]);
+            }}
+          >
+            <span className="tab-emoji">{tab.emoji}</span>
+            <span className="tab-label">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="selector-row">
         <div className="selector-group">
           <label>Brand</label>
@@ -194,7 +226,19 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({ device, inventory, bran
             }}
           >
             <option value="">-- Brand --</option>
-            {brands.map(b => <option key={b} value={b}>{displayBrand(b)}</option>)}
+            {sortedBrands.priority.length > 0 && (
+              <>
+                <optgroup label="Popular Brands">
+                  {sortedBrands.priority.map(b => (
+                    <option key={b} value={b}>{displayBrand(b)}</option>
+                  ))}
+                </optgroup>
+                <option disabled>──────────</option>
+              </>
+            )}
+            {sortedBrands.others.map(b => (
+              <option key={b} value={b}>{displayBrand(b)}</option>
+            ))}
           </select>
         </div>
         <div className="selector-group">

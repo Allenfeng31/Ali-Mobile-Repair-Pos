@@ -225,9 +225,21 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const validBrands = catalog.brands.filter(b => b.category === category);
 
   // Dynamically split into Popular and Other
-  const topBrands = validBrands.filter(b => 
-    POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
-  );
+  let topBrands;
+  if (category === 'phone') {
+    const PHONE_PRIORITY = ['iPhone', 'Samsung', 'Google', 'Oppo'];
+    topBrands = validBrands
+      .filter(b => PHONE_PRIORITY.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase())))
+      .sort((a, b) => {
+        const indexA = PHONE_PRIORITY.findIndex(pk => a.brand.toLowerCase().includes(pk.toLowerCase()));
+        const indexB = PHONE_PRIORITY.findIndex(pk => b.brand.toLowerCase().includes(pk.toLowerCase()));
+        return indexA - indexB;
+      });
+  } else {
+    topBrands = validBrands.filter(b => 
+      POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
+    );
+  }
   
   const otherBrands = validBrands
     .filter(b => !topBrands.some(tb => tb.slug === b.slug))
