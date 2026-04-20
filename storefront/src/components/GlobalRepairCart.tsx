@@ -310,29 +310,41 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
       </div>
 
       {selectedModel && (
-        <div className="services-grid">
-          {availableServices.length > 0 ? (
-            availableServices.map(s => (
-              <div 
-                key={s.id} 
-                className={`service-card ${device.services.some(item => item.id === s.id) ? 'selected' : ''}`}
-                onClick={() => toggleService(s)}
-              >
-                <div className="checkbox-custom" />
-                <div className="service-name-price">
-                  <span className="service-name">{s.service}</span>
-                  <span className="service-price">
-                    {s.price > 0 ? `$${s.price.toFixed(2)}` : "Quote on Request"}
-                  </span>
+        <>
+          <div className="services-grid animate-fade">
+            {availableServices.length > 0 ? (
+              availableServices.map(s => (
+                <div 
+                  key={s.id} 
+                  className={`service-card ${device.services.some(item => item.id === s.id) ? 'selected' : ''}`}
+                  onClick={() => toggleService(s)}
+                >
+                  <div className="checkbox-custom" />
+                  <div className="service-name-price">
+                    <span className="service-name">{s.service}</span>
+                    <span className="service-price">
+                      {s.price > 0 ? `$${s.price.toFixed(2)}` : "Quote on Request"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p style={{ gridColumn: '1/-1', opacity: 0.5, fontSize: '0.85rem' }}>
-              No standard pricing found. We can still help! Please add to cart and we will quote you.
-            </p>
-          )}
-        </div>
+              ))
+            ) : (
+              <p style={{ gridColumn: '1/-1', opacity: 0.5, fontSize: '0.85rem' }}>
+                No standard pricing found. We can still help! Please add to cart and we will quote you.
+              </p>
+            )}
+          </div>
+
+          <div className="confirmation-row">
+            <button 
+              className="confirm-device-btn"
+              onClick={handleConfirm}
+              disabled={device.services.length === 0}
+            >
+              Confirm Selection
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

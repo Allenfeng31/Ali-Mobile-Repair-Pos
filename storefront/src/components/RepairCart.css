@@ -335,18 +335,35 @@
   color: #fff;
 }
 
+.confirmation-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--layer-border);
+}
+
 /* Summary Card & Confirmation */
 .device-summary-card {
-  background: var(--background);
-  border: 2px solid var(--primary);
+  background: var(--layer);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--primary);
+  border-left: 6px solid var(--primary);
   border-radius: 18px;
-  padding: 1.25rem;
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.05);
+  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.device-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 122, 255, 0.15);
 }
 
 .summary-main {
@@ -354,16 +371,27 @@
 }
 
 .summary-title {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--foreground);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
 }
 
 .summary-services {
-  font-size: 0.85rem;
-  opacity: 0.7;
+  font-size: 0.9rem;
+  opacity: 0.8;
   color: var(--foreground);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.summary-services::before {
+  content: "Selected:";
+  font-weight: 700;
+  opacity: 0.5;
+  margin-right: 0.25rem;
 }
 
 .summary-actions {
@@ -372,58 +400,68 @@
 }
 
 .edit-summary-btn {
-  background: var(--secondary);
-  color: var(--foreground);
-  border: 1px solid var(--layer-border);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  padding: 0.5rem 1.25rem;
+  border-radius: 10px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .edit-summary-btn:hover {
-  background: var(--layer-border);
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 
 .remove-summary-btn {
   background: rgba(255, 59, 48, 0.1);
   color: #ff3b30;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  padding: 0.5rem 1.25rem;
+  border-radius: 10px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .remove-summary-btn:hover {
   background: #ff3b30;
   color: #fff;
+  border-color: #ff3b30;
 }
 
 .confirm-device-btn {
   background: var(--primary);
   color: #fff;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 1rem;
+  padding: 1rem 2.5rem;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1.05rem;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px var(--primary-glow);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px var(--primary-glow);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .confirm-device-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px var(--primary-glow);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px var(--primary-glow);
+}
+
+.confirm-device-btn:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
 }
 
 .confirm-device-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
   box-shadow: none;
+  transform: none;
 }
-
