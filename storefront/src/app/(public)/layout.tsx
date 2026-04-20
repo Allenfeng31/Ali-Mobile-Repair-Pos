@@ -30,13 +30,15 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-AU" className={`${inter.variable}`}>
+    <html lang="en-AU" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
         <link rel="canonical" href="https://www.alimobile.com.au" />
         <meta name="geo.region" content="AU-VIC" />
@@ -45,7 +47,8 @@ export default function RootLayout({
         <meta name="ICBM" content="-37.815444, 145.222375" />
       </head>
       <body>
-        <Header />
+        <ThemeProvider>
+          <Header />
         <main>{children}</main>
         <ChatWidget />
         <footer className="footer">
@@ -57,6 +60,7 @@ export default function RootLayout({
           <p>Address: Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</p>
           <p>&copy; {new Date().getFullYear()} Ali Mobile Repair. All rights reserved.</p>
         </footer>
+        </ThemeProvider>
       </body>
     </html>
   );
