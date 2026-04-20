@@ -2,13 +2,13 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--layer);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  color: #fff;
+  border: 1px solid var(--layer-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: var(--foreground);
 }
 
 .cart-header {
@@ -19,30 +19,29 @@
 .cart-header h1 {
   font-size: 2.2rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, #aaa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--foreground);
   margin-bottom: 0.5rem;
 }
 
 .cart-header p {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--foreground);
+  opacity: 0.6;
   font-size: 0.95rem;
 }
 
 .device-entry {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--secondary);
   border-radius: 18px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--layer-border);
   transition: all 0.3s ease;
   position: relative;
 }
 
 .device-entry:hover {
   border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--layer);
 }
 
 .device-info-header {
@@ -85,8 +84,8 @@
 }
 
 .service-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--secondary);
+  border: 1px solid var(--layer-border);
   border-radius: 12px;
   padding: 1rem;
   display: flex;
@@ -105,13 +104,13 @@
 .service-card.selected {
   background: rgba(0, 122, 255, 0.2);
   border-color: var(--primary);
-  box-shadow: 0 0 15px rgba(0, 122, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 122, 255, 0.1);
 }
 
 .checkbox-custom {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--layer-border);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -144,7 +143,8 @@
 
 .service-price {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--foreground);
+  opacity: 0.5;
   font-weight: 500;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .add-device-btn {
-  background: linear-gradient(135deg, var(--primary) 0%, #0051ff 100%);
+  background: var(--primary);
   color: #fff;
   border: none;
   padding: 0.8rem 1.75rem;
@@ -163,58 +163,63 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .add-device-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 6px 20px var(--primary-glow);
 }
 
 .cart-footer {
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--layer-border);
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .total-section h4 {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  color: var(--foreground);
+  opacity: 0.5;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .total-amount {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--primary);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--foreground);
 }
 
 .custom-quote-badge {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #ff9500;
+  margin-left: 0.5rem;
 }
 
 .checkout-btn {
-  background: #fff;
-  color: #000;
+  background: var(--primary);
+  color: #fff;
   border: none;
-  padding: 1rem 2.5rem;
+  padding: 0.8rem 2rem;
   border-radius: 12px;
-  font-weight: 800;
-  font-size: 1.1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 10px var(--primary-glow);
 }
 
 .checkout-btn:hover {
-  background: #f0f0f0;
   transform: scale(1.02);
+  box-shadow: 0 6px 15px var(--primary-glow);
 }
 
 .checkout-btn:disabled {
@@ -243,20 +248,22 @@
   display: block;
   font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--foreground);
+  opacity: 0.5;
   margin-bottom: 0.4rem;
   padding-left: 0.5rem;
 }
 
 .cart-control {
   width: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--background);
+  border: 1px solid var(--layer-border);
   border-radius: 10px;
   padding: 0.75rem;
-  color: #fff;
+  color: var(--foreground);
   font-size: 1rem;
   outline: none;
+  transition: border-color 0.2s;
 }
 
 .cart-control:focus {
@@ -264,6 +271,7 @@
 }
 
 .cart-control option {
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--secondary);
+  color: var(--foreground);
 }
+

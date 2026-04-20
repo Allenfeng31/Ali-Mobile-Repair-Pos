@@ -53,12 +53,12 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
       </p>
 
       <div style={{ 
-        background: "rgba(255,255,255,0.05)", 
+        background: "var(--secondary)", 
         borderRadius: "16px", 
         padding: "1.5rem", 
         textAlign: "left",
         marginBottom: "2rem",
-        border: "1px solid rgba(255,255,255,0.1)"
+        border: "1px solid var(--layer-border)"
       }}>
         <h3 style={{ fontSize: "1rem", marginBottom: "1rem", color: "var(--primary)" }}>Appointment Details</h3>
         <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>📅 <strong>Time:</strong> {booking.displayDate}</p>
@@ -293,20 +293,23 @@ export default function BookRepairPage() {
               </div>
             )}
             <div className="form-group">
-              <label>Confirmation Order Summary</label>
+              <label>Confirmation - Estimated Cost (Pay In-Store)</label>
               <div 
                 className="form-control" 
-                style={{ background: "rgba(255,255,255,0.05)", height: "auto", minHeight: "2.8rem", color: "var(--primary)", fontWeight: 700, border: "1px solid rgba(255,255,255,0.1)" }}
+                style={{ background: "var(--layer)", height: "auto", minHeight: "2.8rem", color: "var(--foreground)", border: "1px solid var(--layer-border)" }}
               >
                 {devices.length > 0 ? (
                   <div>
                     {devices.map((d, i) => (
-                      <div key={i}>{d.brand} {d.model}: {d.services.map(s => s.name).join(', ')}</div>
+                      <div key={i} style={{ opacity: 0.9, marginBottom: '0.2rem' }}>{d.brand} {d.model}: {d.services.map(s => s.name).join(', ')}</div>
                     ))}
-                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem' }}>
-                      Total Estimate: ${totalPrice.toFixed(2)}
+                    <div style={{ marginTop: '0.8rem', borderTop: '1px solid var(--layer-border)', paddingTop: '0.8rem', fontWeight: 700, fontSize: '1.1rem' }}>
+                      Estimated Total: ${totalPrice.toFixed(2)}
                       {hasCustomQuote && <span style={{ color: '#ff9500' }}> + Custom Quote</span>}
                     </div>
+                    <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.5rem', fontWeight: 400 }}>
+                      💡 No upfront payment required. You only pay in-store after your device is successfully repaired.
+                    </p>
                   </div>
                 ) : "No items in cart..."}
               </div>
@@ -325,13 +328,13 @@ export default function BookRepairPage() {
             <button 
               type="submit" 
               className="primary-btn" 
-              style={{ width: "100%", marginTop: "1rem" }}
+              style={{ width: "100%", marginTop: "1.5rem" }}
               disabled={isSubmitting || devices.length === 0}
             >
-              {isSubmitting ? "Processing..." : "Confirm Booking"}
+              {isSubmitting ? "Processing..." : "Confirm Appointment"}
             </button>
             <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.8rem', opacity: 0.6 }}>
-              We'll confirm your appointment via internal system. No fix, no charge.
+              No fix, no charge. Balance paid in-store only.
             </p>
           </form>
         </div>

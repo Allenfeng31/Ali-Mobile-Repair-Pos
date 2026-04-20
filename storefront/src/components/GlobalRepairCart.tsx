@@ -118,18 +118,18 @@ const CartContent = () => {
       {devices.length > 0 && (
         <div className="cart-footer animate-fade">
           <div className="total-section">
-            <h4>Total Estimate</h4>
+            <h4>Estimated Cost (Pay In-Store)</h4>
             <div className="total-amount">
               ${totalPrice.toFixed(2)}
               {hasCustomQuote && <span className="custom-quote-badge"> + Custom Quote</span>}
             </div>
-            <p style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '0.5rem' }}>
-              No fix, no charge. Final price confirmed in store.
+            <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.5rem', color: 'var(--foreground)' }}>
+              💡 No upfront payment required. You only pay in-store after your device is successfully repaired.
             </p>
           </div>
           
           <button className="checkout-btn" onClick={() => window.location.href = `/book-repair/checkout`}>
-            Book Now
+            Book Visit
           </button>
         </div>
       )}
