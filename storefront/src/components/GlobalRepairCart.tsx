@@ -251,12 +251,15 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
           <button 
             className={`add-upsell-btn ${isAdded ? 'added' : ''}`}
             onClick={() => {
-              if (isAdded) return;
-              onUpdate([...device.services, { 
-                id: `upsell-glass-${device.id}`, 
-                name: 'Premium Tempered Glass', 
-                price: 25 
-              }]);
+              if (isAdded) {
+                onUpdate(device.services.filter(s => s.id !== `upsell-glass-${device.id}`));
+              } else {
+                onUpdate([...device.services, { 
+                  id: `upsell-glass-${device.id}`, 
+                  name: 'Premium Tempered Glass', 
+                  price: 25 
+                }]);
+              }
             }}
           >
             {isAdded ? 'Added ✓' : '+ Add'}
