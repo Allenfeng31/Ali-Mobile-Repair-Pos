@@ -12,16 +12,7 @@ interface ModelPageProps {
 }
 
 export async function generateStaticParams() {
-  const catalog = await fetchRepairCatalog();
-  const allParams: { category: string; brand: string; model: string }[] = [];
-
-  for (const brand of catalog.brands) {
-    for (const model of brand.models) {
-      allParams.push({ category: brand.category, brand: brand.slug, model: model.slug });
-    }
-  }
-
-  return allParams;
+  return [];
 }
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {

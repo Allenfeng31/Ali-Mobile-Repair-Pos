@@ -31,23 +31,7 @@ interface RepairPageProps {
 }
 
 export async function generateStaticParams() {
-  const catalog = await fetchRepairCatalog();
-  const allParams: { category: string; brand: string; model: string; 'repair-type': string }[] = [];
-
-  for (const brand of catalog.brands) {
-    for (const model of brand.models) {
-      for (const repair of model.repairTypes) {
-        allParams.push({
-          category: brand.category,
-          brand: brand.slug,
-          model: model.slug,
-          'repair-type': repair.slug,
-        });
-      }
-    }
-  }
-
-  return allParams;
+  return [];
 }
 
 /** Stable hash: deterministic index from a string (sum of char codes mod length). */

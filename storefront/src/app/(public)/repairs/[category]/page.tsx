@@ -14,7 +14,7 @@ export const dynamicParams = true;
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 
 export async function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ category: c }));
+  return [];
 }
 
 interface CategoryPageProps {

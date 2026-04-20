@@ -16,7 +16,9 @@ type ModelItem = {
 
 /** Extract generation number from model name (e.g. "S25 Ultra" -> 25) */
 export function extractGenerationNumber(model: string): number {
-  const lower = model.toLowerCase();
+  // Strip AU model codes in parentheses to avoid numerical noise (e.g. "SM-X930" -> ignored)
+  const cleanModel = model.replace(/\s*\([^)]*\)/g, '').trim();
+  const lower = cleanModel.toLowerCase();
 
   // Special catch for M-chips in Macs/iPads to act as generation (M4 = 40)
   const mChip = lower.match(/\bm(\d)\b/);
@@ -147,13 +149,26 @@ export function groupModelsBySeries(
       else seriesKey = 'Other Models';
     }
 
-    // Samsung grouping
+    // Samsung Tablets (Higher priority than phone S/A series)
+    const isSamsungBrand = brand.includes('samsung');
+    if (isSamsungBrand && lower.includes('galaxy tab')) {
+      if (/\btab\s+s/i.test(lower)) seriesKey = 'Galaxy Tab S Series';
+      else if (/\btab\s+a/i.test(lower)) seriesKey = 'Galaxy Tab A Series';
+      else seriesKey = 'Galaxy Tab Series';
+    }
+    // Lenovo grouping
+    else if (brand.includes('lenovo') || lower.includes('lenovo')) {
+      if (/\btab\s+p/i.test(lower)) seriesKey = 'Lenovo Tab P Series';
+      else if (/\btab\s+m/i.test(lower)) seriesKey = 'Lenovo Tab M Series';
+      else if (lower.includes('yoga')) seriesKey = 'Lenovo Yoga Tab Series';
+      else seriesKey = 'Lenovo Other Series';
+    }
+    // Generic Samsung phone series
     else if (lower.includes('galaxy z') || lower.includes('fold') || lower.includes('flip')) seriesKey = 'Galaxy Z Series';
-    else if (/galaxy s\d+/.test(lower) || /\bs\d+/.test(lower)) seriesKey = 'Galaxy S Series';
-    else if (/galaxy a\d+/.test(lower) || /\ba\d+/.test(lower)) seriesKey = 'Galaxy A Series';
+    else if (/galaxy s\d+/.test(lower) || (isSamsungBrand && /\bs\d+/.test(lower))) seriesKey = 'Galaxy S Series';
+    else if (/galaxy a\d+/.test(lower) || (isSamsungBrand && /\ba\d+/.test(lower))) seriesKey = 'Galaxy A Series';
     else if (lower.includes('note')) seriesKey = 'Galaxy Note Series';
-    else if (lower.includes('galaxy j') || /\bj\d+/.test(lower)) seriesKey = 'Galaxy J Series';
-    else if (lower.includes('galaxy tab')) seriesKey = 'Galaxy Tab Series';
+    else if (isSamsungBrand && (lower.includes('galaxy j') || /\bj\d+/.test(lower))) seriesKey = 'Galaxy J Series';
 
     // Google grouping
     else if (lower.includes('pixel')) seriesKey = 'Pixel Series';
