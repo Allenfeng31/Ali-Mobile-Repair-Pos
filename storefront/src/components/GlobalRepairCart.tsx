@@ -6,6 +6,7 @@ import { useCart, RepairService, CartDevice } from '@/context/CartContext';
 import { 
   RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType 
 } from '@/lib/inventoryUtils';
+import { smartSortModels } from '@/lib/modelSortConfig';
 import './RepairCart.css';
 
 // ── Shared Component for the Cart ──────────────────────────────────────────
@@ -37,23 +38,22 @@ const CartContent = () => {
     fetchInventory();
   }, []);
 
-  // ── SEO Intent Auto-Populate ──────────────────────────────────────────────
+  // ── SEO Intent Auto-Populate (One-time Consume & Clear) ───────────────────
   useEffect(() => {
     if (loading || inventory.length === 0) return;
 
-    const modelParam = searchParams.get('model');
-    const repairParam = searchParams.get('repair');
+    const params = new URLSearchParams(window.location.search);
+    const modelParam = params.get('model');
+    const repairParam = params.get('repair');
 
     if (modelParam) {
       const decodedModel = modelParam.replace(/-/g, ' ').toLowerCase();
-      // Find the best match in inventory
       const matchedItem = inventory.find(i => 
         i.deviceModel.toLowerCase() === decodedModel || 
         i.deviceModel.toLowerCase().replace(/\s+/g, '-') === modelParam
       );
 
       if (matchedItem) {
-        // If this exact model is not already in the cart, add it
         const alreadyInCart = devices.some(d => d.brand === matchedItem.brand && d.model === matchedItem.deviceModel);
         
         if (!alreadyInCart) {
@@ -72,8 +72,12 @@ const CartContent = () => {
           addDevice(matchedItem.brand, matchedItem.deviceModel, matchedItem.category, serviceToSelect);
         }
       }
+      
+      // CRITICAL: Clear URL parameters once consumed to prevent state hijacking on refresh/interaction
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
     }
-  }, [loading, inventory, searchParams, addDevice, devices]);
+  }, [loading, inventory]); // Remove devices/searchParams from deps to ensure it only runs once on load
 
   // UI Helpers
   const brands = useMemo(() => Array.from(new Set(inventory.map(i => i.brand))).sort(), [inventory]);
@@ -169,7 +173,12 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({ device, inventory, bran
   const models = useMemo(() => {
     if (!selectedBrand) return [];
     const dbModels = inventory.filter(i => i.brand === selectedBrand).map(i => i.deviceModel);
-    return Array.from(new Set(dbModels)).sort();
+    const uniqueModels = Array.from(new Set(dbModels));
+    
+    // Apply Generation-Aware Sorting
+    const modelItems = uniqueModels.map(m => ({ model: m, slug: "", repairTypes: [] }));
+    const sorted = smartSortModels(modelItems);
+    return sorted.map(s => s.model);
   }, [inventory, selectedBrand]);
 
   const availableServices = useMemo(() => {
