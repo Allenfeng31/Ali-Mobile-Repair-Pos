@@ -70,7 +70,9 @@ export default function BrandModelSearch({
       ) : (
         filteredGroups.map((group) => (
           <div key={group.series} className="model-series-section">
-            <h2 className="model-series-title">{group.series}</h2>
+            {seriesGroups.length > 1 && (
+              <h2 className="model-series-title">{group.series}</h2>
+            )}
             <div className="model-series-grid">
               {group.models.map((entry) => (
                 <Link

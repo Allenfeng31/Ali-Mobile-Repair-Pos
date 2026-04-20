@@ -37,7 +37,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const categorySlug = resolvedParams.category;
   const brandSlug = resolvedParams.brand;
   const sortedModels = smartSortModels(models);
-  const seriesGroups = groupModelsBySeries(sortedModels);
+  const seriesGroups = groupModelsBySeries(sortedModels, brandName);
 
   return (
     <div className="page-container" style={{ maxWidth: "1000px" }}>
