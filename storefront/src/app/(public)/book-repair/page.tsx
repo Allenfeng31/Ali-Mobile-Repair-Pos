@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import LiveQuoteCalculator from "@/components/LiveQuoteCalculator";
+import GlobalRepairCart from "@/components/GlobalRepairCart";
+import { useCart } from "@/context/CartContext";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -92,8 +93,8 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
 }
 
 export default function BookRepairPage() {
-  const [selection, setSelection] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: "", phone: "", datetime: "", notes: "" });
+  const { devices, totalPrice, hasCustomQuote, clearCart } = useCart();
+  const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<any>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -108,7 +109,7 @@ export default function BookRepairPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selection) return alert("Please select a device and service first!");
+    if (devices.length === 0) return alert("Your cart is empty! Please select a device and service first.");
     if (!selectedDay || !selectedSlot) return alert("Please choose a date and time!");
     setShowDisclaimer(true);
   };
@@ -127,16 +128,16 @@ export default function BookRepairPage() {
       const payload = {
         customer_name: formData.name,
         phone: formData.phone,
-        brand: selection.brand,
-        model: selection.model,
-        service: selection.service,
+        devices: devices,
+        total: totalPrice,
+        hasCustomQuote: hasCustomQuote,
         datetime: dateObj.toISOString(),
         displayDate: displayDate,
         notes: formData.notes,
         session_token: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null 
       };
 
-      const res = await fetch("/api/proxy/appointments", {
+      const res = await fetch("/api/proxy/book-repair", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -146,8 +147,13 @@ export default function BookRepairPage() {
       
       setSuccessBooking({
         ...payload,
-        name: formData.name
+        name: formData.name,
+        // Legacy fields for SuccessView compatibility
+        brand: devices[0].brand,
+        model: devices[0].model,
+        service: devices.length > 1 ? `${devices[0].services[0]?.name || 'Repair'} + more` : (devices[0].services[0]?.name || 'Repair')
       });
+      clearCart();
     } catch (err) {
       alert("Something went wrong. Please try again or call us.");
     } finally {
@@ -181,33 +187,35 @@ export default function BookRepairPage() {
         </p>
 
         {/* 1. Selection Step */}
-        <LiveQuoteCalculator onSelectionChange={setSelection} />
+        <GlobalRepairCart />
 
         {/* 2. Action Step */}
-        <div className={`form-container ${!selection ? 'opacity-40 pointer-events-none' : ''}`} style={{ marginTop: '2rem', transition: 'all 0.3s ease' }}>
+        <div className={`form-container ${devices.length === 0 ? 'opacity-40 pointer-events-none' : ''}`} style={{ marginTop: '2rem', transition: 'all 0.3s ease' }}>
           <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>Schedule Your Visit</h2>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Full Name</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="John Smith" 
-                required 
-                value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input 
-                type="tel" 
-                className="form-control" 
-                placeholder="04xx xxx xxx" 
-                required 
-                value={formData.phone}
-                onChange={e => setFormData({ ...formData, phone: e.target.value })}
-              />
+            <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label>Full Name</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="John Smith" 
+                  required 
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label>Phone Number</label>
+                <input 
+                  type="tel" 
+                  className="form-control" 
+                  placeholder="04xx xxx xxx" 
+                  required 
+                  value={formData.phone}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
             </div>
             <div className="form-group">
               <label>1. Select Date</label>
@@ -285,12 +293,22 @@ export default function BookRepairPage() {
               </div>
             )}
             <div className="form-group">
-              <label>Device / Issue (Confirmation)</label>
+              <label>Confirmation Order Summary</label>
               <div 
                 className="form-control" 
-                style={{ background: "var(--layer)", height: "auto", minHeight: "2.8rem", color: "var(--primary)", fontWeight: 700, border: "1px solid var(--layer-border)" }}
+                style={{ background: "rgba(255,255,255,0.05)", height: "auto", minHeight: "2.8rem", color: "var(--primary)", fontWeight: 700, border: "1px solid rgba(255,255,255,0.1)" }}
               >
-                {selection ? `${selection.brand} ${selection.model} - ${selection.service}` : "Please select above..."}
+                {devices.length > 0 ? (
+                  <div>
+                    {devices.map((d, i) => (
+                      <div key={i}>{d.brand} {d.model}: {d.services.map(s => s.name).join(', ')}</div>
+                    ))}
+                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem' }}>
+                      Total Estimate: ${totalPrice.toFixed(2)}
+                      {hasCustomQuote && <span style={{ color: '#ff9500' }}> + Custom Quote</span>}
+                    </div>
+                  </div>
+                ) : "No items in cart..."}
               </div>
             </div>
             <div className="form-group">
@@ -308,7 +326,7 @@ export default function BookRepairPage() {
               type="submit" 
               className="primary-btn" 
               style={{ width: "100%", marginTop: "1rem" }}
-              disabled={isSubmitting || !selection}
+              disabled={isSubmitting || devices.length === 0}
             >
               {isSubmitting ? "Processing..." : "Confirm Booking"}
             </button>

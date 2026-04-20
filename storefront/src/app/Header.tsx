@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
+import { useCart } from '@/context/CartContext';
 
 export default function Header() {
+  const { devices } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -78,9 +80,9 @@ export default function Header() {
           <Link 
             href="/book-repair" 
             className="primary-btn"
-            style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem' }}
+            style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            Book Repair
+            Book Repair {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>{devices.length}</span>}
           </Link>
 
           {/* Hamburger button – mobile only */}
@@ -106,7 +108,7 @@ export default function Header() {
           <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)}>About Us</Link>
           <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
           <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="mobile-nav-cta">
-            Book Repair Now
+            Book Repair Now {devices.length > 0 && `(${devices.length})`}
           </Link>
           
           {mounted && (

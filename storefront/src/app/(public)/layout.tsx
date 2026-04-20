@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { CartProvider } from "@/context/CartContext";
 
 export default function RootLayout({
   children,
@@ -48,18 +49,20 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <Header />
-        <main>{children}</main>
-        <ChatWidget />
-        <footer className="footer">
-          <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-            <a href="/privacy-policy">Privacy Policy</a>
-            <a href="/about-us">About Us</a>
-          </div>
-          <p>Contact Number: 0481 058 514</p>
-          <p>Address: Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</p>
-          <p>&copy; {new Date().getFullYear()} Ali Mobile Repair. All rights reserved.</p>
-        </footer>
+          <CartProvider>
+            <Header />
+            <main>{children}</main>
+            <ChatWidget />
+            <footer className="footer">
+              <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/about-us">About Us</a>
+              </div>
+              <p>Contact Number: 0481 058 514</p>
+              <p>Address: Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</p>
+              <p>&copy; {new Date().getFullYear()} Ali Mobile Repair. All rights reserved.</p>
+            </footer>
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

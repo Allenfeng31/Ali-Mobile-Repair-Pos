@@ -65,18 +65,28 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
   console.warn('⚠️  [SMS] Twilio credentials not set — SMS notifications disabled. Add TWILIO_* to server/.env');
 }
 
+const cleanSMS = (text) => {
+  return text
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') // Remove emojis
+    .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII
+    .slice(0, 160); // Strict length limit
+};
+
 const SMS_MESSAGES = {
   dropoff: (name) =>
-    `Hi ${name}, your device is safely checked in at Ali Mobile Repair. We'll text you as soon as the repair is complete. Thank you!`,
+    `Hi ${name}, your device is checked in at Ali Mobile Repair. We'll text you when complete. Thank you!`,
 
   completed: (name, device) =>
-    `Great news ${name}! Your ${device} repair at Ali Mobile Repair is complete. It is ready for pickup at your earliest convenience.`,
+    `Hi ${name}, your ${device} repair at Ali Mobile Repair is complete. Ready for pickup!`,
 
   review: (name) =>
-    `Hi ${name}, thanks for picking Ali Mobile Repair! Please leave us a quick review here:\n${googleReviewLink}`,
+    `Hi ${name}, thanks for picking Ali Mobile Repair! Please leave a review: ${googleReviewLink}`,
 
   partArrived: (name, device) =>
-    `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Please visit us soon for your repair.`,
+    `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
+  
+  booking: (name, count) =>
+    `Hi ${name}, we received your booking for ${count} device(s). We will confirm shortly. Ali Mobile Ringwood 0481058514`,
 };
 
 app.post('/api/sms/send', async (req, res) => {
@@ -98,13 +108,15 @@ app.post('/api/sms/send', async (req, res) => {
   }
 
   try {
-    const body = type === 'dropoff'
+    let body = type === 'dropoff'
       ? SMS_MESSAGES.dropoff(customerName)
       : type === 'completed'
         ? SMS_MESSAGES.completed(customerName, deviceModel)
         : type === 'partArrived'
           ? SMS_MESSAGES.partArrived(customerName, deviceModel)
           : SMS_MESSAGES.review(customerName);
+
+    body = cleanSMS(body);
 
     const message = await twilioClient.messages.create({
       body,
@@ -227,10 +239,34 @@ app.get('/api/inventory', async (req, res) => {
 });
 
 app.post('/api/inventory', async (req, res) => {
+  const item = req.body;
+  
+  // If we have a device_model and name, try to find existing first to prevent duplicates 
+  // until a DB-level unique constraint is applied.
+  if (item.device_model && item.name) {
+    const { data: existing } = await supabase
+      .from('inventory')
+      .select('id')
+      .eq('device_model', item.device_model)
+      .eq('name', item.name)
+      .single();
+      
+    if (existing) {
+      const { data, error } = await supabase
+        .from('inventory')
+        .update(item)
+        .eq('id', existing.id)
+        .select();
+      if (error) return res.status(500).json({ error: error.message });
+      return res.json(data[0]);
+    }
+  }
+
   const { data, error } = await supabase
     .from('inventory')
-    .upsert([req.body], { onConflict: 'model,category' })
+    .insert([item])
     .select();
+
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
@@ -359,24 +395,25 @@ app.delete('/api/customers/:id', async (req, res) => {
 // ----------------------------------------------------------------------
 // APPOINTMENTS
 // ----------------------------------------------------------------------
-app.post('/api/appointments', async (req, res) => {
-  const { customer_name, phone, brand, model, service, datetime, notes, session_token } = req.body;
+app.post('/api/book-repair', async (req, res) => {
+  const { customer_name, phone, devices, total, hasCustomQuote, datetime, notes, session_token } = req.body;
 
-  if (!customer_name || !phone || !datetime) {
-    return res.status(400).json({ error: 'Name, phone, and datetime are required' });
+  if (!customer_name || !phone || !datetime || !devices) {
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // 1. Create Appointment Record
+  // 1. Create Main Appointment Record
+  const mainDevice = devices[0];
   const { data: appointment, error: apptError } = await supabase
     .from('appointments')
     .insert([{
       customer_name,
       phone,
-      brand,
-      model,
-      service,
+      brand: mainDevice.brand,
+      model: mainDevice.model,
+      service: devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair'),
       datetime,
-      notes,
+      notes: `[MULTI-DEVICE] Total: $${total} ${hasCustomQuote ? '(+Custom)' : ''} | Full Notes: ${notes}`,
       status: 'pending'
     }])
     .select()
@@ -384,52 +421,50 @@ app.post('/api/appointments', async (req, res) => {
 
   if (apptError) return res.status(500).json({ error: apptError.message });
 
-  // 2. Identify or Create Chat Session
+  // 2. Chat Session Integration
   let sessionId = null;
   if (session_token) {
-    const { data: session } = await supabase
-      .from('chat_sessions')
-      .select('id')
-      .eq('session_token', session_token)
-      .single();
+    const { data: session } = await supabase.from('chat_sessions').select('id').eq('session_token', session_token).single();
     if (session) sessionId = session.id;
   }
 
   if (!sessionId) {
     const newToken = crypto.randomBytes(16).toString('hex');
-    const { data: newSession } = await supabase
-      .from('chat_sessions')
-      .insert({ session_token: newToken })
-      .select()
-      .single();
+    const { data: newSession } = await supabase.from('chat_sessions').insert({ session_token: newToken }).select().single();
     if (newSession) sessionId = newSession.id;
   }
 
-  // 3. Send Internal Notification Message
-  // Using [BOOKING_DATA] prefix to help POS UI identify this special message
-  const bookingData = JSON.stringify({
+  const bookingSummary = devices.map(d => `${d.brand} ${d.model}: ${d.services.map(s => s.name).join(', ')}`).join(' | ');
+  const messageContent = `[BOOKING_DATA] ${JSON.stringify({
     appointmentId: appointment.id,
     name: customer_name,
     phone,
-    device: `${brand} ${model}`.trim(),
-    service,
+    summary: bookingSummary,
+    total: total,
     time: datetime,
     notes
-  });
+  })}`;
 
-  await supabase
-    .from('chat_messages')
-    .insert({
-      session_id: sessionId,
-      sender: 'customer',
-      content: `[BOOKING_DATA] ${bookingData}`
-    });
+  await supabase.from('chat_messages').insert({ session_id: sessionId, sender: 'customer', content: messageContent });
+  await supabase.from('chat_sessions').update({ last_message_at: new Date().toISOString() }).eq('id', sessionId);
 
-  // Update session activity
-  await supabase
-    .from('chat_sessions')
-    .update({ last_message_at: new Date().toISOString() })
-    .eq('id', sessionId);
+  // 3. SMS Notification (Strict Segment)
+  if (twilioClient) {
+    try {
+      const smsBody = cleanSMS(SMS_MESSAGES.booking(customer_name, devices.length));
+      let formattedPhone = phone.replace(/\s/g, '');
+      if (formattedPhone.startsWith('0')) formattedPhone = '+61' + formattedPhone.slice(1);
+
+      await twilioClient.messages.create({
+        body: smsBody,
+        from: twilioPhone,
+        to: formattedPhone,
+      });
+      console.log(`✅ [SMS] Booking confirmation sent to ${formattedPhone}`);
+    } catch (err) {
+      console.error('❌ [SMS] Booking SMS failed:', err.message);
+    }
+  }
 
   res.json({ success: true, appointment });
 });

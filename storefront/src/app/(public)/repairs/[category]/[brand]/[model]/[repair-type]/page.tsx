@@ -247,7 +247,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
 
           <div className="cta-group">
-            <Link href="/book-repair" className="cta-book">
+            <Link href={`/book-repair?model=${resolvedParams.model}&repair=${resolvedParams['repair-type']}`} className="cta-book">
               Book Repair Now
             </Link>
             <a href="tel:0481058514" className="cta-call">
