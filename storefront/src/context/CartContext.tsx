@@ -14,15 +14,20 @@ export interface CartDevice {
   model: string;
   category: string;
   services: RepairService[];
+  isConfirmed: boolean;
 }
 
 interface CartContextType {
   devices: CartDevice[];
-  addDevice: (brand: string, model: string, category: string, service?: RepairService) => void;
+  addDevice: (brand: string, model: string, category: string, service?: RepairService, autoConfirm?: boolean) => void;
   removeDevice: (deviceId: string) => void;
   updateServices: (deviceId: string, services: RepairService[]) => void;
+  updateDeviceInfo: (deviceId: string, brand: string, model: string, category: string) => void;
+  confirmDevice: (deviceId: string) => void;
+  editDevice: (deviceId: string) => void;
   clearCart: () => void;
   totalPrice: number;
+  hasConfirmedDevices: boolean;
   hasCustomQuote: boolean;
 }
 
@@ -48,13 +53,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('repair_cart', JSON.stringify(devices));
   }, [devices]);
 
-  const addDevice = (brand: string, model: string, category: string, service?: RepairService) => {
+  const addDevice = (brand: string, model: string, category: string, service?: RepairService, autoConfirm: boolean = false) => {
     const newDevice: CartDevice = {
       id: Math.random().toString(36).substring(2, 9),
       brand,
       model,
       category,
       services: service ? [service] : [],
+      isConfirmed: autoConfirm,
     };
     setDevices(prev => [...prev, newDevice]);
   };
@@ -69,15 +75,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ));
   };
 
+  const updateDeviceInfo = (deviceId: string, brand: string, model: string, category: string) => {
+    setDevices(prev => prev.map(d => 
+      d.id === deviceId ? { ...d, brand, model, category } : d
+    ));
+  };
+
+  const confirmDevice = (deviceId: string) => {
+    setDevices(prev => prev.map(d => 
+      d.id === deviceId ? { ...d, isConfirmed: true } : d
+    ));
+  };
+
+  const editDevice = (deviceId: string) => {
+    setDevices(prev => prev.map(d => 
+      d.id === deviceId ? { ...d, isConfirmed: false } : d
+    ));
+  };
+
   const clearCart = () => {
     setDevices([]);
   };
 
-  const totalPrice = devices.reduce((sum, device) => 
+  const confirmedDevices = devices.filter(d => d.isConfirmed);
+
+  const totalPrice = confirmedDevices.reduce((sum, device) => 
     sum + device.services.reduce((s, service) => s + (service.price || 0), 0)
   , 0);
 
-  const hasCustomQuote = devices.some(device => 
+  const hasConfirmedDevices = confirmedDevices.length > 0;
+
+  const hasCustomQuote = confirmedDevices.some(device => 
     device.services.some(s => s.price === 0)
   );
 
@@ -87,8 +115,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addDevice, 
       removeDevice, 
       updateServices, 
+      updateDeviceInfo,
+      confirmDevice,
+      editDevice,
       clearCart, 
       totalPrice, 
+      hasConfirmedDevices,
       hasCustomQuote 
     }}>
       {children}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import GlobalRepairCart from "@/components/GlobalRepairCart";
 import { useCart } from "@/context/CartContext";
+import { formatDeviceTitle } from "@/lib/inventoryUtils";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,8 +26,8 @@ function generateICS(booking: any) {
     `DTSTAMP:${formatDate(new Date())}`,
     `DTSTART:${formatDate(start)}`,
     `DTEND:${formatDate(end)}`,
-    `SUMMARY:Repair Appointment: ${brand} ${model} - ${service}`,
-    `DESCRIPTION:Repair for ${name}\\nService: ${service}\\nDevice: ${brand} ${model}\\n\\nAli Mobile Repair Ringwood`,
+    `SUMMARY:Repair Appointment: ${formatDeviceTitle(brand, model)} - ${service}`,
+    `DESCRIPTION:Repair for ${name}\\nService: ${service}\\nDevice: ${formatDeviceTitle(brand, model)}\\n\\nAli Mobile Repair Ringwood`,
     "LOCATION:Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC 3134",
     "END:VEVENT",
     "END:VCALENDAR"
@@ -49,7 +50,7 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
       <div style={{ fontSize: "4rem", marginBottom: "1.5rem" }}>🎉</div>
       <h1 style={{ marginBottom: "1rem" }}>Booking Confirmed!</h1>
       <p style={{ opacity: 0.8, marginBottom: "2rem" }}>
-        Thank you, <strong>{booking.name}</strong>. We've received your request for <strong>{booking.brand} {booking.model}</strong>.
+        Thank you, <strong>{booking.name}</strong>. We've received your request for <strong>{formatDeviceTitle(booking.brand, booking.model)}</strong>.
       </p>
 
       <div style={{ 
@@ -93,7 +94,8 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
 }
 
 export default function BookRepairPage() {
-  const { devices, totalPrice, hasCustomQuote, clearCart } = useCart();
+  const { devices, totalPrice, hasConfirmedDevices, hasCustomQuote, clearCart } = useCart();
+  const confirmedDevices = devices.filter(d => d.isConfirmed);
   const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<any>(null);
@@ -109,7 +111,7 @@ export default function BookRepairPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (devices.length === 0) return alert("Your cart is empty! Please select a device and service first.");
+    if (!hasConfirmedDevices) return alert("Your cart is empty! Please select a device and service first, and click 'Confirm'.");
     if (!selectedDay || !selectedSlot) return alert("Please choose a date and time!");
     setShowDisclaimer(true);
   };
@@ -128,9 +130,13 @@ export default function BookRepairPage() {
       const payload = {
         customer_name: formData.name,
         phone: formData.phone,
-        devices: devices,
+        devices: confirmedDevices.map(d => ({
+          brand: d.brand,
+          model: d.model,
+          category: d.category,
+          services: d.services
+        })),
         total: totalPrice,
-        hasCustomQuote: hasCustomQuote,
         datetime: dateObj.toISOString(),
         displayDate: displayDate,
         notes: formData.notes,
@@ -149,9 +155,9 @@ export default function BookRepairPage() {
         ...payload,
         name: formData.name,
         // Legacy fields for SuccessView compatibility
-        brand: devices[0].brand,
-        model: devices[0].model,
-        service: devices.length > 1 ? `${devices[0].services[0]?.name || 'Repair'} + more` : (devices[0].services[0]?.name || 'Repair')
+        brand: confirmedDevices[0].brand,
+        model: confirmedDevices[0].model,
+        service: confirmedDevices.length > 1 ? `${confirmedDevices[0].services[0]?.name || 'Repair'} + more` : (confirmedDevices[0].services[0]?.name || 'Repair')
       });
       clearCart();
     } catch (err) {
@@ -190,7 +196,7 @@ export default function BookRepairPage() {
         <GlobalRepairCart />
 
         {/* 2. Action Step */}
-        <div className={`form-container ${devices.length === 0 ? 'opacity-40 pointer-events-none' : ''}`} style={{ marginTop: '2rem', transition: 'all 0.3s ease' }}>
+        <div className={`form-container ${!hasConfirmedDevices ? 'opacity-40 pointer-events-none' : ''}`} style={{ marginTop: '2rem', transition: 'all 0.3s ease' }}>
           <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>Schedule Your Visit</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -298,10 +304,12 @@ export default function BookRepairPage() {
                 className="form-control" 
                 style={{ background: "var(--layer)", height: "auto", minHeight: "2.8rem", color: "var(--foreground)", border: "1px solid var(--layer-border)" }}
               >
-                {devices.length > 0 ? (
+                {confirmedDevices.length > 0 ? (
                   <div>
-                    {devices.map((d, i) => (
-                      <div key={i} style={{ opacity: 0.9, marginBottom: '0.2rem' }}>{d.brand} {d.model}: {d.services.map(s => s.name).join(', ')}</div>
+                    {confirmedDevices.map((d, i) => (
+                      <div key={i} style={{ opacity: 0.9, marginBottom: '0.2rem' }}>
+                        <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => s.name).join(', ')}
+                      </div>
                     ))}
                     <div style={{ marginTop: '0.8rem', borderTop: '1px solid var(--layer-border)', paddingTop: '0.8rem', fontWeight: 700, fontSize: '1.1rem' }}>
                       Estimated Total: ${totalPrice.toFixed(2)}
@@ -325,11 +333,11 @@ export default function BookRepairPage() {
                 style={{ resize: 'vertical' }}
               />
             </div>
-            <button 
+              <button 
               type="submit" 
               className="primary-btn" 
               style={{ width: "100%", marginTop: "1.5rem" }}
-              disabled={isSubmitting || devices.length === 0}
+              disabled={isSubmitting || !hasConfirmedDevices}
             >
               {isSubmitting ? "Processing..." : "Confirm Appointment"}
             </button>

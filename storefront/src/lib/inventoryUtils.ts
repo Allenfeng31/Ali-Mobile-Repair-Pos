@@ -69,6 +69,23 @@ export function displayBrand(brand: string): string {
   return brand;
 }
 
+/**
+ * Formats device title by deduplicating brand and model names.
+ * e.g. Brand="iPhone", Model="iPhone 17 Pro Max" -> "iPhone 17 Pro Max"
+ * e.g. Brand="Samsung", Model="Galaxy S24" -> "Samsung Galaxy S24"
+ */
+export function formatDeviceTitle(brand: string, model: string): string {
+  if (!brand && !model) return "New Device";
+  if (!brand) return model;
+  if (!model) return displayBrand(brand);
+  
+  const b = displayBrand(brand);
+  if (model.toLowerCase().includes(b.toLowerCase())) {
+    return model;
+  }
+  return `${b} ${model}`;
+}
+
 export function parseItem(raw: RawItem): ParsedItem | null {
   // Skip non-repair items
   const cat = (raw.category || "").toLowerCase();

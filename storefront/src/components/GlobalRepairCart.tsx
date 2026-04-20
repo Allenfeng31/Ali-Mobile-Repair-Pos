@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCart, RepairService, CartDevice } from '@/context/CartContext';
 import { 
-  RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType 
+  RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle 
 } from '@/lib/inventoryUtils';
 import { smartSortModels } from '@/lib/modelSortConfig';
 import './RepairCart.css';
@@ -12,7 +12,10 @@ import './RepairCart.css';
 // ── Shared Component for the Cart ──────────────────────────────────────────
 
 const CartContent = () => {
-  const { devices, addDevice, removeDevice, updateServices, totalPrice, hasCustomQuote } = useCart();
+  const { 
+    devices, addDevice, removeDevice, updateServices, updateDeviceInfo, 
+    confirmDevice, editDevice, totalPrice, hasCustomQuote 
+  } = useCart();
   const searchParams = useSearchParams();
   
   const [inventory, setInventory] = useState<ParsedItem[]>([]);
@@ -69,7 +72,7 @@ const CartContent = () => {
               serviceToSelect = { id: matchedService.id, name: matchedService.service, price: matchedService.price };
             }
           }
-          addDevice(matchedItem.brand, matchedItem.deviceModel, matchedItem.category, serviceToSelect);
+          addDevice(matchedItem.brand, matchedItem.deviceModel, matchedItem.category, serviceToSelect, true);
         }
       }
       
@@ -109,6 +112,9 @@ const CartContent = () => {
           brands={brands}
           onRemove={() => removeDevice(device.id)}
           onUpdate={(services) => updateServices(device.id, services)}
+          onConfirm={() => confirmDevice(device.id)}
+          onEdit={() => editDevice(device.id)}
+          onUpdateInfo={(brand, model, category) => updateDeviceInfo(device.id, brand, model, category)}
           isFirst={idx === 0}
         />
       ))}
@@ -130,7 +136,12 @@ const CartContent = () => {
             </p>
           </div>
           
-          <button className="checkout-btn" onClick={() => window.location.href = `/book-repair/checkout`}>
+          <button 
+            className="checkout-btn" 
+            onClick={() => window.location.href = `/book-repair/checkout`}
+            disabled={!devices.some(d => d.isConfirmed)}
+            style={{ opacity: devices.some(d => d.isConfirmed) ? 1 : 0.5 }}
+          >
             Book Visit
           </button>
         </div>
@@ -147,10 +158,15 @@ interface DeviceSelectorProps {
   brands: string[];
   onRemove: () => void;
   onUpdate: (services: RepairService[]) => void;
+  onConfirm: () => void;
+  onEdit: () => void;
+  onUpdateInfo: (brand: string, model: string, category: string) => void;
   isFirst: boolean;
 }
 
-const DeviceSelector: React.FC<DeviceSelectorProps> = ({ device, inventory, brands, onRemove, onUpdate, isFirst }) => {
+const DeviceSelector: React.FC<DeviceSelectorProps> = ({ 
+  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst 
+}) => {
   const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
   const [selectedModel, setSelectedModel] = useState(device.model || "");
@@ -195,11 +211,37 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({ device, inventory, bran
     }
   };
 
+  const handleConfirm = () => {
+    if (!selectedBrand || !selectedModel) return alert("Please select brand and model first");
+    if (device.services.length === 0) return alert("Please select at least one repair service");
+    onUpdateInfo(selectedBrand, selectedModel, selectedCategory);
+    onConfirm();
+  };
+
+  if (device.isConfirmed) {
+    return (
+      <div className="device-summary-card animate-fade">
+        <div className="summary-main">
+          <div className="summary-title">
+            {formatDeviceTitle(device.brand, device.model)}
+          </div>
+          <div className="summary-services">
+            {device.services.map(s => s.name).join(", ")}
+          </div>
+        </div>
+        <div className="summary-actions">
+          <button className="edit-summary-btn" onClick={onEdit}>Edit</button>
+          <button className="remove-summary-btn" onClick={onRemove}>Remove</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="device-entry animate-fade">
       <div className="device-info-header">
         <div className="device-title">
-          {selectedModel ? `${displayBrand(selectedBrand)} ${selectedModel}` : "New Device"}
+          {formatDeviceTitle(selectedBrand, selectedModel)}
         </div>
         {!isFirst && <button className="remove-device-btn" onClick={onRemove}>Remove</button>}
       </div>

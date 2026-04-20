@@ -19,17 +19,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, message: 'Lead captured (SMS disabled)' });
     }
 
-    const client = twilio(accountSid, authToken);
-    
-    await client.messages.create({
-      body: `Quote: ${name}, ${deviceModel} ${repairType}. Ph: ${phone}`,
-      from: fromNumber,
-      to: adminNumber,
-    });
+    try {
+      const client = twilio(accountSid, authToken);
+      
+      await client.messages.create({
+        body: `Quote: ${name}, ${deviceModel} ${repairType}. Ph: ${phone}`,
+        from: fromNumber,
+        to: adminNumber,
+      });
 
-    return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true });
+    } catch (smsError: any) {
+      console.error('Twilio SMS Send Failure:', {
+        message: smsError.message,
+        code: smsError.code,
+        moreInfo: smsError.moreInfo
+      });
+      return NextResponse.json({ 
+        error: 'Failed to send SMS alert', 
+        details: smsError.message 
+      }, { status: 500 });
+    }
   } catch (error: any) {
-    console.error('Error sending SMS:', error);
-    return NextResponse.json({ error: 'Failed to send alert' }, { status: 500 });
+    console.error('Critical Error in Quote Request API:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -335,3 +335,95 @@
   color: #fff;
 }
 
+/* Summary Card & Confirmation */
+.device-summary-card {
+  background: var(--background);
+  border: 2px solid var(--primary);
+  border-radius: 18px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.05);
+}
+
+.summary-main {
+  flex: 1;
+}
+
+.summary-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.summary-services {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  color: var(--foreground);
+}
+
+.summary-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.edit-summary-btn {
+  background: var(--secondary);
+  color: var(--foreground);
+  border: 1px solid var(--layer-border);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-summary-btn:hover {
+  background: var(--layer-border);
+}
+
+.remove-summary-btn {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.remove-summary-btn:hover {
+  background: #ff3b30;
+  color: #fff;
+}
+
+.confirm-device-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.confirm-device-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--primary-glow);
+}
+
+.confirm-device-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
