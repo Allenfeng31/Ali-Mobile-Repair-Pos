@@ -14,7 +14,11 @@ interface BrandPageProps {
 }
 
 export async function generateStaticParams() {
-  return [];
+  const catalog = await fetchRepairCatalog();
+  return catalog.brands.map((b) => ({
+    category: b.category,
+    brand: b.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: BrandPageProps): Promise<Metadata> {

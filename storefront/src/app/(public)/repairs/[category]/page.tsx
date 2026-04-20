@@ -20,7 +20,9 @@ const POPULAR_BRANDS_KEYS = [
 ];
 
 export async function generateStaticParams() {
-  return [];
+  return CATEGORIES.map((category) => ({
+    category,
+  }));
 }
 
 interface CategoryPageProps {

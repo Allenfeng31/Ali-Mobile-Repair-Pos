@@ -1,8 +1,10 @@
-import Link from "next/link";
 import { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -12,12 +14,25 @@ interface ModelPageProps {
 }
 
 export async function generateStaticParams() {
-  return [];
+  const catalog = await fetchRepairCatalog();
+  
+  // Limit to top 100 models to balance build time and SEO
+  const allModels = catalog.brands.flatMap(brand => 
+    brand.models.map(model => ({
+      category: brand.category,
+      brand: brand.slug,
+      model: model.slug
+    }))
+  );
+
+  return allModels.slice(0, 100);
 }
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
   const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
+
+  if (!data) return {};
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
@@ -32,8 +47,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
+  if (!data) {
+    notFound();
+  }
+
   const modelName = data?.model || formatDynamicParam(modelSlug);
-  const brandName = data?.brand || formatDynamicParam(brandSlug);
   const repairTypes = data?.repairTypes || [];
 
   return (
@@ -63,30 +81,13 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         Select the repair you need for your {modelName}. Walk-in or book online for same-day service in Ringwood.
       </p>
 
-      <div className="repair-option-grid">
-        {repairTypes.map((rt) => (
-          <Link
-            key={rt.slug}
-            href={`/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`}
-            className="repair-option-card"
-          >
-            <span className="repair-option-icon">
-              {getRepairIcon(rt.slug)}
-            </span>
-            <div className="repair-option-info">
-              <span className="repair-option-name">{rt.name}</span>
-              <span className="repair-option-price">
-                {rt.price > 0
-                  ? `From $${rt.price}`
-                  : rt.slug === "water-damage-repair"
-                  ? "From $50"
-                  : "Quote on Request"}
-              </span>
-            </div>
-            <span className="repair-option-arrow">→</span>
-          </Link>
-        ))}
-      </div>
+      <RepairOptionsGrid 
+        repairTypes={repairTypes}
+        categorySlug={categorySlug}
+        brandSlug={brandSlug}
+        modelSlug={modelSlug}
+        modelName={modelName}
+      />
 
       {/* CTA Section */}
       <div
@@ -116,20 +117,4 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       </div>
     </div>
   );
-}
-
-function getRepairIcon(slug: string): string {
-  switch (slug) {
-    case "screen-replacement": return "📱";
-    case "battery-replacement": return "🔋";
-    case "charging-port-repair":
-    case "charging-port-replacement": return "🔌";
-    case "water-damage-repair": return "💧";
-    case "back-glass-repair":
-    case "back-housing-replacement": return "🪟";
-    case "camera-repair":
-    case "front-camera-replacement":
-    case "back-camera-replacement": return "📷";
-    default: return "🔧";
-  }
 }

@@ -59,9 +59,13 @@ function parseItem(raw: RawItem): ParsedItem | null {
   };
 }
 
+import QuoteRequestModal from './QuoteRequestModal';
+
 export default function LivePricingGrid({ deviceType, defaultItems, title }: { deviceType: string, defaultItems: any[], title: string }) {
   const [items, setItems] = useState<ParsedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{ model: string, service: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +77,8 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
         if (cancelled) return;
 
         const parsed = raw.map(parseItem).filter(Boolean) as ParsedItem[];
-        const filtered = parsed.filter(i => i.deviceType === deviceType && i.price > 0);
+        // Include $0 items now to allow for Quote on Request
+        const filtered = parsed.filter(i => i.deviceType === deviceType);
         
         let eligibleItems = filtered.filter(i => 
           !i.service.toLowerCase().includes("protector") &&
@@ -129,6 +134,11 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
 
   const displayList = items.length > 0 ? items : defaultItems;
 
+  const handleQuoteClick = (model: string, service: string) => {
+    setSelectedItem({ model, service });
+    setModalOpen(true);
+  };
+
   return (
     <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>
       <h2 style={{ marginBottom: '1rem' }}>{title}</h2>
@@ -147,8 +157,26 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
               <tr key={i} style={{ borderBottom: i === displayList.length - 1 ? 'none' : '1px solid var(--layer-border)' }}>
                 <td style={{ padding: '1rem', fontWeight: 600 }}>{item.deviceModel || item.model}</td>
                 <td style={{ padding: '1rem', opacity: 0.8 }}>{item.service}</td>
-                <td style={{ padding: '1rem', color: 'var(--primary)', fontWeight: 'bold', textAlign: 'right' }}>
-                  Starting at ${item.price}
+                <td style={{ padding: '1rem', textAlign: 'right' }}>
+                  {item.price > 0 ? (
+                    <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Starting at ${item.price}</span>
+                  ) : (
+                    <button 
+                      onClick={() => handleQuoteClick(item.deviceModel || (item as any).model, item.service)}
+                      style={{ 
+                        background: 'var(--primary)', 
+                        color: 'white', 
+                        border: 'none', 
+                        padding: '4px 12px', 
+                        borderRadius: '6px', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Request Quote
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -162,6 +190,16 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
           If you want to check the price for other {deviceType} models, please check out our <Link href="/book-repair" style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}>Live Repair Quote</Link>.
         </p>
       </div>
+
+      {modalOpen && selectedItem && (
+        <QuoteRequestModal 
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          deviceModel={selectedItem.model}
+          repairType={selectedItem.service}
+        />
+      )}
     </div>
   );
 }
+

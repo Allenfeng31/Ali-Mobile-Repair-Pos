@@ -30,6 +30,7 @@ function getChatToken(): string {
   localStorage.removeItem(CUSTOMER_INTRO_SENT_KEY);
   localStorage.removeItem(CUSTOMER_NAME_KEY);
   localStorage.removeItem(CUSTOMER_PHONE_KEY);
+  localStorage.removeItem('ali_chat_alert_sent');
   return token;
 }
 
@@ -203,6 +204,23 @@ export default function ChatWidget() {
     try {
       // Ensure session exists — recreates it if staff deleted it on the backend
       await ensureSession();
+
+      // Trigger first-message alert asynchronously
+      const alertSent = localStorage.getItem('ali_chat_alert_sent');
+      if (!alertSent) {
+        const customerName = localStorage.getItem(CUSTOMER_NAME_KEY) || '';
+        const customerPhone = localStorage.getItem(CUSTOMER_PHONE_KEY) || '';
+        
+        // Fire and forget alert
+        fetch('/api/chat-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, customerName, customerPhone }),
+        }).catch(err => console.error('Chat alert failed', err));
+        
+        localStorage.setItem('ali_chat_alert_sent', '1');
+      }
+
       const res = await fetch(`${getApiBase()}/chat/session/${tokenRef.current}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
