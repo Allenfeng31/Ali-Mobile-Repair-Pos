@@ -95,15 +95,15 @@ export function RepairServiceSchema({ serviceName, description, price, modelCode
     }
   };
 
-  const parsedPrice = Number(price);
+  const parsedPrice = typeof price === 'string' ? parseFloat(price) : Number(price);
 
   if (!price || isNaN(parsedPrice) || parsedPrice <= 0) {
     serviceData.offers.description = "No Fix No Charge policy. Get a free quote.";
-    // Ensure no zero values are added to avoid Search Console errors
-    delete serviceData.offers.price;
-    delete serviceData.offers.priceCurrency;
+    // STRICT GUARD: Ensure absolutely no price output for zero/empty values
+    delete (serviceData.offers as any).price;
+    delete (serviceData.offers as any).priceCurrency;
   } else {
-    serviceData.offers.price = parsedPrice;
+    serviceData.offers.price = parsedPrice.toFixed(2);
     serviceData.offers.priceCurrency = "AUD";
   }
 

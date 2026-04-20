@@ -312,8 +312,14 @@ export default function BookRepairPage() {
                       </div>
                     ))}
                     <div style={{ marginTop: '0.8rem', borderTop: '1px solid var(--layer-border)', paddingTop: '0.8rem', fontWeight: 700, fontSize: '1.1rem' }}>
-                      Estimated Total: ${totalPrice.toFixed(2)}
-                      {hasCustomQuote && <span style={{ color: '#ff9500' }}> + Custom Quote</span>}
+                      Estimated Total: {totalPrice > 0 ? (
+                        <>
+                          ${totalPrice.toFixed(2)}
+                          {hasCustomQuote && <span style={{ color: '#ff9500' }}> + Custom Quote</span>}
+                        </>
+                      ) : (
+                        hasCustomQuote ? "Custom Quote" : "$0.00"
+                      )}
                     </div>
                     <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.5rem', fontWeight: 400 }}>
                       💡 No upfront payment required. You only pay in-store after your device is successfully repaired.
