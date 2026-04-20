@@ -109,6 +109,18 @@ export default function BookRepairPage() {
     "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
   ];
 
+  // ── VIC Public Holidays 2026/2027 ─────────────────────────────────────────
+  const VIC_PUBLIC_HOLIDAYS = [
+    // 2026
+    "2026-01-01", "2026-01-26", "2026-03-09", "2026-04-03", "2026-04-04", 
+    "2026-04-05", "2026-04-06", "2026-04-25", "2026-06-08", "2026-09-25", 
+    "2026-11-03", "2026-12-25", "2026-12-26", "2026-12-28",
+    // 2027
+    "2027-01-01", "2027-01-26", "2027-03-08", "2027-03-26", "2027-03-27", 
+    "2027-03-28", "2027-03-29", "2027-04-26", "2027-06-14", "2027-10-01", 
+    "2027-11-02", "2027-12-25", "2027-12-27", "2027-12-28"
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hasConfirmedDevices) return alert("Your cart is empty! Please select a device and service first, and click 'Confirm'.");
@@ -238,6 +250,9 @@ export default function BookRepairPage() {
                   d.setDate(d.getDate() + i);
                   const isSunday = d.getDay() === 0;
                   const dayStr = d.toISOString().split('T')[0];
+                  const isHoliday = VIC_PUBLIC_HOLIDAYS.includes(dayStr);
+                  const isDisabled = isSunday || isHoliday;
+                  
                   const isSelected = selectedDay === dayStr;
                   const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
                   const dateNum = d.getDate();
@@ -247,24 +262,24 @@ export default function BookRepairPage() {
                     <button
                       key={dayStr}
                       type="button"
-                      disabled={isSunday}
+                      disabled={isDisabled}
                       onClick={() => { setSelectedDay(dayStr); setSelectedSlot(""); }}
                       style={{
                         flex: "0 0 70px",
                         padding: "0.8rem 0.5rem",
                         borderRadius: "12px",
                         border: isSelected ? "2px solid var(--primary)" : "1px solid var(--layer-border)",
-                        background: isSunday ? "transparent" : (isSelected ? "var(--primary)" : "var(--layer)"),
+                        background: isDisabled ? "transparent" : (isSelected ? "var(--primary)" : "var(--layer)"),
                         color: isSelected ? "white" : "var(--foreground)",
                         textAlign: "center",
-                        cursor: isSunday ? "not-allowed" : "pointer",
+                        cursor: isDisabled ? "not-allowed" : "pointer",
                         transition: "all 0.2s ease",
-                        opacity: isSunday ? 0.3 : 1
+                        opacity: isDisabled ? 0.3 : 1
                       }}
                     >
-                      <div style={{ fontSize: "0.7rem", opacity: isSunday ? 0.3 : 0.6, textTransform: "uppercase" }}>{dayName}</div>
-                      <div style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0.2rem 0" }}>{dateNum}</div>
-                      <div style={{ fontSize: "0.7rem", opacity: isSunday ? 0.3 : 0.6 }}>{monthName}</div>
+                      <div style={{ fontSize: "0.7rem", opacity: isDisabled ? 0.3 : 0.6, textTransform: "uppercase" }}>{dayName}</div>
+                      <div style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0.2rem 0" }}>{dateNum} {isHoliday ? "🛡️" : ""}</div>
+                      <div style={{ fontSize: "0.7rem", opacity: isDisabled ? 0.3 : 0.6 }}>{monthName}</div>
                     </button>
                   );
                 })}

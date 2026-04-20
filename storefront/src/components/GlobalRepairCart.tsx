@@ -225,19 +225,42 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   };
 
   if (device.isConfirmed) {
+    const isAdded = device.services.some(s => s.id === `upsell-glass-${device.id}`);
+    
     return (
-      <div className="device-summary-card animate-fade">
-        <div className="summary-main">
-          <div className="summary-title">
-            {formatDeviceTitle(device.brand, device.model)}
+      <div className="device-summary-card-wrapper animate-fade">
+        <div className="device-summary-card">
+          <div className="summary-main">
+            <div className="summary-title">
+              {formatDeviceTitle(device.brand, device.model)}
+            </div>
+            <div className="summary-services">
+              {device.services.map(s => s.name).join(", ")}
+            </div>
           </div>
-          <div className="summary-services">
-            {device.services.map(s => s.name).join(", ")}
+          <div className="summary-actions">
+            <button className="edit-summary-btn" onClick={onEdit}>Edit</button>
+            <button className="remove-summary-btn" onClick={onRemove}>Remove</button>
           </div>
         </div>
-        <div className="summary-actions">
-          <button className="edit-summary-btn" onClick={onEdit}>Edit</button>
-          <button className="remove-summary-btn" onClick={onRemove}>Remove</button>
+        
+        <div className="upsell-banner">
+          <div className="upsell-text">
+            <span>💡</span> Protect your screen with a Premium Tempered Glass for $25
+          </div>
+          <button 
+            className={`add-upsell-btn ${isAdded ? 'added' : ''}`}
+            onClick={() => {
+              if (isAdded) return;
+              onUpdate([...device.services, { 
+                id: `upsell-glass-${device.id}`, 
+                name: 'Premium Tempered Glass', 
+                price: 25 
+              }]);
+            }}
+          >
+            {isAdded ? 'Added ✓' : '+ Add'}
+          </button>
         </div>
       </div>
     );

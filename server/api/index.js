@@ -85,8 +85,8 @@ const SMS_MESSAGES = {
   partArrived: (name, device) =>
     `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
   
-  booking: (name, count) =>
-    `Hi ${name}, we received your booking for ${count} device(s). We will confirm shortly. Ali Mobile Ringwood 0481058514`,
+  booking: (name) =>
+    `Hi ${name}, your booking at Ali Mobile Repair is confirmed! See you in-store. Address: Kiosk C1, Ringwood Square Shopping Centre, Ringwood.`,
 };
 
 app.post('/api/sms/send', async (req, res) => {
@@ -451,7 +451,7 @@ app.post('/api/book-repair', async (req, res) => {
   // 3. SMS Notification (Strict Segment)
   if (twilioClient) {
     try {
-      const smsBody = cleanSMS(SMS_MESSAGES.booking(customer_name, devices.length));
+      const smsBody = cleanSMS(SMS_MESSAGES.booking(customer_name));
       let formattedPhone = phone.replace(/\s/g, '');
       if (formattedPhone.startsWith('0')) formattedPhone = '+61' + formattedPhone.slice(1);
 

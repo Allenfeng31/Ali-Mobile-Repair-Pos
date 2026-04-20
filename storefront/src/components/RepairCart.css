@@ -465,3 +465,53 @@
   box-shadow: none;
   transform: none;
 }
+
+/* Upsell Styles */
+.upsell-banner {
+  margin-top: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(var(--primary-rgb, 0, 122, 255), 0.05);
+  border: 1px dashed var(--primary);
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.upsell-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.add-upsell-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.add-upsell-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.add-upsell-btn.added {
+  background: #34c759;
+  cursor: default;
+}
+
+.add-upsell-btn.added:hover {
+  transform: none;
+}
