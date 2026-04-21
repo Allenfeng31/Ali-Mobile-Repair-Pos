@@ -435,10 +435,15 @@ app.post('/api/book-repair', async (req, res) => {
   }
 
   const bookingSummary = devices.map(d => `${d.brand} ${d.model}: ${d.services.map(s => s.name).join(', ')}`).join(' | ');
+  const mainDeviceTitle = `${mainDevice.brand} ${mainDevice.model}`;
+  const mainServiceDescription = devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair');
+
   const messageContent = `[BOOKING_DATA] ${JSON.stringify({
     appointmentId: appointment.id,
     name: customer_name,
     phone,
+    device: mainDeviceTitle,
+    service: mainServiceDescription,
     summary: bookingSummary,
     total: total,
     time: datetime,
