@@ -46,9 +46,9 @@ export default function Header() {
 
         {/* Desktop nav links */}
         <nav className="nav-links nav-links--desktop">
-          <Link href="/repairs">Service &amp; Repairs</Link>
-          <Link href="/about-us">About Us</Link>
-          <Link href="/blog">Blog</Link>
+          <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
+          <Link href="/about-us" prefetch={true}>About Us</Link>
+          <Link href="/blog" prefetch={true}>Blog</Link>
         </nav>
 
         {/* Right side: Book Repair + Hamburger */}
@@ -79,6 +79,7 @@ export default function Header() {
 
           <Link 
             href="/book-repair" 
+            prefetch={true}
             className="primary-btn"
             style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
@@ -104,10 +105,10 @@ export default function Header() {
       {/* Mobile dropdown menu */}
       {isMobileMenuOpen && (
         <nav className="mobile-nav">
-          <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)}>Service &amp; Repairs</Link>
-          <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)}>About Us</Link>
-          <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
-          <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="mobile-nav-cta">
+          <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)} prefetch={true}>Service &amp; Repairs</Link>
+          <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)} prefetch={true}>About Us</Link>
+          <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)} prefetch={true}>Blog</Link>
+          <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="mobile-nav-cta" prefetch={true}>
             Book Repair Now {devices.length > 0 && `(${devices.length})`}
           </Link>
           

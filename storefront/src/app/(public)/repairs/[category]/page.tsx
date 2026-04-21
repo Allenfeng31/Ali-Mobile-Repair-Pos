@@ -273,7 +273,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         {topBrands.length > 0 ? (
           <div className="brand-grid-hero">
             {topBrands.map(b => (
-              <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} className="brand-card-hero">
+              <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
                 {b.brand}
               </Link>
             ))}
@@ -291,7 +291,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
             <div className="brand-grid-standard">
               {otherBrands.map(b => (
-                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} className="brand-card-standard">
+                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
                   {b.brand}
                 </Link>
               ))}
@@ -317,7 +317,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             Use our Live Quote tool or call us — we'll identify your device and give you an instant price.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", alignItems: 'center' }}>
-            <Link href="/book-repair" className="primary-btn">
+            <Link href="/book-repair" prefetch={true} className="primary-btn">
               Get a Live Quote
             </Link>
             <a href="tel:0481058514" className="secondary-btn">
@@ -359,7 +359,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         ))}
 
         <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-          <Link href="/book-repair" className="primary-btn">
+          <Link href="/book-repair" prefetch={true} className="primary-btn">
             Book Your {category.charAt(0).toUpperCase() + category.slice(1)} Repair
           </Link>
         </div>

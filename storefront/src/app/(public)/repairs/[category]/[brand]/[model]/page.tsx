@@ -107,7 +107,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           Bring your {modelName} to our Ringwood kiosk for a free diagnostic — no obligation.
         </p>
         <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href={`/book-repair?model=${modelSlug}`} className="cta-book">
+          <Link href={`/book-repair?model=${modelSlug}`} prefetch={true} className="cta-book">
             Book Repair Now
           </Link>
           <a href="tel:0481058514" className="cta-call">

@@ -187,7 +187,7 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
       <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(0,122,255,0.05)', borderRadius: '10px', border: '1px solid var(--layer-border)' }}>
         <p style={{ fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
           <strong>Note:</strong> Prices are queried live from our backend POS system. 
-          If you want to check the price for other {deviceType} models, please check out our <Link href="/book-repair" style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}>Live Repair Quote</Link>.
+          If you want to check the price for other {deviceType} models, please check out our <Link href="/book-repair" prefetch={true} style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}>Live Repair Quote</Link>.
         </p>
       </div>
 
