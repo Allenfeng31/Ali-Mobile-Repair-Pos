@@ -538,6 +538,38 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           </div>
                         </div>
 
+                        {/* Quick Edit Pinning Controls */}
+                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+                                <Zap size={14} className="text-primary" />
+                                Pin to POS Home
+                              </label>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                className="sr-only peer"
+                                checked={formData.is_pinned}
+                                onChange={e => setFormData({...formData, is_pinned: e.target.checked})}
+                              />
+                              <div className="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                          </div>
+                          {formData.is_pinned && (
+                            <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2">
+                              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Pin Order</label>
+                              <input 
+                                type="number"
+                                className="w-full px-3 py-1.5 bg-surface-container-lowest border border-primary/10 rounded-lg text-xs font-bold" 
+                                value={formData.pin_order}
+                                onChange={e => setFormData({...formData, pin_order: parseInt(e.target.value) || 0})}
+                              />
+                            </div>
+                          )}
+                        </div>
+
                         <div className="flex justify-between items-center pt-2">
                           <button 
                             onClick={async () => {

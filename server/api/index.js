@@ -268,12 +268,15 @@ app.post('/api/inventory', async (req, res) => {
     .select();
 
   if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
-    console.warn(`⚠️ [Database] Falling back: 'is_pinned' or 'pin_order' columns not found. Please run the SQL migration.`);
+    console.warn(`⚠️ [Database Fallback] 'is_pinned' or 'pin_order' columns missing in 'inventory' table. Skipping pinning fields.`);
     const { is_pinned: _p, pin_order: _o, ...safeData } = item;
     ({ data, error } = await supabase.from('inventory').insert([safeData]).select());
   }
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    console.error(`❌ [Database Error] Failed to create inventory item:`, error.message);
+    return res.status(500).json({ error: error.message });
+  }
   res.json(data[0]);
 });
 
@@ -282,12 +285,15 @@ app.put('/api/inventory/:id', async (req, res) => {
   let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();
   
   if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
-    console.warn(`⚠️ [Database] Falling back: 'is_pinned' or 'pin_order' columns not found. Please run the SQL migration.`);
+    console.warn(`⚠️ [Database Fallback] 'is_pinned' or 'pin_order' columns missing in 'inventory' table. Skipping pinning fields.`);
     const { is_pinned: _p, pin_order: _o, ...safeData } = itemData;
     ({ data, error } = await supabase.from('inventory').update(safeData).eq('id', req.params.id).select());
   }
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    console.error(`❌ [Database Error] Failed to update inventory item ${req.params.id}:`, error.message);
+    return res.status(500).json({ error: error.message });
+  }
   res.json(data[0]);
 });
 
