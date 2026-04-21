@@ -70,7 +70,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     stock: '',
     minStock: '5',
     costPrice: '',
-    sellingPrice: ''
+    sellingPrice: '',
+    is_pinned: false,
+    pin_order: 0
   });
 
   const [newCategory, setNewCategory] = useState('');
@@ -139,7 +141,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       stock: '',
       minStock: '5',
       costPrice: '',
-      sellingPrice: ''
+      sellingPrice: '',
+      is_pinned: false,
+      pin_order: 0
     });
     setEditingId(null);
   };
@@ -155,7 +159,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       stock: item.stock.toString(),
       minStock: item.minStock.toString(),
       costPrice: item.costPrice.toString(),
-      sellingPrice: item.price.toString()
+      sellingPrice: item.price.toString(),
+      is_pinned: item.is_pinned || false,
+      pin_order: item.pin_order || 0
     });
   };
 
@@ -192,7 +198,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 formData.category.toLowerCase().includes('phone') ? 'Smartphone' : 
                 formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package',
       status: stock <= minStock ? 'low-stock' : 'in-stock',
-      category: formData.category
+      category: formData.category,
+      is_pinned: formData.is_pinned,
+      pin_order: formData.pin_order
     };
 
     const getIconComponent = (name: string) => {
@@ -769,6 +777,40 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <label className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-2">
+                      <Zap size={14} className="text-primary" />
+                      Pin to POS Home
+                    </label>
+                    <p className="text-[10px] text-on-surface-variant font-medium">Show in Quick Access for muscle memory</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={formData.is_pinned}
+                      onChange={e => setFormData({...formData, is_pinned: e.target.checked})}
+                    />
+                    <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                {formData.is_pinned && (
+                  <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
+                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Pin Order (Lower numbers show first)</label>
+                    <input 
+                      type="number"
+                      className="w-full px-4 py-2.5 bg-surface-container-lowest border border-primary/20 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-bold" 
+                      placeholder="0"
+                      value={formData.pin_order}
+                      onChange={e => setFormData({...formData, pin_order: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 flex gap-3">

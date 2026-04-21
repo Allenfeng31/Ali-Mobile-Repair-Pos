@@ -80,7 +80,7 @@ const attachIcons = (items: any[]) => {
 };
 
 export function TerminalView({ inventory, setInventory, orders, setOrders, cart, setCart, categories, brands, t }: TerminalViewProps) {
-  const [activeCategory, setActiveCategory] = useState('All Items');
+  const [activeCategory, setActiveCategory] = useState('⭐ Quick Access');
   const [activeBrand, setActiveBrand] = useState('All Brands');
 
   // Strip P/T/C/W prefix for display ("C MacBook" → "MacBook", "P iPhone" → "iPhone")
@@ -141,6 +141,11 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
     const itemCat = item.category || '';
     let matchesCategory = activeCategory === 'All Items' || itemCat === activeCategory;
+
+    // Handle Quick Access specially
+    if (activeCategory === '⭐ Quick Access') {
+      return item.is_pinned === true;
+    }
 
     if (!matchesCategory) {
       const migratedNameMap: Record<string, string> = {
@@ -220,6 +225,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       if (scoreA !== scoreB) return scoreB - scoreA;
     }
 
+    // Special sorting for Quick Access: strictly by pin_order (ascending: 0, 1, 2...)
+    if (activeCategory === '⭐ Quick Access') {
+      const orderA = a.pin_order || 0;
+      const orderB = b.pin_order || 0;
+      if (orderA !== orderB) return orderA - orderB;
+    }
+
     // When showing all items, Accessories always floats to top
     if (activeCategory === 'All Items') {
       const aIsAcc = (a.category || '') === 'Accessories';
@@ -238,7 +250,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const currentItems = filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const displayBrands = ['All Brands', ...brands];
-  const displayCategories = ['All Items', ...categories];
+  const displayCategories = ['⭐ Quick Access', 'All Items', ...categories];
 
 
   const addToCart = (item: any) => {

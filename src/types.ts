@@ -41,6 +41,8 @@ export interface InventoryItem {
   icon: string;
   status: string;
   category: string;
+  is_pinned?: boolean;
+  pin_order?: number;
 }
 
 export interface RepairRecord {
