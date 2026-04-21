@@ -262,17 +262,31 @@ app.post('/api/inventory', async (req, res) => {
     }
   }
 
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from('inventory')
     .insert([item])
     .select();
+
+  if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
+    console.warn(`⚠️ [Database] Falling back: 'is_pinned' or 'pin_order' columns not found. Please run the SQL migration.`);
+    const { is_pinned: _p, pin_order: _o, ...safeData } = item;
+    ({ data, error } = await supabase.from('inventory').insert([safeData]).select());
+  }
 
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
 
 app.put('/api/inventory/:id', async (req, res) => {
-  const { data, error } = await supabase.from('inventory').update(req.body).eq('id', req.params.id).select();
+  const itemData = req.body;
+  let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();
+  
+  if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
+    console.warn(`⚠️ [Database] Falling back: 'is_pinned' or 'pin_order' columns not found. Please run the SQL migration.`);
+    const { is_pinned: _p, pin_order: _o, ...safeData } = itemData;
+    ({ data, error } = await supabase.from('inventory').update(safeData).eq('id', req.params.id).select());
+  }
+
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
