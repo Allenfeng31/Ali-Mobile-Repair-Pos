@@ -4,9 +4,7 @@ import "../globals.css";
 import dynamic from "next/dynamic";
 import Header from "../Header";
 
-const ChatWidget = dynamic(() => import("../ChatWidget"), {
-  ssr: false,
-});
+const ChatWidget = dynamic(() => import("../ChatWidget"));
 
 const inter = Inter({
   variable: "--font-inter",

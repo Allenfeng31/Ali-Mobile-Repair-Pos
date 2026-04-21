@@ -48,6 +48,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
 
@@ -75,6 +76,7 @@ export default function ChatWidget() {
     } else {
       setStep('intro');
     }
+    setMounted(true);
     setInitialized(true);
   }, []);
 
@@ -248,6 +250,8 @@ export default function ChatWidget() {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
+  if (!mounted) return null;
+
   return (
     <>
       {/* Floating button */}
