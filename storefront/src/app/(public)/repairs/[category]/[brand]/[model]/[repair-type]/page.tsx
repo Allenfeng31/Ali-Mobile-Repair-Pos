@@ -34,7 +34,6 @@ export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
   const params: { category: string; brand: string; model: string; 'repair-type': string }[] = [];
 
-  // Limit to top 100 high-value landing pages
   for (const brand of catalog.brands) {
     for (const model of brand.models) {
       for (const repair of REPAIR_TYPES) {
@@ -44,7 +43,6 @@ export async function generateStaticParams() {
           model: model.slug,
           'repair-type': repair.slug
         });
-        if (params.length >= 100) return params;
       }
     }
   }

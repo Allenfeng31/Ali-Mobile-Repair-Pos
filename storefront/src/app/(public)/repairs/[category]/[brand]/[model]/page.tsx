@@ -25,7 +25,7 @@ export async function generateStaticParams() {
     }))
   );
 
-  return allModels.slice(0, 100);
+  return allModels;
 }
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
