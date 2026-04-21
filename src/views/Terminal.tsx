@@ -100,6 +100,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const [showInvoice, setShowInvoice] = useState(false);
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [numpadItem, setNumpadItem] = useState<any | null>(null);
   const [numpadValue, setNumpadValue] = useState('');
@@ -280,7 +281,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   };
 
   const handleAction = async () => {
-    setIsConfirming(false);
+    setError(null);
     setIsProcessing(true);
     setSuccessMessage(null);
     
@@ -410,13 +411,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       setInventory(updatedInventory);
       setCart([]);
       setDiscountPercent(0);
+      setIsConfirming(false); // Only close on success
       setShowInvoice(true);
       
       setSuccessMessage(t('term', 'success'));
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setSuccessMessage(t('term', 'fail'));
+      setError(err.message || t('term', 'fail'));
     } finally {
       setIsProcessing(false);
     }
@@ -766,12 +768,25 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     <ShoppingCart size={24} />
                   </div>
                   <button 
-                    onClick={() => setIsConfirming(false)}
-                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                    onClick={() => {
+                      if (!isProcessing) {
+                        setIsConfirming(false);
+                        setError(null);
+                      }
+                    }}
+                    disabled={isProcessing}
+                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors disabled:opacity-30"
                   >
                     <X size={20} />
                   </button>
                 </div>
+
+                {error && (
+                  <div className="p-3 bg-error-container/20 text-error text-xs font-bold rounded-xl border border-error/10 flex items-center gap-2 animate-in shake-1">
+                    <AlertCircle size={16} />
+                    {error}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <h3 className="text-2xl font-black text-on-surface">{t('term', 'orderSummary')}</h3>
@@ -933,16 +948,26 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
                 <div className="flex gap-3">
                   <button 
-                    onClick={() => setIsConfirming(false)}
-                    className="flex-1 py-4 bg-surface-container-high text-on-surface rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-all"
+                    onClick={() => {
+                      setIsConfirming(false);
+                      setError(null);
+                    }}
+                    disabled={isProcessing}
+                    className="flex-1 py-4 bg-surface-container-high text-on-surface rounded-xl font-bold text-sm hover:bg-surface-container-highest transition-all disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button 
                     onClick={handleAction}
-                    className="flex-1 py-4 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all"
+                    disabled={isProcessing}
+                    className="flex-1 py-4 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Complete Order
+                    {isProcessing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" />
+                        Processing...
+                      </>
+                    ) : 'Complete Order'}
                   </button>
                 </div>
               </div>

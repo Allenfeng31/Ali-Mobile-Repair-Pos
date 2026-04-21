@@ -337,14 +337,22 @@ app.post('/api/orders', async (req, res) => {
     }
   }
 
-  // Insert Order - if surcharge column doesn't exist yet, retry without it
+  // Insert Order - if new columns don't exist yet, retry with only legacy ones
   let order, orderError;
   ({ data: order, error: orderError } = await supabase.from('orders').insert([orderData]).select());
 
-  if (orderError && orderError.message && orderError.message.includes("surcharge")) {
-    // Fallback: column doesn't exist in DB yet, insert without surcharge
-    const { surcharge: _removed, ...orderDataWithoutSurcharge } = orderData;
-    ({ data: order, error: orderError } = await supabase.from('orders').insert([orderDataWithoutSurcharge]).select());
+  if (orderError && orderError.message && (
+    orderError.message.includes("surcharge") || 
+    orderError.message.includes("status") || 
+    orderError.message.includes("mixedCash") || 
+    orderError.message.includes("mixedEftpos")
+  )) {
+    console.warn(`⚠️ [Database Fallback] One or more new 'orders' columns missing. Retrying with essential columns only.`);
+    const essentialColumns = ['id', 'timestamp', 'subtotal', 'tax', 'total', 'profit', 'type', 'paymentMethod'];
+    const safeOrderData = {};
+    essentialColumns.forEach(key => { if (orderData[key] !== undefined) safeOrderData[key] = orderData[key]; });
+    
+    ({ data: order, error: orderError } = await supabase.from('orders').insert([safeOrderData]).select());
   }
 
   if (orderError) return res.status(500).json({ error: orderError.message });
