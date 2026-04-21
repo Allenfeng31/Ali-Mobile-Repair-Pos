@@ -32,7 +32,15 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         <div className="text-sm text-blue-600 font-bold mb-2 uppercase tracking-widest">{postData.date}</div>
         <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">{postData.title}</h1>
         {postData.image && (
-          <Image src={postData.image} alt={postData.title} width={800} height={320} className="w-full h-80 object-cover rounded-3xl mb-8" />
+          <Image 
+            src={postData.image} 
+            alt={postData.title} 
+            width={800} 
+            height={320} 
+            priority
+            sizes="(max-width: 800px) 100vw, 800px"
+            className="w-full h-80 object-cover rounded-3xl mb-8" 
+          />
         )}
       </header>
 

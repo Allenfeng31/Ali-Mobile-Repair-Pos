@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Script from "next/script";
-import ReviewsSection from "@/components/ReviewsSection";
-import HomeFAQ from "@/components/HomeFAQ";
-import ServiceAreas from "@/components/seo/ServiceAreas";
+import dynamic from "next/dynamic";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
+
+const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"), { ssr: false });
+const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"), { ssr: false });
+const ServiceAreas = dynamic(() => import("@/components/seo/ServiceAreas"), { ssr: false });
 
 export default function Home() {
   return (
