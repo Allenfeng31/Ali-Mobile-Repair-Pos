@@ -9,6 +9,17 @@ export const metadata = {
 
 export default async function BlogPage() {
   const allPostsData = await getSortedPostsData();
+  
+  if (allPostsData.length === 0) {
+    return (
+      <div className="blog-archive py-20 text-center">
+        <h1 className="text-2xl font-bold text-slate-800">No Articles Found</h1>
+        <p className="text-slate-500 mt-2">Check back soon for new repair guides and tech news!</p>
+        <Link href="/" className="mt-8 inline-block text-blue-600 font-bold hover:underline">← Return Home</Link>
+      </div>
+    );
+  }
+
   const featuredPost = allPostsData[0];
   const remainingPosts = allPostsData.slice(1);
 
@@ -194,6 +205,7 @@ export default async function BlogPage() {
           display: flex;
           flex-direction: column;
           border: 1px solid #e2e8f0;
+          min-height: 480px;
         }
 
         .blog-card:hover {

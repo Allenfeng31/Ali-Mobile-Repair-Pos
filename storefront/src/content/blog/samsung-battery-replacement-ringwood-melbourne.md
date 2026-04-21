@@ -1,5 +1,5 @@
 ---
-title: "samsung battery replacement in Ringwood, Melbourne"
+title: "Samsung Battery Replacement in Ringwood, Melbourne"
 description: "Expert samsung battery replacement services at Ali Mobile Repair in Ringwood, Melbourne. High-quality parts and fast turnaround."
 date: "2026-04-01"
 image: "/blog/samsung-battery-replacement-ringwood-melbourne.png"

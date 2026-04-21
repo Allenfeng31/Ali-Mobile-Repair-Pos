@@ -16,30 +16,73 @@ export interface BlogPost {
   contentHtml: string;
 }
 
+/**
+ * Capitalizes titles according to standard conventions, 
+ * with hardcoded overrides for brand names.
+ */
+function capitalizeTitle(title: string): string {
+  if (!title) return '';
+  
+  // Standard title case
+  const words = title.toLowerCase().split(' ');
+  const capitalizedWords = words.map((word, index) => {
+    // Hardcoded Brand Mappings
+    if (word === 'iphone') return 'iPhone';
+    if (word === 'ipad') return 'iPad';
+    if (word === 'samsung') return 'Samsung';
+    if (word === 'google') return 'Google';
+    if (word === 'pixel') return 'Pixel';
+    if (word === 'macbook') return 'MacBook';
+    
+    // Capitalize first letter of all other words
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+
+  return capitalizedWords.join(' ');
+}
+
 export async function getSortedPostsData() {
   // Get file names under /content/blog
   if (!fs.existsSync(postsDirectory)) return [];
   const fileNames = fs.readdirSync(postsDirectory).filter(fileName => fileName.endsWith('.md'));
+  
   const allPostsData = fileNames.map((fileName) => {
-    // Remove ".md" from file name to get slug
     const slug = fileName.replace(/\.md$/, '');
-
-    // Read markdown file as string
     const fullPath = path.join(postsDirectory, fileName);
     const fileContents = fs.readFileSync(fullPath, 'utf8');
-
-    // Use gray-matter to parse the post metadata section
     const matterResult = matter(fileContents);
 
-    // Combine the data with the slug
+    const title = capitalizeTitle(matterResult.data.title || '');
+    const date = matterResult.data.date || '';
+    
+    // Excerpt/Description fallback: If no description, take first 100 chars of content
+    let description = matterResult.data.description || '';
+    if (!description && matterResult.content) {
+      description = matterResult.content
+        .replace(/[#*`]/g, '') // Strip basic markdown
+        .trim()
+        .slice(0, 100) + '...';
+    }
+
     return {
       slug,
-      ...(matterResult.data as { title: string; date: string; description: string; image?: string }),
+      title,
+      date,
+      description,
+      image: matterResult.data.image,
+      content: matterResult.content
     };
   });
 
+  // Filter out posts with empty titles or invalid dates
+  const filteredPosts = allPostsData.filter(post => {
+    const hasTitle = post.title.trim().length > 0;
+    const hasValidDate = post.date && !isNaN(new Date(post.date).getTime());
+    return hasTitle && hasValidDate;
+  });
+
   // Sort posts by date
-  return allPostsData.sort((a, b) => {
+  return filteredPosts.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 }
@@ -47,20 +90,19 @@ export async function getSortedPostsData() {
 export async function getPostData(slug: string): Promise<BlogPost> {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
-
-  // Use gray-matter to parse the post metadata section
   const matterResult = matter(fileContents);
 
-  // Use remark to convert markdown into HTML string
   const processedContent = await remark()
     .use(html)
     .process(matterResult.content);
   const contentHtml = processedContent.toString();
 
-  // Combine the data with the slug and contentHtml
   return {
     slug,
     contentHtml,
-    ...(matterResult.data as { title: string; date: string; description: string; image?: string }),
+    title: capitalizeTitle(matterResult.data.title || ''),
+    date: matterResult.data.date || '',
+    description: matterResult.data.description || '',
+    image: matterResult.data.image,
   };
 }

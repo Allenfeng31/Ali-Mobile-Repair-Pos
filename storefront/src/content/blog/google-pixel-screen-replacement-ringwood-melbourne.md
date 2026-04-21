@@ -1,5 +1,5 @@
 ---
-title: "google pixel screen replacement in Ringwood, Melbourne"
+title: "Google Pixel Screen Replacement in Ringwood, Melbourne"
 description: "Expert google pixel screen replacement services at Ali Mobile Repair in Ringwood, Melbourne. High-quality parts and fast turnaround."
 date: "2026-04-01"
 image: "/blog/iphone-screen.png"
