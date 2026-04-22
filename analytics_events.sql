@@ -18,17 +18,20 @@ CREATE TABLE IF NOT EXISTS public.analytics_events (
 ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
 
 -- Create policy for inserting events (Public/Anon access)
--- Note: We want storefront users to be able to log events without being logged in
+-- Allows storefront users to log events without authentication
 CREATE POLICY "Allow anonymous inserts for analytics" ON public.analytics_events
     FOR INSERT 
     WITH CHECK (true);
 
--- Create policy for viewing events (Super Admin only)
--- Assuming we have a service_role or super_admin check
+-- Create policy for viewing events (Super Admin only via employee_permissions table)
 CREATE POLICY "Allow super admins to view analytics" ON public.analytics_events
     FOR SELECT
     USING (
-        auth.jwt() ->> 'email' IN (SELECT email FROM public.employees WHERE is_super_admin = true)
+        EXISTS (
+            SELECT 1 FROM public.employee_permissions 
+            WHERE user_id = auth.uid() 
+            AND is_super_admin = true
+        )
         OR auth.role() = 'service_role'
     );
 
