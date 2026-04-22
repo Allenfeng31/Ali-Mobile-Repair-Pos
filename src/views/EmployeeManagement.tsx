@@ -118,11 +118,14 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      // Dummy Email Mapping Pattern
+      const mappedEmail = newEmail.includes('@') ? newEmail : `${newEmail}@pos.local`;
+
       const res = await fetch(`${API_BASE}/admin/employees`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: newEmail,
+          email: mappedEmail,
           password: newPassword,
           permissions: newPermissions
         })
@@ -214,7 +217,9 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
                       {emp.email.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-black text-on-surface truncate max-w-[150px]">{emp.email}</span>
+                      <span className="font-black text-on-surface truncate max-w-[150px]">
+                        {emp.email.replace('@pos.local', '')}
+                      </span>
                       <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
                         {emp.is_super_admin ? 'Super Admin' : 'Staff Member'}
                       </span>
@@ -312,15 +317,15 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
               <form onSubmit={handleCreateEmployee} className="space-y-8">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Email Address</label>
+                    <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Username</label>
                     <div className="relative">
                       <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40" />
                       <input 
-                        type="email"
+                        type="text"
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         required
-                        placeholder="staff@alimobile.com.au"
+                        placeholder="e.g. admin, allen"
                         className="w-full bg-surface-container-high rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/30"
                       />
                     </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Lock, User, ArrowRight, Key } from 'lucide-react';
-import { dict, Language } from '../lib/i18n'; // Assuming i18n.ts defines dict and Language
-import { cn } from '../lib/utils'; // Assuming cn utility function is available
+import { dict, Language } from '../lib/i18n';
+import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 
 interface LoginProps {
   onLogin: (user: any) => void;
@@ -21,11 +22,20 @@ export function LoginView({ onLogin, lang = 'en', setLang }: LoginProps) {
     setIsLoading(true);
 
     try {
-      const { api } = await import('../lib/api');
-      const res = await api.login(username, password);
-      onLogin(res.user);
+      // Dummy Email Mapping Pattern
+      const mappedEmail = username.includes('@') ? username : `${username}@pos.local`;
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: mappedEmail,
+        password
+      });
+
+      if (error) throw error;
+      if (data.user) {
+        onLogin(data.user);
+      }
     } catch (err: any) {
-      const errorMsg = err?.message || dict[lang].login.errUser;
+      const errorMsg = err?.message || 'Login failed. Please check your credentials.';
       setError(errorMsg);
     } finally {
       setIsLoading(false);

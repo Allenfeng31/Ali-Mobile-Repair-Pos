@@ -37,10 +37,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         .from('employee_permissions')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      set({ permissions: data, isLoading: false });
+      set({ permissions: data || null, isLoading: false });
     } catch (err: any) {
       console.error('Error fetching permissions:', err);
       set({ error: err.message, isLoading: false });

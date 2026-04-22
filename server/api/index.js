@@ -169,24 +169,24 @@ app.post('/api/login', async (req, res) => {
     return res.status(400).json({ error: 'Username and password required' });
   }
 
-  const { data, error } = await supabase
-    .from('pos_users')
-    .select('*')
-    .eq('username', username)
-    .eq('password', password)
-    .single();
+  // Dummy Email Mapping Pattern (for legacy support)
+  const mappedEmail = username.includes('@') ? username : `${username}@pos.local`;
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: mappedEmail,
+    password
+  });
 
   if (error) {
     console.error('Login error:', error);
-    return res.status(401).json({ error: `Database error: ${error.message || 'Access denied'}` });
+    return res.status(401).json({ error: error.message || 'Access denied' });
   }
 
-  if (!data) {
+  if (!data?.user) {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
-  const { password: _, ...user } = data;
-  res.json({ success: true, user });
+  res.json({ success: true, user: data.user });
 });
 
 
@@ -312,7 +312,7 @@ app.post('/api/inventory', async (req, res) => {
       .select('id')
       .eq('device_model', item.device_model)
       .eq('name', item.name)
-      .single();
+      .maybeSingle();
       
     if (existing) {
       const { data, error } = await supabase
@@ -508,7 +508,7 @@ app.post('/api/book-repair', async (req, res) => {
       status: 'pending'
     }])
     .select()
-    .single();
+    .maybeSingle();
 
   if (apptError) return res.status(500).json({ error: apptError.message });
 
@@ -581,7 +581,7 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
     .update({ status })
     .eq('id', id)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error(`❌ [Appointment] Failed to update: ${error.message}`);
@@ -707,7 +707,7 @@ app.get('/api/appointments/:id', async (req, res) => {
     .from('appointments')
     .select('id, status')
     .eq('id', req.params.id)
-    .single();
+    .maybeSingle();
 
   if (error) return res.status(404).json({ error: 'Not found' });
   res.json(data);
@@ -885,7 +885,7 @@ app.post('/api/chat/session', async (req, res) => {
     .from('chat_sessions')
     .select('*')
     .eq('session_token', token)
-    .single();
+    .maybeSingle();
 
   if (existing) return res.json(existing);
 
@@ -894,7 +894,7 @@ app.post('/api/chat/session', async (req, res) => {
     .from('chat_sessions')
     .insert({ session_token: token })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
@@ -906,7 +906,7 @@ app.get('/api/chat/session/:token/messages', async (req, res) => {
     .from('chat_sessions')
     .select('id')
     .eq('session_token', req.params.token)
-    .single();
+    .maybeSingle();
 
   if (!session) return res.status(404).json({ error: 'session not found' });
 
@@ -929,7 +929,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
     .from('chat_sessions')
     .select('id')
     .eq('session_token', req.params.token)
-    .single();
+    .maybeSingle();
 
   if (!session) return res.status(404).json({ error: 'session not found' });
 
@@ -937,7 +937,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
     .from('chat_messages')
     .insert({ session_id: session.id, sender: 'customer', content: content.trim() })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) return res.status(500).json({ error: error.message });
 
@@ -996,7 +996,7 @@ app.post('/api/chat/session/id/:id/reply', async (req, res) => {
     .from('chat_messages')
     .insert({ session_id: req.params.id, sender: 'staff', content: content.trim() })
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) return res.status(500).json({ error: error.message });
 
