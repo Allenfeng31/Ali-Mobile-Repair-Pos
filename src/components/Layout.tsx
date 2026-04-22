@@ -481,11 +481,15 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             </div>
 
             <div className="hidden sm:flex flex-col items-end mr-3">
-              <span className="text-xs font-black text-on-surface uppercase tracking-wide">{currentUser?.username || t('nav', 'guest')}</span>
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{currentUser?.role || t('nav', 'staff')}</span>
+              <span className="text-xs font-black text-on-surface uppercase tracking-wide">
+                {currentUser?.username || currentUser?.email?.replace('@pos.local', '') || t('nav', 'guest')}
+              </span>
+              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                {currentUser?.role || (permissions?.is_super_admin ? 'Super Admin' : t('nav', 'staff'))}
+              </span>
             </div>
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black uppercase text-lg border border-primary/20 shadow-inner">
-              {(currentUser?.username || 'G').charAt(0)}
+              {(currentUser?.username || currentUser?.email || 'G').charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
@@ -505,7 +509,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
 
         {/* Bottom Nav - Mobile */}
         <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-surface/90 backdrop-blur-lg border-t border-outline-variant/10 z-50">
-          {navItems.filter(item => !item.adminOnly || useAuthStore.getState().permissions?.is_super_admin).map((item) => {
+          {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             const showBadge = item.id === 'chat' && unreadChats > 0;
