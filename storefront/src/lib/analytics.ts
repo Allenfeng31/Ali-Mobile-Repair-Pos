@@ -17,12 +17,16 @@ interface TrackEventParams {
 function getSessionId() {
   if (typeof window === 'undefined') return 'server-side';
   
-  let sessionId = localStorage.getItem('repair_session_id');
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem('repair_session_id', sessionId);
+  try {
+    let sessionId = localStorage.getItem('repair_session_id');
+    if (!sessionId) {
+      sessionId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+      localStorage.setItem('repair_session_id', sessionId);
+    }
+    return sessionId;
+  } catch (e) {
+    return 'storage-blocked';
   }
-  return sessionId;
 }
 
 /**

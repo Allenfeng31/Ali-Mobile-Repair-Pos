@@ -2,7 +2,7 @@ import React from 'react';
 import { TARGET_SUBURBS } from '@/data/seo-data';
 import { slugify } from '@/lib/inventoryUtils';
 import Link from 'next/link';
-import { analytics } from '@/lib/analytics';
+import LocationCTA, { LocationCallCTA } from '@/components/locations/LocationCTA';
 
 interface LocationPageProps {
   params: {
@@ -63,22 +63,7 @@ export default function LocationPage({ params }: LocationPageProps) {
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <Link 
-              href="/book-repair"
-              className="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
-              onClick={() => analytics.trackGetQuote()}
-            >
-              Get Instant Quote
-            </Link>
-            <a 
-              href="https://www.google.com/maps/dir/?api=1&destination=Ali+Mobile+%26+Repair+Ringwood" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-slate-200 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:border-slate-300 hover:bg-slate-50 transition text-center"
-              onClick={() => analytics.trackNavigate()}
-            >
-              Get Directions
-            </a>
+          <LocationCTA />
           </div>
         </section>
         
@@ -110,13 +95,7 @@ export default function LocationPage({ params }: LocationPageProps) {
             <p className="text-slate-300 mb-6 text-lg">Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</p>
             <div className="flex flex-col gap-2 mb-6">
               <span className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Call for an instant quote</span>
-              <a 
-                href="tel:0481058514" 
-                className="text-3xl font-bold text-white hover:text-blue-400 transition"
-                onClick={() => analytics.trackCallNow()}
-              >
-                📞 0481 058 514
-              </a>
+              <LocationCallCTA />
             </div>
             <p className="text-sm text-slate-400 bg-slate-800/50 p-4 rounded-lg inline-block border border-slate-700">
               Walk-ins warmly welcomed! We fix most issues on the spot.
