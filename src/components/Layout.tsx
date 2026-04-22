@@ -16,7 +16,8 @@ import {
   PenTool,
   Trash2,
   FileText,
-  Copy
+  Copy,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -38,7 +39,7 @@ const navItems = [
   { id: 'reports', label: 'Reports', icon: BarChart3 },
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'chat', label: 'Chat', icon: MessageSquare },
-  { id: 'admin', label: 'Admin', icon: Settings, adminOnly: true },
+  { id: 'admin', label: 'Admin', icon: Shield, adminOnly: true },
 ];
 
 // ─── Slim Settings Panel ──────────────────────────────────────────────────────
@@ -485,7 +486,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 {currentUser?.username || currentUser?.email?.replace('@pos.local', '') || t('nav', 'guest')}
               </span>
               <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-                {currentUser?.role || (permissions?.is_super_admin ? 'Super Admin' : t('nav', 'staff'))}
+                {permissions?.is_super_admin ? 'Super Admin' : (currentUser?.role === 'authenticated' ? t('nav', 'staff') : (currentUser?.role || t('nav', 'staff')))}
               </span>
             </div>
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black uppercase text-lg border border-primary/20 shadow-inner">
