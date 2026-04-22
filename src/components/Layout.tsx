@@ -482,7 +482,10 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             </div>
 
             <div className="hidden sm:flex flex-col items-end mr-3">
-              <span className="text-xs font-black text-on-surface uppercase tracking-wide">
+              <span 
+                className="text-xs font-black text-on-surface uppercase tracking-wide cursor-help"
+                title={`User ID: ${currentUser?.id || 'Unknown'}`}
+              >
                 {currentUser?.username || currentUser?.email?.replace('@pos.local', '') || t('nav', 'guest')}
               </span>
               <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
