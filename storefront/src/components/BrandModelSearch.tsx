@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { analytics } from "@/lib/analytics";
 
 interface ModelEntry {
   model: string;
@@ -79,6 +80,7 @@ export default function BrandModelSearch({
                   key={entry.slug}
                   href={`/repairs/${categorySlug}/${brandSlug}/${entry.slug}`}
                   className="model-card"
+                  onClick={() => analytics.trackModelClick(entry.model)}
                 >
                   <div className="model-card-info">
                     <span>{entry.model}</span>
