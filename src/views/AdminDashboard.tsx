@@ -11,6 +11,7 @@ interface AdminCard {
   description: string;
   color: string;
   gradient: string;
+  href?: string;
 }
 
 const adminCards: AdminCard[] = [
@@ -29,6 +30,7 @@ const adminCards: AdminCard[] = [
     description: 'Deep dive into revenue and performance.',
     color: 'text-purple-600',
     gradient: 'from-purple-500/10 to-purple-600/5',
+    href: `${import.meta.env.VITE_STOREFRONT_URL}/dashboard/analytics`,
   },
   {
     id: 'cms',
@@ -120,7 +122,13 @@ export function AdminDashboard() {
           <motion.button
             key={card.id}
             variants={item}
-            onClick={() => setActiveModule(card.id)}
+            onClick={() => {
+              if (card.href) {
+                window.location.href = card.href;
+              } else {
+                setActiveModule(card.id);
+              }
+            }}
             className="group relative flex flex-col items-start p-8 bg-surface-container-low rounded-[2.5rem] border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 transition-all text-left overflow-hidden no-tap-highlight"
           >
             {/* Background Decoration */}
