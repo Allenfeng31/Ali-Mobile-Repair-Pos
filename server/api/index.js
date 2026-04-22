@@ -222,6 +222,22 @@ app.get('/api/admin/employees', async (req, res) => {
   }
 });
 
+app.get('/api/admin/permissions/:userId', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('employee_permissions')
+      .select('*')
+      .eq('user_id', req.params.userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    res.json(data || null);
+  } catch (error) {
+    console.error('Error fetching user permissions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/admin/employees', async (req, res) => {
   const { email, password, permissions } = req.body;
   

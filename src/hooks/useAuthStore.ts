@@ -33,17 +33,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchPermissions: async (userId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const { data, error } = await supabase
-        .from('employee_permissions')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) throw error;
+      const { api } = await import('../lib/api');
+      const data = await api.getPermissions(userId);
       set({ permissions: data || null, isLoading: false });
     } catch (err: any) {
       console.error('Error fetching permissions:', err);
-      set({ error: err.message, isLoading: false });
+      // Fallback to direct supabase in case backend is down
+      try {
+        const { data, error } = await supabase
+          .from('employee_permissions')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (error) throw error;
+        set({ permissions: data || null, isLoading: false });
+      } catch (innerErr: any) {
+        set({ error: err.message, isLoading: false });
+      }
     }
   },
 

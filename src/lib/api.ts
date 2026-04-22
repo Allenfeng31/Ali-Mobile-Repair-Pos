@@ -193,4 +193,10 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  // PermissionsFallback
+  getPermissions: async (userId: string) => {
+    const res = await fetch(`${API_URL}/admin/permissions/${userId}`);
+    return handleResponse(res);
+  },
 };
