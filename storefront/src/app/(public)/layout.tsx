@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CartProvider } from "@/context/CartContext";
+import PageTransition from "@/components/PageTransition";
 
 export default function RootLayout({
   children,
@@ -53,7 +54,11 @@ export default function RootLayout({
         <ThemeProvider>
           <CartProvider>
             <Header />
-            <main>{children}</main>
+            <main>
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </main>
             <ChatWidget />
             <footer className="footer">
               <div className="footer-links" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
