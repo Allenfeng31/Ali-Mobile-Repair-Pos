@@ -30,6 +30,7 @@ import { RepairTicketModal } from '../components/RepairTicketModal';
 import { api } from '../lib/api';
 import { OCRImeiScanner } from '../components/OCRImeiScanner';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { useAuthStore } from '../hooks/useAuthStore';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   { 
@@ -125,6 +126,7 @@ const getStatusColor = (status: string) => {
 };
 
 export function CustomersView() {
+  const { permissions } = useAuthStore();
   const t = (section: string, key: string) => key; // Simplified for now
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -452,6 +454,10 @@ export function CustomersView() {
   };
 
   const handleDeleteCustomer = async () => {
+    if (permissions?.can_delete_customers === false) {
+      alert('You do not have permission to delete customers.');
+      return;
+    }
     try {
             await api.deleteCustomer(selectedId);
       
@@ -636,6 +642,11 @@ export function CustomersView() {
 
   const handleDeleteRepair = async () => {
     if (!selectedRepair) return;
+
+    if (permissions?.can_delete_customers === false) {
+      alert('You do not have permission to delete repair records.');
+      return;
+    }
 
     try {
             await api.deleteRepair(selectedRepair.id);

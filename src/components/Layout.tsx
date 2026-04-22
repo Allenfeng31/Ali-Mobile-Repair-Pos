@@ -21,6 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/hooks/useAuthStore';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ const navItems = [
   { id: 'reports', label: 'Reports', icon: BarChart3 },
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'chat', label: 'Chat', icon: MessageSquare },
+  { id: 'admin', label: 'Admin', icon: Settings, adminOnly: true },
 ];
 
 // ─── Slim Settings Panel ──────────────────────────────────────────────────────
@@ -352,7 +354,8 @@ function SettingsPanel({
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 export function Layout({ children, currentView, onViewChange, onLogout, currentUser, t }: LayoutProps) {
-  const [backendOk, setBackendOk] = React.useState(false);
+  const [backendOk, setBackendOk] = React.useState(true);
+  const { permissions } = useAuthStore();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [unreadChats, setUnreadChats] = React.useState(0);
 
@@ -415,9 +418,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           </span>
         </div>
 
-        {/* Nav items */}
         <div className="flex flex-col gap-8 w-full items-center">
-          {navItems.map((item) => {
+          {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             const showBadge = item.id === 'chat' && unreadChats > 0;
@@ -503,7 +505,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
 
         {/* Bottom Nav - Mobile */}
         <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-surface/90 backdrop-blur-lg border-t border-outline-variant/10 z-50">
-          {navItems.map((item) => {
+          {navItems.filter(item => !item.adminOnly || useAuthStore.getState().permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             const showBadge = item.id === 'chat' && unreadChats > 0;

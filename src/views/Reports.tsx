@@ -38,6 +38,8 @@ import { Order } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { useAuthStore } from '../hooks/useAuthStore';
+import { Lock } from 'lucide-react';
 
 interface ReportsViewProps {
   orders: Order[];
@@ -46,6 +48,7 @@ interface ReportsViewProps {
 }
 
 export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
+  const { permissions } = useAuthStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   
@@ -220,6 +223,20 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
 
   const totalPages = Math.ceil(searchedOrders.length / ITEMS_PER_PAGE);
   const displayedOrders = searchedOrders.slice((orderPage - 1) * ITEMS_PER_PAGE, orderPage * ITEMS_PER_PAGE);
+
+  if (permissions?.can_view_full_sales_report === false) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low rounded-[2rem] border border-outline-variant/10">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
+          <Lock size={32} />
+        </div>
+        <h2 className="text-2xl font-black text-on-surface mb-2">Access Restricted</h2>
+        <p className="text-on-surface-variant font-medium text-center max-w-md px-6">
+          You do not have permission to view full sales reports. Please contact your administrator for access.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10">

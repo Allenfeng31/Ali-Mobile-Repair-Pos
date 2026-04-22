@@ -33,6 +33,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { api } from '../lib/api';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { useAuthStore } from '../hooks/useAuthStore';
 
 interface TerminalViewProps {
   inventory: InventoryItem[];
@@ -80,6 +81,7 @@ const attachIcons = (items: any[]) => {
 };
 
 export function TerminalView({ inventory, setInventory, orders, setOrders, cart, setCart, categories, brands, t }: TerminalViewProps) {
+  const { permissions } = useAuthStore();
   const [activeCategory, setActiveCategory] = useState('⭐ Quick Access');
   const [activeBrand, setActiveBrand] = useState('All Brands');
 
@@ -456,7 +458,18 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   });
 
   const lineDiscountAmount = grossMSRP - rawTotal;
-  const percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
+  let percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
+  
+  // Cap the discount if a limit is set and user is not super admin
+  const discountExceeded = permissions?.is_super_admin === false && 
+                           permissions?.max_discount_limit !== undefined && 
+                           permissions.max_discount_limit > 0 &&
+                           percentDiscountAmount > permissions.max_discount_limit;
+
+  if (discountExceeded) {
+    percentDiscountAmount = permissions.max_discount_limit;
+  }
+
   const totalDiscountAmount = lineDiscountAmount + percentDiscountAmount;
 
   const baseTotal = rawTotal - percentDiscountAmount;
@@ -692,21 +705,50 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           )}
         </div>
 
-        {cart.length > 0 && (
-          <div className="mt-4 flex items-center justify-between bg-surface-container-high p-3 rounded-xl border border-outline-variant/10">
-            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Apply Discount (%)</span>
-            <div className="flex items-center gap-2">
-              <input 
-                type="number" 
-                min="0"
-                max="100"
-                value={discountPercent === 0 ? '' : discountPercent}
-                onChange={(e) => setDiscountPercent(Math.min(100, Math.max(0, Number(e.target.value))))}
-                placeholder="0"
-                className="w-16 bg-surface-container-lowest border border-outline-variant/20 rounded-lg py-1.5 px-2 text-center text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <span className="text-sm font-bold text-on-surface">%</span>
+        {cart.length > 0 && permissions?.can_give_discount !== false && (
+          <div className="space-y-2">
+            <div className={cn(
+              "flex items-center justify-between p-3 rounded-xl border transition-all",
+              discountExceeded ? "bg-error/5 border-error/20 shadow-[inset_0_1px_4px_rgba(255,0,0,0.05)]" : "bg-surface-container-high border-outline-variant/10"
+            )}>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Apply Discount (%)</span>
+                {discountExceeded && (
+                  <span className="text-[10px] font-black text-error uppercase tracking-tighter mt-0.5 animate-pulse">
+                    Limit Capped: ${permissions.max_discount_limit} Max
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  value={discountPercent === 0 ? '' : discountPercent}
+                  onChange={(e) => {
+                    const val = Math.min(100, Math.max(0, Number(e.target.value)));
+                    setDiscountPercent(val);
+                  }}
+                  placeholder="0"
+                  className={cn(
+                    "w-16 border rounded-lg py-1.5 px-2 text-center text-sm font-bold focus:outline-none focus:ring-2 transition-all",
+                    discountExceeded 
+                      ? "bg-error-container text-on-error-container border-error/30 focus:ring-error/20" 
+                      : "bg-surface-container-lowest border-outline-variant/20 text-on-surface focus:ring-primary/20"
+                  )}
+                />
+                <span className={cn("text-sm font-bold", discountExceeded ? "text-error" : "text-on-surface")}>%</span>
+              </div>
             </div>
+          </div>
+        )}
+
+        {cart.length > 0 && !permissions?.can_give_discount && (
+          <div className="mt-4 flex items-center justify-center p-3 opacity-50 bg-surface-container rounded-xl border border-dashed border-outline-variant/20">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+              <Lock size={12} />
+              Discounting Restricted
+            </span>
           </div>
         )}
 

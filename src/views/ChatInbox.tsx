@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageSquare, ArrowLeft, Send, RefreshCw, Circle, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuthStore } from '../hooks/useAuthStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,6 +35,7 @@ const BOOKING_PREFIX = '[BOOKING_DATA]';
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatInbox() {
+  const { permissions } = useAuthStore();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -260,15 +262,16 @@ export function ChatInbox() {
             <Circle size={8} className="fill-green-500" />
             Live
           </div>
-          {/* Delete button */}
-          <button
-            onClick={deleteSession}
-            disabled={deleting}
-            className="p-2 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all disabled:opacity-40"
-            title="Delete conversation"
-          >
-            <Trash2 size={17} />
-          </button>
+          {permissions?.can_delete_chats !== false && (
+            <button
+              onClick={deleteSession}
+              disabled={deleting}
+              className="p-2 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all disabled:opacity-40"
+              title="Delete conversation"
+            >
+              <Trash2 size={17} />
+            </button>
+          )}
         </div>
 
         {/* Messages */}

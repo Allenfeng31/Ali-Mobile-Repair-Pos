@@ -7,6 +7,8 @@ import { CustomersView } from './views/Customers';
 import { SettingsView } from './views/Settings';
 import { ChatInbox } from './views/ChatInbox';
 import { LoginView } from './views/Login';
+import { AdminDashboard } from './views/AdminDashboard';
+import { useAuthStore } from './hooks/useAuthStore';
 import { AnimatePresence } from 'motion/react';
 import { 
   Smartphone, 
@@ -105,6 +107,11 @@ export default function App() {
         if (expiresAt && Date.now() < expiresAt) {
           setCurrentUser(user);
           setIsAuthenticated(true);
+          // Sync with Zustand and fetch permissions
+          useAuthStore.getState().setUser(user);
+          if (user.id) {
+            useAuthStore.getState().fetchPermissions(user.id);
+          }
         } else {
           localStorage.removeItem('pos_session');
         }
@@ -210,6 +217,7 @@ export default function App() {
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('pos_session');
+    useAuthStore.getState().logout();
   };
 
   const handleLang = (l: Language) => {
@@ -220,6 +228,13 @@ export default function App() {
   const handleLogin = (user: any) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
+    
+    // Sync with Zustand and fetch permissions
+    useAuthStore.getState().setUser(user);
+    if (user.id) {
+      useAuthStore.getState().fetchPermissions(user.id);
+    }
+
     const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
     const expiresAt = Date.now() + SESSION_DURATION;
     
@@ -247,6 +262,8 @@ export default function App() {
         return <ChatInbox />;
       case 'settings':
         return <SettingsView onLogout={handleLogout} currentUser={currentUser} onUpdateUser={setCurrentUser} />;
+      case 'admin':
+        return <AdminDashboard />;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }

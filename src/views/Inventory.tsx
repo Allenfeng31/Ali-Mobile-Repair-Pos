@@ -30,6 +30,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { InventoryItem } from '../types';
 import { api } from '../lib/api';
+import { useAuthStore } from '../hooks/useAuthStore';
+import { Lock } from 'lucide-react';
 
 interface InventoryViewProps {
   inventory: InventoryItem[];
@@ -42,6 +44,7 @@ interface InventoryViewProps {
 }
 
 export function InventoryView({ inventory, setInventory, categories, setCategories, brands, setBrands, t }: InventoryViewProps) {
+  const { permissions } = useAuthStore();
   const [filter, setFilter] = useState('All Parts');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -527,11 +530,15 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               onChange={e => setFormData({...formData, costPrice: e.target.value})}
                             />
                           </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Selling ($)</label>
+                          <div className="space-y-1.5 opacity-80">
+                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-1">
+                              Selling ($)
+                              {!permissions?.can_change_inventory_price && <Lock size={8} />}
+                            </label>
                             <input 
                               type="number" 
-                              className="w-full px-3 py-2.5 bg-surface-container-lowest rounded-xl text-sm font-bold border border-primary/20 text-primary"
+                              disabled={!permissions?.can_change_inventory_price}
+                              className="w-full px-3 py-2.5 bg-surface-container-lowest rounded-xl text-sm font-bold border border-primary/20 text-primary disabled:bg-surface-container disabled:text-on-surface-variant disabled:cursor-not-allowed"
                               value={formData.sellingPrice}
                               onChange={e => setFormData({...formData, sellingPrice: e.target.value})}
                             />
@@ -571,22 +578,24 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         </div>
 
                         <div className="flex justify-between items-center pt-2">
-                          <button 
-                            onClick={async () => {
-                              if (window.confirm(`Delete ${item.name}?`)) {
-                                try {
-                                  await api.deleteInventoryItem(item.id);
-                                  setInventory(prev => prev.filter(i => i.id !== item.id));
-                                  setEditingId(null);
-                                } catch (err: any) {
-                                  console.error(err);
+                          {permissions?.is_super_admin && (
+                            <button 
+                              onClick={async () => {
+                                if (window.confirm(`Delete ${item.name}?`)) {
+                                  try {
+                                    await api.deleteInventoryItem(item.id);
+                                    setInventory(prev => prev.filter(i => i.id !== item.id));
+                                    setEditingId(null);
+                                  } catch (err: any) {
+                                    console.error(err);
+                                  }
                                 }
-                              }
-                            }}
-                            className="text-error text-xs font-bold hover:underline"
-                          >
-                            Delete Forever
-                          </button>
+                              }}
+                              className="text-error text-xs font-bold hover:underline"
+                            >
+                              Delete Forever
+                            </button>
+                          )}
                           <div className="flex gap-2">
                             <button 
                               onClick={() => setEditingId(null)}
@@ -797,12 +806,16 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'sell')}</label>
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+                    {t('inv', 'sell')}
+                    {!permissions?.can_change_inventory_price && <Lock size={12} />}
+                  </label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
                     <input 
                       type="number"
-                      className="w-full pl-8 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary" 
+                      disabled={!permissions?.can_change_inventory_price}
+                      className="w-full pl-8 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary disabled:bg-surface-container disabled:cursor-not-allowed" 
                       placeholder="0.00"
                       value={formData.sellingPrice}
                       onChange={e => setFormData({...formData, sellingPrice: e.target.value})}
