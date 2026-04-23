@@ -30,7 +30,7 @@ const adminCards: AdminCard[] = [
     description: 'Deep dive into revenue and performance.',
     color: 'text-purple-600',
     gradient: 'from-purple-500/10 to-purple-600/5',
-    href: `${import.meta.env.VITE_STOREFRONT_URL}/dashboard/analytics`,
+    href: 'https://ali-mobile-repair-pos.vercel.app/dashboard/analytics',
   },
   {
     id: 'cms',
