@@ -11,19 +11,30 @@ interface TrackEventParams {
   metadata?: Record<string, any>;
 }
 
+let cachedCity: string | null = null;
+let cityPromise: Promise<string | null> | null = null;
+
 /**
  * Get the user's city via a lightweight API.
- * This helps populate the "Top Locations" leaderboard.
+ * Uses caching to avoid redundant lookups.
  */
 async function getCity() {
   if (typeof window === 'undefined') return null;
-  try {
-    const res = await fetch('https://ipapi.co/json/');
-    const data = await res.json();
-    return data.city || null;
-  } catch (e) {
-    return null;
+  if (cachedCity) return cachedCity;
+  
+  if (!cityPromise) {
+    cityPromise = fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        cachedCity = data.city || null;
+        return cachedCity;
+      })
+      .catch(() => {
+        cachedCity = null;
+        return null;
+      });
   }
+  return cityPromise;
 }
 
 /**
@@ -56,9 +67,11 @@ export async function trackEvent({
   metadata = {},
 }: TrackEventParams) {
   try {
+    console.log(`[analytics] Attempting to track event: ${eventName}`, { eventType, modelName, repairCategory });
+    
     const city = await getCity();
     
-    const { error } = await supabase.from('analytics_events').insert({
+    const { data, error } = await supabase.from('analytics_events').insert({
       event_type: eventType,
       event_name: eventName,
       model_name: modelName,
@@ -71,13 +84,15 @@ export async function trackEvent({
         path: typeof window !== 'undefined' ? window.location.pathname : '',
       },
       // Region/Country could be added too if needed
-    });
+    }).select();
 
     if (error) {
-      console.error('[analytics] Error logging event:', error);
+      console.error('[analytics] Supabase insertion failed:', error);
+    } else {
+      console.log('[analytics] Event tracked successfully:', data);
     }
   } catch (err) {
-    console.error('[analytics] Unexpected error:', err);
+    console.error('[analytics] Unexpected error in trackEvent:', err);
   }
 }
 

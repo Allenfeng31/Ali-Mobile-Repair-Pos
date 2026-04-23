@@ -5,6 +5,7 @@ import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
+import RepairCTA from "@/components/services/RepairCTA";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -106,14 +107,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
           Bring your {modelName} to our Ringwood kiosk for a free diagnostic — no obligation.
         </p>
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href={`/book-repair?model=${modelSlug}`} prefetch={true} className="cta-book">
-            Book Repair Now
-          </Link>
-          <a href="tel:0481058514" className="cta-call">
-            📞 Call 0481 058 514
-          </a>
-        </div>
+      <RepairCTA 
+        modelSlug={modelSlug}
+        repairSlug="general" // Default for model-level intent
+        modelName={modelName}
+        repairName="General Inquiry"
+      />
       </div>
     </div>
   );

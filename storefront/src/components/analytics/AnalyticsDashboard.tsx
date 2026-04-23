@@ -105,48 +105,55 @@ export default function AnalyticsDashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const calculateGrowth = (current: number, previous: number) => {
+    if (previous === 0) return current > 0 ? '+100%' : '0%';
+    const growth = ((current - previous) / previous) * 100;
+    return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
+  };
+
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
       const nowMelbourne = toZonedTime(new Date(), MELBOURNE_TZ);
       
-      let start: Date;
-      let end: Date = endOfDay(nowMelbourne);
+      let currentStart: Date;
+      let currentEnd: Date = endOfDay(nowMelbourne);
 
       if (timeRange === 'today') {
-        start = startOfDay(nowMelbourne);
+        currentStart = startOfDay(nowMelbourne);
       } else if (timeRange === '7d') {
-        start = startOfDay(subDays(nowMelbourne, 6));
+        currentStart = startOfDay(subDays(nowMelbourne, 6));
       } else if (timeRange === '30d') {
-        start = startOfDay(subDays(nowMelbourne, 29));
+        currentStart = startOfDay(subDays(nowMelbourne, 29));
       } else {
-        // Custom range - convert string dates to Melbourne zoned start/end
-        start = startOfDay(toZonedTime(new Date(startDate), MELBOURNE_TZ));
-        end = endOfDay(toZonedTime(new Date(endDate), MELBOURNE_TZ));
+        currentStart = startOfDay(toZonedTime(new Date(startDate), MELBOURNE_TZ));
+        currentEnd = endOfDay(toZonedTime(new Date(endDate), MELBOURNE_TZ));
       }
 
-      // Supabase query
-      const { data: events, error } = await supabase
+      // Period Duration for PoP
+      const durationMs = currentEnd.getTime() - currentStart.getTime();
+      const previousEnd = new Date(currentStart.getTime() - 1);
+      const previousStart = new Date(previousEnd.getTime() - durationMs);
+
+      // Fetch combined range
+      const { data: allEvents, error } = await supabase
         .from('analytics_events')
         .select('*')
-        .gte('created_at', fromZonedTime(start, MELBOURNE_TZ).toISOString())
-        .lte('created_at', fromZonedTime(end, MELBOURNE_TZ).toISOString());
+        .gte('created_at', previousStart.toISOString())
+        .lte('created_at', currentEnd.toISOString());
 
       if (error) throw error;
+      if (!allEvents) return;
 
-      if (!events) return;
+      const currentEvents = allEvents.filter(e => new Date(e.created_at) >= currentStart);
+      const previousEvents = allEvents.filter(e => new Date(e.created_at) < currentStart);
 
-      // 1. Timeline Data
-      const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      // 1. Timeline Data (Current Period)
+      const diffDays = Math.ceil((currentEnd.getTime() - currentStart.getTime()) / (1000 * 60 * 60 * 24));
       const timelineData = Array.from({ length: diffDays + 1 }).map((_, i) => {
-        const d = subDays(end, diffDays - i);
+        const d = subDays(currentEnd, diffDays - i);
         const dateStr = format(d, 'MMM d');
-        
-        const dayEvents = events.filter(e => {
-          const ed = toZonedTime(new Date(e.created_at), MELBOURNE_TZ);
-          return isSameDay(ed, d);
-        });
-
+        const dayEvents = currentEvents.filter(e => isSameDay(toZonedTime(new Date(e.created_at), MELBOURNE_TZ), d));
         return {
           name: dateStr,
           Visits: dayEvents.length,
@@ -154,8 +161,8 @@ export default function AnalyticsDashboard() {
         };
       });
 
-      // 2. Model Popularity (Model Clicks)
-      const modelClicks = events.filter(e => e.event_name === 'model_click');
+      // 2. Model Popularity
+      const modelClicks = currentEvents.filter(e => e.event_name === 'model_click');
       const modelCounts = modelClicks.reduce((acc: any, curr: any) => {
         acc[curr.model_name] = (acc[curr.model_name] || 0) + 1;
         return acc;
@@ -172,16 +179,14 @@ export default function AnalyticsDashboard() {
 
       // 3. Conversion Triggers
       const conversions = [
-        { name: 'Calls', value: events.filter(e => e.event_name === 'call_now').length, icon: Phone },
-        { name: 'Quotes', value: events.filter(e => e.event_name === 'get_quote').length, icon: MessageSquare },
-        { name: 'Bookings', value: events.filter(e => e.event_name === 'book_repair').length, icon: Clock },
+        { name: 'Calls', value: currentEvents.filter(e => e.event_name === 'call_now').length, icon: Phone },
+        { name: 'Quotes', value: currentEvents.filter(e => e.event_name === 'get_quote').length, icon: MessageSquare },
+        { name: 'Bookings', value: currentEvents.filter(e => e.event_name === 'book_repair').length, icon: Clock },
       ];
 
       // 4. Top Locations
-      const locationCounts = events.reduce((acc: any, curr: any) => {
-        if (curr.city) {
-          acc[curr.city] = (acc[curr.city] || 0) + 1;
-        }
+      const locationCounts = currentEvents.reduce((acc: any, curr: any) => {
+        if (curr.city) acc[curr.city] = (acc[curr.city] || 0) + 1;
         return acc;
       }, {});
       const topLocations = Object.entries(locationCounts)
@@ -189,16 +194,13 @@ export default function AnalyticsDashboard() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // 5. Pricing Health & Advanced Conversions
-      // Combine model_name and repairCategory
+      // 5. Pricing Health
       const healthMap = new globalThis.Map<string, PricingHealthItem>();
-      events.forEach(e => {
+      currentEvents.forEach(e => {
         const category = e.metadata?.repairCategory;
         if (e.model_name && category) {
           const key = `${e.model_name} - ${category}`;
-          if (!healthMap.has(key)) {
-            healthMap.set(key, { name: key, views: 0, actions: 0 });
-          }
+          if (!healthMap.has(key)) healthMap.set(key, { name: key, views: 0, actions: 0 });
           const item = healthMap.get(key);
           if (item) {
             if (e.event_name === 'repair_view') item.views++;
@@ -215,10 +217,14 @@ export default function AnalyticsDashboard() {
         .sort((a, b) => b.views - a.views)
         .slice(0, 10);
 
-      // Totals
-      const totalVisits = events.filter(e => e.event_type === 'click' || e.event_type === 'view').length;
-      const totalConversions = events.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
-      const conversionRate = totalVisits > 0 ? (totalConversions / totalVisits) * 100 : 0;
+      // 6. Metrics & Growth
+      const currentVisits = currentEvents.filter(e => e.event_type === 'click' || e.event_type === 'view').length;
+      const currentConversionsTotal = currentEvents.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
+      const currentConvRate = currentVisits > 0 ? (currentConversionsTotal / currentVisits) * 100 : 0;
+
+      const prevVisits = previousEvents.filter(e => e.event_type === 'click' || e.event_type === 'view').length;
+      const prevConversionsTotal = previousEvents.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
+      const prevConvRate = prevVisits > 0 ? (prevConversionsTotal / prevVisits) * 100 : 0;
 
       setData({
         eventCounts: timelineData,
@@ -226,9 +232,19 @@ export default function AnalyticsDashboard() {
         conversions,
         pricingHealth,
         topLocations,
-        totalVisitors: totalVisits,
-        pageViews: events.length,
-        conversionRate
+        totalVisitors: currentVisits,
+        pageViews: currentEvents.length,
+        conversionRate: currentConvRate,
+        trends: {
+          visits: calculateGrowth(currentVisits, prevVisits),
+          events: calculateGrowth(currentEvents.length, previousEvents.length),
+          conversions: calculateGrowth(currentConversionsTotal, prevConversionsTotal),
+          rate: calculateGrowth(currentConvRate, prevConvRate),
+          visitsUp: currentVisits >= prevVisits,
+          eventsUp: currentEvents.length >= previousEvents.length,
+          conversionsUp: currentConversionsTotal >= prevConversionsTotal,
+          rateUp: currentConvRate >= prevConvRate
+        }
       });
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
@@ -347,10 +363,38 @@ export default function AnalyticsDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Interactions" value={data.totalVisitors.toLocaleString()} icon={Users} trend="+12.5%" trendUp={true} color="bg-blue-600" />
-          <StatCard title="Analytics Events" value={data.pageViews.toLocaleString()} icon={Eye} trend="+8.2%" trendUp={true} color="bg-indigo-600" />
-          <StatCard title="Total Conversions" value={data.conversions.reduce((a: any, b: any) => a + b.value, 0).toString()} icon={CheckCircle2} trend="+15.3%" trendUp={true} color="bg-emerald-600" />
-          <StatCard title="Conversion Rate" value={`${data.conversionRate.toFixed(1)}%`} icon={TrendingUp} trend="-0.4%" trendUp={false} color="bg-amber-600" />
+          <StatCard 
+            title="Total Interactions" 
+            value={data.totalVisitors.toLocaleString()} 
+            icon={Users} 
+            trend={data.trends?.visits || '0%'} 
+            trendUp={data.trends?.visitsUp} 
+            color="bg-blue-600" 
+          />
+          <StatCard 
+            title="Analytics Events" 
+            value={data.pageViews.toLocaleString()} 
+            icon={Eye} 
+            trend={data.trends?.events || '0%'} 
+            trendUp={data.trends?.eventsUp} 
+            color="bg-indigo-600" 
+          />
+          <StatCard 
+            title="Total Conversions" 
+            value={data.conversions.reduce((a: any, b: any) => a + b.value, 0).toString()} 
+            icon={CheckCircle2} 
+            trend={data.trends?.conversions || '0%'} 
+            trendUp={data.trends?.conversionsUp} 
+            color="bg-emerald-600" 
+          />
+          <StatCard 
+            title="Conversion Rate" 
+            value={`${data.conversionRate.toFixed(1)}%`} 
+            icon={TrendingUp} 
+            trend={data.trends?.rate || '0%'} 
+            trendUp={data.trends?.rateUp} 
+            color="bg-amber-600" 
+          />
         </div>
 
         {/* Main Charts Row */}
