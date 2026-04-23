@@ -91,7 +91,6 @@ export default function AnalyticsDashboard() {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      // 1. Timezone-aware date range calculation
       const nowMelbourne = toZonedTime(new Date(), MELBOURNE_TZ);
       const todayStartMelbourne = startOfDay(nowMelbourne);
       
@@ -104,7 +103,6 @@ export default function AnalyticsDashboard() {
         startDateMelbourne = subDays(todayStartMelbourne, 30);
       }
 
-      // 2. Fetch events from Supabase
       const { data: events, error } = await supabase
         .from('analytics_events')
         .select('*')
@@ -112,7 +110,6 @@ export default function AnalyticsDashboard() {
 
       if (error) throw error;
 
-      // 3. Process data
       const modelClicks = events?.filter(e => e.event_name === 'model_click') || [];
       const modelCounts = modelClicks.reduce((acc: any, curr: any) => {
         acc[curr.model_name] = (acc[curr.model_name] || 0) + 1;
@@ -134,7 +131,6 @@ export default function AnalyticsDashboard() {
         { name: 'Directions', value: events?.filter(e => e.event_name === 'navigate').length || 0, icon: Navigation },
       ];
 
-      // 4. Group by day for the chart
       const days = timeRange === 'today' ? 1 : timeRange === '7d' ? 7 : 30;
       const timelineData = Array.from({ length: days }).map((_, i) => {
         const d = subDays(todayStartMelbourne, days - 1 - i);
@@ -170,7 +166,6 @@ export default function AnalyticsDashboard() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         
-        {/* Header Section */}
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black tracking-tight text-slate-900">
@@ -198,7 +193,6 @@ export default function AnalyticsDashboard() {
           </div>
         </header>
 
-        {/* KPI Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard title="Total Visitors" value="1,284" icon={Users} trend="+12.5%" trendUp={true} color="bg-blue-500" />
           <StatCard title="Page Views" value="4,892" icon={Eye} trend="+8.2%" trendUp={true} color="bg-indigo-500" />
@@ -206,7 +200,6 @@ export default function AnalyticsDashboard() {
           <StatCard title="Conv. Rate" value="4.2%" icon={MapPin} trend="-0.4%" trendUp={false} color="bg-amber-500" />
         </div>
 
-        {/* Massive Main Chart Container */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -242,10 +235,7 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
-        {/* Bottom Section - Top Models & Locations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Top Models Leaderboard */}
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold text-slate-900">Popular Models</h2>
@@ -276,7 +266,6 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
 
-          {/* Conversion Breakdown */}
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold text-slate-900">Conversion Triggers</h2>
@@ -301,7 +290,6 @@ export default function AnalyticsDashboard() {
               ))}
             </div>
           </div>
-
         </div>
       </div>
     </div>
