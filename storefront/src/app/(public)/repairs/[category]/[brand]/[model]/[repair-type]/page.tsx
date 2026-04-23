@@ -141,6 +141,7 @@ function getLSIForRepair(slug: string): { component?: string[]; issue?: string[]
 
 import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
+import RepairCTA from '@/components/services/RepairCTA';
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
@@ -244,14 +245,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             </div>
           </div>
 
-          <div className="cta-group">
-            <Link href={`/book-repair?model=${resolvedParams.model}&repair=${resolvedParams['repair-type']}`} className="cta-book">
-              Book Repair Now
-            </Link>
-            <a href="tel:0481058514" className="cta-call">
-              📞 Call 0481 058 514
-            </a>
-          </div>
+          <RepairCTA 
+            modelSlug={resolvedParams.model}
+            repairSlug={resolvedParams['repair-type']}
+            modelName={displayModel}
+            repairName={finalRepairName}
+          />
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { analytics } from "@/lib/analytics";
 import QuoteRequestModal from "./QuoteRequestModal";
 
 interface RepairOption {
@@ -52,6 +53,7 @@ export default function RepairOptionsGrid({
             key={rt.slug}
             href={`/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`}
             className="repair-option-card"
+            onClick={() => analytics.trackRepairView(modelName, rt.name)}
           >
             <span className="repair-option-icon">{getRepairIcon(rt.slug)}</span>
             <div className="repair-option-info">
