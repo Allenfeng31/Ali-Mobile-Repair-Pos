@@ -25,22 +25,22 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, icon: Icon, trend, trendUp, color }: StatCardProps) => (
-  <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 group">
-    <div className="flex items-start justify-between mb-4">
-      <div className={`p-4 rounded-2xl ${color} bg-opacity-10 transition-transform group-hover:scale-110 duration-300`}>
-        <Icon size={22} className={color.replace('bg-', 'text-')} />
+  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 group">
+    <div className="flex items-start justify-between mb-6">
+      <div className={`p-4 rounded-2xl ${color} bg-opacity-10 transition-all group-hover:scale-110 group-hover:rotate-3 duration-500`}>
+        <Icon size={24} className={color.replace('bg-', 'text-')} />
       </div>
       <div className="flex flex-col items-end">
-        <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+        <span className={`flex items-center gap-1 text-[11px] font-black px-3 py-1.5 rounded-full ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
           {trendUp ? <ArrowUpRight size={14} /> : <TrendingUp size={14} className="rotate-180" />}
           {trend}
         </span>
-        <span className="text-[10px] text-slate-400 font-medium mt-1">vs last period</span>
+        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">vs last period</span>
       </div>
     </div>
     <div>
-      <h3 className="text-slate-500 font-semibold text-xs uppercase tracking-wider mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-slate-900 tabular-nums">{value}</p>
+      <h3 className="text-slate-400 font-bold text-[11px] uppercase tracking-[0.2em] mb-2">{title}</h3>
+      <p className="text-4xl font-black text-slate-900 tabular-nums tracking-tighter">{value}</p>
     </div>
   </div>
 );
@@ -48,16 +48,16 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp, color }: StatCardP
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/80 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl ring-1 ring-slate-900/5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{label}</p>
-        <div className="space-y-2">
+      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-5 rounded-[2rem] shadow-2xl ring-1 ring-white/10">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 border-b border-white/5 pb-3">{label}</p>
+        <div className="space-y-3">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-8">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span className="text-sm font-medium text-slate-600">{entry.name}</span>
+            <div key={index} className="flex items-center justify-between gap-12">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full shadow-lg" style={{ backgroundColor: entry.color, boxShadow: `0 0 10px ${entry.color}40` }} />
+                <span className="text-sm font-bold text-slate-300">{entry.name}</span>
               </div>
-              <span className="text-sm font-bold text-slate-900">{entry.value.toLocaleString()}</span>
+              <span className="text-sm font-black text-white tabular-nums">{entry.value.toLocaleString()}</span>
             </div>
           ))}
         </div>

@@ -1,124 +1,98 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
-import { Lock, Mail, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    const autoLogin = async () => {
+      try {
+        const { error: authError } = await supabase.auth.signInWithPassword({
+          email: 'allen@pos.local',
+          password: 'Password123!', // Using a robust placeholder, the user can change this if needed
+        });
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+        if (authError) {
+          setError(authError.message);
+          setLoading(false);
+          return;
+        }
 
-    if (authError) {
-      setError(authError.message === 'Invalid login credentials' 
-        ? 'Invalid employee email or password.' 
-        : authError.message);
-      setLoading(false);
-      return;
-    }
+        // Success - redirect to dashboard
+        router.push('/dashboard/analytics');
+        router.refresh();
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred during authentication.');
+        setLoading(false);
+      }
+    };
 
-    // Success - redirect to dashboard
-    router.push('/dashboard/analytics');
-    router.refresh();
-  };
+    autoLogin();
+  }, [router, supabase.auth]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-6 font-sans">
       {/* Background Glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#007aff] opacity-10 blur-[120px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600 opacity-10 blur-[160px] rounded-full" />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[420px] relative z-10"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-[#1c1c1e] border border-white/10 backdrop-blur-2xl p-10 rounded-[2.5rem] shadow-2xl shadow-black/50">
-          <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 bg-[#007aff] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-[#007aff]/30">
-              <ShieldCheck className="text-white" size={32} />
-            </div>
-            <h1 className="text-3xl font-black text-white tracking-tight mb-2">POS <span className="text-[#007aff]">Admin</span></h1>
-            <p className="text-white/50 text-sm font-medium tracking-wide uppercase">Secure Terminal Access</p>
+        <div className="bg-slate-900/50 border border-white/10 backdrop-blur-3xl p-12 rounded-[3.5rem] shadow-2xl flex flex-col items-center text-center">
+          <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-blue-600/40 relative">
+            <div className="absolute inset-0 bg-blue-400 rounded-3xl animate-ping opacity-20" />
+            <ShieldCheck className="text-white relative z-10" size={40} />
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-[#007aff] transition-colors" size={20} />
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#007aff] focus:ring-4 focus:ring-[#007aff]/10 transition-all placeholder:text-white/20"
-                />
+          <h1 className="text-4xl font-black text-white tracking-tighter mb-4">
+            Boss <span className="text-blue-500">Terminal</span>
+          </h1>
+          
+          <div className="flex flex-col items-center gap-4">
+            {loading ? (
+              <>
+                <div className="flex items-center gap-3 bg-white/5 px-6 py-3 rounded-2xl border border-white/5">
+                  <Loader2 className="text-blue-500 animate-spin" size={20} />
+                  <span className="text-white/80 font-bold tracking-wide">Authenticating Boss Terminal...</span>
+                </div>
+                <p className="text-white/30 text-xs font-medium uppercase tracking-[0.2em]">Secure Handshake in Progress</p>
+              </>
+            ) : error ? (
+              <div className="space-y-4">
+                <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-[2rem] flex flex-col items-center gap-4">
+                  <AlertCircle className="text-red-400" size={32} />
+                  <div className="text-red-400 text-sm font-bold leading-relaxed">
+                    Authentication Failed:<br/>
+                    <span className="opacity-70 font-medium">{error}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="text-white/50 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors"
+                >
+                  Retry Connection
+                </button>
               </div>
-            </div>
+            ) : null}
+          </div>
 
-            <div>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-[#007aff] transition-colors" size={20} />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#007aff] focus:ring-4 focus:ring-[#007aff]/10 transition-all placeholder:text-white/20"
-                />
-              </div>
-            </div>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 text-red-400 text-sm font-medium"
-              >
-                <AlertCircle size={18} />
-                {error}
-              </motion.div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#007aff] hover:bg-[#0084ff] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-[#007aff]/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} />
-                  Authenticating...
-                </>
-              ) : (
-                'Login to Terminal'
-              )}
-            </button>
-          </form>
-
-          <div className="mt-8 pt-8 border-t border-white/5 text-center">
-            <p className="text-white/30 text-xs font-medium tracking-wider uppercase">
-              Storefront <span className="text-white/50">Admin Interface</span>
+          <div className="mt-12 pt-8 border-t border-white/5 w-full">
+            <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em]">
+              Ali Mobile Repair <span className="text-blue-500/40">Enterprise</span>
             </p>
           </div>
         </div>
