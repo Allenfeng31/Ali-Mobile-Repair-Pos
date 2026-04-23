@@ -38,6 +38,21 @@ async function getCity() {
 }
 
 /**
+ * Get the user's device type.
+ */
+function getDeviceType() {
+  if (typeof window === 'undefined') return 'Server';
+  const ua = navigator.userAgent;
+  if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+    return 'Tablet';
+  }
+  if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+    return 'Mobile';
+  }
+  return 'Desktop';
+}
+
+/**
  * Get or create a session ID for the user.
  * This helps us track unique users without personal data.
  */
@@ -70,6 +85,7 @@ export async function trackEvent({
     console.log(`[analytics] Attempting to track event: ${eventName}`, { eventType, modelName, repairCategory });
     
     const city = await getCity();
+    const deviceType = getDeviceType();
     
     const { data, error } = await supabase.from('analytics_events').insert({
       event_type: eventType,
@@ -77,6 +93,7 @@ export async function trackEvent({
       model_name: modelName,
       session_id: getSessionId(),
       city: city,
+      device_type: deviceType,
       url: typeof window !== 'undefined' ? window.location.href : '',
       metadata: {
         ...metadata,

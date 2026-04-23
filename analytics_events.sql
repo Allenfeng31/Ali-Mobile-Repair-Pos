@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS public.analytics_events (
     user_agent TEXT,
     city TEXT,
     region TEXT,
-    country TEXT
+    country TEXT,
+    device_type TEXT -- 'Mobile', 'Desktop'
 );
 
 -- Enable RLS

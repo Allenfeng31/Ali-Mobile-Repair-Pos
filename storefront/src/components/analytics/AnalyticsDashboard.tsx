@@ -10,7 +10,7 @@ import {
   Phone, MessageSquare, Navigation, Trophy, ArrowUpRight, TrendingUp,
   Download, Filter, ChevronDown, Apple, Smartphone as AndroidIcon,
   Search, AlertCircle, CheckCircle2, Clock, Map, ChevronRight,
-  TrendingDown, Info, Trash2
+  TrendingDown, Info, Trash2, Laptop
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -217,7 +217,20 @@ export default function AnalyticsDashboard() {
         .sort((a, b) => b.views - a.views)
         .slice(0, 10);
 
-      // 6. Metrics & Growth
+      // 6. Device Usage Split
+      const deviceCounts = currentEvents.reduce((acc: any, curr: any) => {
+        const type = curr.device_type || 'Unknown';
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {});
+      const totalEvents = currentEvents.length;
+      const deviceUsage = Object.entries(deviceCounts).map(([name, value]) => ({
+        name,
+        value: value as number,
+        percentage: totalEvents > 0 ? ((value as number) / totalEvents) * 100 : 0
+      })).sort((a, b) => b.value - a.value);
+
+      // Totals & Growth
       const currentVisits = currentEvents.filter(e => e.event_type === 'click' || e.event_type === 'view').length;
       const currentConversionsTotal = currentEvents.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
       const currentConvRate = currentVisits > 0 ? (currentConversionsTotal / currentVisits) * 100 : 0;
@@ -232,6 +245,7 @@ export default function AnalyticsDashboard() {
         conversions,
         pricingHealth,
         topLocations,
+        deviceUsage,
         totalVisitors: currentVisits,
         pageViews: currentEvents.length,
         conversionRate: currentConvRate,
@@ -381,7 +395,7 @@ export default function AnalyticsDashboard() {
           />
           <StatCard 
             title="Total Conversions" 
-            value={data.conversions.reduce((a: any, b: any) => a + b.value, 0).toString()} 
+            value={data.conversions?.reduce((a: any, b: any) => a + b.value, 0).toString()} 
             icon={CheckCircle2} 
             trend={data.trends?.conversions || '0%'} 
             trendUp={data.trends?.conversionsUp} 
@@ -395,6 +409,35 @@ export default function AnalyticsDashboard() {
             trendUp={data.trends?.rateUp} 
             color="bg-amber-600" 
           />
+        </div>
+
+        {/* Device Split Bar */}
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Laptop size={16} className="text-indigo-600" /> Device Distribution
+            </h3>
+            <div className="flex gap-4">
+              {data.deviceUsage?.map((d: any) => (
+                <div key={d.name} className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${d.name === 'Mobile' ? 'bg-indigo-600' : d.name === 'Desktop' ? 'bg-slate-300' : 'bg-emerald-400'}`} />
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">{d.name} {Math.round(d.percentage)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="h-3 w-full bg-slate-50 rounded-full overflow-hidden flex">
+            {data.deviceUsage?.map((d: any, idx: number) => (
+              <motion.div
+                key={d.name}
+                initial={{ width: 0 }}
+                animate={{ width: `${d.percentage}%` }}
+                transition={{ duration: 1, ease: "easeOut", delay: idx * 0.1 }}
+                className={`h-full ${d.name === 'Mobile' ? 'bg-indigo-600' : d.name === 'Desktop' ? 'bg-slate-300' : 'bg-emerald-400'}`}
+                title={`${d.name}: ${Math.round(d.percentage)}%`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Main Charts Row */}
