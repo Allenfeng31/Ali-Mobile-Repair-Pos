@@ -199,4 +199,32 @@ export const api = {
     const res = await fetch(`${API_URL}/admin/permissions/${userId}`);
     return handleResponse(res);
   },
+
+  // Announcements
+  getAnnouncements: async () => {
+    const res = await fetch(`${API_URL}/announcements`);
+    return handleResponse(res);
+  },
+  createAnnouncement: async (announcement: { message: string, is_active: boolean, display_order: number }) => {
+    const res = await fetch(`${API_URL}/announcements`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(announcement),
+    });
+    return handleResponse(res);
+  },
+  updateAnnouncement: async (id: string, announcement: Partial<{ message: string, is_active: boolean, display_order: number }>) => {
+    const res = await fetch(`${API_URL}/announcements/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(announcement),
+    });
+    return handleResponse(res);
+  },
+  deleteAnnouncement: async (id: string) => {
+    const res = await fetch(`${API_URL}/announcements/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(res);
+  },
 };

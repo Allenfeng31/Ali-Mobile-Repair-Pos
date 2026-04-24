@@ -3,6 +3,7 @@ import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare } from
 import { motion } from 'motion/react';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { EmployeeManagement } from './EmployeeManagement';
+import { StorefrontCMS } from './StorefrontCMS';
 
 interface AdminCard {
   id: string;
@@ -84,6 +85,10 @@ export function AdminDashboard() {
 
   if (activeModule === 'employees') {
     return <EmployeeManagement onBack={() => setActiveModule(null)} />;
+  }
+
+  if (activeModule === 'cms') {
+    return <StorefrontCMS onBack={() => setActiveModule(null)} />;
   }
 
   const container = {

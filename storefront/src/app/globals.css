@@ -9,6 +9,7 @@
   --accent: #ff2d55;
   --layer: rgba(255, 255, 255, 0.05);
   --layer-border: rgba(255, 255, 255, 0.1);
+  --announcement-bar-height: 0px;
 }
 
 /* Explicit Light Theme */
@@ -86,7 +87,7 @@ a {
 /* ─── Navigation ─────────────────────────────────── */
 .navbar {
   position: fixed;
-  top: 0;
+  top: var(--announcement-bar-height);
   width: 100%;
   background: var(--layer);
   backdrop-filter: blur(12px);
@@ -364,7 +365,7 @@ input:checked + .toggle-slider:before {
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 6rem 1.5rem 3rem;
+  padding: calc(var(--announcement-bar-height) + 6rem) 1.5rem 3rem;
   background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 60%);
   animation: fadeIn 1s ease-out;
 }
