@@ -1,49 +1,9 @@
 import Link from 'next/link';
 import { getSortedPostsData } from '@/lib/blog';
+import { BlogImage } from '@/components/BlogImage';
 
 // Force dynamic so newly published Supabase posts appear immediately
 export const dynamic = 'force-dynamic';
-
-export const metadata = {
-  title: 'Repair Guides & Tech News | Ali Mobile Repair Blog',
-  description: 'Expert mobile and tablet repair tips from Melbourne\'s most trusted technicians. Stay updated with the latest in device maintenance.',
-};
-
-function BlogImage({ src, alt, className, priority = false }: { src?: string; alt: string; className?: string; priority?: boolean }) {
-  // Use a gradient placeholder when no image is provided
-  if (!src) {
-    return (
-      <div className={`blog-placeholder-img ${className || ''}`}>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <path d="M21 15l-5-5L5 21" />
-        </svg>
-      </div>
-    );
-  }
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      loading={priority ? 'eager' : 'lazy'}
-      onError={(e: any) => {
-        // Replace broken image with placeholder gradient
-        const parent = e.target.parentNode;
-        if (parent) {
-          e.target.style.display = 'none';
-          const placeholder = document.createElement('div');
-          placeholder.className = 'blog-placeholder-img';
-          placeholder.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
-          parent.appendChild(placeholder);
-        }
-      }}
-    />
-  );
-}
 
 export default async function BlogPage() {
   let allPostsData = [];

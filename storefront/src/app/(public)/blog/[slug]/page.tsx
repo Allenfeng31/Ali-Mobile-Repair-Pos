@@ -1,5 +1,6 @@
 import { getPostData, getSortedPostsData } from '@/lib/blog';
 import Link from 'next/link';
+import { BlogImage } from '@/components/BlogImage';
 
 // Force dynamic so Supabase posts always appear
 export const dynamic = 'force-dynamic';
@@ -40,12 +41,11 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         {/* Cover Image */}
         {postData.image && (
           <div className="cover-wrapper">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <BlogImage
               src={postData.image}
               alt={postData.title}
               className="cover-image"
-              onError={(e: any) => { e.target.style.display = 'none'; }}
+              priority
             />
           </div>
         )}
