@@ -26,6 +26,13 @@ export function PortalView() {
   const [password, setPassword] = useState('');
   const [referralSource, setReferralSource] = useState('');
   const [referralOther, setReferralOther] = useState('');
+  const [upsells, setUpsells] = useState<any[]>([]);
+  const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
+
+  // Fetch upsells
+  useEffect(() => {
+    api.getUpsells().then(setUpsells).catch(console.error);
+  }, []);
 
   // Polling for live status
   useEffect(() => {
@@ -98,7 +105,15 @@ export function PortalView() {
       }
 
       const source = referralSource === 'Other' ? referralOther : referralSource;
-      const finalRemark = source ? `Where did you hear about us: ${source}. Client Self-Service Drop-off` : 'Client Self-Service Drop-off';
+      let finalRemark = source ? `Where did you hear about us: ${source}. Client Self-Service Drop-off` : 'Client Self-Service Drop-off';
+
+      if (selectedUpsells.length > 0) {
+        const accessoryNames = upsells
+          .filter(u => selectedUpsells.includes(u.id))
+          .map(u => u.name)
+          .join(', ');
+        finalRemark += ` | Requested Accessories: ${accessoryNames}`;
+      }
 
       await api.createRepair({
         id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
@@ -299,6 +314,35 @@ export function PortalView() {
                   className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium resize-none text-sm"
                   value={problem} onChange={e => setProblem(e.target.value)}
                 />
+
+                {/* Accessory Upsells */}
+                {upsells.length > 0 && (
+                  <div className="space-y-2 py-2">
+                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Optional Accessories</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {upsells.map(upsell => (
+                        <label key={upsell.id} className="flex items-center gap-3 p-3 bg-surface-container-low/50 border border-outline-variant/10 rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors">
+                          <input 
+                            type="checkbox"
+                            className="w-4 h-4 accent-primary"
+                            checked={selectedUpsells.includes(upsell.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedUpsells([...selectedUpsells, upsell.id]);
+                              } else {
+                                setSelectedUpsells(selectedUpsells.filter(id => id !== upsell.id));
+                              }
+                            }}
+                          />
+                          <div className="flex-1">
+                            <p className="text-xs font-bold text-on-surface">{upsell.name}</p>
+                            <p className="text-[10px] text-on-surface-variant font-medium">Add for only ${upsell.bundle_price}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <input 
                   type="text" placeholder="Phone Password (Optional)"

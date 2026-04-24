@@ -171,6 +171,12 @@ export function CustomersView() {
   const [partNotifiedId, setPartNotifiedId] = useState<string | null>(null);
   const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
   const [scannerTarget, setScannerTarget] = useState<'add' | 'repair' | null>(null);
+  const [upsells, setUpsells] = useState<any[]>([]);
+  const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
+
+  useEffect(() => {
+    api.getUpsells().then(setUpsells).catch(console.error);
+  }, []);
 
   // Lock body scroll when any modal is open
   useScrollLock(
@@ -326,6 +332,20 @@ export function CustomersView() {
     return origin + '/portal';
   };
 
+  const toggleUpsell = (upsell: any) => {
+    const isSelected = selectedUpsells.includes(upsell.id);
+    const currentPrice = parseFloat(formData.price) || 0;
+    const bundlePrice = parseFloat(upsell.bundle_price) || 0;
+
+    if (isSelected) {
+      setSelectedUpsells(selectedUpsells.filter(id => id !== upsell.id));
+      setFormData({ ...formData, price: (currentPrice - bundlePrice).toFixed(2) });
+    } else {
+      setSelectedUpsells([...selectedUpsells, upsell.id]);
+      setFormData({ ...formData, price: (currentPrice + bundlePrice).toFixed(2) });
+    }
+  };
+
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -404,7 +424,17 @@ export function CustomersView() {
           liquidDamage: formData.liquidDamage,
           password: formData.password,
           imei: formData.imei,
-          remark: formData.remark,
+          remark: (() => {
+            let finalRemark = formData.remark;
+            if (selectedUpsells.length > 0) {
+              const accessoryNames = upsells
+                .filter(u => selectedUpsells.includes(u.id))
+                .map(u => u.name)
+                .join(', ');
+              finalRemark = finalRemark ? `${finalRemark} | Requested Accessories: ${accessoryNames}` : `Requested Accessories: ${accessoryNames}`;
+            }
+            return finalRemark;
+          })(),
           deposit: parseFloat(formData.deposit) || 0,
           status: 'In Processing'
         };
@@ -478,6 +508,7 @@ export function CustomersView() {
   };
 
   const resetForm = () => {
+    setSelectedUpsells([]);
     setFormData({
       name: '',
       phone: '',
@@ -1190,7 +1221,7 @@ export function CustomersView() {
 
                 {/* Send Review SMS */}
                 <button
-                  onClick={handleSendReview}
+                  onClick={() => handleSendReview()}
                   className="flex items-center gap-4 p-4 bg-amber-50 rounded-2xl hover:bg-amber-100 transition-all w-full text-left border border-amber-200/50"
                 >
                   <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
@@ -1369,6 +1400,42 @@ export function CustomersView() {
                             </button>
                           </div>
                         </div>
+
+                        {/* Accessory Upsells */}
+                        {upsells.length > 0 && !isEditing && (
+                          <div className="space-y-3 py-2">
+                            <div className="flex items-center justify-between px-1">
+                              <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Add Accessories (Bundle Price)</label>
+                              <span className="text-[10px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">Upsell Opp</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              {upsells.map(upsell => (
+                                <button
+                                  key={upsell.id}
+                                  type="button"
+                                  onClick={() => toggleUpsell(upsell)}
+                                  className={cn(
+                                    "flex items-center gap-3 p-3 rounded-2xl border transition-all text-left",
+                                    selectedUpsells.includes(upsell.id)
+                                      ? "bg-primary/5 border-primary shadow-sm"
+                                      : "bg-surface-container-lowest border-outline-variant/10 hover:border-primary/30"
+                                  )}
+                                >
+                                  <div className={cn(
+                                    "w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors",
+                                    selectedUpsells.includes(upsell.id) ? "bg-primary border-primary text-on-primary" : "border-outline-variant"
+                                  )}>
+                                    {selectedUpsells.includes(upsell.id) && <Check size={14} strokeWidth={4} />}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="text-[10px] font-black text-on-surface truncate uppercase tracking-tighter">{upsell.name}</p>
+                                    <p className="text-[11px] font-black text-primary tracking-tighter">+${upsell.bundle_price}</p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1 flex items-center gap-1.5">

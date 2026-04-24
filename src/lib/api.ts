@@ -227,4 +227,10 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  // Upsells
+  getUpsells: async () => {
+    const res = await fetch(`${API_URL}/upsells`);
+    return handleResponse(res);
+  },
 };

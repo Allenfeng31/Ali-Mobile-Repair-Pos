@@ -811,6 +811,24 @@ app.delete('/api/repairs/:id', async (req, res) => {
 });
 
 // ----------------------------------------------------------------------
+// STOREFRONT UPSELLS
+// ----------------------------------------------------------------------
+app.get('/api/upsells', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('storefront_upsells')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ----------------------------------------------------------------------
 // SETTINGS
 // ----------------------------------------------------------------------
 app.get('/api/settings', async (req, res) => {
