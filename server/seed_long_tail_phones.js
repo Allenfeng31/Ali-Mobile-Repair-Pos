@@ -176,7 +176,7 @@ for (const brandObj of brandsData) {
         // Concatenate Model + Service name for standard naming
         name: `${model.name} ${cat}`,
         // Strict format required by parsing engine
-        model: `${brand}||${model.name}`,
+        model: `P ${brand}||${model.name}`,
         device_model: model.code,
         // Optional prefix generation logic (fallback)
         sku: `${brand.substring(0, 2).toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,

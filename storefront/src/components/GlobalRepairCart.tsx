@@ -3,11 +3,21 @@
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCart, RepairService, CartDevice } from '@/context/CartContext';
+import { supabase } from '@/lib/supabase';
 import { 
   RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle 
 } from '@/lib/inventoryUtils';
 import { smartSortModels } from '@/lib/modelSortConfig';
 import './RepairCart.css';
+
+// ── Types ──────────────────────────────────────────────────────────────────
+interface UpsellItem {
+  id: string;
+  name: string;
+  description: string;
+  regular_price: number;
+  bundle_price: number;
+}
 
 // ── Shared Component for the Cart ──────────────────────────────────────────
 
@@ -21,6 +31,7 @@ const CartContent = () => {
   const [inventory, setInventory] = useState<ParsedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [upsells, setUpsells] = useState<UpsellItem[]>([]);
 
   // Fetch inventory once - NO POLLING
   useEffect(() => {
@@ -39,6 +50,25 @@ const CartContent = () => {
       }
     };
     fetchInventory();
+  }, []);
+
+  // Fetch active upsells from Supabase
+  useEffect(() => {
+    const fetchUpsells = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('storefront_upsells')
+          .select('id, name, description, regular_price, bundle_price')
+          .eq('is_active', true);
+
+        if (!error && data) {
+          setUpsells(data);
+        }
+      } catch (err) {
+        console.error('Failed to load upsells', err);
+      }
+    };
+    fetchUpsells();
   }, []);
 
   // ── SEO Intent Auto-Populate (One-time Consume & Clear) ───────────────────
@@ -116,6 +146,7 @@ const CartContent = () => {
           onEdit={() => editDevice(device.id)}
           onUpdateInfo={(brand, model, category) => updateDeviceInfo(device.id, brand, model, category)}
           isFirst={idx === 0}
+          upsells={upsells}
         />
       ))}
 
@@ -168,10 +199,11 @@ interface DeviceSelectorProps {
   onEdit: () => void;
   onUpdateInfo: (brand: string, model: string, category: string) => void;
   isFirst: boolean;
+  upsells: UpsellItem[];
 }
 
 const DeviceSelector: React.FC<DeviceSelectorProps> = ({ 
-  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst 
+  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst, upsells 
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
@@ -181,11 +213,32 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     const PRIORITY_BRANDS = ['iPhone', 'Samsung', 'Google', 'Oppo'];
     const filtered = brands.filter(b => detectDeviceType(b) === selectedCategory);
     
-    const priority = filtered
+    // UI Safeguard: Deduplicate by display name to prevent visually identical options
+    const displayToRaw = new Map<string, string[]>();
+    filtered.forEach(b => {
+      const display = displayBrand(b);
+      if (!displayToRaw.has(display)) displayToRaw.set(display, []);
+      displayToRaw.get(display)!.push(b);
+    });
+
+    // Development-time validation: Log warning if duplicate raw brands produce the same display label
+    if (process.env.NODE_ENV === 'development') {
+      const duplicates = Array.from(displayToRaw.entries()).filter(([_, raws]) => raws.length > 1);
+      if (duplicates.length > 0) {
+        console.warn(
+          `[Inventory Validation] Duplicate brands detected for category "${selectedCategory}":`,
+          duplicates.map(([display, raws]) => `${display} (${raws.join(', ')})`)
+        );
+      }
+    }
+
+    const uniqueBrands = Array.from(displayToRaw.values()).map(raws => raws[0]);
+    
+    const priority = uniqueBrands
       .filter(b => PRIORITY_BRANDS.includes(displayBrand(b)))
       .sort((a, b) => PRIORITY_BRANDS.indexOf(displayBrand(a)) - PRIORITY_BRANDS.indexOf(displayBrand(b)));
       
-    const others = filtered
+    const others = uniqueBrands
       .filter(b => !PRIORITY_BRANDS.includes(displayBrand(b)))
       .sort((a, b) => displayBrand(a).localeCompare(displayBrand(b)));
       
@@ -225,8 +278,6 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   };
 
   if (device.isConfirmed) {
-    const isAdded = device.services.some(s => s.id === `upsell-glass-${device.id}`);
-    
     return (
       <div className="device-summary-card-wrapper animate-fade">
         <div className="device-summary-card">
@@ -235,7 +286,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               {formatDeviceTitle(device.brand, device.model)}
             </div>
             <div className="summary-services">
-              {device.services.map(s => s.name).join(", ")}
+              {device.services.filter(s => !String(s.id).startsWith('upsell-')).map(s => s.name).join(", ")}
             </div>
           </div>
           <div className="summary-actions">
@@ -244,27 +295,46 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
           </div>
         </div>
         
-        <div className="upsell-banner">
-          <div className="upsell-text">
-            <span>💡</span> Protect your screen with a Premium Tempered Glass for $25
-          </div>
-          <button 
-            className={`add-upsell-btn ${isAdded ? 'added' : ''}`}
-            onClick={() => {
-              if (isAdded) {
-                onUpdate(device.services.filter(s => s.id !== `upsell-glass-${device.id}`));
-              } else {
-                onUpdate([...device.services, { 
-                  id: `upsell-glass-${device.id}`, 
-                  name: 'Premium Tempered Glass', 
-                  price: 25 
-                }]);
-              }
-            }}
-          >
-            {isAdded ? 'Added ✓' : '+ Add'}
-          </button>
-        </div>
+        {upsells.map(upsell => {
+          const upsellServiceId = `upsell-${upsell.id}-${device.id}`;
+          const isAdded = device.services.some(s => s.id === upsellServiceId);
+
+          return (
+            <div key={upsell.id} className="upsell-banner">
+              <div className="upsell-text">
+                <span>💡</span>
+                <span>{upsell.name}</span>
+                {upsell.description && (
+                  <span style={{ opacity: 0.7, fontSize: '0.82rem' }}> — {upsell.description}</span>
+                )}
+                {Number(upsell.regular_price) > 0 && Number(upsell.regular_price) !== Number(upsell.bundle_price) && (
+                  <span style={{ textDecoration: 'line-through', opacity: 0.45, marginLeft: '0.5rem', fontSize: '0.82rem' }}>
+                    ${Number(upsell.regular_price).toFixed(2)}
+                  </span>
+                )}
+                <span style={{ fontWeight: 800, color: 'var(--primary)' }}>
+                  ${Number(upsell.bundle_price).toFixed(2)}
+                </span>
+              </div>
+              <button 
+                className={`add-upsell-btn ${isAdded ? 'added' : ''}`}
+                onClick={() => {
+                  if (isAdded) {
+                    onUpdate(device.services.filter(s => s.id !== upsellServiceId));
+                  } else {
+                    onUpdate([...device.services, { 
+                      id: upsellServiceId, 
+                      name: upsell.name, 
+                      price: Number(upsell.bundle_price) 
+                    }]);
+                  }
+                }}
+              >
+                {isAdded ? 'Added ✓' : '+ Add'}
+              </button>
+            </div>
+          );
+        })}
       </div>
     );
   }

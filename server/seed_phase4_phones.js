@@ -4,7 +4,7 @@ const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SU
 
 const brandsData = [
   {
-    brand: "Apple",
+    brand: "iPhone",
     models: [
       { name: "iPhone 17 Pro Max", code: "A3526" },
       { name: "iPhone 17 Pro", code: "A3523" },
@@ -55,7 +55,7 @@ for (const brandObj of brandsData) {
       const generatedName = `${model.name} ${cat}`;
       items.push({
         name: generatedName,
-        model: `${brand}||${model.name}`,
+        model: `P ${brand}||${model.name}`,
         device_model: model.code,
         sku: `${brand.substring(0, 2).toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
         stock: 0,
