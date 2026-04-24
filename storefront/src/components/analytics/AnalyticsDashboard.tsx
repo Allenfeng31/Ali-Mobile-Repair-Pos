@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, BarChart, Bar 
@@ -10,7 +10,7 @@ import {
   Phone, MessageSquare, Navigation, Trophy, ArrowUpRight, TrendingUp,
   Download, Filter, ChevronDown, Apple, Smartphone as AndroidIcon,
   Search, AlertCircle, CheckCircle2, Clock, Map, ChevronRight,
-  TrendingDown, Info, Trash2, Laptop
+  TrendingDown, Info, Trash2, Laptop, ChevronUp, Tablet, Watch
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -79,6 +79,12 @@ export default function AnalyticsDashboard() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const datePickerRef = useRef<HTMLDivElement>(null);
+
+  // --- Data Grid State ---
+  const [activeTab, setActiveTab] = useState<'Phones'|'Tablets'|'Computers'|'Watches'>('Phones');
+  const [sortConfig, setSortConfig] = useState<{ key: 'views'|'actions'|'rate'; direction: 'desc'|'asc' }>({ key: 'views', direction: 'desc' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 30;
   
   const [data, setData] = useState<any>({
     eventCounts: [],
@@ -213,9 +219,7 @@ export default function AnalyticsDashboard() {
         .map((item: PricingHealthItem) => ({
           ...item,
           rate: item.views > 0 ? (item.actions / item.views) * 100 : 0
-        }))
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 10);
+        }));
 
       // 6. Device Usage Split
       const deviceCounts = currentEvents.reduce((acc: any, curr: any) => {
@@ -274,6 +278,65 @@ export default function AnalyticsDashboard() {
     } else {
       setIsDatePickerOpen(true);
     }
+  };
+
+  // --- Data Grid Helpers ---
+  const classifyDevice = (name: string): string => {
+    const lower = name.toLowerCase();
+    if (lower.includes('ipad') || lower.includes('tab')) return 'Tablets';
+    if (lower.includes('mac') || lower.includes('pc') || lower.includes('laptop') || lower.includes('surface')) return 'Computers';
+    if (lower.includes('watch')) return 'Watches';
+    return 'Phones';
+  };
+
+  const handleSort = (key: 'views' | 'actions' | 'rate') => {
+    setSortConfig(prev =>
+      prev.key === key
+        ? { key, direction: prev.direction === 'desc' ? 'asc' : 'desc' }
+        : { key, direction: 'desc' }
+    );
+    setCurrentPage(1);
+  };
+
+  const handleTabChange = (tab: 'Phones' | 'Tablets' | 'Computers' | 'Watches') => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
+  const { paginatedItems, totalPages, totalFiltered } = useMemo(() => {
+    const allItems: PricingHealthItem[] = data.pricingHealth || [];
+    // Filter
+    const filtered = allItems.filter((item: PricingHealthItem) => classifyDevice(item.name) === activeTab);
+    // Sort
+    const sorted = [...filtered].sort((a: any, b: any) => {
+      const aVal = a[sortConfig.key] ?? 0;
+      const bVal = b[sortConfig.key] ?? 0;
+      return sortConfig.direction === 'desc' ? bVal - aVal : aVal - bVal;
+    });
+    // Paginate
+    const totalPages = Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE));
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedItems = sorted.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+    return { paginatedItems, totalPages, totalFiltered: filtered.length };
+  }, [data.pricingHealth, activeTab, sortConfig, currentPage]);
+
+  const tabCounts = useMemo(() => {
+    const allItems: PricingHealthItem[] = data.pricingHealth || [];
+    return {
+      Phones: allItems.filter((i: PricingHealthItem) => classifyDevice(i.name) === 'Phones').length,
+      Tablets: allItems.filter((i: PricingHealthItem) => classifyDevice(i.name) === 'Tablets').length,
+      Computers: allItems.filter((i: PricingHealthItem) => classifyDevice(i.name) === 'Computers').length,
+      Watches: allItems.filter((i: PricingHealthItem) => classifyDevice(i.name) === 'Watches').length,
+    };
+  }, [data.pricingHealth]);
+
+  const SortIndicator = ({ columnKey }: { columnKey: 'views' | 'actions' | 'rate' }) => {
+    if (sortConfig.key !== columnKey) {
+      return <ChevronDown size={12} className="text-slate-300 ml-1 inline-block" />;
+    }
+    return sortConfig.direction === 'desc'
+      ? <ChevronDown size={12} className="text-indigo-600 ml-1 inline-block" />
+      : <ChevronUp size={12} className="text-indigo-600 ml-1 inline-block" />;
   };
 
   return (
@@ -527,9 +590,10 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
-        {/* Pricing Health Row */}
+        {/* Pricing Health Data Grid */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Header */}
+          <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <AlertCircle className="text-indigo-600" size={24} /> Pricing Health & Conversions
@@ -540,23 +604,77 @@ export default function AnalyticsDashboard() {
               <TrendingDown size={14} /> Flagging items under 2.0% Conversion
             </div>
           </div>
+
+          {/* Category Tabs */}
+          <div className="px-8 pt-6 pb-2">
+            <div className="flex gap-2 flex-wrap">
+              {([
+                { key: 'Phones' as const, icon: Smartphone, label: 'Phones' },
+                { key: 'Tablets' as const, icon: Tablet, label: 'Tablets' },
+                { key: 'Computers' as const, icon: Monitor, label: 'Computers' },
+                { key: 'Watches' as const, icon: Watch, label: 'Watches' },
+              ]).map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => handleTabChange(tab.key)}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    activeTab === tab.key
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 border border-slate-100'
+                  }`}
+                >
+                  <tab.icon size={16} />
+                  {tab.label}
+                  <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                    activeTab === tab.key
+                      ? 'bg-white/20 text-white'
+                      : 'bg-slate-200/60 text-slate-400'
+                  }`}>
+                    {tabCounts[tab.key]}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sortable Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50/50">
                   <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Model & Repair Detail</th>
-                  <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Price Views</th>
-                  <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Conversions</th>
-                  <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Conversion Rate</th>
+                  <th className="px-8 py-4 text-center">
+                    <button onClick={() => handleSort('views')} className={`text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-0.5 ${
+                      sortConfig.key === 'views' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
+                    }`}>
+                      Price Views <SortIndicator columnKey="views" />
+                    </button>
+                  </th>
+                  <th className="px-8 py-4 text-center">
+                    <button onClick={() => handleSort('actions')} className={`text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-0.5 ${
+                      sortConfig.key === 'actions' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
+                    }`}>
+                      Conversions <SortIndicator columnKey="actions" />
+                    </button>
+                  </th>
+                  <th className="px-8 py-4 text-right">
+                    <button onClick={() => handleSort('rate')} className={`text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-0.5 ml-auto ${
+                      sortConfig.key === 'rate' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
+                    }`}>
+                      Conversion Rate <SortIndicator columnKey="rate" />
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {data.pricingHealth.length > 0 ? data.pricingHealth.map((item: any, idx: number) => (
+                {paginatedItems.length > 0 ? paginatedItems.map((item: any, idx: number) => (
                   <tr key={idx} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-white group-hover:text-indigo-600 transition-colors shadow-sm">
-                          {item.name.toLowerCase().includes('iphone') ? <Apple size={18} /> : <AndroidIcon size={18} />}
+                          {item.name.toLowerCase().includes('iphone') || item.name.toLowerCase().includes('ipad') || item.name.toLowerCase().includes('mac') || item.name.toLowerCase().includes('watch')
+                            ? <Apple size={18} />
+                            : <AndroidIcon size={18} />}
                         </div>
                         <span className="font-bold text-slate-900">{item.name}</span>
                       </div>
@@ -578,12 +696,48 @@ export default function AnalyticsDashboard() {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={4} className="px-8 py-12 text-center text-slate-400 font-medium">Not enough data to calculate pricing health.</td>
+                    <td colSpan={4} className="px-8 py-12 text-center text-slate-400 font-medium">No data for the {activeTab} category in this time range.</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalFiltered > 0 && (
+            <div className="px-8 py-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-400">
+                Showing {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, totalFiltered)}–{Math.min(currentPage * ITEMS_PER_PAGE, totalFiltered)} of {totalFiltered} items
+              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    currentPage === 1
+                      ? 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                      : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-100'
+                  }`}
+                >
+                  <ChevronDown size={14} className="rotate-90" /> Prev
+                </button>
+                <span className="text-sm font-bold text-slate-700 tabular-nums">
+                  Page {currentPage} <span className="text-slate-400 font-medium">of</span> {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    currentPage === totalPages
+                      ? 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                      : 'bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-100'
+                  }`}
+                >
+                  Next <ChevronDown size={14} className="-rotate-90" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Row: Models & Geolocation */}
