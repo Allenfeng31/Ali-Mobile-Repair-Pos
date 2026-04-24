@@ -3,7 +3,7 @@ import { REPAIR_TYPES, LSI_KEYWORDS } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
 import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
-import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench } from 'lucide-react';
+import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -100,33 +100,82 @@ function generateFaqs(model: string, repairName: string, repairSlug: string, pri
   const altComponent = lsi.component?.[1] || 'damaged component';
   
   const displayModel = modelCode ? `${model} (${modelCode})` : model;
+  const isWaterDamage = repairSlug === 'water-damage-repair';
   
-  const priceInfo = price > 0
-    ? `Starting from $${price}, the exact pricing depends on the specific ${displayModel} variant.`
-    : `Pricing depends on the specific ${displayModel} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`;
+  const priceInfo = isWaterDamage
+    ? `Water damage recovery starts from $50 for the intensive cleaning and drying process. If additional parts like a screen or battery are needed, we will provide a comprehensive quote after the internal assessment.`
+    : (price > 0
+      ? `Starting from $${price}, the exact pricing depends on the specific ${displayModel} variant.`
+      : `Pricing depends on the specific ${displayModel} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`);
 
   return [
     {
       question: `How long does the ${model} ${repairName} take?`,
-      answer: `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at our Ringwood Square location. Walk-ins are welcome on weekdays for same-day service.`,
+      answer: isWaterDamage 
+        ? `Water damage recovery typically takes 24 to 48 hours. Unlike standard repairs, we must fully disassemble the ${model}, perform professional ultrasonic cleaning, and ensure every component is completely dry before testing to prevent future corrosion.`
+        : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at our Ringwood Square location. Walk-ins are welcome on weekdays for same-day service.`,
     },
     {
       question: `Do you use OEM parts for ${model} ${repairName.toLowerCase()}?`,
-      answer: `We use premium-quality ${component} parts that meet or exceed OEM specifications. All parts come with our 6-month warranty, so you can be confident in the quality of the ${altComponent} replacement.`,
+      answer: isWaterDamage
+        ? `For water damage, our first priority is to rescue your original high-quality boards and components using specialized cleaning. If a component like the screen is beyond saving, we replace it with premium parts that meet or exceed OEM standards.`
+        : `We use premium-quality ${component} parts that meet or exceed OEM specifications. All parts come with our 6-month warranty, so you can be confident in the quality of the ${altComponent} replacement.`,
     },
     {
       question: `How much does a ${model} ${repairName.toLowerCase()} cost?`,
-      answer: `${priceInfo} Our "No Fix, No Charge" policy means you only pay if we successfully complete the repair.`,
+      answer: `${priceInfo} ${isWaterDamage ? 'Please note that due to the labor-intensive nature of the drying and cleaning process, a specialized labor fee applies even if the device is ultimately unrepairable.' : 'Our "No Fix, No Charge" policy means you only pay if we successfully complete the repair.'}`,
     },
     {
-      question: `What if my ${model} has additional damage beyond the ${component}?`,
-      answer: `Our technicians perform a free diagnostic assessment on every device. If we discover additional issues such as ${lsi.issue?.[0] || 'internal damage'}, we'll inform you before proceeding with any extra work. You're never charged for repairs you didn't approve.`,
+      question: `What if my ${model} has additional damage beyond the ${isWaterDamage ? 'initial leak' : component}?`,
+      answer: `Our technicians perform a free diagnostic assessment on every device. ${isWaterDamage ? 'Water damage often affects multiple areas simultaneously. We will test every function and give you a full report before you commit to any major part replacements.' : `If we discover additional issues such as ${lsi.issue?.[0] || 'internal damage'}, we'll inform you before proceeding with any extra work. You're never charged for repairs you didn't approve.`}`,
     },
     {
-      question: `Where is your ${model} repair shop located?`,
-      answer: `We're located at Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC 3134. We're easily accessible from Croydon, Mitcham, Bayswater, and the wider Melbourne eastern suburbs. Free parking is available at the shopping centre.`,
+      question: `Is there a warranty for ${model} water damage recovery?`,
+      answer: isWaterDamage
+        ? `Due to the unpredictable nature of liquid-induced corrosion, we do not offer a general warranty on water damage rescue services. However, if we replace a specific part (like a new screen), that specific part will still be covered by our 6-month warranty, provided the rest of the device remains stable.`
+        : `Yes, all our standard repairs come with a comprehensive 6-month warranty on both parts and labor at our Ringwood location.`,
     },
   ];
+}
+
+function WaterDamagePolicySection() {
+  return (
+    <div className="page-container" style={{ paddingTop: '0', paddingBottom: '0' }}>
+      <div style={{
+        background: '#fef2f2',
+        border: '1px solid #fee2e2',
+        borderRadius: '1rem',
+        padding: '2rem',
+        marginTop: '0rem',
+        marginBottom: '3rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <ShieldAlert size={28} color="#dc2626" />
+          <h2 style={{ margin: 0, color: '#991b1b', fontSize: '1.5rem', fontWeight: 700 }}>
+            Special Policy: Water Damage Recovery 进水维修政策
+          </h2>
+        </div>
+        <div style={{ color: '#b91c1c', lineHeight: '1.6', fontSize: '1.05rem' }}>
+          <p style={{ marginBottom: '1.25rem' }}>
+            <strong>English:</strong> While our general motto is "No Fix, No Charge," water damage is a special case. 
+            Liquid damage requires immediate intervention: we must completely disassemble your phone, dry every component, 
+            and perform professional alcohol cleaning to stop corrosion. Because this specialized labor is required regardless 
+            of the final outcome, a labor fee applies even if the phone is not successfully repaired. 
+            Furthermore, due to the complexity of motherboard corrosion, we do not provide a general warranty for 
+            water damage rescue. <em>Exception:</em> If a specific part (e.g., a screen) is replaced, that part will carry 
+            our standard warranty.
+          </p>
+          <p style={{ margin: 0 }}>
+            <strong>中文详情：</strong> 虽然我们的宗旨是 "No Fix No Charge"，但进水相关的维修是一个例外。
+            水损手机需要立即进行抢救性处理：我们必须首先拆开手机，将所有部件进行烘干，并使用酒精清洗零部件以阻断腐蚀。
+            由于这一过程需要耗费大量专门的人工成本，即使手机最终未能修好，我们仍需收取一定的人工费用。
+            此外，鉴于主板腐蚀后的不可预见性，抢救成功的进水手机不提供整机保修。
+            <em>特殊示例：</em> 如果清理后发现仅需更换屏幕即可正常使用，那么更换的<strong>屏幕部分</strong>将按照标准享受保修政策。
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
@@ -236,8 +285,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               Under 1 Hour
             </div>
             <div className="trust-badge">
-              <span className="trust-badge-icon"><ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-              No Fix, No Charge
+              <span className="trust-badge-icon">
+                {resolvedParams['repair-type'] === 'water-damage-repair' ? <ShieldAlert size={20} strokeWidth={2.5} aria-hidden="true" /> : <ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" />}
+              </span>
+              {resolvedParams['repair-type'] === 'water-damage-repair' ? 'Specialist Rescue' : 'No Fix, No Charge'}
             </div>
             <div className="trust-badge">
               <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
@@ -256,6 +307,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
       <ReviewsSection />
+
+      {/* ─── WATER DAMAGE POLICY ──────────────────────── */}
+      {resolvedParams['repair-type'] === 'water-damage-repair' && <WaterDamagePolicySection />}
 
       {/* ─── FAQ SECTION ──────────────────────────────── */}
       <FaqAccordion faqs={faqs} />
