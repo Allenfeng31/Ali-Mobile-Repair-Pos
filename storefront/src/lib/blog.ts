@@ -4,8 +4,16 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
+import { createClient } from '@supabase/supabase-js';
 
 const postsDirectory = path.join(process.cwd(), 'src/content/blog');
+
+// Server-side Supabase client for blog fetching
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseServer = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 export interface BlogPost {
   slug: string;
@@ -14,6 +22,7 @@ export interface BlogPost {
   description: string;
   image?: string;
   contentHtml: string;
+  source?: 'markdown' | 'supabase';
 }
 
 /**
@@ -23,10 +32,8 @@ export interface BlogPost {
 function capitalizeTitle(title: string): string {
   if (!title) return '';
   
-  // Standard title case
   const words = title.toLowerCase().split(' ');
   const capitalizedWords = words.map((word, index) => {
-    // Hardcoded Brand Mappings
     if (word === 'iphone') return 'iPhone';
     if (word === 'ipad') return 'iPad';
     if (word === 'samsung') return 'Samsung';
@@ -34,60 +41,133 @@ function capitalizeTitle(title: string): string {
     if (word === 'pixel') return 'Pixel';
     if (word === 'macbook') return 'MacBook';
     
-    // Capitalize first letter of all other words
     return word.charAt(0).toUpperCase() + word.slice(1);
   });
 
   return capitalizedWords.join(' ');
 }
 
-export async function getSortedPostsData() {
-  // Get file names under /content/blog
-  if (!fs.existsSync(postsDirectory)) return [];
-  const fileNames = fs.readdirSync(postsDirectory).filter(fileName => fileName.endsWith('.md'));
-  
-  const allPostsData = fileNames.map((fileName) => {
-    const slug = fileName.replace(/\.md$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    const matterResult = matter(fileContents);
+/**
+ * Fetch published blog posts from Supabase storefront_blogs table.
+ */
+async function getSupabasePosts(): Promise<BlogPost[]> {
+  if (!supabaseServer) return [];
 
-    const title = capitalizeTitle(matterResult.data.title || '');
-    const date = matterResult.data.date || '';
-    
-    // Excerpt/Description fallback: If no description, take first 100 chars of content
-    let description = matterResult.data.description || '';
-    if (!description && matterResult.content) {
-      description = matterResult.content
-        .replace(/[#*`]/g, '') // Strip basic markdown
-        .trim()
-        .slice(0, 100) + '...';
+  try {
+    const { data, error } = await supabaseServer
+      .from('storefront_blogs')
+      .select('*')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching Supabase blog posts:', error);
+      return [];
     }
 
-    return {
-      slug,
-      title,
-      date,
-      description,
-      image: matterResult.data.image,
-      content: matterResult.content
-    };
-  });
+    return (data || []).map((post: any) => ({
+      slug: post.slug,
+      title: post.title,
+      date: post.published_at || post.created_at,
+      description: post.description || '',
+      image: post.cover_image || undefined,
+      contentHtml: post.content || '',
+      source: 'supabase' as const,
+    }));
+  } catch (err) {
+    console.error('Failed to fetch Supabase blog posts:', err);
+    return [];
+  }
+}
+
+/**
+ * Get sorted posts from BOTH markdown files and Supabase.
+ */
+export async function getSortedPostsData() {
+  // 1. Get markdown posts
+  const markdownPosts: any[] = [];
+  if (fs.existsSync(postsDirectory)) {
+    const fileNames = fs.readdirSync(postsDirectory).filter(fileName => fileName.endsWith('.md'));
+    
+    for (const fileName of fileNames) {
+      const slug = fileName.replace(/\.md$/, '');
+      const fullPath = path.join(postsDirectory, fileName);
+      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      const matterResult = matter(fileContents);
+
+      const title = capitalizeTitle(matterResult.data.title || '');
+      const date = matterResult.data.date || '';
+      
+      let description = matterResult.data.description || '';
+      if (!description && matterResult.content) {
+        description = matterResult.content
+          .replace(/[#*`]/g, '')
+          .trim()
+          .slice(0, 100) + '...';
+      }
+
+      markdownPosts.push({
+        slug,
+        title,
+        date,
+        description,
+        image: matterResult.data.image,
+        content: matterResult.content,
+        source: 'markdown',
+      });
+    }
+  }
+
+  // 2. Get Supabase posts
+  const supabasePosts = await getSupabasePosts();
+
+  // 3. Merge both sources
+  const allPosts = [...markdownPosts, ...supabasePosts];
 
   // Filter out posts with empty titles or invalid dates
-  const filteredPosts = allPostsData.filter(post => {
+  const filteredPosts = allPosts.filter(post => {
     const hasTitle = post.title.trim().length > 0;
     const hasValidDate = post.date && !isNaN(new Date(post.date).getTime());
     return hasTitle && hasValidDate;
   });
 
-  // Sort posts by date
+  // Sort posts by date (newest first)
   return filteredPosts.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 }
 
+/**
+ * Get a single post by slug — checks Supabase first, then falls back to markdown.
+ */
 export async function getPostData(slug: string): Promise<BlogPost> {
+  // Try Supabase first
+  if (supabaseServer) {
+    try {
+      const { data, error } = await supabaseServer
+        .from('storefront_blogs')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .single();
+
+      if (data && !error) {
+        return {
+          slug: data.slug,
+          title: data.title,
+          date: data.published_at || data.created_at,
+          description: data.description || '',
+          image: data.cover_image || undefined,
+          contentHtml: data.content || '',
+          source: 'supabase',
+        };
+      }
+    } catch {
+      // Fall through to markdown
+    }
+  }
+
+  // Fall back to markdown file
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const matterResult = matter(fileContents);
@@ -104,5 +184,6 @@ export async function getPostData(slug: string): Promise<BlogPost> {
     date: matterResult.data.date || '',
     description: matterResult.data.description || '',
     image: matterResult.data.image,
+    source: 'markdown',
   };
 }

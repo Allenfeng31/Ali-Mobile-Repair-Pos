@@ -45,16 +45,58 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
       </header>
 
       <div 
-        className="prose prose-lg max-w-none font-medium text-gray-700 leading-relaxed space-y-4"
+        className="blog-content prose prose-lg max-w-none font-medium text-gray-700 leading-relaxed space-y-4"
         dangerouslySetInnerHTML={{ __html: postData.contentHtml }} 
       />
 
       <style>{`
-        .prose h1, .prose h2, .prose h3 { font-weight: 900; color: #111; margin-top: 2rem; margin-bottom: 1rem; }
-        .prose p { margin-bottom: 1.5rem; }
-        .prose strong { font-weight: 800; color: #1f2937; }
-        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; }
-        .prose a { color: #2563eb; font-weight: 700; text-decoration: underline; }
+        .blog-content h1, .blog-content h2, .blog-content h3 { font-weight: 900; color: #111; margin-top: 2rem; margin-bottom: 1rem; }
+        .blog-content h1 { font-size: 2rem; }
+        .blog-content h2 { font-size: 1.5rem; }
+        .blog-content h3 { font-size: 1.25rem; }
+        .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; }
+        .blog-content strong { font-weight: 800; color: #1f2937; }
+        .blog-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; }
+        .blog-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.5rem; }
+        .blog-content li { margin-bottom: 0.5rem; }
+        .blog-content a { color: #2563eb; font-weight: 700; text-decoration: underline; }
+        .blog-content blockquote {
+          border-left: 4px solid #6366f1;
+          padding: 0.75rem 1.25rem;
+          margin: 1rem 0;
+          background: #f1f5f9;
+          border-radius: 0 12px 12px 0;
+          color: #475569;
+          font-style: italic;
+        }
+        .blog-content pre {
+          background: #1e293b;
+          color: #e2e8f0;
+          padding: 1rem;
+          border-radius: 12px;
+          font-family: 'SF Mono', 'Fira Code', monospace;
+          font-size: 0.9rem;
+          overflow-x: auto;
+          margin: 1rem 0;
+        }
+        .blog-content code {
+          background: #f1f5f9;
+          color: #6366f1;
+          padding: 0.15rem 0.4rem;
+          border-radius: 4px;
+          font-size: 0.9em;
+        }
+        .blog-content pre code {
+          background: none;
+          color: inherit;
+          padding: 0;
+        }
+        .blog-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 12px;
+          margin: 1.5rem 0;
+        }
       `}</style>
 
       <footer className="mt-16 pt-8 border-t border-gray-100">

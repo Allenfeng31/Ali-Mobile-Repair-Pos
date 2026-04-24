@@ -221,20 +221,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         )}
       </div>
 
-      <div className="mt-12 p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem]">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-white rounded-2xl text-indigo-600 shadow-sm border border-indigo-100">
-            <AlertCircle size={24} />
-          </div>
-          <div>
-            <h4 className="font-bold text-indigo-900 mb-1">Coming Soon: Visual Banner Editor</h4>
-            <p className="text-indigo-700/70 text-sm leading-relaxed">
-              We're currently building the visual editor for hero banners and promo cards. 
-              Soon you'll be able to upload images directly and link them to repair categories.
-            </p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }
