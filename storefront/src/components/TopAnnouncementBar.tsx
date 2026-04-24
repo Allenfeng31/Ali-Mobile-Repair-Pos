@@ -71,10 +71,10 @@ export function TopAnnouncementBar() {
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full z-[2000] h-[40px] bg-slate-950 text-white overflow-hidden border-b border-white/10">
-      <div className="relative h-full max-w-7xl mx-auto px-4 flex items-center justify-center">
+    <div className="fixed top-0 left-0 w-full z-[2000] h-[40px] bg-white text-black border-b border-gray-200 dark:bg-black dark:text-white dark:border-gray-800 transition-colors duration-300">
+      <div className="relative h-full w-full px-4 flex items-center justify-center">
         {/* Carousel Content */}
-        <div className="flex-1 flex items-center justify-center overflow-hidden h-full">
+        <div className="flex items-center justify-center overflow-hidden h-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={announcements[currentIndex].id}
@@ -82,10 +82,10 @@ export function TopAnnouncementBar() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="flex items-center gap-2 text-sm font-semibold tracking-wide text-center"
+              className="flex items-center justify-center gap-2 text-sm font-semibold tracking-wide text-center"
             >
-              <Megaphone className="w-4 h-4 text-primary shrink-0" />
-              <span className="truncate px-2">
+              <Megaphone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <span className="truncate max-w-[80vw] sm:max-w-none">
                 {announcements[currentIndex].message}
               </span>
             </motion.div>
@@ -95,10 +95,10 @@ export function TopAnnouncementBar() {
         {/* Close Icon */}
         <button
           onClick={handleDismiss}
-          className="absolute right-4 p-1 rounded-full hover:bg-white/10 transition-colors"
+          className="absolute right-4 p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
           aria-label="Dismiss announcement"
         >
-          <X className="w-4 h-4 text-white/60 hover:text-white" />
+          <X className="w-4 h-4 text-black/40 dark:text-white/60 hover:text-black dark:hover:text-white" />
         </button>
       </div>
     </div>

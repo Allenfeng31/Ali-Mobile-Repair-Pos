@@ -46,7 +46,13 @@ function BlogImage({ src, alt, className, priority = false }: { src?: string; al
 }
 
 export default async function BlogPage() {
-  const allPostsData = await getSortedPostsData();
+  let allPostsData = [];
+  try {
+    allPostsData = await getSortedPostsData();
+  } catch (err) {
+    console.error('CRITICAL: Failed to load blog posts in page component:', err);
+    // Continue with empty array so page still renders "No Articles Found" instead of 500
+  }
   
   if (allPostsData.length === 0) {
     return (

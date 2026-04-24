@@ -65,10 +65,10 @@ async function getSupabasePosts(): Promise<BlogPost[]> {
       return [];
     }
 
-    return (data || []).map((post: any) => ({
-      slug: post.slug,
-      title: post.title,
-      date: post.published_at || post.created_at,
+      return (data || []).map((post: any) => ({
+      slug: post.slug || `post-${post.id}`,
+      title: post.title || 'Untitled Post',
+      date: post.published_at || post.created_at || new Date().toISOString(),
       description: post.description || '',
       image: post.cover_image || undefined,
       contentHtml: post.content || '',
@@ -119,22 +119,37 @@ export async function getSortedPostsData() {
   }
 
   // 2. Get Supabase posts
-  const supabasePosts = await getSupabasePosts();
+  let supabasePosts: any[] = [];
+  try {
+    supabasePosts = await getSupabasePosts();
+  } catch (err) {
+    console.error('Error in getSortedPostsData (Supabase fetch):', err);
+  }
 
   // 3. Merge both sources
-  const allPosts = [...markdownPosts, ...supabasePosts];
+  try {
+    const allPosts = [...markdownPosts, ...supabasePosts];
 
-  // Filter out posts with empty titles or invalid dates
-  const filteredPosts = allPosts.filter(post => {
-    const hasTitle = post.title.trim().length > 0;
-    const hasValidDate = post.date && !isNaN(new Date(post.date).getTime());
-    return hasTitle && hasValidDate;
-  });
+    // Filter out posts with empty titles or invalid dates
+    const filteredPosts = allPosts.filter(post => {
+      if (!post) return false;
+      const title = String(post.title || '').trim();
+      const hasTitle = title.length > 0;
+      const dateVal = post.date;
+      const hasValidDate = dateVal && !isNaN(new Date(dateVal).getTime());
+      return hasTitle && hasValidDate;
+    });
 
-  // Sort posts by date (newest first)
-  return filteredPosts.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+    // Sort posts by date (newest first)
+    return filteredPosts.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA;
+    });
+  } catch (err) {
+    console.error('Error merging or sorting blog posts:', err);
+    return markdownPosts; // Fallback to just markdown if merge fails
+  }
 }
 
 /**
