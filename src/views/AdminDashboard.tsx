@@ -70,7 +70,7 @@ const adminCards: AdminCard[] = [
   },
 ];
 
-export function AdminDashboard() {
+export function AdminDashboard({ onViewChange }: { onViewChange: (view: string) => void }) {
   const { permissions } = useAuthStore();
   const [activeModule, setActiveModule] = React.useState<string | null>(null);
 
@@ -123,7 +123,10 @@ export function AdminDashboard() {
             key={card.id}
             variants={item}
             onClick={() => {
-              if (card.href) {
+              if (card.href?.startsWith('/admin/')) {
+                const view = card.href.split('/').pop() || card.id;
+                onViewChange(view);
+              } else if (card.href) {
                 window.location.href = card.href;
               } else {
                 setActiveModule(card.id);

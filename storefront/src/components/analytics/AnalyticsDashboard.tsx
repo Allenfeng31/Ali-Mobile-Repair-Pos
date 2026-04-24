@@ -411,37 +411,8 @@ export default function AnalyticsDashboard() {
           />
         </div>
 
-        {/* Device Split Bar */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Laptop size={16} className="text-indigo-600" /> Device Distribution
-            </h3>
-            <div className="flex gap-4">
-              {data.deviceUsage?.map((d: any) => (
-                <div key={d.name} className="flex items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full ${d.name === 'Mobile' ? 'bg-indigo-600' : d.name === 'Desktop' ? 'bg-slate-300' : 'bg-emerald-400'}`} />
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">{d.name} {Math.round(d.percentage)}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="h-3 w-full bg-slate-50 rounded-full overflow-hidden flex">
-            {data.deviceUsage?.map((d: any, idx: number) => (
-              <motion.div
-                key={d.name}
-                initial={{ width: 0 }}
-                animate={{ width: `${d.percentage}%` }}
-                transition={{ duration: 1, ease: "easeOut", delay: idx * 0.1 }}
-                className={`h-full ${d.name === 'Mobile' ? 'bg-indigo-600' : d.name === 'Desktop' ? 'bg-slate-300' : 'bg-emerald-400'}`}
-                title={`${d.name}: ${Math.round(d.percentage)}%`}
-              />
-            ))}
-          </div>
-        </div>
-
         {/* Main Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -453,7 +424,7 @@ export default function AnalyticsDashboard() {
                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-500 rounded-full"/> Conversions</div>
               </div>
             </div>
-            <div className="h-[350px] w-full">
+            <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data.eventCounts}>
                   <defs>
@@ -477,30 +448,81 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-xl font-bold text-slate-900">Conversion Triggers</h2>
-              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                <TargetIcon size={18} />
+          <div className="flex flex-col gap-8">
+            {/* Device Distribution Card */}
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Laptop size={22} className="text-indigo-600" /> Device Distribution
+                </h2>
+              </div>
+              
+              <div className="h-[200px] w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data.deviceUsage}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {data.deviceUsage?.map((entry: any, index: number) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.name === 'Mobile' ? '#6366f1' : entry.name === 'Desktop' ? '#94a3b8' : '#10b981'} 
+                        />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-black text-slate-900">
+                    {Math.round(data.deviceUsage?.find((d: any) => d.name === 'Mobile')?.percentage || 0)}%
+                  </span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mobile</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {data.deviceUsage?.map((d: any) => (
+                  <div key={d.name} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${d.name === 'Mobile' ? 'bg-indigo-600' : d.name === 'Desktop' ? 'bg-slate-400' : 'bg-emerald-500'}`} />
+                      <span className="text-xs font-bold text-slate-600">{d.name}</span>
+                    </div>
+                    <span className="text-sm font-black text-slate-900">{Math.round(d.percentage)}%</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="space-y-5">
-              {data.conversions.map((conv: any) => (
-                <div key={conv.name} className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 hover:bg-slate-100/50 transition-all group">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                      <conv.icon size={20} className="text-indigo-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">{conv.name}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Direct interaction</p>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-black text-slate-900 tabular-nums">
-                    {conv.value}
-                  </div>
+
+            {/* Conversion Triggers Card */}
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl font-bold text-slate-900">Conversion Triggers</h2>
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <TargetIcon size={18} />
                 </div>
-              ))}
+              </div>
+              <div className="space-y-4">
+                {data.conversions.map((conv: any) => (
+                  <div key={conv.name} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-white rounded-xl shadow-sm">
+                        <conv.icon size={18} className="text-indigo-600" />
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-sm">{conv.name}</h4>
+                    </div>
+                    <div className="text-xl font-black text-slate-900 tabular-nums">
+                      {conv.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
