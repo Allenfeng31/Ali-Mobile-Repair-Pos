@@ -1,21 +1,61 @@
 import Link from 'next/link';
 import { getSortedPostsData } from '@/lib/blog';
-import Image from 'next/image';
+
+// Force dynamic so newly published Supabase posts appear immediately
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Repair Guides & Tech News | Ali Mobile Repair Blog',
   description: 'Expert mobile and tablet repair tips from Melbourne\'s most trusted technicians. Stay updated with the latest in device maintenance.',
 };
 
+function BlogImage({ src, alt, className, priority = false }: { src?: string; alt: string; className?: string; priority?: boolean }) {
+  // Use a gradient placeholder when no image is provided
+  if (!src) {
+    return (
+      <div className={`blog-placeholder-img ${className || ''}`}>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="M21 15l-5-5L5 21" />
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading={priority ? 'eager' : 'lazy'}
+      onError={(e: any) => {
+        // Replace broken image with placeholder gradient
+        const parent = e.target.parentNode;
+        if (parent) {
+          e.target.style.display = 'none';
+          const placeholder = document.createElement('div');
+          placeholder.className = 'blog-placeholder-img';
+          placeholder.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+          parent.appendChild(placeholder);
+        }
+      }}
+    />
+  );
+}
+
 export default async function BlogPage() {
   const allPostsData = await getSortedPostsData();
   
   if (allPostsData.length === 0) {
     return (
-      <div className="blog-archive py-20 text-center">
-        <h1 className="text-2xl font-bold text-slate-800">No Articles Found</h1>
-        <p className="text-slate-500 mt-2">Check back soon for new repair guides and tech news!</p>
-        <Link href="/" className="mt-8 inline-block text-blue-600 font-bold hover:underline">← Return Home</Link>
+      <div className="blog-archive">
+        <div style={{ paddingTop: '180px', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>No Articles Found</h1>
+          <p style={{ color: '#64748b', marginTop: '0.5rem' }}>Check back soon for new repair guides and tech news!</p>
+          <Link href="/" style={{ marginTop: '2rem', display: 'inline-block', color: '#2563eb', fontWeight: 700 }}>← Return Home</Link>
+        </div>
       </div>
     );
   }
@@ -30,15 +70,11 @@ export default async function BlogPage() {
         <section className="featured-hero">
           <div className="hero-content">
             <div className="hero-image-wrapper">
-              <Image 
-                src={featuredPost.image || '/blog/phone-repair.png'} 
-                alt={featuredPost.title} 
-                width={800} 
-                height={450} 
-                fill={false} 
+              <BlogImage
+                src={featuredPost.image}
+                alt={featuredPost.title}
+                className="hero-img"
                 priority
-                sizes="(max-width: 900px) 100vw, 800px"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               />
               <div className="hero-overlay"></div>
             </div>
@@ -55,41 +91,48 @@ export default async function BlogPage() {
       )}
 
       {/* Blog Grid */}
-      <section className="blog-grid-section">
-        <div className="section-header">
-          <h2>Latest Repair Guides</h2>
-          <div className="header-line"></div>
-        </div>
-        
-        <div className="blog-grid">
-          {remainingPosts.map(({ slug, date, title, description, image }) => (
-            <Link href={`/blog/${slug}`} key={slug} className="blog-card">
-              <div className="card-image">
-                <Image 
-                  src={image || '/blog/phone-repair.png'} 
-                  alt={title} 
-                  width={400} 
-                  height={250} 
-                  sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 400px"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-                <div className="date-badge">{new Date(date).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}</div>
-              </div>
-              <div className="card-body">
-                <h3>{title}</h3>
-                <p>{description}</p>
-                <span className="card-link">Continue Reading →</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {remainingPosts.length > 0 && (
+        <section className="blog-grid-section">
+          <div className="section-header">
+            <h2>Latest Repair Guides</h2>
+            <div className="header-line"></div>
+          </div>
+          
+          <div className="blog-grid">
+            {remainingPosts.map(({ slug, date, title, description, image }) => (
+              <Link href={`/blog/${slug}`} key={slug} className="blog-card">
+                <div className="card-image">
+                  <BlogImage src={image} alt={title} className="card-img" />
+                  <div className="date-badge">
+                    {new Date(date).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
+                  </div>
+                </div>
+                <div className="card-body">
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                  <span className="card-link">Continue Reading →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <style>{`
         .blog-archive {
           background-color: #f8fafc;
           min-height: 100vh;
           padding-bottom: 5rem;
+        }
+
+        /* Placeholder for missing images */
+        .blog-placeholder-img {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         /* Hero Styling */
@@ -113,12 +156,14 @@ export default async function BlogPage() {
           flex: 1.2;
           position: relative;
           overflow: hidden;
+          min-height: 300px;
         }
 
-        .hero-image-wrapper img {
+        .hero-img {
           width: 100%;
           height: 100%;
-          object-cover: cover;
+          object-fit: cover;
+          display: block;
         }
 
         .hero-overlay {
@@ -236,14 +281,15 @@ export default async function BlogPage() {
           overflow: hidden;
         }
 
-        .card-image img {
+        .card-img {
           width: 100%;
           height: 100%;
-          object-cover: cover;
+          object-fit: cover;
+          display: block;
           transition: transform 0.6s ease;
         }
 
-        .blog-card:hover .card-image img {
+        .blog-card:hover .card-img {
           transform: scale(1.05);
         }
 
@@ -303,6 +349,9 @@ export default async function BlogPage() {
           .hero-text h1 {
             font-size: 1.75rem;
           }
+          .hero-image-wrapper {
+            min-height: 220px;
+          }
         }
 
         @media (max-width: 600px) {
@@ -311,6 +360,9 @@ export default async function BlogPage() {
           }
           .blog-archive {
             padding-top: 1rem;
+          }
+          .featured-hero {
+            padding-top: 130px;
           }
         }
       `}</style>
