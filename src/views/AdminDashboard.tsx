@@ -2,8 +2,6 @@ import React from 'react';
 import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../hooks/useAuthStore';
-import { EmployeeManagement } from './EmployeeManagement';
-import { StorefrontCMS } from './StorefrontCMS';
 
 interface AdminCard {
   id: string;
@@ -23,6 +21,7 @@ const adminCards: AdminCard[] = [
     description: 'Manage accounts and granular permissions.',
     color: 'text-blue-600',
     gradient: 'from-blue-500/10 to-blue-600/5',
+    href: '/admin/employees',
   },
   {
     id: 'analytics',
@@ -40,6 +39,7 @@ const adminCards: AdminCard[] = [
     description: 'Update banners, announcements, and blogs.',
     color: 'text-orange-600',
     gradient: 'from-orange-500/10 to-orange-600/5',
+    href: '/admin/cms',
   },
   {
     id: 'security',
@@ -48,6 +48,7 @@ const adminCards: AdminCard[] = [
     description: 'Review system access and audit trails.',
     color: 'text-emerald-600',
     gradient: 'from-emerald-500/10 to-emerald-600/5',
+    href: '/admin/security',
   },
   {
     id: 'notifications',
@@ -56,6 +57,7 @@ const adminCards: AdminCard[] = [
     description: 'Send broadcast alerts to all terminals.',
     color: 'text-pink-600',
     gradient: 'from-pink-500/10 to-pink-600/5',
+    href: '/admin/messages',
   },
   {
     id: 'system',
@@ -64,6 +66,7 @@ const adminCards: AdminCard[] = [
     description: 'Configure global POS parameters.',
     color: 'text-slate-600',
     gradient: 'from-slate-500/10 to-slate-600/5',
+    href: '/admin/settings',
   },
 ];
 
@@ -81,14 +84,6 @@ export function AdminDashboard() {
         </div>
       </div>
     );
-  }
-
-  if (activeModule === 'employees') {
-    return <EmployeeManagement onBack={() => setActiveModule(null)} />;
-  }
-
-  if (activeModule === 'cms') {
-    return <StorefrontCMS onBack={() => setActiveModule(null)} />;
   }
 
   const container = {
