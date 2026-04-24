@@ -10,34 +10,39 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
   
-  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const autoLogin = async () => {
-      try {
-        const { error: authError } = await supabase.auth.signInWithPassword({
-          email: 'allen@pos.local',
-          password: 'Password123!', // Using a robust placeholder, the user can change this if needed
-        });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-        if (authError) {
-          setError(authError.message);
-          setLoading(false);
-          return;
-        }
+    try {
+      // Dummy Email Mapping Pattern
+      const mappedEmail = username.includes('@') ? username : `${username}@pos.local`;
 
-        // Success - redirect to dashboard
-        router.push('/dashboard/analytics');
-        router.refresh();
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred during authentication.');
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: mappedEmail,
+        password: password,
+      });
+
+      if (authError) {
+        setError(authError.message);
         setLoading(false);
+        return;
       }
-    };
 
-    autoLogin();
-  }, [router, supabase.auth]);
+      // Success - redirect to dashboard
+      router.push('/dashboard/analytics');
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred during authentication.');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-6 font-sans">
@@ -58,37 +63,60 @@ export default function LoginPage() {
             <ShieldCheck className="text-white relative z-10" size={40} />
           </div>
 
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-4">
+          <h1 className="text-4xl font-black text-white tracking-tighter mb-10">
             Boss <span className="text-blue-500">Terminal</span>
           </h1>
           
-          <div className="flex flex-col items-center gap-4">
-            {loading ? (
-              <>
-                <div className="flex items-center gap-3 bg-white/5 px-6 py-3 rounded-2xl border border-white/5">
-                  <Loader2 className="text-blue-500 animate-spin" size={20} />
-                  <span className="text-white/80 font-bold tracking-wide">Authenticating Boss Terminal...</span>
+          <form onSubmit={handleSubmit} className="w-full space-y-4">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 mb-4">
+                <AlertCircle className="text-red-400 shrink-0" size={20} />
+                <div className="text-red-400 text-xs font-bold text-left leading-tight">
+                  {error}
                 </div>
-                <p className="text-white/30 text-xs font-medium uppercase tracking-[0.2em]">Secure Handshake in Progress</p>
-              </>
-            ) : error ? (
-              <div className="space-y-4">
-                <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-[2rem] flex flex-col items-center gap-4">
-                  <AlertCircle className="text-red-400" size={32} />
-                  <div className="text-red-400 text-sm font-bold leading-relaxed">
-                    Authentication Failed:<br/>
-                    <span className="opacity-70 font-medium">{error}</span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="text-white/50 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors"
-                >
-                  Retry Connection
-                </button>
               </div>
-            ) : null}
-          </div>
+            )}
+
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">
+                Username or Email
+              </label>
+              <input 
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="allen"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10"
+              />
+            </div>
+
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-4">
+                Access Password
+              </label>
+              <input 
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Authorize Access"
+              )}
+            </button>
+          </form>
 
           <div className="mt-12 pt-8 border-t border-white/5 w-full">
             <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em]">
