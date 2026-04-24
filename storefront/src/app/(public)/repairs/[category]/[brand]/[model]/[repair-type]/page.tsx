@@ -112,7 +112,7 @@ function generateFaqs(model: string, repairName: string, repairSlug: string, pri
     {
       question: `How long does the ${model} ${repairName} take?`,
       answer: isWaterDamage 
-        ? `Water damage recovery typically takes 24 to 48 hours. Unlike standard repairs, we must fully disassemble the ${model}, perform professional ultrasonic cleaning, and ensure every component is completely dry before testing to prevent future corrosion.`
+        ? `Water damage recovery typically takes around 1 hour. If the damage is extensive and requires more time for professional drying or component cleaning, our technicians will inform you beforehand.`
         : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at our Ringwood Square location. Walk-ins are welcome on weekdays for same-day service.`,
     },
     {
@@ -152,25 +152,18 @@ function WaterDamagePolicySection() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <ShieldAlert size={28} color="#dc2626" />
           <h2 style={{ margin: 0, color: '#991b1b', fontSize: '1.5rem', fontWeight: 700 }}>
-            Special Policy: Water Damage Recovery 进水维修政策
+            Special Policy: Water Damage Recovery
           </h2>
         </div>
         <div style={{ color: '#b91c1c', lineHeight: '1.6', fontSize: '1.05rem' }}>
-          <p style={{ marginBottom: '1.25rem' }}>
-            <strong>English:</strong> While our general motto is "No Fix, No Charge," water damage is a special case. 
+          <p style={{ margin: 0 }}>
+            While our general motto is "No Fix, No Charge," water damage is a special case. 
             Liquid damage requires immediate intervention: we must completely disassemble your phone, dry every component, 
             and perform professional alcohol cleaning to stop corrosion. Because this specialized labor is required regardless 
             of the final outcome, a labor fee applies even if the phone is not successfully repaired. 
             Furthermore, due to the complexity of motherboard corrosion, we do not provide a general warranty for 
             water damage rescue. <em>Exception:</em> If a specific part (e.g., a screen) is replaced, that part will carry 
             our standard warranty.
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>中文详情：</strong> 虽然我们的宗旨是 "No Fix No Charge"，但进水相关的维修是一个例外。
-            水损手机需要立即进行抢救性处理：我们必须首先拆开手机，将所有部件进行烘干，并使用酒精清洗零部件以阻断腐蚀。
-            由于这一过程需要耗费大量专门的人工成本，即使手机最终未能修好，我们仍需收取一定的人工费用。
-            此外，鉴于主板腐蚀后的不可预见性，抢救成功的进水手机不提供整机保修。
-            <em>特殊示例：</em> 如果清理后发现仅需更换屏幕即可正常使用，那么更换的<strong>屏幕部分</strong>将按照标准享受保修政策。
           </p>
         </div>
       </div>
