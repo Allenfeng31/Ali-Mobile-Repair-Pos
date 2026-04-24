@@ -336,7 +336,11 @@ export function PortalView() {
                           />
                           <div className="flex-1">
                             <p className="text-xs font-bold text-on-surface">{upsell.name}</p>
-                            <p className="text-[10px] text-on-surface-variant font-medium">Add for only ${upsell.bundle_price}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[10px] text-on-surface-variant font-medium">RRP</span>
+                              <span className="text-[10px] text-on-surface-variant line-through opacity-50 font-medium">${upsell.regular_price}</span>
+                              <span className="text-[10px] text-primary font-black ml-auto">Bundle +${upsell.bundle_price}</span>
+                            </div>
                           </div>
                         </label>
                       ))}
