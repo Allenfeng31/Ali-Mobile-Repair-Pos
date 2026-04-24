@@ -601,9 +601,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
     if (error) {
       console.error('Error fetching upsells:', error);
-      setUpsellError('Failed to load upsells. Make sure the storefront_upsells table exists.');
+      setUpsellError(`Error: ${error.message} (${error.code})`);
     } else {
       setUpsells(data || []);
+      setUpsellError(null);
     }
     setLoadingUpsells(false);
   };
@@ -626,7 +627,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
     if (error) {
       console.error('Error adding upsell:', error);
-      setUpsellError('Failed to add upsell');
+      setUpsellError(`Add Error: ${error.message} (${error.code})`);
     } else if (data) {
       setUpsells([data[0], ...upsells]);
       setNewUpsellName('');
@@ -646,9 +647,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
     if (error) {
       console.error('Error updating upsell:', error);
-      setUpsellError('Failed to update upsell');
+      setUpsellError(`Update Error: ${error.message} (${error.code})`);
     } else {
       setUpsells(upsells.map(u => u.id === id ? { ...u, ...updates } : u));
+      setUpsellError(null);
     }
   };
 
@@ -661,9 +663,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
     if (error) {
       console.error('Error deleting upsell:', error);
-      setUpsellError('Failed to delete upsell');
+      setUpsellError(`Delete Error: ${error.message} (${error.code})`);
     } else {
       setUpsells(upsells.filter(u => u.id !== id));
+      setUpsellError(null);
     }
   };
 
@@ -1039,10 +1042,19 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         ) : upsellError && upsells.length === 0 ? (
           <div className="text-center py-16 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
             <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-on-surface mb-2">Upsells Table Not Found</h3>
-            <p className="text-on-surface-variant max-w-md mx-auto text-sm mb-6">
-              Run <code className="bg-surface-container px-1.5 py-0.5 rounded text-primary font-bold">storefront_upsells.sql</code> in your Supabase SQL Editor.
+            <h3 className="text-lg font-bold text-on-surface mb-2">Supabase Error Detected</h3>
+            <p className="text-on-surface-variant max-w-lg mx-auto text-sm mb-6 bg-surface-container p-4 rounded-2xl font-mono break-all">
+              {upsellError}
             </p>
+            <p className="text-on-surface-variant max-w-md mx-auto text-sm mb-6">
+              If the error says "relation does not exist", please ensure you have run the SQL script in your Supabase SQL Editor.
+            </p>
+            <button 
+              onClick={() => { setUpsellError(null); fetchUpsells(); }}
+              className="text-primary font-bold hover:underline"
+            >
+              Try to refresh table connection →
+            </button>
           </div>
         ) : upsells.length === 0 ? (
           <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
