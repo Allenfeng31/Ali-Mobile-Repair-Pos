@@ -9,6 +9,7 @@ interface TrackEventParams {
   modelName?: string;
   repairCategory?: string;
   metadata?: Record<string, any>;
+  req?: any; // Generic to support Next.js Request or Node Express req
 }
 
 let cachedCity: string | null = null;
@@ -80,8 +81,31 @@ export async function trackEvent({
   modelName,
   repairCategory,
   metadata = {},
+  req,
 }: TrackEventParams) {
   try {
+    // 1. Bot & Crawler Filtering (SEO/GEO Safe)
+    // We want to abort tracking for known bots so they don't skew Conversion Rates and Views
+    let userAgent = '';
+    if (typeof navigator !== 'undefined' && navigator.userAgent) {
+      userAgent = navigator.userAgent;
+    } else if (req) {
+      if (typeof req.headers?.get === 'function') {
+        userAgent = req.headers.get('user-agent') || '';
+      } else if (req.headers && req.headers['user-agent']) {
+        userAgent = req.headers['user-agent'] as string;
+      }
+    }
+
+    if (userAgent) {
+      // Extensive Regex to catch search engines, scrapers, and AI crawlers
+      const botPattern = /bot|spider|crawler|Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|GPTBot|ClaudeBot|PerplexityBot|anthropic-ai|OpenAI|cohere-ai|Omillia|PetalBot/i;
+      if (botPattern.test(userAgent)) {
+        // Silently abort tracking, do not log to Supabase, but allow the page to render perfectly
+        return;
+      }
+    }
+
     console.log(`[analytics] Attempting to track event: ${eventName}`, { eventType, modelName, repairCategory });
     
     const city = await getCity();
