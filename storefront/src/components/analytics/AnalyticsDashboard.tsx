@@ -12,10 +12,10 @@ import {
   Search, AlertCircle, CheckCircle2, Clock, Map, ChevronRight,
   TrendingDown, Info, Trash2, Laptop, ChevronUp, Tablet, Watch
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // retained for potential future client-side use
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, startOfDay, endOfDay, subDays, isWithinInterval, parseISO, isSameDay } from 'date-fns';
-import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { format, startOfDay, endOfDay, subDays, isSameDay } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 const MELBOURNE_TZ = 'Australia/Melbourne';
 const PROFESSIONAL_COLORS = ['#3b82f6', '#10b981', '#6366f1', '#f59e0b', '#8b5cf6', '#06b6d4'];
@@ -120,55 +120,61 @@ export default function AnalyticsDashboard() {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const nowMelbourne = toZonedTime(new Date(), MELBOURNE_TZ);
-      
-      let currentStart: Date;
-      let currentEnd: Date = endOfDay(nowMelbourne);
-
-      if (timeRange === 'today') {
-        currentStart = startOfDay(nowMelbourne);
-      } else if (timeRange === '7d') {
-        currentStart = startOfDay(subDays(nowMelbourne, 6));
-      } else if (timeRange === '30d') {
-        currentStart = startOfDay(subDays(nowMelbourne, 29));
-      } else {
-        currentStart = startOfDay(toZonedTime(new Date(startDate), MELBOURNE_TZ));
-        currentEnd = endOfDay(toZonedTime(new Date(endDate), MELBOURNE_TZ));
+      // -----------------------------------------------------------
+      // Fetch from server-side API route which uses Service Role Key
+      // (bypasses RLS) and handles timezone conversion correctly.
+      // -----------------------------------------------------------
+      const params = new URLSearchParams({ timeRange });
+      if (timeRange === 'custom') {
+        params.set('startDate', startDate);
+        params.set('endDate', endDate);
       }
 
-      // Period Duration for PoP
-      const durationMs = currentEnd.getTime() - currentStart.getTime();
-      const previousEnd = new Date(currentStart.getTime() - 1);
-      const previousStart = new Date(previousEnd.getTime() - durationMs);
+      const res = await fetch(`/api/analytics?${params.toString()}`);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `API responded ${res.status}`);
+      }
 
-      // Fetch combined range
-      const { data: allEvents, error } = await supabase
-        .from('analytics_events')
-        .select('*')
-        .gte('created_at', previousStart.toISOString())
-        .lte('created_at', currentEnd.toISOString());
+      const { events: allEvents, currentStartUTC } = await res.json();
+      if (!allEvents || allEvents.length === 0) {
+        console.warn('[dashboard] No events returned from API');
+      }
 
-      if (error) throw error;
-      if (!allEvents) return;
+      const currentStartDate = new Date(currentStartUTC);
+      const currentEvents = allEvents.filter((e: any) => new Date(e.created_at) >= currentStartDate);
+      const previousEvents = allEvents.filter((e: any) => new Date(e.created_at) < currentStartDate);
 
-      const currentEvents = allEvents.filter(e => new Date(e.created_at) >= currentStart);
-      const previousEvents = allEvents.filter(e => new Date(e.created_at) < currentStart);
+      // 1. Timeline Data (Current Period) — using Melbourne local dates for display
+      const nowMelbourne = toZonedTime(new Date(), MELBOURNE_TZ);
+      let localStart: Date;
+      let localEnd: Date = endOfDay(nowMelbourne);
 
-      // 1. Timeline Data (Current Period)
-      const diffDays = Math.ceil((currentEnd.getTime() - currentStart.getTime()) / (1000 * 60 * 60 * 24));
+      if (timeRange === 'today') {
+        localStart = startOfDay(nowMelbourne);
+      } else if (timeRange === '7d') {
+        localStart = startOfDay(subDays(nowMelbourne, 6));
+      } else if (timeRange === '30d') {
+        localStart = startOfDay(subDays(nowMelbourne, 29));
+      } else {
+        localStart = startOfDay(toZonedTime(new Date(startDate), MELBOURNE_TZ));
+        localEnd = endOfDay(toZonedTime(new Date(endDate), MELBOURNE_TZ));
+      }
+
+      const diffDays = Math.ceil((localEnd.getTime() - localStart.getTime()) / (1000 * 60 * 60 * 24));
       const timelineData = Array.from({ length: diffDays + 1 }).map((_, i) => {
-        const d = subDays(currentEnd, diffDays - i);
+        const d = subDays(localEnd, diffDays - i);
         const dateStr = format(d, 'MMM d');
-        const dayEvents = currentEvents.filter(e => isSameDay(toZonedTime(new Date(e.created_at), MELBOURNE_TZ), d));
+        const dayEvents = currentEvents.filter((e: any) => isSameDay(toZonedTime(new Date(e.created_at), MELBOURNE_TZ), d));
         return {
           name: dateStr,
           Visits: dayEvents.length,
-          Conversions: dayEvents.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length
+          Conversions: dayEvents.filter((e: any) => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length
         };
       });
 
       // 2. Model Popularity
-      const modelClicks = currentEvents.filter(e => e.event_name === 'model_click');
+      const modelClicks = currentEvents.filter((e: any) => e.event_name === 'model_click');
       const modelCounts = modelClicks.reduce((acc: any, curr: any) => {
         acc[curr.model_name] = (acc[curr.model_name] || 0) + 1;
         return acc;
@@ -185,9 +191,9 @@ export default function AnalyticsDashboard() {
 
       // 3. Conversion Triggers
       const conversions = [
-        { name: 'Calls', value: currentEvents.filter(e => e.event_name === 'call_now').length, icon: Phone },
-        { name: 'Quotes', value: currentEvents.filter(e => e.event_name === 'get_quote').length, icon: MessageSquare },
-        { name: 'Bookings', value: currentEvents.filter(e => e.event_name === 'book_repair').length, icon: Clock },
+        { name: 'Calls', value: currentEvents.filter((e: any) => e.event_name === 'call_now').length, icon: Phone },
+        { name: 'Quotes', value: currentEvents.filter((e: any) => e.event_name === 'get_quote').length, icon: MessageSquare },
+        { name: 'Bookings', value: currentEvents.filter((e: any) => e.event_name === 'book_repair').length, icon: Clock },
       ];
 
       // 4. Top Locations
@@ -202,7 +208,7 @@ export default function AnalyticsDashboard() {
 
       // 5. Pricing Health
       const healthMap = new globalThis.Map<string, PricingHealthItem>();
-      currentEvents.forEach(e => {
+      currentEvents.forEach((e: any) => {
         const category = e.metadata?.repairCategory;
         if (e.model_name && category) {
           const key = `${e.model_name} - ${category}`;
@@ -235,12 +241,12 @@ export default function AnalyticsDashboard() {
       })).sort((a, b) => b.value - a.value);
 
       // Totals & Growth
-      const currentVisits = currentEvents.filter(e => e.event_type === 'click' || e.event_type === 'view').length;
-      const currentConversionsTotal = currentEvents.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
+      const currentVisits = currentEvents.filter((e: any) => e.event_type === 'click' || e.event_type === 'view').length;
+      const currentConversionsTotal = currentEvents.filter((e: any) => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
       const currentConvRate = currentVisits > 0 ? (currentConversionsTotal / currentVisits) * 100 : 0;
 
-      const prevVisits = previousEvents.filter(e => e.event_type === 'click' || e.event_type === 'view').length;
-      const prevConversionsTotal = previousEvents.filter(e => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
+      const prevVisits = previousEvents.filter((e: any) => e.event_type === 'click' || e.event_type === 'view').length;
+      const prevConversionsTotal = previousEvents.filter((e: any) => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
       const prevConvRate = prevVisits > 0 ? (prevConversionsTotal / prevVisits) * 100 : 0;
 
       setData({
