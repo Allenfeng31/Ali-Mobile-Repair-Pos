@@ -111,7 +111,7 @@ export async function trackEvent({
     const city = await getCity();
     const deviceType = getDeviceType();
     
-    const { data, error } = await supabase.from('analytics_events').insert({
+    const { error } = await supabase.from('analytics_events').insert({
       event_type: eventType,
       event_name: eventName,
       model_name: modelName,
@@ -125,12 +125,12 @@ export async function trackEvent({
         path: typeof window !== 'undefined' ? window.location.pathname : '',
       },
       // Region/Country could be added too if needed
-    }).select();
+    });
 
     if (error) {
       console.error('[analytics] Supabase insertion failed:', error);
     } else {
-      console.log('[analytics] Event tracked successfully:', data);
+      console.log('[analytics] Event tracked successfully');
     }
   } catch (err) {
     console.error('[analytics] Unexpected error in trackEvent:', err);
