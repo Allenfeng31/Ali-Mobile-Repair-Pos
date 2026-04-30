@@ -9,9 +9,9 @@ const ServiceAreas = dynamic(() => import("@/components/seo/ServiceAreas"));
 
 export default function Home() {
   return (
-    <>
+    <main>
       <LocalBusinessSchema />
-      <section className="hero">
+      <header className="hero">
         <div className="hero-contact-pill">
           <a href="https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7" target="_blank" rel="noopener noreferrer" className="contact-item">
             <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -54,9 +54,10 @@ export default function Home() {
           <Link href="/book-repair" className="primary-btn">Book Repair Now</Link>
           <Link href="/track-status" className="secondary-btn">Track Status</Link>
         </div>
-      </section>
+      </header>
 
-      <section className="servicesGrid">
+      <section className="servicesGrid" aria-labelledby="services-heading">
+        <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
         <Link href="/repairs/phone" className="serviceCard">
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📱</div>
           <h3>Phone Repair</h3>
@@ -113,6 +114,6 @@ export default function Home() {
         </div>
       </section>
 
-    </>
+    </main>
   );
 }

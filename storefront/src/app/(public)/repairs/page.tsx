@@ -14,8 +14,9 @@ export const metadata: Metadata = {
 
 export default function RepairsHubPage() {
   return (
-    <div className="page-container">
-      <h1
+    <main className="page-container">
+      <header style={{ marginBottom: "3rem" }}>
+        <h1
         style={{
           fontSize: "clamp(2rem, 5vw, 3rem)",
           fontWeight: 800,
@@ -36,9 +37,10 @@ export default function RepairsHubPage() {
         }}
       >
         We repair all major devices — select a category below to see available services and pricing.
-      </p>
+        </p>
+      </header>
 
-      <section className="servicesGrid">
+      <section className="servicesGrid" aria-label="Repair Categories">
         <Link href="/repairs/phone" className="serviceCard">
           <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
             <Smartphone size={48} strokeWidth={1.5} aria-hidden="true" color="var(--primary)" />
@@ -113,6 +115,6 @@ export default function RepairsHubPage() {
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -23,15 +23,17 @@ export function SchemaOrg({ type, data }: SchemaOrgProps) {
 
 export function LocalBusinessSchema() {
   const businessData = {
+    "@type": "MobilePhoneStore",
     "name": "Ali Mobile & Repair",
-    "image": "https://alimobile.com.au/logo.png", // Correct logo URL
+    "image": "https://alimobile.com.au/logo.png",
     "@id": "https://alimobile.com.au/#localbusiness",
     "url": "https://alimobile.com.au",
     "telephone": "0481 058 514",
     "priceRange": "$$",
+    "description": "Expert mobile phone, tablet, and laptop repair service located in Ringwood Square Shopping Centre, Melbourne. Specializing in screen replacements, micro-soldering, Face ID repair, and using OEM parts.",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Kiosk C1, Ringwood Square Shopping Centre",
+      "streetAddress": "Kiosk C1, Ringwood Square Shopping Centre, 59-65 Maroondah Hwy",
       "addressLocality": "Ringwood",
       "addressRegion": "VIC",
       "postalCode": "3134",
@@ -51,8 +53,35 @@ export function LocalBusinessSchema() {
       }
     ],
     "sameAs": [
-      "https://www.facebook.com/alimobileandreari/",
+      "https://www.facebook.com/alimobileandreari/"
     ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Specialty Repair Services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Micro-soldering Repair"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Face ID Repair"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "OEM Parts Replacement"
+          }
+        }
+      ]
+    },
     "areaServed": {
       "@type": "GeoCircle",
       "geoMidpoint": {
