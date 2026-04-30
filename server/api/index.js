@@ -359,6 +359,40 @@ app.post('/api/inventory', async (req, res) => {
   res.json(data[0]);
 });
 
+// Bulk create inventory items (Batch insert for "Bulk Generate Repair Suite")
+app.post('/api/inventory/bulk', async (req, res) => {
+  const items = req.body;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Request body must be a non-empty array of items.' });
+  }
+
+  try {
+    let { data, error } = await supabase
+      .from('inventory')
+      .insert(items)
+      .select();
+
+    // Fallback: strip is_pinned/pin_order if columns don't exist
+    if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
+      console.warn(`⚠️ [Database Fallback] 'is_pinned' or 'pin_order' columns missing. Retrying bulk insert without pinning fields.`);
+      const safeItems = items.map(({ is_pinned, pin_order, ...rest }) => rest);
+      ({ data, error } = await supabase.from('inventory').insert(safeItems).select());
+    }
+
+    if (error) {
+      console.error(`❌ [Database Error] Bulk insert failed:`, error.message);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log(`✅ [Inventory] Bulk generated ${data.length} items successfully.`);
+    res.json(data);
+  } catch (err) {
+    console.error(`❌ [Inventory] Bulk insert exception:`, err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put('/api/inventory/:id', async (req, res) => {
   const itemData = req.body;
   let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();

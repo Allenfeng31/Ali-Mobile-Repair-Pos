@@ -63,6 +63,14 @@ export const api = {
     });
     return handleResponse(res);
   },
+  bulkCreateInventoryItems: async (items: any[]) => {
+    const res = await fetch(`${API_URL}/inventory/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(items),
+    });
+    return handleResponse(res);
+  },
 
   // Orders
   getOrders: async () => {

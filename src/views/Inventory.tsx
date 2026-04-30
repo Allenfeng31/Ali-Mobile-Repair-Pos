@@ -24,7 +24,8 @@ import {
   Layout as LayoutIcon,
   Volume2,
   Mic,
-  Wifi
+  Wifi,
+  Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
@@ -77,6 +78,80 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     is_pinned: false,
     pin_order: 0
   });
+
+  // ── Bulk Generate Repair Suite ──────────────────────────────────────
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+  const [bulkBrand, setBulkBrand] = useState('Samsung');
+  const [bulkModel, setBulkModel] = useState('');
+  const [bulkDeviceModel, setBulkDeviceModel] = useState('');
+
+  const REPAIR_TEMPLATES = [
+    { label: 'Screen Replacement', iconName: 'Smartphone' },
+    { label: 'Battery Replacement', iconName: 'Battery' },
+    { label: 'Charging Port Replacement', iconName: 'Zap' },
+    { label: 'Back Camera Replacement', iconName: 'Camera' },
+    { label: 'Front Camera Replacement', iconName: 'Camera' },
+    { label: 'Back Housing Replacement', iconName: 'Layout' },
+    { label: 'Logic Board Repair', iconName: 'Cpu' },
+  ] as const;
+
+  const getIconComponent = (name: string) => {
+    const icons: Record<string, any> = {
+      Battery, Tablet, Laptop, Watch, Headphones, Smartphone, Wrench, Zap, Package, Camera, Cpu, LayoutIcon, Volume2, Mic, Wifi
+    };
+    return icons[name] || Package;
+  };
+
+  const handleBulkGenerate = async () => {
+    if (!bulkModel.trim()) return;
+
+    setBulkGenerating(true);
+    try {
+      const items = REPAIR_TEMPLATES.map(tmpl => ({
+        name: `${bulkModel.trim()} ${tmpl.label}`,
+        model: `${bulkBrand}||${bulkModel.trim()}`,
+        device_model: bulkDeviceModel.trim() || null,
+        stock: 0,
+        minStock: 0,
+        costPrice: 0,
+        price: 0,
+        margin: 0,
+        iconName: tmpl.iconName,
+        status: 'in-stock',
+        category: 'Phone Repair',
+        is_pinned: false,
+        pin_order: 0,
+      }));
+
+      const created: any[] = await api.bulkCreateInventoryItems(items);
+
+      // Normalize and append to local state
+      const normalizedItems = created.map((raw: any) => {
+        let b = 'Other', m = raw.model;
+        if (typeof m === 'string' && m.includes('||')) {
+          const parts = m.split('||');
+          b = parts[0];
+          m = parts[1];
+        }
+        return { ...raw, brand: b, model: m, icon: getIconComponent(raw.iconName) };
+      });
+
+      setInventory(prev => [...prev, ...normalizedItems]);
+      setSuccessMessage(`⚡️ Bulk generated ${created.length} repair items for ${bulkModel.trim()}!`);
+      setTimeout(() => setSuccessMessage(null), 4000);
+
+      // Reset bulk fields
+      setBulkModel('');
+      setBulkDeviceModel('');
+    } catch (err: any) {
+      console.error('Bulk generate failed:', err);
+      setSuccessMessage(`Error: ${err?.message || 'Bulk generate failed'}`);
+      setTimeout(() => setSuccessMessage(null), 5000);
+    } finally {
+      setBulkGenerating(false);
+    }
+  };
 
   const [newCategory, setNewCategory] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -204,13 +279,6 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       category: formData.category,
       is_pinned: formData.is_pinned,
       pin_order: formData.pin_order
-    };
-
-    const getIconComponent = (name: string) => {
-      const icons: Record<string, any> = {
-        Battery, Tablet, Laptop, Watch, Headphones, Smartphone, Wrench, Zap, Package, Camera, Cpu, LayoutIcon, Volume2, Mic, Wifi
-      };
-      return icons[name] || Package;
     };
 
     const normalizeItem = (raw: any) => {
@@ -647,7 +715,113 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
         {/* Add/Edit Form - Now below the list on mobile */}
         <aside className="lg:col-span-4 flex flex-col gap-6 order-last lg:order-first w-full">
-          <div className="bg-surface-container-low border border-outline-variant/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden">
+          {/* ── Bulk Generate Toggle ─────────────────────────── */}
+          <button
+            onClick={() => { setBulkMode(!bulkMode); setEditingId(null); }}
+            className={cn(
+              "w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl font-bold text-sm transition-all border shadow-lg",
+              bulkMode
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-orange-400/30 shadow-orange-500/25 hover:shadow-orange-500/40"
+                : "bg-surface-container-low text-on-surface border-outline-variant/20 hover:border-primary/30 hover:shadow-primary/10"
+            )}
+          >
+            <Layers size={18} className={bulkMode ? "animate-pulse" : ""} />
+            {bulkMode ? '⚡️ Bulk Generate Mode ON' : '⚡️ Bulk Generate Repair Suite'}
+          </button>
+
+          {/* ── Bulk Generate Panel ─────────────────────────── */}
+          <motion.div
+            initial={false}
+            animate={{ height: bulkMode ? 'auto' : 0, opacity: bulkMode ? 1 : 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-red-500/5 border border-orange-400/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-[100px] pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-tr-[60px] pointer-events-none"></div>
+
+              <h2 className="text-xl font-black text-on-surface mb-1 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+                  <Zap size={18} />
+                </div>
+                Bulk Generate
+              </h2>
+              <p className="text-xs text-on-surface-variant font-medium mb-6 ml-11">Enter device info → auto-create {REPAIR_TEMPLATES.length} repair items</p>
+
+              <div className="space-y-4">
+                {/* Brand */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Device Brand</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-orange-500/20 outline-none appearance-none font-medium"
+                    value={bulkBrand}
+                    onChange={e => setBulkBrand(e.target.value)}
+                  >
+                    {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
+                  </select>
+                </div>
+
+                {/* Model */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Device Model <span className="text-error">*</span></label>
+                  <input
+                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-on-surface-variant/40"
+                    placeholder="e.g. Galaxy A56 5G"
+                    value={bulkModel}
+                    onChange={e => setBulkModel(e.target.value)}
+                  />
+                </div>
+
+                {/* AU Model Code */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">AU Model Code</label>
+                  <input
+                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-on-surface-variant/40"
+                    placeholder="e.g. SM-A566B"
+                    value={bulkDeviceModel}
+                    onChange={e => setBulkDeviceModel(e.target.value)}
+                  />
+                </div>
+
+                {/* Preview chips */}
+                <div className="space-y-2 pt-2">
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Will Generate:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {REPAIR_TEMPLATES.map((tmpl, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-[10px] font-bold text-on-surface-variant"
+                      >
+                        {React.createElement(getIconComponent(tmpl.iconName), { size: 10, className: 'text-orange-500' })}
+                        {bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Generate button */}
+                <div className="pt-3">
+                  <button
+                    onClick={handleBulkGenerate}
+                    disabled={bulkGenerating || !bulkModel.trim()}
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 relative overflow-hidden"
+                  >
+                    <span className={cn(bulkGenerating ? "opacity-0" : "opacity-100", "flex items-center justify-center gap-2")}>
+                      <Zap size={18} />
+                      Generate {REPAIR_TEMPLATES.length} Repair Items
+                    </span>
+                    {bulkGenerating && (
+                      <div className="absolute inset-0 flex items-center justify-center gap-2">
+                        <RefreshCw size={18} className="animate-spin" />
+                        Generating...
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className={cn("bg-surface-container-low border border-outline-variant/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden", bulkMode && "opacity-50 pointer-events-none")}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
             
             <h2 className="text-xl font-black text-on-surface mb-6 flex items-center gap-3">
