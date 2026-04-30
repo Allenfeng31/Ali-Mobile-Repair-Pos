@@ -71,13 +71,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     brand: 'iPhone',
     model: '',
     device_model: '',
-    stock: '',
-    minStock: '5',
-    costPrice: '',
-    sellingPrice: '',
     is_pinned: false,
     pin_order: 0,
-    quality_grade: 'Standard'
+    variants: [
+      { id: Date.now(), quality_grade: 'Standard', stock: '', minStock: '5', costPrice: '', sellingPrice: '' }
+    ]
   });
 
   // ── Bulk Generate Repair Suite ──────────────────────────────────────
@@ -217,18 +215,30 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       brand: 'iPhone',
       model: '',
       device_model: '',
-      stock: '',
-      minStock: '5',
-      costPrice: '',
-      sellingPrice: '',
       is_pinned: false,
       pin_order: 0,
-      quality_grade: 'Standard'
+      variants: [
+        { id: Date.now(), quality_grade: 'Standard', stock: '', minStock: '5', costPrice: '', sellingPrice: '' }
+      ]
     });
     setEditingId(null);
   };
 
   const handleEdit = (item: InventoryItem) => {
+    // Find all variants for this item
+    const variants = inventory.filter(i => 
+      i.name === item.name && 
+      i.model === item.model && 
+      (i.device_model || '') === (item.device_model || '')
+    ).map(v => ({
+      id: v.id,
+      quality_grade: v.quality_grade || 'Standard',
+      stock: v.stock.toString(),
+      minStock: v.minStock.toString(),
+      costPrice: v.costPrice.toString(),
+      sellingPrice: v.price.toString(),
+    }));
+
     setEditingId(item.id);
     setFormData({
       name: item.name,
@@ -236,54 +246,55 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       brand: item.brand || 'iPhone',
       model: item.model,
       device_model: item.device_model || '',
-      stock: item.stock.toString(),
-      minStock: item.minStock.toString(),
-      costPrice: item.costPrice.toString(),
-      sellingPrice: item.price.toString(),
       is_pinned: item.is_pinned || false,
       pin_order: item.pin_order || 0,
-      quality_grade: item.quality_grade || 'Standard'
+      variants: variants.length > 0 ? variants : [{ id: Date.now(), quality_grade: 'Standard', stock: '0', minStock: '5', costPrice: '', sellingPrice: '' }]
     });
   };
 
   const handleSave = async (e?: React.FormEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
-    if (!formData.name || !formData.sellingPrice) return;
+    if (!formData.name) return;
 
-    const cost = parseFloat(formData.costPrice) || 0;
-    const selling = parseFloat(formData.sellingPrice) || 0;
-    const margin = cost > 0 ? Math.round(((selling - cost) / selling) * 100) : 0;
-    const stock = parseInt(formData.stock) || 0;
-    const minStock = parseInt(formData.minStock) || 0;
+    const baseIconName = formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' : 
+                         formData.name.toLowerCase().includes('battery') ? 'Battery' :
+                         formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
+                         formData.name.toLowerCase().includes('camera') ? 'Camera' :
+                         formData.name.toLowerCase().includes('housing') || formData.name.toLowerCase().includes('glass') || formData.name.toLowerCase().includes('back cover') ? 'Layout' :
+                         formData.name.toLowerCase().includes('logic board') || formData.name.toLowerCase().includes('motherboard') || formData.name.toLowerCase().includes('ic ') ? 'Cpu' :
+                         formData.name.toLowerCase().includes('speaker') || formData.name.toLowerCase().includes('buzzer') ? 'Volume2' :
+                         formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
+                         formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
+                         formData.category.toLowerCase().includes('watch') ? 'Watch' :
+                         formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
+                         formData.category.toLowerCase().includes('phone') ? 'Smartphone' : 
+                         formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package';
 
-    const itemData = {
-      name: formData.name,
-      model: `${formData.brand}||${formData.model}`,
-      stock: stock,
-      minStock: minStock,
-      costPrice: cost,
-      price: selling,
-      margin: margin,
-      device_model: formData.device_model,
-      iconName: formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' : 
-                formData.name.toLowerCase().includes('battery') ? 'Battery' :
-                formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
-                formData.name.toLowerCase().includes('camera') ? 'Camera' :
-                formData.name.toLowerCase().includes('housing') || formData.name.toLowerCase().includes('glass') || formData.name.toLowerCase().includes('back cover') ? 'Layout' :
-                formData.name.toLowerCase().includes('logic board') || formData.name.toLowerCase().includes('motherboard') || formData.name.toLowerCase().includes('ic ') ? 'Cpu' :
-                formData.name.toLowerCase().includes('speaker') || formData.name.toLowerCase().includes('buzzer') ? 'Volume2' :
-                formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
-                formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
-                formData.category.toLowerCase().includes('watch') ? 'Watch' :
-                formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
-                formData.category.toLowerCase().includes('phone') ? 'Smartphone' : 
-                formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package',
-      status: stock <= minStock ? 'low-stock' : 'in-stock',
-      category: formData.category,
-      is_pinned: formData.is_pinned,
-      pin_order: formData.pin_order,
-      quality_grade: formData.quality_grade
-    };
+    const itemsToSave = formData.variants.map(variant => {
+      const cost = parseFloat(variant.costPrice) || 0;
+      const selling = parseFloat(variant.sellingPrice) || 0;
+      const margin = cost > 0 ? Math.round(((selling - cost) / selling) * 100) : 0;
+      const stock = parseInt(variant.stock) || 0;
+      const minStock = parseInt(variant.minStock) || 0;
+
+      return {
+        ...(variant.id > 1000000000000 ? {} : { id: variant.id }), // If id is a timestamp, it's new
+        name: formData.name,
+        model: `${formData.brand}||${formData.model}`,
+        device_model: formData.device_model,
+        category: formData.category,
+        is_pinned: formData.is_pinned,
+        pin_order: formData.pin_order,
+        iconName: baseIconName,
+        quality_grade: variant.quality_grade,
+        price: selling,
+        costPrice: cost,
+        stock: stock,
+        minStock: minStock,
+        margin: margin,
+        status: stock <= minStock ? 'low-stock' : 'in-stock'
+      };
+    });
 
     const normalizeItem = (raw: any) => {
       let b = 'Other', m = raw.model;
@@ -297,23 +308,42 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
     setSaving(true);
     try {
-      if (editingId) {
-        const updatedItem = await api.updateInventoryItem(editingId, itemData);
-        setInventory(prev => prev.map(item => 
-          item.id === editingId ? { ...item, ...normalizeItem(updatedItem) } : item
-        ));
-        setSuccessMessage(`Updated ${formData.name} successfully!`);
-      } else {
-        const newItem = await api.createInventoryItem(itemData);
-        setInventory(prev => [...prev, normalizeItem(newItem)]);
-        setSuccessMessage(`Added ${formData.name} to inventory!`);
+      const newItems = itemsToSave.filter(i => !i.id);
+      const existingItems = itemsToSave.filter(i => i.id);
+
+      let savedItems: any[] = [];
+
+      if (newItems.length > 0) {
+        const created = await api.bulkCreateInventoryItems(newItems);
+        savedItems = [...savedItems, ...created];
       }
 
+      for (const item of existingItems) {
+        const { id, ...updateData } = item;
+        const updated = await api.updateInventoryItem(id, updateData);
+        savedItems.push(updated);
+      }
+
+      // Update local state
+      setInventory(prev => {
+        const next = [...prev];
+        savedItems.forEach(saved => {
+          const idx = next.findIndex(i => i.id === saved.id);
+          if (idx >= 0) {
+            next[idx] = { ...next[idx], ...normalizeItem(saved) };
+          } else {
+            next.push(normalizeItem(saved));
+          }
+        });
+        return next;
+      });
+
+      setSuccessMessage(`Saved ${formData.name} variants successfully!`);
       setTimeout(() => setSuccessMessage(null), 3000);
       clearForm();
     } catch (err: any) {
-      console.error('Failed to save inventory item:', err);
-      const errorMsg = err?.message || 'Failed to save item. Check your database settings.';
+      console.error('Failed to save inventory items:', err);
+      const errorMsg = err?.message || 'Failed to save items. Check your database settings.';
       setSuccessMessage(`Error: ${errorMsg}`);
       setTimeout(() => setSuccessMessage(null), 5000);
     } finally {
@@ -947,73 +977,106 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Quality Tier</label>
-                <select 
-                  className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-medium"
-                  value={formData.quality_grade}
-                  onChange={e => setFormData({...formData, quality_grade: e.target.value})}
-                >
-                  <option value="Standard">Standard</option>
-                  <option value="Budget">Budget</option>
-                  <option value="Premium">Premium</option>
-                  <option value="Genuine">Genuine</option>
-                </select>
-              </div>
+              {/* Variants Section */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Variants / Quality Tiers</label>
+                  <button 
+                    type="button"
+                    onClick={() => setFormData({
+                      ...formData, 
+                      variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '' }]
+                    })}
+                    className="text-xs font-bold text-primary flex items-center gap-1 hover:bg-primary/10 px-2 py-1 rounded-md transition-colors"
+                  >
+                    <Plus size={14} /> Add Quality Tier
+                  </button>
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'qty')}</label>
-                  <input 
-                    type="number"
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
-                    placeholder="0"
-                    value={formData.stock}
-                    onChange={e => setFormData({...formData, stock: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'minStock')}</label>
-                  <input 
-                    type="number"
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
-                    placeholder="5"
-                    value={formData.minStock}
-                    onChange={e => setFormData({...formData, minStock: e.target.value})}
-                  />
-                </div>
-              </div>
+                <div className="space-y-3">
+                  {formData.variants.map((variant, index) => (
+                    <div key={variant.id} className="p-3 bg-surface-container-highest border border-outline-variant/20 rounded-xl relative">
+                      {formData.variants.length > 1 && (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newVariants = [...formData.variants];
+                            newVariants.splice(index, 1);
+                            setFormData({ ...formData, variants: newVariants });
+                          }}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">Grade</label>
+                          <select 
+                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-medium"
+                            value={variant.quality_grade}
+                            onChange={e => {
+                              const newVariants = [...formData.variants];
+                              newVariants[index].quality_grade = e.target.value;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                          >
+                            <option value="Standard">Standard</option>
+                            <option value="Budget">Budget</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Genuine">Genuine</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'qty')}</label>
+                          <input 
+                            type="number"
+                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                            placeholder="0"
+                            value={variant.stock}
+                            onChange={e => {
+                              const newVariants = [...formData.variants];
+                              newVariants[index].stock = e.target.value;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                          />
+                        </div>
+                      </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'cost')}</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
-                    <input 
-                      type="number"
-                      className="w-full pl-8 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
-                      placeholder="0.00"
-                      value={formData.costPrice}
-                      onChange={e => setFormData({...formData, costPrice: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                    {t('inv', 'sell')}
-                    {!permissions?.can_change_inventory_price && <Lock size={12} />}
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
-                    <input 
-                      type="number"
-                      disabled={!permissions?.can_change_inventory_price}
-                      className="w-full pl-8 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary disabled:bg-surface-container disabled:cursor-not-allowed" 
-                      placeholder="0.00"
-                      value={formData.sellingPrice}
-                      onChange={e => setFormData({...formData, sellingPrice: e.target.value})}
-                    />
-                  </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
+                          <input 
+                            type="number"
+                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                            placeholder="0.00"
+                            value={variant.costPrice}
+                            onChange={e => {
+                              const newVariants = [...formData.variants];
+                              newVariants[index].costPrice = e.target.value;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'sell')} ($)</label>
+                          <input 
+                            type="number"
+                            disabled={!permissions?.can_change_inventory_price}
+                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary disabled:bg-surface-container disabled:cursor-not-allowed" 
+                            placeholder="0.00"
+                            value={variant.sellingPrice}
+                            onChange={e => {
+                              const newVariants = [...formData.variants];
+                              newVariants[index].sellingPrice = e.target.value;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -1054,7 +1117,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               <div className="pt-4 flex gap-3">
                 <button 
                   onClick={() => handleSave()}
-                  disabled={saving || !formData.name || !formData.sellingPrice}
+                  disabled={saving || !formData.name || formData.variants.length === 0}
                   className="flex-1 bg-primary text-on-primary py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
                 >
                   <span className={cn(saving ? "opacity-0" : "opacity-100")}>

@@ -294,6 +294,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             repairSlug={resolvedParams['repair-type']}
             modelName={displayModel}
             repairName={finalRepairName}
+            variants={details?.variants || []}
           />
         </div>
       </div>

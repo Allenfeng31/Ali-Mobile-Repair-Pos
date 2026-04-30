@@ -369,6 +369,7 @@ export async function fetchRepairDetails(
   modelCode?: string;
   repairType: string;
   price: number;
+  variants: RepairVariant[];
   source: 'pos' | 'fallback';
 } | null> {
   const catalog = await fetchRepairCatalog();
@@ -386,6 +387,7 @@ export async function fetchRepairDetails(
     modelCode: modelEntry.modelCode,
     repairType: repairEntry?.name || repairSlug.replace(/-/g, ' '),
     price: repairEntry?.price || 0,
+    variants: repairEntry?.variants || [],
     source: catalog.source,
   };
 }
