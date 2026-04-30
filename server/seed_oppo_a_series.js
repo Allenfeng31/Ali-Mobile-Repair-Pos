@@ -4,7 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 // Initialize Supabase Client
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
 
-const brand = "OPPO";
+const brand = "Oppo";
 const models = [
   "A1k", "A3s", "A5", "A5s", "A7", "A9", "A5 (2020)", "A9 (2020)", "A11", "A12", 
   "A15", "A16", "A16s", "A31", "A32", "A33", "A37", "A39", "A52", "A53", 

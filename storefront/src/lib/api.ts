@@ -79,7 +79,7 @@ async function fetchPOSInventory(): Promise<RawItem[] | null> {
 
 // ─── Data Sanitization ───────────────────────────────────────────────────────
 
-const VALID_SHORT_NAMES = new Set(['se', 'xr', 'xs', 'x', 'a5', 'a9', 's9', 's8']);
+const VALID_SHORT_NAMES = new Set(['se', 'xr', 'xs', 'x', 'a5', 'a7', 'a9', 's9', 's8']);
 
 /** Filter out dirty model names: pure numbers, or too-short strings */
 function isValidModelName(name: string): boolean {
