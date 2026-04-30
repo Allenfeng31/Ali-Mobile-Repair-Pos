@@ -3,10 +3,16 @@ import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+export interface RepairVariant {
+  quality_grade: string;
+  price: number;
+}
+
 export interface RepairOption {
   slug: string;
   name: string;
   price: number;
+  variants?: RepairVariant[];
 }
 
 export interface ModelEntry {
@@ -223,22 +229,28 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
 
     const { repairTypes } = modelMap.get(item.deviceModel)!;
 
-    // ── Dedup: if a slug already exists, keep the entry with the higher price ──
+    // ── Dedup: if a slug already exists, push as a variant ──
     const existingIdx = repairTypes.findIndex(r => r.slug === standardSlug);
     if (existingIdx !== -1) {
-      // Keep the entry with higher price (prefer real POS pricing)
-      if (item.price > repairTypes[existingIdx].price) {
-        repairTypes[existingIdx] = {
-          slug: standardSlug,
-          name: standardName,
-          price: item.price,
-        };
+      const existing = repairTypes[existingIdx];
+      if (!existing.variants) {
+        // Initialize variants with the existing item if it didn't have any
+        existing.variants = [{ quality_grade: 'Standard', price: existing.price }];
+      }
+      existing.variants.push({
+        quality_grade: item.quality_grade,
+        price: item.price,
+      });
+      // The base price should be the lowest (starting price)
+      if (item.price > 0 && (existing.price === 0 || item.price < existing.price)) {
+        existing.price = item.price;
       }
     } else {
       repairTypes.push({
         slug: standardSlug,
         name: standardName,
         price: item.price,
+        variants: [{ quality_grade: item.quality_grade, price: item.price }],
       });
     }
   }

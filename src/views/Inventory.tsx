@@ -76,7 +76,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     costPrice: '',
     sellingPrice: '',
     is_pinned: false,
-    pin_order: 0
+    pin_order: 0,
+    quality_grade: 'Standard'
   });
 
   // ── Bulk Generate Repair Suite ──────────────────────────────────────
@@ -221,7 +222,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       costPrice: '',
       sellingPrice: '',
       is_pinned: false,
-      pin_order: 0
+      pin_order: 0,
+      quality_grade: 'Standard'
     });
     setEditingId(null);
   };
@@ -239,7 +241,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       costPrice: item.costPrice.toString(),
       sellingPrice: item.price.toString(),
       is_pinned: item.is_pinned || false,
-      pin_order: item.pin_order || 0
+      pin_order: item.pin_order || 0,
+      quality_grade: item.quality_grade || 'Standard'
     });
   };
 
@@ -278,7 +281,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       status: stock <= minStock ? 'low-stock' : 'in-stock',
       category: formData.category,
       is_pinned: formData.is_pinned,
-      pin_order: formData.pin_order
+      pin_order: formData.pin_order,
+      quality_grade: formData.quality_grade
     };
 
     const normalizeItem = (raw: any) => {
@@ -523,6 +527,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium truncate">
                             {item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model} 
                             {item.device_model && <span className="ml-2 px-1.5 py-0.5 bg-primary/15 text-primary rounded-md text-[9px] font-bold tracking-wider">{item.device_model}</span>}
+                            {item.quality_grade && item.quality_grade !== 'Standard' && <span className="ml-2 px-1.5 py-0.5 bg-amber-500/15 text-amber-600 rounded-md text-[9px] font-bold tracking-wider">{item.quality_grade}</span>}
                           </p>
                         </div>
                       </div>
@@ -940,6 +945,20 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                     onChange={e => setFormData({...formData, device_model: e.target.value})}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Quality Tier</label>
+                <select 
+                  className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-medium"
+                  value={formData.quality_grade}
+                  onChange={e => setFormData({...formData, quality_grade: e.target.value})}
+                >
+                  <option value="Standard">Standard</option>
+                  <option value="Budget">Budget</option>
+                  <option value="Premium">Premium</option>
+                  <option value="Genuine">Genuine</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

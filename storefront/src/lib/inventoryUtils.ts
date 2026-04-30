@@ -6,6 +6,7 @@ export interface RawItem {
   price: number;
   category: string;
   sku?: string;
+  quality_grade?: string;
 }
 
 export interface ParsedItem {
@@ -18,6 +19,7 @@ export interface ParsedItem {
   price: number;
   category: string;
   deviceType: "phone" | "tablet" | "computer" | "watch";
+  quality_grade: string;
 }
 
 export function slugify(text: string): string {
@@ -149,6 +151,7 @@ export function parseItem(raw: RawItem): ParsedItem | null {
     price: raw.price ?? 0,
     category: raw.category,
     deviceType: detectDeviceType(brand),
+    quality_grade: raw.quality_grade || "Standard",
   };
 }
 

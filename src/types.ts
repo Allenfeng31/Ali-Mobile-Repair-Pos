@@ -43,6 +43,7 @@ export interface InventoryItem {
   category: string;
   is_pinned?: boolean;
   pin_order?: number;
+  quality_grade?: string;
 }
 
 export interface RepairRecord {
