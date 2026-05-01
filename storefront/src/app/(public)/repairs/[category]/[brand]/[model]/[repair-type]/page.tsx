@@ -10,8 +10,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
 
-export const revalidate = 3600; // ISR: revalidate every hour
-export const dynamicParams = true; // Allow on-demand generation of new pages
+export const dynamic = 'force-dynamic';
 
 function getRepairIcon(slug: string, size = 48) {
   if (slug.includes('water')) return <Droplet size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
@@ -183,7 +182,7 @@ function getLSIForRepair(slug: string): { component?: string[]; issue?: string[]
 
 import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
-import RepairCTA from '@/components/services/RepairCTA';
+import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
