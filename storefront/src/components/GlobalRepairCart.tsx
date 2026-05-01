@@ -97,40 +97,60 @@ const CartContent = () => {
     if (loading || inventory.length === 0) return;
 
     const params = new URLSearchParams(window.location.search);
+    const brandParam = params.get('brand');
     const modelParam = params.get('model');
-    const repairParam = params.get('repair');
+    const serviceParam = params.get('service');
+    const legacyModelParam = params.get('model') && !brandParam ? params.get('model') : null;
+    const legacyRepairParam = params.get('repair');
 
-    if (modelParam) {
-      const decodedModel = modelParam.replace(/-/g, ' ').toLowerCase();
-      const matchedItem = inventory.find(i => 
-        i.deviceModel.toLowerCase() === decodedModel || 
-        i.deviceModel.toLowerCase().replace(/\s+/g, '-') === modelParam
-      );
+    import('@/lib/cartAutoSelect').then(({ resolveInitialCartState }) => {
+      if (brandParam && modelParam) {
+        const { brand, model, category, serviceToSelect, shouldAutoConfirm } = resolveInitialCartState(
+          brandParam,
+          modelParam,
+          serviceParam,
+          inventory
+        );
 
-      if (matchedItem) {
-        const alreadyInCart = devices.some(d => d.brand === matchedItem.brand && d.model === matchedItem.deviceModel);
-        
-        if (!alreadyInCart) {
-          let serviceToSelect: RepairService | undefined = undefined;
-          if (repairParam) {
-            const decodedRepair = repairParam.replace(/-/g, ' ').toLowerCase();
-            const matchedService = inventory.find(i => 
-              i.brand === matchedItem.brand && 
-              i.deviceModel === matchedItem.deviceModel &&
-              (i.service.toLowerCase() === decodedRepair || i.service.toLowerCase().replace(/\s+/g, '-') === repairParam)
-            );
-            if (matchedService) {
-              serviceToSelect = { id: matchedService.id, name: matchedService.service, price: matchedService.price };
-            }
+        if (brand && model && category) {
+          const alreadyInCart = devices.some(d => d.brand === brand && d.model === model);
+          if (!alreadyInCart) {
+            addDevice(brand, model, category as ParsedItem["deviceType"], serviceToSelect || undefined, shouldAutoConfirm);
           }
-          addDevice(matchedItem.brand, matchedItem.deviceModel, matchedItem.category, serviceToSelect, true);
+        }
+      } else if (legacyModelParam) {
+        const decodedModel = legacyModelParam.replace(/-/g, ' ').toLowerCase();
+        const matchedItem = inventory.find(i => 
+          i.deviceModel.toLowerCase() === decodedModel || 
+          i.deviceModel.toLowerCase().replace(/\s+/g, '-') === legacyModelParam
+        );
+
+        if (matchedItem) {
+          const alreadyInCart = devices.some(d => d.brand === matchedItem.brand && d.model === matchedItem.deviceModel);
+          if (!alreadyInCart) {
+            let serviceToSelect: RepairService | undefined = undefined;
+            if (legacyRepairParam) {
+              const decodedRepair = legacyRepairParam.replace(/-/g, ' ').toLowerCase();
+              const matchedService = inventory.find(i => 
+                i.brand === matchedItem.brand && 
+                i.deviceModel === matchedItem.deviceModel &&
+                (i.service.toLowerCase() === decodedRepair || i.service.toLowerCase().replace(/\s+/g, '-') === legacyRepairParam)
+              );
+              if (matchedService) {
+                serviceToSelect = { id: matchedService.id, name: matchedService.service, price: matchedService.price };
+              }
+            }
+            addDevice(matchedItem.brand, matchedItem.deviceModel, matchedItem.category, serviceToSelect, true);
+          }
         }
       }
       
-      // CRITICAL: Clear URL parameters once consumed to prevent state hijacking on refresh/interaction
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
+      if (brandParam || legacyModelParam) {
+        // CRITICAL: Clear URL parameters once consumed to prevent state hijacking on refresh/interaction
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }
+    });
   }, [loading, inventory]); // Remove devices/searchParams from deps to ensure it only runs once on load
 
   // UI Helpers

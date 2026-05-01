@@ -236,41 +236,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
 
-          {price > 0 || resolvedParams['repair-type'] === 'water-damage-repair' ? (
-            <p style={{
-              fontSize: '2.5rem',
-              fontWeight: 800,
-              color: '#2563eb',
-              marginBottom: '1rem',
-              marginTop: '-0.25rem',
-              letterSpacing: '-0.5px',
-            }}>
-              Starting from ${price > 0 ? price : 50}
-            </p>
-          ) : (
-            <div style={{ marginBottom: '1rem', marginTop: '-0.25rem' }}>
-              <p style={{
-                fontSize: '2rem',
-                fontWeight: 800,
-                color: '#2563eb',
-                marginBottom: '0.5rem',
-              }}>
-                Quote on Request
-              </p>
-              <p style={{
-                fontSize: '1rem',
-                fontWeight: 500,
-                color: 'var(--foreground)',
-                opacity: 0.85,
-              }}>
-                Please fill out the form below or call{' '}
-                <a href="tel:0481058514" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline' }}>
-                  0481 058 514
-                </a>{' '}
-                for an instant quote.
-              </p>
-            </div>
-          )}
+          <RepairPricingAndCTA 
+            brandName={displayBrand}
+            modelName={displayModel}
+            repairName={finalRepairName}
+            variants={details?.variants || []}
+          />
 
           <div className="trust-badges">
             <div className="trust-badge">
@@ -288,14 +259,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               6-Month Warranty
             </div>
           </div>
-
-          <RepairCTA 
-            modelSlug={resolvedParams.model}
-            repairSlug={resolvedParams['repair-type']}
-            modelName={displayModel}
-            repairName={finalRepairName}
-            variants={details?.variants || []}
-          />
         </div>
       </div>
 
