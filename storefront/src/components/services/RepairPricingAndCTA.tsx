@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { analytics } from '@/lib/analytics';
-import { ShieldCheck, Info } from 'lucide-react';
 
 interface RepairVariant {
   quality_grade: string;
@@ -43,42 +42,64 @@ export default function RepairPricingAndCTA({
   }, []);
 
   const displayVariants = variants.length > 0 ? variants : [];
+  const isMultiple = displayVariants.length > 1;
 
   return (
-    <div className="flex flex-col items-center w-full max-w-2xl mx-auto mt-2 mb-6">
+    <div className="w-full mt-8 mb-12">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
-        <div className="w-full mb-10 text-left bg-transparent">
-          <div className="flex flex-col">
-            {displayVariants.map((variant) => (
+        <div className={`grid gap-6 ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'max-w-md mx-auto grid-cols-1'}`}>
+          {displayVariants.map((variant) => {
+            const isPremium = variant.quality_grade === 'Premium' || variant.quality_grade === 'Genuine';
+            
+            return (
               <div 
                 key={variant.quality_grade}
-                className="flex items-start justify-between py-6 border-b border-gray-200 dark:border-white/10 last:border-b-0"
+                className={`
+                  relative flex flex-col p-8 rounded-2xl border transition-all duration-200
+                  ${isPremium 
+                    ? 'bg-blue-50/50 border-blue-200 shadow-sm hover:shadow-md' 
+                    : 'bg-white border-slate-200 shadow-sm hover:shadow-md'}
+                `}
               >
-                <div className="flex flex-col pr-6">
-                  <span className="font-semibold text-xl text-gray-900 dark:text-white">
+                {/* Badge */}
+                {isPremium && (
+                  <div className="absolute top-4 right-4 bg-blue-100 text-blue-700 text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full">
+                    {variant.quality_grade === 'Genuine' ? 'Original' : 'Best Value'}
+                  </div>
+                )}
+
+                {/* Tier Name */}
+                <div className="mb-1">
+                  <h3 className="text-xl font-bold text-slate-900">
                     {variant.quality_grade}
-                  </span>
-                  {tierDescriptions[variant.quality_grade] && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed max-w-md">
-                      {tierDescriptions[variant.quality_grade]}
-                    </p>
-                  )}
+                  </h3>
                 </div>
-                <span className="font-medium text-xl text-gray-900 dark:text-white whitespace-nowrap">
-                  ${variant.price}
-                </span>
+
+                {/* Price */}
+                <div className="flex items-baseline mb-4">
+                  <span className="text-4xl md:text-5xl font-extrabold text-blue-600">
+                    ${variant.price}
+                  </span>
+                </div>
+
+                {/* Description */}
+                {tierDescriptions[variant.quality_grade] && (
+                  <p className="text-sm text-slate-500 leading-relaxed mt-2 flex-grow">
+                    {tierDescriptions[variant.quality_grade]}
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="mb-6 mt-2 text-center w-full">
-          <p className="text-3xl font-extrabold text-primary mb-2">
+        <div className="mb-12 mt-4 text-center max-w-md mx-auto p-10 rounded-2xl border border-slate-200 bg-slate-50/50 shadow-sm">
+          <p className="text-4xl font-extrabold text-blue-600 mb-4">
             Quote on Request
           </p>
-          <p className="text-base font-medium text-on-surface opacity-80">
+          <p className="text-base text-slate-500 leading-relaxed">
             Please fill out the form below or call{' '}
-            <a href="tel:0481058514" className="text-primary font-bold hover:underline">
+            <a href="tel:0481058514" className="text-blue-600 font-bold hover:underline">
               0481 058 514
             </a>{' '}
             for an instant quote.
@@ -86,10 +107,11 @@ export default function RepairPricingAndCTA({
         </div>
       )}
 
-      <div className="cta-group w-full max-w-md">
+      {/* Global CTA Group */}
+      <div className="mt-12 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
         <Link 
           href={`/book-repair?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&service=${encodeURIComponent(repairName)}`} 
-          className="cta-book"
+          className="w-full py-4 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
           onClick={() => {
             analytics.trackBookRepair(modelName, repairName);
           }}
@@ -98,7 +120,7 @@ export default function RepairPricingAndCTA({
         </Link>
         <a 
           href="tel:0481058514" 
-          className="cta-call"
+          className="w-full py-4 px-8 text-center bg-white border border-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
           onClick={() => analytics.trackCallNow(modelName, repairName)}
         >
           📞 Call 0481 058 514
