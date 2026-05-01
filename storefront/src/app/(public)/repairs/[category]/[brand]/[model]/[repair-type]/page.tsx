@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
   return { title, description };
 }
 
-function generateFaqs(model: string, repairName: string, repairSlug: string, price: number, modelCode?: string) {
+export function generateFaqs(model: string, repairName: string, repairSlug: string, price: number, modelCode?: string, brand?: string) {
   const lsi = getLSIForRepair(repairSlug);
   const component = lsi.component?.[0] || repairName.toLowerCase();
   const altComponent = lsi.component?.[1] || 'damaged component';
@@ -107,7 +107,7 @@ function generateFaqs(model: string, repairName: string, repairSlug: string, pri
       ? `Starting from $${price}, the exact pricing depends on the specific ${displayModel} variant.`
       : `Pricing depends on the specific ${displayModel} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`);
 
-  return [
+  const baseFaqs = [
     {
       question: `How long does the ${model} ${repairName} take?`,
       answer: isWaterDamage 
@@ -135,6 +135,18 @@ function generateFaqs(model: string, repairName: string, repairSlug: string, pri
         : `Yes, all our standard repairs come with a comprehensive 6-month warranty on both parts and labor at our Ringwood location.`,
     },
   ];
+
+  if ((brand?.toLowerCase() === 'apple' || brand?.toLowerCase() === 'iphone') && repairSlug.includes('screen')) {
+    baseFaqs.splice(1, 0, {
+      question: "What is the difference between Standard, Premium, and Genuine screens?",
+      answer: `We offer three tiers to suit your budget: <br/><br/> 
+<b>1. Standard (In-cell LCD):</b> A budget-friendly aftermarket option. It works reliably, but uses LCD technology instead of OLED, meaning colors are slightly cooler and it consumes a bit more battery. Best for a quick, cost-effective fix. <br/><br/>
+<b>2. Premium (Soft OLED) - ⭐ Highly Recommended:</b> This is our most popular option and the sweet spot for value. It uses the exact same Soft OLED technology as your original Apple screen. You get the deep blacks, vibrant colors, perfect edge-to-edge touch sensitivity, and original battery efficiency, all at a significantly better price than the Genuine part. <br/><br/>
+<b>3. Genuine (OEM):</b> The uncompromised original factory display. It offers maximum quality for purists, but comes with the highest price tag.`
+    });
+  }
+
+  return baseFaqs;
 }
 
 function WaterDamagePolicySection() {
@@ -170,7 +182,7 @@ function WaterDamagePolicySection() {
   );
 }
 
-function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
+export function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
   if (slug === 'screen-replacement') return { component: LSI_KEYWORDS.components.screen, issue: LSI_KEYWORDS.issues.screenDamage };
   if (slug === 'battery-replacement') return { component: LSI_KEYWORDS.components.battery, issue: LSI_KEYWORDS.issues.batteryDrain };
   if (slug === 'charging-port-repair' || slug === 'charging-port-replacement') return { component: LSI_KEYWORDS.components.chargingPort };
@@ -208,7 +220,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const knownRepair = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
   const finalRepairName = knownRepair?.name || repairTypeDerived;
 
-  const faqs = generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode);
+  const faqs = generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
 
   return (
     <>

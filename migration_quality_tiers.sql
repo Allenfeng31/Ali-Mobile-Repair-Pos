@@ -13,7 +13,7 @@ INSERT INTO public.quality_tiers (name, description) VALUES
 ('Budget', 'High-quality aftermarket part. Best for quick, cost-effective fixes.'),
 ('Standard', 'Industry-standard replacement part with reliable performance.'),
 ('Premium', 'Top-tier aftermarket part matching original color and touch sensitivity perfectly.'),
-('Genuine', '100% Original part pulled from a new device.')
+('Genuine', '100% Genuine OEM Display. Uncompromised original factory quality, color accuracy, and performance.')
 ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description;
 
 -- Security hardening

@@ -40,7 +40,7 @@ export default function FaqAccordion({ faqs }: FaqAccordionProps) {
               </svg>
             </summary>
             <div className="faq-answer">
-              <p>{faq.answer}</p>
+              <p dangerouslySetInnerHTML={{ __html: faq.answer }} />
             </div>
           </details>
         ))}
