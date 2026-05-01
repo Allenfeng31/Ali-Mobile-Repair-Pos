@@ -1,5 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+/**
+ * @vitest-environment jsdom
+ */
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { SettingsView } from './Settings';
 
 // Mock the API since it is used in useEffect
@@ -18,6 +21,9 @@ vi.mock('../lib/api', () => ({
 }));
 
 describe('SettingsView', () => {
+  afterEach(() => {
+    cleanup();
+  });
   it('does not render Quality Tiers Management card for regular admin', () => {
     const user = { id: 1, username: 'admin', role: 'admin' };
     render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
@@ -25,8 +31,22 @@ describe('SettingsView', () => {
     expect(screen.queryByText('Quality Tiers Management')).toBeNull();
   });
 
-  it('renders Quality Tiers Management card for super admin', () => {
+  it('renders Quality Tiers Management card for super admin with direct role', () => {
     const user = { id: 2, username: 'superadmin', role: 'super admin' };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+    
+    expect(screen.getByText('Quality Tiers Management')).toBeDefined();
+  });
+
+  it('renders Quality Tiers Management card for super admin with nested user_metadata', () => {
+    const user = { id: 2, username: 'superadmin', user_metadata: { role: 'SUPER_ADMIN' } };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+    
+    expect(screen.getByText('Quality Tiers Management')).toBeDefined();
+  });
+
+  it('renders Quality Tiers Management card for super admin with nested app_metadata', () => {
+    const user = { id: 2, username: 'superadmin', app_metadata: { role: 'Super Admin' } };
     render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
     
     expect(screen.getByText('Quality Tiers Management')).toBeDefined();

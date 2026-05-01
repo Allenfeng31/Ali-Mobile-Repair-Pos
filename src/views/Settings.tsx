@@ -43,6 +43,9 @@ export function SettingsView({
   const [isGeneratingBlog, setIsGeneratingBlog] = React.useState(false);
   const [blogDraft, setBlogDraft] = React.useState<any>(null);
 
+  const userRoleStr = String(currentUser?.role || currentUser?.app_metadata?.role || currentUser?.user_metadata?.role || '');
+  const isSuperAdmin = userRoleStr.toLowerCase().replace(/_/g, ' ') === 'super admin';
+
   // SMS Generator States
   const [smsModel, setSmsModel] = React.useState('');
   const [smsRepair, setSmsRepair] = React.useState('');
@@ -140,7 +143,7 @@ export function SettingsView({
       if (settings.ali_pos_invoice_footer) setFooter(settings.ali_pos_invoice_footer);
     }).catch(console.error);
 
-    if (currentUser?.role?.toLowerCase().replace('_', ' ') === 'super admin') {
+    if (isSuperAdmin) {
       loadQualityTiers();
     }
   }, [currentUser]);
@@ -510,6 +513,105 @@ export function SettingsView({
             </div>
           </section>
 
+          {/* Quality Tiers Management (Super Admin Only) */}
+          {isSuperAdmin && (
+            <section className="bg-surface-container-low rounded-[2rem] p-8 border border-outline-variant/5 mt-8">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-2 bg-amber-50 rounded-xl text-amber-600">
+                  <Layers size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-primary tracking-tight">Quality Tiers Management</h3>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-1">Super Admin Dictionary</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-surface-container-highest p-5 rounded-2xl border border-outline-variant/10 space-y-4">
+                  <h4 className="text-xs font-black text-on-surface uppercase tracking-wider">Add New Tier</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input 
+                      type="text" 
+                      value={newTierName}
+                      onChange={(e) => setNewTierName(e.target.value)}
+                      placeholder="Name (e.g. Premium)"
+                      className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
+                    />
+                    <input 
+                      type="text" 
+                      value={newTierDesc}
+                      onChange={(e) => setNewTierDesc(e.target.value)}
+                      placeholder="Tooltip Description..."
+                      className="md:col-span-2 w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleCreateTier}
+                    disabled={!newTierName || !newTierDesc}
+                    className="bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amber-600 transition-all disabled:opacity-50"
+                  >
+                    Create Tier
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {qualityTiers.map(tier => (
+                    <div key={tier.id} className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <span className="inline-block px-2 py-1 bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded mb-2">
+                          {tier.name}
+                        </span>
+                        {editingTierId === tier.id ? (
+                          <input 
+                            type="text" 
+                            value={editingTierDesc}
+                            onChange={(e) => setEditingTierDesc(e.target.value)}
+                            className="w-full bg-surface-container-high border border-outline-variant/10 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                          />
+                        ) : (
+                          <p className="text-xs text-on-surface-variant font-medium">{tier.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {editingTierId === tier.id ? (
+                          <>
+                            <button 
+                              onClick={() => handleUpdateTierDesc(tier.id)}
+                              className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
+                            >
+                              <CheckCircle2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => { setEditingTierId(null); setEditingTierDesc(''); }}
+                              className="p-2 bg-error/5 text-error rounded-lg hover:bg-error/10 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button 
+                              onClick={() => { setEditingTierId(tier.id); setEditingTierDesc(tier.description); }}
+                              className="p-2 bg-secondary-container text-on-secondary-container rounded-lg hover:opacity-80 transition-opacity"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteTier(tier.id)}
+                              className="p-2 bg-error/5 text-error rounded-lg hover:bg-error/10 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* AI Blog Generator */}
           <section className="bg-surface-container-low rounded-[2rem] p-8 border border-outline-variant/5 mt-8">
             <div className="flex items-center gap-3 mb-8">
@@ -666,104 +768,7 @@ export function SettingsView({
             </div>
           </section>
 
-          {/* Quality Tiers Management (Super Admin Only) */}
-          {currentUser?.role?.toLowerCase().replace('_', ' ') === 'super admin' && (
-            <section className="bg-surface-container-low rounded-[2rem] p-8 border border-outline-variant/5 mt-8">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-amber-50 rounded-xl text-amber-600">
-                  <Layers size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-primary tracking-tight">Quality Tiers Management</h3>
-                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-1">Super Admin Dictionary</p>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="bg-surface-container-highest p-5 rounded-2xl border border-outline-variant/10 space-y-4">
-                  <h4 className="text-xs font-black text-on-surface uppercase tracking-wider">Add New Tier</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input 
-                      type="text" 
-                      value={newTierName}
-                      onChange={(e) => setNewTierName(e.target.value)}
-                      placeholder="Name (e.g. Premium)"
-                      className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
-                    />
-                    <input 
-                      type="text" 
-                      value={newTierDesc}
-                      onChange={(e) => setNewTierDesc(e.target.value)}
-                      placeholder="Tooltip Description..."
-                      className="md:col-span-2 w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
-                    />
-                  </div>
-                  <button 
-                    onClick={handleCreateTier}
-                    disabled={!newTierName || !newTierDesc}
-                    className="bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amber-600 transition-all disabled:opacity-50"
-                  >
-                    Create Tier
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {qualityTiers.map(tier => (
-                    <div key={tier.id} className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <span className="inline-block px-2 py-1 bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded mb-2">
-                          {tier.name}
-                        </span>
-                        {editingTierId === tier.id ? (
-                          <input 
-                            type="text" 
-                            value={editingTierDesc}
-                            onChange={(e) => setEditingTierDesc(e.target.value)}
-                            className="w-full bg-surface-container-high border border-outline-variant/10 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                          />
-                        ) : (
-                          <p className="text-xs text-on-surface-variant font-medium">{tier.description}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {editingTierId === tier.id ? (
-                          <>
-                            <button 
-                              onClick={() => handleUpdateTierDesc(tier.id)}
-                              className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
-                            >
-                              <CheckCircle2 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => { setEditingTierId(null); setEditingTierDesc(''); }}
-                              className="p-2 bg-error/5 text-error rounded-lg hover:bg-error/10 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button 
-                              onClick={() => { setEditingTierId(tier.id); setEditingTierDesc(tier.description); }}
-                              className="p-2 bg-secondary-container text-on-secondary-container rounded-lg hover:opacity-80 transition-opacity"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteTier(tier.id)}
-                              className="p-2 bg-error/5 text-error rounded-lg hover:bg-error/10 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
+          {/* (Quality Tiers Management section moved above AI Blog Generator) */}
         </div>
       </div>
     </div>

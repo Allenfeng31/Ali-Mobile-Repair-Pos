@@ -612,46 +612,117 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       className="overflow-hidden bg-surface-container-low"
                     >
                       <div className="p-4 sm:p-6 border-t border-outline-variant/10 space-y-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Stock</label>
-                            <input 
-                              type="number" 
-                              className="w-full px-3 py-2.5 bg-surface-container-lowest rounded-xl text-sm font-bold border border-outline-variant/10"
-                              value={formData.stock}
-                              onChange={e => setFormData({...formData, stock: e.target.value})}
-                            />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Variants / Quality Tiers</label>
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFormData({
+                                  ...formData, 
+                                  variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '' }]
+                                });
+                              }}
+                              className="text-xs font-bold text-primary flex items-center gap-1 hover:bg-primary/10 px-2 py-1 rounded-md transition-colors"
+                            >
+                              <Plus size={14} /> Add Quality Tier
+                            </button>
                           </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Min. Stock</label>
-                            <input 
-                              type="number" 
-                              className="w-full px-3 py-2.5 bg-surface-container-lowest rounded-xl text-sm font-bold border border-outline-variant/10"
-                              value={formData.minStock}
-                              onChange={e => setFormData({...formData, minStock: e.target.value})}
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Cost ($)</label>
-                            <input 
-                              type="number" 
-                              className="w-full px-3 py-2.5 bg-surface-container-lowest rounded-xl text-sm font-bold border border-outline-variant/10"
-                              value={formData.costPrice}
-                              onChange={e => setFormData({...formData, costPrice: e.target.value})}
-                            />
-                          </div>
-                          <div className="space-y-1.5 opacity-80">
-                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-1">
-                              Selling ($)
-                              {!permissions?.can_change_inventory_price && <Lock size={8} />}
-                            </label>
-                            <input 
-                              type="number" 
-                              disabled={!permissions?.can_change_inventory_price}
-                              className="w-full px-3 py-2.5 bg-surface-container-lowest rounded-xl text-sm font-bold border border-primary/20 text-primary disabled:bg-surface-container disabled:text-on-surface-variant disabled:cursor-not-allowed"
-                              value={formData.sellingPrice}
-                              onChange={e => setFormData({...formData, sellingPrice: e.target.value})}
-                            />
+
+                          <div className="space-y-3">
+                            {formData.variants.map((variant, index) => (
+                              <div key={variant.id} className="p-3 bg-surface-container-highest border border-outline-variant/20 rounded-xl relative">
+                                {formData.variants.length > 1 && (
+                                  <button 
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const newVariants = [...formData.variants];
+                                      newVariants.splice(index, 1);
+                                      setFormData({ ...formData, variants: newVariants });
+                                    }}
+                                    className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
+                                
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">Grade</label>
+                                    <select 
+                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-medium"
+                                      value={variant.quality_grade}
+                                      onChange={e => {
+                                        const newVariants = [...formData.variants];
+                                        newVariants[index].quality_grade = e.target.value;
+                                        setFormData({ ...formData, variants: newVariants });
+                                      }}
+                                    >
+                                      {qualityTiers.length > 0 ? (
+                                        qualityTiers.map(tier => (
+                                          <option key={tier.id} value={tier.name}>{tier.name}</option>
+                                        ))
+                                      ) : (
+                                        <>
+                                          <option value="Standard">Standard</option>
+                                          <option value="Budget">Budget</option>
+                                          <option value="Premium">Premium</option>
+                                          <option value="Genuine">Genuine</option>
+                                        </>
+                                      )}
+                                    </select>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'qty')}</label>
+                                    <input 
+                                      type="number"
+                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                                      placeholder="0"
+                                      value={variant.stock}
+                                      onChange={e => {
+                                        const newVariants = [...formData.variants];
+                                        newVariants[index].stock = e.target.value;
+                                        setFormData({ ...formData, variants: newVariants });
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
+                                    <input 
+                                      type="number"
+                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                                      placeholder="0.00"
+                                      value={variant.costPrice}
+                                      onChange={e => {
+                                        const newVariants = [...formData.variants];
+                                        newVariants[index].costPrice = e.target.value;
+                                        setFormData({ ...formData, variants: newVariants });
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-1">
+                                      {t('inv', 'sell')} ($)
+                                      {!permissions?.can_change_inventory_price && <Lock size={8} />}
+                                    </label>
+                                    <input 
+                                      type="number"
+                                      disabled={!permissions?.can_change_inventory_price}
+                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary disabled:bg-surface-container disabled:cursor-not-allowed" 
+                                      placeholder="0.00"
+                                      value={variant.sellingPrice}
+                                      onChange={e => {
+                                        const newVariants = [...formData.variants];
+                                        newVariants[index].sellingPrice = e.target.value;
+                                        setFormData({ ...formData, variants: newVariants });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
 
