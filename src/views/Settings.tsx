@@ -140,7 +140,7 @@ export function SettingsView({
       if (settings.ali_pos_invoice_footer) setFooter(settings.ali_pos_invoice_footer);
     }).catch(console.error);
 
-    if (currentUser?.role === 'super admin') {
+    if (currentUser?.role?.toLowerCase().replace('_', ' ') === 'super admin') {
       loadQualityTiers();
     }
   }, [currentUser]);
@@ -667,7 +667,7 @@ export function SettingsView({
           </section>
 
           {/* Quality Tiers Management (Super Admin Only) */}
-          {currentUser?.role === 'super admin' && (
+          {currentUser?.role?.toLowerCase().replace('_', ' ') === 'super admin' && (
             <section className="bg-surface-container-low rounded-[2rem] p-8 border border-outline-variant/5 mt-8">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-2 bg-amber-50 rounded-xl text-amber-600">
