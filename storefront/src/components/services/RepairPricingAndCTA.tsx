@@ -45,7 +45,7 @@ export default function RepairPricingAndCTA({
   const isMultiple = displayVariants.length > 1;
 
   return (
-    <div className="w-full mt-8 mb-12">
+    <div className="w-full mt-8">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
         <div className={`grid gap-6 ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'max-w-md mx-auto grid-cols-1'}`}>
           {displayVariants.map((variant) => {
@@ -107,8 +107,8 @@ export default function RepairPricingAndCTA({
         </div>
       )}
 
-      {/* Global CTA Group */}
-      <div className="mt-12 mb-10 flex flex-col items-center justify-center w-full gap-4 mx-auto">
+      {/* Global CTA Group - Outside the grid container */}
+      <div className="w-full flex flex-col items-center justify-center mt-[40px] mb-[32px] gap-4">
         <Link 
           href={`/book-repair?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&service=${encodeURIComponent(repairName)}`} 
           className="w-full max-w-xs text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
