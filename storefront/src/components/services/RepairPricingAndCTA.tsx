@@ -77,7 +77,7 @@ export default function RepairPricingAndCTA({
 
                 {/* Price */}
                 <div className="flex items-baseline mb-4">
-                  <span className="text-4xl md:text-5xl font-extrabold text-blue-600">
+                  <span className="text-3xl md:text-4xl font-extrabold text-blue-600">
                     ${variant.price}
                   </span>
                 </div>
@@ -108,10 +108,10 @@ export default function RepairPricingAndCTA({
       )}
 
       {/* Global CTA Group */}
-      <div className="mt-12 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
+      <div className="mt-8 flex flex-col items-center justify-center w-full gap-4 max-w-sm mx-auto">
         <Link 
           href={`/book-repair?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&service=${encodeURIComponent(repairName)}`} 
-          className="w-full py-4 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
           onClick={() => {
             analytics.trackBookRepair(modelName, repairName);
           }}
@@ -120,7 +120,7 @@ export default function RepairPricingAndCTA({
         </Link>
         <a 
           href="tel:0481058514" 
-          className="w-full py-4 px-8 text-center bg-white border border-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
           onClick={() => analytics.trackCallNow(modelName, repairName)}
         >
           📞 Call 0481 058 514
