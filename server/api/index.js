@@ -824,6 +824,66 @@ app.delete('/api/announcements/:id', async (req, res) => {
 });
 
 // ----------------------------------------------------------------------
+// QUALITY TIERS
+// ----------------------------------------------------------------------
+app.get('/api/quality-tiers', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('quality_tiers')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/quality-tiers', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('quality_tiers')
+      .insert([req.body])
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/quality-tiers/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('quality_tiers')
+      .update(req.body)
+      .eq('id', req.params.id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/quality-tiers/:id', async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('quality_tiers')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ----------------------------------------------------------------------
 // REPAIRS
 // ----------------------------------------------------------------------
 app.post('/api/repairs', async (req, res) => {

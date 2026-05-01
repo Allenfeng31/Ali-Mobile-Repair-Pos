@@ -62,6 +62,13 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filter, activeBrandFilter, activeCategoryFilter]);
+
+  const [qualityTiers, setQualityTiers] = useState<any[]>([]);
+  React.useEffect(() => {
+    api.getQualityTiers().then(tiers => {
+      setQualityTiers(tiers || []);
+    }).catch(console.error);
+  }, []);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -1022,10 +1029,18 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               setFormData({ ...formData, variants: newVariants });
                             }}
                           >
-                            <option value="Standard">Standard</option>
-                            <option value="Budget">Budget</option>
-                            <option value="Premium">Premium</option>
-                            <option value="Genuine">Genuine</option>
+                            {qualityTiers.length > 0 ? (
+                              qualityTiers.map(tier => (
+                                <option key={tier.id} value={tier.name}>{tier.name}</option>
+                              ))
+                            ) : (
+                              <>
+                                <option value="Standard">Standard</option>
+                                <option value="Budget">Budget</option>
+                                <option value="Premium">Premium</option>
+                                <option value="Genuine">Genuine</option>
+                              </>
+                            )}
                           </select>
                         </div>
                         <div className="space-y-1">

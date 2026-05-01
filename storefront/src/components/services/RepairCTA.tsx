@@ -18,12 +18,8 @@ interface RepairCTAProps {
   variants?: RepairVariant[];
 }
 
-const TIER_DESCRIPTIONS: Record<string, string> = {
-  'Budget': 'Basic aftermarket part, cost-effective option.',
-  'Standard': 'High-quality aftermarket display.',
-  'Premium': 'Matches original color and touch sensitivity perfectly.',
-  'Genuine': 'Official manufacturer part.'
-};
+// Dynamic tier descriptions fetched from backend
+// previously TIER_DESCRIPTIONS
 
 export default function RepairCTA({ 
   modelSlug, 
@@ -35,6 +31,24 @@ export default function RepairCTA({
   // If there's only 1 variant or if none exist, we don't strictly "require" a selection to proceed,
   // but if there are multiple, the user must select one.
   const [selectedVariant, setSelectedVariant] = useState<string | null>(variants.length === 1 ? variants[0].quality_grade : null);
+  const [tierDescriptions, setTierDescriptions] = useState<Record<string, string>>({});
+
+  React.useEffect(() => {
+    const fetchTierDescriptions = async () => {
+      try {
+        const res = await fetch('/api/proxy/quality-tiers');
+        if (res.ok) {
+          const tiers = await res.json();
+          const map: Record<string, string> = {};
+          tiers.forEach((t: any) => { map[t.name] = t.description; });
+          setTierDescriptions(map);
+        }
+      } catch (err) {
+        console.error('Failed to load quality tiers', err);
+      }
+    };
+    fetchTierDescriptions();
+  }, []);
 
   const displayVariants = variants.length > 0 ? variants : [];
 
@@ -62,7 +76,7 @@ export default function RepairCTA({
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-on-surface">{variant.quality_grade}</span>
                     <span 
-                      title={TIER_DESCRIPTIONS[variant.quality_grade] || 'Information about this tier'}
+                      title={tierDescriptions[variant.quality_grade] || 'Information about this tier'}
                       className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-black/5 dark:bg-white/10 text-xs font-medium opacity-70 cursor-help"
                     >
                       ?

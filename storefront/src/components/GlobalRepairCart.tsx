@@ -20,12 +20,8 @@ interface UpsellItem {
   bundle_price: number;
 }
 
-const TIER_DESCRIPTIONS: Record<string, string> = {
-  'Budget': 'Basic aftermarket part, cost-effective option.',
-  'Standard': 'High-quality aftermarket part.',
-  'Premium': 'Matches original color and touch sensitivity perfectly.',
-  'Genuine': 'Official manufacturer part.'
-};
+// Dynamic tier descriptions fetched from backend
+// previously TIER_DESCRIPTIONS
 
 // ── Shared Component for the Cart ──────────────────────────────────────────
 
@@ -40,6 +36,7 @@ const CartContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [upsells, setUpsells] = useState<UpsellItem[]>([]);
+  const [tierDescriptions, setTierDescriptions] = useState<Record<string, string>>({});
 
   // Fetch inventory once - NO POLLING
   useEffect(() => {
@@ -57,7 +54,23 @@ const CartContent = () => {
         setLoading(false);
       }
     };
+
+    const fetchTierDescriptions = async () => {
+      try {
+        const res = await fetch('/api/proxy/quality-tiers');
+        if (res.ok) {
+          const tiers = await res.json();
+          const map: Record<string, string> = {};
+          tiers.forEach((t: any) => { map[t.name] = t.description; });
+          setTierDescriptions(map);
+        }
+      } catch (err) {
+        console.error('Failed to load quality tiers', err);
+      }
+    };
+
     fetchInventory();
+    fetchTierDescriptions();
   }, []);
 
   // Fetch active upsells from Supabase
@@ -155,6 +168,7 @@ const CartContent = () => {
           onUpdateInfo={(brand, model, category) => updateDeviceInfo(device.id, brand, model, category)}
           isFirst={idx === 0}
           upsells={upsells}
+          tierDescriptions={tierDescriptions}
         />
       ))}
 
@@ -208,10 +222,11 @@ interface DeviceSelectorProps {
   onUpdateInfo: (brand: string, model: string, category: string) => void;
   isFirst: boolean;
   upsells: UpsellItem[];
+  tierDescriptions: Record<string, string>;
 }
 
 const DeviceSelector: React.FC<DeviceSelectorProps> = ({ 
-  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst, upsells 
+  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst, upsells, tierDescriptions 
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
@@ -499,7 +514,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                               <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{v.quality_grade} Tier</span>
                               <span 
-                                title={TIER_DESCRIPTIONS[v.quality_grade] || 'Information about this tier'} 
+                                title={tierDescriptions[v.quality_grade] || 'Information about this tier'} 
                                 style={{ 
                                   cursor: 'help', 
                                   opacity: 0.6, 

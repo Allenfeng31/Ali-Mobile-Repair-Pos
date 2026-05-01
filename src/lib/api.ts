@@ -241,4 +241,32 @@ export const api = {
     const res = await fetch(`${API_URL}/upsells`);
     return handleResponse(res);
   },
+
+  // Quality Tiers
+  getQualityTiers: async () => {
+    const res = await fetch(`${API_URL}/quality-tiers`);
+    return handleResponse(res);
+  },
+  createQualityTier: async (tier: { name: string, description: string }) => {
+    const res = await fetch(`${API_URL}/quality-tiers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tier),
+    });
+    return handleResponse(res);
+  },
+  updateQualityTier: async (id: string, tier: Partial<{ name: string, description: string }>) => {
+    const res = await fetch(`${API_URL}/quality-tiers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tier),
+    });
+    return handleResponse(res);
+  },
+  deleteQualityTier: async (id: string) => {
+    const res = await fetch(`${API_URL}/quality-tiers/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(res);
+  },
 };
