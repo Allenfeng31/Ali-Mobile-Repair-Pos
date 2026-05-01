@@ -6,6 +6,7 @@ import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 export interface RepairVariant {
   quality_grade: string;
   price: number;
+  is_recommended: boolean;
 }
 
 export interface RepairOption {
@@ -240,6 +241,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
       existing.variants.push({
         quality_grade: item.quality_grade,
         price: item.price,
+        is_recommended: item.is_recommended,
       });
       // The base price should be the lowest (starting price)
       if (item.price > 0 && (existing.price === 0 || item.price < existing.price)) {
@@ -250,7 +252,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
         slug: standardSlug,
         name: standardName,
         price: item.price,
-        variants: [{ quality_grade: item.quality_grade, price: item.price }],
+        variants: [{ quality_grade: item.quality_grade, price: item.price, is_recommended: item.is_recommended }],
       });
     }
   }

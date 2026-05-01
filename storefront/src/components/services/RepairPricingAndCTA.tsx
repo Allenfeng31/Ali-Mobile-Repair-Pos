@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { analytics } from '@/lib/analytics';
+import { ThumbsUp } from 'lucide-react';
 
 interface RepairVariant {
   quality_grade: string;
   price: number;
+  is_recommended?: boolean;
 }
 
 interface RepairPricingAndCTAProps {
@@ -56,15 +58,18 @@ export default function RepairPricingAndCTA({
                 key={variant.quality_grade}
                 className={`
                   relative flex flex-col p-8 rounded-2xl border transition-all duration-200
-                  ${isPremium 
-                    ? 'bg-blue-50/50 border-blue-200 shadow-sm hover:shadow-md' 
-                    : 'bg-white border-slate-200 shadow-sm hover:shadow-md'}
+                  ${variant.is_recommended 
+                    ? 'bg-blue-50/30 border-blue-300 shadow-md ring-1 ring-blue-300' 
+                    : isPremium 
+                      ? 'bg-blue-50/50 border-blue-200 shadow-sm hover:shadow-md' 
+                      : 'bg-white border-slate-200 shadow-sm hover:shadow-md'}
                 `}
               >
-                {/* Badge */}
-                {isPremium && (
-                  <div className="absolute top-4 right-4 bg-blue-100 text-blue-700 text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full">
-                    {variant.quality_grade === 'Genuine' ? 'Original' : 'Best Value'}
+                {/* Recommended Badge */}
+                {variant.is_recommended && (
+                  <div className="flex items-center gap-1 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-bl-lg rounded-tr-xl shadow-md absolute top-0 right-0 bg-blue-600 text-white z-10">
+                    <ThumbsUp size={14} />
+                    RECOMMENDED
                   </div>
                 )}
 

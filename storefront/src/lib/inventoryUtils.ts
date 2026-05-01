@@ -7,6 +7,7 @@ export interface RawItem {
   category: string;
   sku?: string;
   quality_grade?: string;
+  is_recommended?: boolean;
 }
 
 export interface ParsedItem {
@@ -20,6 +21,7 @@ export interface ParsedItem {
   category: string;
   deviceType: "phone" | "tablet" | "computer" | "watch";
   quality_grade: string;
+  is_recommended: boolean;
 }
 
 export function slugify(text: string): string {
@@ -152,6 +154,7 @@ export function parseItem(raw: RawItem): ParsedItem | null {
     category: raw.category,
     deviceType: detectDeviceType(brand),
     quality_grade: raw.quality_grade || "Standard",
+    is_recommended: raw.is_recommended || false,
   };
 }
 

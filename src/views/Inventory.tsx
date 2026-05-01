@@ -81,7 +81,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     is_pinned: false,
     pin_order: 0,
     variants: [
-      { id: Date.now(), quality_grade: 'Standard', stock: '', minStock: '5', costPrice: '', sellingPrice: '' }
+      { id: Date.now(), quality_grade: 'Standard', stock: '', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }
     ]
   });
 
@@ -225,7 +225,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       is_pinned: false,
       pin_order: 0,
       variants: [
-        { id: Date.now(), quality_grade: 'Standard', stock: '', minStock: '5', costPrice: '', sellingPrice: '' }
+        { id: Date.now(), quality_grade: 'Standard', stock: '', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }
       ]
     });
     setEditingId(null);
@@ -244,6 +244,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       minStock: v.minStock.toString(),
       costPrice: v.costPrice.toString(),
       sellingPrice: v.price.toString(),
+      is_recommended: v.is_recommended || false,
     }));
 
     setEditingId(item.id);
@@ -255,7 +256,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       device_model: item.device_model || '',
       is_pinned: item.is_pinned || false,
       pin_order: item.pin_order || 0,
-      variants: variants.length > 0 ? variants : [{ id: Date.now(), quality_grade: 'Standard', stock: '0', minStock: '5', costPrice: '', sellingPrice: '' }]
+      variants: variants.length > 0 ? variants : [{ id: Date.now(), quality_grade: 'Standard', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
     });
   };
 
@@ -294,6 +295,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         pin_order: formData.pin_order,
         iconName: baseIconName,
         quality_grade: variant.quality_grade,
+        is_recommended: variant.is_recommended,
         price: selling,
         costPrice: cost,
         stock: stock,
@@ -621,7 +623,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                 e.stopPropagation();
                                 setFormData({
                                   ...formData, 
-                                  variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '' }]
+                                  variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
                                 });
                               }}
                               className="text-xs font-bold text-primary flex items-center gap-1 hover:bg-primary/10 px-2 py-1 rounded-md transition-colors"
@@ -720,6 +722,24 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                       }}
                                     />
                                   </div>
+                                </div>
+                                <div className="mt-3 flex items-center justify-between border-t border-outline-variant/10 pt-2.5">
+                                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-1.5">
+                                    <span className="text-amber-500">⭐</span> Highlight / Recommend
+                                  </label>
+                                  <label className="relative inline-flex items-center cursor-pointer">
+                                    <input 
+                                      type="checkbox" 
+                                      className="sr-only peer"
+                                      checked={variant.is_recommended}
+                                      onChange={e => {
+                                        const newVariants = [...formData.variants];
+                                        newVariants[index].is_recommended = e.target.checked;
+                                        setFormData({ ...formData, variants: newVariants });
+                                      }}
+                                    />
+                                    <div className="w-8 h-4.5 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
+                                  </label>
                                 </div>
                               </div>
                             ))}
@@ -1063,7 +1083,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                     type="button"
                     onClick={() => setFormData({
                       ...formData, 
-                      variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '' }]
+                      variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
                     })}
                     className="text-xs font-bold text-primary flex items-center gap-1 hover:bg-primary/10 px-2 py-1 rounded-md transition-colors"
                   >
@@ -1160,6 +1180,24 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                             }}
                           />
                         </div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between border-t border-outline-variant/10 pt-2.5">
+                        <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-1.5">
+                          <span className="text-amber-500">⭐</span> Highlight / Recommend
+                        </label>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer"
+                            checked={variant.is_recommended}
+                            onChange={e => {
+                              const newVariants = [...formData.variants];
+                              newVariants[index].is_recommended = e.target.checked;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                          />
+                          <div className="w-8 h-4.5 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
                       </div>
                     </div>
                   ))}
