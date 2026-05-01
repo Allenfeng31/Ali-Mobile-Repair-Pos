@@ -44,12 +44,12 @@ describe('cartAutoSelect', () => {
     expect(result.brand).toBeNull();
   });
 
-  it('should auto-select but not confirm if service has multiple variants', () => {
+  it('should not auto-select but should expand if service has multiple variants', () => {
     const result = resolveInitialCartState('iPhone', 'iPhone 14 Pro Max', 'Screen Replacement', mockInventory);
     expect(result.brand).toBe('iPhone');
     expect(result.model).toBe('iPhone 14 Pro Max');
-    expect(result.serviceToSelect).not.toBeNull();
-    expect(result.serviceToSelect?.id).toBe(1); // Standard tier default
+    expect(result.serviceToSelect).toBeNull();
+    expect(result.serviceToExpand).toBe('Screen Replacement');
     expect(result.shouldAutoConfirm).toBe(false);
   });
 
@@ -59,6 +59,7 @@ describe('cartAutoSelect', () => {
     expect(result.model).toBe('iPhone 14 Pro Max');
     expect(result.serviceToSelect).not.toBeNull();
     expect(result.serviceToSelect?.id).toBe(3);
+    expect(result.serviceToExpand).toBeNull();
     expect(result.shouldAutoConfirm).toBe(true);
   });
 });

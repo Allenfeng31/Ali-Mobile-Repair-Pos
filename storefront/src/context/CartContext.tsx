@@ -15,11 +15,12 @@ export interface CartDevice {
   category: string;
   services: RepairService[];
   isConfirmed: boolean;
+  pendingExpandedService?: string;
 }
 
 interface CartContextType {
   devices: CartDevice[];
-  addDevice: (brand: string, model: string, category: string, service?: RepairService, autoConfirm?: boolean) => void;
+  addDevice: (brand: string, model: string, category: string, service?: RepairService, autoConfirm?: boolean, pendingExpandedService?: string | null) => void;
   removeDevice: (deviceId: string) => void;
   updateServices: (deviceId: string, services: RepairService[]) => void;
   updateDeviceInfo: (deviceId: string, brand: string, model: string, category: string) => void;
@@ -53,7 +54,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('repair_cart', JSON.stringify(devices));
   }, [devices]);
 
-  const addDevice = (brand: string, model: string, category: string, service?: RepairService, autoConfirm: boolean = false) => {
+  const addDevice = (brand: string, model: string, category: string, service?: RepairService, autoConfirm: boolean = false, pendingExpandedService?: string | null) => {
     const newDevice: CartDevice = {
       id: Math.random().toString(36).substring(2, 9),
       brand,
@@ -61,6 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       category,
       services: service ? [service] : [],
       isConfirmed: autoConfirm,
+      ...(pendingExpandedService ? { pendingExpandedService } : {})
     };
     setDevices(prev => [...prev, newDevice]);
   };

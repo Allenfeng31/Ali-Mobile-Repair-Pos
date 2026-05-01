@@ -105,7 +105,7 @@ const CartContent = () => {
 
     import('@/lib/cartAutoSelect').then(({ resolveInitialCartState }) => {
       if (brandParam && modelParam) {
-        const { brand, model, category, serviceToSelect, shouldAutoConfirm } = resolveInitialCartState(
+        const { brand, model, category, serviceToSelect, serviceToExpand, shouldAutoConfirm } = resolveInitialCartState(
           brandParam,
           modelParam,
           serviceParam,
@@ -115,7 +115,7 @@ const CartContent = () => {
         if (brand && model && category) {
           const alreadyInCart = devices.some(d => d.brand === brand && d.model === model);
           if (!alreadyInCart) {
-            addDevice(brand, model, category as ParsedItem["deviceType"], serviceToSelect || undefined, shouldAutoConfirm);
+            addDevice(brand, model, category as ParsedItem["deviceType"], serviceToSelect || undefined, shouldAutoConfirm, serviceToExpand);
           }
         }
       } else if (legacyModelParam) {
@@ -251,6 +251,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
   const [selectedModel, setSelectedModel] = useState(device.model || "");
+  const [localCollapsedGroups, setLocalCollapsedGroups] = useState<Record<string, boolean>>({});
 
   const sortedBrands = useMemo(() => {
     const PRIORITY_BRANDS = ['iPhone', 'Samsung', 'Google', 'Oppo'];
@@ -305,15 +306,21 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     return groupServicesByBaseName(filtered);
   }, [inventory, selectedBrand, selectedModel]);
 
-  const isGroupSelected = (s: GroupedService) => 
+  const hasVariantInCart = (s: GroupedService) => 
     s.variants.some(v => device.services.some(ds => ds.id === v.id));
 
+  const isGroupSelected = (s: GroupedService) => 
+    !localCollapsedGroups[s.service] && (hasVariantInCart(s) || s.service === device.pendingExpandedService);
+
   const toggleService = (s: GroupedService) => {
-    const isSelected = isGroupSelected(s);
-    if (isSelected) {
+    const inCart = hasVariantInCart(s);
+    if (inCart) {
       const variantIds = s.variants.map(v => v.id);
       onUpdate(device.services.filter(item => !variantIds.includes(item.id as number)));
+    } else if (s.service === device.pendingExpandedService && !localCollapsedGroups[s.service]) {
+      setLocalCollapsedGroups({ ...localCollapsedGroups, [s.service]: true });
     } else {
+      setLocalCollapsedGroups({ ...localCollapsedGroups, [s.service]: false });
       const defaultVariant = s.variants.find(v => v.quality_grade === 'Standard') || s.variants[0];
       const name = s.variants.length > 1 ? `${s.service} - ${defaultVariant.quality_grade}` : s.service;
       onUpdate([...device.services, { id: defaultVariant.id, name, price: defaultVariant.price }]);

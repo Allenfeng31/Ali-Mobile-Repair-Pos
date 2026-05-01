@@ -47,25 +47,26 @@ export default function RepairPricingAndCTA({
   return (
     <div className="flex flex-col items-center w-full max-w-2xl mx-auto mt-2 mb-6">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
-        <div className="w-full mb-8 text-left">
-          <p className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-4">Pricing & Options</p>
-          <div className="space-y-4">
+        <div className="w-full mb-10 text-left bg-transparent">
+          <div className="flex flex-col">
             {displayVariants.map((variant) => (
               <div 
                 key={variant.quality_grade}
-                className="flex flex-col p-5 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest"
+                className="flex items-start justify-between py-6 border-b border-gray-200 dark:border-white/10 last:border-b-0"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg text-on-surface">{variant.quality_grade}</span>
-                  </div>
-                  <span className="font-black text-2xl text-primary">${variant.price}</span>
+                <div className="flex flex-col pr-6">
+                  <span className="font-semibold text-xl text-gray-900 dark:text-white">
+                    {variant.quality_grade}
+                  </span>
+                  {tierDescriptions[variant.quality_grade] && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed max-w-md">
+                      {tierDescriptions[variant.quality_grade]}
+                    </p>
+                  )}
                 </div>
-                {tierDescriptions[variant.quality_grade] && (
-                  <p className="text-sm text-on-surface-variant/80 leading-relaxed">
-                    {tierDescriptions[variant.quality_grade]}
-                  </p>
-                )}
+                <span className="font-medium text-xl text-gray-900 dark:text-white whitespace-nowrap">
+                  ${variant.price}
+                </span>
               </div>
             ))}
           </div>

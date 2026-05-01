@@ -5,6 +5,7 @@ export interface AutoSelectResult {
   model: string | null;
   category: string | null;
   serviceToSelect: { id: number, name: string, price: number } | null;
+  serviceToExpand: string | null;
   shouldAutoConfirm: boolean;
 }
 
@@ -15,7 +16,7 @@ export function resolveInitialCartState(
   inventory: ParsedItem[]
 ): AutoSelectResult {
   if (!brandParam || !modelParam) {
-    return { brand: null, model: null, category: null, serviceToSelect: null, shouldAutoConfirm: false };
+    return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
   }
 
   // Find model matches
@@ -28,7 +29,7 @@ export function resolveInitialCartState(
   );
 
   if (matchedItems.length === 0) {
-    return { brand: null, model: null, category: null, serviceToSelect: null, shouldAutoConfirm: false };
+    return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
   }
 
   const category = matchedItems[0].category;
@@ -36,7 +37,7 @@ export function resolveInitialCartState(
   const model = matchedItems[0].deviceModel;
 
   if (!serviceParam) {
-    return { brand, model, category, serviceToSelect: null, shouldAutoConfirm: false };
+    return { brand, model, category, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
   }
 
   const decodedService = decodeURIComponent(serviceParam).toLowerCase();
@@ -46,24 +47,27 @@ export function resolveInitialCartState(
   const matchedGroup = grouped.find(g => g.service.toLowerCase() === decodedService);
 
   if (!matchedGroup) {
-    return { brand, model, category, serviceToSelect: null, shouldAutoConfirm: false };
+    return { brand, model, category, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
   }
 
   // Check variants
   const hasMultipleVariants = matchedGroup.variants.length > 1;
   const defaultVariant = matchedGroup.variants.find(v => v.quality_grade === 'Standard') || matchedGroup.variants[0];
   
-  const serviceToSelect = {
+  const serviceToSelect = hasMultipleVariants ? null : {
     id: defaultVariant.id,
-    name: hasMultipleVariants ? `${matchedGroup.service} - ${defaultVariant.quality_grade}` : matchedGroup.service,
+    name: matchedGroup.service,
     price: defaultVariant.price
   };
+
+  const serviceToExpand = hasMultipleVariants ? matchedGroup.service : null;
 
   return {
     brand,
     model,
     category,
     serviceToSelect,
+    serviceToExpand,
     shouldAutoConfirm: !hasMultipleVariants
   };
 }
