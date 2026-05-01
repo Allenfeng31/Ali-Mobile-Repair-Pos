@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { useCart, RepairService, CartDevice } from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
 import { 
-  RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle 
+  RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle,
+  groupServicesByBaseName, GroupedService
 } from '@/lib/inventoryUtils';
 import { smartSortModels } from '@/lib/modelSortConfig';
 import './RepairCart.css';
@@ -18,6 +19,13 @@ interface UpsellItem {
   regular_price: number;
   bundle_price: number;
 }
+
+const TIER_DESCRIPTIONS: Record<string, string> = {
+  'Budget': 'Basic aftermarket part, cost-effective option.',
+  'Standard': 'High-quality aftermarket part.',
+  'Premium': 'Matches original color and touch sensitivity perfectly.',
+  'Genuine': 'Official manufacturer part.'
+};
 
 // ── Shared Component for the Cart ──────────────────────────────────────────
 
@@ -258,16 +266,31 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
 
   const availableServices = useMemo(() => {
     if (!selectedBrand || !selectedModel) return [];
-    return inventory.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
+    const filtered = inventory.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
+    return groupServicesByBaseName(filtered);
   }, [inventory, selectedBrand, selectedModel]);
 
-  const toggleService = (s: ParsedItem) => {
-    const isSelected = device.services.some(item => item.id === s.id);
+  const isGroupSelected = (s: GroupedService) => 
+    s.variants.some(v => device.services.some(ds => ds.id === v.id));
+
+  const toggleService = (s: GroupedService) => {
+    const isSelected = isGroupSelected(s);
     if (isSelected) {
-      onUpdate(device.services.filter(item => item.id !== s.id));
+      const variantIds = s.variants.map(v => v.id);
+      onUpdate(device.services.filter(item => !variantIds.includes(item.id as number)));
     } else {
-      onUpdate([...device.services, { id: s.id, name: s.service, price: s.price }]);
+      const defaultVariant = s.variants.find(v => v.quality_grade === 'Standard') || s.variants[0];
+      const name = s.variants.length > 1 ? `${s.service} - ${defaultVariant.quality_grade}` : s.service;
+      onUpdate([...device.services, { id: defaultVariant.id, name, price: defaultVariant.price }]);
     }
+  };
+
+  const selectVariant = (s: GroupedService, variantId: number) => {
+    const variant = s.variants.find(v => v.id === variantId);
+    if (!variant) return;
+    const name = s.variants.length > 1 ? `${s.service} - ${variant.quality_grade}` : s.service;
+    const newServices = device.services.filter(item => !s.variants.some(v => v.id === item.id));
+    onUpdate([...newServices, { id: variant.id, name, price: variant.price }]);
   };
 
   const handleConfirm = () => {
@@ -415,21 +438,93 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
         <>
           <div className="services-grid animate-fade">
             {availableServices.length > 0 ? (
-              availableServices.map(s => (
-                <div 
-                  key={s.id} 
-                  className={`service-card ${device.services.some(item => item.id === s.id) ? 'selected' : ''}`}
-                  onClick={() => toggleService(s)}
-                >
-                  <div className="checkbox-custom" />
-                  <div className="service-name-price">
-                    <span className="service-name">{s.service}</span>
-                    <span className="service-price">
-                      {s.price > 0 ? `$${s.price.toFixed(2)}` : "Quote on Request"}
-                    </span>
+              availableServices.map(s => {
+                const isSelected = isGroupSelected(s);
+                const selectedVariantId = isSelected 
+                  ? device.services.find(ds => s.variants.some(v => v.id === ds.id))?.id 
+                  : null;
+
+                return (
+                  <div key={s.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div 
+                      className={`service-card ${isSelected ? 'selected' : ''}`}
+                      onClick={() => toggleService(s)}
+                      style={isSelected && s.variants.length > 1 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderBottom: 'none' } : {}}
+                    >
+                      <div className="checkbox-custom" />
+                      <div className="service-name-price">
+                        <span className="service-name">{s.service}</span>
+                        <span className="service-price">
+                          {s.price > 0 ? (s.variants.length > 1 ? `From $${s.price}` : `$${s.price.toFixed(2)}`) : "Quote on Request"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isSelected && s.variants.length > 1 && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1px',
+                        background: 'var(--layer-border)',
+                        border: '1px solid var(--layer-border)',
+                        borderTop: 'none',
+                        borderBottomLeftRadius: '12px',
+                        borderBottomRightRadius: '12px',
+                        overflow: 'hidden',
+                        marginTop: '-0.5rem',
+                        padding: '0.5rem'
+                      }}>
+                        {s.variants.map(v => (
+                          <label 
+                            key={v.id} 
+                            style={{
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '1rem', 
+                              padding: '0.8rem', 
+                              background: selectedVariantId === v.id ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--layer)',
+                              cursor: 'pointer',
+                              borderRadius: '8px',
+                              border: selectedVariantId === v.id ? '1px solid var(--primary)' : '1px solid transparent',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <input 
+                              type="radio" 
+                              name={`variant-${s.id}`} 
+                              checked={selectedVariantId === v.id}
+                              onChange={() => selectVariant(s, v.id)}
+                              style={{ accentColor: 'var(--primary)', width: '1.1rem', height: '1.1rem', margin: 0 }}
+                            />
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{v.quality_grade} Tier</span>
+                              <span 
+                                title={TIER_DESCRIPTIONS[v.quality_grade] || 'Information about this tier'} 
+                                style={{ 
+                                  cursor: 'help', 
+                                  opacity: 0.6, 
+                                  fontSize: '0.85rem',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '18px',
+                                  height: '18px',
+                                  borderRadius: '50%',
+                                  background: 'var(--layer-border)',
+                                  color: 'var(--foreground)'
+                                }}
+                              >
+                                ?
+                              </span>
+                            </div>
+                            <span style={{ fontWeight: 700, color: 'var(--primary)' }}>${v.price}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <p style={{ gridColumn: '1/-1', opacity: 0.5, fontSize: '0.85rem' }}>
                 No standard pricing found. We can still help! Please add to cart and we will quote you.

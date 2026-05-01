@@ -18,6 +18,13 @@ interface RepairCTAProps {
   variants?: RepairVariant[];
 }
 
+const TIER_DESCRIPTIONS: Record<string, string> = {
+  'Budget': 'Basic aftermarket part, cost-effective option.',
+  'Standard': 'High-quality aftermarket display.',
+  'Premium': 'Matches original color and touch sensitivity perfectly.',
+  'Genuine': 'Official manufacturer part.'
+};
+
 export default function RepairCTA({ 
   modelSlug, 
   repairSlug, 
@@ -52,11 +59,20 @@ export default function RepairCTA({
                   }`}>
                     {selectedVariant === variant.quality_grade && <Check size={12} strokeWidth={3} className="text-on-primary" />}
                   </div>
-                  <span className="font-bold text-on-surface">{variant.quality_grade}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-on-surface">{variant.quality_grade}</span>
+                    <span 
+                      title={TIER_DESCRIPTIONS[variant.quality_grade] || 'Information about this tier'}
+                      className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-black/5 dark:bg-white/10 text-xs font-medium opacity-70 cursor-help"
+                    >
+                      ?
+                    </span>
+                  </div>
                 </div>
                 <span className="font-black text-lg text-primary">${variant.price}</span>
                 <input 
                   type="radio" 
+
                   name="quality_grade" 
                   value={variant.quality_grade}
                   checked={selectedVariant === variant.quality_grade}

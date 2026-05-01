@@ -179,3 +179,48 @@ export const MANUAL_MODELS: Record<string, string[]> = {
     "Apple Watch SE (2nd Gen)", "Apple Watch Series 9", "Apple Watch Ultra 2", "Apple Watch Series 10"
   ]
 };
+
+export interface ServiceVariant {
+  id: number;
+  quality_grade: string;
+  price: number;
+  originalItem: ParsedItem;
+}
+
+export interface GroupedService {
+  id: string; // Base id, we can use the first item's id or combination
+  service: string;
+  price: number; // Starting price
+  variants: ServiceVariant[];
+}
+
+export function groupServicesByBaseName(items: ParsedItem[]): GroupedService[] {
+  const grouped = new Map<string, GroupedService>();
+
+  for (const item of items) {
+    if (!grouped.has(item.service)) {
+      grouped.set(item.service, {
+        id: `grouped-${item.id}`,
+        service: item.service,
+        price: item.price,
+        variants: []
+      });
+    }
+
+    const group = grouped.get(item.service)!;
+    group.variants.push({
+      id: item.id,
+      quality_grade: item.quality_grade || 'Standard',
+      price: item.price,
+      originalItem: item
+    });
+
+    // Update starting price if this variant is cheaper
+    if (item.price > 0 && (group.price === 0 || item.price < group.price)) {
+      group.price = item.price;
+    }
+  }
+
+  return Array.from(grouped.values());
+}
+
