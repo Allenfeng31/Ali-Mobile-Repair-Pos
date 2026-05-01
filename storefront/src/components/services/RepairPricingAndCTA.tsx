@@ -45,9 +45,9 @@ export default function RepairPricingAndCTA({
   const isMultiple = displayVariants.length > 1;
 
   return (
-    <div className="w-full mt-8">
+    <div className="w-full flex flex-col items-center mt-8">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
-        <div className={`grid gap-6 ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'max-w-md mx-auto grid-cols-1'}`}>
+        <div className={`grid gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
           {displayVariants.map((variant) => {
             const isPremium = variant.quality_grade === 'Premium' || variant.quality_grade === 'Genuine';
             
@@ -107,8 +107,8 @@ export default function RepairPricingAndCTA({
         </div>
       )}
 
-      {/* Global CTA Group - Outside the grid container */}
-      <div className="w-full flex flex-col items-center justify-center mt-[40px] mb-[32px] gap-4">
+      {/* Global CTA Group - Strictly below the grid in document flow */}
+      <div className="w-full flex flex-col items-center justify-center mt-12 mb-8 gap-4">
         <Link 
           href={`/book-repair?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&service=${encodeURIComponent(repairName)}`} 
           className="w-full max-w-xs text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
