@@ -71,8 +71,8 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_PUBLIC_KEY = process.env.VITE_VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 
 // Push subscriptions are stored in Supabase `push_subscriptions` table
 // (NOT in-memory — in-memory arrays die on Vercel serverless cold starts)
@@ -1347,7 +1347,7 @@ app.get('/api/blog/proxy-image', async (req, res) => {
 // Get VAPID public key (needed by frontend to subscribe)
 app.get('/api/push/vapid-public-key', (req, res) => {
   // Read directly from process.env to ensure we get the latest
-  const publicKey = process.env.VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY;
+  const publicKey = process.env.VITE_VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY;
   
   if (!publicKey) {
     console.error("Missing keys in env:", Object.keys(process.env));
