@@ -223,15 +223,6 @@ const CartContent = () => {
               💡 No upfront payment required. You only pay in-store after your device is successfully repaired.
             </p>
           </div>
-          
-          <button 
-            className="checkout-btn" 
-            onClick={() => window.location.href = `/book-repair/checkout`}
-            disabled={!devices.some(d => d.isConfirmed)}
-            style={{ opacity: devices.some(d => d.isConfirmed) ? 1 : 0.5 }}
-          >
-            Book Repair
-          </button>
         </div>
       )}
     </div>

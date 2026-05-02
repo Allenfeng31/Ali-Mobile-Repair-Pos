@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useCart } from '@/context/CartContext';
 import { analytics } from '@/lib/analytics';
@@ -12,7 +11,6 @@ export default function Header() {
   const { devices } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -84,16 +82,14 @@ export default function Header() {
             </div>
           )}
 
-          {pathname !== '/book-repair' && (
-            <Link 
-              href="/book-repair" 
-              prefetch={true}
-              className="primary-btn"
-              style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              Book Repair {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>{devices.length}</span>}
-            </Link>
-          )}
+          <Link 
+            href="/book-repair" 
+            prefetch={true}
+            className="primary-btn"
+            style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            Book Repair {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>{devices.length}</span>}
+          </Link>
 
           {/* Hamburger button – mobile only */}
           <button 
