@@ -3,6 +3,7 @@
  */
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
+import '@testing-library/jest-dom';
 import RepairPricingAndCTA from './RepairPricingAndCTA';
 import React from 'react';
 
@@ -96,17 +97,41 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
 
   // ── Step 2: Routing Validation & URL ────────────────────────────────────────
 
-  it('blocks routing when no tier is selected and shows alert', () => {
+  it('shows inline error message and blocks routing when no tier is selected', () => {
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    render(<RepairPricingAndCTA {...defaultProps} />);
+    
+    // Initially error should not be visible
+    expect(screen.queryByText(/Please select a screen quality tier to proceed/i)).not.toBeInTheDocument();
+
+    const bookBtn = screen.getByRole('button', { name: /book repair now/i });
+    fireEvent.click(bookBtn);
+    
+    // Should show inline error
+    expect(screen.getByText(/Please select a screen quality tier to proceed/i)).toBeInTheDocument();
+    // Should NOT show alert anymore
+    expect(alertSpy).not.toHaveBeenCalled();
+    // Should block routing
+    expect(mockPush).not.toHaveBeenCalled();
+    
+    alertSpy.mockRestore();
+  });
+
+  it('clears inline error message when a tier is selected', () => {
     render(<RepairPricingAndCTA {...defaultProps} />);
     
     const bookBtn = screen.getByRole('button', { name: /book repair now/i });
     fireEvent.click(bookBtn);
     
-    expect(alertSpy).toHaveBeenCalledWith('Please select a screen quality tier first.');
-    expect(mockPush).not.toHaveBeenCalled();
-    
-    alertSpy.mockRestore();
+    // Should show inline error
+    expect(screen.getByText(/Please select a screen quality tier to proceed/i)).toBeInTheDocument();
+
+    // Select a tier
+    const premiumCard = screen.getByRole('button', { name: /select premium tier/i });
+    fireEvent.click(premiumCard);
+
+    // Error should be gone
+    expect(screen.queryByText(/Please select a screen quality tier to proceed/i)).not.toBeInTheDocument();
   });
 
   it('routes with tier param when a tier IS selected', () => {

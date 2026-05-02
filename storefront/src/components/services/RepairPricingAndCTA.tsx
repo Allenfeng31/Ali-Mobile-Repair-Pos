@@ -28,6 +28,7 @@ export default function RepairPricingAndCTA({
   const [tierDescriptions, setTierDescriptions] = useState<Record<string, string>>({});
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [showValidationHint, setShowValidationHint] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     const fetchTierDescriptions = async () => {
@@ -51,6 +52,7 @@ export default function RepairPricingAndCTA({
 
   const handleCardClick = (tierName: string) => {
     setShowValidationHint(false);
+    setShowError(false);
     setSelectedTier(prev => prev === tierName ? null : tierName);
   };
 
@@ -65,7 +67,7 @@ export default function RepairPricingAndCTA({
     // If there are multiple tiers and none is selected, block navigation
     if (isMultiple && !selectedTier) {
       setShowValidationHint(true);
-      alert('Please select a screen quality tier first.');
+      setShowError(true);
       return;
     }
 
@@ -172,6 +174,14 @@ export default function RepairPricingAndCTA({
 
       {/* Global CTA Group - Strictly below the spacer in document flow */}
       <div className="w-full flex flex-col items-center justify-center mb-8 gap-4 max-w-sm mx-auto">
+        {showError && (
+          <div className="text-red-500 text-sm font-semibold flex items-center justify-center gap-1 mb-2 animate-pulse">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Please select a screen quality tier to proceed.
+          </div>
+        )}
         <button 
           type="button"
           onClick={handleBookRepair}
