@@ -6,6 +6,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
+const { isSmsAlertEnabled } = require('./sms-gate.js');
 // Only load dotenv in local development (where .env file exists)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -1183,19 +1184,24 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
         .update({ last_sms_sent_at: now.toISOString() })
         .eq('id', session.id);
 
-      // SMS alert
+      // SMS alert — only if admin has SMS alerts enabled (cost-saving gate)
       if (twilioClient && twilioPhone) {
-        const snippet = trimmed.length > 30 ? trimmed.substring(0, 30) + '...' : trimmed;
-        const smsBody = cleanSMS(`New POS Chat: "${snippet}"`);
-        twilioClient.messages.create({
-          body: smsBody,
-          from: twilioPhone,
-          to: ADMIN_PHONE,
-        }).then(msg => {
-          console.log(`✅ [SMS] Chat alert sent — SID: ${msg.sid}`);
-        }).catch(err => {
-          console.error('❌ [SMS] Chat alert failed:', err.message);
-        });
+        const smsEnabled = await isSmsAlertEnabled(supabase);
+        if (!smsEnabled) {
+          console.log('SMS alerts disabled by admin. Skipping Twilio.');
+        } else {
+          const snippet = trimmed.length > 30 ? trimmed.substring(0, 30) + '...' : trimmed;
+          const smsBody = cleanSMS(`New POS Chat: "${snippet}"`);
+          twilioClient.messages.create({
+            body: smsBody,
+            from: twilioPhone,
+            to: ADMIN_PHONE,
+          }).then(msg => {
+            console.log(`✅ [SMS] Chat alert sent — SID: ${msg.sid}`);
+          }).catch(err => {
+            console.error('❌ [SMS] Chat alert failed:', err.message);
+          });
+        }
       }
 
       // Web Push alert (load subscriptions from DB, not in-memory)

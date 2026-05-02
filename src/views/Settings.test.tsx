@@ -1,14 +1,14 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { SettingsView } from './Settings';
 
 // Mock the API since it is used in useEffect
 vi.mock('../lib/api', () => ({
   api: {
-    getSettings: vi.fn().mockResolvedValue({}),
+    getSettings: vi.fn().mockResolvedValue({ sms_alerts_enabled: 'true' }),
     updateSetting: vi.fn().mockResolvedValue({}),
     updateUser: vi.fn(),
 
@@ -82,4 +82,45 @@ describe('SettingsView', () => {
 
     expect(screen.queryByText('Quality Tiers Management')).toBeNull();
   });
+
+  // ========================================================================
+  // SMS ALERTS TOGGLE
+  // ========================================================================
+  it('renders the SMS Alerts section', () => {
+    const user = { id: 1, username: 'admin', role: 'admin' };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+
+    expect(screen.getByText('SMS Alerts')).toBeDefined();
+    expect(screen.getByText(/Receive text messages for new customer chats/)).toBeDefined();
+  });
+
+  it('renders the SMS toggle button with correct initial text when enabled', () => {
+    const user = { id: 1, username: 'admin', role: 'admin' };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+
+    const toggleButton = screen.getByText('Disable SMS Alerts');
+    expect(toggleButton).toBeDefined();
+  });
+
+  it('renders cost-saving explanation text', () => {
+    const user = { id: 1, username: 'admin', role: 'admin' };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+
+    expect(screen.getByText(/save Twilio credits/)).toBeDefined();
+    expect(screen.getByText(/push notifications will still work/i)).toBeDefined();
+  });
+
+  it('calls updateSetting when SMS toggle is clicked', async () => {
+    const { api } = await import('../lib/api');
+    const user = { id: 1, username: 'admin', role: 'admin' };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+
+    const toggleButton = screen.getByText('Disable SMS Alerts');
+    fireEvent.click(toggleButton);
+
+    await waitFor(() => {
+      expect(api.updateSetting).toHaveBeenCalledWith('sms_alerts_enabled', 'false');
+    });
+  });
 });
+

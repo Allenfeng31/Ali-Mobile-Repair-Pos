@@ -11,7 +11,9 @@ import {
   Edit2,
   Bell,
   BellOff,
-  BellRing
+  BellRing,
+  Smartphone,
+  SmartphoneNfc
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -62,6 +64,10 @@ export function SettingsView({
   const [pushLoading, setPushLoading] = React.useState(false);
   const [pushStatus, setPushStatus] = React.useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
   const [testPushSent, setTestPushSent] = React.useState(false);
+
+  // SMS Alerts Toggle State
+  const [smsAlertsEnabled, setSmsAlertsEnabled] = React.useState(true);
+  const [smsToggleLoading, setSmsToggleLoading] = React.useState(false);
 
   // Check push notification status on mount
   React.useEffect(() => {
@@ -172,10 +178,28 @@ export function SettingsView({
 
 
 
+  const handleToggleSmsAlerts = async () => {
+    setSmsToggleLoading(true);
+    try {
+      const newValue = !smsAlertsEnabled;
+      await api.updateSetting('sms_alerts_enabled', newValue ? 'true' : 'false');
+      setSmsAlertsEnabled(newValue);
+    } catch (err: any) {
+      console.error('[SMS Toggle] Failed:', err);
+      alert('Failed to update SMS setting: ' + err.message);
+    } finally {
+      setSmsToggleLoading(false);
+    }
+  };
+
   React.useEffect(() => {
     api.getSettings().then(settings => {
       if (settings.ali_pos_invoice_header) setHeader(settings.ali_pos_invoice_header);
       if (settings.ali_pos_invoice_footer) setFooter(settings.ali_pos_invoice_footer);
+      // Load SMS alerts setting (default: true if not set)
+      if (settings.sms_alerts_enabled !== undefined) {
+        setSmsAlertsEnabled(settings.sms_alerts_enabled !== 'false');
+      }
     }).catch(console.error);
 
     if (isSuperAdmin) {
@@ -441,6 +465,68 @@ export function SettingsView({
                   ⚠️ Notifications are blocked. Open your browser settings and allow notifications for this site, then try again.
                 </p>
               )}
+            </div>
+          </section>
+
+          {/* SMS Alerts Toggle */}
+          <section id="sms-alerts-section" className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={cn(
+                "p-2 rounded-xl transition-colors",
+                smsAlertsEnabled ? "bg-amber-50 text-amber-600" : "bg-surface-container-high text-on-surface-variant"
+              )}>
+                {smsAlertsEnabled ? <SmartphoneNfc size={22} /> : <Smartphone size={22} />}
+              </div>
+              <div>
+                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">SMS Alerts</h3>
+                <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                  Receive text messages for new customer chats
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Status indicator */}
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant/10">
+                <div className={cn(
+                  "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
+                  smsAlertsEnabled ? "bg-amber-500 shadow-lg shadow-amber-500/50 animate-pulse" : "bg-on-surface-variant/20"
+                )} />
+                <span className={cn(
+                  "text-sm font-bold",
+                  smsAlertsEnabled ? "text-amber-500" : "text-on-surface-variant"
+                )}>
+                  {smsAlertsEnabled ? 'SMS Alerts Active' : 'SMS Alerts Off'}
+                </span>
+              </div>
+
+              {/* Toggle button */}
+              <button
+                id="sms-alerts-toggle"
+                onClick={handleToggleSmsAlerts}
+                disabled={smsToggleLoading}
+                className={cn(
+                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50",
+                  smsAlertsEnabled
+                    ? "bg-surface-container-high text-on-surface-variant border border-outline-variant/10 hover:bg-error/10 hover:text-error hover:border-error/20 shadow-none"
+                    : "bg-amber-500 text-white hover:bg-amber-400 shadow-amber-200"
+                )}
+              >
+                {smsToggleLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : smsAlertsEnabled ? (
+                  <BellOff size={16} />
+                ) : (
+                  <Smartphone size={16} />
+                )}
+                {smsAlertsEnabled ? 'Disable SMS Alerts' : 'Enable SMS Alerts'}
+              </button>
+
+              {/* Cost-saving info */}
+              <p className="text-[10px] text-on-surface-variant/60 leading-relaxed px-1">
+                💡 Turn this off to stop receiving text messages and save Twilio credits.
+                Desktop/PWA push notifications will still work.
+              </p>
             </div>
           </section>
         </div>
