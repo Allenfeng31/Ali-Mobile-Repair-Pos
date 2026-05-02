@@ -45,8 +45,13 @@ self.addEventListener('push', (event) => {
   };
 
   // Set app badge count if supported (iOS 16.4+, Android)
-  if (self.navigator && self.navigator.setAppBadge) {
-    self.navigator.setAppBadge(1).catch(() => {});
+  // Wrapped in try/catch — some older browsers crash if API is absent
+  try {
+    if (self.navigator && typeof self.navigator.setAppBadge === 'function') {
+      self.navigator.setAppBadge(1).catch(() => {});
+    }
+  } catch (_) {
+    // Badge API not supported — fail silently
   }
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -56,9 +61,13 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // Clear app badge on tap
-  if (self.navigator && self.navigator.clearAppBadge) {
-    self.navigator.clearAppBadge().catch(() => {});
+  // Clear app badge on tap — wrapped in try/catch for safety
+  try {
+    if (self.navigator && typeof self.navigator.clearAppBadge === 'function') {
+      self.navigator.clearAppBadge().catch(() => {});
+    }
+  } catch (_) {
+    // Badge API not supported — fail silently
   }
 
   const urlToOpen = event.notification.data?.url || '/';
@@ -77,4 +86,18 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+});
+
+// ── Badge Clearing Message Handler ───────────────────────────────────
+// Allows the main app to request badge clearing (e.g. when chat is opened)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CLEAR_BADGE') {
+    try {
+      if (self.navigator && typeof self.navigator.clearAppBadge === 'function') {
+        self.navigator.clearAppBadge().catch(() => {});
+      }
+    } catch (_) {
+      // Badge API not supported — fail silently
+    }
+  }
 });

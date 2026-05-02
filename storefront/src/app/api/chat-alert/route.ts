@@ -3,7 +3,7 @@ import twilio from 'twilio';
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const fromNumber = process.env.TWILIO_FROM_NUMBER;
+const fromNumber = process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM_NUMBER;
 const adminNumber = process.env.ADMIN_PHONE_NUMBER || '+61481058514';
 
 export async function POST(request: Request) {

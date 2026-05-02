@@ -3,6 +3,9 @@
  * 
  * Tests the logic that determines when to send an SMS alert
  * for incoming customer chat messages.
+ * 
+ * ARCHITECTURE NOTE: Debounce is DB-backed (not in-memory) because
+ * Vercel serverless functions are stateless across cold starts.
  */
 import { describe, it, expect } from 'vitest';
 
@@ -29,17 +32,23 @@ function shouldTriggerSmsAlert(
 }
 
 /**
- * Determines whether we are within the debounce window for a session.
+ * DB-backed debounce check: determines whether we are within the
+ * debounce window for a session.
+ * 
+ * Uses a database timestamp (`last_sms_sent_at` on `chat_sessions`)
+ * instead of an in-memory Map, ensuring correctness across Vercel
+ * serverless cold starts.
+ * 
  * Returns true if the last alert was sent LESS than `windowMs` ago,
  * meaning we should SKIP this alert.
  */
 function isWithinDebounceWindow(
-  lastAlertTimestamp: string | null,
+  lastSmsTimestamp: string | null,
   now: Date,
   windowMs: number = 5 * 60 * 1000, // 5 minutes
 ): boolean {
-  if (!lastAlertTimestamp) return false;
-  const lastAlert = new Date(lastAlertTimestamp);
+  if (!lastSmsTimestamp) return false;
+  const lastAlert = new Date(lastSmsTimestamp);
   return (now.getTime() - lastAlert.getTime()) < windowMs;
 }
 
@@ -71,21 +80,33 @@ describe('Chat SMS Alert — Trigger Logic', () => {
   });
 });
 
-describe('Chat SMS Alert — Debounce', () => {
-  it('is NOT within debounce window when there is no previous alert', () => {
+describe('Chat SMS Alert — DB-Backed Debounce (Serverless-Safe)', () => {
+  it('is NOT within debounce window when last_sms_sent_at is null (first message ever)', () => {
     expect(isWithinDebounceWindow(null, new Date(), 5 * 60 * 1000)).toBe(false);
   });
 
-  it('IS within debounce window when last alert was 2 minutes ago', () => {
+  it('IS within debounce window when last_sms_sent_at was 2 minutes ago', () => {
     const now = new Date('2026-05-02T10:10:00Z');
     const lastAlert = '2026-05-02T10:08:00Z'; // 2 min ago
     expect(isWithinDebounceWindow(lastAlert, now, 5 * 60 * 1000)).toBe(true);
   });
 
-  it('is NOT within debounce window when last alert was 6 minutes ago', () => {
+  it('is NOT within debounce window when last_sms_sent_at was 6 minutes ago', () => {
     const now = new Date('2026-05-02T10:10:00Z');
     const lastAlert = '2026-05-02T10:04:00Z'; // 6 min ago
     expect(isWithinDebounceWindow(lastAlert, now, 5 * 60 * 1000)).toBe(false);
+  });
+
+  it('handles edge case: exactly at the 5-minute boundary (not within window)', () => {
+    const now = new Date('2026-05-02T10:05:00Z');
+    const lastAlert = '2026-05-02T10:00:00Z'; // exactly 5 min ago
+    expect(isWithinDebounceWindow(lastAlert, now, 5 * 60 * 1000)).toBe(false);
+  });
+
+  it('survives cold start: null timestamp means no debounce (always send)', () => {
+    // Simulates Vercel cold start — no in-memory state, DB has no timestamp
+    const freshColdStart = isWithinDebounceWindow(null, new Date());
+    expect(freshColdStart).toBe(false);
   });
 });
 

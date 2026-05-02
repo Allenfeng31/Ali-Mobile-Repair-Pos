@@ -80,6 +80,20 @@ export function ChatInbox() {
         const data = await res.json();
         setMessages(data);
         
+        // Clear app badge when messages are read (chat window is open)
+        // This handles the case where admin opens chat directly, not via notification tap
+        try {
+          if ('clearAppBadge' in navigator) {
+            (navigator as any).clearAppBadge().catch(() => {});
+          }
+        } catch (_) {
+          // Badge API not supported — fail silently
+        }
+        // Also tell the service worker to clear badge (covers PWA standalone mode)
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_BADGE' });
+        }
+
         // Fetch statuses for any booking messages
         const bookingIds = data
           .filter((m: any) => m.content.startsWith(BOOKING_PREFIX))

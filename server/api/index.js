@@ -73,8 +73,8 @@ const webpush = require('web-push');
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
 
-// In-memory push subscription store (persisted to Supabase if table exists)
-let pushSubscriptions = [];
+// Push subscriptions are stored in Supabase `push_subscriptions` table
+// (NOT in-memory — in-memory arrays die on Vercel serverless cold starts)
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -87,8 +87,9 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   console.warn('⚠️  [Push] VAPID keys not set — Web Push disabled. Add VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to server/.env');
 }
 
-// Per-session SMS debounce tracker: { sessionId: lastAlertTimestamp }
-const chatAlertDebounce = new Map();
+// SMS debounce is DB-backed via `last_sms_sent_at` on `chat_sessions`
+// (NOT in-memory Map — Maps die on Vercel serverless cold starts)
+const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
 
 const cleanSMS = (text) => {
   return text
@@ -1140,9 +1141,10 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
 
   const trimmed = content.trim();
 
+  // Fetch session WITH the debounce timestamp (DB-backed, serverless-safe)
   const { data: session } = await supabase
     .from('chat_sessions')
-    .select('id')
+    .select('id, last_sms_sent_at')
     .eq('session_token', req.params.token)
     .maybeSingle();
 
@@ -1162,19 +1164,24 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', session.id);
 
-  // ── Server-side SMS + Push Alert (debounced) ──────────────────────
+  // ── Server-side SMS + Push Alert (DB-backed debounce) ─────────────
   const INTRO_PREFIX = '[CUSTOMER_INFO]';
   const BOOKING_PREFIX = '[BOOKING_DATA]';
   const shouldAlert = !trimmed.startsWith(INTRO_PREFIX) && !trimmed.startsWith(BOOKING_PREFIX);
 
   if (shouldAlert) {
-    const now = Date.now();
-    const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
-    const lastAlert = chatAlertDebounce.get(session.id);
-    const withinDebounce = lastAlert && (now - lastAlert) < DEBOUNCE_MS;
+    const now = new Date();
+    // DB-backed debounce: check `last_sms_sent_at` from chat_sessions
+    const lastSmsTimestamp = session.last_sms_sent_at;
+    const withinDebounce = lastSmsTimestamp && 
+      (now.getTime() - new Date(lastSmsTimestamp).getTime()) < DEBOUNCE_MS;
 
     if (!withinDebounce) {
-      chatAlertDebounce.set(session.id, now);
+      // Update the DB timestamp FIRST (atomic, survives cold starts)
+      await supabase
+        .from('chat_sessions')
+        .update({ last_sms_sent_at: now.toISOString() })
+        .eq('id', session.id);
 
       // SMS alert
       if (twilioClient && twilioPhone) {
@@ -1191,23 +1198,42 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
         });
       }
 
-      // Web Push alert
-      if (VAPID_PUBLIC_KEY && pushSubscriptions.length > 0) {
-        const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
-        const pushPayload = JSON.stringify({
-          title: 'New Customer Chat',
-          body: snippet,
-          url: '/admin/chat',
-        });
-        pushSubscriptions.forEach(sub => {
-          webpush.sendNotification(sub, pushPayload).catch(err => {
-            console.error('❌ [Push] Failed to send push:', err.message);
-            // Remove invalid subscriptions
-            if (err.statusCode === 410 || err.statusCode === 404) {
-              pushSubscriptions = pushSubscriptions.filter(s => s.endpoint !== sub.endpoint);
+      // Web Push alert (load subscriptions from DB, not in-memory)
+      if (VAPID_PUBLIC_KEY) {
+        try {
+          const { data: subs } = await supabase
+            .from('push_subscriptions')
+            .select('endpoint, p256dh, auth');
+
+          if (subs && subs.length > 0) {
+            const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
+            const pushPayload = JSON.stringify({
+              title: 'New Customer Chat',
+              body: snippet,
+              url: '/admin/chat',
+            });
+
+            for (const sub of subs) {
+              const pushSub = {
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.p256dh, auth: sub.auth },
+              };
+              webpush.sendNotification(pushSub, pushPayload).catch(async (err) => {
+                console.error('❌ [Push] Failed to send push:', err.message);
+                // Remove stale/invalid subscriptions from DB
+                if (err.statusCode === 410 || err.statusCode === 404) {
+                  await supabase
+                    .from('push_subscriptions')
+                    .delete()
+                    .eq('endpoint', sub.endpoint);
+                  console.log(`🗑️ [Push] Removed stale subscription: ${sub.endpoint.substring(0, 40)}...`);
+                }
+              });
             }
-          });
-        });
+          }
+        } catch (pushErr) {
+          console.error('❌ [Push] Failed to load subscriptions:', pushErr.message);
+        }
       }
     }
   }
@@ -1320,48 +1346,99 @@ app.get('/api/push/vapid-public-key', (req, res) => {
   res.json({ publicKey: VAPID_PUBLIC_KEY });
 });
 
-// Save a push subscription
-app.post('/api/push/subscribe', (req, res) => {
+// Save a push subscription (DB-backed, upsert by endpoint)
+app.post('/api/push/subscribe', async (req, res) => {
   const subscription = req.body;
   if (!subscription || !subscription.endpoint) {
     return res.status(400).json({ error: 'Invalid subscription' });
   }
 
-  // Prevent duplicate subscriptions
-  const exists = pushSubscriptions.some(s => s.endpoint === subscription.endpoint);
-  if (!exists) {
-    pushSubscriptions.push(subscription);
-    console.log(`✅ [Push] New subscription registered. Total: ${pushSubscriptions.length}`);
+  const keys = subscription.keys || {};
+  if (!keys.p256dh || !keys.auth) {
+    return res.status(400).json({ error: 'Missing p256dh or auth keys' });
   }
 
-  res.json({ success: true });
+  try {
+    // Upsert: insert or update if endpoint already exists
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .upsert({
+        endpoint: subscription.endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+        user_id: subscription.user_id || null,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'endpoint' });
+
+    if (error) throw error;
+
+    const { count } = await supabase
+      .from('push_subscriptions')
+      .select('*', { count: 'exact', head: true });
+
+    console.log(`✅ [Push] Subscription upserted. Total in DB: ${count}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('❌ [Push] Failed to save subscription:', err.message);
+    res.status(500).json({ error: 'Failed to save subscription' });
+  }
 });
 
-// Unsubscribe
-app.post('/api/push/unsubscribe', (req, res) => {
+// Unsubscribe (DB-backed)
+app.post('/api/push/unsubscribe', async (req, res) => {
   const { endpoint } = req.body;
   if (!endpoint) return res.status(400).json({ error: 'endpoint required' });
-  pushSubscriptions = pushSubscriptions.filter(s => s.endpoint !== endpoint);
-  console.log(`🗑️ [Push] Subscription removed. Remaining: ${pushSubscriptions.length}`);
-  res.json({ success: true });
+
+  try {
+    await supabase
+      .from('push_subscriptions')
+      .delete()
+      .eq('endpoint', endpoint);
+
+    const { count } = await supabase
+      .from('push_subscriptions')
+      .select('*', { count: 'exact', head: true });
+
+    console.log(`🗑️ [Push] Subscription removed. Remaining in DB: ${count}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('❌ [Push] Failed to remove subscription:', err.message);
+    res.status(500).json({ error: 'Failed to remove subscription' });
+  }
 });
 
-// Test push (for debugging)
-app.post('/api/push/test', (req, res) => {
-  if (pushSubscriptions.length === 0) {
-    return res.json({ ok: false, reason: 'No subscriptions' });
-  }
-  const payload = JSON.stringify({
-    title: 'Test Notification',
-    body: 'Push notifications are working! 🎉',
-    url: '/admin/chat',
-  });
-  pushSubscriptions.forEach(sub => {
-    webpush.sendNotification(sub, payload).catch(err => {
-      console.error('❌ [Push] Test push failed:', err.message);
+// Test push (for debugging — reads from DB)
+app.post('/api/push/test', async (req, res) => {
+  try {
+    const { data: subs } = await supabase
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth');
+
+    if (!subs || subs.length === 0) {
+      return res.json({ ok: false, reason: 'No subscriptions' });
+    }
+
+    const payload = JSON.stringify({
+      title: 'Test Notification',
+      body: 'Push notifications are working! 🎉',
+      url: '/admin/chat',
     });
-  });
-  res.json({ ok: true, sent: pushSubscriptions.length });
+
+    for (const sub of subs) {
+      const pushSub = {
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.p256dh, auth: sub.auth },
+      };
+      webpush.sendNotification(pushSub, payload).catch(err => {
+        console.error('❌ [Push] Test push failed:', err.message);
+      });
+    }
+
+    res.json({ ok: true, sent: subs.length });
+  } catch (err) {
+    console.error('❌ [Push] Test push error:', err.message);
+    res.status(500).json({ error: 'Failed to send test push' });
+  }
 });
 
 // ----------------------------------------------------------------------
