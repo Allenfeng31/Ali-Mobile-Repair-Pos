@@ -269,4 +269,32 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  // Push Notifications
+  getVapidPublicKey: async () => {
+    const res = await fetch(`${API_URL}/push/vapid-public-key`);
+    return handleResponse(res);
+  },
+  subscribePush: async (subscription: PushSubscriptionJSON) => {
+    const res = await fetch(`${API_URL}/push/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subscription),
+    });
+    return handleResponse(res);
+  },
+  unsubscribePush: async (endpoint: string) => {
+    const res = await fetch(`${API_URL}/push/unsubscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint }),
+    });
+    return handleResponse(res);
+  },
+  testPush: async () => {
+    const res = await fetch(`${API_URL}/push/test`, {
+      method: 'POST',
+    });
+    return handleResponse(res);
+  },
 };

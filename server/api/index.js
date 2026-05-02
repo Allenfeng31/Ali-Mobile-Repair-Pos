@@ -56,6 +56,7 @@ const getLocalIp = () => {
 let twilioClient = null;
 const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
 const googleReviewLink = process.env.GOOGLE_REVIEW_LINK || 'https://g.page/r/your-review-link';
+const ADMIN_PHONE = process.env.ADMIN_PHONE_NUMBER || '+61481058514';
 
 if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
   const twilio = require('twilio');
@@ -64,6 +65,30 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 } else {
   console.warn('⚠️  [SMS] Twilio credentials not set — SMS notifications disabled. Add TWILIO_* to server/.env');
 }
+
+// ----------------------------------------------------------------------
+// Web Push (VAPID)
+// ----------------------------------------------------------------------
+const webpush = require('web-push');
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+
+// In-memory push subscription store (persisted to Supabase if table exists)
+let pushSubscriptions = [];
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:admin@alimobile.com.au',
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+  );
+  console.log('✅ [Push] VAPID keys configured — Web Push active.');
+} else {
+  console.warn('⚠️  [Push] VAPID keys not set — Web Push disabled. Add VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to server/.env');
+}
+
+// Per-session SMS debounce tracker: { sessionId: lastAlertTimestamp }
+const chatAlertDebounce = new Map();
 
 const cleanSMS = (text) => {
   return text
@@ -1113,6 +1138,8 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
   const { content } = req.body;
   if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
 
+  const trimmed = content.trim();
+
   const { data: session } = await supabase
     .from('chat_sessions')
     .select('id')
@@ -1123,7 +1150,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
 
   const { data, error } = await supabase
     .from('chat_messages')
-    .insert({ session_id: session.id, sender: 'customer', content: content.trim() })
+    .insert({ session_id: session.id, sender: 'customer', content: trimmed })
     .select()
     .maybeSingle();
 
@@ -1134,6 +1161,56 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
     .from('chat_sessions')
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', session.id);
+
+  // ── Server-side SMS + Push Alert (debounced) ──────────────────────
+  const INTRO_PREFIX = '[CUSTOMER_INFO]';
+  const BOOKING_PREFIX = '[BOOKING_DATA]';
+  const shouldAlert = !trimmed.startsWith(INTRO_PREFIX) && !trimmed.startsWith(BOOKING_PREFIX);
+
+  if (shouldAlert) {
+    const now = Date.now();
+    const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
+    const lastAlert = chatAlertDebounce.get(session.id);
+    const withinDebounce = lastAlert && (now - lastAlert) < DEBOUNCE_MS;
+
+    if (!withinDebounce) {
+      chatAlertDebounce.set(session.id, now);
+
+      // SMS alert
+      if (twilioClient && twilioPhone) {
+        const snippet = trimmed.length > 30 ? trimmed.substring(0, 30) + '...' : trimmed;
+        const smsBody = cleanSMS(`New POS Chat: "${snippet}"`);
+        twilioClient.messages.create({
+          body: smsBody,
+          from: twilioPhone,
+          to: ADMIN_PHONE,
+        }).then(msg => {
+          console.log(`✅ [SMS] Chat alert sent — SID: ${msg.sid}`);
+        }).catch(err => {
+          console.error('❌ [SMS] Chat alert failed:', err.message);
+        });
+      }
+
+      // Web Push alert
+      if (VAPID_PUBLIC_KEY && pushSubscriptions.length > 0) {
+        const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
+        const pushPayload = JSON.stringify({
+          title: 'New Customer Chat',
+          body: snippet,
+          url: '/admin/chat',
+        });
+        pushSubscriptions.forEach(sub => {
+          webpush.sendNotification(sub, pushPayload).catch(err => {
+            console.error('❌ [Push] Failed to send push:', err.message);
+            // Remove invalid subscriptions
+            if (err.statusCode === 410 || err.statusCode === 404) {
+              pushSubscriptions = pushSubscriptions.filter(s => s.endpoint !== sub.endpoint);
+            }
+          });
+        });
+      }
+    }
+  }
 
   res.json(data);
 });
@@ -1229,6 +1306,62 @@ app.get('/api/blog/proxy-image', async (req, res) => {
     console.error('❌ [Proxy] Image fetch failed:', err.message);
     res.status(500).send('Failed to proxy image');
   }
+});
+
+// ----------------------------------------------------------------------
+// WEB PUSH NOTIFICATIONS
+// ----------------------------------------------------------------------
+
+// Get VAPID public key (needed by frontend to subscribe)
+app.get('/api/push/vapid-public-key', (req, res) => {
+  if (!VAPID_PUBLIC_KEY) {
+    return res.status(503).json({ error: 'VAPID not configured' });
+  }
+  res.json({ publicKey: VAPID_PUBLIC_KEY });
+});
+
+// Save a push subscription
+app.post('/api/push/subscribe', (req, res) => {
+  const subscription = req.body;
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Invalid subscription' });
+  }
+
+  // Prevent duplicate subscriptions
+  const exists = pushSubscriptions.some(s => s.endpoint === subscription.endpoint);
+  if (!exists) {
+    pushSubscriptions.push(subscription);
+    console.log(`✅ [Push] New subscription registered. Total: ${pushSubscriptions.length}`);
+  }
+
+  res.json({ success: true });
+});
+
+// Unsubscribe
+app.post('/api/push/unsubscribe', (req, res) => {
+  const { endpoint } = req.body;
+  if (!endpoint) return res.status(400).json({ error: 'endpoint required' });
+  pushSubscriptions = pushSubscriptions.filter(s => s.endpoint !== endpoint);
+  console.log(`🗑️ [Push] Subscription removed. Remaining: ${pushSubscriptions.length}`);
+  res.json({ success: true });
+});
+
+// Test push (for debugging)
+app.post('/api/push/test', (req, res) => {
+  if (pushSubscriptions.length === 0) {
+    return res.json({ ok: false, reason: 'No subscriptions' });
+  }
+  const payload = JSON.stringify({
+    title: 'Test Notification',
+    body: 'Push notifications are working! 🎉',
+    url: '/admin/chat',
+  });
+  pushSubscriptions.forEach(sub => {
+    webpush.sendNotification(sub, payload).catch(err => {
+      console.error('❌ [Push] Test push failed:', err.message);
+    });
+  });
+  res.json({ ok: true, sent: pushSubscriptions.length });
 });
 
 // ----------------------------------------------------------------------

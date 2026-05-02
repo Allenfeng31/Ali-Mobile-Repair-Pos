@@ -126,14 +126,14 @@ export default function RepairPricingAndCTA({
                 )}
 
                 {/* Tier Name */}
-                <div className="mb-1">
+                <div className="mb-1 text-center">
                   <h3 className={`text-xl font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                     {variant.quality_grade}
                   </h3>
                 </div>
 
                 {/* Price */}
-                <div className="flex items-baseline mb-4">
+                <div className="flex items-baseline justify-center mb-4">
                   <span className={`text-2xl font-extrabold ${isSelected ? 'text-blue-100' : 'text-blue-600'}`}>
                     ${variant.price}
                   </span>
@@ -141,7 +141,7 @@ export default function RepairPricingAndCTA({
 
                 {/* Description */}
                 {tierDescriptions[variant.quality_grade] && (
-                  <p className={`text-sm leading-relaxed mt-2 flex-grow ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
+                  <p className={`text-sm leading-relaxed mt-2 flex-grow text-center ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
                     {tierDescriptions[variant.quality_grade]}
                   </p>
                 )}

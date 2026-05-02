@@ -8,7 +8,10 @@ import {
   MessageSquare,
   Copy,
   Layers,
-  Edit2
+  Edit2,
+  Bell,
+  BellOff,
+  BellRing
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -53,6 +56,98 @@ export function SettingsView({
   const [newTierDesc, setNewTierDesc] = React.useState('');
   const [editingTierId, setEditingTierId] = React.useState<string | null>(null);
   const [editingTierDesc, setEditingTierDesc] = React.useState('');
+
+  // Push Notification State
+  const [pushEnabled, setPushEnabled] = React.useState(false);
+  const [pushLoading, setPushLoading] = React.useState(false);
+  const [pushStatus, setPushStatus] = React.useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
+  const [testPushSent, setTestPushSent] = React.useState(false);
+
+  // Check push notification status on mount
+  React.useEffect(() => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      setPushStatus('unsupported');
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      setPushStatus('granted');
+      // Check if we have an active subscription
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
+          setPushEnabled(!!sub);
+        });
+      });
+    } else if (Notification.permission === 'denied') {
+      setPushStatus('denied');
+    }
+  }, []);
+
+  const handleTogglePush = async () => {
+    setPushLoading(true);
+    try {
+      if (pushEnabled) {
+        // Unsubscribe
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await api.unsubscribePush(sub.endpoint);
+          await sub.unsubscribe();
+        }
+        setPushEnabled(false);
+        setPushStatus('idle');
+      } else {
+        // Request permission
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          setPushStatus('denied');
+          setPushLoading(false);
+          return;
+        }
+        setPushStatus('granted');
+
+        // Get VAPID public key from server
+        const { publicKey } = await api.getVapidPublicKey();
+        
+        // Convert VAPID key to Uint8Array
+        const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+          const padding = '='.repeat((4 - base64String.length % 4) % 4);
+          const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+          const rawData = window.atob(base64);
+          const outputArray = new Uint8Array(rawData.length);
+          for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+          }
+          return outputArray;
+        };
+
+        // Subscribe
+        const reg = await navigator.serviceWorker.ready;
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+        
+        // Send subscription to server
+        await api.subscribePush(subscription.toJSON());
+        setPushEnabled(true);
+      }
+    } catch (err: any) {
+      console.error('[Push] Toggle failed:', err);
+      alert('Failed to toggle push notifications: ' + err.message);
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
+  const handleTestPush = async () => {
+    try {
+      await api.testPush();
+      setTestPushSent(true);
+      setTimeout(() => setTestPushSent(false), 3000);
+    } catch (err: any) {
+      alert('Test push failed: ' + err.message);
+    }
+  };
 
   const handleCopySMS = async () => {
     if (!smsModel || !smsRepair || !smsAmount) {
@@ -263,6 +358,89 @@ export function SettingsView({
                   Sign Out
                 </button>
               </div>
+            </div>
+          </section>
+
+          {/* Push Notifications */}
+          <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={cn(
+                "p-2 rounded-xl transition-colors",
+                pushEnabled ? "bg-emerald-50 text-emerald-600" : "bg-surface-container-high text-on-surface-variant"
+              )}>
+                {pushEnabled ? <BellRing size={22} /> : <Bell size={22} />}
+              </div>
+              <div>
+                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Push Notifications</h3>
+                <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                  {pushStatus === 'unsupported' && 'Not supported on this browser'}
+                  {pushStatus === 'denied' && 'Blocked — check browser settings'}
+                  {pushStatus === 'granted' && pushEnabled && 'Active — you will receive alerts'}
+                  {pushStatus === 'granted' && !pushEnabled && 'Permission granted — tap to enable'}
+                  {pushStatus === 'idle' && 'Enable to receive chat alerts on this device'}
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Status indicator */}
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant/10">
+                <div className={cn(
+                  "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
+                  pushEnabled ? "bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse" : "bg-on-surface-variant/20"
+                )} />
+                <span className={cn(
+                  "text-sm font-bold",
+                  pushEnabled ? "text-emerald-500" : "text-on-surface-variant"
+                )}>
+                  {pushEnabled ? 'Notifications Active' : 'Notifications Off'}
+                </span>
+              </div>
+
+              {/* Toggle button */}
+              <button 
+                id="push-notification-toggle"
+                onClick={handleTogglePush}
+                disabled={pushLoading || pushStatus === 'unsupported'}
+                className={cn(
+                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50",
+                  pushEnabled 
+                    ? "bg-surface-container-high text-on-surface-variant border border-outline-variant/10 hover:bg-error/10 hover:text-error hover:border-error/20 shadow-none" 
+                    : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-200"
+                )}
+              >
+                {pushLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : pushEnabled ? (
+                  <BellOff size={16} />
+                ) : (
+                  <Bell size={16} />
+                )}
+                {pushEnabled ? 'Disable Notifications' : 'Enable Push Notifications'}
+              </button>
+
+              {/* Test button (only visible when enabled) */}
+              {pushEnabled && (
+                <button 
+                  id="push-notification-test"
+                  onClick={handleTestPush}
+                  className={cn(
+                    "w-full py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                    testPushSent 
+                      ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                      : "bg-surface-container-highest text-on-surface-variant border border-outline-variant/10 hover:text-primary hover:border-primary/20"
+                  )}
+                >
+                  {testPushSent ? <CheckCircle2 size={14} /> : <BellRing size={14} />}
+                  {testPushSent ? 'Test Notification Sent!' : 'Send Test Notification'}
+                </button>
+              )}
+
+              {pushStatus === 'denied' && (
+                <p className="text-[10px] text-error font-bold leading-relaxed">
+                  ⚠️ Notifications are blocked. Open your browser settings and allow notifications for this site, then try again.
+                </p>
+              )}
             </div>
           </section>
         </div>
