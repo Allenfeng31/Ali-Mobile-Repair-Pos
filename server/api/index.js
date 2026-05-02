@@ -71,7 +71,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = process.env.VITE_VAPID_PUBLIC_KEY || '';
+const VAPID_PUBLIC_KEY = "BKcZgg4Ijy8Yvaz7hNzy9LbXaDcH0VsODexU3myBL3ISBHmDvNqpVmm40pvJNjNylgAQmBbRQ9QIwF532JhqoLk";
 const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 
 // Push subscriptions are stored in Supabase `push_subscriptions` table
@@ -1346,14 +1346,7 @@ app.get('/api/blog/proxy-image', async (req, res) => {
 
 // Get VAPID public key (needed by frontend to subscribe)
 app.get('/api/push/vapid-public-key', (req, res) => {
-  // Read directly from process.env to ensure we get the latest
-  const publicKey = process.env.VITE_VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY;
-  
-  if (!publicKey) {
-    console.error("Missing keys in env:", Object.keys(process.env));
-    return res.status(500).json({ error: "VAPID not configured (Build forced)" });
-  }
-  res.json({ publicKey });
+  res.json({ publicKey: VAPID_PUBLIC_KEY });
 });
 
 // Save a push subscription (DB-backed, upsert by endpoint)
