@@ -11,8 +11,7 @@ vi.mock('../lib/api', () => ({
     getSettings: vi.fn().mockResolvedValue({}),
     updateSetting: vi.fn().mockResolvedValue({}),
     updateUser: vi.fn(),
-    generateBlog: vi.fn(),
-    confirmBlog: vi.fn(),
+
     getQualityTiers: vi.fn().mockResolvedValue([]),
     createQualityTier: vi.fn(),
     updateQualityTier: vi.fn(),
