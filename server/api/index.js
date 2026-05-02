@@ -1346,10 +1346,14 @@ app.get('/api/blog/proxy-image', async (req, res) => {
 
 // Get VAPID public key (needed by frontend to subscribe)
 app.get('/api/push/vapid-public-key', (req, res) => {
-  if (!VAPID_PUBLIC_KEY) {
-    return res.status(503).json({ error: 'VAPID not configured' });
+  // Read directly from process.env to ensure we get the latest
+  const publicKey = process.env.VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY;
+  
+  if (!publicKey) {
+    console.error("Missing keys in env:", Object.keys(process.env));
+    return res.status(500).json({ error: "VAPID not configured (Build forced)" });
   }
-  res.json({ publicKey: VAPID_PUBLIC_KEY });
+  res.json({ publicKey });
 });
 
 // Save a push subscription (DB-backed, upsert by endpoint)
