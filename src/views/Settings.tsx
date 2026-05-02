@@ -43,8 +43,15 @@ export function SettingsView({
   const [isGeneratingBlog, setIsGeneratingBlog] = React.useState(false);
   const [blogDraft, setBlogDraft] = React.useState<any>(null);
 
-  const userRoleStr = String(currentUser?.role || currentUser?.app_metadata?.role || currentUser?.user_metadata?.role || '');
-  const isSuperAdmin = userRoleStr.toLowerCase().replace(/_/g, ' ') === 'super admin';
+  // Supabase system roles that are NOT custom user roles — must be skipped
+  const SUPABASE_SYSTEM_ROLES = ['authenticated', 'anon', 'service_role'];
+  const rawTopLevelRole = currentUser?.role || '';
+  const isSystemRole = SUPABASE_SYSTEM_ROLES.includes(String(rawTopLevelRole).toLowerCase());
+  const userRole = (!rawTopLevelRole || isSystemRole)
+    ? (currentUser?.app_metadata?.role || currentUser?.user_metadata?.role || '')
+    : rawTopLevelRole;
+  const userRoleStr = String(userRole);
+  const isSuperAdmin = typeof userRoleStr === 'string' && userRoleStr.toLowerCase().replace(/_/g, ' ') === 'super admin';
 
   // SMS Generator States
   const [smsModel, setSmsModel] = React.useState('');
@@ -771,6 +778,16 @@ export function SettingsView({
           {/* (Quality Tiers Management section moved above AI Blog Generator) */}
         </div>
       </div>
+
+      {/* Failsafe Debug: shows raw user object when super admin check fails */}
+      {!isSuperAdmin && (
+        <details className="mt-4 opacity-30 hover:opacity-100 transition-opacity text-[10px] text-on-surface-variant">
+          <summary className="cursor-pointer font-mono">🔍 Auth Debug (dev only)</summary>
+          <pre className="mt-2 p-3 bg-surface-container-high rounded-xl overflow-auto max-h-40 font-mono text-[9px] leading-tight">
+            {JSON.stringify(currentUser, null, 2)}
+          </pre>
+        </details>
+      )}
     </div>
   );
 }

@@ -24,6 +24,7 @@ describe('SettingsView', () => {
   afterEach(() => {
     cleanup();
   });
+
   it('does not render Quality Tiers Management card for regular admin', () => {
     const user = { id: 1, username: 'admin', role: 'admin' };
     render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
@@ -50,5 +51,36 @@ describe('SettingsView', () => {
     render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
     
     expect(screen.getByText('Quality Tiers Management')).toBeDefined();
+  });
+
+  // ========================================================================
+  // THE REAL BUG: Supabase data.user.role is always 'authenticated'.
+  // The || short-circuit picks up 'authenticated' (truthy) and never
+  // reaches app_metadata.role where the actual custom role lives.
+  // ========================================================================
+  it('renders Quality Tiers Management for a real Supabase user object where role=authenticated but app_metadata has SUPER ADMIN', () => {
+    const user = {
+      id: '123',
+      email: 'test@test.com',
+      role: 'authenticated',
+      app_metadata: { role: 'SUPER ADMIN' },
+      user_metadata: { role: 'SUPER ADMIN' }
+    };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+
+    expect(screen.getByText('Quality Tiers Management')).toBeDefined();
+  });
+
+  it('does NOT render Quality Tiers Management for a Supabase user with role=authenticated and NO custom role in metadata', () => {
+    const user = {
+      id: '456',
+      email: 'staff@test.com',
+      role: 'authenticated',
+      app_metadata: { provider: 'email' },
+      user_metadata: {}
+    };
+    render(<SettingsView currentUser={user} onUpdateUser={vi.fn()} onLogout={vi.fn()} />);
+
+    expect(screen.queryByText('Quality Tiers Management')).toBeNull();
   });
 });
