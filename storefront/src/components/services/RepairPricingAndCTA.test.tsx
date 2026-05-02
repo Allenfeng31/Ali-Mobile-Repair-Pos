@@ -124,8 +124,8 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     const url = mockPush.mock.calls[0][0];
     expect(url).toContain('tier=Premium');
     expect(url).toContain('brand=iPhone');
-    expect(url).toContain('model=iPhone%2013%20Pro%20Max');
-    expect(url).toContain('service=Screen%20Replacement');
+    expect(url).toContain('model=iPhone+13+Pro+Max');
+    expect(url).toContain('service=Screen+Replacement');
   });
 
   it('allows routing without tier selection when only one variant exists', () => {

@@ -96,64 +96,71 @@ const CartContent = () => {
   useEffect(() => {
     if (loading || inventory.length === 0) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const brandParam = params.get('brand');
-    const modelParam = params.get('model');
-    const serviceParam = params.get('service');
-    const tierParam = params.get('tier');
-    const legacyModelParam = params.get('model') && !brandParam ? params.get('model') : null;
-    const legacyRepairParam = params.get('repair');
+    const brandParam = searchParams.get('brand');
+    const modelParam = searchParams.get('model');
+    const serviceParam = searchParams.get('service');
+    const tierParam = searchParams.get('tier');
+    
+    if (!brandParam || !modelParam) {
+      // Check for legacy params
+      const legacyModel = searchParams.get('model');
+      const legacyRepair = searchParams.get('repair');
+      if (!legacyModel) return;
 
-    import('@/lib/cartAutoSelect').then(({ resolveInitialCartState }) => {
-      if (brandParam && modelParam) {
-        const { brand, model, category, serviceToSelect, serviceToExpand, shouldAutoConfirm } = resolveInitialCartState(
-          brandParam,
-          modelParam,
-          serviceParam,
-          inventory,
-          tierParam
-        );
-
-        if (brand && model && category) {
-          const alreadyInCart = devices.some(d => d.brand === brand && d.model === model);
-          if (!alreadyInCart) {
-            addDevice(brand, model, category as ParsedItem["deviceType"], serviceToSelect || undefined, shouldAutoConfirm, serviceToExpand);
-          }
-        }
-      } else if (legacyModelParam) {
-        const decodedModel = legacyModelParam.replace(/-/g, ' ').toLowerCase();
+      import('@/lib/cartAutoSelect').then(({ resolveInitialCartState }) => {
+        const decodedModel = legacyModel.replace(/-/g, ' ').toLowerCase();
         const matchedItem = inventory.find(i => 
           i.deviceModel.toLowerCase() === decodedModel || 
-          i.deviceModel.toLowerCase().replace(/\s+/g, '-') === legacyModelParam
+          i.deviceModel.toLowerCase().replace(/\s+/g, '-') === legacyModel
         );
 
         if (matchedItem) {
           const alreadyInCart = devices.some(d => d.brand === matchedItem.brand && d.model === matchedItem.deviceModel);
           if (!alreadyInCart) {
             let serviceToSelect: RepairService | undefined = undefined;
-            if (legacyRepairParam) {
-              const decodedRepair = legacyRepairParam.replace(/-/g, ' ').toLowerCase();
+            if (legacyRepair) {
+              const decodedRepair = legacyRepair.replace(/-/g, ' ').toLowerCase();
               const matchedService = inventory.find(i => 
                 i.brand === matchedItem.brand && 
                 i.deviceModel === matchedItem.deviceModel &&
-                (i.service.toLowerCase() === decodedRepair || i.service.toLowerCase().replace(/\s+/g, '-') === legacyRepairParam)
+                (i.service.toLowerCase() === decodedRepair || i.service.toLowerCase().replace(/\s+/g, '-') === legacyRepair)
               );
               if (matchedService) {
                 serviceToSelect = { id: matchedService.id, name: matchedService.service, price: matchedService.price };
               }
             }
             addDevice(matchedItem.brand, matchedItem.deviceModel, matchedItem.category, serviceToSelect, true);
+            
+            // Clear URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
           }
         }
-      }
-      
-      if (brandParam || legacyModelParam) {
-        // CRITICAL: Clear URL parameters once consumed to prevent state hijacking on refresh/interaction
+      });
+      return;
+    }
+
+    import('@/lib/cartAutoSelect').then(({ resolveInitialCartState }) => {
+      const { brand, model, category, serviceToSelect, serviceToExpand, shouldAutoConfirm } = resolveInitialCartState(
+        brandParam,
+        modelParam,
+        serviceParam,
+        inventory,
+        tierParam
+      );
+
+      if (brand && model && category) {
+        const alreadyInCart = devices.some(d => d.brand === brand && d.model === model);
+        if (!alreadyInCart) {
+          addDevice(brand, model, category as ParsedItem["deviceType"], serviceToSelect || undefined, shouldAutoConfirm, serviceToExpand);
+        }
+        
+        // Clear URL
         const newUrl = window.location.pathname;
         window.history.replaceState({}, '', newUrl);
       }
     });
-  }, [loading, inventory]); // Remove devices/searchParams from deps to ensure it only runs once on load
+  }, [loading, inventory, searchParams]);
 
   // UI Helpers
   const brands = useMemo(() => Array.from(new Set(inventory.map(i => i.brand))).sort(), [inventory]);

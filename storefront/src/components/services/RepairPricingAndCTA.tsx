@@ -70,7 +70,16 @@ export default function RepairPricingAndCTA({
     }
 
     const tierToUse = selectedTier || (displayVariants.length === 1 ? displayVariants[0].quality_grade : null);
-    const url = `/book-repair?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&service=${encodeURIComponent(repairName)}${tierToUse ? `&tier=${encodeURIComponent(tierToUse)}` : ''}`;
+    
+    const params = new URLSearchParams();
+    params.set('brand', brandName);
+    params.set('model', modelName);
+    params.set('service', repairName);
+    if (tierToUse) {
+      params.set('tier', tierToUse);
+    }
+    
+    const url = `/book-repair?${params.toString()}`;
     
     analytics.trackBookRepair(modelName, repairName);
     router.push(url);

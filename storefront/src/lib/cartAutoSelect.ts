@@ -24,10 +24,14 @@ export function resolveInitialCartState(
   const decodedBrand = decodeURIComponent(brandParam).toLowerCase();
   const decodedModel = decodeURIComponent(modelParam).toLowerCase();
 
-  const matchedItems = inventory.filter(i => 
-    i.brand.toLowerCase() === decodedBrand && 
-    i.deviceModel.toLowerCase() === decodedModel
-  );
+  const matchedItems = inventory.filter(i => {
+    // Standardize brand by removing prefix for comparison
+    const itemBrand = (i.brand.includes(' ') && /^[PTCW] /i.test(i.brand)) 
+      ? i.brand.split(' ')[1].toLowerCase() 
+      : i.brand.toLowerCase();
+      
+    return itemBrand === decodedBrand && i.deviceModel.toLowerCase() === decodedModel;
+  });
 
   if (matchedItems.length === 0) {
     return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
@@ -54,8 +58,8 @@ export function resolveInitialCartState(
   // Check variants
   const hasMultipleVariants = matchedGroup.variants.length > 1;
 
-  // If a specific tier is requested and the service has multiple variants, try to match it
-  if (hasMultipleVariants && tierParam) {
+  // If a specific tier is requested, try to match it regardless of variant count
+  if (tierParam) {
     const decodedTier = decodeURIComponent(tierParam).toLowerCase();
     const matchedVariant = matchedGroup.variants.find(v => v.quality_grade.toLowerCase() === decodedTier);
     if (matchedVariant) {
@@ -65,14 +69,13 @@ export function resolveInitialCartState(
         category,
         serviceToSelect: {
           id: matchedVariant.id,
-          name: `${matchedGroup.service} - ${matchedVariant.quality_grade}`,
+          name: matchedGroup.variants.length > 1 ? `${matchedGroup.service} - ${matchedVariant.quality_grade}` : matchedGroup.service,
           price: matchedVariant.price
         },
         serviceToExpand: null,
         shouldAutoConfirm: true
       };
     }
-    // Tier not found — fall through to default multi-variant behavior (expand)
   }
 
   const defaultVariant = matchedGroup.variants.find(v => v.quality_grade === 'Standard') || matchedGroup.variants[0];
