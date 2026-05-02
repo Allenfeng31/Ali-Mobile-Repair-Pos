@@ -35,6 +35,50 @@ export default function QuoteRequestModal({
       });
 
       if (res.ok) {
+        // --- Route "Quick Quote" directly into POS Chat ---
+        try {
+          const SESSION_KEY = 'ali_chat_token';
+          let token = window.localStorage.getItem(SESSION_KEY);
+          if (!token) {
+             token = crypto.randomUUID();
+             window.localStorage.setItem(SESSION_KEY, token);
+             window.localStorage.setItem('ali_chat_token_expiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+          }
+
+          // Ensure session exists
+          await fetch('/api/proxy/chat/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          }).catch(() => {});
+
+          // Send Customer Intro if not sent
+          const introSent = window.localStorage.getItem('ali_chat_intro_sent');
+          if (!introSent) {
+            const introContent = `[CUSTOMER_INFO]\nName: ${name}\nPhone: ${phone}`;
+            await fetch(`/api/proxy/chat/session/${token}/message`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: introContent }),
+            }).catch(() => {});
+            
+            window.localStorage.setItem('ali_chat_name', name);
+            window.localStorage.setItem('ali_chat_phone', phone);
+            window.localStorage.setItem('ali_chat_intro_sent', '1');
+          }
+
+          // Send the Quote Message into Chat
+          const quoteContent = `Hi, I would like to request a quote for my ${deviceModel}. Service needed: ${repairType}.`;
+          await fetch(`/api/proxy/chat/session/${token}/message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: quoteContent }),
+          }).catch(() => {});
+        } catch (chatError) {
+          console.error("Failed to sync quote to POS chat", chatError);
+        }
+        // ---------------------------------------------------
+
         setSubmitted(true);
         setTimeout(() => {
           onClose();

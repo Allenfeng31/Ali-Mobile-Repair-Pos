@@ -331,6 +331,7 @@ export function ChatInbox() {
                             const d = new Date(data.time);
                             return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                           })()}</strong></p>
+                          <p><span className="opacity-50">Notes:</span> <strong>{data.notes || 'None'}</strong></p>
                         </div>
                         
                         {(apptStatusCache[data.appointmentId] === 'confirmed' || apptStatusCache[data.appointmentId] === 'declined') ? (

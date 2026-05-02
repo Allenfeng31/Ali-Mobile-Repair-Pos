@@ -423,7 +423,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            const showBadge = item.id === 'chat' && unreadChats > 0;
+            const showBadge = item.id === 'chat' && unreadChats > 0 && !isActive;
             return (
               <button
                 key={item.id}
@@ -435,10 +435,12 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                     : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
                 )}
               >
-                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                {showBadge && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 border border-surface-container-low" />
-                )}
+                <div className="relative">
+                  <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-surface-container-low shadow-sm" />
+                  )}
+                </div>
                 <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                   {item.label}
                 </span>
@@ -516,7 +518,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            const showBadge = item.id === 'chat' && unreadChats > 0;
+            const showBadge = item.id === 'chat' && unreadChats > 0 && !isActive;
             return (
               <button
                 key={item.id}
@@ -528,10 +530,12 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                     : "text-on-surface-variant"
                 )}
               >
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                {showBadge && (
-                  <span className="absolute top-0 right-1 w-2 h-2 rounded-full bg-red-500" />
-                )}
+                <div className="relative">
+                  <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border border-surface/90 shadow-sm" />
+                  )}
+                </div>
                 <span className="text-[10px] font-bold uppercase tracking-wider mt-1">{item.label}</span>
               </button>
             );
