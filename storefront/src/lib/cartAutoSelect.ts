@@ -13,7 +13,8 @@ export function resolveInitialCartState(
   brandParam: string | null,
   modelParam: string | null,
   serviceParam: string | null,
-  inventory: ParsedItem[]
+  inventory: ParsedItem[],
+  tierParam?: string | null
 ): AutoSelectResult {
   if (!brandParam || !modelParam) {
     return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
@@ -52,6 +53,28 @@ export function resolveInitialCartState(
 
   // Check variants
   const hasMultipleVariants = matchedGroup.variants.length > 1;
+
+  // If a specific tier is requested and the service has multiple variants, try to match it
+  if (hasMultipleVariants && tierParam) {
+    const decodedTier = decodeURIComponent(tierParam).toLowerCase();
+    const matchedVariant = matchedGroup.variants.find(v => v.quality_grade.toLowerCase() === decodedTier);
+    if (matchedVariant) {
+      return {
+        brand,
+        model,
+        category,
+        serviceToSelect: {
+          id: matchedVariant.id,
+          name: `${matchedGroup.service} - ${matchedVariant.quality_grade}`,
+          price: matchedVariant.price
+        },
+        serviceToExpand: null,
+        shouldAutoConfirm: true
+      };
+    }
+    // Tier not found — fall through to default multi-variant behavior (expand)
+  }
+
   const defaultVariant = matchedGroup.variants.find(v => v.quality_grade === 'Standard') || matchedGroup.variants[0];
   
   const serviceToSelect = hasMultipleVariants ? null : {
@@ -71,3 +94,4 @@ export function resolveInitialCartState(
     shouldAutoConfirm: !hasMultipleVariants
   };
 }
+

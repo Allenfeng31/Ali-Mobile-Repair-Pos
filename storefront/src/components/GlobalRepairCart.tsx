@@ -100,6 +100,7 @@ const CartContent = () => {
     const brandParam = params.get('brand');
     const modelParam = params.get('model');
     const serviceParam = params.get('service');
+    const tierParam = params.get('tier');
     const legacyModelParam = params.get('model') && !brandParam ? params.get('model') : null;
     const legacyRepairParam = params.get('repair');
 
@@ -109,7 +110,8 @@ const CartContent = () => {
           brandParam,
           modelParam,
           serviceParam,
-          inventory
+          inventory,
+          tierParam
         );
 
         if (brand && model && category) {

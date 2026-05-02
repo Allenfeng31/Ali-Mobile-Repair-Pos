@@ -62,4 +62,29 @@ describe('cartAutoSelect', () => {
     expect(result.serviceToExpand).toBeNull();
     expect(result.shouldAutoConfirm).toBe(true);
   });
+
+  it('should auto-select the specified tier variant when tier param is provided for a multi-variant service', () => {
+    const result = resolveInitialCartState('iPhone', 'iPhone 14 Pro Max', 'Screen Replacement', mockInventory, 'Genuine');
+    expect(result.brand).toBe('iPhone');
+    expect(result.model).toBe('iPhone 14 Pro Max');
+    expect(result.serviceToSelect).not.toBeNull();
+    expect(result.serviceToSelect?.id).toBe(2);
+    expect(result.serviceToSelect?.price).toBe(300);
+    expect(result.serviceToExpand).toBeNull();
+    expect(result.shouldAutoConfirm).toBe(true);
+  });
+
+  it('should fall back to expand behavior if tier param does not match any variant', () => {
+    const result = resolveInitialCartState('iPhone', 'iPhone 14 Pro Max', 'Screen Replacement', mockInventory, 'NonExistent');
+    expect(result.serviceToSelect).toBeNull();
+    expect(result.serviceToExpand).toBe('Screen Replacement');
+    expect(result.shouldAutoConfirm).toBe(false);
+  });
+
+  it('should ignore tier param when service has only one variant', () => {
+    const result = resolveInitialCartState('iPhone', 'iPhone 14 Pro Max', 'Battery Replacement', mockInventory, 'Premium');
+    expect(result.serviceToSelect).not.toBeNull();
+    expect(result.serviceToSelect?.id).toBe(3);
+    expect(result.shouldAutoConfirm).toBe(true);
+  });
 });
