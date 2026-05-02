@@ -1192,54 +1192,67 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
         } else {
           const snippet = trimmed.length > 30 ? trimmed.substring(0, 30) + '...' : trimmed;
           const smsBody = cleanSMS(`New POS Chat: "${snippet}"`);
-          twilioClient.messages.create({
-            body: smsBody,
-            from: twilioPhone,
-            to: ADMIN_PHONE,
-          }).then(msg => {
+          try {
+            const msg = await twilioClient.messages.create({
+              body: smsBody,
+              from: twilioPhone,
+              to: ADMIN_PHONE,
+            });
             console.log(`✅ [SMS] Chat alert sent — SID: ${msg.sid}`);
-          }).catch(err => {
+          } catch (err) {
             console.error('❌ [SMS] Chat alert failed:', err.message);
-          });
+          }
         }
       }
+    }
 
-      // Web Push alert (load subscriptions from DB, not in-memory)
-      if (VAPID_PUBLIC_KEY) {
-        try {
-          const { data: subs } = await supabase
-            .from('push_subscriptions')
-            .select('endpoint, p256dh, auth');
+    // Web Push alert (load subscriptions from DB, not in-memory)
+    // ALWAYS fire push, even within debounce, because push is free and updates the badge
+    if (VAPID_PUBLIC_KEY) {
+      try {
+        const { data: subs } = await supabase
+          .from('push_subscriptions')
+          .select('endpoint, p256dh, auth');
 
-          if (subs && subs.length > 0) {
-            const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
-            const pushPayload = JSON.stringify({
-              title: 'New Customer Chat',
-              body: snippet,
-              url: '/admin/chat',
+        if (subs && subs.length > 0) {
+          const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
+          
+          // Calculate total unread messages for the app badge
+          const { count: unreadCount } = await supabase
+            .from('chat_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_read', false)
+            .eq('sender', 'customer');
+
+          const pushPayload = JSON.stringify({
+            title: 'New Customer Chat',
+            body: snippet,
+            url: '/admin/chat',
+            unreadCount: unreadCount || 1
+          });
+
+          const pushPromises = subs.map(sub => {
+            const pushSub = {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            };
+            return webpush.sendNotification(pushSub, pushPayload).catch(async (err) => {
+              console.error('❌ [Push] Failed to send push:', err.message);
+              // Remove stale/invalid subscriptions from DB
+              if (err.statusCode === 410 || err.statusCode === 404) {
+                await supabase
+                  .from('push_subscriptions')
+                  .delete()
+                  .eq('endpoint', sub.endpoint);
+                console.log(`🗑️ [Push] Removed stale subscription: ${sub.endpoint.substring(0, 40)}...`);
+              }
             });
-
-            for (const sub of subs) {
-              const pushSub = {
-                endpoint: sub.endpoint,
-                keys: { p256dh: sub.p256dh, auth: sub.auth },
-              };
-              webpush.sendNotification(pushSub, pushPayload).catch(async (err) => {
-                console.error('❌ [Push] Failed to send push:', err.message);
-                // Remove stale/invalid subscriptions from DB
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                  await supabase
-                    .from('push_subscriptions')
-                    .delete()
-                    .eq('endpoint', sub.endpoint);
-                  console.log(`🗑️ [Push] Removed stale subscription: ${sub.endpoint.substring(0, 40)}...`);
-                }
-              });
-            }
-          }
-        } catch (pushErr) {
-          console.error('❌ [Push] Failed to load subscriptions:', pushErr.message);
+          });
+          
+          await Promise.all(pushPromises);
         }
+      } catch (pushErr) {
+        console.error('❌ [Push] Failed to load subscriptions:', pushErr.message);
       }
     }
   }
@@ -1427,15 +1440,17 @@ app.post('/api/push/test', async (req, res) => {
       url: '/admin/chat',
     });
 
-    for (const sub of subs) {
+    const pushPromises = subs.map(sub => {
       const pushSub = {
         endpoint: sub.endpoint,
         keys: { p256dh: sub.p256dh, auth: sub.auth },
       };
-      webpush.sendNotification(pushSub, payload).catch(err => {
+      return webpush.sendNotification(pushSub, payload).catch(err => {
         console.error('❌ [Push] Test push failed:', err.message);
       });
-    }
+    });
+
+    await Promise.all(pushPromises);
 
     res.json({ ok: true, sent: subs.length });
   } catch (err) {

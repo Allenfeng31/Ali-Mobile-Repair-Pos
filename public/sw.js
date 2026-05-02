@@ -34,6 +34,7 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'New Customer Chat';
   const body = payload.body || 'You have a new message';
   const url = payload.url || '/admin/chat';
+  const unreadCount = payload.unreadCount || 1;
 
   const options = {
     body,
@@ -47,8 +48,10 @@ self.addEventListener('push', (event) => {
   // Set app badge count if supported (iOS 16.4+, Android)
   // Wrapped in try/catch — some older browsers crash if API is absent
   try {
-    if (self.navigator && typeof self.navigator.setAppBadge === 'function') {
-      self.navigator.setAppBadge(1).catch(() => {});
+    if (navigator.setAppBadge) {
+      navigator.setAppBadge(unreadCount).catch(() => {});
+    } else if (self.navigator && self.navigator.setAppBadge) {
+      self.navigator.setAppBadge(unreadCount).catch(() => {});
     }
   } catch (_) {
     // Badge API not supported — fail silently
