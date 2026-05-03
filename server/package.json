@@ -2,7 +2,7 @@
   "name": "react-pos-backend",
   "version": "1.0.0",
   "description": "Express Backend for Ali POS with Supabase",
-  "main": "index.js",
+  "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
     "dev": "nodemon api/index.js"

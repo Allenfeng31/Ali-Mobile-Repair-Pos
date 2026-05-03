@@ -59,12 +59,12 @@ const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
 const googleReviewLink = process.env.GOOGLE_REVIEW_LINK || 'https://g.page/r/your-review-link';
 const ADMIN_PHONE = process.env.ADMIN_PHONE_NUMBER || '+61481058514';
 
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
   const twilio = require('twilio');
   twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   console.log('✅ [SMS] Twilio client initialized — SMS notifications active.');
 } else {
-  console.warn('⚠️  [SMS] Twilio credentials not set — SMS notifications disabled. Add TWILIO_* to server/.env');
+  console.warn('⚠️  [SMS] Twilio credentials or phone number not set — SMS notifications disabled. Add TWILIO_* to server/.env');
 }
 
 // ----------------------------------------------------------------------
@@ -72,8 +72,6 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
 const VAPID_PUBLIC_KEY = "BETAg1e-VdMbXaRk4_TOk9rWZOjVIB2vWulpdEk4IxIWd4yV_oyrLgLVls4Rs5hKJwxiySP7Q27t1z_T3Exjg-k";
-
-const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 
 // Push subscriptions are stored in Supabase `push_subscriptions` table
 // (NOT in-memory — in-memory arrays die on Vercel serverless cold starts)
@@ -1246,6 +1244,14 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
               return { success: true };
             } catch (err) {
               console.error("❌ PUSH REJECTED:", err.statusCode, err.body || err.message);
+              
+              if (err.statusCode === 401 || err.statusCode === 403) {
+                console.error("🚨 [Push Auth Error] 401/403 鉴权失败！可能原因：");
+                console.error("   1. Vercel 上未配置 VAPID_PRIVATE_KEY 环境变量");
+                console.error("   2. 前后端 VAPID_PUBLIC_KEY 不一致");
+                console.error("   3. mailto subject 格式不正确");
+              }
+
               // Remove stale/invalid subscriptions from DB
               if (err.statusCode === 410 || err.statusCode === 404) {
                 await supabase
@@ -1468,6 +1474,13 @@ app.post('/api/push/test', async (req, res) => {
         return { success: true, endpoint: sub.endpoint };
       } catch (err) {
         console.error("❌ PUSH REJECTED:", err.statusCode, err.body || err.message);
+
+        if (err.statusCode === 401 || err.statusCode === 403) {
+          console.error("🚨 [Push Auth Error] 401/403 鉴权失败！可能原因：");
+          console.error("   1. Vercel 上未配置 VAPID_PRIVATE_KEY 环境变量");
+          console.error("   2. 前后端 VAPID_PUBLIC_KEY 不一致");
+          console.error("   3. mailto subject 格式不正确");
+        }
 
         // Remove stale/invalid subscriptions from DB
         if (err.statusCode === 410 || err.statusCode === 404) {
