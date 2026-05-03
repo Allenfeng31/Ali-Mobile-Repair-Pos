@@ -71,7 +71,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = "BJuwk0qMB1315WUtzhooEVjyW2HPJ8OuKq9JScu5xEStrJjGkSalUBXFCyU7TpGbKZ52OldUjtcTfVvIXUKivy8";
+const VAPID_PUBLIC_KEY = "BETAg1e-VdMbXaRk4_TOk9rWZOjVIB2vWulpdEk4IxIWd4yV_oyrLgLVls4Rs5hKJwxiySP7Q27t1z_T3Exjg-k";
 
 const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 
