@@ -71,7 +71,8 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = "BKcZgg4Ijy8Yvaz7hNzy9LbXaDcH0VsODexU3myBL3ISBHmDvNqpVmm40pvJNjNylgAQmBbRQ9QIwF532JhqoLk";
+const VAPID_PUBLIC_KEY = "BD0ZY-quADsyck8K0hyz-LKNG4hSP0Tw-_H1NPgCTTBPJZ6H-vyHV93RCWuhGu3Oggf_tEjJ14uCKuqkNeUDzPI";
+
 const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 
 // Push subscriptions are stored in Supabase `push_subscriptions` table
