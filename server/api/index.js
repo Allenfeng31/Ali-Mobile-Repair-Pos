@@ -77,15 +77,15 @@ const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 // Push subscriptions are stored in Supabase `push_subscriptions` table
 // (NOT in-memory — in-memory arrays die on Vercel serverless cold starts)
 
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+if (VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
     'mailto:admin@alimobile.com.au',
     VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY
+    process.env.VAPID_PRIVATE_KEY
   );
   console.log('✅ [Push] VAPID keys configured — Web Push active.');
 } else {
-  console.warn('⚠️  [Push] VAPID keys not set — Web Push disabled. Add VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to server/.env');
+  console.warn('⚠️ [Push] VAPID keys not fully set. Public:', !!VAPID_PUBLIC_KEY, 'Private:', !!process.env.VAPID_PRIVATE_KEY);
 }
 
 // SMS debounce is DB-backed via `last_sms_sent_at` on `chat_sessions`
@@ -1231,6 +1231,10 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
             unreadCount: unreadCount || 1
           });
 
+          if (!process.env.VAPID_PRIVATE_KEY) {
+            console.error("🚨 CRITICAL: VAPID_PRIVATE_KEY is UNDEFINED in production!");
+          }
+
           const results = await Promise.allSettled(subs.map(async sub => {
             const pushSub = {
               endpoint: sub.endpoint,
@@ -1448,6 +1452,10 @@ app.post('/api/push/test', async (req, res) => {
       body: 'Push notifications are working! 🎉',
       url: '/admin/chat',
     });
+
+    if (!process.env.VAPID_PRIVATE_KEY) {
+      console.error("🚨 CRITICAL: VAPID_PRIVATE_KEY is UNDEFINED in production!");
+    }
 
     const results = await Promise.allSettled(subs.map(async sub => {
       const pushSub = {
