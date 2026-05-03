@@ -71,7 +71,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = "BD0ZY-quADsyck8K0hyz-LKNG4hSP0Tw-_H1NPgCTTBPJZ6H-vyHV93RCWuhGu3Oggf_tEjJ14uCKuqkNeUDzPI";
+const VAPID_PUBLIC_KEY = "BJuwk0qMB1315WUtzhooEVjyW2HPJ8OuKq9JScu5xEStrJjGkSalUBXFCyU7TpGbKZ52OldUjtcTfVvIXUKivy8";
 
 const VAPID_PRIVATE_KEY = process.env['VAPID_PRIVATE_KEY'] || '';
 
@@ -112,7 +112,7 @@ const SMS_MESSAGES = {
 
   partArrived: (name, device) =>
     `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
-  
+
   booking: (name) =>
     `Hi ${name}, your booking at Ali Mobile Repair is confirmed! See you in-store. Address: Kiosk C1, Ringwood Square Shopping Centre, Ringwood.`,
 };
@@ -268,7 +268,7 @@ app.get('/api/admin/permissions/:userId', async (req, res) => {
 
 app.post('/api/admin/employees', async (req, res) => {
   const { email, password, permissions } = req.body;
-  
+
   try {
     // 1. Create user in Supabase Auth
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
@@ -347,7 +347,7 @@ app.get('/api/inventory', async (req, res) => {
 
 app.post('/api/inventory', async (req, res) => {
   const item = req.body;
-  
+
   // If we have a device_model and name, try to find existing first to prevent duplicates 
   // until a DB-level unique constraint is applied.
   if (item.device_model && item.name) {
@@ -357,7 +357,7 @@ app.post('/api/inventory', async (req, res) => {
       .eq('device_model', item.device_model)
       .eq('name', item.name)
       .maybeSingle();
-      
+
     if (existing) {
       const { data, error } = await supabase
         .from('inventory')
@@ -424,7 +424,7 @@ app.post('/api/inventory/bulk', async (req, res) => {
 app.put('/api/inventory/:id', async (req, res) => {
   const itemData = req.body;
   let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();
-  
+
   if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
     console.warn(`⚠️ [Database Fallback] 'is_pinned' or 'pin_order' columns missing in 'inventory' table. Skipping pinning fields.`);
     const { is_pinned: _p, pin_order: _o, ...safeData } = itemData;
@@ -483,16 +483,16 @@ app.post('/api/orders', async (req, res) => {
   ({ data: order, error: orderError } = await supabase.from('orders').insert([orderData]).select());
 
   if (orderError && orderError.message && (
-    orderError.message.includes("surcharge") || 
-    orderError.message.includes("status") || 
-    orderError.message.includes("mixedCash") || 
+    orderError.message.includes("surcharge") ||
+    orderError.message.includes("status") ||
+    orderError.message.includes("mixedCash") ||
     orderError.message.includes("mixedEftpos")
   )) {
     console.warn(`⚠️ [Database Fallback] One or more new 'orders' columns missing. Retrying with essential columns only.`);
     const essentialColumns = ['id', 'timestamp', 'subtotal', 'tax', 'total', 'profit', 'type', 'paymentMethod'];
     const safeOrderData = {};
     essentialColumns.forEach(key => { if (orderData[key] !== undefined) safeOrderData[key] = orderData[key]; });
-    
+
     ({ data: order, error: orderError } = await supabase.from('orders').insert([safeOrderData]).select());
   }
 
@@ -1175,7 +1175,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
     const now = new Date();
     // DB-backed debounce: check `last_sms_sent_at` from chat_sessions
     const lastSmsTimestamp = session.last_sms_sent_at;
-    const withinDebounce = lastSmsTimestamp && 
+    const withinDebounce = lastSmsTimestamp &&
       (now.getTime() - new Date(lastSmsTimestamp).getTime()) < DEBOUNCE_MS;
 
     if (!withinDebounce) {
@@ -1217,7 +1217,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
 
         if (subs && subs.length > 0) {
           const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
-          
+
           // Calculate total unread messages for the app badge
           const { count: unreadCount } = await supabase
             .from('chat_messages')
@@ -1468,18 +1468,18 @@ app.post('/api/push/test', async (req, res) => {
         return { success: true, endpoint: sub.endpoint };
       } catch (err) {
         console.error("❌ PUSH REJECTED:", err.statusCode, err.body || err.message);
-        
+
         // Remove stale/invalid subscriptions from DB
         if (err.statusCode === 410 || err.statusCode === 404) {
           await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
           console.log(`🗑️ [Push] Removed stale subscription: ${sub.endpoint.substring(0, 40)}...`);
         }
-        
-        return { 
-          success: false, 
-          endpoint: sub.endpoint, 
-          error: err.body || err.message, 
-          statusCode: err.statusCode 
+
+        return {
+          success: false,
+          endpoint: sub.endpoint,
+          error: err.body || err.message,
+          statusCode: err.statusCode
         };
       }
     }));
@@ -1489,11 +1489,11 @@ app.post('/api/push/test', async (req, res) => {
       .map(r => r.status === 'fulfilled' ? r.value : { success: false, error: 'Settlement Error' })
       .filter(f => !f.success);
 
-    res.json({ 
-      ok: true, 
-      attempted: subs.length, 
-      successes, 
-      failures 
+    res.json({
+      ok: true,
+      attempted: subs.length,
+      successes,
+      failures
     });
   } catch (err) {
     console.error('❌ [Push] Test push error:', err.message);
