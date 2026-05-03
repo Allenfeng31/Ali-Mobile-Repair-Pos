@@ -8,124 +8,6 @@ const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
 // Only load dotenv in local development (where .env file exists)
-
-// Test push (for debugging — reads from DB)
-
-    }
-
-    const payload = JSON.stringify({
-      title: 'Test Notification',
-      body: 'Push notifications are working! 🎉',
-      url: '/admin/chat',
-    });
-
-    const results = await Promise.allSettled(subs.map(async sub => {
-      const pushSub = {
-        endpoint: sub.endpoint,
-        keys: { p256dh: sub.p256dh, auth: sub.auth },
-      };
-      try {
-        await webpush.sendNotification(pushSub, payload);
-        return { success: true, endpoint: sub.endpoint };
-      } catch (err) {
-        console.error("❌ PUSH REJECTED:", err.statusCode, err.body || err.message);
-        
-        // Remove stale/invalid subscriptions from DB
-        if (err.statusCode === 410 || err.statusCode === 404) {
-          await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
-          console.log(`🗑️ [Push] Removed stale subscription: ${sub.endpoint.substring(0, 40)}...`);
-        }
-        
-        return { 
-          success: false, 
-          endpoint: sub.endpoint, 
-          error: err.body || err.message, 
-          statusCode: err.statusCode 
-        };
-      }
-    }));
-
-    const successes = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-    const failures = results
-      .map(r => r.status === 'fulfilled' ? r.value : { success: false, error: 'Settlement Error' })
-      .filter(f => !f.success);
-
-    res.json({ 
-      ok: true, 
-      attempted: subs.length, 
-      successes, 
-      failures 
-    });
-  } catch (err) {
-    console.error('❌ [Push] Test push error:', err.message);
-    res.status(500).json({ error: 'Failed to send test push' });
-  }
-});
-
-
-// Test push (for debugging — reads from DB)
-app.post('/api/push/test', async (req, res) => {
-  console.log("🔥 TEST ENDPOINT TRIGGERED");
-  try {
-    const { data: subs } = await supabase
-      .from('push_subscriptions')
-      .select('endpoint, p256dh, auth');
-
-    console.log("📊 Subscriptions found in DB:", subs?.length);
-
-    if (!subs || subs.length === 0) {
-      return res.status(404).json({ error: "No push subscriptions found in database." });
-    }
-
-    const payload = JSON.stringify({
-      title: 'Test Notification',
-      body: 'Push notifications are working! 🎉',
-      url: '/admin/chat',
-    });
-
-    const results = await Promise.allSettled(subs.map(async sub => {
-      const pushSub = {
-        endpoint: sub.endpoint,
-        keys: { p256dh: sub.p256dh, auth: sub.auth },
-      };
-      try {
-        await webpush.sendNotification(pushSub, payload);
-        return { success: true, endpoint: sub.endpoint };
-      } catch (err) {
-        console.error("❌ PUSH REJECTED:", err.statusCode, err.body || err.message);
-        
-        // Remove stale/invalid subscriptions from DB
-        if (err.statusCode === 410 || err.statusCode === 404) {
-          await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
-          console.log(`🗑️ [Push] Removed stale subscription: ${sub.endpoint.substring(0, 40)}...`);
-        }
-        
-        return { 
-          success: false, 
-          endpoint: sub.endpoint, 
-          error: err.body || err.message, 
-          statusCode: err.statusCode 
-        };
-      }
-    }));
-
-    const successes = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-    const failures = results
-      .map(r => r.status === 'fulfilled' ? r.value : { success: false, error: 'Settlement Error' })
-      .filter(f => !f.success);
-
-    res.json({ 
-      ok: true, 
-      attempted: subs.length, 
-      successes, 
-      failures 
-    });
-  } catch (err) {
-    console.error('❌ [Push] Test push error:', err.message);
-    res.status(500).json({ error: 'Failed to send test push' });
-  }
-});
-
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -1049,8 +931,6 @@ app.delete('/api/repairs/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-});
-
 // ----------------------------------------------------------------------
 // STOREFRONT UPSELLS
 // ----------------------------------------------------------------------
@@ -1334,8 +1214,6 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
           .from('push_subscriptions')
           .select('endpoint, p256dh, auth');
 
-        console.log("📊 [Push] Subscriptions found in DB:", subs?.length);
-
         if (subs && subs.length > 0) {
           const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
           
@@ -1551,10 +1429,6 @@ app.post('/api/push/unsubscribe', async (req, res) => {
   }
 });
 
-
-
-// ----------------------------------------------------------------------
-
 // Test push (for debugging — reads from DB)
 app.post('/api/push/test', async (req, res) => {
   console.log("🔥 TEST ENDPOINT TRIGGERED");
@@ -1618,6 +1492,9 @@ app.post('/api/push/test', async (req, res) => {
   }
 });
 
+// ----------------------------------------------------------------------
+// START SERVER
+// ----------------------------------------------------------------------
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, '0.0.0.0', () => {
     console.log(`Backend server running on http://0.0.0.0:${port}`);
