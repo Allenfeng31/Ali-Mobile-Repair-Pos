@@ -1214,6 +1214,8 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
           .from('push_subscriptions')
           .select('endpoint, p256dh, auth');
 
+        console.log("📊 [Push] Subscriptions found in DB:", subs?.length);
+
         if (subs && subs.length > 0) {
           const snippet = trimmed.length > 50 ? trimmed.substring(0, 50) + '...' : trimmed;
           
@@ -1237,7 +1239,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
               keys: { p256dh: sub.p256dh, auth: sub.auth },
             };
             return webpush.sendNotification(pushSub, pushPayload).catch(async (err) => {
-              console.error('❌ [Push] Failed to send push:', err.message);
+              console.error("❌ WEBPUSH FAILED:", err);
               // Remove stale/invalid subscriptions from DB
               if (err.statusCode === 410 || err.statusCode === 404) {
                 await supabase
@@ -1425,13 +1427,16 @@ app.post('/api/push/unsubscribe', async (req, res) => {
 
 // Test push (for debugging — reads from DB)
 app.post('/api/push/test', async (req, res) => {
+  console.log("🔥 TEST ENDPOINT TRIGGERED");
   try {
     const { data: subs } = await supabase
       .from('push_subscriptions')
       .select('endpoint, p256dh, auth');
 
+    console.log("📊 Subscriptions found in DB:", subs?.length);
+
     if (!subs || subs.length === 0) {
-      return res.json({ ok: false, reason: 'No subscriptions' });
+      return res.status(404).json({ error: "No push subscriptions found in database." });
     }
 
     const payload = JSON.stringify({
@@ -1446,7 +1451,7 @@ app.post('/api/push/test', async (req, res) => {
         keys: { p256dh: sub.p256dh, auth: sub.auth },
       };
       return webpush.sendNotification(pushSub, payload).catch(err => {
-        console.error('❌ [Push] Test push failed:', err.message);
+        console.error("❌ WEBPUSH FAILED:", err);
       });
     });
 
