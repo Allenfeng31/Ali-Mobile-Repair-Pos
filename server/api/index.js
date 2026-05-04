@@ -1254,6 +1254,15 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
           console.log('3. VAPID Details Configuration:', webpush.generateVapidHeaders ? 'Methods exist' : 'Missing methods');
           console.log('--- PUSH DEBUG END ---');
 
+          if (process.env.VAPID_PRIVATE_KEY) {
+            webpush.setVapidDetails(
+              'mailto:admin@alimobile.com.au',
+              VAPID_PUBLIC_KEY,
+              process.env.VAPID_PRIVATE_KEY
+            );
+            console.log("Current Subject:", "mailto:admin@alimobile.com.au");
+          }
+
           const results = await Promise.allSettled(subs.map(async sub => {
             const pushSub = {
               endpoint: sub.endpoint,
@@ -1489,6 +1498,15 @@ app.post('/api/push/test', async (req, res) => {
     console.log('2. Private Key Length:', process.env.VAPID_PRIVATE_KEY ? process.env.VAPID_PRIVATE_KEY.length : 'UNDEFINED!');
     console.log('3. VAPID Details Configuration:', webpush.generateVapidHeaders ? 'Methods exist' : 'Missing methods');
     console.log('--- PUSH DEBUG END ---');
+
+    if (process.env.VAPID_PRIVATE_KEY) {
+      webpush.setVapidDetails(
+        'mailto:admin@alimobile.com.au',
+        VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+      );
+      console.log("Current Subject:", "mailto:admin@alimobile.com.au");
+    }
 
     const results = await Promise.allSettled(subs.map(async sub => {
       const pushSub = {
