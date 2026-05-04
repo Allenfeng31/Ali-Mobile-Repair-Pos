@@ -71,7 +71,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.e
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = "BJuwk0qMB1315WUtzhooEVjyW2HPJ8OuKq9JScu5xEStrJjGkSalUBXFCyU7TpGbKZ52OldUjtcTfVvIXUKivy8";
+const VAPID_PUBLIC_KEY = "BLApuKbr8Y8olv4dOWbYlt-_y0umoi11j_HCGsk-NPU_xM5bGVk2I2_3NeZqmiif2_PWXsvdkGFMIn10oh9RoIU";
 
 // Push subscriptions are stored in Supabase `push_subscriptions` table
 // (NOT in-memory — in-memory arrays die on Vercel serverless cold starts)
