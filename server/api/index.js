@@ -25,6 +25,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root route to prevent "Cannot GET /" confusion
+app.get('/', (req, res) => {
+  res.send(`
+    <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
+      <h1>Ali Mobile Repair POS API</h1>
+      <p>The backend API is running correctly.</p>
+      <p style="margin-top: 2rem; font-weight: bold; color: #004253;">
+        Please visit the UI at: <a href="http://localhost:3002">http://localhost:3002</a>
+      </p>
+    </div>
+  `);
+});
+
 // Initialize Supabase
 // Use service_role key if available (bypasses RLS, recommended for server-side use)
 // Get service_role key from: Supabase Dashboard → Settings → API → service_role (secret)
@@ -82,7 +95,8 @@ if (VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
-  console.log('✅ [Push] VAPID keys configured — Web Push active.');
+  const privKeyPrefix = process.env.VAPID_PRIVATE_KEY.substring(0, 3);
+  console.log(`✅ [Push] VAPID keys configured — Web Push active. (Private Key Prefix: ${privKeyPrefix}...)`);
 } else {
   console.warn('⚠️ [Push] VAPID keys not fully set. Public:', !!VAPID_PUBLIC_KEY, 'Private:', !!process.env.VAPID_PRIVATE_KEY);
 }
