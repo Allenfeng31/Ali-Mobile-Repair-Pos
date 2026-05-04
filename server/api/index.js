@@ -71,7 +71,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.e
 // Web Push (VAPID)
 // ----------------------------------------------------------------------
 const webpush = require('web-push');
-const VAPID_PUBLIC_KEY = "BETAg1e-VdMbXaRk4_TOk9rWZOjVIB2vWulpdEk4IxIWd4yV_oyrLgLVls4Rs5hKJwxiySP7Q27t1z_T3Exjg-k";
+const VAPID_PUBLIC_KEY = "BJuwk0qMB1315WUtzhooEVjyW2HPJ8OuKq9JScu5xEStrJjGkSalUBXFCyU7TpGbKZ52OldUjtcTfVvIXUKivy8";
 
 // Push subscriptions are stored in Supabase `push_subscriptions` table
 // (NOT in-memory — in-memory arrays die on Vercel serverless cold starts)
@@ -1234,6 +1234,12 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
             console.error("🚨 CRITICAL: VAPID_PRIVATE_KEY is UNDEFINED in production!");
           }
 
+          console.log('--- PUSH DEBUG START ---');
+          console.log('1. Has Private Key Context?', !!process.env.VAPID_PRIVATE_KEY);
+          console.log('2. Private Key Length:', process.env.VAPID_PRIVATE_KEY ? process.env.VAPID_PRIVATE_KEY.length : 'UNDEFINED!');
+          console.log('3. VAPID Details Configuration:', webpush.generateVapidHeaders ? 'Methods exist' : 'Missing methods');
+          console.log('--- PUSH DEBUG END ---');
+
           const results = await Promise.allSettled(subs.map(async sub => {
             const pushSub = {
               endpoint: sub.endpoint,
@@ -1463,6 +1469,12 @@ app.post('/api/push/test', async (req, res) => {
     if (!process.env.VAPID_PRIVATE_KEY) {
       console.error("🚨 CRITICAL: VAPID_PRIVATE_KEY is UNDEFINED in production!");
     }
+
+    console.log('--- PUSH DEBUG START ---');
+    console.log('1. Has Private Key Context?', !!process.env.VAPID_PRIVATE_KEY);
+    console.log('2. Private Key Length:', process.env.VAPID_PRIVATE_KEY ? process.env.VAPID_PRIVATE_KEY.length : 'UNDEFINED!');
+    console.log('3. VAPID Details Configuration:', webpush.generateVapidHeaders ? 'Methods exist' : 'Missing methods');
+    console.log('--- PUSH DEBUG END ---');
 
     const results = await Promise.allSettled(subs.map(async sub => {
       const pushSub = {
