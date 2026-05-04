@@ -155,13 +155,13 @@ export default function RepairPricingAndCTA({
           })}
         </div>
       ) : (
-        <div className="mb-12 mt-4 text-center max-w-md mx-auto p-10 rounded-2xl border border-slate-200 bg-slate-50/50 shadow-sm">
-          <p className="text-2xl font-extrabold text-blue-600 mb-4">
+        <div className="mb-12 mt-4 text-center max-w-md mx-auto p-10 rounded-2xl border border-slate-200 bg-slate-50/50 dark:bg-white dark:border-white shadow-sm">
+          <p className="text-2xl font-extrabold text-blue-600 dark:text-black mb-4">
             Quote on Request
           </p>
-          <p className="text-base text-slate-500 leading-relaxed">
+          <p className="text-base text-slate-500 dark:text-black leading-relaxed">
             Please fill out the form below or call{' '}
-            <a href="tel:0481058514" className="text-blue-600 font-bold hover:underline">
+            <a href="tel:0481058514" className="text-blue-600 dark:text-blue-700 font-bold hover:underline">
               0481 058 514
             </a>{' '}
             for an instant quote.
@@ -185,13 +185,13 @@ export default function RepairPricingAndCTA({
         <button 
           type="button"
           onClick={handleBookRepair}
-          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
         >
           Book Repair Now
         </button>
         <a 
           href="tel:0481058514" 
-          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-white dark:bg-white border border-slate-200 dark:border-white text-slate-700 dark:text-black rounded-2xl hover:bg-slate-50 dark:hover:bg-gray-100 hover:border-slate-300 transition-all duration-200"
           onClick={() => analytics.trackCallNow(modelName, repairName)}
         >
           📞 Call 0481 058 514
