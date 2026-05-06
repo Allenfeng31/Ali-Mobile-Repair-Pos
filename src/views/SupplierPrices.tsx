@@ -71,13 +71,65 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
     isNewPartType: false,
     isNewGrade: false
   });
+  const [persistentGrades, setPersistentGrades] = useState<string[]>([]);
+  const [partTypeSuggestions, setPartTypeSuggestions] = useState<string[]>([]);
+  const [customGradeInput, setCustomGradeInput] = useState('');
+  const [customPartTypeInput, setCustomPartTypeInput] = useState('');
+
+  // Confirm Modal State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    isDestructive?: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   useEffect(() => {
     fetchData();
+    fetchPersistentGrades();
+    fetchPartTypeSuggestions();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchPartTypeSuggestions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('part_type_suggestions')
+        .select('name');
+      
+      if (error) {
+        console.error('Supabase Part Type Fetch Error:', error);
+      }
+
+      if (data) {
+        const types = data.map(p => p.name);
+        // Apply Priority Sorting
+        const sortedTypes = [...types].sort((a, b) => {
+          const indexA = PART_TYPE_PRIORITY.indexOf(a);
+          const indexB = PART_TYPE_PRIORITY.indexOf(b);
+          
+          if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+          return a.localeCompare(b);
+        });
+        setPartTypeSuggestions(sortedTypes);
+      } else {
+        setPartTypeSuggestions([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch part type suggestions:', err);
+    }
+  };
+
+  const fetchData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       // 1. Fetch mapped items
       const { data: mappedData, error: mappedError } = await supabase
@@ -243,36 +295,203 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
   };
   
   const handleUnmapItem = async (rawItemId: string) => {
-    if (!confirm('Are you sure you want to move this item back to Uncategorized?')) return;
-    
-    try {
-      const { error } = await supabase
-        .from('item_mapping')
-        .delete()
-        .eq('raw_item_id', rawItemId);
-        
-      if (error) throw error;
-      await fetchData(); // Refresh
-    } catch (err) {
-      console.error('Failed to unmap item:', err);
-      alert('Failed to unmap item');
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Unmap Item?',
+      message: 'This item will be moved to the Uncategorized section. Its price history will be preserved.',
+      confirmText: 'Unmap Item',
+      onConfirm: async () => {
+        // Optimistic Update
+        const previousTaxonomy = [...taxonomy];
+
+        setTaxonomy(prev => prev.map(brand => ({
+          ...brand,
+          categories: brand.categories.map((cat: any) => ({
+            ...cat,
+            models: cat.models.map((model: any) => ({
+              ...model,
+              partTypes: model.partTypes.map((pt: any) => ({
+                ...pt,
+                qualityTiers: pt.qualityTiers.map((tier: any) => ({
+                  ...tier,
+                  suppliers: tier.suppliers.filter((s: any) => s.id !== rawItemId)
+                })).filter((tier: any) => tier.suppliers.length > 0)
+              })).filter((pt: any) => pt.qualityTiers.length > 0)
+            })).filter((model: any) => model.partTypes.length > 0)
+          })).filter((cat: any) => cat.models.length > 0)
+        })).filter(brand => brand.categories.length > 0));
+
+        try {
+          const { error } = await supabase
+            .from('item_mapping')
+            .delete()
+            .eq('raw_item_id', rawItemId);
+
+          if (error) throw error;
+          fetchData(false); // background sync
+        } catch (err) {
+          console.error('Failed to unmap item:', err);
+          setTaxonomy(previousTaxonomy);
+        }
+      }
+    });
   };
 
   const handleDeleteItem = async (rawItemId: string) => {
-    if (!confirm('Permanently delete this item and its price history? This action cannot be undone.')) return;
-    
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Item?',
+      message: 'PERMANENTLY delete this item and its price history? This action cannot be undone.',
+      confirmText: 'Delete Permanently',
+      isDestructive: true,
+      onConfirm: async () => {
+        // Optimistic Update
+        const previousTaxonomy = [...taxonomy];
+        const previousUnmapped = [...unmappedItems];
+
+        setTaxonomy(prev => prev.map(brand => ({
+          ...brand,
+          categories: brand.categories.map((cat: any) => ({
+            ...cat,
+            models: cat.models.map((model: any) => ({
+              ...model,
+              partTypes: model.partTypes.map((pt: any) => ({
+                ...pt,
+                qualityTiers: pt.qualityTiers.map((tier: any) => ({
+                  ...tier,
+                  suppliers: tier.suppliers.filter((s: any) => s.id !== rawItemId)
+                })).filter((tier: any) => tier.suppliers.length > 0)
+              })).filter((pt: any) => pt.qualityTiers.length > 0)
+            })).filter((model: any) => model.partTypes.length > 0)
+          })).filter((cat: any) => cat.models.length > 0)
+        })).filter(brand => brand.categories.length > 0));
+
+        setUnmappedItems(prev => prev.filter(item => item.id !== rawItemId));
+
+        try {
+          const { error } = await supabase
+            .from('raw_supplier_items')
+            .delete()
+            .eq('id', rawItemId);
+
+          if (error) throw error;
+          fetchData(false); // background sync
+        } catch (err) {
+          console.error('Failed to delete item:', err);
+          setTaxonomy(previousTaxonomy);
+          setUnmappedItems(previousUnmapped);
+        }
+      }
+    });
+  };
+
+  const fetchPersistentGrades = async (specificPartType?: string) => {
+    const pt = specificPartType || wizardData.partType;
+    if (!pt) {
+      setPersistentGrades([]);
+      return;
+    }
+
     try {
-      const { error } = await supabase
-        .from('raw_supplier_items')
-        .delete()
-        .eq('id', rawItemId);
-        
-      if (error) throw error;
-      await fetchData(); // Refresh
+      const { data, error } = await supabase
+        .from('quality_tiers_suggestions')
+        .select('name')
+        .eq('part_type', pt)
+        .order('name');
+      
+      if (error) {
+        console.error('Supabase Grade Fetch Error:', error);
+      }
+
+      if (data) {
+        // Use a Set to ensure absolute deduplication in the UI
+        const uniqueNames = Array.from(new Set(data.map(g => g.name)));
+        setPersistentGrades(uniqueNames);
+      }
     } catch (err) {
-      console.error('Failed to delete item:', err);
-      alert('Failed to delete item');
+      console.error('Failed to fetch persistent grades:', err);
+    }
+  };
+
+  const handleSavePartType = async () => {
+    if (!customPartTypeInput.trim()) return;
+    
+    setLoading(true);
+    try {
+      const trimmedName = customPartTypeInput.trim();
+      const { error } = await supabase
+        .from('part_type_suggestions')
+        .insert({ name: trimmedName });
+
+      if (error) {
+        if (error.code === '23505') {
+          alert(`The part type "${trimmedName}" already exists.`);
+        } else {
+          alert(`Database Error: ${error.message}`);
+        }
+      } else {
+        await fetchPartTypeSuggestions();
+        setCustomPartTypeInput('');
+        // Auto-select the newly created part type
+        setWizardData(prev => ({ ...prev, partType: trimmedName, isNewPartType: false }));
+      }
+    } catch (err: any) {
+      console.error('Failed to save part type:', err);
+      alert(`System Error: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveGrade = async () => {
+    if (!customGradeInput.trim() || !wizardData.partType) return;
+    
+    setLoading(true);
+    try {
+      const trimmedGrade = customGradeInput.trim();
+      const { error } = await supabase
+        .from('quality_tiers_suggestions')
+        .insert({ 
+          name: trimmedGrade,
+          part_type: wizardData.partType 
+        });
+
+      if (error) {
+        console.error('Supabase Save Error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        if (error.code === '23505') { // Unique constraint
+          alert(`Duplicate Error: The grade "${trimmedGrade}" already exists for "${wizardData.partType}".`);
+        } else {
+          alert(`Database Error: ${error.message}\n\nDetails: ${error.details || 'None'}`);
+        }
+      } else {
+        await fetchPersistentGrades();
+        setCustomGradeInput('');
+        // Auto-select the newly created grade
+        setWizardData(prev => ({ ...prev, grade: trimmedGrade, isNewGrade: false }));
+      }
+    } catch (err: any) {
+      console.error('Failed to save grade:', err);
+      alert(`System Error: ${err.message || 'Unknown error occurred'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteGradeSuggestion = async (grade: string) => {
+    try {
+      await supabase
+        .from('quality_tiers_suggestions')
+        .delete()
+        .eq('name', grade);
+      setPersistentGrades(prev => prev.filter(g => g !== grade));
+    } catch (err) {
+      console.error('Failed to delete grade suggestion:', err);
     }
   };
 
@@ -499,6 +718,18 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                       </button>
                       <button 
                         onClick={() => {
+                          // RESET WIZARD DATA COMPLETELY
+                          setWizardData({
+                            brand: '',
+                            model: '',
+                            partType: '',
+                            grade: '',
+                            isNewModel: false,
+                            isNewPartType: false,
+                            isNewGrade: false
+                          });
+                          setCustomGradeInput('');
+                          setCustomPartTypeInput('');
                           setWizardItem(item);
                           setWizardStep(1);
                         }}
@@ -564,20 +795,15 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                   {tier.suppliers.map((supplier: any, index: number) => (
                                     <div key={index} className="p-5 flex flex-col relative group hover:bg-surface-container-lowest transition-colors">
                                       <div className="flex justify-between items-start mb-3">
-                                        <div className="flex flex-col">
-                                          {/* If generic grade, show item title, otherwise show Grade as title */}
-                                          <span className="font-bold text-on-surface text-lg leading-tight">
-                                            {tier.name === 'Standard' ? supplier.raw_title : tier.name}
+                                        <div className="flex flex-col flex-1">
+                                          {/* Full Raw Title with wrapping */}
+                                          <span className="font-bold text-on-surface text-sm leading-snug whitespace-normal break-words">
+                                            {supplier.raw_title}
                                           </span>
-                                          <div className="flex items-center gap-1.5 mt-1">
-                                            <span className="text-xs font-bold text-on-surface-variant/60">{supplier.name}</span>
-                                            <span className={`w-1 h-1 rounded-full ${getStockColor(supplier.stock).split(' ')[0]}`} />
-                                            <span className="text-[10px] font-bold text-on-surface-variant/50 uppercase">{supplier.stockText}</span>
-                                          </div>
                                         </div>
                                         
                                         {/* Item Actions */}
-                                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                                           <button 
                                             onClick={() => handleUnmapItem(supplier.id)}
                                             className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
@@ -597,11 +823,11 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                       
                                       <div className="mt-auto pt-4 flex items-end justify-between">
                                         <div className="flex flex-col">
-                                          <span className="text-3xl font-black text-on-surface tracking-tighter">
-                                            <span className="text-xl text-on-surface-variant/50 mr-1">$</span>
+                                          <span className="text-xl font-black text-on-surface tracking-tight">
+                                            <span className="text-sm text-on-surface-variant/50 mr-1">$</span>
                                             {(supplier.price * 1.1).toFixed(2)}
                                           </span>
-                                          <div className="text-[10px] text-on-surface-variant/70 font-bold uppercase tracking-wider">(GST incl.)</div>
+                                          <div className="text-[9px] text-on-surface-variant/70 font-bold uppercase tracking-wider">Incl. GST</div>
                                         </div>
                                         <div className="text-[10px] text-on-surface-variant/40 font-mono">
                                           Excl. ${supplier.price.toFixed(2)}
@@ -744,7 +970,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                 )}
 
                 {wizardStep === 3 && (
-                  <div className="space-y-4">
+                  <div className="space-y-4" onMouseEnter={() => fetchPartTypeSuggestions()}>
                     <div className="flex items-center gap-2 mb-4">
                       <button onClick={() => setWizardStep(2)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
                         <ChevronLeft size={20} />
@@ -752,42 +978,66 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                       <h4 className="text-lg font-bold text-on-surface">Step 3: Select Part Type</h4>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-2">
-                      {PART_TYPE_PRIORITY.map(pt => (
-                        <button
-                          key={pt}
-                          onClick={() => {
-                            setWizardData(prev => ({ ...prev, partType: pt, isNewPartType: false }));
-                            setWizardStep(4);
-                          }}
-                          className={`px-4 py-3 rounded-xl border transition-all text-left text-sm font-bold ${
-                            wizardData.partType === pt 
-                              ? 'border-primary bg-primary/5 text-primary' 
-                              : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
-                          }`}
-                        >
-                          {pt}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
+                      {partTypeSuggestions.length > 0 ? (
+                        partTypeSuggestions.map(pt => (
+                          <button
+                            key={pt}
+                            onClick={() => {
+                              setWizardData(prev => ({ ...prev, partType: pt, isNewPartType: false }));
+                            }}
+                            className={`px-4 py-3 rounded-xl border transition-all text-left text-sm font-bold ${
+                              wizardData.partType === pt 
+                                ? 'border-primary bg-primary/5 text-primary' 
+                                : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                            }`}
+                          >
+                            {pt}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="col-span-2 py-8 text-center bg-surface-container-low rounded-2xl border border-dashed border-outline-variant/30">
+                          <p className="text-sm text-on-surface-variant font-medium">No part types found in database.</p>
+                          <button 
+                            onClick={() => fetchPartTypeSuggestions()}
+                            className="mt-2 text-xs font-bold text-primary hover:underline"
+                          >
+                            Click to Retry Fetch
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="pt-4 border-t border-outline-variant/10">
-                      <div className="flex gap-2">
+                      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Add New Type</p>
+                      <div className="flex gap-2 mb-6">
                         <input 
                           type="text" 
-                          placeholder="Other Part Type..."
+                          placeholder="e.g. Back Housing, Full Screw Set..."
                           className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
-                          value={wizardData.isNewPartType ? wizardData.partType : ''}
-                          onChange={(e) => setWizardData(prev => ({ ...prev, partType: e.target.value, isNewPartType: true }))}
+                          value={customPartTypeInput}
+                          onChange={(e) => setCustomPartTypeInput(e.target.value)}
                         />
                         <button 
-                          disabled={!wizardData.partType}
-                          onClick={() => setWizardStep(4)}
-                          className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold disabled:opacity-50"
+                          onClick={handleSavePartType}
+                          disabled={!customPartTypeInput.trim()}
+                          className="w-12 h-12 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-xl transition-colors disabled:opacity-50"
                         >
-                          Next
+                          <Plus size={20} />
                         </button>
                       </div>
+
+                      <button 
+                        onClick={() => {
+                          fetchPersistentGrades(wizardData.partType);
+                          setWizardStep(4);
+                        }}
+                        disabled={!wizardData.partType}
+                        className="w-full py-3 bg-primary text-on-primary rounded-xl font-bold disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                      >
+                        Next Step
+                        <ChevronRight size={18} />
+                      </button>
                     </div>
                   </div>
                 )}
@@ -801,37 +1051,56 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                       <h4 className="text-lg font-bold text-on-surface">Step 4: Quality / Grade</h4>
                     </div>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-4" onMouseEnter={() => fetchPersistentGrades()}>
                       <p className="text-sm text-on-surface-variant">Selected Mapping: <span className="font-bold text-on-surface">{wizardData.brand} {wizardData.model} &gt; {wizardData.partType}</span></p>
                       
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Select Existing Grade</p>
                         <div className="flex flex-wrap gap-2">
-                          {['Soft OLED', 'Hard OLED', 'In-cell LCD', 'Standard', 'Premium'].map(g => (
-                            <button
-                              key={g}
-                              onClick={() => setWizardData(prev => ({ ...prev, grade: g, isNewGrade: false }))}
-                              className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition-all ${
-                                wizardData.grade === g 
-                                  ? 'border-primary bg-primary text-on-primary' 
-                                  : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
-                              }`}
-                            >
-                              {g}
-                            </button>
+                          {persistentGrades.map(g => (
+                            <div key={g} className="relative group">
+                              <button
+                                onClick={() => setWizardData(prev => ({ ...prev, grade: g, isNewGrade: false }))}
+                                className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition-all pr-8 ${
+                                  wizardData.grade === g 
+                                    ? 'border-primary bg-primary text-on-primary' 
+                                    : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                                }`}
+                              >
+                                {g}
+                              </button>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteGradeSuggestion(g);
+                                }}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant/40 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Plus className="w-3 h-3 rotate-45" />
+                              </button>
+                            </div>
                           ))}
                         </div>
                       </div>
 
                       <div className="pt-4 border-t border-outline-variant/10">
-                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Custom Grade</p>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Service Pack, Refurbished..."
-                          className="w-full px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary mb-6"
-                          value={wizardData.grade}
-                          onChange={(e) => setWizardData(prev => ({ ...prev, grade: e.target.value, isNewGrade: true }))}
-                        />
+                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Add New Grade</p>
+                        <div className="flex gap-2 mb-6">
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Service Pack, Refurbished..."
+                            className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
+                            value={customGradeInput}
+                            onChange={(e) => setCustomGradeInput(e.target.value)}
+                          />
+                          <button 
+                            onClick={handleSaveGrade}
+                            disabled={!customGradeInput.trim()}
+                            className="w-12 h-12 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-xl transition-colors disabled:opacity-50"
+                          >
+                            <Plus size={20} />
+                          </button>
+                        </div>
 
                         <button 
                           onClick={async () => {
@@ -894,6 +1163,52 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                     </div>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Custom Confirm Modal */}
+      <AnimatePresence>
+        {confirmConfig.isOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+            >
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={`p-3 rounded-xl ${confirmConfig.isDestructive ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{confirmConfig.title}</h3>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  {confirmConfig.message}
+                </p>
+              </div>
+              <div className="p-4 bg-slate-800/50 flex gap-3">
+                <button
+                  onClick={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+                  className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirmConfig.onConfirm();
+                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                  }}
+                  className={`flex-1 py-3 px-4 ${
+                    confirmConfig.isDestructive 
+                      ? 'bg-red-600 hover:bg-red-500' 
+                      : 'bg-blue-600 hover:bg-blue-500'
+                  } text-white font-semibold rounded-xl shadow-lg transition-colors`}
+                >
+                  {confirmConfig.confirmText || 'Confirm'}
+                </button>
               </div>
             </motion.div>
           </div>

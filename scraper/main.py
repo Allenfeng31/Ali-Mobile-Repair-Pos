@@ -60,11 +60,13 @@ def get_cookies():
 
 def scrape_tph_category(url: str, cookies=None):
     """
-    Uses direct Playwright for reliability with cookies, then Scrapling for parsing.
+    Uses direct Playwright for multi-page scraping with cookies.
+    Constructs pagination URLs directly for maximum reliability.
     """
     print(f"Scraping category: {url}")
     
-    content = ""
+    items_scraped = []
+    
     with sync_playwright() as p:
         print("Launching browser...")
         browser = p.chromium.launch(headless=True)
@@ -74,135 +76,103 @@ def scrape_tph_category(url: str, cookies=None):
         
         if cookies:
             print(f"Injecting {len(cookies)} cookies...")
-            for i, c in enumerate(cookies):
-                if 'domain' not in c and 'url' not in c:
-                    print(f"ERROR: Cookie {i} is missing domain and url: {c}")
             context.add_cookies(cookies)
             
         page = context.new_page()
-        print("Navigating to target URL...")
-        # Use a longer timeout for slow Magento pages
-        page.goto(url, wait_until="load", timeout=60000)
         
-        # Wait for KnockoutJS to render prices
-        try:
-            print("Scrolling and waiting for prices to render...")
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight/2)")
-            time.sleep(1)
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page_num = 1
+        has_more_items = True
+
+        while has_more_items and page_num <= 15:
+            # Construct pagination URL
+            sep = "&" if "?" in url else "?"
+            paginated_url = f"{url}{sep}p={page_num}"
+            print(f"Scraping page {page_num}: {paginated_url}")
             
-            page.wait_for_selector(".product-item .price", timeout=30000)
-            time.sleep(2)
-        except:
-            print("Warning: .product-item .price selector not found within 30s.")
+            page.goto(paginated_url, wait_until="load", timeout=60000)
             
-        content = page.content()
-        page.evaluate("window.scrollTo(0, 0)")
-        page.screenshot(path="debug_screenshot.png", full_page=True)
-        print("Debug: Screenshot saved to debug_screenshot.png")
-        with open("debug_page.html", "w") as f:
-            f.write(content)
-        print("Debug: HTML saved to debug_page.html")
-        browser.close()
-
-    # Wrap the content in a Scrapling Response object for easy parsing
-    response = Response(
-        url=url, 
-        text=content, 
-        body=content.encode('utf-8'), 
-        status=200, 
-        reason='OK', 
-        cookies={}, 
-        headers={}, 
-        request_headers={}
-    )
-    
-    # Magento 2 typical selectors
-    # Target the main product grid specifically to avoid mini-cart items
-    item_nodes = response.css("ol.products.list.items.product-items .product-item")
-    
-    items_scraped = []
-    
-    for item in item_nodes:
-        try:
-            link_node = item.css_first(".product-item-link")
-            raw_url = link_node.attrib.get("href", "") if link_node else ""
-            raw_title = link_node.text.strip() if link_node else ""
-            
-            # Precise price parsing using Magento 2 data attributes
-            # We prefer 'basePrice' (Excl. GST) as per user requirement for frontend calculation.
-            price_box = item.css_first(".price-box")
-            if not price_box:
-                print(f"Skipping {raw_title}: Price box not found.")
-                continue
-
-            # Try to find basePrice (Excl. GST) first
-            price_wrapper = price_box.css_first("[data-price-type='basePrice']")
-            if not price_wrapper:
-                # Fallback to finalPrice (Incl. GST) and divide by 1.1 if needed
-                price_wrapper = price_box.css_first("[data-price-type='finalPrice']")
-                is_incl_gst = True
-            else:
-                is_incl_gst = False
-
-            if not price_wrapper:
-                # Last resort fallback to the generic .price class
-                price_wrapper = price_box.css_first(".price")
-                is_incl_gst = False # Unknown, assume Excl.
-
-            if not price_wrapper:
-                print(f"Skipping {raw_title}: Price element not found within price box.")
-                continue
-
-            # Use data-price-amount attribute for precision if available
-            price_amount_attr = price_wrapper.attrib.get("data-price-amount")
-            if price_amount_attr:
-                price_float = float(price_amount_attr)
-            else:
-                # Fallback to text parsing
-                price_text = price_wrapper.text.strip()
-                price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", ""))
-
-            # If we captured an Incl. GST price, convert it back to Excl. GST for consistent DB storage
-            if is_incl_gst:
-                price_float = round(price_float / 1.1, 2)
-            
-            # Stock parsing
-            stock_node = item.css_first(".stock")
-            stock_status = "In Stock" if stock_node and "available" in stock_node.attrib.get("class", "").lower() else "Out of Stock"
-            
-            items_scraped.append({
-                "raw_url": raw_url,
-                "raw_title": raw_title,
-                "current_price": price_float,
-                "stock_status": stock_status
-            })
-        except Exception as e:
-            print(f"Error parsing item: {e}")
-
-    # Fallback for single product page if no category items found
-    if not items_scraped:
-        title_node = response.css_first(".page-title .base")
-        if title_node:
-            print("Detected single product page...")
+            # Wait for products to render
             try:
-                raw_title = title_node.text.strip()
-                price_node = response.css_first(".price-box .price")
-                if price_node:
-                    price_text = price_node.text.strip()
-                    price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", ""))
-                    stock_node = response.css_first(".stock.available")
-                    stock_status = "In Stock" if stock_node else "Out of Stock"
+                page.wait_for_selector(".product-item", timeout=15000)
+                # Scroll to trigger any lazy loading logic
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight/2)")
+                time.sleep(1)
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                time.sleep(2)
+            except:
+                print(f"No items found on page {page_num} or timed out. Ending pagination.")
+                break
+                
+            content = page.content()
+            response = Response(
+                url=paginated_url, 
+                text=content, 
+                body=content.encode('utf-8'),
+                status=200,
+                reason='OK',
+                cookies={},
+                headers={},
+                request_headers={}
+            )
+            item_nodes = response.css("ol.products.list.items.product-items .product-item")
+            
+            if not item_nodes:
+                print(f"No item nodes parsed on page {page_num}. Ending.")
+                break
+
+            print(f"Found {len(item_nodes)} items on page {page_num}.")
+            
+            for item in item_nodes:
+                try:
+                    link_node = item.css_first(".product-item-link")
+                    raw_url = link_node.attrib.get("href", "") if link_node else ""
+                    raw_title = link_node.text.strip() if link_node else ""
+                    
+                    price_box = item.css_first(".price-box")
+                    if not price_box: continue
+
+                    price_wrapper = price_box.css_first("[data-price-type='basePrice']")
+                    is_incl_gst = False
+                    if not price_wrapper:
+                        price_wrapper = price_box.css_first("[data-price-type='finalPrice']")
+                        is_incl_gst = True
+                    
+                    if not price_wrapper:
+                        price_wrapper = price_box.css_first(".price")
+                        is_incl_gst = False
+
+                    if not price_wrapper: continue
+
+                    price_amount_attr = price_wrapper.attrib.get("data-price-amount")
+                    if price_amount_attr:
+                        price_float = float(price_amount_attr)
+                    else:
+                        price_text = price_wrapper.text.strip()
+                        price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", ""))
+
+                    if is_incl_gst:
+                        price_float = round(price_float / 1.1, 2)
+                    
+                    stock_node = item.css_first(".stock")
+                    stock_status = "In Stock" if stock_node and "available" in stock_node.attrib.get("class", "").lower() else "Out of Stock"
+
                     items_scraped.append({
-                        "raw_url": url,
+                        "raw_url": raw_url,
                         "raw_title": raw_title,
                         "current_price": price_float,
                         "stock_status": stock_status
                     })
-                else:
-                    print(f"Price not found on product page: {raw_title}")
-            except Exception as e:
-                print(f"Error parsing product page: {e}")
+                except Exception as e:
+                    print(f"Error parsing item: {e}")
+
+            # If we got fewer than 10 items, it's likely the last page
+            if len(item_nodes) < 10:
+                print("Likely last page reached.")
+                has_more_items = False
+            else:
+                page_num += 1
+
+        browser.close()
     
     return items_scraped
 
@@ -233,10 +203,12 @@ def upsert_to_supabase(supplier_name: str, items: list):
             "last_scraped_at": datetime.utcnow().isoformat()
         }
 
+        # Robust Deduplication Check: Check by URL OR by Title for the same supplier
         existing = supabase.table("raw_supplier_items")\
             .select("id, current_price")\
             .eq("supplier_id", supplier_id)\
-            .eq("raw_url", item["raw_url"])\
+            .or_(f"raw_url.eq.{item['raw_url']},raw_title.eq.{item['raw_title']}")\
+            .limit(1)\
             .execute()
 
         raw_item_id = None
@@ -309,11 +281,13 @@ def auto_categorize_item(raw_title: str):
         "display": "Screen Replacement",
         "tempered glass": "Tempered Glass",
         "glass protector": "Tempered Glass",
+        "back rear battery cover": "Back Glass / Housing",
+        "housing": "Back Glass / Housing",
+        "back glass": "Back Glass / Housing",
+        "back cover": "Back Glass / Housing",
+        "internal li-ion battery": "Battery",
         "battery": "Battery",
-        "back glass": "Back Glass",
-        "back cover": "Back Glass",
-        "housing": "Back Glass",
-        "charging port": "Charging Port",
+        "charging": "Charging Port",
         "charge port": "Charging Port",
         "front camera": "Front Camera",
         "rear camera": "Back Camera",
@@ -366,40 +340,64 @@ def auto_categorize_item(raw_title: str):
 def map_items_to_catalog(upserted_items: list):
     """
     Takes a list of {'raw_item_id': id, 'raw_title': title} and auto-maps them.
+    Implements a "Learning Loop": Checks for historical manual mappings for identical titles.
     """
     if not upserted_items: return
     
     print(f"Attempting to auto-map {len(upserted_items)} items...")
     mapped_count = 0
     for item in upserted_items:
-        parsed = auto_categorize_item(item['raw_title'])
-        if parsed:
-            cat_res = supabase.table("master_catalog").select("id").eq("brand", parsed["brand"]).eq("device_model", parsed["device_model"]).eq("part_type", parsed["part_type"]).eq("quality_tier", parsed["quality_tier"]).execute()
-            
-            master_id = None
-            if cat_res.data:
-                master_id = cat_res.data[0]['id']
-            else:
-                ins_res = supabase.table("master_catalog").insert(parsed).execute()
-                if ins_res.data:
-                    master_id = ins_res.data[0]['id']
-                    
-            if master_id:
-                map_res = supabase.table("item_mapping").select("raw_item_id").eq("raw_item_id", item['raw_item_id']).execute()
-                if not map_res.data:
-                    supabase.table("item_mapping").insert({
-                        "raw_item_id": item['raw_item_id'],
-                        "master_catalog_id": master_id
-                    }).execute()
-                    mapped_count += 1
-                    print(f"Mapped '{item['raw_title']}' -> {parsed['part_type']} ({parsed['quality_tier']})")
+        master_id = None
+        
+        # 1. Learning Logic: Have we mapped this exact title before?
+        # We look for ANY raw_supplier_item with the same title that has a mapping.
+        history = supabase.table("raw_supplier_items")\
+            .select("id, item_mapping(master_catalog_id)")\
+            .eq("raw_title", item['raw_title'])\
+            .execute()
+        
+        # Check if any of these historical items have a mapping
+        for h in history.data:
+            if h.get('item_mapping') and h['item_mapping'].get('master_catalog_id'):
+                master_id = h['item_mapping']['master_catalog_id']
+                print(f"Learned mapping for '{item['raw_title']}' from history.")
+                break
+        
+        # 2. If no history, use Smart Parser
+        parsed = None
+        if not master_id:
+            parsed = auto_categorize_item(item['raw_title'])
+            if parsed:
+                cat_res = supabase.table("master_catalog").select("id").eq("brand", parsed["brand"]).eq("device_model", parsed["device_model"]).eq("part_type", parsed["part_type"]).eq("quality_tier", parsed["quality_tier"]).execute()
+                
+                if cat_res.data:
+                    master_id = cat_res.data[0]['id']
                 else:
-                    supabase.table("item_mapping").update({
-                        "master_catalog_id": master_id
-                    }).eq("raw_item_id", item['raw_item_id']).execute()
-                    print(f"Updated Mapping '{item['raw_title']}' -> {parsed['part_type']} ({parsed['quality_tier']})")
+                    ins_res = supabase.table("master_catalog").insert(parsed).execute()
+                    if ins_res.data:
+                        master_id = ins_res.data[0]['id']
+
+        # 3. Apply Mapping
+        if master_id:
+            # Check if this specific item already has a mapping
+            map_res = supabase.table("item_mapping").select("raw_item_id").eq("raw_item_id", item['raw_item_id']).execute()
+            
+            if not map_res.data:
+                supabase.table("item_mapping").insert({
+                    "raw_item_id": item['raw_item_id'],
+                    "master_catalog_id": master_id
+                }).execute()
+                mapped_count += 1
+                if not history.data: # Only log as "Mapped" if it was new
+                    print(f"Mapped '{item['raw_title']}' -> {parsed['part_type']} ({parsed['quality_tier']})")
+            else:
+                # Update existing mapping if different
+                supabase.table("item_mapping").update({
+                    "master_catalog_id": master_id
+                }).eq("raw_item_id", item['raw_item_id']).execute()
+                # print(f"Verified/Updated Mapping for '{item['raw_title']}'")
     
-    print(f"Successfully auto-mapped {mapped_count} items. Unmapped items will appear in the Review section.")
+    print(f"Successfully processed {len(upserted_items)} items. Auto-mapped {mapped_count} new items.")
 
 def main():
     print("Initializing Scraper...")
