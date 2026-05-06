@@ -9,3 +9,19 @@ coverage/
 seed-macbook.js
 seed-*.js
 migrate-*
+
+# Python Virtual Environments
+scraper_venv/
+scraper/scraper_venv/
+__pycache__/
+*/__pycache__/
+
+# Scraper Secrets and Data
+scraper/cookies.json
+cookies.json
+
+# Scraper Debug Files
+debug_screenshot.png
+debug_page.html
+scraper/debug_screenshot.png
+scraper/debug_page.html

@@ -9,6 +9,7 @@ import { ChatInbox } from './views/ChatInbox';
 import { LoginView } from './views/Login';
 import { AdminDashboard } from './views/AdminDashboard';
 import { StorefrontCMS } from './views/StorefrontCMS';
+import { SupplierPrices } from './views/SupplierPrices';
 import { useAuthStore } from './hooks/useAuthStore';
 import { AnimatePresence } from 'motion/react';
 import { 
@@ -267,6 +268,8 @@ export default function App() {
         return <AdminDashboard onViewChange={setCurrentView} />;
       case 'cms':
         return <StorefrontCMS onBack={() => setCurrentView('admin')} />;
+      case 'supplier-prices':
+        return <SupplierPrices onBack={() => setCurrentView('admin')} />;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }

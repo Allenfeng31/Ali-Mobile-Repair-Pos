@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare } from 'lucide-react';
+import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../hooks/useAuthStore';
 
@@ -42,13 +42,13 @@ const adminCards: AdminCard[] = [
     href: '/admin/cms',
   },
   {
-    id: 'security',
-    title: 'Security Logs',
-    icon: ShieldCheck,
-    description: 'Review system access and audit trails.',
+    id: 'supplier-prices',
+    title: 'Supplier Prices',
+    icon: ShoppingCart,
+    description: 'Track and compare real-time vendor costs.',
     color: 'text-emerald-600',
     gradient: 'from-emerald-500/10 to-emerald-600/5',
-    href: '/admin/security',
+    href: '/admin/supplier-prices',
   },
   {
     id: 'notifications',
