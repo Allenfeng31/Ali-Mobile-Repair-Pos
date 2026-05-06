@@ -118,7 +118,8 @@ def scrape_tph_category(url: str, cookies=None):
     )
     
     # Magento 2 typical selectors
-    item_nodes = response.css(".item.product.product-item")
+    # Target the main product grid specifically to avoid mini-cart items
+    item_nodes = response.css("ol.products.list.items.product-items .product-item")
     
     items_scraped = []
     
@@ -128,15 +129,43 @@ def scrape_tph_category(url: str, cookies=None):
             raw_url = link_node.attrib.get("href", "") if link_node else ""
             raw_title = link_node.text.strip() if link_node else ""
             
-            # Price parsing
-            price_node = item.css_first(".price")
-            if not price_node:
-                print(f"Skipping {raw_title}: Price not visible (Out of stock or login issue?)")
+            # Precise price parsing using Magento 2 data attributes
+            # We prefer 'basePrice' (Excl. GST) as per user requirement for frontend calculation.
+            price_box = item.css_first(".price-box")
+            if not price_box:
+                print(f"Skipping {raw_title}: Price box not found.")
                 continue
-                
-            price_text = price_node.text.strip()
-            # Handle "AU$123.00"
-            price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", ""))
+
+            # Try to find basePrice (Excl. GST) first
+            price_wrapper = price_box.css_first("[data-price-type='basePrice']")
+            if not price_wrapper:
+                # Fallback to finalPrice (Incl. GST) and divide by 1.1 if needed
+                price_wrapper = price_box.css_first("[data-price-type='finalPrice']")
+                is_incl_gst = True
+            else:
+                is_incl_gst = False
+
+            if not price_wrapper:
+                # Last resort fallback to the generic .price class
+                price_wrapper = price_box.css_first(".price")
+                is_incl_gst = False # Unknown, assume Excl.
+
+            if not price_wrapper:
+                print(f"Skipping {raw_title}: Price element not found within price box.")
+                continue
+
+            # Use data-price-amount attribute for precision if available
+            price_amount_attr = price_wrapper.attrib.get("data-price-amount")
+            if price_amount_attr:
+                price_float = float(price_amount_attr)
+            else:
+                # Fallback to text parsing
+                price_text = price_wrapper.text.strip()
+                price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", ""))
+
+            # If we captured an Incl. GST price, convert it back to Excl. GST for consistent DB storage
+            if is_incl_gst:
+                price_float = round(price_float / 1.1, 2)
             
             # Stock parsing
             stock_node = item.css_first(".stock")
@@ -244,49 +273,88 @@ def upsert_to_supabase(supplier_name: str, items: list):
 def auto_categorize_item(raw_title: str):
     """
     Parses the raw title to extract Brand, Model, Part Type, and Quality Tier.
+    Dynamic NLP-style parsing based on keyword patterns.
     """
-    title_lower = raw_title.lower()
+    title_clean = raw_title.replace("|", " ").replace("[", " [").replace("]", "] ")
+    title_lower = title_clean.lower()
     
-    brand = "Apple"
+    brand = "Apple" # Default for now as requested
     device_model = "Unknown"
     part_type = "Unknown"
     quality_tier = "Standard"
     
-    match = re.search(r'iphone\s+\d+(?:\s+(?:pro\s+max|pro|mini|plus))?', title_lower)
-    if match:
-        words = match.group(0).split()
+    # 1. Extract Device Model
+    # iPhone Pattern
+    iphone_match = re.search(r'iphone\s+(\d+(?:\s+(?:pro\s+max|pro|mini|plus))?|se\s+\d+|x[rs]?)', title_lower)
+    if iphone_match:
+        words = iphone_match.group(0).split()
         words[0] = "iPhone"
         for i in range(1, len(words)):
-            if words[i] == "pro": words[i] = "Pro"
-            elif words[i] == "max": words[i] = "Max"
-            elif words[i] == "mini": words[i] = "mini"
-            elif words[i] == "plus": words[i] = "Plus"
+            if words[i] in ["pro", "max", "mini", "plus", "se"]:
+                words[i] = words[i].capitalize()
+            elif words[i].lower() == "xr": words[i] = "XR"
+            elif words[i].lower() == "xs": words[i] = "XS"
         device_model = " ".join(words)
         
-    if "screen" in title_lower or "lcd" in title_lower or "oled" in title_lower or "display" in title_lower:
-        part_type = "Screen Replacement"
-        if "oled" in title_lower and "soft" in title_lower:
-            quality_tier = "Soft OLED"
-        elif "oled" in title_lower and "hard" in title_lower:
-            quality_tier = "Hard OLED"
-        elif "incell" in title_lower or "lcd" in title_lower:
-            quality_tier = "In-cell LCD"
-        else:
-            quality_tier = "Standard Screen"
-            
-    elif "battery" in title_lower:
-        part_type = "Battery"
-        if "original" in title_lower or "premium" in title_lower or "ti" in title_lower:
-            quality_tier = "Premium Battery"
-        else:
-            quality_tier = "Standard Battery"
-            
-    elif "charging port" in title_lower or "flex" in title_lower:
-        part_type = "Charging Port"
-        quality_tier = "Premium OEM Pull"
+    # iPad Pattern
+    ipad_match = re.search(r'ipad\s+(?:pro|air|mini)?(?:\s+\d+(?:st|nd|rd|th)\s+gen)?', title_lower)
+    if ipad_match:
+        device_model = ipad_match.group(0).title()
+
+    # 2. Extract Part Type (Hardcoded Priority)
+    part_type_map = {
+        "screen": "Screen Replacement",
+        "lcd": "Screen Replacement",
+        "oled": "Screen Replacement",
+        "display": "Screen Replacement",
+        "tempered glass": "Tempered Glass",
+        "glass protector": "Tempered Glass",
+        "battery": "Battery",
+        "back glass": "Back Glass",
+        "back cover": "Back Glass",
+        "housing": "Back Glass",
+        "charging port": "Charging Port",
+        "charge port": "Charging Port",
+        "front camera": "Front Camera",
+        "rear camera": "Back Camera",
+        "back camera": "Back Camera",
+        "earpiece": "Earpiece Speaker",
+        "loudspeaker": "Loudspeaker",
+        "vibrator": "Taptic Engine",
+        "power flex": "Power/Volume Flex",
+        "volume flex": "Power/Volume Flex"
+    }
+    
+    for kw, pt in part_type_map.items():
+        if kw in title_lower:
+            part_type = pt
+            break
+
+    # 3. Extract Quality / Grade
+    # Priority 1: Brackets []
+    brackets_match = re.findall(r'\[([^\]]+)\]', title_clean)
+    if brackets_match:
+        # Filter for quality-related keywords
+        quality_keywords = ["soft", "hard", "incell", "oled", "premium", "value", "ohq", "original", "refurbished", "service pack", "ti", "oem"]
+        found_quality = []
+        for b_content in brackets_match:
+            b_lower = b_content.lower()
+            if any(qk in b_lower for qk in quality_keywords):
+                found_quality.append(b_content.strip())
         
+        if found_quality:
+            quality_tier = " | ".join(found_quality)
+    
+    # Priority 2: Inline keywords if no brackets or generic brackets
+    if quality_tier == "Standard":
+        if "soft oled" in title_lower: quality_tier = "Soft OLED"
+        elif "hard oled" in title_lower: quality_tier = "Hard OLED"
+        elif "incell" in title_lower: quality_tier = "In-cell LCD"
+        elif "original" in title_lower: quality_tier = "Original / OEM"
+
+    # If we couldn't find a model or part type, return None to keep it Uncategorized
     if device_model == "Unknown" or part_type == "Unknown":
-        return None # Uncategorized
+        return None 
         
     return {
         "brand": brand,

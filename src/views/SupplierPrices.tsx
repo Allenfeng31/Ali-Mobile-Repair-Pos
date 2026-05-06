@@ -18,12 +18,30 @@ import {
   Layers,
   Wrench,
   Loader2,
-  Inbox
+  Inbox,
+  Trash2,
+  Undo2,
+  ChevronLeft,
+  Check
 } from 'lucide-react';
 
 interface SupplierPricesProps {
   onBack: () => void;
 }
+
+const PART_TYPE_PRIORITY = [
+  "Screen Replacement",
+  "Tempered Glass",
+  "Battery",
+  "Back Glass",
+  "Charging Port",
+  "Front Camera",
+  "Back Camera",
+  "Earpiece Speaker",
+  "Loudspeaker",
+  "Taptic Engine",
+  "Power/Volume Flex"
+];
 export function SupplierPrices({ onBack }: SupplierPricesProps) {
   // Data State
   const [taxonomy, setTaxonomy] = useState<any[]>([]);
@@ -40,6 +58,19 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
 
   // Toggle for Uncategorized Review
   const [showUncategorized, setShowUncategorized] = useState(false);
+  
+  // Mapping Wizard State
+  const [wizardItem, setWizardItem] = useState<any>(null);
+  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardData, setWizardData] = useState({
+    brand: '',
+    model: '',
+    partType: '',
+    grade: '',
+    isNewModel: false,
+    isNewPartType: false,
+    isNewGrade: false
+  });
 
   useEffect(() => {
     fetchData();
@@ -58,6 +89,8 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           quality_tier,
           item_mapping (
             raw_supplier_items (
+              id,
+              raw_title,
               current_price,
               stock_status,
               suppliers (
@@ -143,7 +176,9 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                rawItem.stock_status?.toLowerCase().includes('low') ? 'low' : 'high';
             
             taxonomyMap[brandName].categories[categoryName].models[deviceModel].partTypes[partType].qualityTiers[qualityTier].suppliers.push({
+              id: rawItem.id,
               name: rawItem.suppliers.name,
+              raw_title: rawItem.raw_title,
               price: Number(rawItem.current_price),
               stock: stockLevel,
               stockText: rawItem.stock_status || 'Unknown'
@@ -152,7 +187,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
         });
       });
 
-      // Convert maps back to arrays
+      // Convert maps back to arrays with sorting
       const finalTaxonomy = Object.values(taxonomyMap).map((b: any) => ({
         brand: b.brand,
         categories: Object.values(b.categories).map((c: any) => ({
@@ -160,10 +195,24 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           icon: c.name.includes('iPad') ? Tablet : (c.name.includes('MacBook') ? Laptop : Smartphone),
           models: Object.values(c.models).map((m: any) => ({
             name: m.name,
-            partTypes: Object.values(m.partTypes).map((p: any) => ({
-              name: p.name,
-              qualityTiers: Object.values(p.qualityTiers)
-            }))
+            partTypes: Object.values(m.partTypes)
+              .map((p: any) => ({
+                name: p.name,
+                qualityTiers: Object.values(p.qualityTiers)
+              }))
+              .sort((a, b) => {
+                const indexA = PART_TYPE_PRIORITY.indexOf(a.name);
+                const indexB = PART_TYPE_PRIORITY.indexOf(b.name);
+                
+                // If both in priority list, sort by priority
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                // If only A in priority list, A comes first
+                if (indexA !== -1) return -1;
+                // If only B in priority list, B comes first
+                if (indexB !== -1) return 1;
+                // Otherwise alphabetical
+                return a.name.localeCompare(b.name);
+              })
           }))
         }))
       }));
@@ -193,6 +242,39 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
     }
   };
   
+  const handleUnmapItem = async (rawItemId: string) => {
+    if (!confirm('Are you sure you want to move this item back to Uncategorized?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('item_mapping')
+        .delete()
+        .eq('raw_item_id', rawItemId);
+        
+      if (error) throw error;
+      await fetchData(); // Refresh
+    } catch (err) {
+      console.error('Failed to unmap item:', err);
+      alert('Failed to unmap item');
+    }
+  };
+
+  const handleDeleteItem = async (rawItemId: string) => {
+    if (!confirm('Permanently delete this item and its price history? This action cannot be undone.')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('raw_supplier_items')
+        .delete()
+        .eq('id', rawItemId);
+        
+      if (error) throw error;
+      await fetchData(); // Refresh
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+      alert('Failed to delete item');
+    }
+  };
 
   const toggleBrand = (brand: string) => {
     setExpandedBrands(prev => 
@@ -407,9 +489,24 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                       {(Number(item.current_price) * 1.1).toFixed(2)}
                       <span className="text-sm text-on-surface-variant/70 font-normal ml-2 tracking-normal">(GST included)</span>
                     </span>
-                    <button className="text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 px-4 py-1.5 rounded-lg transition-colors">
-                      Map Item
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="p-2 text-on-surface-variant hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Delete Item"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setWizardItem(item);
+                          setWizardStep(1);
+                        }}
+                        className="text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 px-4 py-1.5 rounded-lg transition-colors"
+                      >
+                        Map Item
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -452,35 +549,63 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                           <div className="p-6 border-t border-outline-variant/10 space-y-6">
                             {part.qualityTiers.map((tier: any) => (
                               <div key={tier.name} className="bg-surface border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
-                                {/* Quality Tier Header */}
-                                <div className="px-5 py-3 bg-surface-container-low border-b border-outline-variant/20 flex items-center gap-2">
-                                  <Package size={16} className="text-primary" />
-                                  <h4 className="text-sm font-black tracking-widest uppercase text-on-surface-variant">{tier.name}</h4>
-                                </div>
+                                {/* Quality Tier Header - Hidden if generic "Standard" and only one tier */}
+                                {(tier.name !== 'Standard' || part.qualityTiers.length > 1) && (
+                                  <div className="px-5 py-3 bg-surface-container-low border-b border-outline-variant/20 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <Package size={16} className="text-primary" />
+                                      <h4 className="text-sm font-black tracking-widest uppercase text-on-surface-variant">{tier.name}</h4>
+                                    </div>
+                                  </div>
+                                )}
                                 
-                                {/* Supplier Pricing Grid (Side by side comparison) */}
+                                {/* Supplier Pricing Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-outline-variant/10">
                                   {tier.suppliers.map((supplier: any, index: number) => (
                                     <div key={index} className="p-5 flex flex-col relative group hover:bg-surface-container-lowest transition-colors">
-                                      {/* Highlight lowest price visually if needed */}
                                       <div className="flex justify-between items-start mb-3">
-                                        <div className="flex items-center gap-2">
-                                          <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center">
-                                            <Building2 size={14} className="text-on-surface-variant" />
+                                        <div className="flex flex-col">
+                                          {/* If generic grade, show item title, otherwise show Grade as title */}
+                                          <span className="font-bold text-on-surface text-lg leading-tight">
+                                            {tier.name === 'Standard' ? supplier.raw_title : tier.name}
+                                          </span>
+                                          <div className="flex items-center gap-1.5 mt-1">
+                                            <span className="text-xs font-bold text-on-surface-variant/60">{supplier.name}</span>
+                                            <span className={`w-1 h-1 rounded-full ${getStockColor(supplier.stock).split(' ')[0]}`} />
+                                            <span className="text-[10px] font-bold text-on-surface-variant/50 uppercase">{supplier.stockText}</span>
                                           </div>
-                                          <span className="font-bold text-on-surface">{supplier.name}</span>
                                         </div>
-                                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${getStockColor(supplier.stock)}`}>
-                                          {supplier.stockText}
-                                        </span>
+                                        
+                                        {/* Item Actions */}
+                                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <button 
+                                            onClick={() => handleUnmapItem(supplier.id)}
+                                            className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
+                                            title="Unmap / Move to Uncategorized"
+                                          >
+                                            <Undo2 size={16} />
+                                          </button>
+                                          <button 
+                                            onClick={() => handleDeleteItem(supplier.id)}
+                                            className="p-1.5 text-on-surface-variant hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                                            title="Delete Permanently"
+                                          >
+                                            <Trash2 size={16} />
+                                          </button>
+                                        </div>
                                       </div>
                                       
-                                      <div className="mt-auto">
-                                        <span className="text-3xl font-black text-on-surface tracking-tighter">
-                                          <span className="text-xl text-on-surface-variant/50 mr-1">$</span>
-                                          {(supplier.price * 1.1).toFixed(2)}
-                                        </span>
-                                        <div className="text-xs text-on-surface-variant/70 mt-1 font-medium">(GST included)</div>
+                                      <div className="mt-auto pt-4 flex items-end justify-between">
+                                        <div className="flex flex-col">
+                                          <span className="text-3xl font-black text-on-surface tracking-tighter">
+                                            <span className="text-xl text-on-surface-variant/50 mr-1">$</span>
+                                            {(supplier.price * 1.1).toFixed(2)}
+                                          </span>
+                                          <div className="text-[10px] text-on-surface-variant/70 font-bold uppercase tracking-wider">(GST incl.)</div>
+                                        </div>
+                                        <div className="text-[10px] text-on-surface-variant/40 font-mono">
+                                          Excl. ${supplier.price.toFixed(2)}
+                                        </div>
                                       </div>
                                     </div>
                                   ))}
@@ -506,6 +631,274 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           )}
         </div>
       </div>
+
+      {/* Mapping Wizard Modal */}
+      <AnimatePresence>
+        {wizardItem && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-on-surface/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-surface rounded-[32px] w-full max-w-xl overflow-hidden shadow-2xl border border-outline-variant/20"
+            >
+              {/* Wizard Header */}
+              <div className="px-8 py-6 border-b border-outline-variant/10 flex items-center justify-between bg-surface-container-low">
+                <div>
+                  <h3 className="text-xl font-black text-on-surface">Map Supplier Item</h3>
+                  <p className="text-sm text-on-surface-variant font-medium truncate max-w-xs">{wizardItem.raw_title}</p>
+                </div>
+                <button 
+                  onClick={() => setWizardItem(null)}
+                  className="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors"
+                >
+                  <XCircle size={20} />
+                </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="h-1.5 w-full bg-surface-container flex">
+                {[1, 2, 3, 4].map(step => (
+                  <div 
+                    key={step} 
+                    className={`h-full flex-1 transition-all duration-500 ${step <= wizardStep ? 'bg-primary' : 'bg-transparent'}`}
+                  />
+                ))}
+              </div>
+
+              {/* Step Content */}
+              <div className="p-8 min-h-[340px]">
+                {wizardStep === 1 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold text-on-surface mb-2">Step 1: Select Brand</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['Apple', 'Samsung', 'Google', 'Oppo', 'Huawei'].map(b => (
+                        <button
+                          key={b}
+                          onClick={() => {
+                            setWizardData(prev => ({ ...prev, brand: b }));
+                            setWizardStep(2);
+                          }}
+                          className={`px-4 py-3 rounded-2xl border-2 transition-all text-left font-bold ${
+                            wizardData.brand === b 
+                              ? 'border-primary bg-primary/5 text-primary' 
+                              : 'border-outline-variant/20 hover:border-primary/50 text-on-surface-variant'
+                          }`}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 2 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <button onClick={() => setWizardStep(1)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
+                        <ChevronLeft size={20} />
+                      </button>
+                      <h4 className="text-lg font-bold text-on-surface">Step 2: Select Model</h4>
+                    </div>
+                    
+                    <div className="max-h-60 overflow-y-auto pr-2 space-y-2">
+                      {/* Filter models by brand */}
+                      {taxonomy.find(b => b.brand === wizardData.brand)?.categories.flatMap((c: any) => c.models).map((m: any) => (
+                        <button
+                          key={m.name}
+                          onClick={() => {
+                            setWizardData(prev => ({ ...prev, model: m.name, isNewModel: false }));
+                            setWizardStep(3);
+                          }}
+                          className={`w-full px-4 py-3 rounded-xl border transition-all text-left font-medium ${
+                            wizardData.model === m.name 
+                              ? 'border-primary bg-primary/5 text-primary' 
+                              : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                          }`}
+                        >
+                          {m.name}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div className="pt-4 border-t border-outline-variant/10">
+                      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Add New Model</p>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="Enter model name (e.g. iPhone 17)"
+                          className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
+                          value={wizardData.isNewModel ? wizardData.model : ''}
+                          onChange={(e) => setWizardData(prev => ({ ...prev, model: e.target.value, isNewModel: true }))}
+                        />
+                        <button 
+                          disabled={!wizardData.model}
+                          onClick={() => setWizardStep(3)}
+                          className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold disabled:opacity-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 3 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <button onClick={() => setWizardStep(2)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
+                        <ChevronLeft size={20} />
+                      </button>
+                      <h4 className="text-lg font-bold text-on-surface">Step 3: Select Part Type</h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      {PART_TYPE_PRIORITY.map(pt => (
+                        <button
+                          key={pt}
+                          onClick={() => {
+                            setWizardData(prev => ({ ...prev, partType: pt, isNewPartType: false }));
+                            setWizardStep(4);
+                          }}
+                          className={`px-4 py-3 rounded-xl border transition-all text-left text-sm font-bold ${
+                            wizardData.partType === pt 
+                              ? 'border-primary bg-primary/5 text-primary' 
+                              : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                          }`}
+                        >
+                          {pt}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="pt-4 border-t border-outline-variant/10">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="Other Part Type..."
+                          className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
+                          value={wizardData.isNewPartType ? wizardData.partType : ''}
+                          onChange={(e) => setWizardData(prev => ({ ...prev, partType: e.target.value, isNewPartType: true }))}
+                        />
+                        <button 
+                          disabled={!wizardData.partType}
+                          onClick={() => setWizardStep(4)}
+                          className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold disabled:opacity-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 4 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <button onClick={() => setWizardStep(3)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
+                        <ChevronLeft size={20} />
+                      </button>
+                      <h4 className="text-lg font-bold text-on-surface">Step 4: Quality / Grade</h4>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <p className="text-sm text-on-surface-variant">Selected Mapping: <span className="font-bold text-on-surface">{wizardData.brand} {wizardData.model} &gt; {wizardData.partType}</span></p>
+                      
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Select Existing Grade</p>
+                        <div className="flex flex-wrap gap-2">
+                          {['Soft OLED', 'Hard OLED', 'In-cell LCD', 'Standard', 'Premium'].map(g => (
+                            <button
+                              key={g}
+                              onClick={() => setWizardData(prev => ({ ...prev, grade: g, isNewGrade: false }))}
+                              className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition-all ${
+                                wizardData.grade === g 
+                                  ? 'border-primary bg-primary text-on-primary' 
+                                  : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                              }`}
+                            >
+                              {g}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-outline-variant/10">
+                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Custom Grade</p>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Service Pack, Refurbished..."
+                          className="w-full px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary mb-6"
+                          value={wizardData.grade}
+                          onChange={(e) => setWizardData(prev => ({ ...prev, grade: e.target.value, isNewGrade: true }))}
+                        />
+
+                        <button 
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              // 1. Find or Create Master Catalog Item
+                              const { data: existing, error: findError } = await supabase
+                                .from('master_catalog')
+                                .select('id')
+                                .eq('brand', wizardData.brand)
+                                .eq('device_model', wizardData.model)
+                                .eq('part_type', wizardData.partType)
+                                .eq('quality_tier', wizardData.grade)
+                                .maybeSingle();
+                              
+                              let masterId = existing?.id;
+                              
+                              if (!masterId) {
+                                const { data: created, error: createError } = await supabase
+                                  .from('master_catalog')
+                                  .insert({
+                                    brand: wizardData.brand,
+                                    device_model: wizardData.model,
+                                    part_type: wizardData.partType,
+                                    quality_tier: wizardData.grade
+                                  })
+                                  .select('id')
+                                  .single();
+                                
+                                if (createError) throw createError;
+                                masterId = created.id;
+                              }
+                              
+                              // 2. Create Mapping
+                              const { error: mapError } = await supabase
+                                .from('item_mapping')
+                                .insert({
+                                  raw_item_id: wizardItem.id,
+                                  master_catalog_id: masterId
+                                });
+                                
+                              if (mapError) throw mapError;
+                              
+                              setWizardItem(null);
+                              await fetchData();
+                            } catch (err) {
+                              console.error('Mapping failed:', err);
+                              alert('Mapping failed');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={!wizardData.grade}
+                          className="w-full py-4 bg-primary text-on-primary rounded-2xl font-black text-lg shadow-lg shadow-primary/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Check size={20} />
+                          Finalize Mapping
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
