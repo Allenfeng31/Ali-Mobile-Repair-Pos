@@ -100,7 +100,8 @@ def scrape_tph_category(url: str, cookies=None):
                 page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 time.sleep(2)
             except:
-                print(f"No items found on page {page_num} or timed out. Ending pagination.")
+                print(f"No items found on page {page_num} or timed out. Saving screenshot for debug...")
+                page.screenshot(path="debug_page.png")
                 break
                 
             content = page.content()
@@ -114,7 +115,10 @@ def scrape_tph_category(url: str, cookies=None):
                 headers={},
                 request_headers={}
             )
+            # Fallback selectors for robustness
             item_nodes = response.css("ol.products.list.items.product-items .product-item")
+            if not item_nodes:
+                item_nodes = response.css(".product-item")
             
             if not item_nodes:
                 print(f"No item nodes parsed on page {page_num}. Ending.")
@@ -129,30 +133,38 @@ def scrape_tph_category(url: str, cookies=None):
                     raw_title = link_node.text.strip() if link_node else ""
                     
                     price_box = item.css_first(".price-box")
-                    if not price_box: continue
-
-                    price_wrapper = price_box.css_first("[data-price-type='basePrice']")
-                    is_incl_gst = False
-                    if not price_wrapper:
-                        price_wrapper = price_box.css_first("[data-price-type='finalPrice']")
-                        is_incl_gst = True
+                    price_float = 0.0
                     
-                    if not price_wrapper:
-                        price_wrapper = price_box.css_first(".price")
+                    if price_box:
+                        price_wrapper = price_box.css_first("[data-price-type='basePrice']")
                         is_incl_gst = False
+                        if not price_wrapper:
+                            price_wrapper = price_box.css_first("[data-price-type='finalPrice']")
+                            is_incl_gst = True
+                        
+                        if not price_wrapper:
+                            price_wrapper = price_box.css_first(".price")
+                            is_incl_gst = False
 
-                    if not price_wrapper: continue
+                        if price_wrapper:
+                            price_amount_attr = price_wrapper.attrib.get("data-price-amount")
+                            if price_amount_attr:
+                                price_float = float(price_amount_attr)
+                            else:
+                                price_text = price_wrapper.text.strip()
+                                # Handle "Login for price" text
+                                if any(kw in price_text.lower() for kw in ["login", "check price", "unavailable"]):
+                                    price_float = 0.0
+                                else:
+                                    try:
+                                        price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", "").strip())
+                                    except:
+                                        price_float = 0.0
 
-                    price_amount_attr = price_wrapper.attrib.get("data-price-amount")
-                    if price_amount_attr:
-                        price_float = float(price_amount_attr)
-                    else:
-                        price_text = price_wrapper.text.strip()
-                        price_float = float(price_text.replace("AU$", "").replace("$", "").replace(",", ""))
-
-                    if is_incl_gst:
-                        price_float = round(price_float / 1.1, 2)
+                            if is_incl_gst and price_float > 0:
+                                price_float = round(price_float / 1.1, 2)
                     
+                    # If price is 0, we still scrape the item so it shows up in "Uncategorized" as manual review
                     stock_node = item.css_first(".stock")
                     stock_status = "In Stock" if stock_node and "available" in stock_node.attrib.get("class", "").lower() else "Out of Stock"
 
@@ -241,6 +253,34 @@ def upsert_to_supabase(supplier_name: str, items: list):
             print(f"Recorded price change for {item['raw_title']}: ${item['current_price']}")
             
     return upserted_records
+
+def normalize_title(title: str):
+    """
+    Advanced Normalization for Cross-Model Learning.
+    Strips brands, models, and colors to extract the core 'Part Identity'.
+    Example: 'iPhone 13 Pro Max Flash Light Flex Cable' -> 'flash light flex cable'
+    """
+    t = title.lower()
+    
+    # 1. Strip Model/Brand Identifiers
+    # Matches: Apple, iPhone 13 Pro Max, iPhone 13 mini, iPhone 13, etc.
+    t = re.sub(r'(apple|iphone\s+\d+(?:\s+(?:pro\s+max|pro|mini|plus))?|ipad\s+(?:pro|air|mini)?(?:\s+\d+(?:st|nd|rd|th)\s+gen)?|se\s+\d+|x[rs]?)', '', t)
+    
+    # 2. Strip Colors/Variants
+    colors = [
+        "space grey", "space gray", "silver", "gold", "rose gold", "midnight", "starlight", 
+        "blue", "red", "pink", "green", "purple", "sierra blue", "alpine green", "deep purple",
+        "graphite", "pacific blue", "black", "white", "yellow", "coral", "starlight"
+    ]
+    for color in colors:
+        t = t.replace(f" {color}", "").replace(f"-{color}", "")
+    
+    # 3. Clean up common delimiters and whitespace
+    t = re.split(r'\s+[-/]\s+', t)[0]
+    t = t.replace("|", "").replace("[", "").replace("]", "")
+    t = re.sub(r'\s+', ' ', t).strip()
+    
+    return t
 
 def auto_categorize_item(raw_title: str):
     """
@@ -340,44 +380,41 @@ def auto_categorize_item(raw_title: str):
 def map_items_to_catalog(upserted_items: list):
     """
     Takes a list of {'raw_item_id': id, 'raw_title': title} and auto-maps them.
-    Implements a "Learning Loop": Checks for historical manual mappings for identical titles.
+    STRICT LEARNING MODE: Only maps if we have a historical manual mapping for a similar title.
     """
     if not upserted_items: return
     
-    print(f"Attempting to auto-map {len(upserted_items)} items...")
+    print(f"Attempting to auto-map {len(upserted_items)} items using Strict Historical Learning...")
     mapped_count = 0
-    for item in upserted_items:
-        master_id = None
-        
-        # 1. Learning Logic: Have we mapped this exact title before?
-        # We look for ANY raw_supplier_item with the same title that has a mapping.
-        history = supabase.table("raw_supplier_items")\
-            .select("id, item_mapping(master_catalog_id)")\
-            .eq("raw_title", item['raw_title'])\
-            .execute()
-        
-        # Check if any of these historical items have a mapping
-        for h in history.data:
-            if h.get('item_mapping') and h['item_mapping'].get('master_catalog_id'):
-                master_id = h['item_mapping']['master_catalog_id']
-                print(f"Learned mapping for '{item['raw_title']}' from history.")
-                break
-        
-        # 2. If no history, use Smart Parser
-        parsed = None
-        if not master_id:
-            parsed = auto_categorize_item(item['raw_title'])
-            if parsed:
-                cat_res = supabase.table("master_catalog").select("id").eq("brand", parsed["brand"]).eq("device_model", parsed["device_model"]).eq("part_type", parsed["part_type"]).eq("quality_tier", parsed["quality_tier"]).execute()
+    
+    # Pre-fetch all existing mappings to build a local "Knowledge Base"
+    # This is much faster than querying for every single item.
+    knowledge_base = {} # normalized_title -> master_catalog_id
+    
+    print("Building local knowledge base from historical mappings...")
+    historical_data = supabase.table("raw_supplier_items")\
+        .select("raw_title, item_mapping(master_catalog_id)")\
+        .execute()
+    
+    for row in historical_data.data:
+        if row.get('item_mapping') and row['item_mapping']:
+            # Handle case where item_mapping is a list or a dict
+            mappings = row['item_mapping']
+            if isinstance(mappings, list) and mappings:
+                m_id = mappings[0].get('master_catalog_id')
+            elif isinstance(mappings, dict):
+                m_id = mappings.get('master_catalog_id')
+            else:
+                m_id = None
                 
-                if cat_res.data:
-                    master_id = cat_res.data[0]['id']
-                else:
-                    ins_res = supabase.table("master_catalog").insert(parsed).execute()
-                    if ins_res.data:
-                        master_id = ins_res.data[0]['id']
+            if m_id:
+                norm = normalize_title(row['raw_title'])
+                knowledge_base[norm] = m_id
 
-        # 3. Apply Mapping
+    for item in upserted_items:
+        norm_title = normalize_title(item['raw_title'])
+        master_id = knowledge_base.get(norm_title)
+        
         if master_id:
             # Check if this specific item already has a mapping
             map_res = supabase.table("item_mapping").select("raw_item_id").eq("raw_item_id", item['raw_item_id']).execute()
@@ -388,58 +425,41 @@ def map_items_to_catalog(upserted_items: list):
                     "master_catalog_id": master_id
                 }).execute()
                 mapped_count += 1
-                if not history.data: # Only log as "Mapped" if it was new
-                    print(f"Mapped '{item['raw_title']}' -> {parsed['part_type']} ({parsed['quality_tier']})")
-            else:
-                # Update existing mapping if different
-                supabase.table("item_mapping").update({
-                    "master_catalog_id": master_id
-                }).eq("raw_item_id", item['raw_item_id']).execute()
-                # print(f"Verified/Updated Mapping for '{item['raw_title']}'")
+                # print(f"Learned mapping for '{item['raw_title']}' -> MasterID: {master_id}")
+        # else:
+        #     print(f"No historical mapping found for '{item['raw_title']}'. Leaving unmapped.")
     
-    print(f"Successfully processed {len(upserted_items)} items. Auto-mapped {mapped_count} new items.")
+    print(f"Strict Learning complete. Auto-mapped {mapped_count} items based on manual history.")
 
 def main():
     print("Initializing Scraper...")
     cookies = get_cookies()
     
     supplier_name = "The Parts Home"
-    base_url = "https://www.thepartshome.com.au/apple/iphone-parts.html"
+    # Target iPhone 13 Series Categories (Corrected URLs with year suffixes)
+    categories = [
+        {"name": "iPhone 13", "url": "https://www.thepartshome.com.au/apple/iphone-parts/iphone-13-2021.html"},
+        {"name": "iPhone 13 mini", "url": "https://www.thepartshome.com.au/apple/iphone-parts/iphone-13-mini-2021.html"},
+        {"name": "iPhone 13 Pro", "url": "https://www.thepartshome.com.au/apple/iphone-parts/iphone-13-pro-2021.html"}
+    ]
     
-    all_scraped_data = []
-    print(f"Starting mass scrape job for {supplier_name}...")
-    
-    page_num = 1
-    max_pages = 50 # reasonable limit
-    
-    while page_num <= max_pages:
-        url = f"{base_url}?p={page_num}"
-        print(f"Scraping page {page_num}...")
-        scraped_data = scrape_tph_category(url, cookies=cookies)
+    for cat in categories:
+        print(f"\n--- Starting mass scrape for: {cat['name']} ---")
         
-        if not scraped_data:
-            print(f"No items found on page {page_num}. Ending pagination.")
-            break
-            
-        all_scraped_data.extend(scraped_data)
-        print(f"Scraped {len(scraped_data)} items from page {page_num}. Total so far: {len(all_scraped_data)}")
+        # We delegate the full pagination to scrape_tph_category
+        # No need for the while loop here anymore
+        all_scraped_data = scrape_tph_category(cat['url'], cookies=cookies)
         
-        if len(scraped_data) < 5:
-            print("Looks like the last page. Stopping.")
-            break
-            
-        page_num += 1
+        print(f"Total items scraped for {cat['name']}: {len(all_scraped_data)}")
+        
+        if all_scraped_data:
+            print(f"Upserting and Mapping {cat['name']} data...")
+            upserted_records = upsert_to_supabase(supplier_name, all_scraped_data)
+            map_items_to_catalog(upserted_records)
+        else:
+            print(f"No data to upsert for {cat['name']}. Please check debug_page.png if items were expected.")
     
-    print(f"Total items scraped: {len(all_scraped_data)}")
-    
-    if all_scraped_data:
-        print("Upserting to Supabase...")
-        upserted_records = upsert_to_supabase(supplier_name, all_scraped_data)
-        map_items_to_catalog(upserted_records)
-    else:
-        print("No data to upsert.")
-    
-    print("Job completed.")
+    print("\n--- All Mass Scrape Jobs Completed ---")
 
 if __name__ == "__main__":
     main()
