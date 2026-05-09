@@ -22,8 +22,10 @@ import {
   Trash2,
   Undo2,
   ChevronLeft,
-  Check
+  Check,
+  CloudDownload
 } from 'lucide-react';
+import { SupplierSyncDrawer } from '../components/SupplierSyncDrawer';
 
 interface SupplierPricesProps {
   onBack: () => void;
@@ -58,6 +60,9 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
 
   // Toggle for Uncategorized Review
   const [showUncategorized, setShowUncategorized] = useState(false);
+  
+  // Sync Drawer State
+  const [isSyncDrawerOpen, setIsSyncDrawerOpen] = useState(false);
   
   // Mapping Wizard State
   const [wizardItem, setWizardItem] = useState<any>(null);
@@ -672,7 +677,14 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSyncDrawerOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-surface-container-high text-on-surface rounded-2xl text-sm font-bold hover:bg-surface-container-highest transition-all active:scale-95 border border-outline-variant/10 shadow-sm"
+            >
+              <CloudDownload size={18} className="text-primary" />
+              Sync Data
+            </button>
             <button className="flex items-center gap-2 px-5 py-2.5 bg-on-surface text-surface rounded-2xl text-sm font-bold hover:scale-105 transition-transform active:scale-95 shadow-md">
               <Plus size={18} />
               Add Vendor
@@ -1214,6 +1226,14 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           </div>
         )}
       </AnimatePresence>
+      {/* Supplier Sync Drawer */}
+      <SupplierSyncDrawer 
+        isOpen={isSyncDrawerOpen} 
+        onClose={() => setIsSyncDrawerOpen(false)} 
+        onSyncComplete={() => {
+          fetchData(false); // background refresh when sync is done
+        }}
+      />
     </div>
   );
 }

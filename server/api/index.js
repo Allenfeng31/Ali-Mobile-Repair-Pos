@@ -2,14 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
 // Only load dotenv in local development (where .env file exists)
 if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
+  require('dotenv').config({ path: path.join(__dirname, '../.env') });
 }
 
 const app = express();
@@ -120,7 +120,7 @@ const SMS_MESSAGES = {
     `Hi ${name}, your ${device} repair at Ali Mobile Repair is complete. Ready for pickup!`,
 
   review: (name) =>
-    `Hi ${name}, thanks for picking Ali Mobile Repair! Please leave a review: ${googleReviewLink}`,
+    `Hi ${name}, thanks for choosing Ali Mobile Repair! If you loved our service, a quick review helps us out a lot: https://g.page/r/CRGwjUq_bZMbEBM/review`,
 
   partArrived: (name, device) =>
     `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
@@ -191,6 +191,44 @@ app.post('/api/sms/send', async (req, res) => {
     }
     res.status(500).json({ ok: false, error: err.message, code: err.code });
   }
+});
+
+// ----------------------------------------------------------------------
+// SUPPLIER SYNC (Scraper Control Center)
+// ----------------------------------------------------------------------
+// SUPPLIER SYNC (Background Catalog Sync)
+// ----------------------------------------------------------------------
+app.post('/api/scraper/sync', (req, res) => {
+  const rootDir = path.resolve(__dirname, '../../');
+  const venvPath = path.join(rootDir, 'scraper/scraper_venv/bin/python3');
+  const scraperPath = path.join(rootDir, 'scraper/main.py');
+  
+  console.log(`🚀 [Scraper] Initiating background sync...`);
+  console.log(`📍 [Scraper] VENV Path: ${venvPath}`);
+
+  const pythonCmd = fs.existsSync(venvPath) ? venvPath : 'python3';
+
+  const scraperProcess = spawn(pythonCmd, [scraperPath], {
+    cwd: rootDir,
+    env: { ...process.env, PYTHONUNBUFFERED: '1' },
+    detached: true,
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+
+  scraperProcess.stderr.on('data', (data) => {
+    console.error(`❌ [Scraper Startup Error]: ${data.toString()}`);
+  });
+
+  scraperProcess.on('error', (err) => {
+    console.error(`❌ [Scraper Failed to Launch]:`, err);
+  });
+
+  scraperProcess.unref();
+
+  res.status(200).json({ 
+    ok: true, 
+    message: 'Background sync started. This may take 10-15 minutes.' 
+  });
 });
 
 // ----------------------------------------------------------------------
