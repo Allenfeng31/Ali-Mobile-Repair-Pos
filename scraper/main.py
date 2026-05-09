@@ -9,7 +9,7 @@ import warnings
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
-from scrapling.engines.toolbelt.custom import Response
+from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from supabase import create_client, Client
 
@@ -125,8 +125,8 @@ def scrape_tph_category(url: str, cookies=None):
                     except Exception as ae:
                         logging.warning(f"Auth check timed out or failed: {str(ae)}. Continuing anyway...")
 
-                logging.info(f"Waiting for .product-item on page {page_num}...")
-                page.wait_for_selector(".product-item", timeout=15000)
+                logging.info(f"Waiting for .product-item on page {page_num} (state=attached)...")
+                page.wait_for_selector(".product-item", state="attached", timeout=15000)
                 
                 logging.info("Scrolling to bottom to trigger lazy loading...")
                 page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -135,25 +135,32 @@ def scrape_tph_category(url: str, cookies=None):
                 logging.info("Capturing page content...")
             except Exception as e:
                 logging.error(f"Timeout or Error during page preparation (page {page_num}): {str(e)}")
-                # 3. DOM Dump for Zero Items
+                # DOM Dump for debugging
                 if page_num == 1:
-                    html_path = os.path.join(debug_dir, "debug_html.txt")
-                    with open(html_path, "w", encoding="utf-8") as f:
-                        f.write(page.content())
-                    logging.info(f"DOM dump saved to {html_path}")
+                    try:
+                        html_path = os.path.join(debug_dir, "debug_html.txt")
+                        with open(html_path, "w", encoding="utf-8") as f:
+                            f.write(page.content())
+                        logging.info(f"DOM dump saved to {html_path}")
+                    except: pass
                 break
                 
             content = page.content()
-            logging.info("Content captured. Parsing with Scrapling...")
-            response = Response(url=paginated_url, text=content, body=content.encode('utf-8'), status=200)
+            logging.info(f"Content captured ({len(content)} chars). Parsing with BeautifulSoup...")
             
-            # Updated Selectors based on debug_html.txt analysis
-            item_nodes = response.css("li.product-item")
+            try:
+                soup = BeautifulSoup(content, "html.parser")
+            except Exception as e:
+                logging.error(f"BeautifulSoup parse error: {str(e)}")
+                break
+            
+            # Find all product items
+            item_nodes = soup.select("li.product-item")
             
             if not item_nodes:
                 logging.warning(f"No item nodes (li.product-item) found on page {page_num}.")
-                # Fallback check for any item info
-                item_nodes = response.css(".product-item-info")
+                # Fallback
+                item_nodes = soup.select(".product-item-info")
                 if not item_nodes:
                     logging.error(f"ABORTING: No items found on page {page_num} after all waits.")
                     break
@@ -163,63 +170,76 @@ def scrape_tph_category(url: str, cookies=None):
             page_items_count = 0
             for idx, item in enumerate(item_nodes):
                 try:
-                    # 1. Improved Title & Link Extraction
-                    link_node = item.css_first("a.product-item-link")
+                    # 1. Title & Link Extraction
+                    link_node = item.select_one("a.product-item-link")
                     if not link_node:
-                        link_node = item.css_first(".product-item-name a")
+                        link_node = item.select_one(".product-item-name a")
                         
-                    raw_url = link_node.attrib.get("href", "") if link_node else ""
-                    raw_title = link_node.text.strip() if link_node else ""
+                    raw_url = link_node.get("href", "") if link_node else ""
+                    raw_title = link_node.get_text(strip=True) if link_node else ""
                     
                     if not raw_title or not raw_url:
                         logging.warning(f"  Item {idx}: Skipped — missing title or URL")
                         continue
 
-                    # 2. Robust Price Extraction (Prioritize Excl. GST)
+                    # 2. Price Extraction (Prioritize Excl. GST)
                     price_float = 0.0
                     price_source = "none"
                     
-                    # Try data attributes first (most reliable)
-                    price_wrapper = item.css_first(".price-excluding-tax") or item.css_first("[data-price-type='basePrice']")
-                    if price_wrapper:
-                        price_source = "excl-tax"
+                    # Try excl-tax / basePrice first
+                    price_el = item.select_one(".price-excluding-tax [data-price-amount]")
+                    if price_el:
+                        price_source = "excl-tax/attr"
                     else:
-                        price_wrapper = item.css_first(".price-including-tax") or item.css_first("[data-price-type='finalPrice']")
-                        if price_wrapper:
-                            price_source = "incl-tax"
+                        price_el = item.select_one("[data-price-type='basePrice']")
+                        if price_el:
+                            price_source = "basePrice/attr"
+                        else:
+                            # Fall back to incl-tax / finalPrice
+                            price_el = item.select_one(".price-including-tax [data-price-amount]")
+                            if price_el:
+                                price_source = "incl-tax/attr"
+                            else:
+                                price_el = item.select_one("[data-price-type='finalPrice']")
+                                if price_el:
+                                    price_source = "finalPrice/attr"
                     
-                    if price_wrapper:
-                        # Check data-price-amount attribute
-                        amount_node = price_wrapper.css_first("[data-price-amount]") or price_wrapper
-                        amount_attr = amount_node.attrib.get("data-price-amount")
+                    if price_el:
+                        amount_attr = price_el.get("data-price-amount")
                         if amount_attr:
                             try:
-                                # Aggressive sanitize: strip everything except digits and decimal
                                 sanitized = re.sub(r'[^\d.]', '', str(amount_attr))
                                 if sanitized:
                                     price_float = float(sanitized)
-                                    price_source += "/attr"
                             except Exception as pe:
                                 logging.warning(f"  Item {idx}: data-price-amount parse error: {pe} (raw='{amount_attr}')")
                         
-                        # Fallback to text parsing if amount_attr failed or was 0
+                        # Fallback to text parsing
                         if price_float == 0.0:
-                            price_text_node = price_wrapper.css_first(".price")
-                            if not price_text_node:
-                                price_text_node = price_wrapper
+                            price_text_el = price_el.select_one(".price") or price_el
                             try:
-                                raw_price_text = price_text_node.text.strip()
-                                # Aggressive sanitize: strip ALL non-numeric except decimal
+                                raw_price_text = price_text_el.get_text(strip=True)
                                 sanitized = re.sub(r'[^\d.]', '', raw_price_text)
                                 if sanitized:
                                     price_float = float(sanitized)
                                     price_source += "/text"
                             except Exception as pe:
-                                logging.warning(f"  Item {idx}: text price parse error: {pe} (raw='{raw_price_text}')")
+                                logging.warning(f"  Item {idx}: text price parse error: {pe}")
+                    
+                    # If still no price, try any .price element in the item
+                    if price_float == 0.0:
+                        any_price = item.select_one(".price")
+                        if any_price:
+                            try:
+                                sanitized = re.sub(r'[^\d.]', '', any_price.get_text(strip=True))
+                                if sanitized:
+                                    price_float = float(sanitized)
+                                    price_source = "fallback/.price/text"
+                            except: pass
                     
                     # 3. Stock Status
                     stock_status = "In Stock"
-                    stock_node = item.css_first(".stock.unavailable")
+                    stock_node = item.select_one(".stock.unavailable")
                     if stock_node or price_float == 0.0:
                         stock_status = "Out of Stock"
 
@@ -231,7 +251,7 @@ def scrape_tph_category(url: str, cookies=None):
                     })
                     page_items_count += 1
 
-                    # Debug: Log first 3 items per page for visibility
+                    # Debug: Log first 3 items per page
                     if page_items_count <= 3:
                         logging.info(f"  SAMPLE [{page_items_count}]: '{raw_title[:60]}...' | ${price_float:.2f} ({price_source}) | {stock_status}")
 
