@@ -190,12 +190,15 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         .wrapText('4. UNCLAIMED GOODS: Items not collected within 180 days will be disposed of.')
         .blank()
 
-      // ── Tracking URL (instead of QR code image) ──
+      // ── QR Code for Status Tracking ──
+      const trackingUrl = 'https://alimobile.com.au/track-status?id=' + repair.id;
       ticket
         .align('center')
-        .text('Track your repair status at:')
+        .text('Scan to track your repair:')
+        .blank()
+        .qrCode(trackingUrl, 6, 49) // size=6, error correction=M (15%)
+        .blank()
         .boldOn()
-        .text('alimobile.com.au/track-status')
         .text('ID: ' + repair.id)
         .boldOff()
         .blank()

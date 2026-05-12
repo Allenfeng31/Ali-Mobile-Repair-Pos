@@ -237,6 +237,51 @@ export class EscPosBuilder {
     return this;
   }
 
+  // ── QR Code (native ESC/POS via GS ( k ) ─────────────────
+
+  /**
+   * Print a native QR code using the printer's hardware renderer.
+   * Uses the standard ESC/POS GS ( k command set (5-step sequence).
+   * 
+   * @param data - The string to encode (URL, ID, etc.)
+   * @param size - Module size in dots (1-16, default 6)
+   * @param errorCorrection - Error correction level:
+   *   48 = L (7%), 49 = M (15%), 50 = Q (25%), 51 = H (30%)
+   */
+  qrCode(data: string, size = 6, errorCorrection = 48): this {
+    // GS ( k header bytes
+    const hdr = [0x1D, 0x28, 0x6B];
+
+    // Step 1: Select QR Code model (Model 2)
+    // pL=4, pH=0, cn=49, fn=65, n1=50 (Model 2), n2=0
+    this.chunks.push(new Uint8Array([...hdr, 4, 0, 49, 65, 50, 0]));
+
+    // Step 2: Set module size (dot size per module)
+    // pL=3, pH=0, cn=49, fn=67, n=size
+    this.chunks.push(new Uint8Array([...hdr, 3, 0, 49, 67, size]));
+
+    // Step 3: Set error correction level
+    // pL=3, pH=0, cn=49, fn=69, n=errorCorrection
+    this.chunks.push(new Uint8Array([...hdr, 3, 0, 49, 69, errorCorrection]));
+
+    // Step 4: Store QR data in symbol storage area
+    // pL/pH = length of (cn=49 + fn=80 + m=48 + data), little-endian
+    const dataBytes = encoder.encode(data);
+    const storeLen = dataBytes.length + 3; // cn + fn + m + data
+    const pL = storeLen & 0xFF;
+    const pH = (storeLen >> 8) & 0xFF;
+    const storeCmd = new Uint8Array(3 + 2 + 3 + dataBytes.length);
+    storeCmd.set([...hdr, pL, pH, 49, 80, 48], 0);
+    storeCmd.set(dataBytes, 8);
+    this.chunks.push(storeCmd);
+
+    // Step 5: Print the QR code from symbol storage
+    // pL=3, pH=0, cn=49, fn=81, m=48
+    this.chunks.push(new Uint8Array([...hdr, 3, 0, 49, 81, 48]));
+
+    return this;
+  }
+
   // ── Build ────────────────────────────────────────────────
 
   /** Concatenate all chunks into a single Uint8Array for transfer */
