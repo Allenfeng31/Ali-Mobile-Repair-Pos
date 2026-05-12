@@ -135,30 +135,29 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         .leftRight('Order ID:', order.id)
         .leftRight('Date:', new Date(order.timestamp).toLocaleString())
         .blank()
-        .separator('-')
-        // ── Items Header ──
-        .boldOn()
-        .threeColumns('ITEM', 'QTY', 'PRICE')
-        .boldOff()
         .separator('-');
 
-      // ── Items ──
-      for (const item of order.items) {
+      // ── Items (multi-line: name on top, qty+price on bottom right) ──
+      for (let i = 0; i < order.items.length; i++) {
+        const item = order.items[i];
         const itemTotal = item.price * item.qty;
         const isDeduction = itemTotal < 0;
 
         if (isDeduction) {
-          receipt.threeColumns(
-            '(DED) ' + item.name,
-            '-',
-            '-$' + Math.abs(itemTotal).toFixed(2)
-          );
+          // Row 1: full deduction name
+          receipt.boldOn().text('(DED) ' + item.name).boldOff();
+          // Row 2: price right-aligned
+          receipt.leftRight('', '-$' + Math.abs(itemTotal).toFixed(2));
         } else {
-          receipt.threeColumns(
-            item.name,
-            'x' + item.qty,
-            '$' + itemTotal.toFixed(2)
-          );
+          // Row 1: full item name
+          receipt.boldOn().text(item.name).boldOff();
+          // Row 2: qty + price pushed to the right
+          receipt.leftRight('', 'x' + item.qty + '     $' + itemTotal.toFixed(2));
+        }
+
+        // Breathing room between items (but not after the last one)
+        if (i < order.items.length - 1) {
+          receipt.blank();
         }
       }
 

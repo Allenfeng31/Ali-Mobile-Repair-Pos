@@ -143,13 +143,18 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         .boldOn()
         .text('REPAIR TASK')
         .boldOff()
-        .separator('-')
-        .boldOn()
-        .text(repair.repairItem);
+        .separator('-');
 
-      // Sanitize notes to strip non-ASCII (Chinese etc.)
+      // Row 1: full repair item name
+      ticket.boldOn().text(repair.repairItem).boldOff();
+      // Row 2: price right-aligned
+      ticket.leftRight('', '$' + repair.price.toFixed(2));
+
+      // Sanitized notes (non-ASCII → ?) with word wrapping
       if (repair.remark) {
-        ticket.boldOff().text('Notes: ' + sanitize(repair.remark));
+        ticket.blank()
+          .boldOn().text('Notes:').boldOff()
+          .wrapText(sanitize(repair.remark));
       }
 
       ticket
