@@ -114,6 +114,12 @@ export default function App() {
           if (user.id) {
             useAuthStore.getState().fetchPermissions(user.id);
           }
+          // Sliding session: refresh expiry on each app load so active users stay logged in
+          const REFRESH_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+          localStorage.setItem('pos_session', JSON.stringify({
+            user,
+            expiresAt: Date.now() + REFRESH_DURATION
+          }));
         } else {
           localStorage.removeItem('pos_session');
         }
@@ -237,7 +243,7 @@ export default function App() {
       useAuthStore.getState().fetchPermissions(user.id);
     }
 
-    const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+    const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
     const expiresAt = Date.now() + SESSION_DURATION;
     
     localStorage.setItem('pos_session', JSON.stringify({
