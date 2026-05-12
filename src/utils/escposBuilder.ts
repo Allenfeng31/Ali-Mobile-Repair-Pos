@@ -4,7 +4,7 @@
  * Lightweight, browser-native utility. Zero dependencies.
  * Builds raw byte arrays (Uint8Array) for direct USB transfer.
  * 
- * Target: SAM4S ELLIX 30IIs (80mm / 48-char line width)
+ * Target: SAM4S ELLIX 30IIs (80mm / 42-char line width, Font A)
  * 
  * ESC/POS Reference:
  *   ESC @       = 0x1B 0x40  Initialize printer
@@ -20,8 +20,11 @@ const ESC = 0x1B;
 const GS  = 0x1D;
 const LF  = 0x0A;
 
-/** Default line width for 80mm thermal printers (Font A, 12×24) */
-export const LINE_WIDTH = 48;
+/**
+ * Maximum characters per line for SAM4S ELLIX 30IIs (Font A).
+ * All alignment padding math MUST use this number.
+ */
+export const MAX_CHARS = 42;
 
 const encoder = new TextEncoder();
 
@@ -118,41 +121,71 @@ export class EscPosBuilder {
   // ── Layout Helpers ───────────────────────────────────────
 
   /** Print a dashed separator line */
-  separator(char = '-', width = LINE_WIDTH): this {
+  separator(char = '-', width = MAX_CHARS): this {
     return this.text(char.repeat(width));
   }
 
   /** Print a double-line separator */
-  doubleSeparator(width = LINE_WIDTH): this {
+  doubleSeparator(width = MAX_CHARS): this {
     return this.text('='.repeat(width));
   }
 
   /**
    * Print two strings on the same line: left-aligned and right-aligned.
+   * If combined length exceeds MAX_CHARS, truncates leftText with ".."
+   * to guarantee rightText stays on the same line.
+   * 
    * Example: leftRight("Subtotal:", "$12.50")
+   * Output:  "Subtotal:                         $12.50"
    */
-  leftRight(left: string, right: string, width = LINE_WIDTH): this {
-    const gap = width - left.length - right.length;
-    if (gap < 1) {
-      // Content too long, print on separate lines
-      return this.text(left).text(right);
+  leftRight(left: string, right: string, width = MAX_CHARS): this {
+    const minGap = 1; // At least 1 space between left and right
+    const maxLeft = width - right.length - minGap;
+
+    let l = left;
+    if (l.length > maxLeft) {
+      // Truncate left side with ".." to prevent wrapping
+      l = l.substring(0, Math.max(maxLeft - 2, 0)) + '..';
     }
-    return this.text(left + ' '.repeat(gap) + right);
+
+    const gap = width - l.length - right.length;
+    return this.text(l + ' '.repeat(Math.max(gap, 1)) + right);
   }
 
   /**
-   * Print three columns on the same line.
-   * Columns: left (50%), center (20%), right (30%)
-   * Example: threeColumns("Widget", "x2", "$24.00")
+   * Print three columns on the same line with strict boundaries.
+   * 
+   * Layout for 42 CPL:
+   *   Col 1 (Item Name): 24 chars max, left-aligned, truncated with ".." if too long
+   *   Col 2 (Qty):        6 chars, right-aligned
+   *   Col 3 (Price):     12 chars, right-aligned
+   *   Total:             42 chars exactly
+   * 
+   * Example: threeColumns("iPhone XS Max Screen Replacement", "x1", "$120.00")
+   * Output:  "iPhone XS Max Screen ..    x1     $120.00"
    */
-  threeColumns(left: string, center: string, right: string, width = LINE_WIDTH): this {
-    const colLeft = Math.floor(width * 0.50);
-    const colCenter = Math.floor(width * 0.20);
-    const colRight = width - colLeft - colCenter;
+  threeColumns(left: string, center: string, right: string, width = MAX_CHARS): this {
+    const colRight = 12;
+    const colCenter = 6;
+    const colLeft = width - colCenter - colRight; // 24 for 42 CPL
 
-    const l = left.length > colLeft ? left.substring(0, colLeft - 1) + '.' : left.padEnd(colLeft);
-    const c = center.length > colCenter ? center.substring(0, colCenter) : center.padStart(colCenter);
-    const r = right.length > colRight ? right.substring(0, colRight) : right.padStart(colRight);
+    // Col 1: left-aligned, truncate with ".." if over limit
+    let l: string;
+    if (left.length > colLeft) {
+      l = left.substring(0, colLeft - 2) + '..';
+    } else {
+      l = left.padEnd(colLeft);
+    }
+
+    // Col 2: right-aligned within its 6-char slot
+    const c = center.length > colCenter
+      ? center.substring(0, colCenter)
+      : center.padStart(colCenter);
+
+    // Col 3: right-aligned within its 12-char slot
+    const r = right.length > colRight
+      ? right.substring(0, colRight)
+      : right.padStart(colRight);
 
     return this.text(l + c + r);
   }
@@ -160,7 +193,7 @@ export class EscPosBuilder {
   /**
    * Print centered text with optional padding character.
    */
-  centered(text: string, width = LINE_WIDTH, padChar = ' '): this {
+  centered(text: string, width = MAX_CHARS, padChar = ' '): this {
     const totalPad = width - text.length;
     if (totalPad <= 0) return this.text(text);
     const leftPad = Math.floor(totalPad / 2);

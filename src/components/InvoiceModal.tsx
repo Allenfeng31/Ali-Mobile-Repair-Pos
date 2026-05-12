@@ -110,16 +110,17 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
 
       const receipt = escpos()
         .init()
-        // ── Store Header ──
+        // ── Store Header (each line separately centered) ──
         .align('center')
         .boldOn().doubleSize()
         .text(storeName.toUpperCase())
-        .normalSize().boldOff();
+        .normalSize();
 
-      // Address lines
+      // Print each address/phone/ABN line individually
       for (const line of addressLines) {
-        receipt.text(line.trim());
+        receipt.boldOn().text(line.trim());
       }
+      receipt.boldOff();
 
       receipt
         .blank()

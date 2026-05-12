@@ -101,13 +101,14 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
 
       const ticket = escpos()
         .init()
-        // ── Store Header ──
+        // ── Store Header (each line separately centered) ──
         .align('center')
         .boldOn().doubleSize()
         .text('ALI MOBILE REPAIRS')
         .normalSize()
         .text('Kiosk C1 Ringwood Square')
-        .text('Shopping Centre, Ringwood 3134')
+        .text('Shopping Centre')
+        .text('Ringwood VIC 3134')
         .text('Phone: 0481 058 514')
         .boldOff()
         .blank()
