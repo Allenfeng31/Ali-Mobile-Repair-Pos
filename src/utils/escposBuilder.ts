@@ -28,6 +28,15 @@ export const MAX_CHARS = 42;
 
 const encoder = new TextEncoder();
 
+/**
+ * Strip non-ASCII characters (e.g. Chinese, emoji) from text.
+ * Replaces them with '?' to avoid garbled output on thermal printers
+ * that only support CP437/ASCII code pages.
+ */
+export function sanitize(text: string): string {
+  return text.replace(/[^\x20-\x7E]/g, '?');
+}
+
 export class EscPosBuilder {
   private chunks: Uint8Array[] = [];
 
@@ -106,9 +115,9 @@ export class EscPosBuilder {
     return this;
   }
 
-  /** Print text followed by a line feed */
+  /** Print text followed by a line feed. Auto-sanitizes non-ASCII. */
   text(text: string): this {
-    this.chunks.push(encoder.encode(text + '\n'));
+    this.chunks.push(encoder.encode(sanitize(text) + '\n'));
     return this;
   }
 
@@ -139,53 +148,54 @@ export class EscPosBuilder {
    * Output:  "Subtotal:                         $12.50"
    */
   leftRight(left: string, right: string, width = MAX_CHARS): this {
+    const safeLeft = sanitize(left);
+    const safeRight = sanitize(right);
     const minGap = 1; // At least 1 space between left and right
-    const maxLeft = width - right.length - minGap;
+    const maxLeft = width - safeRight.length - minGap;
 
-    let l = left;
+    let l = safeLeft;
     if (l.length > maxLeft) {
       // Truncate left side with ".." to prevent wrapping
       l = l.substring(0, Math.max(maxLeft - 2, 0)) + '..';
     }
 
-    const gap = width - l.length - right.length;
-    return this.text(l + ' '.repeat(Math.max(gap, 1)) + right);
+    const gap = width - l.length - safeRight.length;
+    return this.text(l + ' '.repeat(Math.max(gap, 1)) + safeRight);
   }
 
   /**
    * Print three columns on the same line with strict boundaries.
    * 
    * Layout for 42 CPL:
-   *   Col 1 (Item Name): 24 chars max, left-aligned, truncated with ".." if too long
-   *   Col 2 (Qty):        6 chars, right-aligned
+   *   Col 1 (Item Name): 22 chars max, left-aligned, truncated with ".." if >22
+   *   Col 2 (Qty):        8 chars, right-aligned
    *   Col 3 (Price):     12 chars, right-aligned
    *   Total:             42 chars exactly
    * 
-   * Example: threeColumns("iPhone XS Max Screen Replacement", "x1", "$120.00")
-   * Output:  "iPhone XS Max Screen ..    x1     $120.00"
+   * Example: threeColumns("iPhone 13 Pro Max Screen Repl", "x1", "$120.00")
+   * Output:  "iPhone 13 Pro Max Scr.      x1     $120.00"
    */
   threeColumns(left: string, center: string, right: string, width = MAX_CHARS): this {
-    const colRight = 12;
-    const colCenter = 6;
-    const colLeft = width - colCenter - colRight; // 24 for 42 CPL
+    const COL_NAME  = 22;
+    const COL_QTY   = 8;
+    const COL_PRICE = 12;
+    // COL_NAME + COL_QTY + COL_PRICE = 42
 
-    // Col 1: left-aligned, truncate with ".." if over limit
+    const safeLeft = sanitize(left);
+
+    // Col 1: left-aligned, hard truncate at 22 with ".." if over
     let l: string;
-    if (left.length > colLeft) {
-      l = left.substring(0, colLeft - 2) + '..';
+    if (safeLeft.length > COL_NAME) {
+      l = safeLeft.substring(0, COL_NAME - 2) + '..';
     } else {
-      l = left.padEnd(colLeft);
+      l = safeLeft.padEnd(COL_NAME);
     }
 
-    // Col 2: right-aligned within its 6-char slot
-    const c = center.length > colCenter
-      ? center.substring(0, colCenter)
-      : center.padStart(colCenter);
+    // Col 2: right-aligned within its 8-char slot
+    const c = sanitize(center).padStart(COL_QTY).substring(0, COL_QTY);
 
     // Col 3: right-aligned within its 12-char slot
-    const r = right.length > colRight
-      ? right.substring(0, colRight)
-      : right.padStart(colRight);
+    const r = sanitize(right).padStart(COL_PRICE).substring(0, COL_PRICE);
 
     return this.text(l + c + r);
   }
@@ -194,11 +204,37 @@ export class EscPosBuilder {
    * Print centered text with optional padding character.
    */
   centered(text: string, width = MAX_CHARS, padChar = ' '): this {
-    const totalPad = width - text.length;
-    if (totalPad <= 0) return this.text(text);
+    const safe = sanitize(text);
+    const totalPad = width - safe.length;
+    if (totalPad <= 0) return this.text(safe);
     const leftPad = Math.floor(totalPad / 2);
     const rightPad = totalPad - leftPad;
-    return this.text(padChar.repeat(leftPad) + text + padChar.repeat(rightPad));
+    return this.text(padChar.repeat(leftPad) + safe + padChar.repeat(rightPad));
+  }
+
+  /**
+   * Word-wrap long text to fit within MAX_CHARS.
+   * Useful for policy text and disclaimers.
+   */
+  wrapText(text: string, width = MAX_CHARS): this {
+    const safe = sanitize(text);
+    const words = safe.split(' ');
+    let line = '';
+
+    for (const word of words) {
+      if (line.length === 0) {
+        line = word;
+      } else if (line.length + 1 + word.length <= width) {
+        line += ' ' + word;
+      } else {
+        this.text(line);
+        line = word;
+      }
+    }
+    if (line.length > 0) {
+      this.text(line);
+    }
+    return this;
   }
 
   // ── Build ────────────────────────────────────────────────

@@ -101,28 +101,28 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
       const { escpos } = await import('../utils/escposBuilder');
       const { sendToPrinter } = await import('../lib/usbPrinter');
 
-      const headerLines = invoiceHeader.split('\n');
-      const storeName = headerLines[0] || '';
-      const addressLines = headerLines.slice(1).filter(
-        line => order.type !== 'deposit' || !line.toUpperCase().includes('ABN')
-      );
       const docType = order.type === 'deposit' ? 'DEPOSIT RECEIPT' : 'TAX INVOICE';
 
       const receipt = escpos()
         .init()
-        // ── Store Header (each line separately centered) ──
+        // ── Store Header (forced individual lines) ──
         .align('center')
         .boldOn().doubleSize()
-        .text(storeName.toUpperCase())
-        .normalSize();
+        .text('ALI MOBILE')
+        .normalSize()
+        .boldOn()
+        .text('Kiosk C1 Ringwood Square')
+        .text('Shopping Centre')
+        .text('Ringwood VIC 3134')
+        .text('Tel: 0481 058 514');
 
-      // Print each address/phone/ABN line individually
-      for (const line of addressLines) {
-        receipt.boldOn().text(line.trim());
+      // Hide ABN on deposit receipts
+      if (order.type !== 'deposit') {
+        receipt.text('ABN: 98779190382');
       }
-      receipt.boldOff();
 
       receipt
+        .boldOff()
         .blank()
         .separator('-')
         .boldOn()
@@ -176,7 +176,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
           .leftRight('Cash Payment:', '$' + (order.mixedCash || 0).toFixed(2))
           .leftRight('Card Payment:', '$' + ((order.mixedEftpos || 0) + (order.surcharge || 0)).toFixed(2));
         if ((order.surcharge || 0) > 0) {
-          receipt.leftRight('  - Card Surcharge (1.5%):', '$' + (order.surcharge || 0).toFixed(2));
+          receipt.leftRight('  - Surcharge (1.5%):', '$' + (order.surcharge || 0).toFixed(2));
         }
       } else if ((order.surcharge || 0) > 0) {
         receipt.leftRight(
@@ -192,9 +192,23 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         .boldOff()
         .separator('=')
         .blank()
-        // ── Footer ──
+        // ── Refund & Exchange Policy ──
         .align('center')
-        .text(invoiceFooter)
+        .boldOn()
+        .text('REFUND & EXCHANGE POLICY')
+        .boldOff()
+        .align('left')
+        .wrapText('1. Change of Mind: 14-day exchange/refund for unused/original condition items.')
+        .wrapText('2. Faulty Items: Under ACL, you have rights to refund/replacement for major failures.')
+        .wrapText('3. Proof of purchase required.')
+        .blank()
+        // ── Warranty ──
+        .align('center')
+        .separator('-')
+        .boldOn()
+        .wrapText('WARRANTY: 180 DAYS ON MOBILE REPAIRS ONLY (parts and labor). No refunds on water damage repairs. Thank you!')
+        .boldOff()
+        .separator('-')
         .blank()
         .text('[ ' + order.id + ' ]')
         .blank()

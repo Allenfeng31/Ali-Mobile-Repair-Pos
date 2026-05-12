@@ -96,20 +96,22 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
     if (!repair || !customer) return;
 
     try {
-      const { escpos } = await import('../utils/escposBuilder');
+      const { escpos, sanitize } = await import('../utils/escposBuilder');
       const { sendToPrinter } = await import('../lib/usbPrinter');
 
       const ticket = escpos()
         .init()
-        // ── Store Header (each line separately centered) ──
+        // ── Store Header (forced individual lines) ──
         .align('center')
         .boldOn().doubleSize()
-        .text('ALI MOBILE REPAIRS')
+        .text('ALI MOBILE')
         .normalSize()
+        .boldOn()
         .text('Kiosk C1 Ringwood Square')
         .text('Shopping Centre')
         .text('Ringwood VIC 3134')
-        .text('Phone: 0481 058 514')
+        .text('Tel: 0481 058 514')
+        .text('ABN: 98779190382')
         .boldOff()
         .blank()
         .separator('-')
@@ -145,11 +147,13 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         .boldOn()
         .text(repair.repairItem);
 
+      // Sanitize notes to strip non-ASCII (Chinese etc.)
       if (repair.remark) {
-        ticket.boldOff().text('Notes: ' + repair.remark);
+        ticket.boldOff().text('Notes: ' + sanitize(repair.remark));
       }
 
       ticket
+        .boldOff()
         .blank()
         .separator('=')
         .boldOn()
@@ -167,22 +171,22 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
           .separator('-');
       }
 
-      // ── Terms & Conditions ──
+      // ── Terms & Conditions (updated warranty) ──
       ticket
         .blank()
         .align('center')
         .boldOn()
         .text('TERMS & CONDITIONS')
         .boldOff()
-        .align('left');
-
-      disclaimerTerms.forEach((term, i) => {
-        ticket.text((i + 1) + '. ' + term.en.toUpperCase());
-      });
+        .align('left')
+        .wrapText('1. DATA BACKUP: Data loss is not covered. Please backup your device.')
+        .wrapText('2. LIQUID DAMAGE: No warranty on liquid damage repairs once they leave the shop.')
+        .wrapText('3. WARRANTY: 180 days on mobile repairs only (parts and labor).')
+        .wrapText('4. UNCLAIMED GOODS: Items not collected within 180 days will be disposed of.')
+        .blank()
 
       // ── Tracking URL (instead of QR code image) ──
       ticket
-        .blank()
         .align('center')
         .text('Track your repair status at:')
         .boldOn()
