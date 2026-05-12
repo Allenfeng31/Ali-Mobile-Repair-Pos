@@ -104,7 +104,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         // ── Store Header (forced individual lines) ──
         .align('center')
         .boldOn().doubleSize()
-        .text('ALI MOBILE')
+        .text('ALI MOBILE REPAIRS')
         .normalSize()
         .boldOn()
         .text('Kiosk C1 Ringwood Square')

@@ -108,7 +108,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         // ── Store Header (forced individual lines) ──
         .align('center')
         .boldOn().doubleSize()
-        .text('ALI MOBILE')
+        .text('ALI MOBILE REPAIRS')
         .normalSize()
         .boldOn()
         .text('Kiosk C1 Ringwood Square')
