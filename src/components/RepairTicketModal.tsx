@@ -20,6 +20,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   const ticketRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [pdfInstance, setPdfInstance] = React.useState<jsPDF | null>(null);
+  const settingsFetched = useRef(false);
 
   const [ticketHeader, setTicketHeader] = React.useState(`Ali Mobile Repair\nKiosk C1, Ringwood Square\nRingwood VIC 3134\nTel: 0481 058 514`);
   
@@ -33,11 +34,15 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   React.useEffect(() => {
     if (isOpen) {
       setPdfInstance(null);
-      import('../lib/api').then(({ api }) => {
-        api.getSettings().then(settings => {
-          if (settings.ali_pos_invoice_header) setTicketHeader(settings.ali_pos_invoice_header);
-        }).catch(console.error);
-      });
+      // Skip redundant API call if settings were already fetched
+      if (!settingsFetched.current) {
+        import('../lib/api').then(({ api }) => {
+          api.getSettings().then(settings => {
+            if (settings.ali_pos_invoice_header) setTicketHeader(settings.ali_pos_invoice_header);
+            settingsFetched.current = true;
+          }).catch(console.error);
+        });
+      }
     }
   }, [isOpen]);
 
@@ -104,7 +109,6 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
           <!DOCTYPE html>
           <html>
             <head>
-              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
               <style>
                 @page { size: 80mm auto; margin: 0; }
                 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -115,7 +119,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                   width: 100%;
                   max-width: 80mm;
                   margin: 0 auto;
-                  font-family: 'Inter', sans-serif;
+                  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                   -webkit-font-smoothing: antialiased;
                   color: #000;
                   line-height: 1.5;
@@ -213,12 +217,14 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         `);
         doc.close();
 
-        setTimeout(() => {
+        // Event-driven: fire print() the instant the iframe DOM is ready
+        // This also waits for the QR code image to finish loading
+        iframe.onload = () => {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
           onClose();
-        }, 500);
+        };
       }
     } catch (err: any) {
       console.error('Print error:', err);

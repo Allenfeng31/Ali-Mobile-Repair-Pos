@@ -19,6 +19,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [pdfInstance, setPdfInstance] = React.useState<jsPDF | null>(null);
+  const settingsFetched = useRef(false);
 
   const [invoiceHeader, setInvoiceHeader] = React.useState(`Precision Tech Repairs\n123 Artisan Way, Ste 4\nSan Francisco, CA 94103\nTel: (555) 012-3456`);
   const [invoiceFooter, setInvoiceFooter] = React.useState(`Warranty: 90 days on parts and labor. No refunds on water damage repairs. Thank you for choosing Precision!`);
@@ -26,12 +27,16 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
   React.useEffect(() => {
     if (isOpen) {
       setPdfInstance(null);
-      import('../lib/api').then(({ api }) => {
-        api.getSettings().then(settings => {
-          if (settings.ali_pos_invoice_header) setInvoiceHeader(settings.ali_pos_invoice_header);
-          if (settings.ali_pos_invoice_footer) setInvoiceFooter(settings.ali_pos_invoice_footer);
-        }).catch(console.error);
-      });
+      // Skip redundant API call if settings were already fetched
+      if (!settingsFetched.current) {
+        import('../lib/api').then(({ api }) => {
+          api.getSettings().then(settings => {
+            if (settings.ali_pos_invoice_header) setInvoiceHeader(settings.ali_pos_invoice_header);
+            if (settings.ali_pos_invoice_footer) setInvoiceFooter(settings.ali_pos_invoice_footer);
+            settingsFetched.current = true;
+          }).catch(console.error);
+        });
+      }
     }
   }, [isOpen]);
 
@@ -108,7 +113,6 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
           <!DOCTYPE html>
           <html>
             <head>
-              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
               <style>
                 @page { 
                   size: 80mm auto; 
@@ -123,7 +127,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                   background: white; 
                   padding: 4mm;
                   width: ${width};
-                  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                   -webkit-font-smoothing: antialiased;
                 }
                 /* Utility classes from Tailwind to be replicated for the print doc */
@@ -186,12 +190,13 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         `);
         doc.close();
 
-        setTimeout(() => {
+        // Event-driven: fire print() the instant the iframe DOM is ready
+        iframe.onload = () => {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
           setTimeout(() => document.body.removeChild(iframe), 1000);
           onClose();
-        }, 500);
+        };
       }
     } catch (err: any) {
       console.error('Print error:', err);
