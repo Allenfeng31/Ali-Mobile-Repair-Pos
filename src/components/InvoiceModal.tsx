@@ -95,112 +95,124 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
   };
 
   const handlePrint = async () => {
-    if (!invoiceRef.current) return;
+    if (!order) return;
 
     try {
-      const iframe = document.createElement('iframe');
-      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-      document.body.appendChild(iframe);
+      const { escpos } = await import('../utils/escposBuilder');
+      const { sendToPrinter } = await import('../lib/usbPrinter');
 
-      const doc = iframe.contentWindow?.document;
-      if (doc) {
-        doc.open();
-        // Clone the content to extract its HTML and styles
-        const contentHtml = invoiceRef.current.innerHTML;
-        const width = '76mm'; // Use slightly less than 80mm to allow for physical printer margins
+      const headerLines = invoiceHeader.split('\n');
+      const storeName = headerLines[0] || '';
+      const addressLines = headerLines.slice(1).filter(
+        line => order.type !== 'deposit' || !line.toUpperCase().includes('ABN')
+      );
+      const docType = order.type === 'deposit' ? 'DEPOSIT RECEIPT' : 'TAX INVOICE';
 
-        doc.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-                @page { 
-                  size: 80mm auto; 
-                  margin: 0; 
-                }
-                * { 
-                  margin: 0; 
-                  padding: 0; 
-                  box-sizing: border-box; 
-                }
-                body { 
-                  background: white; 
-                  padding: 4mm;
-                  width: ${width};
-                  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                  -webkit-font-smoothing: antialiased;
-                }
-                /* Utility classes from Tailwind to be replicated for the print doc */
-                .text-center { text-align: center; }
-                .text-left { text-align: left; }
-                .text-right { text-align: right; }
-                .mb-1 { margin-bottom: 0.25rem; }
-                .mb-2 { margin-bottom: 0.5rem; }
-                .mb-4 { margin-bottom: 1rem; }
-                .mb-6 { margin-bottom: 1.5rem; }
-                .mt-3 { margin-top: 0.75rem; }
-                .mt-4 { margin-top: 1rem; }
-                .mt-6 { margin-top: 1.5rem; }
-                .flex { display: flex; }
-                .justify-between { justify-content: space-between; }
-                .items-center { align-items: center; }
-                .font-black { font-weight: 900; }
-                .font-bold { font-weight: 700; }
-                .font-black { font-weight: 900; }
-                .italic { font-style: italic; }
-                .uppercase { text-transform: uppercase; }
-                .tracking-tighter { letter-spacing: -0.05em; }
-                .tracking-widest { letter-spacing: 0.1em; }
-                .tracking-wider { letter-spacing: 0.05em; }
-                .border-t { border-top: 1px solid #000; }
-                .border-b { border-bottom: 1px solid #000; }
-                .border-dashed { border-style: dashed !important; }
-                .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-                .pb-1 { padding-bottom: 0.25rem; }
-                .pt-2 { padding-top: 0.5rem; }
-                .pt-4 { padding-top: 1rem; }
-                .pr-1 { padding-right: 0.25rem; }
-                .pr-2 { padding-right: 0.5rem; }
-                .text-xs { font-size: 10px; }
-                .text-sm { font-size: 12px; }
-                .leading-tight { line-height: 1.25; }
-                .leading-relaxed { line-height: 1.625; }
-                .w-full { width: 100%; }
-                .h-8 { height: 2rem; }
-                .h-6 { height: 1.5rem; }
-                .h-4 { height: 1rem; }
-                .w-0.5 { width: 2px; }
-                .gap-0.5 { gap: 2px; }
-                .gap-1 { gap: 4px; }
-                .inline-block { display: inline-block; }
-                .break-words { overflow-wrap: break-word; }
-                table { width: 100%; border-collapse: collapse; }
-                
-                /* Specific fix for text quality on thermal printers */
-                body {
-                  color: #000;
-                  print-color-adjust: exact;
-                }
-              </style>
-            </head>
-            <body>
-              ${contentHtml}
-            </body>
-          </html>
-        `);
-        doc.close();
+      const receipt = escpos()
+        .init()
+        // ── Store Header ──
+        .align('center')
+        .boldOn().doubleSize()
+        .text(storeName.toUpperCase())
+        .normalSize().boldOff();
 
-        // Event-driven: fire print() the instant the iframe DOM is ready
-        iframe.onload = () => {
-          iframe.contentWindow?.focus();
-          iframe.contentWindow?.print();
-          setTimeout(() => document.body.removeChild(iframe), 1000);
-          onClose();
-        };
+      // Address lines
+      for (const line of addressLines) {
+        receipt.text(line.trim());
       }
+
+      receipt
+        .blank()
+        .separator('-')
+        .boldOn()
+        .text(docType + ' #' + order.id)
+        .boldOff()
+        .separator('-')
+        .blank()
+        // ── Order Info ──
+        .align('left')
+        .leftRight('Order ID:', order.id)
+        .leftRight('Date:', new Date(order.timestamp).toLocaleString())
+        .blank()
+        .separator('-')
+        // ── Items Header ──
+        .boldOn()
+        .threeColumns('ITEM', 'QTY', 'PRICE')
+        .boldOff()
+        .separator('-');
+
+      // ── Items ──
+      for (const item of order.items) {
+        const itemTotal = item.price * item.qty;
+        const isDeduction = itemTotal < 0;
+
+        if (isDeduction) {
+          receipt.threeColumns(
+            '(DED) ' + item.name,
+            '-',
+            '-$' + Math.abs(itemTotal).toFixed(2)
+          );
+        } else {
+          receipt.threeColumns(
+            item.name,
+            'x' + item.qty,
+            '$' + itemTotal.toFixed(2)
+          );
+        }
+      }
+
+      receipt.separator('-');
+
+      // ── Totals ──
+      if (order.type !== 'deposit') {
+        receipt
+          .leftRight('Subtotal:', '$' + order.subtotal.toFixed(2))
+          .leftRight('Tax (GST):', '$' + order.tax.toFixed(2));
+      }
+
+      if (order.paymentMethod === 'mixed') {
+        receipt
+          .leftRight('Cash Payment:', '$' + (order.mixedCash || 0).toFixed(2))
+          .leftRight('Card Payment:', '$' + ((order.mixedEftpos || 0) + (order.surcharge || 0)).toFixed(2));
+        if ((order.surcharge || 0) > 0) {
+          receipt.leftRight('  - Card Surcharge (1.5%):', '$' + (order.surcharge || 0).toFixed(2));
+        }
+      } else if ((order.surcharge || 0) > 0) {
+        receipt.leftRight(
+          'Surcharge (' + (order.paymentMethod || '').toUpperCase() + '):',
+          '$' + (order.surcharge || 0).toFixed(2)
+        );
+      }
+
+      receipt
+        .separator('=')
+        .boldOn()
+        .leftRight('TOTAL:', '$' + order.total.toFixed(2))
+        .boldOff()
+        .separator('=')
+        .blank()
+        // ── Footer ──
+        .align('center')
+        .text(invoiceFooter)
+        .blank()
+        .text('[ ' + order.id + ' ]')
+        .blank()
+        .boldOn()
+        .text('THANK YOU!')
+        .boldOff()
+        .feed(3)
+        .fullCut();
+
+      await sendToPrinter(receipt.build());
+      onClose();
+
     } catch (err: any) {
-      console.error('Print error:', err);
-      alert('Failed to print: ' + err.message);
+      console.error('USB Print error:', err);
+      if (err.name === 'NotFoundError') {
+        alert('No USB printer selected. Please connect your thermal printer and try again.');
+      } else {
+        alert('Print failed: ' + (err.message || 'Unknown error. Check console for details.'));
+      }
     }
   };
 

@@ -93,142 +93,124 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   };
 
   const handlePrint = async () => {
-    if (!ticketRef.current) return;
+    if (!repair || !customer) return;
 
     try {
-      const iframe = document.createElement('iframe');
-      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-      document.body.appendChild(iframe);
+      const { escpos } = await import('../utils/escposBuilder');
+      const { sendToPrinter } = await import('../lib/usbPrinter');
 
-      const doc = iframe.contentWindow?.document;
-      if (doc) {
-        doc.open();
-        const contentHtml = ticketRef.current.innerHTML;
+      const ticket = escpos()
+        .init()
+        // ── Store Header ──
+        .align('center')
+        .boldOn().doubleSize()
+        .text('ALI MOBILE REPAIRS')
+        .normalSize()
+        .text('Kiosk C1 Ringwood Square')
+        .text('Shopping Centre, Ringwood 3134')
+        .text('Phone: 0481 058 514')
+        .boldOff()
+        .blank()
+        .separator('-')
+        .boldOn()
+        .text('REPAIR WORK ORDER')
+        .boldOff()
+        .text('Time: ' + new Date(repair.timestamp).toLocaleString())
+        .separator('-')
+        .blank()
+        // ── Customer Details ──
+        .align('left')
+        .boldOn()
+        .text('CUSTOMER DETAILS')
+        .boldOff()
+        .separator('-')
+        .leftRight('Name:', customer.name)
+        .leftRight('Phone:', customer.phone)
+        .blank()
+        // ── Device Information ──
+        .boldOn()
+        .text('DEVICE INFORMATION')
+        .boldOff()
+        .separator('-')
+        .leftRight('Model:', repair.modelNumber)
+        .leftRight('IMEI/SN:', repair.imei || 'N/A')
+        .leftRight('Lock Code:', repair.password || 'None')
+        .blank()
+        // ── Repair Task ──
+        .boldOn()
+        .text('REPAIR TASK')
+        .boldOff()
+        .separator('-')
+        .boldOn()
+        .text(repair.repairItem);
 
-        doc.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-                @page { size: 80mm auto; margin: 0; }
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                
-                body { 
-                  background: white; 
-                  padding: 0 2mm; 
-                  width: 100%;
-                  max-width: 80mm;
-                  margin: 0 auto;
-                  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                  -webkit-font-smoothing: antialiased;
-                  color: #000;
-                  line-height: 1.5;
-                }
-                
-                .ticket-container {
-                  padding: 0; /* Override on-screen padding */
-                }
-
-                .text-center { text-align: center; }
-                .mb-1 { margin-bottom: 0.25rem; }
-                .mb-2 { margin-bottom: 0.5rem; }
-                .mb-3 { margin-bottom: 0.75rem; }
-                .mb-4 { margin-bottom: 1rem; }
-                .mb-6 { margin-bottom: 1.5rem; }
-                .mt-2 { margin-top: 0.5rem; }
-                .mt-4 { margin-top: 1rem; }
-                .mt-6 { margin-top: 1.5rem; }
-                .mt-8 { margin-top: 2rem; }
-                .mt-10 { margin-top: 2.5rem; }
-                
-                .flex { display: flex; }
-                .flex-col { flex-direction: column; }
-                .items-center { align-items: center; }
-                .items-start { align-items: flex-start; }
-                .justify-between { justify-content: space-between; }
-                .flex-1 { flex: 1; }
-                .gap-2 { gap: 0.5rem; }
-                
-                .font-black { font-weight: 900; }
-                .font-bold { font-weight: 700; }
-                .uppercase { text-transform: uppercase; }
-                .italic { font-style: italic; }
-                .underline { text-decoration: underline; }
-                
-                .border-t { border-top: 1px solid #000; }
-                .border-b { border-bottom: 1px solid #000; }
-                .border-dashed { border-style: dashed !important; }
-                .border-gray-100 { border-color: #f3f4f6; }
-                .border-gray-200 { border-color: #e5e7eb; }
-                .border-gray-400 { border-color: #9ca3af; }
-                
-                .bg-gray-50 { background-color: #f9fafb; }
-                .bg-white { background-color: #ffffff; }
-                .rounded-lg { border-radius: 0.5rem; }
-                .rounded-xl { border-radius: 0.75rem; }
-                .p-2 { padding: 0.5rem; }
-                .pt-2 { padding-top: 0.5rem; }
-                .pt-4 { padding-top: 1rem; }
-                .pb-1 { padding-bottom: 0.25rem; }
-                
-                /* Precise Print Typography */
-                .text-\\[14px\\] { font-size: 22px; } /* Main Headers */
-                .text-\\[13px\\] { font-size: 20px; } 
-                .text-\\[12px\\] { font-size: 18px; }
-                .text-\\[11px\\] { font-size: 17px; }
-                .text-\\[10px\\] { font-size: 16px; }
-                .text-\\[9px\\] { font-size: 14px; }
-                .text-\\[8px\\] { font-size: 13px; }
-                .text-\\[7px\\] { font-size: 12px; } /* Smallest readable terms */
-                
-                .text-xl { font-size: 18px; }
-                
-                .tracking-tighter { letter-spacing: -0.05em; }
-                .tracking-tight { letter-spacing: -0.025em; }
-                .tracking-widest { letter-spacing: 0.1em; }
-                .tracking-\\[0\\.2em\\] { letter-spacing: 0.2em; }
-                
-                .leading-tight { line-height: 1.25; }
-                .leading-normal { line-height: 1.5; }
-                
-                .text-primary { color: #000; } /* Force to black on print */
-                
-                .w-full { width: 100%; }
-                .w-20 { width: 5rem; }
-                .h-20 { height: 5rem; }
-                .w-16 { width: 4rem; }
-                .h-16 { height: 4rem; }
-                .w-2\\/3 { width: 66.666667%; }
-                .mx-auto { margin-left: auto; margin-right: auto; }
-                
-                /* Layout overrides to prevent crushing */
-                .word-break { word-break: break-word; }
-                .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.25rem; }
-                .space-y-2\\\\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.625rem; }
-                .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
-              </style>
-            </head>
-            <body>
-              <div class="ticket-container">
-                ${contentHtml}
-              </div>
-            </body>
-          </html>
-        `);
-        doc.close();
-
-        // Event-driven: fire print() the instant the iframe DOM is ready
-        // This also waits for the QR code image to finish loading
-        iframe.onload = () => {
-          iframe.contentWindow?.focus();
-          iframe.contentWindow?.print();
-          setTimeout(() => document.body.removeChild(iframe), 1000);
-          onClose();
-        };
+      if (repair.remark) {
+        ticket.boldOff().text('Notes: ' + repair.remark);
       }
+
+      ticket
+        .blank()
+        .separator('=')
+        .boldOn()
+        .leftRight('EST. TOTAL:', '$' + repair.price.toFixed(2))
+        .boldOff()
+        .separator('=');
+
+      // ── Deposit / Balance ──
+      if ((repair.deposit || 0) > 0) {
+        ticket
+          .leftRight('Deposit Paid:', '$' + repair.deposit!.toFixed(2))
+          .boldOn()
+          .leftRight('BALANCE DUE:', '$' + (repair.price - repair.deposit!).toFixed(2))
+          .boldOff()
+          .separator('-');
+      }
+
+      // ── Terms & Conditions ──
+      ticket
+        .blank()
+        .align('center')
+        .boldOn()
+        .text('TERMS & CONDITIONS')
+        .boldOff()
+        .align('left');
+
+      disclaimerTerms.forEach((term, i) => {
+        ticket.text((i + 1) + '. ' + term.en.toUpperCase());
+      });
+
+      // ── Tracking URL (instead of QR code image) ──
+      ticket
+        .blank()
+        .align('center')
+        .text('Track your repair status at:')
+        .boldOn()
+        .text('alimobile.com.au/track-status')
+        .text('ID: ' + repair.id)
+        .boldOff()
+        .blank()
+        .blank()
+        // ── Signature ──
+        .separator('_')
+        .text('Customer Signature')
+        .blank()
+        .blank()
+        .boldOn()
+        .text('THANK YOU')
+        .boldOff()
+        .feed(3)
+        .fullCut();
+
+      await sendToPrinter(ticket.build());
+      onClose();
+
     } catch (err: any) {
-      console.error('Print error:', err);
-      alert('Failed to print: ' + err.message);
+      console.error('USB Print error:', err);
+      if (err.name === 'NotFoundError') {
+        alert('No USB printer selected. Please connect your thermal printer and try again.');
+      } else {
+        alert('Print failed: ' + (err.message || 'Unknown error. Check console for details.'));
+      }
     }
   };
 
@@ -336,7 +318,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-dashed border-black">
-                  <p className="text-[8px] font-black uppercase tracking-widest mb-3 text-center underline">Terms & Conditions</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest mb-3 text-center underline">Terms &amp; Conditions</p>
                   <div className="space-y-2.5">
                     {disclaimerTerms.map((term, i) => (
                       <div key={i} className="flex gap-2 items-start">
