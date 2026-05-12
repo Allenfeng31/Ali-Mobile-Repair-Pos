@@ -10,6 +10,7 @@ import { LoginView } from './views/Login';
 import { AdminDashboard } from './views/AdminDashboard';
 import { StorefrontCMS } from './views/StorefrontCMS';
 import { SupplierPrices } from './views/SupplierPrices';
+import { UsbPrintTest } from './components/UsbPrintTest';
 import { useAuthStore } from './hooks/useAuthStore';
 import { AnimatePresence } from 'motion/react';
 import { 
@@ -276,6 +277,8 @@ export default function App() {
         return <StorefrontCMS onBack={() => setCurrentView('admin')} />;
       case 'supplier-prices':
         return <SupplierPrices onBack={() => setCurrentView('admin')} />;
+      case 'usb-print-test':
+        return <UsbPrintTest />;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }

@@ -202,7 +202,7 @@ app.post('/api/scraper/sync', (req, res) => {
   const rootDir = path.resolve(__dirname, '../../');
   const venvPath = path.join(rootDir, 'scraper/scraper_venv/bin/python3');
   const scraperPath = path.join(rootDir, 'scraper/main.py');
-  
+
   console.log(`🚀 [Scraper] Initiating background sync...`);
   console.log(`📍 [Scraper] VENV Path: ${venvPath}`);
 
@@ -225,9 +225,9 @@ app.post('/api/scraper/sync', (req, res) => {
 
   scraperProcess.unref();
 
-  res.status(200).json({ 
-    ok: true, 
-    message: 'Background sync started. This may take 10-15 minutes.' 
+  res.status(200).json({
+    ok: true,
+    message: 'Background sync started. This may take 10-15 minutes.'
   });
 });
 
@@ -1311,7 +1311,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
               return { success: true };
             } catch (err) {
               console.error("❌ PUSH REJECTED:", err.statusCode, err.body || err.message);
-              
+
               if (err.statusCode === 401 || err.statusCode === 403) {
                 console.error("🚨 [Push Auth Error] 401/403 鉴权失败！可能原因：");
                 console.error("   1. Vercel 上未配置 VAPID_PRIVATE_KEY 环境变量");

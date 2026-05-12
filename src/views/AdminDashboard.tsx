@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart } from 'lucide-react';
+import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart, Usb } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../hooks/useAuthStore';
 
@@ -67,6 +67,15 @@ const adminCards: AdminCard[] = [
     color: 'text-slate-600',
     gradient: 'from-slate-500/10 to-slate-600/5',
     href: '/admin/settings',
+  },
+  {
+    id: 'usb-print-test',
+    title: 'USB Print Test',
+    icon: Usb,
+    description: 'WebUSB ESC/POS direct print proof-of-concept.',
+    color: 'text-cyan-600',
+    gradient: 'from-cyan-500/10 to-cyan-600/5',
+    href: '/admin/usb-print-test',
   },
 ];
 
