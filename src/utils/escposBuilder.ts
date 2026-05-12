@@ -3,6 +3,7 @@
  * 
  * Lightweight, browser-native utility. Zero dependencies.
  * Builds raw byte arrays (Uint8Array) for direct USB transfer.
+ * Supports ASCII + Chinese (CJK) via GB18030 encoding.
  * 
  * Target: SAM4S ELLIX 30IIs (80mm / 42-char line width, Font A)
  * 
@@ -10,32 +11,188 @@
  *   ESC @       = 0x1B 0x40  Initialize printer
  *   ESC a n     = 0x1B 0x61  Alignment (0=left, 1=center, 2=right)
  *   ESC E n     = 0x1B 0x45  Bold on/off
- *   ESC ! n     = 0x1B 0x21  Print mode (bit flags for font size/style)
  *   GS ! n      = 0x1D 0x21  Character size (width × height multiplier)
  *   GS V m      = 0x1D 0x56  Paper cut (0=full, 1=partial)
+ *   FS &        = 0x1C 0x26  Enter Chinese character mode
+ *   FS .        = 0x1C 0x2E  Exit Chinese character mode
  *   LF          = 0x0A       Line feed
  */
 
 const ESC = 0x1B;
+const FS  = 0x1C;
 const GS  = 0x1D;
 const LF  = 0x0A;
 
 /**
- * Maximum characters per line for SAM4S ELLIX 30IIs (Font A).
- * All alignment padding math MUST use this number.
+ * Maximum columns per line for SAM4S ELLIX 30IIs (Font A).
+ * CJK characters consume 2 columns each, ASCII consumes 1.
  */
 export const MAX_CHARS = 42;
 
-const encoder = new TextEncoder();
+const utf8Encoder = new TextEncoder();
+
+// ── GB18030 Encoding Support ─────────────────────────────────
 
 /**
- * Strip non-ASCII characters (e.g. Chinese, emoji) from text.
- * Replaces them with '?' to avoid garbled output on thermal printers
- * that only support CP437/ASCII code pages.
+ * Lazy-initialized reverse lookup: Unicode codepoint → GB18030 byte pair.
+ * Built at runtime from TextDecoder('gb18030') to avoid bundling a 200KB table.
  */
-export function sanitize(text: string): string {
-  return text.replace(/[^\x20-\x7E]/g, '?');
+let _gb18030Map: Map<number, number[]> | null = null;
+
+function getGB18030Map(): Map<number, number[]> {
+  if (_gb18030Map) return _gb18030Map;
+
+  const map = new Map<number, number[]>();
+  const decoder = new TextDecoder('gb18030');
+
+  // Iterate all valid GBK 2-byte sequences (covers CJK Unified Ideographs)
+  // First byte: 0x81-0xFE, Second byte: 0x40-0x7E and 0x80-0xFE
+  for (let b1 = 0x81; b1 <= 0xFE; b1++) {
+    for (let b2 = 0x40; b2 <= 0xFE; b2++) {
+      if (b2 === 0x7F) continue; // 0x7F is not a valid second byte
+      const bytes = new Uint8Array([b1, b2]);
+      const char = decoder.decode(bytes);
+      if (char.length === 1 && char.charCodeAt(0) !== 0xFFFD) {
+        map.set(char.charCodeAt(0), [b1, b2]);
+      }
+    }
+  }
+
+  _gb18030Map = map;
+  return map;
 }
+
+/**
+ * Check if a character is in the CJK double-width range.
+ * These characters occupy 2 columns on thermal printers.
+ */
+function isCJK(code: number): boolean {
+  return (
+    (code >= 0x2E80 && code <= 0x9FFF) ||  // CJK Radicals, Kangxi, Ideographs
+    (code >= 0xF900 && code <= 0xFAFF) ||  // CJK Compatibility Ideographs
+    (code >= 0xFE30 && code <= 0xFE4F) ||  // CJK Compatibility Forms
+    (code >= 0xFF00 && code <= 0xFFEF) ||  // Fullwidth Forms
+    (code >= 0x3000 && code <= 0x303F) ||  // CJK Symbols and Punctuation
+    (code >= 0x3040 && code <= 0x309F) ||  // Hiragana
+    (code >= 0x30A0 && code <= 0x30FF) ||  // Katakana
+    (code >= 0xAC00 && code <= 0xD7AF)     // Hangul
+  );
+}
+
+/**
+ * Check if a string contains any non-ASCII characters.
+ */
+function hasNonASCII(text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    if (text.charCodeAt(i) > 0x7E) return true;
+  }
+  return false;
+}
+
+/**
+ * Calculate the print width of a string in columns.
+ * ASCII = 1 column, CJK = 2 columns.
+ */
+export function printWidth(text: string): number {
+  let width = 0;
+  for (const char of text) {
+    const code = char.codePointAt(0) || 0;
+    width += isCJK(code) ? 2 : 1;
+  }
+  return width;
+}
+
+/**
+ * Encode a string to GB18030 bytes for the printer.
+ * ASCII bytes pass through directly; CJK characters are looked up
+ * in the reverse GB18030 table. Unmappable chars become '?'.
+ */
+function encodeGB18030(text: string): Uint8Array {
+  const map = getGB18030Map();
+  const result: number[] = [];
+
+  for (const char of text) {
+    const code = char.codePointAt(0) || 0;
+    if (code < 0x80) {
+      result.push(code);
+    } else {
+      const bytes = map.get(code);
+      if (bytes) {
+        result.push(...bytes);
+      } else {
+        result.push(0x3F); // '?' for unmapped characters
+      }
+    }
+  }
+
+  return new Uint8Array(result);
+}
+
+/**
+ * Encode text for the printer. If it contains CJK, wraps with
+ * FS & (enable Chinese mode) and FS . (disable Chinese mode)
+ * and encodes as GB18030. Otherwise encodes as ASCII/UTF-8.
+ */
+function encodeForPrinter(text: string): Uint8Array {
+  if (!hasNonASCII(text)) {
+    // Pure ASCII — encode directly
+    return utf8Encoder.encode(text);
+  }
+
+  // Mixed or CJK text — wrap with Chinese mode commands
+  const encoded = encodeGB18030(text);
+  const result = new Uint8Array(2 + encoded.length + 2);
+  result.set([FS, 0x26], 0);          // FS & — enable Chinese mode
+  result.set(encoded, 2);             // GB18030 encoded text
+  result.set([FS, 0x2E], 2 + encoded.length); // FS . — disable Chinese mode
+  return result;
+}
+
+/**
+ * Truncate a string to fit within a target print-width (column count).
+ * Appends ".." if truncation occurs. Accounts for CJK double-width.
+ */
+function truncateToWidth(text: string, maxWidth: number): string {
+  let width = 0;
+  let result = '';
+  const suffixWidth = 2; // ".." is 2 columns
+
+  for (const char of text) {
+    const code = char.codePointAt(0) || 0;
+    const charWidth = isCJK(code) ? 2 : 1;
+
+    if (width + charWidth > maxWidth - suffixWidth) {
+      return result + '..';
+    }
+    result += char;
+    width += charWidth;
+  }
+
+  // No truncation needed
+  return text;
+}
+
+/**
+ * Pad a string with spaces on the right to reach a target print-width.
+ */
+function padEndWidth(text: string, targetWidth: number): string {
+  const currentWidth = printWidth(text);
+  const needed = targetWidth - currentWidth;
+  if (needed <= 0) return text;
+  return text + ' '.repeat(needed);
+}
+
+/**
+ * Pad a string with spaces on the left to reach a target print-width.
+ */
+function padStartWidth(text: string, targetWidth: number): string {
+  const currentWidth = printWidth(text);
+  const needed = targetWidth - currentWidth;
+  if (needed <= 0) return text;
+  return ' '.repeat(needed) + text;
+}
+
+// ── Builder Class ────────────────────────────────────────────
 
 export class EscPosBuilder {
   private chunks: Uint8Array[] = [];
@@ -65,6 +222,20 @@ export class EscPosBuilder {
   /** Partial paper cut */
   partialCut(): this {
     this.chunks.push(new Uint8Array([GS, 0x56, 0x01]));
+    return this;
+  }
+
+  // ── Chinese Mode ─────────────────────────────────────────
+
+  /** Enable Chinese character mode (FS &) */
+  enableChinese(): this {
+    this.chunks.push(new Uint8Array([FS, 0x26]));
+    return this;
+  }
+
+  /** Disable Chinese character mode (FS .) */
+  disableChinese(): this {
+    this.chunks.push(new Uint8Array([FS, 0x2E]));
     return this;
   }
 
@@ -111,13 +282,18 @@ export class EscPosBuilder {
 
   /** Print a raw text string (no line feed appended) */
   raw(text: string): this {
-    this.chunks.push(encoder.encode(text));
+    this.chunks.push(encodeForPrinter(text));
     return this;
   }
 
-  /** Print text followed by a line feed. Auto-sanitizes non-ASCII. */
+  /**
+   * Print text followed by a line feed.
+   * Automatically enables Chinese mode for CJK characters
+   * and encodes as GB18030.
+   */
   text(text: string): this {
-    this.chunks.push(encoder.encode(sanitize(text) + '\n'));
+    this.chunks.push(encodeForPrinter(text));
+    this.chunks.push(new Uint8Array([LF]));
     return this;
   }
 
@@ -131,106 +307,121 @@ export class EscPosBuilder {
 
   /** Print a dashed separator line */
   separator(char = '-', width = MAX_CHARS): this {
-    return this.text(char.repeat(width));
+    this.chunks.push(utf8Encoder.encode(char.repeat(width)));
+    this.chunks.push(new Uint8Array([LF]));
+    return this;
   }
 
   /** Print a double-line separator */
   doubleSeparator(width = MAX_CHARS): this {
-    return this.text('='.repeat(width));
+    this.chunks.push(utf8Encoder.encode('='.repeat(width)));
+    this.chunks.push(new Uint8Array([LF]));
+    return this;
   }
 
   /**
    * Print two strings on the same line: left-aligned and right-aligned.
-   * If combined length exceeds MAX_CHARS, truncates leftText with ".."
-   * to guarantee rightText stays on the same line.
-   * 
-   * Example: leftRight("Subtotal:", "$12.50")
-   * Output:  "Subtotal:                         $12.50"
+   * If combined print-width exceeds MAX_CHARS, truncates leftText with "..".
+   * Correctly accounts for CJK double-width characters.
    */
   leftRight(left: string, right: string, width = MAX_CHARS): this {
-    const safeLeft = sanitize(left);
-    const safeRight = sanitize(right);
-    const minGap = 1; // At least 1 space between left and right
-    const maxLeft = width - safeRight.length - minGap;
+    const rightW = printWidth(right);
+    const minGap = 1;
+    const maxLeftW = width - rightW - minGap;
 
-    let l = safeLeft;
-    if (l.length > maxLeft) {
-      // Truncate left side with ".." to prevent wrapping
-      l = l.substring(0, Math.max(maxLeft - 2, 0)) + '..';
+    let l = left;
+    if (printWidth(l) > maxLeftW) {
+      l = truncateToWidth(l, maxLeftW);
     }
 
-    const gap = width - l.length - safeRight.length;
-    return this.text(l + ' '.repeat(Math.max(gap, 1)) + safeRight);
+    const leftW = printWidth(l);
+    const gap = width - leftW - rightW;
+    const line = l + ' '.repeat(Math.max(gap, 1)) + right;
+    return this.text(line);
   }
 
   /**
    * Print three columns on the same line with strict boundaries.
+   * Correctly accounts for CJK double-width in the name column.
    * 
    * Layout for 42 CPL:
-   *   Col 1 (Item Name): 22 chars max, left-aligned, truncated with ".." if >22
-   *   Col 2 (Qty):        8 chars, right-aligned
-   *   Col 3 (Price):     12 chars, right-aligned
-   *   Total:             42 chars exactly
-   * 
-   * Example: threeColumns("iPhone 13 Pro Max Screen Repl", "x1", "$120.00")
-   * Output:  "iPhone 13 Pro Max Scr.      x1     $120.00"
+   *   Col 1 (Item Name): 22 cols max, left-aligned, truncated with ".."
+   *   Col 2 (Qty):        8 cols, right-aligned
+   *   Col 3 (Price):     12 cols, right-aligned
    */
   threeColumns(left: string, center: string, right: string, width = MAX_CHARS): this {
     const COL_NAME  = 22;
     const COL_QTY   = 8;
     const COL_PRICE = 12;
-    // COL_NAME + COL_QTY + COL_PRICE = 42
 
-    const safeLeft = sanitize(left);
-
-    // Col 1: left-aligned, hard truncate at 22 with ".." if over
+    // Col 1: left-aligned, truncate if print-width exceeds limit
     let l: string;
-    if (safeLeft.length > COL_NAME) {
-      l = safeLeft.substring(0, COL_NAME - 2) + '..';
+    if (printWidth(left) > COL_NAME) {
+      l = truncateToWidth(left, COL_NAME);
+      l = padEndWidth(l, COL_NAME);
     } else {
-      l = safeLeft.padEnd(COL_NAME);
+      l = padEndWidth(left, COL_NAME);
     }
 
-    // Col 2: right-aligned within its 8-char slot
-    const c = sanitize(center).padStart(COL_QTY).substring(0, COL_QTY);
+    // Col 2: right-aligned within its slot
+    const c = padStartWidth(center, COL_QTY);
 
-    // Col 3: right-aligned within its 12-char slot
-    const r = sanitize(right).padStart(COL_PRICE).substring(0, COL_PRICE);
+    // Col 3: right-aligned within its slot
+    const r = padStartWidth(right, COL_PRICE);
 
     return this.text(l + c + r);
   }
 
   /**
    * Print centered text with optional padding character.
+   * Accounts for CJK double-width.
    */
   centered(text: string, width = MAX_CHARS, padChar = ' '): this {
-    const safe = sanitize(text);
-    const totalPad = width - safe.length;
-    if (totalPad <= 0) return this.text(safe);
+    const textW = printWidth(text);
+    const totalPad = width - textW;
+    if (totalPad <= 0) return this.text(text);
     const leftPad = Math.floor(totalPad / 2);
     const rightPad = totalPad - leftPad;
-    return this.text(padChar.repeat(leftPad) + safe + padChar.repeat(rightPad));
+    return this.text(padChar.repeat(leftPad) + text + padChar.repeat(rightPad));
   }
 
   /**
    * Word-wrap long text to fit within MAX_CHARS.
-   * Useful for policy text and disclaimers.
+   * Accounts for CJK double-width characters.
+   * CJK characters can be broken at any point (no word boundaries).
    */
   wrapText(text: string, width = MAX_CHARS): this {
-    const safe = sanitize(text);
-    const words = safe.split(' ');
     let line = '';
+    let lineW = 0;
 
-    for (const word of words) {
-      if (line.length === 0) {
-        line = word;
-      } else if (line.length + 1 + word.length <= width) {
-        line += ' ' + word;
-      } else {
+    for (const char of text) {
+      const code = char.codePointAt(0) || 0;
+
+      // Handle explicit spaces as word separators for ASCII
+      if (char === ' ') {
+        if (lineW + 1 <= width) {
+          line += ' ';
+          lineW += 1;
+        } else {
+          this.text(line);
+          line = '';
+          lineW = 0;
+        }
+        continue;
+      }
+
+      const charW = isCJK(code) ? 2 : 1;
+
+      if (lineW + charW > width) {
         this.text(line);
-        line = word;
+        line = char;
+        lineW = charW;
+      } else {
+        line += char;
+        lineW += charW;
       }
     }
+
     if (line.length > 0) {
       this.text(line);
     }
@@ -249,25 +440,20 @@ export class EscPosBuilder {
    *   48 = L (7%), 49 = M (15%), 50 = Q (25%), 51 = H (30%)
    */
   qrCode(data: string, size = 6, errorCorrection = 48): this {
-    // GS ( k header bytes
     const hdr = [0x1D, 0x28, 0x6B];
 
     // Step 1: Select QR Code model (Model 2)
-    // pL=4, pH=0, cn=49, fn=65, n1=50 (Model 2), n2=0
     this.chunks.push(new Uint8Array([...hdr, 4, 0, 49, 65, 50, 0]));
 
-    // Step 2: Set module size (dot size per module)
-    // pL=3, pH=0, cn=49, fn=67, n=size
+    // Step 2: Set module size
     this.chunks.push(new Uint8Array([...hdr, 3, 0, 49, 67, size]));
 
     // Step 3: Set error correction level
-    // pL=3, pH=0, cn=49, fn=69, n=errorCorrection
     this.chunks.push(new Uint8Array([...hdr, 3, 0, 49, 69, errorCorrection]));
 
     // Step 4: Store QR data in symbol storage area
-    // pL/pH = length of (cn=49 + fn=80 + m=48 + data), little-endian
-    const dataBytes = encoder.encode(data);
-    const storeLen = dataBytes.length + 3; // cn + fn + m + data
+    const dataBytes = utf8Encoder.encode(data);
+    const storeLen = dataBytes.length + 3;
     const pL = storeLen & 0xFF;
     const pH = (storeLen >> 8) & 0xFF;
     const storeCmd = new Uint8Array(3 + 2 + 3 + dataBytes.length);
@@ -276,7 +462,6 @@ export class EscPosBuilder {
     this.chunks.push(storeCmd);
 
     // Step 5: Print the QR code from symbol storage
-    // pL=3, pH=0, cn=49, fn=81, m=48
     this.chunks.push(new Uint8Array([...hdr, 3, 0, 49, 81, 48]));
 
     return this;

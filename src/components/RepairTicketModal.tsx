@@ -96,7 +96,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
     if (!repair || !customer) return;
 
     try {
-      const { escpos, sanitize } = await import('../utils/escposBuilder');
+      const { escpos } = await import('../utils/escposBuilder');
       const { sendToPrinter } = await import('../lib/usbPrinter');
 
       const ticket = escpos()
@@ -154,7 +154,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
       if (repair.remark) {
         ticket.blank()
           .boldOn().text('Notes:').boldOff()
-          .wrapText(sanitize(repair.remark));
+          .wrapText(repair.remark);
       }
 
       ticket
