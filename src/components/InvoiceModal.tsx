@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Printer, FileDown, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = React.useState(false);
   const [pdfInstance, setPdfInstance] = React.useState<jsPDF | null>(null);
   const settingsFetched = useRef(false);
+  const [includeFeedbackQr, setIncludeFeedbackQr] = useState(false);
 
   const [invoiceHeader, setInvoiceHeader] = React.useState(`Precision Tech Repairs\n123 Artisan Way, Ste 4\nSan Francisco, CA 94103\nTel: (555) 012-3456`);
   const [invoiceFooter, setInvoiceFooter] = React.useState(`Warranty: 90 days on parts and labor. No refunds on water damage repairs. Thank you for choosing Precision!`);
@@ -209,8 +210,25 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         .boldOff()
         .separator('-')
         .blank()
-        .text('[ ' + order.id + ' ]')
-        .blank()
+        .text('[ ' + order.id + ' ]');
+
+      // ── Optional Feedback QR Code ──
+      if (includeFeedbackQr) {
+        const feedbackUrl = 'https://ali-mobile-repair-pos.vercel.app/feedback?id=' + order.id;
+        receipt
+          .blank()
+          .separator('-')
+          .boldOn()
+          .text('How did we do?')
+          .boldOff()
+          .text('Scan to leave feedback!')
+          .blank()
+          .qrCode(feedbackUrl, 6, 49)
+          .blank();
+      }
+
+      receipt
+        .align('center')
         .boldOn()
         .text('THANK YOU!')
         .boldOff()
@@ -403,8 +421,23 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
               </div>
             </div>
 
+            {/* Feedback QR Toggle */}
+            <div className="px-6 pt-4 pb-2 bg-surface-container-low border-t border-outline-variant/10">
+              <label className="flex items-center gap-3 cursor-pointer group select-none">
+                <input
+                  type="checkbox"
+                  checked={includeFeedbackQr}
+                  onChange={(e) => setIncludeFeedbackQr(e.target.checked)}
+                  className="w-5 h-5 rounded-lg border-2 border-outline-variant/30 accent-primary cursor-pointer"
+                />
+                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider group-hover:text-on-surface transition-colors">
+                  Include Feedback / Review QR Code
+                </span>
+              </label>
+            </div>
+
             {/* Actions */}
-            <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 grid grid-cols-2 gap-4">
+            <div className="px-6 pb-6 pt-2 bg-surface-container-low grid grid-cols-2 gap-4">
               {pdfInstance ? (
                 <button 
                   onClick={handleSavePDF}

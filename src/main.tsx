@@ -2,6 +2,7 @@ import { StrictMode, Component, ErrorInfo, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { PortalView } from './views/Portal';
+import { FeedbackPage } from './views/FeedbackPage';
 import './index.css';
 
 interface Props {
@@ -48,12 +49,21 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 const rootElement = document.getElementById('root')!;
+const pathname = window.location.pathname;
 
-if (window.location.pathname === '/portal') {
+if (pathname === '/portal') {
   createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>
         <PortalView />
+      </ErrorBoundary>
+    </StrictMode>
+  );
+} else if (pathname === '/feedback') {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <FeedbackPage />
       </ErrorBoundary>
     </StrictMode>
   );
