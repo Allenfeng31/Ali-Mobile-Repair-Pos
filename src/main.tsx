@@ -51,7 +51,7 @@ class ErrorBoundary extends Component<Props, State> {
 const rootElement = document.getElementById('root')!;
 const pathname = window.location.pathname;
 
-if (pathname === '/portal') {
+if (pathname === '/portal' || pathname === '/track-status') {
   createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>

@@ -1,11 +1,17 @@
 {
-  "regions": [
-    "syd1"
-  ],
+  "regions": ["syd1"],
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "https://ali-mobile-repair-pos-tqdh.vercel.app/api/:path*"
+    },
+    {
+      "source": "/feedback",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/track-status",
+      "destination": "/index.html"
     },
     {
       "source": "/(.*)",
