@@ -982,6 +982,71 @@ app.delete('/api/repairs/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+// Public Tracking Endpoint
+app.get('/api/repairs/track/:id', async (req, res) => {
+  const query = decodeURIComponent(req.params.id);
+  try {
+    // 1. Try exact ID match
+    let { data: repair } = await supabase
+      .from('repairs')
+      .select('id, status, customer_id')
+      .eq('id', query)
+      .maybeSingle();
+
+    let customerName = null;
+
+    // 2. If no ID match, try Phone match
+    if (!repair) {
+      const cleanPhone = query.replace(/\s/g, '');
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id, name')
+        .eq('phone', cleanPhone)
+        .maybeSingle();
+
+      if (customer) {
+        const { data: recentRepair } = await supabase
+          .from('repairs')
+          .select('id, status, customer_id')
+          .eq('customer_id', customer.id)
+          .order('timestamp', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (recentRepair) {
+          repair = recentRepair;
+          customerName = customer.name;
+        }
+      }
+    } else {
+      // Get customer name for ID match
+      if (repair.customer_id) {
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('name')
+          .eq('id', repair.customer_id)
+          .maybeSingle();
+        if (customer) customerName = customer.name;
+      }
+    }
+
+    if (!repair) {
+      return res.status(404).json({ error: 'Repair not found. Please check your ID.' });
+    }
+
+    res.json({
+      repair: {
+        id: repair.id,
+        status: repair.status,
+        customerName: customerName
+      }
+    });
+  } catch (error) {
+    console.error('Track API error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ----------------------------------------------------------------------
 // STOREFRONT UPSELLS
 // ----------------------------------------------------------------------

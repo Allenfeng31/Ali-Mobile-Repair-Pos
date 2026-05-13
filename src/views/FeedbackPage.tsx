@@ -23,7 +23,7 @@ export function FeedbackPage() {
   }, []);
 
   const handlePositive = () => {
-    window.location.href = GOOGLE_REVIEW_LINK;
+    window.location.href = "https://g.page/r/CRGwjUq_bZMbEBM/review";
   };
 
   const handleNegative = () => {
