@@ -63,16 +63,17 @@ export function PortalView() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const data = await api.getCustomers();
-      const found = data.find((c: any) => c.phone === phone);
-      if (found) {
-        found.repairs.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        setCustomer(found);
+      const data = await api.trackRepair(phone.trim());
+      if (data && data.repair) {
+        setCustomer({
+          name: data.customerName,
+          repairs: [data.repair]
+        });
       } else {
-        setErrorMsg('No repair found for this phone number.');
+        setErrorMsg('Repair not found. Please check your ID or Phone Number.');
       }
-    } catch (err) {
-      setErrorMsg('Failed to fetch tracking data.');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Repair not found. Please check your ID or Phone Number.');
     }
     setLoading(false);
   };
@@ -209,8 +210,8 @@ export function PortalView() {
               <h2 className="text-xl font-bold text-center mb-6">Track Your Repair</h2>
               <form onSubmit={handleTrackSubmit} className="space-y-4">
                 <input 
-                  type="tel"
-                  placeholder="Enter your Phone Number"
+                  type="text"
+                  placeholder="Order ID or Phone Number"
                   className="w-full px-4 py-4 bg-surface-container-low border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-center font-bold text-lg"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
@@ -250,11 +251,6 @@ export function PortalView() {
                        <p className="font-bold text-center text-on-surface">{r.repairItem}</p>
                        <p className="text-sm text-on-surface-variant text-center font-medium mb-4">{r.modelNumber}</p>
                        
-                       {r.status === 'Completed' && (
-                         <div className="bg-green-100 text-green-800 w-full p-3 rounded-xl text-center text-xs font-bold animate-in fade-in slide-in-from-bottom-2">
-                           Your device is fully repaired and ready for pickup!
-                         </div>
-                       )}
                        {r.status === 'In Processing' && (
                          <div className="bg-blue-100 text-blue-800 w-full p-3 rounded-xl text-center text-xs font-bold animate-in fade-in transition-all">
                            Our technicians are actively working on your device. This screen will jump to completed automatically!
