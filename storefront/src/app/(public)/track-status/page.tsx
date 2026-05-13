@@ -8,23 +8,27 @@ function TrackStatusContent() {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
+  const [customerName, setCustomerName] = useState<string | null>(null);
 
   const performCheck = async (id: string) => {
     if (!id) return;
     setLoading(true);
     setStatus(null);
+    setCustomerName(null);
     try {
-      const res = await fetch(`/api/proxy/repair-status?id=${encodeURIComponent(id)}`);
+      const res = await fetch(`/api/proxy/repairs/track/${encodeURIComponent(id)}`);
       if (res.ok) {
         const data = await res.json();
-        setStatus(data.status || "In Progress");
+        const repairData = data.repair || data;
+        setStatus(repairData.status || "In Progress");
+        setCustomerName(repairData.customerName || null);
       } else {
-        setTimeout(() => setStatus("Ready for Pickup"), 600);
+        setStatus("Not Found");
       }
     } catch {
-      setTimeout(() => setStatus("Parts Ordered"), 600);
+      setStatus("Error Connecting to Server");
     } finally {
-      setTimeout(() => setLoading(false), 600);
+      setLoading(false);
     }
   };
 
