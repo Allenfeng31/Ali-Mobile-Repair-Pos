@@ -137,6 +137,10 @@ export const api = {
     });
     return handleResponse(res);
   },
+  trackRepair: async (id: string) => {
+    const res = await fetch(`${API_URL}/repairs/track/${id}`);
+    return handleResponse(res);
+  },
 
   // Settings
   getSettings: async () => {
