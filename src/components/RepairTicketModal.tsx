@@ -191,7 +191,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         .blank()
 
       // ── QR Code for Status Tracking ──
-      const trackingUrl = 'https://ali-mobile-repair-pos.vercel.app/track-status?id=' + repair.id;
+      const trackingUrl = 'https://ali-mobile-repair-pos-g2by.vercel.app/track-status?id=' + repair.id;
       ticket
         .align('center')
         .text('Scan to track your repair:')

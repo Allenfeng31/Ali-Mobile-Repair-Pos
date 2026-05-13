@@ -214,7 +214,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
 
       // ── Optional Feedback QR Code ──
       if (includeFeedbackQr) {
-        const feedbackUrl = 'https://ali-mobile-repair-pos.vercel.app/feedback?id=' + order.id;
+        const feedbackUrl = 'https://ali-mobile-repair-pos-g2by.vercel.app/feedback?id=' + order.id;
         receipt
           .blank()
           .separator('-')
