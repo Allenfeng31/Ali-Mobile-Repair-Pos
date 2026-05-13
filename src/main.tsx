@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { PortalView } from './views/Portal';
 import { FeedbackPage } from './views/FeedbackPage';
+import { TrackStatusPage } from './views/TrackStatusPage';
 import './index.css';
 
 interface Props {
@@ -51,11 +52,19 @@ class ErrorBoundary extends Component<Props, State> {
 const rootElement = document.getElementById('root')!;
 const pathname = window.location.pathname;
 
-if (pathname === '/portal' || pathname === '/track-status') {
+if (pathname === '/portal') {
   createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>
         <PortalView />
+      </ErrorBoundary>
+    </StrictMode>
+  );
+} else if (pathname === '/track-status') {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <TrackStatusPage />
       </ErrorBoundary>
     </StrictMode>
   );

@@ -129,6 +129,64 @@ const SMS_MESSAGES = {
     `Hi ${name}, your booking at Ali Mobile Repair is confirmed! See you in-store. Address: Kiosk C1, Ringwood Square Shopping Centre, Ringwood.`,
 };
 
+  // Repairs
+  // Public Endpoint: Track a single repair safely without exposing other customer data
+  app.get('/api/repairs/track/:id', async (req, res) => {
+    try {
+      const queryParam = req.params.id;
+      if (!queryParam) return res.status(400).json({ error: 'Repair ID or Phone required' });
+
+      let repairData = null;
+      let customerData = null;
+
+      // 1. Try fetching by Repair ID directly
+      const { data: rData, error: rErr } = await supabase
+        .from('repairs')
+        .select('*')
+        .eq('id', queryParam)
+        .maybeSingle();
+
+      if (rData) {
+        repairData = rData;
+        const { data: cData } = await supabase.from('customers').select('name').eq('id', rData.customer_id).maybeSingle();
+        customerData = cData;
+      } else {
+        // 2. If not found, try fetching by Phone Number
+        // Normalize phone number (strip spaces if needed, but the DB might have spaces)
+        // We'll just do a direct match for now.
+        const { data: cData, error: cErr } = await supabase
+          .from('customers')
+          .select('id, name')
+          .eq('phone', queryParam)
+          .maybeSingle();
+
+        if (cData) {
+          customerData = cData;
+          // Get the most recent repair for this customer
+          const { data: latestRData } = await supabase
+            .from('repairs')
+            .select('*')
+            .eq('customer_id', cData.id)
+            .order('timestamp', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          repairData = latestRData;
+        }
+      }
+
+      if (!repairData) return res.status(404).json({ error: 'Repair ticket not found. Please check your ID or Phone Number.' });
+
+      res.json({
+        repair: repairData,
+        customerName: customerData ? customerData.name : 'Customer'
+      });
+
+    } catch (err) {
+      console.error('❌ [Tracking] Error fetching repair:', err.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 app.post('/api/sms/send', async (req, res) => {
   const { to, type, customerName = 'Valued Customer', deviceModel = 'your device', customerId } = req.body;
 
