@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
  */
 
 // ── Replace this with your actual Google Review link ──
-const GOOGLE_REVIEW_LINK = '[GOOGLE_REVIEW_LINK]';
+const GOOGLE_REVIEW_LINK = "https://g.page/r/CRGwjUq_bZMbEBM/review";
 
 export function FeedbackPage() {
   const [orderId, setOrderId] = useState<string | null>(null);
