@@ -73,4 +73,5 @@ export interface Customer {
   lastVisit: string;
   initials: string;
   lastReviewSent?: string;
+  synced_to_google?: boolean;
 }

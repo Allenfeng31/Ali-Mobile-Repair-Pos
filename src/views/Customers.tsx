@@ -21,7 +21,8 @@ import {
   Package,
   Printer,
   DollarSign,
-  Scan
+  Scan,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -156,6 +157,7 @@ export function CustomersView() {
     }).catch(() => {});
   }, []);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterSyncedOnly, setFilterSyncedOnly] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingAllOrders, setIsViewingAllOrders] = useState(false);
@@ -255,13 +257,16 @@ export function CustomersView() {
       (r.repairItem || '').toLowerCase().includes(query) || 
       (r.modelNumber || '').toLowerCase().includes(query)
     );
-    return (
+    const matchesSearch = (
       (c.name || '').toLowerCase().includes(query) ||
       (c.phone || '').toLowerCase().includes(query) ||
       (c.email || '').toLowerCase().includes(query) ||
       (c.id || '').toLowerCase().includes(query) ||
       hasRepairMatch
     );
+    
+    if (filterSyncedOnly && !c.synced_to_google) return false;
+    return matchesSearch;
   });
 
   const inProcessingCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed');
@@ -921,16 +926,30 @@ export function CustomersView() {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
-          <input 
-            className="w-full bg-surface-container-high border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-highest transition-all outline-none text-on-surface font-medium" 
-            placeholder="Search by name, phone, email or repair item..." 
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Search & Filter */}
+        <div className="flex gap-4 mb-6">
+          <div className="relative group flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
+            <input 
+              className="w-full bg-surface-container-high border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-highest transition-all outline-none text-on-surface font-medium" 
+              placeholder="Search by name, phone, email or repair item..." 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={() => setFilterSyncedOnly(!filterSyncedOnly)}
+            className={cn(
+              "px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 border-2",
+              filterSyncedOnly 
+                ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100" 
+                : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:bg-surface-container-high hover:text-on-surface"
+            )}
+          >
+            {filterSyncedOnly ? <Check size={16} /> : <Users size={16} />}
+            Google Synced
+          </button>
         </div>
 
         {/* List */}

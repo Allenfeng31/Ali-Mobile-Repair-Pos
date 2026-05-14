@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
+const { syncCustomerToGoogleContacts } = require('./googleContactsSync.js');
 // Only load dotenv in local development (where .env file exists)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config({ path: path.join(__dirname, '../.env') });
@@ -652,6 +653,13 @@ app.post('/api/customers', async (req, res) => {
   const { data, error } = await supabase.from('customers').insert([customerData]).select();
   if (error) return res.status(500).json({ error: error.message });
 
+  // Sync to Google Contacts asynchronously
+  if (data && data[0]) {
+    syncCustomerToGoogleContacts(data[0], supabase).catch(err => {
+      console.error('[Google Contacts] Sync failed:', err);
+    });
+  }
+
   res.json({ ...data[0], repairs: [] });
 });
 
@@ -820,6 +828,10 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
         console.error(`❌ [Appointment] Failed to create customer: ${insertError.message}`);
       } else {
         console.log(`✅ [Appointment] Customer record successfully created for ${name}`);
+        // Sync to Google Contacts asynchronously
+        syncCustomerToGoogleContacts({ id: customerId, name: name.trim(), phone: phone.trim() }, supabase).catch(err => {
+          console.error('[Google Contacts] Sync failed:', err);
+        });
       }
 
       // 3. Create Repair Record

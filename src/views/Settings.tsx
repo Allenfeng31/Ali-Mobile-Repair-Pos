@@ -13,7 +13,8 @@ import {
   BellOff,
   BellRing,
   Smartphone,
-  SmartphoneNfc
+  SmartphoneNfc,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -68,6 +69,10 @@ export function SettingsView({
   // SMS Alerts Toggle State
   const [smsAlertsEnabled, setSmsAlertsEnabled] = React.useState(true);
   const [smsToggleLoading, setSmsToggleLoading] = React.useState(false);
+
+  // Google Contacts Sync Toggle State
+  const [googleSyncEnabled, setGoogleSyncEnabled] = React.useState(false);
+  const [googleSyncLoading, setGoogleSyncLoading] = React.useState(false);
 
   // Check push notification status on mount
   React.useEffect(() => {
@@ -192,6 +197,20 @@ export function SettingsView({
     }
   };
 
+  const handleToggleGoogleSync = async () => {
+    setGoogleSyncLoading(true);
+    try {
+      const newValue = !googleSyncEnabled;
+      await api.updateSetting('google_contacts_sync_enabled', newValue ? 'true' : 'false');
+      setGoogleSyncEnabled(newValue);
+    } catch (err: any) {
+      console.error('[Google Sync Toggle] Failed:', err);
+      alert('Failed to update Google Sync setting: ' + err.message);
+    } finally {
+      setGoogleSyncLoading(false);
+    }
+  };
+
   React.useEffect(() => {
     api.getSettings().then(settings => {
       if (settings.ali_pos_invoice_header) setHeader(settings.ali_pos_invoice_header);
@@ -199,6 +218,10 @@ export function SettingsView({
       // Load SMS alerts setting (default: true if not set)
       if (settings.sms_alerts_enabled !== undefined) {
         setSmsAlertsEnabled(settings.sms_alerts_enabled !== 'false');
+      }
+      // Load Google Contacts Sync setting
+      if (settings.google_contacts_sync_enabled !== undefined) {
+        setGoogleSyncEnabled(settings.google_contacts_sync_enabled === 'true' || settings.google_contacts_sync_enabled === true);
       }
     }).catch(console.error);
 
@@ -527,6 +550,58 @@ export function SettingsView({
                 💡 Turn this off to stop receiving text messages and save Twilio credits.
                 Desktop/PWA push notifications will still work.
               </p>
+            </div>
+          </section>
+
+          {/* Google Contacts Sync */}
+          <section id="google-sync-section" className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={cn(
+                "p-2 rounded-xl transition-colors",
+                googleSyncEnabled ? "bg-blue-50 text-blue-600" : "bg-surface-container-high text-on-surface-variant"
+              )}>
+                <Users size={22} />
+              </div>
+              <div>
+                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Google Contacts Sync</h3>
+                <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                  Automatically add new customers to Google Contacts
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant/10">
+                <div className={cn(
+                  "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
+                  googleSyncEnabled ? "bg-blue-500 shadow-lg shadow-blue-500/50 animate-pulse" : "bg-on-surface-variant/20"
+                )} />
+                <span className={cn(
+                  "text-sm font-bold",
+                  googleSyncEnabled ? "text-blue-500" : "text-on-surface-variant"
+                )}>
+                  {googleSyncEnabled ? 'Auto-Sync Active' : 'Auto-Sync Off'}
+                </span>
+              </div>
+
+              <button
+                id="google-sync-toggle"
+                onClick={handleToggleGoogleSync}
+                disabled={googleSyncLoading}
+                className={cn(
+                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50",
+                  googleSyncEnabled
+                    ? "bg-surface-container-high text-on-surface-variant border border-outline-variant/10 hover:bg-error/10 hover:text-error hover:border-error/20 shadow-none"
+                    : "bg-blue-500 text-white hover:bg-blue-400 shadow-blue-200"
+                )}
+              >
+                {googleSyncLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Users size={16} />
+                )}
+                {googleSyncEnabled ? 'Disable Auto-Sync' : 'Enable Auto-Sync'}
+              </button>
             </div>
           </section>
         </div>
