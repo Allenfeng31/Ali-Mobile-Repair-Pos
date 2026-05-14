@@ -28,7 +28,9 @@ function getGoogleContactsClient() {
 
 async function syncCustomerToGoogleContacts(customer, supabase, googleClient = null) {
   try {
+    console.log(`[Google Contacts] Starting sync for customer ${customer.name} (${customer.phone})`);
     const isEnabled = await isGoogleContactsSyncEnabled(supabase);
+    console.log(`[Google Contacts] Sync enabled setting in DB is: ${isEnabled}`);
     if (!isEnabled) {
       return false;
     }
@@ -40,6 +42,7 @@ async function syncCustomerToGoogleContacts(customer, supabase, googleClient = n
     }
 
     // 1. Search for existing contacts by phone number
+    console.log(`[Google Contacts] Searching for existing contact with phone: ${customer.phone}`);
     const searchResponse = await client.people.searchContacts({
       query: customer.phone,
       readMask: 'names,phoneNumbers',
@@ -49,6 +52,7 @@ async function syncCustomerToGoogleContacts(customer, supabase, googleClient = n
     
     // 2. Only add if the number doesn't exist
     if (results.length === 0) {
+      console.log(`[Google Contacts] No existing contact found. Creating new contact...`);
       // Add new contact
       await client.people.createContact({
         requestBody: {
@@ -84,7 +88,10 @@ async function syncCustomerToGoogleContacts(customer, supabase, googleClient = n
 
     return true;
   } catch (error) {
-    console.error('[Google Contacts] Error syncing customer:', error);
+    console.error('[Google Contacts] Error syncing customer:', error.message);
+    if (error.response && error.response.data) {
+      console.error('[Google Contacts] API Response Data:', JSON.stringify(error.response.data, null, 2));
+    }
     return false;
   }
 }
