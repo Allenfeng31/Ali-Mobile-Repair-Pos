@@ -138,7 +138,7 @@ function SettingsPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-neu-bg/40  z-50"
           />
           {/* Slide-out panel from right */}
           <motion.div
@@ -146,17 +146,17 @@ function SettingsPanel({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-            className="fixed right-0 top-0 h-full w-80 bg-black border-l border-zinc-800/10 z-50 flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 h-full w-80 bg-neu-bg border-l border-transparent z-50 flex flex-col shadow-neu-floating"
           >
             {/* Panel header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800/10">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-transparent">
               <div className="flex items-center gap-2.5">
-                <Settings size={18} className="text-blue-500" />
-                <span className="font-black text-white tracking-tight">Settings</span>
+                <Settings size={18} className="text-neu-accent" />
+                <span className="font-black text-neu-text-primary tracking-tight">Settings</span>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-zinc-900 text-zinc-400 transition-all"
+                className="p-1.5 rounded-lg hover:bg-neu-bg text-neu-text-secondary transition-all"
               >
                 <X size={18} />
               </button>
@@ -166,7 +166,7 @@ function SettingsPanel({
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
               {/* Invoice header */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-neu-text-secondary uppercase tracking-widest">
                   Invoice Header
                 </label>
                 <textarea
@@ -174,13 +174,13 @@ function SettingsPanel({
                   value={header}
                   onChange={e => setHeader(e.target.value)}
                   placeholder="Store name, address, phone..."
-                  className="w-full bg-zinc-900 rounded-2xl px-4 py-3 text-sm text-white resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
               </div>
 
               {/* Invoice footer */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                <label className="text-[10px] font-black text-neu-text-secondary uppercase tracking-widest">
                   Invoice Footer / Disclaimer
                 </label>
                 <textarea
@@ -188,14 +188,14 @@ function SettingsPanel({
                   value={footer}
                   onChange={e => setFooter(e.target.value)}
                   placeholder="Warranty terms, return policy..."
-                  className="w-full bg-zinc-900 rounded-2xl px-4 py-3 text-sm text-white resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
               </div>
 
               {/* Save */}
               <button
                 onClick={handleSave}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
+                className="w-full bg-neu-accent hover:bg-blue-600 text-neu-text-primary py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-neu-flat shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
               >
                 {saved ? <CheckCircle2 size={15} /> : <Save size={15} />}
                 {saved ? 'Saved!' : 'Save Changes'}
@@ -206,12 +206,12 @@ function SettingsPanel({
               {/* QUICK SMS GENERATOR */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <MessageSquare size={16} className="text-blue-500" />
-                  <span className="text-xs font-black text-white uppercase tracking-tight">Quick SMS</span>
+                  <MessageSquare size={16} className="text-neu-accent" />
+                  <span className="text-xs font-black text-neu-text-primary uppercase tracking-tight">Quick SMS</span>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-[10px] font-bold text-zinc-400 leading-relaxed">
+                  <p className="text-[10px] font-bold text-neu-text-secondary leading-relaxed">
                     Generate an SMS quote instantly.
                   </p>
                   
@@ -221,23 +221,23 @@ function SettingsPanel({
                       value={smsModel}
                       onChange={(e) => setSmsModel(e.target.value)}
                       placeholder="Model (e.g. iPhone 13)"
-                      className="w-full bg-zinc-900 rounded-2xl px-4 py-2.5 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <input 
                       type="text" 
                       value={smsRepair}
                       onChange={(e) => setSmsRepair(e.target.value)}
                       placeholder="Repair (e.g. Screen)"
-                      className="w-full bg-zinc-900 rounded-2xl px-4 py-2.5 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neu-text-secondary font-bold text-xs">$</span>
                       <input 
                         type="number" 
                         value={smsAmount}
                         onChange={(e) => setSmsAmount(e.target.value)}
                         placeholder="Price (Amount)"
-                        className="w-full bg-zinc-900 rounded-2xl pl-7 pr-4 py-2.5 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-neu-bg rounded-2xl pl-7 pr-4 py-2.5 text-xs text-neu-text-primary outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                       />
                     </div>
                   </div>
@@ -247,8 +247,8 @@ function SettingsPanel({
                     className={cn(
                       "w-full py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98]",
                       isCopied 
-                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200" 
-                        : "bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-500"
+                        ? "bg-emerald-600 text-neu-text-primary shadow-neu-flat shadow-emerald-200" 
+                        : "bg-blue-600 text-neu-text-primary shadow-neu-flat shadow-blue-200 hover:bg-neu-accent"
                     )}
                   >
                     {isCopied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
@@ -256,7 +256,7 @@ function SettingsPanel({
                   </button>
 
                   {(smsModel || smsRepair || smsAmount) && (
-                    <div className="p-3 bg-zinc-800 rounded-2xl text-[9px] whitespace-pre-wrap font-medium text-zinc-400 border border-zinc-800/10 leading-relaxed mt-2">
+                    <div className="p-3 bg-neu-bg shadow-neu-pressed rounded-2xl text-[9px] whitespace-pre-wrap font-medium text-neu-text-secondary border border-transparent leading-relaxed mt-2">
                       {`Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair || '[Repair]'} for ${smsModel || '[Model]'} is $${smsAmount || '0'}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood\nPhone: 0481 058 514`}
                     </div>
                   )}
@@ -269,12 +269,12 @@ function SettingsPanel({
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Sparkles size={16} className="text-purple-500" />
-                  <span className="text-xs font-black text-white uppercase tracking-tight">AI Blog Marketing</span>
+                  <span className="text-xs font-black text-neu-text-primary uppercase tracking-tight">AI Blog Marketing</span>
                 </div>
 
                 {!blogDraft ? (
                   <div className="space-y-3">
-                    <p className="text-[10px] font-bold text-zinc-400 leading-relaxed">
+                    <p className="text-[10px] font-bold text-neu-text-secondary leading-relaxed">
                       Transform a topic into an SEO-ready repair guide for your website.
                     </p>
                     <div className="relative">
@@ -283,14 +283,14 @@ function SettingsPanel({
                         value={blogTopic}
                         onChange={e => setBlogTopic(e.target.value)}
                         placeholder="e.g. iPhone 17 Screen Care"
-                        className="w-full bg-zinc-900 rounded-2xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
+                        className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
                       />
-                      <PenTool size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400/40" />
+                      <PenTool size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-neu-text-secondary/40" />
                     </div>
                     <button
                       onClick={handleGenerateBlog}
                       disabled={isGenerating || !blogTopic.trim()}
-                      className="w-full bg-slate-900 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all disabled:opacity-50"
+                      className="w-full bg-slate-900 text-neu-text-primary py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all disabled:opacity-50"
                     >
                       {isGenerating ? <RotateCw size={14} className="animate-spin" /> : <Sparkles size={14} className="text-purple-400" />}
                       {isGenerating ? 'Generating...' : 'Generate Draft'}
@@ -298,7 +298,7 @@ function SettingsPanel({
                   </div>
                 ) : (
                   <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800/10 shadow-sm">
+                    <div className="bg-neu-bg rounded-2xl overflow-hidden border border-transparent shadow-sm">
                       <div className="aspect-video relative">
                         <img 
                           src={`http://localhost:3001/api/blog/proxy-image?url=${encodeURIComponent(blogDraft.image)}`} 
@@ -306,11 +306,11 @@ function SettingsPanel({
                           className="w-full h-full object-cover" 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
-                          <h4 className="text-white font-black text-xs leading-tight line-clamp-2">{blogDraft.title}</h4>
+                          <h4 className="text-neu-text-primary font-black text-xs leading-tight line-clamp-2">{blogDraft.title}</h4>
                         </div>
                       </div>
                       <div className="p-3">
-                        <p className="text-[9px] text-zinc-400 font-medium line-clamp-2 leading-relaxed italic">
+                        <p className="text-[9px] text-neu-text-secondary font-medium line-clamp-2 leading-relaxed italic">
                           "{blogDraft.description}"
                         </p>
                       </div>
@@ -318,14 +318,14 @@ function SettingsPanel({
                     <div className="grid grid-cols-2 gap-2">
                        <button
                          onClick={() => setBlogDraft(null)}
-                         className="flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-zinc-800 text-zinc-400"
+                         className="flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-neu-bg shadow-neu-pressed text-neu-text-secondary"
                        >
                          <Trash2 size={12} />
                          Discard
                        </button>
                        <button
                          onClick={handlePublishBlog}
-                         className="flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-200"
+                         className="flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-emerald-600 text-neu-text-primary shadow-neu-flat shadow-emerald-200"
                        >
                          <CheckCircle2 size={12} />
                          Publish
@@ -337,10 +337,10 @@ function SettingsPanel({
             </div>
 
             {/* Logout at bottom */}
-            <div className="px-6 py-5 border-t border-zinc-800/10">
+            <div className="px-6 py-5 border-t border-transparent">
               <button
                 onClick={onLogout}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-all font-black text-xs uppercase tracking-widest"
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-neu-text-primary transition-all font-black text-xs uppercase tracking-widest"
               >
                 <LogOut size={16} />
                 Sign Out
@@ -405,12 +405,12 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-black flex-col items-center pt-10 pb-6 z-30 border-r border-zinc-800/10">
+      <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-neu-bg flex-col items-center pt-10 pb-6 z-30 border-r border-transparent">
         {/* Settings button top-left (desktop) */}
         <div className="mb-4 relative group/logo">
           <button
             onClick={() => setSettingsOpen(true)}
-            className="w-10 h-10 rounded-2xl bg-blue-500 hover:bg-blue-600 flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-2xl bg-neu-accent hover:bg-blue-600 flex items-center justify-center text-neu-text-primary shadow-neu-flat hover:scale-105 active:scale-95 transition-all"
           >
             <Settings size={20} strokeWidth={2} />
           </button>
@@ -431,8 +431,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 className={cn(
                   "p-3 rounded-2xl transition-all duration-200 relative group",
                   isActive
-                    ? "text-blue-500 bg-blue-900/30 ring-1 ring-primary/20"
-                    : "text-zinc-400 hover:text-blue-500 hover:bg-zinc-900"
+                    ? "text-neu-accent bg-neu-bg shadow-neu-pressed ring-1 ring-primary/20"
+                    : "text-neu-text-secondary hover:text-neu-accent hover:bg-neu-bg"
                 )}
               >
                 <div className="relative">
@@ -453,23 +453,23 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       {/* ── Main Content ─────────────────────────────────────────────── */}
       <div className="flex-1 md:ml-20 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="bg-black backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex justify-between items-center border-b border-zinc-800/10">
+        <header className="bg-neu-bg  sticky top-0 z-40 px-6 py-3 flex justify-between items-center border-b border-transparent">
           <div className="flex items-center gap-4">
             {/* Mobile: hamburger opens settings panel */}
             <button
-              className="md:hidden text-blue-500 cursor-pointer p-1"
+              className="md:hidden text-neu-accent cursor-pointer p-1"
               onClick={() => setSettingsOpen(true)}
               aria-label="Settings"
             >
               <Menu size={24} />
             </button>
-            <h1 className="text-xl font-extrabold text-blue-500 tracking-tight">Ali Mobile Repair POS</h1>
+            <h1 className="text-xl font-extrabold text-black [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)] tracking-tight">Ali Mobile Repair POS</h1>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => window.location.reload()}
-              className="p-2.5 rounded-2xl bg-zinc-900 text-zinc-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all active:rotate-180 group relative mr-2"
+              className="p-2.5 rounded-2xl bg-neu-bg text-neu-text-secondary hover:text-neu-accent hover:bg-neu-accent/10 transition-all active:rotate-180 group relative mr-2"
               title="Refresh App"
             >
               <RotateCw size={18} />
@@ -485,16 +485,16 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
 
             <div className="hidden sm:flex flex-col items-end mr-3">
               <span 
-                className="text-xs font-black text-white uppercase tracking-wide cursor-help"
+                className="text-xs font-black text-neu-text-primary uppercase tracking-wide cursor-help"
                 title={`User ID: ${currentUser?.id || 'Unknown'}`}
               >
                 {currentUser?.username || currentUser?.email?.replace('@pos.local', '') || t('nav', 'guest')}
               </span>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-neu-text-secondary uppercase tracking-widest">
                 {permissions?.is_super_admin ? 'Super Admin' : (currentUser?.role === 'authenticated' ? t('nav', 'staff') : (currentUser?.role || t('nav', 'staff')))}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 font-black uppercase text-lg border border-primary/20 shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-neu-accent/10 flex items-center justify-center text-neu-accent font-black uppercase text-lg border border-primary/20 shadow-neu-pressed">
               {(currentUser?.username || currentUser?.email || 'G').charAt(0).toUpperCase()}
             </div>
           </div>
@@ -514,7 +514,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         </main>
 
         {/* Bottom Nav - Mobile */}
-        <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-black backdrop-blur-lg border-t border-zinc-800/10 z-50">
+        <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-neu-bg backdrop-blur-lg border-t border-transparent z-50">
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -526,8 +526,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 className={cn(
                   "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-2xl relative",
                   isActive
-                    ? "bg-blue-900/30 text-blue-500 scale-110"
-                    : "text-zinc-400"
+                    ? "bg-neu-bg shadow-neu-pressed text-neu-accent scale-110"
+                    : "text-neu-text-secondary"
                 )}
               >
                 <div className="relative">
