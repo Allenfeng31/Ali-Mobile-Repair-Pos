@@ -259,17 +259,17 @@ export function ChatInbox() {
     return (
       <div className="flex flex-col h-full max-w-3xl mx-auto" style={{ height: 'calc(100vh - 160px)' }}>
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-outline-variant/10">
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-zinc-800/10">
           <button
             onClick={() => { setActiveSession(null); setMessages([]); }}
-            className="p-2 rounded-xl hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all"
+            className="p-2 rounded-2xl hover:bg-zinc-800 text-zinc-400 hover:text-blue-500 transition-all"
           >
             <ArrowLeft size={20} />
           </button>
           <div className="flex-1">
-            <h2 className="font-bold text-on-surface">{getSessionLabel(activeSession, sessionIdx)}</h2>
+            <h2 className="font-bold text-white">{getSessionLabel(activeSession, sessionIdx)}</h2>
             {customerInfo?.phone && (
-              <p className="text-xs text-on-surface-variant">📞 {customerInfo.phone}</p>
+              <p className="text-xs text-zinc-400">📞 {customerInfo.phone}</p>
             )}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-green-500">
@@ -280,7 +280,7 @@ export function ChatInbox() {
             <button
               onClick={deleteSession}
               disabled={deleting}
-              className="p-2 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all disabled:opacity-40"
+              className="p-2 rounded-2xl hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all disabled:opacity-40"
               title="Delete conversation"
             >
               <Trash2 size={17} />
@@ -291,7 +291,7 @@ export function ChatInbox() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 px-1 pb-4">
           {visibleMessages.length === 0 && (
-            <p className="text-center text-on-surface-variant text-sm mt-10">No messages yet</p>
+            <p className="text-center text-zinc-400 text-sm mt-10">No messages yet</p>
           )}
           {visibleMessages.map(msg => (
             <div key={msg.id} className={`flex ${msg.sender === 'staff' ? 'justify-end' : 'justify-start'}`}>
@@ -317,8 +317,8 @@ export function ChatInbox() {
                     if (startIndex === -1 || endIndex === -1) throw new Error('Invalid JSON');
                     const data = JSON.parse(msg.content.substring(startIndex, endIndex + 1));
                     return (
-                      <div className="bg-white/5 rounded-xl p-3 border border-white/10 mt-1 space-y-2">
-                        <div className="flex items-center gap-2 text-primary-light font-bold text-xs uppercase tracking-wider">
+                      <div className="bg-white/5 rounded-2xl p-3 border border-white/10 mt-1 space-y-2">
+                        <div className="flex items-center gap-2 text-blue-500-light font-bold text-xs uppercase tracking-wider">
                           <Circle size={8} className="fill-primary" />
                           New Booking Request
                         </div>
@@ -335,7 +335,7 @@ export function ChatInbox() {
                         </div>
                         
                         {(apptStatusCache[data.appointmentId] === 'confirmed' || apptStatusCache[data.appointmentId] === 'declined') ? (
-                          <div className={`mt-2 py-2 px-3 rounded-lg text-center font-bold text-xs ${
+                          <div className={`mt-2 py-2 px-3 rounded-2xl text-center font-bold text-xs ${
                             apptStatusCache[data.appointmentId] === 'confirmed' 
                             ? 'bg-green-500/20 text-green-400' 
                             : 'bg-red-500/20 text-red-400'
@@ -348,13 +348,13 @@ export function ChatInbox() {
                           <div className="flex gap-2 pt-2">
                             <button 
                               onClick={() => handleStatusUpdate(data.appointmentId, 'confirmed')}
-                              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-xs transition-colors"
+                              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-2xl text-xs transition-colors"
                             >
                               Confirm
                             </button>
                             <button 
                               onClick={() => handleStatusUpdate(data.appointmentId, 'declined')}
-                              className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold py-2 px-3 rounded-lg text-xs transition-colors"
+                              className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold py-2 px-3 rounded-2xl text-xs transition-colors"
                             >
                               Decline
                             </button>
@@ -379,19 +379,19 @@ export function ChatInbox() {
         </div>
 
         {/* Reply box */}
-        <div className="flex gap-2 items-end pt-3 border-t border-outline-variant/10">
+        <div className="flex gap-2 items-end pt-3 border-t border-zinc-800/10">
           <textarea
             rows={2}
             value={reply}
             onChange={e => setReply(e.target.value)}
             onKeyDown={handleKey}
             placeholder="Type your reply... (Enter to send)"
-            className="flex-1 bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-on-surface-variant resize-none outline-none border border-outline-variant/10 focus:border-primary/40 transition-colors"
+            className="flex-1 bg-zinc-800 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-zinc-400 resize-none outline-none border border-zinc-800/10 focus:border-blue-500/40 transition-colors"
           />
           <button
             onClick={sendReply}
             disabled={sending || !reply.trim()}
-            className="w-11 h-11 rounded-xl flex items-center justify-center transition-all disabled:opacity-40"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all disabled:opacity-40"
             style={{ background: reply.trim() ? 'linear-gradient(135deg, #007aff, #0051ff)' : 'rgba(255,255,255,0.06)' }}
           >
             <Send size={16} color="white" />
@@ -406,27 +406,27 @@ export function ChatInbox() {
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-on-surface tracking-tight">Customer Chats</h1>
-          <p className="text-sm text-on-surface-variant mt-1">
+          <h1 className="text-2xl font-black text-white tracking-tight">Customer Chats</h1>
+          <p className="text-sm text-zinc-400 mt-1">
             {sessions.length} conversation{sessions.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
           onClick={loadSessions}
-          className="p-2.5 rounded-xl bg-surface-container-high text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all"
+          className="p-2.5 rounded-2xl bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all"
         >
           <RefreshCw size={18} />
         </button>
       </div>
 
       {loading && (
-        <div className="flex items-center justify-center h-40 text-on-surface-variant">
+        <div className="flex items-center justify-center h-40 text-zinc-400">
           <RefreshCw size={20} className="animate-spin" />
         </div>
       )}
 
       {!loading && sessions.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-60 text-on-surface-variant gap-3">
+        <div className="flex flex-col items-center justify-center h-60 text-zinc-400 gap-3">
           <MessageSquare size={40} strokeWidth={1.5} />
           <p className="text-sm">No customer chats yet</p>
           <p className="text-xs opacity-60">Messages from your website will appear here</p>
@@ -441,7 +441,7 @@ export function ChatInbox() {
             <button
               key={session.id}
               onClick={() => openSession(session)}
-              className="w-full text-left p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10 hover:bg-surface-container-high hover:border-primary/20 transition-all group"
+              className="w-full text-left p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/10 hover:bg-zinc-800 hover:border-blue-500/20 transition-all group"
             >
               <div className="flex items-center gap-3">
                 {/* Avatar */}
@@ -451,24 +451,24 @@ export function ChatInbox() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-sm font-bold ${unread > 0 ? 'text-primary' : 'text-on-surface'}`}>
+                    <span className={`text-sm font-bold ${unread > 0 ? 'text-blue-500' : 'text-white'}`}>
                       {getSessionLabel(session, idx)}
                     </span>
-                    <span className="text-xs text-on-surface-variant">
+                    <span className="text-xs text-zinc-400">
                       {lastMsg ? formatTime(lastMsg.created_at) : formatTime(session.created_at)}
                     </span>
                   </div>
                   {getSessionSubLabel(session) && (
-                    <p className="text-[11px] text-on-surface-variant/70">📞 {getSessionSubLabel(session)}</p>
+                    <p className="text-[11px] text-zinc-400/70">📞 {getSessionSubLabel(session)}</p>
                   )}
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-xs text-on-surface-variant truncate flex-1">
+                    <p className="text-xs text-zinc-400 truncate flex-1">
                       {lastMsg
                         ? `${lastMsg.sender === 'staff' ? 'You: ' : ''}${lastMsg.content}`
                         : 'No messages yet'}
                     </p>
                     {unread > 0 && (
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-black flex items-center justify-center">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500 text-white text-[10px] font-black flex items-center justify-center">
                         {unread}
                       </span>
                     )}

@@ -454,8 +454,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         <div className={cn(
           "fixed top-6 right-6 md:right-12 z-[100] px-6 py-4 rounded-2xl shadow-2xl font-bold animate-in fade-in slide-in-from-top-6 flex items-center gap-3 border",
           successMessage.startsWith('Error') 
-            ? "bg-error-container text-on-error-container border-error/20" 
-            : "bg-primary text-on-primary border-white/20"
+            ? "bg-red-900/30 text-red-200 border-error/20" 
+            : "bg-blue-500 text-white border-white/20"
         )}>
           {successMessage.startsWith('Error') ? <AlertTriangle size={20} /> : <Zap size={20} />}
           {successMessage}
@@ -466,12 +466,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       <div className="h-full flex flex-col pt-6 pb-2 px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-on-surface tracking-tight mb-2">{t('inv', 'title')}</h1>
-          <p className="text-on-surface-variant font-medium">{t('inv', 'sub')}</p>
+          <h1 className="text-3xl font-black text-white tracking-tight mb-2">{t('inv', 'title')}</h1>
+          <p className="text-zinc-400 font-medium">{t('inv', 'sub')}</p>
         </div>
         <button 
           onClick={clearForm}
-          className="bg-primary text-on-primary px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center gap-2"
+          className="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all flex items-center gap-2"
         >
           <Plus size={20} strokeWidth={3} />
           {t('inv', 'addUrl')}
@@ -479,13 +479,13 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       </div>
 
       {/* Search Bar - Moved out of the grid to be consistently at the top on mobile */}
-      <div className="bg-surface-container-low border border-outline-variant/10 rounded-2xl p-4 shadow-sm mb-6">
+      <div className="bg-zinc-900/50 border border-zinc-800/10 rounded-2xl p-4 shadow-sm mb-6">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5 opacity-50" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-5 h-5 opacity-50" />
           <input 
             type="text" 
             placeholder={t('inv', 'search')}
-            className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/10 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-on-surface font-medium placeholder:text-on-surface-variant/50 transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-black border border-zinc-800/10 rounded-2xl focus:ring-2 focus:ring-blue-500/20 outline-none text-white font-medium placeholder:text-zinc-400/50 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -496,16 +496,16 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         {/* Inventory List - Now order-first on mobile */}
         <div className="lg:col-span-8 space-y-4 order-first lg:order-last w-full">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-            <div className="flex gap-2 p-1.5 bg-surface-container rounded-2xl overflow-x-auto no-scrollbar w-full sm:w-auto">
+            <div className="flex gap-2 p-1.5 bg-zinc-900 rounded-2xl overflow-x-auto no-scrollbar w-full sm:w-auto">
               {['All Parts', 'Low Stock', 'Devices'].map(f => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
                   className={cn(
-                    "px-4 py-2 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex-1 sm:flex-none",
+                    "px-4 py-2 rounded-2xl font-bold text-xs whitespace-nowrap transition-all flex-1 sm:flex-none",
                     filter === f 
-                      ? "bg-white text-primary shadow-sm" 
-                      : "text-on-surface-variant hover:text-on-surface hover:bg-white/50"
+                      ? "bg-white text-blue-500 shadow-sm" 
+                      : "text-zinc-400 hover:text-white hover:bg-white/50"
                   )}
                 >
                   {f === 'All Parts' ? t('inv', 'filterAll') : f === 'Low Stock' ? t('inv', 'filterLow') : t('inv', 'filterDev')}
@@ -513,10 +513,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               ))}
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-3 py-2 flex-1 sm:flex-none">
-                <Filter size={14} className="text-primary" />
+              <div className="flex items-center gap-2 bg-black border border-zinc-800/10 rounded-2xl px-3 py-2 flex-1 sm:flex-none">
+                <Filter size={14} className="text-blue-500" />
                 <select 
-                  className="bg-transparent border-none text-xs font-bold text-on-surface focus:outline-none w-full sm:w-24"
+                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-full sm:w-24"
                   value={activeBrandFilter}
                   onChange={e => setActiveBrandFilter(e.target.value)}
                 >
@@ -524,10 +524,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
                 </select>
               </div>
-              <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-3 py-2 flex-1 sm:flex-none">
-                <Filter size={14} className="text-primary" />
+              <div className="flex items-center gap-2 bg-black border border-zinc-800/10 rounded-2xl px-3 py-2 flex-1 sm:flex-none">
+                <Filter size={14} className="text-blue-500" />
                 <select 
-                  className="bg-transparent border-none text-xs font-bold text-on-surface focus:outline-none w-full sm:w-28"
+                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-full sm:w-28"
                   value={activeCategoryFilter}
                   onChange={e => setActiveCategoryFilter(e.target.value)}
                 >
@@ -538,8 +538,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
             </div>
           </div>
 
-          <div className="bg-surface-container-low rounded-3xl overflow-hidden border border-outline-variant/10 shadow-sm">
-            <div className="hidden sm:grid grid-cols-12 px-6 py-4 bg-surface-container text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+          <div className="bg-zinc-900/50 rounded-3xl overflow-hidden border border-zinc-800/10 shadow-sm">
+            <div className="hidden sm:grid grid-cols-12 px-6 py-4 bg-zinc-900 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
               <div className="col-span-12 sm:col-span-5">Item & Model</div>
               <div className="col-span-2 text-center">Stock</div>
               <div className="col-span-2 text-right">Selling</div>
@@ -549,23 +549,23 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               {currentItems.map(item => {
                 const isEditingThis = editingId === item.id;
                 return (
-                  <div key={item.id} className="flex flex-col bg-surface-container-lowest">
+                  <div key={item.id} className="flex flex-col bg-black">
                     <div 
                       onClick={() => handleEdit(item)}
-                      className="grid grid-cols-12 px-4 sm:px-6 py-4 sm:py-5 items-center hover:bg-surface-container/30 transition-colors group cursor-pointer"
+                      className="grid grid-cols-12 px-4 sm:px-6 py-4 sm:py-5 items-center hover:bg-zinc-900/30 transition-colors group cursor-pointer"
                     >
                       <div className="col-span-8 sm:col-span-5 flex items-center gap-3 sm:gap-4">
                         <div className={cn(
-                          "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-colors shrink-0",
-                          item.status === 'device' ? "bg-secondary-container text-on-secondary-container" : "bg-primary-container/10 text-primary"
+                          "w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-colors shrink-0",
+                          item.status === 'device' ? "bg-zinc-800 text-zinc-200" : "bg-blue-900/30/10 text-blue-500"
                         )}>
                           <item.icon size={20} />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-on-surface leading-tight text-sm sm:text-base truncate">{item.name}</p>
-                          <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium truncate">
+                          <p className="font-bold text-white leading-tight text-sm sm:text-base truncate">{item.name}</p>
+                          <p className="text-[10px] sm:text-xs text-zinc-400 font-medium truncate">
                             {item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model} 
-                            {item.device_model && <span className="ml-2 px-1.5 py-0.5 bg-primary/15 text-primary rounded-md text-[9px] font-bold tracking-wider">{item.device_model}</span>}
+                            {item.device_model && <span className="ml-2 px-1.5 py-0.5 bg-blue-500/15 text-blue-500 rounded-md text-[9px] font-bold tracking-wider">{item.device_model}</span>}
                             {item.quality_grade && item.quality_grade !== 'Standard' && <span className="ml-2 px-1.5 py-0.5 bg-amber-500/15 text-amber-600 rounded-md text-[9px] font-bold tracking-wider">{item.quality_grade}</span>}
                           </p>
                         </div>
@@ -573,18 +573,18 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       <div className="col-span-4 sm:col-span-2 text-right sm:text-center">
                         <span className={cn(
                           "px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider",
-                          item.status === 'low-stock' ? "bg-error-container text-on-error-container" : "bg-primary-fixed-dim text-primary"
+                          item.status === 'low-stock' ? "bg-red-900/30 text-red-200" : "bg-blue-500-fixed-dim text-blue-500"
                         )}>
                           {item.stock} {item.stock === 1 ? 'Unit' : 'Units'}
                         </span>
                       </div>
                       <div className="hidden sm:block col-span-2 text-right">
-                        <p className="font-bold text-on-surface">${item.price.toFixed(2)}</p>
+                        <p className="font-bold text-white">${item.price.toFixed(2)}</p>
                         <p className="text-[10px] text-tertiary-container font-bold">{item.margin}% Margin</p>
                       </div>
                       <div className="hidden sm:flex col-span-3 justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="p-2 text-on-surface-variant rounded-lg">
-                          <Edit3 size={18} className={cn(isEditingThis && "text-primary")} />
+                        <div className="p-2 text-zinc-400 rounded-2xl">
+                          <Edit3 size={18} className={cn(isEditingThis && "text-blue-500")} />
                         </div>
                         <button 
                           onClick={async (e) => {
@@ -600,7 +600,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               setTimeout(() => setSuccessMessage(null), 5000);
                             }
                           }}
-                          className="p-2 text-error hover:bg-error-container rounded-lg transition-colors"
+                          className="p-2 text-red-500 hover:bg-red-900/30 rounded-2xl transition-colors"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -611,12 +611,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                     <motion.div
                       initial={false}
                       animate={{ height: isEditingThis ? 'auto' : 0, opacity: isEditingThis ? 1 : 0 }}
-                      className="overflow-hidden bg-surface-container-low"
+                      className="overflow-hidden bg-zinc-900/50"
                     >
-                      <div className="p-4 sm:p-6 border-t border-outline-variant/10 space-y-4">
+                      <div className="p-4 sm:p-6 border-t border-zinc-800/10 space-y-4">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Variants / Quality Tiers</label>
+                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Variants / Quality Tiers</label>
                             <button 
                               type="button"
                               onClick={(e) => {
@@ -626,7 +626,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                   variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
                                 });
                               }}
-                              className="text-xs font-bold text-primary flex items-center gap-1 hover:bg-primary/10 px-2 py-1 rounded-md transition-colors"
+                              className="text-xs font-bold text-blue-500 flex items-center gap-1 hover:bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
                             >
                               <Plus size={14} /> Add Quality Tier
                             </button>
@@ -634,7 +634,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                           <div className="space-y-3">
                             {formData.variants.map((variant, index) => (
-                              <div key={variant.id} className="p-3 bg-surface-container-highest border border-outline-variant/20 rounded-xl relative">
+                              <div key={variant.id} className="p-3 bg-zinc-800 border border-zinc-800/20 rounded-2xl relative">
                                 {formData.variants.length > 1 && (
                                   <button 
                                     type="button"
@@ -652,9 +652,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                 
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                   <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">Grade</label>
+                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Grade</label>
                                     <select 
-                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-medium"
+                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none font-medium"
                                       value={variant.quality_grade}
                                       onChange={e => {
                                         const newVariants = [...formData.variants];
@@ -677,10 +677,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                     </select>
                                   </div>
                                   <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'qty')}</label>
+                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'qty')}</label>
                                     <input 
                                       type="number"
-                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
                                       placeholder="0"
                                       value={variant.stock}
                                       onChange={e => {
@@ -691,10 +691,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                     />
                                   </div>
                                   <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
+                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
                                     <input 
                                       type="number"
-                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
                                       placeholder="0.00"
                                       value={variant.costPrice}
                                       onChange={e => {
@@ -705,14 +705,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                     />
                                   </div>
                                   <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-1">
+                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
                                       {t('inv', 'sell')} ($)
                                       {!permissions?.can_change_inventory_price && <Lock size={8} />}
                                     </label>
                                     <input 
                                       type="number"
                                       disabled={!permissions?.can_change_inventory_price}
-                                      className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary disabled:bg-surface-container disabled:cursor-not-allowed" 
+                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium text-blue-500 disabled:bg-zinc-900 disabled:cursor-not-allowed" 
                                       placeholder="0.00"
                                       value={variant.sellingPrice}
                                       onChange={e => {
@@ -723,8 +723,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                     />
                                   </div>
                                 </div>
-                                <div className="mt-3 flex items-center justify-between border-t border-outline-variant/10 pt-2.5">
-                                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-1.5">
+                                <div className="mt-3 flex items-center justify-between border-t border-zinc-800/10 pt-2.5">
+                                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
                                     <span className="text-amber-500">⭐</span> Highlight / Recommend
                                   </label>
                                   <label className="relative inline-flex items-center cursor-pointer">
@@ -738,7 +738,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                         setFormData({ ...formData, variants: newVariants });
                                       }}
                                     />
-                                    <div className="w-8 h-4.5 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
+                                    <div className="w-8 h-4.5 bg-black peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
                                   </label>
                                 </div>
                               </div>
@@ -747,11 +747,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         </div>
 
                         {/* Quick Edit Pinning Controls */}
-                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                        <div className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                           <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
-                                <Zap size={14} className="text-primary" />
+                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                                <Zap size={14} className="text-blue-500" />
                                 Pin to POS Home
                               </label>
                             </div>
@@ -762,15 +762,15 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                 checked={formData.is_pinned}
                                 onChange={e => setFormData({...formData, is_pinned: e.target.checked})}
                               />
-                              <div className="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                              <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
                             </label>
                           </div>
                           {formData.is_pinned && (
                             <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2">
-                              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Pin Order</label>
+                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pin Order</label>
                               <input 
                                 type="number"
-                                className="w-full px-3 py-1.5 bg-surface-container-lowest border border-primary/10 rounded-lg text-xs font-bold" 
+                                className="w-full px-3 py-1.5 bg-black border border-blue-500/10 rounded-2xl text-xs font-bold" 
                                 value={formData.pin_order}
                                 onChange={e => setFormData({...formData, pin_order: parseInt(e.target.value) || 0})}
                               />
@@ -792,7 +792,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                   }
                                 }
                               }}
-                              className="text-error text-xs font-bold hover:underline"
+                              className="text-red-500 text-xs font-bold hover:underline"
                             >
                               Delete Forever
                             </button>
@@ -800,14 +800,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           <div className="flex gap-2">
                             <button 
                               onClick={() => setEditingId(null)}
-                              className="px-4 py-2 bg-surface-container-highest text-on-surface rounded-xl text-xs font-bold"
+                              className="px-4 py-2 bg-zinc-800 text-white rounded-2xl text-xs font-bold"
                             >
                               Cancel
                             </button>
                             <button 
                               onClick={() => handleSave()}
                               disabled={saving}
-                              className="px-6 py-2 bg-primary text-on-primary rounded-xl text-xs font-bold shadow-lg shadow-primary/20 disabled:opacity-50"
+                              className="px-6 py-2 bg-blue-500 text-white rounded-2xl text-xs font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50"
                             >
                               {saving ? 'Saving...' : 'Quick Save'}
                             </button>
@@ -819,25 +819,25 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 );
               })}
             </div>
-            <div className="px-6 py-4 flex items-center justify-between bg-surface-container/50 border-t border-outline-variant/10">
-              <span className="text-[10px] sm:text-xs font-medium text-on-surface-variant">
+            <div className="px-6 py-4 flex items-center justify-between bg-zinc-900/50 border-t border-zinc-800/10">
+              <span className="text-[10px] sm:text-xs font-medium text-zinc-400">
                 Showing {filteredInventory.length === 0 ? 0 : Math.min((currentPage - 1) * itemsPerPage + 1, filteredInventory.length)} - {Math.min(currentPage * itemsPerPage, filteredInventory.length)} of {filteredInventory.length}
               </span>
               <div className="flex gap-2">
                 <button 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-lowest text-on-surface border border-outline-variant/10 disabled:opacity-50"
+                  className="w-8 h-8 rounded-2xl flex items-center justify-center bg-black text-white border border-zinc-800/10 disabled:opacity-50"
                 >
                   <ChevronLeft size={14} />
                 </button>
-                <div className="px-3 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary text-[10px] font-bold">
+                <div className="px-3 h-8 rounded-2xl flex items-center justify-center bg-blue-500 text-white text-[10px] font-bold">
                   {currentPage} / {totalPages}
                 </div>
                 <button 
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-lowest text-on-surface border border-outline-variant/10 disabled:opacity-50"
+                  className="w-8 h-8 rounded-2xl flex items-center justify-center bg-black text-white border border-zinc-800/10 disabled:opacity-50"
                 >
                   <ChevronRight size={14} />
                 </button>
@@ -855,7 +855,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               "w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl font-bold text-sm transition-all border shadow-lg",
               bulkMode
                 ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-orange-400/30 shadow-orange-500/25 hover:shadow-orange-500/40"
-                : "bg-surface-container-low text-on-surface border-outline-variant/20 hover:border-primary/30 hover:shadow-primary/10"
+                : "bg-zinc-900/50 text-white border-zinc-800/20 hover:border-blue-500/30 hover:shadow-blue-500/10"
             )}
           >
             <Layers size={18} className={bulkMode ? "animate-pulse" : ""} />
@@ -872,20 +872,20 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-[100px] pointer-events-none"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-tr-[60px] pointer-events-none"></div>
 
-              <h2 className="text-xl font-black text-on-surface mb-1 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+              <h2 className="text-xl font-black text-white mb-1 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
                   <Zap size={18} />
                 </div>
                 Bulk Generate
               </h2>
-              <p className="text-xs text-on-surface-variant font-medium mb-6 ml-11">Enter device info → auto-create {REPAIR_TEMPLATES.length} repair items</p>
+              <p className="text-xs text-zinc-400 font-medium mb-6 ml-11">Enter device info → auto-create {REPAIR_TEMPLATES.length} repair items</p>
 
               <div className="space-y-4">
                 {/* Brand */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Device Brand</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Device Brand</label>
                   <select
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-orange-500/20 outline-none appearance-none font-medium"
+                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-orange-500/20 outline-none appearance-none font-medium"
                     value={bulkBrand}
                     onChange={e => setBulkBrand(e.target.value)}
                   >
@@ -895,9 +895,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                 {/* Model */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Device Model <span className="text-error">*</span></label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Device Model <span className="text-red-500">*</span></label>
                   <input
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-on-surface-variant/40"
+                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-zinc-400/40"
                     placeholder="e.g. Galaxy A56 5G"
                     value={bulkModel}
                     onChange={e => setBulkModel(e.target.value)}
@@ -906,9 +906,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                 {/* AU Model Code */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">AU Model Code</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">AU Model Code</label>
                   <input
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-on-surface-variant/40"
+                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-zinc-400/40"
                     placeholder="e.g. SM-A566B"
                     value={bulkDeviceModel}
                     onChange={e => setBulkDeviceModel(e.target.value)}
@@ -917,12 +917,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                 {/* Preview chips */}
                 <div className="space-y-2 pt-2">
-                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Will Generate:</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Will Generate:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {REPAIR_TEMPLATES.map((tmpl, i) => (
                       <span
                         key={i}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-[10px] font-bold text-on-surface-variant"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black border border-zinc-800/10 rounded-2xl text-[10px] font-bold text-zinc-400"
                       >
                         {React.createElement(getIconComponent(tmpl.iconName), { size: 10, className: 'text-orange-500' })}
                         {bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label}
@@ -936,7 +936,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   <button
                     onClick={handleBulkGenerate}
                     disabled={bulkGenerating || !bulkModel.trim()}
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 relative overflow-hidden"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 relative overflow-hidden"
                   >
                     <span className={cn(bulkGenerating ? "opacity-0" : "opacity-100", "flex items-center justify-center gap-2")}>
                       <Zap size={18} />
@@ -954,11 +954,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
             </div>
           </motion.div>
 
-          <div className={cn("bg-surface-container-low border border-outline-variant/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden", bulkMode && "opacity-50 pointer-events-none")}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
+          <div className={cn("bg-zinc-900/50 border border-zinc-800/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden", bulkMode && "opacity-50 pointer-events-none")}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] pointer-events-none"></div>
             
-            <h2 className="text-xl font-black text-on-surface mb-6 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
                 <Wrench size={18} />
               </div>
               {t('inv', 'itemDet')}
@@ -966,9 +966,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
             
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'name')}</label>
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'name')}</label>
                 <input 
-                  className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" 
+                  className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none" 
                   placeholder="e.g. iPhone 13 Screen"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
@@ -977,9 +977,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               <div className="space-y-1.5 flex flex-col">
                 <div className="flex gap-2 items-end">
                   <div className="flex-1 space-y-1.5">
-                    <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'cat')}</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'cat')}</label>
                     <select 
-                      className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                      className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none"
                       value={formData.category}
                       onChange={e => setFormData({...formData, category: e.target.value})}
                     >
@@ -989,14 +989,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   <button 
                     type="button" 
                     onClick={() => handleDeleteCategory(formData.category)}
-                    className="h-[44px] px-3 bg-error/10 text-error rounded-xl font-bold hover:bg-error/20 transition-colors"
+                    className="h-[44px] px-3 bg-error/10 text-red-500 rounded-2xl font-bold hover:bg-error/20 transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setIsAddingCategory(!isAddingCategory)}
-                    className="h-[44px] px-3 bg-primary/10 text-primary rounded-xl font-bold hover:bg-primary/20 transition-colors"
+                    className="h-[44px] px-3 bg-blue-500/10 text-blue-500 rounded-2xl font-bold hover:bg-blue-500/20 transition-colors"
                   >
                     <Plus size={18} />
                   </button>
@@ -1004,12 +1004,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 {isAddingCategory && (
                   <div className="flex gap-2 mt-2">
                     <input 
-                      className="flex-1 px-4 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none text-sm" 
+                      className="flex-1 px-4 py-2 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none text-sm" 
                       placeholder={t('inv', 'addCat')}
                       value={newCategory} 
                       onChange={e => setNewCategory(e.target.value)} 
                     />
-                    <button type="button" onClick={handleAddCategory} className="px-4 bg-primary text-on-primary rounded-xl text-xs font-bold">Add</button>
+                    <button type="button" onClick={handleAddCategory} className="px-4 bg-blue-500 text-white rounded-2xl text-xs font-bold">Add</button>
                   </div>
                 )}
               </div>
@@ -1017,9 +1017,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               <div className="space-y-1.5 flex flex-col">
                 <div className="flex gap-2 items-end">
                   <div className="flex-1 space-y-1.5">
-                    <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'brand')}</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'brand')}</label>
                     <select 
-                      className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                      className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none"
                       value={formData.brand}
                       onChange={e => setFormData({...formData, brand: e.target.value})}
                     >
@@ -1029,14 +1029,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   <button 
                     type="button" 
                     onClick={() => handleDeleteBrand(formData.brand)}
-                    className="h-[44px] px-3 bg-error/10 text-error rounded-xl font-bold hover:bg-error/20 transition-colors"
+                    className="h-[44px] px-3 bg-error/10 text-red-500 rounded-2xl font-bold hover:bg-error/20 transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setIsAddingBrand(!isAddingBrand)}
-                    className="h-[44px] px-3 bg-primary/10 text-primary rounded-xl font-bold hover:bg-primary/20 transition-colors"
+                    className="h-[44px] px-3 bg-blue-500/10 text-blue-500 rounded-2xl font-bold hover:bg-blue-500/20 transition-colors"
                   >
                     <Plus size={18} />
                   </button>
@@ -1044,30 +1044,30 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 {isAddingBrand && (
                   <div className="flex gap-2 mt-2">
                     <input 
-                      className="flex-1 px-4 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none text-sm" 
+                      className="flex-1 px-4 py-2 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none text-sm" 
                       placeholder={t('inv', 'addBrand')} 
                       value={newBrand} 
                       onChange={e => setNewBrand(e.target.value)} 
                     />
-                    <button type="button" onClick={handleAddBrand} className="px-4 bg-primary text-on-primary rounded-xl text-xs font-bold">Add</button>
+                    <button type="button" onClick={handleAddBrand} className="px-4 bg-blue-500 text-white rounded-2xl text-xs font-bold">Add</button>
                   </div>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'model')}</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'model')}</label>
                   <input 
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" 
+                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none" 
                     placeholder="iPhone 13 Pro"
                     value={formData.model}
                     onChange={e => setFormData({...formData, model: e.target.value})}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">AU Model Code</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">AU Model Code</label>
                   <input 
-                    className="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/10 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/40" 
+                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none placeholder:text-zinc-400/40" 
                     placeholder="e.g. A3102, SM-S928B"
                     value={formData.device_model}
                     onChange={e => setFormData({...formData, device_model: e.target.value})}
@@ -1078,14 +1078,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
               {/* Variants Section */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Variants / Quality Tiers</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Variants / Quality Tiers</label>
                   <button 
                     type="button"
                     onClick={() => setFormData({
                       ...formData, 
                       variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
                     })}
-                    className="text-xs font-bold text-primary flex items-center gap-1 hover:bg-primary/10 px-2 py-1 rounded-md transition-colors"
+                    className="text-xs font-bold text-blue-500 flex items-center gap-1 hover:bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
                   >
                     <Plus size={14} /> Add Quality Tier
                   </button>
@@ -1093,7 +1093,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                 <div className="space-y-3">
                   {formData.variants.map((variant, index) => (
-                    <div key={variant.id} className="p-3 bg-surface-container-highest border border-outline-variant/20 rounded-xl relative">
+                    <div key={variant.id} className="p-3 bg-zinc-800 border border-zinc-800/20 rounded-2xl relative">
                       {formData.variants.length > 1 && (
                         <button 
                           type="button"
@@ -1110,9 +1110,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">Grade</label>
+                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Grade</label>
                           <select 
-                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-medium"
+                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none font-medium"
                             value={variant.quality_grade}
                             onChange={e => {
                               const newVariants = [...formData.variants];
@@ -1135,10 +1135,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           </select>
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'qty')}</label>
+                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'qty')}</label>
                           <input 
                             type="number"
-                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
                             placeholder="0"
                             value={variant.stock}
                             onChange={e => {
@@ -1152,10 +1152,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
+                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
                           <input 
                             type="number"
-                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium" 
+                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
                             placeholder="0.00"
                             value={variant.costPrice}
                             onChange={e => {
@@ -1166,11 +1166,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">{t('inv', 'sell')} ($)</label>
+                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'sell')} ($)</label>
                           <input 
                             type="number"
                             disabled={!permissions?.can_change_inventory_price}
-                            className="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant/10 rounded-lg text-sm text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-medium text-primary disabled:bg-surface-container disabled:cursor-not-allowed" 
+                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium text-blue-500 disabled:bg-zinc-900 disabled:cursor-not-allowed" 
                             placeholder="0.00"
                             value={variant.sellingPrice}
                             onChange={e => {
@@ -1181,8 +1181,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           />
                         </div>
                       </div>
-                      <div className="mt-3 flex items-center justify-between border-t border-outline-variant/10 pt-2.5">
-                        <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-1.5">
+                      <div className="mt-3 flex items-center justify-between border-t border-zinc-800/10 pt-2.5">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
                           <span className="text-amber-500">⭐</span> Highlight / Recommend
                         </label>
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -1196,7 +1196,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               setFormData({ ...formData, variants: newVariants });
                             }}
                           />
-                          <div className="w-8 h-4.5 bg-surface-container-lowest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
+                          <div className="w-8 h-4.5 bg-black peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
                         </label>
                       </div>
                     </div>
@@ -1204,14 +1204,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 </div>
               </div>
 
-              <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 space-y-4">
+              <div className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <label className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-2">
-                      <Zap size={14} className="text-primary" />
+                    <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Zap size={14} className="text-blue-500" />
                       Pin to POS Home
                     </label>
-                    <p className="text-[10px] text-on-surface-variant font-medium">Show in Quick Access for muscle memory</p>
+                    <p className="text-[10px] text-zinc-400 font-medium">Show in Quick Access for muscle memory</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input 
@@ -1220,16 +1220,16 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       checked={formData.is_pinned}
                       onChange={e => setFormData({...formData, is_pinned: e.target.checked})}
                     />
-                    <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
                 </div>
 
                 {formData.is_pinned && (
                   <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Pin Order (Lower numbers show first)</label>
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pin Order (Lower numbers show first)</label>
                     <input 
                       type="number"
-                      className="w-full px-4 py-2.5 bg-surface-container-lowest border border-primary/20 rounded-xl text-on-surface focus:ring-2 focus:ring-primary/20 outline-none font-bold" 
+                      className="w-full px-4 py-2.5 bg-black border border-blue-500/20 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-bold" 
                       placeholder="0"
                       value={formData.pin_order}
                       onChange={e => setFormData({...formData, pin_order: parseInt(e.target.value) || 0})}
@@ -1242,7 +1242,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 <button 
                   onClick={() => handleSave()}
                   disabled={saving || !formData.name || formData.variants.length === 0}
-                  className="flex-1 bg-primary text-on-primary py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+                  className="flex-1 bg-blue-500 text-white py-3.5 rounded-2xl font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
                 >
                   <span className={cn(saving ? "opacity-0" : "opacity-100")}>
                     {editingId ? t('inv', 'update') : t('inv', 'save')}
@@ -1256,7 +1256,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 {editingId && (
                   <button 
                     onClick={clearForm}
-                    className="px-6 bg-surface-container-high text-on-surface font-bold py-3.5 rounded-xl hover:bg-surface-container-highest transition-colors"
+                    className="px-6 bg-zinc-800 text-white font-bold py-3.5 rounded-2xl hover:bg-zinc-800 transition-colors"
                   >
                     {t('inv', 'discard')}
                   </button>
@@ -1268,7 +1268,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       </div>
       
       {/* FAB */}
-      <button className="fixed right-6 bottom-24 md:bottom-8 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-40">
+      <button className="fixed right-6 bottom-24 md:bottom-8 bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-40">
         <QrCode size={28} />
       </button>
     </div>

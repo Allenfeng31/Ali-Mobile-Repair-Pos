@@ -528,22 +528,22 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
   };
 
   return (
-    <div className="flex h-full bg-surface">
+    <div className="flex h-full bg-black">
       {/* Left Sidebar - Deep Taxonomy Tree */}
-      <div className="w-72 border-r border-outline-variant/20 bg-surface-container-lowest flex flex-col h-full overflow-hidden">
-        <div className="p-6 border-b border-outline-variant/10">
+      <div className="w-72 border-r border-zinc-800/20 bg-black flex flex-col h-full overflow-hidden">
+        <div className="p-6 border-b border-zinc-800/10">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-primary transition-colors mb-6 group"
+            className="flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-blue-500 transition-colors mb-6 group"
           >
-            <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             </div>
             Back to Dashboard
           </button>
           
-          <h2 className="text-xl font-black text-on-surface flex items-center gap-2">
-            <Layers size={20} className="text-primary" />
+          <h2 className="text-xl font-black text-white flex items-center gap-2">
+            <Layers size={20} className="text-blue-500" />
             Device Catalog
           </h2>
         </div>
@@ -551,7 +551,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
         <div className="flex-1 overflow-y-auto p-4 space-y-1">
           {loading ? (
             <div className="flex items-center justify-center p-8">
-              <Loader2 className="animate-spin text-primary" size={24} />
+              <Loader2 className="animate-spin text-blue-500" size={24} />
             </div>
           ) : (
             <>
@@ -560,10 +560,10 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
               {/* Brand Header */}
               <button 
                 onClick={() => toggleBrand(brandObj.brand)}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-surface-container transition-colors text-left font-bold text-on-surface"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-2xl hover:bg-zinc-900 transition-colors text-left font-bold text-white"
               >
                 <div className={`transition-transform duration-200 ${expandedBrands.includes(brandObj.brand) ? 'rotate-90' : ''}`}>
-                  <ChevronRight size={16} className="text-on-surface-variant" />
+                  <ChevronRight size={16} className="text-zinc-400" />
                 </div>
                 {brandObj.brand}
               </button>
@@ -575,7 +575,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden pl-6 pr-2 mt-1 space-y-1 border-l-2 border-outline-variant/20 ml-[21px]"
+                    className="overflow-hidden pl-6 pr-2 mt-1 space-y-1 border-l-2 border-zinc-800/20 ml-[21px]"
                   >
                     {brandObj.categories.map((category) => {
                       const categoryKey = `${brandObj.brand}-${category.name}`;
@@ -585,7 +585,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                         <div key={category.name} className="mb-1">
                           <button 
                             onClick={() => toggleCategory(categoryKey)}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-surface-container text-left text-sm font-bold text-on-surface-variant transition-colors"
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-2xl hover:bg-zinc-900 text-left text-sm font-bold text-zinc-400 transition-colors"
                           >
                             <div className={`transition-transform duration-200 ${expandedCategories.includes(categoryKey) ? 'rotate-90' : ''}`}>
                               <ChevronRight size={14} />
@@ -614,8 +614,8 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                       }}
                                       className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-all ${
                                         isSelected 
-                                          ? 'bg-primary text-on-primary font-bold shadow-md shadow-primary/20 scale-[1.02]' 
-                                          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-medium'
+                                          ? 'bg-blue-500 text-white font-bold shadow-md shadow-blue-500/20 scale-[1.02]' 
+                                          : 'text-zinc-400 hover:text-white hover:bg-zinc-900 font-medium'
                                       }`}
                                     >
                                       {model.name}
@@ -636,16 +636,16 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           
           {/* Uncategorized Section Link */}
           {unmappedItems.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-outline-variant/20">
+            <div className="mt-6 pt-6 border-t border-zinc-800/20">
               <button
                 onClick={() => {
                   setShowUncategorized(true);
                   setSelectedModel(null);
                 }}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
                   showUncategorized 
                     ? 'bg-orange-500/10 text-orange-600 font-bold' 
-                    : 'bg-surface hover:bg-surface-container text-on-surface-variant font-bold'
+                    : 'bg-black hover:bg-zinc-900 text-zinc-400 font-bold'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -665,14 +665,14 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-surface-container-lowest">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-black">
         {/* Header */}
-        <div className="px-8 py-6 border-b border-outline-variant/20 bg-surface/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between">
+        <div className="px-8 py-6 border-b border-zinc-800/20 bg-black/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-black text-on-surface tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
               {showUncategorized ? 'Uncategorized Items' : (selectedModel?.name || 'Select a Model')}
             </h1>
-            <p className="text-sm text-on-surface-variant font-medium mt-1">
+            <p className="text-sm text-zinc-400 font-medium mt-1">
               {showUncategorized ? 'Raw supplier items that need manual mapping.' : 'Compare pricing across quality tiers and vendors'}
             </p>
           </div>
@@ -680,12 +680,12 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsSyncDrawerOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-surface-container-high text-on-surface rounded-2xl text-sm font-bold hover:bg-surface-container-highest transition-all active:scale-95 border border-outline-variant/10 shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-800 text-white rounded-2xl text-sm font-bold hover:bg-zinc-800 transition-all active:scale-95 border border-zinc-800/10 shadow-sm"
             >
-              <CloudDownload size={18} className="text-primary" />
+              <CloudDownload size={18} className="text-blue-500" />
               Sync Data
             </button>
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-on-surface text-surface rounded-2xl text-sm font-bold hover:scale-105 transition-transform active:scale-95 shadow-md">
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-white text-surface rounded-2xl text-sm font-bold hover:scale-105 transition-transform active:scale-95 shadow-md">
               <Plus size={18} />
               Add Vendor
             </button>
@@ -696,16 +696,16 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
         <div className="flex-1 overflow-auto p-8">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <Loader2 className="animate-spin text-primary" size={48} />
+              <Loader2 className="animate-spin text-blue-500" size={48} />
             </div>
           ) : showUncategorized ? (
             <div className="max-w-5xl mx-auto space-y-4">
               {unmappedItems.map(item => (
-                <div key={item.id} className="bg-surface rounded-2xl border border-outline-variant/20 p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div key={item.id} className="bg-black rounded-2xl border border-zinc-800/20 p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                   <div>
-                    <h3 className="font-bold text-on-surface text-lg">{item.raw_title}</h3>
+                    <h3 className="font-bold text-white text-lg">{item.raw_title}</h3>
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="flex items-center gap-1 text-sm font-medium text-on-surface-variant">
+                      <span className="flex items-center gap-1 text-sm font-medium text-zinc-400">
                         <Building2 size={14} />
                         {item.suppliers?.name || 'Unknown Supplier'}
                       </span>
@@ -715,15 +715,15 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                     </div>
                   </div>
                   <div className="text-right flex flex-col items-end gap-3">
-                    <span className="text-2xl font-black text-on-surface tracking-tighter">
-                      <span className="text-lg text-on-surface-variant/50 mr-1">$</span>
+                    <span className="text-2xl font-black text-white tracking-tighter">
+                      <span className="text-lg text-zinc-400/50 mr-1">$</span>
                       {(Number(item.current_price) * 1.1).toFixed(2)}
-                      <span className="text-sm text-on-surface-variant/70 font-normal ml-2 tracking-normal">(GST included)</span>
+                      <span className="text-sm text-zinc-400/70 font-normal ml-2 tracking-normal">(GST included)</span>
                     </span>
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => handleDeleteItem(item.id)}
-                        className="p-2 text-on-surface-variant hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                         title="Delete Item"
                       >
                         <Trash2 size={18} />
@@ -745,7 +745,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                           setWizardItem(item);
                           setWizardStep(1);
                         }}
-                        className="text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 px-4 py-1.5 rounded-lg transition-colors"
+                        className="text-sm font-bold text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-1.5 rounded-lg transition-colors"
                       >
                         Map Item
                       </button>
@@ -760,23 +760,23 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                 const isExpanded = expandedPartTypes.includes(part.name);
                 
                 return (
-                  <div key={part.name} className="bg-surface rounded-3xl border border-outline-variant/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+                  <div key={part.name} className="bg-black rounded-3xl border border-zinc-800/20 shadow-sm overflow-hidden transition-shadow hover:shadow-md">
                     {/* Part Header (Click to expand) */}
                     <button 
                       onClick={() => togglePartType(part.name)}
-                      className="w-full flex items-center justify-between px-6 py-5 bg-surface hover:bg-surface-container-lowest transition-colors"
+                      className="w-full flex items-center justify-between px-6 py-5 bg-black hover:bg-black transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isExpanded ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isExpanded ? 'bg-blue-500/10 text-blue-500' : 'bg-zinc-900 text-zinc-400'}`}>
                           <Wrench size={24} />
                         </div>
                         <div className="text-left">
-                          <h3 className="text-xl font-black text-on-surface">{part.name}</h3>
-                          <p className="text-sm text-on-surface-variant font-medium">{part.qualityTiers.length} Quality Tier(s) available</p>
+                          <h3 className="text-xl font-black text-white">{part.name}</h3>
+                          <p className="text-sm text-zinc-400 font-medium">{part.qualityTiers.length} Quality Tier(s) available</p>
                         </div>
                       </div>
-                      <div className={`w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center border border-outline-variant/20 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                        <ChevronDown size={20} className="text-on-surface-variant" />
+                      <div className={`w-10 h-10 rounded-full bg-black flex items-center justify-center border border-zinc-800/20 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                        <ChevronDown size={20} className="text-zinc-400" />
                       </div>
                     </button>
 
@@ -787,17 +787,17 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-surface-container-lowest/50"
+                          className="overflow-hidden bg-black/50"
                         >
-                          <div className="p-6 border-t border-outline-variant/10 space-y-6">
+                          <div className="p-6 border-t border-zinc-800/10 space-y-6">
                             {part.qualityTiers.map((tier: any) => (
-                              <div key={tier.name} className="bg-surface border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+                              <div key={tier.name} className="bg-black border border-zinc-800/20 rounded-2xl overflow-hidden shadow-sm">
                                 {/* Quality Tier Header - Hidden if generic "Standard" and only one tier */}
                                 {(tier.name !== 'Standard' || part.qualityTiers.length > 1) && (
-                                  <div className="px-5 py-3 bg-surface-container-low border-b border-outline-variant/20 flex items-center justify-between">
+                                  <div className="px-5 py-3 bg-zinc-900/50 border-b border-zinc-800/20 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                      <Package size={16} className="text-primary" />
-                                      <h4 className="text-sm font-black tracking-widest uppercase text-on-surface-variant">{tier.name}</h4>
+                                      <Package size={16} className="text-blue-500" />
+                                      <h4 className="text-sm font-black tracking-widest uppercase text-zinc-400">{tier.name}</h4>
                                     </div>
                                   </div>
                                 )}
@@ -805,11 +805,11 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                 {/* Supplier Pricing Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-outline-variant/10">
                                   {tier.suppliers.map((supplier: any, index: number) => (
-                                    <div key={index} className="p-5 flex flex-col relative group hover:bg-surface-container-lowest transition-colors">
+                                    <div key={index} className="p-5 flex flex-col relative group hover:bg-black transition-colors">
                                       <div className="flex justify-between items-start mb-3">
                                         <div className="flex flex-col flex-1">
                                           {/* Full Raw Title with wrapping */}
-                                          <span className="font-bold text-on-surface text-sm leading-snug whitespace-normal break-words">
+                                          <span className="font-bold text-white text-sm leading-snug whitespace-normal break-words">
                                             {supplier.raw_title}
                                           </span>
                                         </div>
@@ -818,14 +818,14 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                         <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                                           <button 
                                             onClick={() => handleUnmapItem(supplier.id)}
-                                            className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
+                                            className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-md transition-colors"
                                             title="Unmap / Move to Uncategorized"
                                           >
                                             <Undo2 size={16} />
                                           </button>
                                           <button 
                                             onClick={() => handleDeleteItem(supplier.id)}
-                                            className="p-1.5 text-on-surface-variant hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                                            className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
                                             title="Delete Permanently"
                                           >
                                             <Trash2 size={16} />
@@ -835,13 +835,13 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                       
                                       <div className="mt-auto pt-4 flex items-end justify-between">
                                         <div className="flex flex-col">
-                                          <span className="text-xl font-black text-on-surface tracking-tight">
-                                            <span className="text-sm text-on-surface-variant/50 mr-1">$</span>
+                                          <span className="text-xl font-black text-white tracking-tight">
+                                            <span className="text-sm text-zinc-400/50 mr-1">$</span>
                                             {(supplier.price * 1.1).toFixed(2)}
                                           </span>
-                                          <div className="text-[9px] text-on-surface-variant/70 font-bold uppercase tracking-wider">Incl. GST</div>
+                                          <div className="text-[9px] text-zinc-400/70 font-bold uppercase tracking-wider">Incl. GST</div>
                                         </div>
-                                        <div className="text-[10px] text-on-surface-variant/40 font-mono">
+                                        <div className="text-[10px] text-zinc-400/40 font-mono">
                                           Excl. ${supplier.price.toFixed(2)}
                                         </div>
                                       </div>
@@ -861,9 +861,9 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
           ) : (
             <div className="flex items-center justify-center h-full opacity-50">
               <div className="text-center">
-                <Smartphone size={48} className="mx-auto mb-4 text-on-surface-variant" />
-                <h3 className="text-xl font-black text-on-surface">No Model Selected</h3>
-                <p className="text-on-surface-variant mt-2 max-w-md mx-auto">Choose a model from the left sidebar to view pricing, or check the Uncategorized section for new items.</p>
+                <Smartphone size={48} className="mx-auto mb-4 text-zinc-400" />
+                <h3 className="text-xl font-black text-white">No Model Selected</h3>
+                <p className="text-zinc-400 mt-2 max-w-md mx-auto">Choose a model from the left sidebar to view pricing, or check the Uncategorized section for new items.</p>
               </div>
             </div>
           )}
@@ -873,33 +873,33 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
       {/* Mapping Wizard Modal */}
       <AnimatePresence>
         {wizardItem && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-on-surface/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/40 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-surface rounded-[32px] w-full max-w-xl overflow-hidden shadow-2xl border border-outline-variant/20"
+              className="bg-black rounded-[32px] w-full max-w-xl overflow-hidden shadow-2xl border border-zinc-800/20"
             >
               {/* Wizard Header */}
-              <div className="px-8 py-6 border-b border-outline-variant/10 flex items-center justify-between bg-surface-container-low">
+              <div className="px-8 py-6 border-b border-zinc-800/10 flex items-center justify-between bg-zinc-900/50">
                 <div>
-                  <h3 className="text-xl font-black text-on-surface">Map Supplier Item</h3>
-                  <p className="text-sm text-on-surface-variant font-medium truncate max-w-xs">{wizardItem.raw_title}</p>
+                  <h3 className="text-xl font-black text-white">Map Supplier Item</h3>
+                  <p className="text-sm text-zinc-400 font-medium truncate max-w-xs">{wizardItem.raw_title}</p>
                 </div>
                 <button 
                   onClick={() => setWizardItem(null)}
-                  className="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors"
+                  className="w-10 h-10 rounded-full hover:bg-zinc-900 flex items-center justify-center text-zinc-400 transition-colors"
                 >
                   <XCircle size={20} />
                 </button>
               </div>
 
               {/* Progress Bar */}
-              <div className="h-1.5 w-full bg-surface-container flex">
+              <div className="h-1.5 w-full bg-zinc-900 flex">
                 {[1, 2, 3, 4].map(step => (
                   <div 
                     key={step} 
-                    className={`h-full flex-1 transition-all duration-500 ${step <= wizardStep ? 'bg-primary' : 'bg-transparent'}`}
+                    className={`h-full flex-1 transition-all duration-500 ${step <= wizardStep ? 'bg-blue-500' : 'bg-transparent'}`}
                   />
                 ))}
               </div>
@@ -908,7 +908,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
               <div className="p-8 min-h-[340px]">
                 {wizardStep === 1 && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-on-surface mb-2">Step 1: Select Brand</h4>
+                    <h4 className="text-lg font-bold text-white mb-2">Step 1: Select Brand</h4>
                     <div className="grid grid-cols-2 gap-3">
                       {['Apple', 'Samsung', 'Google', 'Oppo', 'Huawei'].map(b => (
                         <button
@@ -919,8 +919,8 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                           }}
                           className={`px-4 py-3 rounded-2xl border-2 transition-all text-left font-bold ${
                             wizardData.brand === b 
-                              ? 'border-primary bg-primary/5 text-primary' 
-                              : 'border-outline-variant/20 hover:border-primary/50 text-on-surface-variant'
+                              ? 'border-blue-500 bg-blue-500/5 text-blue-500' 
+                              : 'border-zinc-800/20 hover:border-blue-500/50 text-zinc-400'
                           }`}
                         >
                           {b}
@@ -933,10 +933,10 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                 {wizardStep === 2 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
-                      <button onClick={() => setWizardStep(1)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
+                      <button onClick={() => setWizardStep(1)} className="p-2 -ml-2 text-blue-500 hover:bg-blue-500/10 rounded-full">
                         <ChevronLeft size={20} />
                       </button>
-                      <h4 className="text-lg font-bold text-on-surface">Step 2: Select Model</h4>
+                      <h4 className="text-lg font-bold text-white">Step 2: Select Model</h4>
                     </div>
                     
                     <div className="max-h-60 overflow-y-auto pr-2 space-y-2">
@@ -948,10 +948,10 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                             setWizardData(prev => ({ ...prev, model: m.name, isNewModel: false }));
                             setWizardStep(3);
                           }}
-                          className={`w-full px-4 py-3 rounded-xl border transition-all text-left font-medium ${
+                          className={`w-full px-4 py-3 rounded-2xl border transition-all text-left font-medium ${
                             wizardData.model === m.name 
-                              ? 'border-primary bg-primary/5 text-primary' 
-                              : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                              ? 'border-blue-500 bg-blue-500/5 text-blue-500' 
+                              : 'border-zinc-800/20 hover:bg-zinc-900 text-zinc-400'
                           }`}
                         >
                           {m.name}
@@ -959,20 +959,20 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                       ))}
                     </div>
                     
-                    <div className="pt-4 border-t border-outline-variant/10">
-                      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Add New Model</p>
+                    <div className="pt-4 border-t border-zinc-800/10">
+                      <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Or Add New Model</p>
                       <div className="flex gap-2">
                         <input 
                           type="text" 
                           placeholder="Enter model name (e.g. iPhone 17)"
-                          className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
+                          className="flex-1 px-4 py-2 rounded-2xl bg-zinc-900/50 border border-zinc-800/20 focus:outline-none focus:border-blue-500"
                           value={wizardData.isNewModel ? wizardData.model : ''}
                           onChange={(e) => setWizardData(prev => ({ ...prev, model: e.target.value, isNewModel: true }))}
                         />
                         <button 
                           disabled={!wizardData.model}
                           onClick={() => setWizardStep(3)}
-                          className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold disabled:opacity-50"
+                          className="px-4 py-2 bg-blue-500 text-white rounded-2xl font-bold disabled:opacity-50"
                         >
                           Next
                         </button>
@@ -984,10 +984,10 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                 {wizardStep === 3 && (
                   <div className="space-y-4" onMouseEnter={() => fetchPartTypeSuggestions()}>
                     <div className="flex items-center gap-2 mb-4">
-                      <button onClick={() => setWizardStep(2)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
+                      <button onClick={() => setWizardStep(2)} className="p-2 -ml-2 text-blue-500 hover:bg-blue-500/10 rounded-full">
                         <ChevronLeft size={20} />
                       </button>
-                      <h4 className="text-lg font-bold text-on-surface">Step 3: Select Part Type</h4>
+                      <h4 className="text-lg font-bold text-white">Step 3: Select Part Type</h4>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
@@ -998,21 +998,21 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                             onClick={() => {
                               setWizardData(prev => ({ ...prev, partType: pt, isNewPartType: false }));
                             }}
-                            className={`px-4 py-3 rounded-xl border transition-all text-left text-sm font-bold ${
+                            className={`px-4 py-3 rounded-2xl border transition-all text-left text-sm font-bold ${
                               wizardData.partType === pt 
-                                ? 'border-primary bg-primary/5 text-primary' 
-                                : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                                ? 'border-blue-500 bg-blue-500/5 text-blue-500' 
+                                : 'border-zinc-800/20 hover:bg-zinc-900 text-zinc-400'
                             }`}
                           >
                             {pt}
                           </button>
                         ))
                       ) : (
-                        <div className="col-span-2 py-8 text-center bg-surface-container-low rounded-2xl border border-dashed border-outline-variant/30">
-                          <p className="text-sm text-on-surface-variant font-medium">No part types found in database.</p>
+                        <div className="col-span-2 py-8 text-center bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-800/30">
+                          <p className="text-sm text-zinc-400 font-medium">No part types found in database.</p>
                           <button 
                             onClick={() => fetchPartTypeSuggestions()}
-                            className="mt-2 text-xs font-bold text-primary hover:underline"
+                            className="mt-2 text-xs font-bold text-blue-500 hover:underline"
                           >
                             Click to Retry Fetch
                           </button>
@@ -1020,20 +1020,20 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                       )}
                     </div>
 
-                    <div className="pt-4 border-t border-outline-variant/10">
-                      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Add New Type</p>
+                    <div className="pt-4 border-t border-zinc-800/10">
+                      <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Or Add New Type</p>
                       <div className="flex gap-2 mb-6">
                         <input 
                           type="text" 
                           placeholder="e.g. Back Housing, Full Screw Set..."
-                          className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
+                          className="flex-1 px-4 py-2 rounded-2xl bg-zinc-900/50 border border-zinc-800/20 focus:outline-none focus:border-blue-500"
                           value={customPartTypeInput}
                           onChange={(e) => setCustomPartTypeInput(e.target.value)}
                         />
                         <button 
                           onClick={handleSavePartType}
                           disabled={!customPartTypeInput.trim()}
-                          className="w-12 h-12 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-xl transition-colors disabled:opacity-50"
+                          className="w-12 h-12 flex items-center justify-center bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-2xl transition-colors disabled:opacity-50"
                         >
                           <Plus size={20} />
                         </button>
@@ -1045,7 +1045,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                           setWizardStep(4);
                         }}
                         disabled={!wizardData.partType}
-                        className="w-full py-3 bg-primary text-on-primary rounded-xl font-bold disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3 bg-blue-500 text-white rounded-2xl font-bold disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                       >
                         Next Step
                         <ChevronRight size={18} />
@@ -1057,17 +1057,17 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                 {wizardStep === 4 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
-                      <button onClick={() => setWizardStep(3)} className="p-2 -ml-2 text-primary hover:bg-primary/10 rounded-full">
+                      <button onClick={() => setWizardStep(3)} className="p-2 -ml-2 text-blue-500 hover:bg-blue-500/10 rounded-full">
                         <ChevronLeft size={20} />
                       </button>
-                      <h4 className="text-lg font-bold text-on-surface">Step 4: Quality / Grade</h4>
+                      <h4 className="text-lg font-bold text-white">Step 4: Quality / Grade</h4>
                     </div>
                     
                     <div className="space-y-4" onMouseEnter={() => fetchPersistentGrades()}>
-                      <p className="text-sm text-on-surface-variant">Selected Mapping: <span className="font-bold text-on-surface">{wizardData.brand} {wizardData.model} &gt; {wizardData.partType}</span></p>
+                      <p className="text-sm text-zinc-400">Selected Mapping: <span className="font-bold text-white">{wizardData.brand} {wizardData.model} &gt; {wizardData.partType}</span></p>
                       
                       <div className="space-y-2">
-                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Select Existing Grade</p>
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Select Existing Grade</p>
                         <div className="flex flex-wrap gap-2">
                           {persistentGrades.map(g => (
                             <div key={g} className="relative group">
@@ -1075,8 +1075,8 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                 onClick={() => setWizardData(prev => ({ ...prev, grade: g, isNewGrade: false }))}
                                 className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition-all pr-8 ${
                                   wizardData.grade === g 
-                                    ? 'border-primary bg-primary text-on-primary' 
-                                    : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'
+                                    ? 'border-blue-500 bg-blue-500 text-white' 
+                                    : 'border-zinc-800/20 hover:bg-zinc-900 text-zinc-400'
                                 }`}
                               >
                                 {g}
@@ -1086,7 +1086,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                                   e.stopPropagation();
                                   deleteGradeSuggestion(g);
                                 }}
-                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant/40 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-zinc-400/40 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <Plus className="w-3 h-3 rotate-45" />
                               </button>
@@ -1095,20 +1095,20 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-outline-variant/10">
-                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Or Add New Grade</p>
+                      <div className="pt-4 border-t border-zinc-800/10">
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Or Add New Grade</p>
                         <div className="flex gap-2 mb-6">
                           <input 
                             type="text" 
                             placeholder="e.g. Service Pack, Refurbished..."
-                            className="flex-1 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 focus:outline-none focus:border-primary"
+                            className="flex-1 px-4 py-2 rounded-2xl bg-zinc-900/50 border border-zinc-800/20 focus:outline-none focus:border-blue-500"
                             value={customGradeInput}
                             onChange={(e) => setCustomGradeInput(e.target.value)}
                           />
                           <button 
                             onClick={handleSaveGrade}
                             disabled={!customGradeInput.trim()}
-                            className="w-12 h-12 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-xl transition-colors disabled:opacity-50"
+                            className="w-12 h-12 flex items-center justify-center bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-2xl transition-colors disabled:opacity-50"
                           >
                             <Plus size={20} />
                           </button>
@@ -1166,7 +1166,7 @@ export function SupplierPrices({ onBack }: SupplierPricesProps) {
                             }
                           }}
                           disabled={!wizardData.grade}
-                          className="w-full py-4 bg-primary text-on-primary rounded-2xl font-black text-lg shadow-lg shadow-primary/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+                          className="w-full py-4 bg-blue-500 text-white rounded-2xl font-black text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                           <Check size={20} />
                           Finalize Mapping

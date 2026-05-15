@@ -148,8 +148,8 @@ export function PortalView() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest text-on-surface font-sans p-4 sm:p-8 flex flex-col items-center justify-center">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-outline-variant/10 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white font-sans p-4 sm:p-8 flex flex-col items-center justify-center">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-zinc-800/10 relative overflow-hidden">
         
         {/* Top Status Bar */}
         <div className={`absolute top-0 left-0 w-full flex justify-center py-1.5 transition-colors z-50 ${backendOk ? 'bg-green-500/10' : 'bg-red-500/10 border-b border-red-500/20'}`}>
@@ -162,14 +162,14 @@ export function PortalView() {
         </div>
 
         {/* Background Decorative */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] pointer-events-none"></div>
 
         <div className="flex flex-col items-center mb-8 mt-4 relative z-10">
-          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4">
+          <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-4">
             <Smartphone size={32} />
           </div>
-          <h1 className="text-xl font-black text-on-surface tracking-tighter uppercase">Ali Mobile Repair</h1>
-          <p className="text-on-surface-variant text-sm font-medium">Customer Service Portal</p>
+          <h1 className="text-xl font-black text-white tracking-tighter uppercase">Ali Mobile Repair</h1>
+          <p className="text-zinc-400 text-sm font-medium">Customer Service Portal</p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -183,13 +183,13 @@ export function PortalView() {
             >
               <button 
                 onClick={() => setView('dropoff')}
-                className="w-full py-4 bg-primary text-on-primary rounded-xl font-bold shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-0.5 transition-all text-lg"
+                className="w-full py-4 bg-blue-500 text-on-primary rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all text-lg"
               >
                 Start New Repair
               </button>
               <button 
                 onClick={() => setView('track')}
-                className="w-full py-4 bg-surface-container-high text-on-surface rounded-xl font-bold hover:bg-surface-container-highest transition-all text-lg"
+                className="w-full py-4 bg-zinc-900-high text-white rounded-2xl font-bold hover:bg-zinc-800 transition-all text-lg"
               >
                 Track My Repair
               </button>
@@ -204,7 +204,7 @@ export function PortalView() {
               exit={{ opacity: 0, x: 20 }}
               className="space-y-4 relative z-10"
             >
-              <button onClick={() => setView('home')} className="flex items-center gap-2 text-on-surface-variant font-bold text-sm mb-4 hover:text-primary transition-colors">
+              <button onClick={() => setView('home')} className="flex items-center gap-2 text-zinc-400 font-bold text-sm mb-4 hover:text-blue-500 transition-colors">
                 <ArrowLeft size={16} /> Back
               </button>
               <h2 className="text-xl font-bold text-center mb-6">Track Your Repair</h2>
@@ -212,14 +212,14 @@ export function PortalView() {
                 <input 
                   type="text"
                   placeholder="Order ID or Phone Number"
-                  className="w-full px-4 py-4 bg-surface-container-low border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-center font-bold text-lg"
+                  className="w-full px-4 py-4 bg-zinc-900-low border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-center font-bold text-lg"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                 />
-                {errorMsg && <p className="text-error text-center text-sm font-bold">{errorMsg}</p>}
+                {errorMsg && <p className="text-red-500 text-center text-sm font-bold">{errorMsg}</p>}
                 <button 
                   disabled={loading}
-                  className="w-full py-4 bg-primary text-on-primary rounded-xl font-bold shadow-lg disabled:opacity-50"
+                  className="w-full py-4 bg-blue-500 text-on-primary rounded-2xl font-bold shadow-lg disabled:opacity-50"
                   type="submit"
                 >
                   {loading ? 'Searching...' : 'Check Status'}
@@ -237,22 +237,22 @@ export function PortalView() {
               className="relative z-10 flex flex-col items-center"
             >
               <h2 className="text-xl font-bold mb-2">Hello, {customer.name}!</h2>
-              <p className="text-sm text-on-surface-variant mb-6 text-center">Here is the live status of your latest repair ticket.</p>
+              <p className="text-sm text-zinc-400 mb-6 text-center">Here is the live status of your latest repair ticket.</p>
               
               {customer.repairs.length > 0 ? (
                 <div className="w-full space-y-6">
                   {customer.repairs.map((r: any, idx: number) => (
-                    <div key={r.id} className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/10 flex flex-col items-center relative overflow-hidden shadow-sm">
-                       <p className="absolute top-4 left-4 text-[10px] font-black uppercase text-on-surface-variant tracking-wider">Ticket: {r.id}</p>
+                    <div key={r.id} className="bg-zinc-900-low p-6 rounded-3xl border border-zinc-800/10 flex flex-col items-center relative overflow-hidden shadow-sm">
+                       <p className="absolute top-4 left-4 text-[10px] font-black uppercase text-zinc-400 tracking-wider">Ticket: {r.id}</p>
                        <div className="mt-6 mb-4 animate-bounce-slight">
                           <StatusIcon status={r.status} />
                        </div>
-                       <h3 className="text-2xl font-black text-center mb-1 text-primary">{r.status}</h3>
-                       <p className="font-bold text-center text-on-surface">{r.repairItem}</p>
-                       <p className="text-sm text-on-surface-variant text-center font-medium mb-4">{r.modelNumber}</p>
+                       <h3 className="text-2xl font-black text-center mb-1 text-blue-500">{r.status}</h3>
+                       <p className="font-bold text-center text-white">{r.repairItem}</p>
+                       <p className="text-sm text-zinc-400 text-center font-medium mb-4">{r.modelNumber}</p>
                        
                        {r.status === 'In Processing' && (
-                         <div className="bg-blue-100 text-blue-800 w-full p-3 rounded-xl text-center text-xs font-bold animate-in fade-in transition-all">
+                         <div className="bg-blue-100 text-blue-800 w-full p-3 rounded-2xl text-center text-xs font-bold animate-in fade-in transition-all">
                            Our technicians are actively working on your device. This screen will jump to completed automatically!
                          </div>
                        )}
@@ -265,7 +265,7 @@ export function PortalView() {
               
               <button 
                 onClick={() => { setCustomer(null); setView('home'); }}
-                className="mt-8 text-on-surface-variant font-bold text-sm hover:text-primary transition-colors"
+                className="mt-8 text-zinc-400 font-bold text-sm hover:text-blue-500 transition-colors"
               >
                 Start Over
               </button>
@@ -280,44 +280,44 @@ export function PortalView() {
               exit={{ opacity: 0, x: 20 }}
               className="space-y-4 relative z-10"
             >
-              <button onClick={() => setView('home')} className="flex items-center gap-2 text-on-surface-variant font-bold text-sm mb-4 hover:text-primary transition-colors">
+              <button onClick={() => setView('home')} className="flex items-center gap-2 text-zinc-400 font-bold text-sm mb-4 hover:text-blue-500 transition-colors">
                 <ArrowLeft size={16} /> Back
               </button>
               <h2 className="text-xl font-bold text-center mb-6">Repair Quick Drop-off</h2>
               <form onSubmit={handleDropoffSubmit} className="space-y-4">
                 <input 
                   type="text" placeholder="Full Name *" required
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium"
+                  className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium"
                   value={name} onChange={e => setName(e.target.value)}
                 />
                 <input 
                   type="tel" placeholder="Phone Number *" required
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium"
+                  className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium"
                   value={phone} onChange={e => setPhone(e.target.value)}
                 />
                 <input 
                   type="email" placeholder="Email Address (Optional)"
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium"
+                  className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium"
                   value={email} onChange={e => setEmail(e.target.value)}
                 />
                 <input 
                   type="text" placeholder="Device Model (e.g. iPhone 13 Pro) *" required
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium"
+                  className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium"
                   value={deviceModel} onChange={e => setDeviceModel(e.target.value)}
                 />
                 <textarea 
                   placeholder="Describe the issue... *" required rows={3}
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium resize-none text-sm"
+                  className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium resize-none text-sm"
                   value={problem} onChange={e => setProblem(e.target.value)}
                 />
 
                 {/* Accessory Upsells */}
                 {upsells.length > 0 && (
                   <div className="space-y-2 py-2">
-                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Optional Accessories</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-1">Optional Accessories</p>
                     <div className="grid grid-cols-1 gap-2">
                       {upsells.map(upsell => (
-                        <label key={upsell.id} className="flex items-center gap-3 p-3 bg-surface-container-low/50 border border-outline-variant/10 rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors">
+                        <label key={upsell.id} className="flex items-center gap-3 p-3 bg-zinc-900-low/50 border border-zinc-800/10 rounded-2xl cursor-pointer hover:bg-zinc-900-low transition-colors">
                           <input 
                             type="checkbox"
                             className="w-4 h-4 accent-primary"
@@ -331,11 +331,11 @@ export function PortalView() {
                             }}
                           />
                           <div className="flex-1">
-                            <p className="text-xs font-bold text-on-surface">{upsell.name}</p>
+                            <p className="text-xs font-bold text-white">{upsell.name}</p>
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[10px] text-on-surface-variant font-medium">RRP</span>
-                              <span className="text-[10px] text-on-surface-variant line-through opacity-50 font-medium">${upsell.regular_price}</span>
-                              <span className="text-[10px] text-primary font-black ml-auto">Bundle +${upsell.bundle_price}</span>
+                              <span className="text-[10px] text-zinc-400 font-medium">RRP</span>
+                              <span className="text-[10px] text-zinc-400 line-through opacity-50 font-medium">${upsell.regular_price}</span>
+                              <span className="text-[10px] text-blue-500 font-black ml-auto">Bundle +${upsell.bundle_price}</span>
                             </div>
                           </div>
                         </label>
@@ -346,17 +346,17 @@ export function PortalView() {
 
                 <input 
                   type="text" placeholder="Phone Password (Optional)"
-                  className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm"
+                  className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium text-sm"
                   value={password} onChange={e => setPassword(e.target.value)}
                 />
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Where did you hear about us? *</label>
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-1">Where did you hear about us? *</label>
                   <select
                     required
                     value={referralSource}
                     onChange={(e) => setReferralSource(e.target.value)}
-                    className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium text-sm"
                   >
                     <option value="" disabled>Select an option</option>
                     <option value="Google">Google</option>
@@ -372,14 +372,14 @@ export function PortalView() {
                 {referralSource === 'Other' && (
                   <input 
                     type="text" placeholder="Please specify... *" required
-                    className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm animate-in fade-in slide-in-from-top-1"
+                    className="w-full px-4 py-3 bg-black border border-zinc-800/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-white font-medium text-sm animate-in fade-in slide-in-from-top-1"
                     value={referralOther} onChange={e => setReferralOther(e.target.value)}
                   />
                 )}
-                {errorMsg && <p className="text-error text-center text-sm font-bold">{errorMsg}</p>}
+                {errorMsg && <p className="text-red-500 text-center text-sm font-bold">{errorMsg}</p>}
                 <button 
                   disabled={loading}
-                  className="w-full py-4 bg-primary text-on-primary rounded-xl font-bold shadow-lg mt-2 disabled:opacity-50"
+                  className="w-full py-4 bg-blue-500 text-on-primary rounded-2xl font-bold shadow-lg mt-2 disabled:opacity-50"
                   type="submit"
                 >
                   {loading ? 'Submitting...' : 'Submit Form & Track Status'}

@@ -226,12 +226,12 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
 
   if (permissions?.can_view_full_sales_report === false) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low rounded-[2rem] border border-outline-variant/10">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
+      <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 rounded-[2rem] border border-zinc-800/10">
+        <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6">
           <Lock size={32} />
         </div>
-        <h2 className="text-2xl font-black text-on-surface mb-2">Access Restricted</h2>
-        <p className="text-on-surface-variant font-medium text-center max-w-md px-6">
+        <h2 className="text-2xl font-black text-white mb-2">Access Restricted</h2>
+        <p className="text-zinc-400 font-medium text-center max-w-md px-6">
           You do not have permission to view full sales reports. Please contact your administrator for access.
         </p>
       </div>
@@ -243,26 +243,26 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       {/* Header */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4">
         <div>
-          <span className="text-on-surface-variant font-bold text-[10px] uppercase tracking-widest">Performance Analytics</span>
-          <h2 className="text-4xl font-extrabold tracking-tight text-primary mt-1">Sales Reports</h2>
+          <span className="text-zinc-400 font-bold text-[10px] uppercase tracking-widest">Performance Analytics</span>
+          <h2 className="text-4xl font-extrabold tracking-tight text-blue-500 mt-1">Sales Reports</h2>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-xl border border-outline-variant/10">
-            <span className="text-xs font-bold text-on-surface-variant">From:</span>
+          <div className="flex items-center gap-2 bg-zinc-900/50 px-3 py-2 rounded-2xl border border-zinc-800/10">
+            <span className="text-xs font-bold text-zinc-400">From:</span>
             <input 
               type="date" 
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-sm font-bold text-on-surface outline-none"
+              className="bg-transparent text-sm font-bold text-white outline-none"
             />
           </div>
-          <div className="flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-xl border border-outline-variant/10">
-            <span className="text-xs font-bold text-on-surface-variant">To:</span>
+          <div className="flex items-center gap-2 bg-zinc-900/50 px-3 py-2 rounded-2xl border border-zinc-800/10">
+            <span className="text-xs font-bold text-zinc-400">To:</span>
             <input 
               type="date" 
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-sm font-bold text-on-surface outline-none"
+              className="bg-transparent text-sm font-bold text-white outline-none"
             />
           </div>
           <button 
@@ -273,13 +273,13 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
               setStartDate(lastWeek.toISOString().split('T')[0]);
               setEndDate(today.toISOString().split('T')[0]);
             }}
-            className="bg-surface-container-low text-on-surface px-4 py-2.5 rounded-xl text-sm font-bold border border-outline-variant/10 transition-transform active:scale-95"
+            className="bg-zinc-900/50 text-white px-4 py-2.5 rounded-2xl text-sm font-bold border border-zinc-800/10 transition-transform active:scale-95"
           >
             Last 7 Days
           </button>
           <button 
             onClick={() => { setStartDate(''); setEndDate(''); }}
-            className="bg-surface-container-lowest text-on-surface px-4 py-2.5 rounded-xl text-sm font-bold border border-outline-variant/10 transition-transform active:scale-95"
+            className="bg-black text-white px-4 py-2.5 rounded-2xl text-sm font-bold border border-zinc-800/10 transition-transform active:scale-95"
           >
             Clear Target
           </button>
@@ -367,17 +367,17 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       {/* Charts & Journal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Chart */}
-        <div className="lg:col-span-2 bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant/10">
+        <div className="lg:col-span-2 bg-black p-8 rounded-3xl shadow-sm border border-zinc-800/10">
           <div className="flex justify-between items-center mb-10">
-            <h3 className="text-lg font-bold text-on-surface">Weekly Sales Trends</h3>
+            <h3 className="text-lg font-bold text-white">Weekly Sales Trends</h3>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary"></div>
-                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Revenue</span>
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Revenue</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary-fixed-dim"></div>
-                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Profit</span>
+                <div className="w-3 h-3 rounded-full bg-blue-500-fixed-dim"></div>
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Profit</span>
               </div>
             </div>
           </div>
@@ -409,22 +409,22 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
         </div>
 
         {/* Daily Journal / Orders List */}
-        <div className="bg-surface-container-low rounded-3xl overflow-hidden flex flex-col border border-outline-variant/5">
+        <div className="bg-zinc-900/50 rounded-3xl overflow-hidden flex flex-col border border-zinc-800/5">
           <div className="p-6 pb-2 space-y-4">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-bold text-on-surface">Filtered Orders</h3>
-                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Showing {searchedOrders.length} transactions</p>
+                <h3 className="text-lg font-bold text-white">Filtered Orders</h3>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Showing {searchedOrders.length} transactions</p>
               </div>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4" />
               <input 
                 type="text" 
                 placeholder="Search Order ID..." 
                 value={searchOrderQuery}
                 onChange={(e) => { setSearchOrderQuery(e.target.value); setOrderPage(1); }}
-                className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl pl-9 pr-4 py-3 text-sm font-bold placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full bg-black border border-zinc-800/20 rounded-2xl pl-9 pr-4 py-3 text-sm font-bold placeholder:text-zinc-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
             </div>
           </div>
@@ -433,31 +433,31 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             {displayedOrders.map((order) => (
               <div 
                 key={order.id} 
-                className="relative pl-6 border-l-2 border-outline-variant/20 group cursor-pointer"
+                className="relative pl-6 border-l-2 border-zinc-800/20 group cursor-pointer"
                 onClick={() => setSelectedOrder(order)}
               >
                 <div className={cn(
                   "absolute -left-[9px] top-0 w-4 h-4 rounded-full ring-4 ring-surface-container-low transition-transform group-hover:scale-125",
-                  order.type === 'repair' ? "bg-primary" : "bg-tertiary"
+                  order.type === 'repair' ? "bg-blue-500" : "bg-tertiary"
                 )}></div>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-[10px] font-black text-on-surface-variant uppercase mb-1 flex items-center gap-2">
-                      {new Date(order.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • <span className="text-primary">{order.paymentMethod ? order.paymentMethod.toUpperCase() : 'CASH'}</span>
-                      {order.status === 'refunded' && <span className="bg-error/10 text-error px-1.5 py-0.5 rounded text-[8px] tracking-widest">REFUNDED</span>}
+                    <p className="text-[10px] font-black text-zinc-400 uppercase mb-1 flex items-center gap-2">
+                      {new Date(order.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • <span className="text-blue-500">{order.paymentMethod ? order.paymentMethod.toUpperCase() : 'CASH'}</span>
+                      {order.status === 'refunded' && <span className="bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded text-[8px] tracking-widest">REFUNDED</span>}
                     </p>
-                    <p className={cn("text-sm font-bold leading-tight", order.status === 'refunded' ? "text-on-surface-variant line-through" : "text-on-surface")}>
+                    <p className={cn("text-sm font-bold leading-tight", order.status === 'refunded' ? "text-zinc-400 line-through" : "text-white")}>
                       Order: #{order.id}
                     </p>
-                    <p className="text-xs text-on-surface-variant mt-1 truncate max-w-[150px]">
+                    <p className="text-xs text-zinc-400 mt-1 truncate max-w-[150px]">
                       {order.items.map(i => i.name).join(', ')}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className={cn("text-sm font-black", order.status === 'refunded' ? "text-on-surface-variant line-through" : "text-primary")}>
+                    <p className={cn("text-sm font-black", order.status === 'refunded' ? "text-zinc-400 line-through" : "text-blue-500")}>
                       ${order.total.toFixed(2)}
                     </p>
-                    <button className="text-[10px] font-bold text-primary flex items-center justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="text-[10px] font-bold text-blue-500 flex items-center justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Eye size={10} /> Details
                     </button>
                   </div>
@@ -466,27 +466,27 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             ))}
             {searchedOrders.length === 0 && (
               <div className="text-center py-10">
-                <p className="text-on-surface-variant text-xs font-bold">{searchOrderQuery ? 'No matching orders found' : 'No orders yet today'}</p>
+                <p className="text-zinc-400 text-xs font-bold">{searchOrderQuery ? 'No matching orders found' : 'No orders yet today'}</p>
               </div>
             )}
           </div>
           
           {totalPages > 0 && (
-            <div className="p-4 border-t border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
+            <div className="p-4 border-t border-zinc-800/10 flex justify-between items-center bg-black">
               <button 
                 onClick={() => setOrderPage(p => Math.max(1, p - 1))}
                 disabled={orderPage === 1}
-                className="text-xs font-bold text-primary disabled:opacity-30 disabled:cursor-not-allowed hover:bg-outline-variant/10 px-4 py-2 bg-primary/10 rounded-xl transition-all flex items-center gap-1"
+                className="text-xs font-bold text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-outline-variant/10 px-4 py-2 bg-blue-500/10 rounded-2xl transition-all flex items-center gap-1"
               >
                 <ChevronLeft size={16} /> Prev
               </button>
-              <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
                 Page {orderPage} / {totalPages}
               </span>
               <button 
                 onClick={() => setOrderPage(p => Math.min(totalPages, p + 1))}
                 disabled={orderPage === totalPages}
-                className="text-xs font-bold text-primary disabled:opacity-30 disabled:cursor-not-allowed hover:bg-outline-variant/10 px-4 py-2 bg-primary/10 rounded-xl transition-all flex items-center gap-1"
+                className="text-xs font-bold text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-outline-variant/10 px-4 py-2 bg-blue-500/10 rounded-2xl transition-all flex items-center gap-1"
               >
                 Next <ChevronRight size={16} />
               </button>
@@ -496,20 +496,20 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       </div>
 
       {/* Service Breakdown */}
-      <div className="bg-surface-container-low rounded-[2rem] p-8 md:p-12 mb-16 border border-outline-variant/10">
-        <h3 className="text-2xl font-extrabold mb-10 text-on-surface tracking-tight">Revenue by Service Type</h3>
+      <div className="bg-zinc-900/50 rounded-[2rem] p-8 md:p-12 mb-16 border border-zinc-800/10">
+        <h3 className="text-2xl font-extrabold mb-10 text-white tracking-tight">Revenue by Service Type</h3>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-center">
           <div className="space-y-8">
             {repairStats.map((s, i) => (
-              <div key={i} className="flex justify-between items-end border-b border-outline-variant/20 pb-4">
+              <div key={i} className="flex justify-between items-end border-b border-zinc-800/20 pb-4">
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-on-surface">{s.label}</span>
-                  <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{s.units} Units</span>
+                  <span className="text-sm font-bold text-white">{s.label}</span>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{s.units} Units</span>
                 </div>
-                <span className="text-xl font-black text-primary">${s.value.toLocaleString()}</span>
+                <span className="text-xl font-black text-blue-500">${s.value.toLocaleString()}</span>
               </div>
             ))}
-            {repairStats.length === 0 && <p className="text-on-surface-variant text-sm italic">No repair data available</p>}
+            {repairStats.length === 0 && <p className="text-zinc-400 text-sm italic">No repair data available</p>}
           </div>
 
           <div className="lg:col-span-2 flex flex-col md:flex-row justify-center items-center gap-12 p-10 bg-white/40 backdrop-blur-md rounded-3xl border border-white/20">
@@ -530,8 +530,8 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Service</span>
-                <span className="text-sm font-black text-primary">Split</span>
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Service</span>
+                <span className="text-sm font-black text-blue-500">Split</span>
               </div>
             </div>
             <div className="space-y-4">
@@ -539,8 +539,8 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                 <div key={i} className="flex items-center gap-4">
                   <div className="w-4 h-4 rounded-md" style={{ backgroundColor: s.color }}></div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-on-surface">{s.name}</span>
-                    <span className="text-[10px] font-bold text-on-surface-variant">{s.value}% of total</span>
+                    <span className="text-xs font-bold text-white">{s.name}</span>
+                    <span className="text-[10px] font-bold text-zinc-400">{s.value}% of total</span>
                   </div>
                 </div>
               ))}
@@ -564,60 +564,60 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[85vh]"
+              className="relative w-full max-w-2xl bg-black rounded-[2rem] shadow-2xl overflow-hidden border border-zinc-800/10 flex flex-col max-h-[85vh]"
             >
-              <div className="p-8 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+              <div className="p-8 border-b border-zinc-800/10 flex justify-between items-center bg-zinc-900/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-primary-container/10 flex items-center justify-center text-primary">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-900/30/10 flex items-center justify-center text-blue-500">
                     <List size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-on-surface">
+                    <h3 className="text-2xl font-black text-white">
                       {breakdownType === 'repair' ? 'Repair Revenue' : breakdownType === 'accessory' ? 'Accessory Revenue' : 'Total Revenue'} Breakdown
                     </h3>
-                    <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                       {startDate || 'All Time'} to {endDate || 'Today'}
                     </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowRevenueModal(false)}
-                  className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                  className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 bg-surface-container-lowest custom-scrollbar space-y-4">
-                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-4 mb-2">
+              <div className="flex-1 overflow-y-auto p-8 bg-black custom-scrollbar space-y-4">
+                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-zinc-400 px-4 mb-2">
                   <div className="col-span-6">Product / Service Name</div>
                   <div className="col-span-3 text-center">Unit Qty</div>
                   <div className="col-span-3 text-right">Total Value</div>
                 </div>
                 
                 {revenueBreakdown.map((item, i) => (
-                  <div key={i} className="grid grid-cols-12 bg-surface-container-low p-4 rounded-xl items-center border border-outline-variant/5 hover:border-primary/20 transition-colors">
-                    <div className="col-span-6 font-bold text-sm text-on-surface leading-tight pr-2">{item.name}</div>
-                    <div className="col-span-3 text-center text-sm font-bold text-on-surface-variant">{item.qty}</div>
-                    <div className="col-span-3 text-right font-black text-primary">${item.total.toFixed(2)}</div>
+                  <div key={i} className="grid grid-cols-12 bg-zinc-900/50 p-4 rounded-2xl items-center border border-zinc-800/5 hover:border-blue-500/20 transition-colors">
+                    <div className="col-span-6 font-bold text-sm text-white leading-tight pr-2">{item.name}</div>
+                    <div className="col-span-3 text-center text-sm font-bold text-zinc-400">{item.qty}</div>
+                    <div className="col-span-3 text-right font-black text-blue-500">${item.total.toFixed(2)}</div>
                   </div>
                 ))}
 
                 {revenueBreakdown.length === 0 && (
                   <div className="text-center py-10">
-                    <p className="text-on-surface-variant text-sm font-bold italic">No items sold in this period.</p>
+                    <p className="text-zinc-400 text-sm font-bold italic">No items sold in this period.</p>
                   </div>
                 )}
               </div>
 
-              <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+              <div className="p-6 bg-zinc-900/50 border-t border-zinc-800/10 space-y-2">
+                <div className="flex justify-between items-center text-xs font-bold text-zinc-400 uppercase tracking-widest">
                   <span>Gross Sales</span>
                   <span>${(breakdownType === 'repair' ? stats.repairRevenue : breakdownType === 'accessory' ? stats.accessoryRevenue : stats.totalRevenue).toFixed(2)}</span>
                 </div>
                 {breakdownType === 'all' && (
                   <>
-                    <div className="flex justify-between items-center text-xs font-bold text-secondary">
+                    <div className="flex justify-between items-center text-xs font-bold text-zinc-300">
                       <span>Total Surcharge (Card Fees)</span>
                       <span>+${stats.surchargeTotal.toFixed(2)}</span>
                     </div>
@@ -627,9 +627,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                     </div>
                   </>
                 )}
-                <div className="flex justify-between items-center pt-2 border-t border-outline-variant/20">
-                  <span className="text-sm font-black text-on-surface uppercase tracking-widest">Net Revenue</span>
-                  <span className="text-2xl font-black text-primary">
+                <div className="flex justify-between items-center pt-2 border-t border-zinc-800/20">
+                  <span className="text-sm font-black text-white uppercase tracking-widest">Net Revenue</span>
+                  <span className="text-2xl font-black text-blue-500">
                     ${(breakdownType === 'repair' ? stats.repairRevenue : breakdownType === 'accessory' ? stats.accessoryRevenue : stats.totalRevenue).toFixed(2)}
                   </span>
                 </div>
@@ -654,49 +654,49 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[85vh]"
+              className="relative w-full max-w-2xl bg-black rounded-[2rem] shadow-2xl overflow-hidden border border-zinc-800/10 flex flex-col max-h-[85vh]"
             >
-              <div className="p-8 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+              <div className="p-8 border-b border-zinc-800/10 flex justify-between items-center bg-zinc-900/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-secondary-container/30 text-secondary">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800/30 text-zinc-300">
                     <CreditCard size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-on-surface">EFTPOS Surcharge Breakdown</h3>
-                    <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Itemized Transaction Fees</p>
+                    <h3 className="text-2xl font-black text-white">EFTPOS Surcharge Breakdown</h3>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Itemized Transaction Fees</p>
                   </div>
                 </div>
-                <button onClick={() => setShowSurchargeModal(false)} className="p-2 hover:bg-surface-container-high rounded-full transition-colors">
+                <button onClick={() => setShowSurchargeModal(false)} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
                   <X size={20} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-8 bg-surface-container-lowest custom-scrollbar space-y-4">
-                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-4 mb-2">
+              <div className="flex-1 overflow-y-auto p-8 bg-black custom-scrollbar space-y-4">
+                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-zinc-400 px-4 mb-2">
                   <div className="col-span-4">Order ID / Date</div>
                   <div className="col-span-4 text-center">Base Amount</div>
                   <div className="col-span-4 text-right">Surcharge (1.5%)</div>
                 </div>
                 {validOrders.filter(o => (o.surcharge || 0) > 0).map((order, i) => (
-                  <div key={i} className="grid grid-cols-12 bg-surface-container-low p-4 rounded-xl items-center border border-outline-variant/5">
+                  <div key={i} className="grid grid-cols-12 bg-zinc-900/50 p-4 rounded-2xl items-center border border-zinc-800/5">
                     <div className="col-span-4">
-                      <p className="font-bold text-sm text-on-surface">#{order.id}</p>
-                      <p className="text-[10px] text-on-surface-variant uppercase">{new Date(order.timestamp).toLocaleDateString()}</p>
+                      <p className="font-bold text-sm text-white">#{order.id}</p>
+                      <p className="text-[10px] text-zinc-400 uppercase">{new Date(order.timestamp).toLocaleDateString()}</p>
                     </div>
-                    <div className="col-span-4 text-center text-sm font-bold text-on-surface-variant">
+                    <div className="col-span-4 text-center text-sm font-bold text-zinc-400">
                       ${(order.total - order.surcharge).toFixed(2)}
                     </div>
-                    <div className="col-span-4 text-right font-black text-secondary">+${order.surcharge.toFixed(2)}</div>
+                    <div className="col-span-4 text-right font-black text-zinc-300">+${order.surcharge.toFixed(2)}</div>
                   </div>
                 ))}
                 {validOrders.filter(o => (o.surcharge || 0) > 0).length === 0 && (
                   <div className="text-center py-10">
-                    <p className="text-on-surface-variant text-sm font-bold italic">No card surcharges in this period.</p>
+                    <p className="text-zinc-400 text-sm font-bold italic">No card surcharges in this period.</p>
                   </div>
                 )}
               </div>
-              <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
-                <span className="text-sm font-black text-on-surface uppercase tracking-widest">Total Surcharge</span>
-                <span className="text-2xl font-black text-secondary">${stats.surchargeTotal.toFixed(2)}</span>
+              <div className="p-6 bg-zinc-900/50 border-t border-zinc-800/10 flex justify-between items-center">
+                <span className="text-sm font-black text-white uppercase tracking-widest">Total Surcharge</span>
+                <span className="text-2xl font-black text-zinc-300">${stats.surchargeTotal.toFixed(2)}</span>
               </div>
             </motion.div>
           </div>
@@ -718,43 +718,43 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[85vh]"
+              className="relative w-full max-w-2xl bg-black rounded-[2rem] shadow-2xl overflow-hidden border border-zinc-800/10 flex flex-col max-h-[85vh]"
             >
-              <div className="p-8 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+              <div className="p-8 border-b border-zinc-800/10 flex justify-between items-center bg-zinc-900/50">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-tertiary-container/20 text-tertiary">
                     <Receipt size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-on-surface">GST Tax Breakdown</h3>
-                    <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">10% GST Itemized</p>
+                    <h3 className="text-2xl font-black text-white">GST Tax Breakdown</h3>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">10% GST Itemized</p>
                   </div>
                 </div>
-                <button onClick={() => setShowTaxModal(false)} className="p-2 hover:bg-surface-container-high rounded-full transition-colors">
+                <button onClick={() => setShowTaxModal(false)} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
                   <X size={20} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-8 bg-surface-container-lowest custom-scrollbar space-y-4">
-                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-4 mb-2">
+              <div className="flex-1 overflow-y-auto p-8 bg-black custom-scrollbar space-y-4">
+                <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-zinc-400 px-4 mb-2">
                   <div className="col-span-4">Order ID / Date</div>
                   <div className="col-span-4 text-center">Net Amount</div>
                   <div className="col-span-4 text-right">GST (1/11th)</div>
                 </div>
                 {validOrders.map((order, i) => (
-                  <div key={i} className="grid grid-cols-12 bg-surface-container-low p-4 rounded-xl items-center border border-outline-variant/5">
+                  <div key={i} className="grid grid-cols-12 bg-zinc-900/50 p-4 rounded-2xl items-center border border-zinc-800/5">
                     <div className="col-span-4">
-                      <p className="font-bold text-sm text-on-surface">#{order.id}</p>
-                      <p className="text-[10px] text-on-surface-variant uppercase">{new Date(order.timestamp).toLocaleDateString()}</p>
+                      <p className="font-bold text-sm text-white">#{order.id}</p>
+                      <p className="text-[10px] text-zinc-400 uppercase">{new Date(order.timestamp).toLocaleDateString()}</p>
                     </div>
-                    <div className="col-span-4 text-center text-sm font-bold text-on-surface-variant">
+                    <div className="col-span-4 text-center text-sm font-bold text-zinc-400">
                       ${(order.total - order.surcharge - order.tax).toFixed(2)}
                     </div>
                     <div className="col-span-4 text-right font-black text-tertiary">${order.tax.toFixed(2)}</div>
                   </div>
                 ))}
               </div>
-              <div className="p-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-between items-center">
-                <span className="text-sm font-black text-on-surface uppercase tracking-widest">Total GST</span>
+              <div className="p-6 bg-zinc-900/50 border-t border-zinc-800/10 flex justify-between items-center">
+                <span className="text-sm font-black text-white uppercase tracking-widest">Total GST</span>
                 <span className="text-2xl font-black text-tertiary">${stats.taxTotal.toFixed(2)}</span>
               </div>
             </motion.div>
@@ -777,29 +777,29 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-surface-container-lowest rounded-[2rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+              className="relative w-full max-w-lg bg-black rounded-[2rem] shadow-2xl overflow-hidden border border-zinc-800/10"
             >
               <div className="p-8 space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-2xl font-black text-on-surface">Order Details</h3>
-                    <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">#{selectedOrder.id} • {new Date(selectedOrder.timestamp).toLocaleString()}</p>
+                    <h3 className="text-2xl font-black text-white">Order Details</h3>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">#{selectedOrder.id} • {new Date(selectedOrder.timestamp).toLocaleString()}</p>
                   </div>
                   <button 
                     onClick={() => setSelectedOrder(null)}
-                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                    className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
                   >
                     <X size={20} />
                   </button>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="bg-surface-container-low rounded-2xl p-4 space-y-3">
+                  <div className="bg-zinc-900/50 rounded-2xl p-4 space-y-3">
                     {selectedOrder.items.map((item, i) => (
                       <div key={i} className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-bold text-on-surface">{item.name}</p>
-                          <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">{item.qty} x ${item.price.toFixed(2)}</p>
+                          <p className="text-sm font-bold text-white">{item.name}</p>
+                          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{item.qty} x ${item.price.toFixed(2)}</p>
                         </div>
                         <span className="font-bold text-sm">${(item.price * item.qty).toFixed(2)}</span>
                       </div>
@@ -808,22 +808,22 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
 
                     <div className="space-y-2 px-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-on-surface-variant font-medium">Subtotal (Excl. GST)</span>
+                        <span className="text-zinc-400 font-medium">Subtotal (Excl. GST)</span>
                         <span className="font-bold">${selectedOrder.subtotal.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-on-surface-variant font-medium">GST (10%)</span>
+                        <span className="text-zinc-400 font-medium">GST (10%)</span>
                         <span className="font-bold">${selectedOrder.tax.toFixed(2)}</span>
                       </div>
                       {selectedOrder.surcharge > 0 && (
-                        <div className="flex justify-between text-sm text-secondary">
+                        <div className="flex justify-between text-sm text-zinc-300">
                           <span className="font-bold">EFTPOS Surcharge</span>
                           <span className="font-bold">${selectedOrder.surcharge.toFixed(2)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between pt-4 border-t border-outline-variant/20">
+                      <div className="flex justify-between pt-4 border-t border-zinc-800/20">
                         <span className="text-lg font-black">Total Paid</span>
-                        <span className="text-2xl font-black text-primary">${selectedOrder.total.toFixed(2)}</span>
+                        <span className="text-2xl font-black text-blue-500">${selectedOrder.total.toFixed(2)}</span>
                       </div>
                     </div>
 
@@ -839,7 +839,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                 <div className="flex flex-col sm:flex-row gap-3 mt-6">
                   <button 
                     onClick={() => setShowInvoiceModal(true)}
-                    className="flex-1 py-4 bg-surface-container-highest text-on-surface rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all flex justify-center items-center gap-2"
+                    className="flex-1 py-4 bg-zinc-800 text-white rounded-2xl font-bold text-sm shadow-sm hover:shadow-md transition-all flex justify-center items-center gap-2"
                   >
                     <Printer size={18} />
                     {t('term', 'printReceipt')}
@@ -847,14 +847,14 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                   {selectedOrder.status !== 'refunded' && (
                     <button 
                       onClick={handleRefund}
-                      className="flex-1 py-4 bg-error/10 text-error rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all flex justify-center items-center gap-2"
+                      className="flex-1 py-4 bg-red-500/10 text-red-500 rounded-2xl font-bold text-sm shadow-sm hover:shadow-md transition-all flex justify-center items-center gap-2"
                     >
                       {t('term', 'refundBtn') || "Refund Order"}
                     </button>
                   )}
                   <button 
                     onClick={() => setSelectedOrder(null)}
-                    className="flex-1 py-4 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all"
+                    className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-bold text-sm shadow-lg shadow-blue-500/20 hover:shadow-xl transition-all"
                   >
                     Close Details
                   </button>
@@ -877,20 +877,20 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
 
 function StatCard({ label, value, trend, trendLabel, icon: Icon, color }: any) {
   return (
-    <div className="bg-surface-container-lowest p-6 rounded-2xl flex flex-col justify-between shadow-sm border border-outline-variant/10 hover:shadow-md transition-all group">
+    <div className="bg-black p-6 rounded-2xl flex flex-col justify-between shadow-sm border border-zinc-800/10 hover:shadow-md transition-all group">
       <div className="flex justify-between items-start">
-        <span className="text-on-surface-variant text-[10px] font-black uppercase tracking-widest">{label}</span>
+        <span className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">{label}</span>
         <div className={cn(
-          "p-2.5 rounded-xl transition-transform group-hover:scale-110",
-          color === 'primary' ? "bg-primary-container/10 text-primary" : 
-          color === 'secondary' ? "bg-secondary-container/30 text-secondary" : 
+          "p-2.5 rounded-2xl transition-transform group-hover:scale-110",
+          color === 'primary' ? "bg-blue-900/30/10 text-blue-500" : 
+          color === 'secondary' ? "bg-zinc-800/30 text-zinc-300" : 
           "bg-tertiary-container/20 text-tertiary"
         )}>
           <Icon size={20} />
         </div>
       </div>
       <div className="mt-6">
-        <p className="text-3xl font-black text-on-surface tracking-tight">{value}</p>
+        <p className="text-3xl font-black text-white tracking-tight">{value}</p>
         {trend && (
           <div className="flex items-center gap-1.5 mt-1.5">
             {trend.includes('+') ? (
@@ -898,9 +898,9 @@ function StatCard({ label, value, trend, trendLabel, icon: Icon, color }: any) {
             ) : null}
             <span className={cn(
               "text-[11px] font-black",
-              trend.includes('+') ? "text-teal-600" : "text-on-surface-variant"
+              trend.includes('+') ? "text-teal-600" : "text-zinc-400"
             )}>{trend}</span>
-            <span className="text-[10px] font-bold text-on-surface-variant ml-0.5">{trendLabel}</span>
+            <span className="text-[10px] font-bold text-zinc-400 ml-0.5">{trendLabel}</span>
           </div>
         )}
       </div>

@@ -152,8 +152,8 @@ function BlogEditorInline({
     return (
       <div className="fixed inset-0 bg-surface z-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-          <p className="text-on-surface-variant font-bold">Loading editor...</p>
+          <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
+          <p className="text-zinc-400 font-bold">Loading editor...</p>
         </div>
       </div>
     );
@@ -314,7 +314,7 @@ function TipTapEditorWrapper({
   // Toolbar button helper
   const TB = ({ onClick, isActive = false, disabled = false, children, title: t }: any) => (
     <button type="button" onClick={onClick} disabled={disabled} title={t}
-      className={`p-2 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'} ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
+      className={`p-2 rounded-2xl transition-all ${isActive ? 'bg-blue-500/10 text-blue-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'} ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
       {children}
     </button>
   );
@@ -322,19 +322,19 @@ function TipTapEditorWrapper({
   return (
     <div className="fixed inset-0 bg-surface z-50 overflow-y-auto">
       {/* Top Bar */}
-      <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/20">
+      <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-xl border-b border-zinc-800/20">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-          <button onClick={onCancel} className="flex items-center gap-2 text-on-surface-variant hover:text-on-surface font-bold transition-colors">
+          <button onClick={onCancel} className="flex items-center gap-2 text-zinc-400 hover:text-white font-bold transition-colors">
             <ArrowLeft size={20} /> Back to CMS
           </button>
           <div className="flex items-center gap-3">
-            {error && <span className="text-error text-sm font-bold mr-2">{error}</span>}
+            {error && <span className="text-red-500 text-sm font-bold mr-2">{error}</span>}
             <button onClick={() => handleSave(false)} disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-2xl font-bold text-sm transition-all disabled:opacity-50">
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl font-bold text-sm transition-all disabled:opacity-50">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save Draft
             </button>
             <button onClick={() => handleSave(true)} disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-on-primary rounded-2xl font-bold text-sm transition-all shadow-lg disabled:opacity-50">
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-500/90 text-white rounded-2xl font-bold text-sm transition-all shadow-lg disabled:opacity-50">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {isPublished ? 'Update & Publish' : 'Publish'}
             </button>
@@ -344,41 +344,41 @@ function TipTapEditorWrapper({
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Meta Fields */}
-        <div className="bg-surface-container-low rounded-3xl border border-outline-variant/10 p-8 mb-6">
+        <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800/10 p-8 mb-6">
           <div className="grid gap-5">
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Title</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Title</label>
               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Your blog post title..."
-                className="w-full text-2xl font-black text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none" />
+                className="w-full text-2xl font-black text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Slug</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Slug</label>
               <div className="flex items-center gap-2">
-                <span className="text-on-surface-variant text-sm font-mono">/blog/</span>
+                <span className="text-zinc-400 text-sm font-mono">/blog/</span>
                 <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugManuallyEdited(true); }}
                   placeholder="url-friendly-slug"
-                  className="flex-1 text-sm font-mono text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 outline-none" />
+                  className="flex-1 text-sm font-mono text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-3 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30 outline-none" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Description / Excerpt</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Description / Excerpt</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief summary for SEO..."
-                rows={2} className="w-full text-sm text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none resize-none" />
+                rows={2} className="w-full text-sm text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Cover Image</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Cover Image</label>
               <div className="flex items-center gap-4">
                 {coverImage && (
                   <div className="relative group">
-                    <img src={coverImage} alt="Cover" className="h-20 w-32 object-cover rounded-xl border border-outline-variant/20" />
+                    <img src={coverImage} alt="Cover" className="h-20 w-32 object-cover rounded-2xl border border-zinc-800/20" />
                     <button onClick={() => setCoverImage('')}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-error text-on-error rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <X size={12} />
                     </button>
                   </div>
                 )}
                 <button onClick={handleCoverImageUpload} disabled={uploading}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface-variant rounded-xl text-sm font-bold transition-all">
+                  className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 rounded-2xl text-sm font-bold transition-all">
                   <ImageIcon size={16} /> {uploading ? 'Uploading...' : coverImage ? 'Change Image' : 'Upload Cover'}
                 </button>
               </div>
@@ -387,9 +387,9 @@ function TipTapEditorWrapper({
         </div>
 
         {/* Editor */}
-        <div className="bg-surface-container-low rounded-3xl border border-outline-variant/10 overflow-hidden">
+        <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800/10 overflow-hidden">
           {/* Toolbar */}
-          <div className="border-b border-outline-variant/20 px-4 py-2 flex items-center gap-1 flex-wrap bg-surface-container/50">
+          <div className="border-b border-zinc-800/20 px-4 py-2 flex items-center gap-1 flex-wrap bg-zinc-900/50">
             <TB onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="Bold"><Bold size={16} /></TB>
             <TB onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="Italic"><Italic size={16} /></TB>
             <TB onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Underline"><UnderlineIcon size={16} /></TB>
@@ -410,7 +410,7 @@ function TipTapEditorWrapper({
             <div className="w-px h-6 bg-outline-variant/20 mx-1" />
             <TB onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo"><Undo size={16} /></TB>
             <TB onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo"><Redo size={16} /></TB>
-            {uploading && <span className="ml-3 text-xs text-primary font-bold flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Uploading...</span>}
+            {uploading && <span className="ml-3 text-xs text-blue-500 font-bold flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Uploading...</span>}
           </div>
           {/* Editor Area */}
           <EditorContent editor={editor} />
@@ -696,15 +696,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       <div className="flex items-center gap-6 mb-12">
         <button
           onClick={onBack}
-          className="w-12 h-12 bg-surface-container-low rounded-2xl flex items-center justify-center text-on-surface-variant hover:text-primary hover:shadow-lg transition-all border border-outline-variant/10"
+          className="w-12 h-12 bg-zinc-900/50 rounded-2xl flex items-center justify-center text-zinc-400 hover:text-blue-500 hover:shadow-lg transition-all border border-zinc-800/10"
         >
           <ArrowLeft size={24} />
         </button>
         <div>
-          <h1 className="text-4xl font-black text-on-surface tracking-tighter">
-            Storefront <span className="text-primary italic">CMS</span>
+          <h1 className="text-4xl font-black text-white tracking-tighter">
+            Storefront <span className="text-blue-500 italic">CMS</span>
           </h1>
-          <p className="text-on-surface-variant font-medium">Manage announcements and blog content.</p>
+          <p className="text-zinc-400 font-medium">Manage announcements and blog content.</p>
         </div>
       </div>
 
@@ -713,13 +713,13 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="mb-16">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-            <Megaphone className="text-primary" size={24} />
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Megaphone className="text-blue-500" size={24} />
             Top Announcement Bar
           </h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg"
+            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500/90 transition-all shadow-lg"
           >
             <Plus size={20} />
             Add Announcement
@@ -735,7 +735,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-surface-container-low border border-primary/20 rounded-3xl p-6 flex items-center gap-4">
+              <div className="bg-zinc-900/50 border border-blue-500/20 rounded-3xl p-6 flex items-center gap-4">
                 <input
                   type="text"
                   value={newMessage}
@@ -743,19 +743,19 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   onKeyDown={(e) => e.key === 'Enter' && handleAddAnnouncement()}
                   placeholder="Type your announcement message..."
                   autoFocus
-                  className="flex-1 text-lg font-bold text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                  className="flex-1 text-lg font-bold text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
                 />
                 <button
                   onClick={handleAddAnnouncement}
                   disabled={addingAnnouncement || !newMessage.trim()}
-                  className="flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-blue-500 text-white px-5 py-2.5 rounded-2xl font-bold text-sm hover:bg-blue-500/90 transition-all disabled:opacity-50"
                 >
                   {addingAnnouncement ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                   Save
                 </button>
                 <button
                   onClick={() => { setShowAddForm(false); setNewMessage(''); }}
-                  className="p-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all"
+                  className="p-2.5 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-2xl transition-all"
                 >
                   <X size={18} />
                 </button>
@@ -766,16 +766,16 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
         {/* Announcements List */}
         {loadingAnnouncements ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] text-on-surface-variant gap-4">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem] text-zinc-400 gap-4">
+            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
             <p className="font-bold">Loading announcements...</p>
           </div>
         ) : announcements.length === 0 ? (
-          <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
+          <div className="text-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
             <Megaphone size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-on-surface mb-2">No active announcements</h3>
-            <p className="text-on-surface-variant mb-8 max-w-sm mx-auto">Create your first announcement to show it on the top bar of your public storefront.</p>
-            <button onClick={() => setShowAddForm(true)} className="text-primary font-bold hover:underline">
+            <h3 className="text-xl font-bold text-white mb-2">No active announcements</h3>
+            <p className="text-zinc-400 mb-8 max-w-sm mx-auto">Create your first announcement to show it on the top bar of your public storefront.</p>
+            <button onClick={() => setShowAddForm(true)} className="text-blue-500 font-bold hover:underline">
               Get started by adding one →
             </button>
           </div>
@@ -789,9 +789,9 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-surface-container-low border border-outline-variant/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-primary/20 transition-all"
+                  className="bg-zinc-900/50 border border-zinc-800/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-blue-500/20 transition-all"
                 >
-                  <div className="w-10 h-10 bg-surface-container rounded-xl flex items-center justify-center text-outline group-hover:text-primary/50 transition-colors">
+                  <div className="w-10 h-10 bg-zinc-900 rounded-2xl flex items-center justify-center text-outline group-hover:text-blue-500/50 transition-colors">
                     <GripVertical size={20} />
                   </div>
                   <div className="flex-1">
@@ -800,14 +800,14 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.message}
                       onChange={(e) => setAnnouncements(announcements.map(a => a.id === item.id ? { ...a, message: e.target.value } : a))}
                       onBlur={(e) => handleUpdateAnnouncement(item.id, { message: e.target.value })}
-                      className="w-full text-lg font-bold text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                      className="w-full text-lg font-bold text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
                       placeholder="Enter announcement message..."
                     />
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
                         Order #{item.display_order}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
                         Added {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -818,7 +818,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-bold text-xs ${
                         item.is_active
                           ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                          : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                       }`}
                     >
                       {item.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
@@ -826,7 +826,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                     </button>
                     <button
                       onClick={() => handleDeleteAnnouncement(item.id)}
-                      className="p-3 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all"
+                      className="p-3 text-zinc-400 hover:text-red-500 hover:bg-red-900/30/20 rounded-2xl transition-all"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -838,7 +838,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         )}
 
         {announcementError && (
-          <div className="flex items-center gap-3 p-4 bg-error-container/20 border border-error/20 rounded-2xl text-error text-sm font-bold mt-4">
+          <div className="flex items-center gap-3 p-4 bg-red-900/30/20 border border-red-500/20 rounded-2xl text-red-500 text-sm font-bold mt-4">
             <AlertCircle size={18} /> {announcementError}
           </div>
         )}
@@ -849,13 +849,13 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-            <BookOpen className="text-primary" size={24} />
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <BookOpen className="text-blue-500" size={24} />
             Blog Management
           </h2>
           <button
             onClick={() => { setEditingPost(null); setEditorOpen(true); }}
-            className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg"
+            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500/90 transition-all shadow-lg"
           >
             <Plus size={20} />
             New Blog Post
@@ -863,24 +863,24 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         </div>
 
         {loadingBlogs ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] text-on-surface-variant gap-4">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem] text-zinc-400 gap-4">
+            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
             <p className="font-bold">Loading blog posts...</p>
           </div>
         ) : blogError ? (
-          <div className="text-center py-16 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
+          <div className="text-center py-16 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
             <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-on-surface mb-2">Blog Table Not Found</h3>
-            <p className="text-on-surface-variant max-w-md mx-auto text-sm mb-6">
-              Run <code className="bg-surface-container px-1.5 py-0.5 rounded text-primary font-bold">storefront_blogs.sql</code> in your Supabase SQL Editor.
+            <h3 className="text-lg font-bold text-white mb-2">Blog Table Not Found</h3>
+            <p className="text-zinc-400 max-w-md mx-auto text-sm mb-6">
+              Run <code className="bg-zinc-900 px-1.5 py-0.5 rounded text-blue-500 font-bold">storefront_blogs.sql</code> in your Supabase SQL Editor.
             </p>
           </div>
         ) : blogPosts.length === 0 ? (
-          <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
+          <div className="text-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
             <FileText size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-on-surface mb-2">No blog posts yet</h3>
-            <p className="text-on-surface-variant mb-8 max-w-sm mx-auto">Start creating content for your storefront blog.</p>
-            <button onClick={() => { setEditingPost(null); setEditorOpen(true); }} className="text-primary font-bold hover:underline">
+            <h3 className="text-xl font-bold text-white mb-2">No blog posts yet</h3>
+            <p className="text-zinc-400 mb-8 max-w-sm mx-auto">Start creating content for your storefront blog.</p>
+            <button onClick={() => { setEditingPost(null); setEditorOpen(true); }} className="text-blue-500 font-bold hover:underline">
               Write your first post →
             </button>
           </div>
@@ -894,37 +894,37 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-surface-container-low border border-outline-variant/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-primary/20 transition-all"
+                  className="bg-zinc-900/50 border border-zinc-800/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-blue-500/20 transition-all"
                 >
                   {post.cover_image ? (
-                    <img src={post.cover_image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-outline-variant/20 shrink-0" />
+                    <img src={post.cover_image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-zinc-800/20 shrink-0" />
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shrink-0">
+                    <div className="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center shrink-0">
                       <FileText size={24} className="text-outline" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-on-surface truncate">{post.title}</h3>
+                    <h3 className="text-lg font-bold text-white truncate">{post.title}</h3>
                     <div className="flex items-center gap-3 mt-1.5">
                       <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
                         post.is_published ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600'
                       }`}>
                         {post.is_published ? 'Published' : 'Draft'}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Calendar size={10} />
                         {post.published_at ? new Date(post.published_at).toLocaleDateString() : new Date(post.created_at || '').toLocaleDateString()}
                       </span>
-                      <span className="text-[10px] font-mono text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">/blog/{post.slug}</span>
+                      <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">/blog/{post.slug}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => { setEditingPost(post); setEditorOpen(true); }}
-                      className="p-3 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-2xl transition-all" title="Edit">
+                      className="p-3 text-zinc-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-2xl transition-all" title="Edit">
                       <Pencil size={18} />
                     </button>
                     <button onClick={() => handleDeleteBlogPost(post.id!)}
-                      className="p-3 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all" title="Delete">
+                      className="p-3 text-zinc-400 hover:text-red-500 hover:bg-red-900/30/20 rounded-2xl transition-all" title="Delete">
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -940,13 +940,13 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-            <ShoppingBag className="text-primary" size={24} />
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <ShoppingBag className="text-blue-500" size={24} />
             Cart Upsells & Accessories
           </h2>
           <button
             onClick={() => setShowAddUpsellForm(true)}
-            className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg"
+            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500/90 transition-all shadow-lg"
           >
             <Plus size={20} />
             Add Upsell
@@ -962,33 +962,33 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-surface-container-low border border-primary/20 rounded-3xl p-6 space-y-4">
+              <div className="bg-zinc-900/50 border border-blue-500/20 rounded-3xl p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Name *</label>
+                    <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-1.5">Name *</label>
                     <input
                       type="text"
                       value={newUpsellName}
                       onChange={(e) => setNewUpsellName(e.target.value)}
                       placeholder="e.g. Premium Tempered Glass"
                       autoFocus
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
+                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Description</label>
+                    <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-1.5">Description</label>
                     <input
                       type="text"
                       value={newUpsellDescription}
                       onChange={(e) => setNewUpsellDescription(e.target.value)}
                       placeholder="e.g. Protect your screen from scratches"
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
+                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Regular Price ($)</label>
+                    <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-1.5">Regular Price ($)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -996,11 +996,11 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={newUpsellRegularPrice}
                       onChange={(e) => setNewUpsellRegularPrice(e.target.value)}
                       placeholder="39.99"
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
+                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Bundle Price ($)</label>
+                    <label className="block text-xs font-black uppercase tracking-widest text-white-variant mb-1.5">Bundle Price ($)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -1008,7 +1008,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={newUpsellBundlePrice}
                       onChange={(e) => setNewUpsellBundlePrice(e.target.value)}
                       placeholder="25.00"
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
+                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
                     />
                   </div>
                 </div>
@@ -1016,14 +1016,14 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   <button
                     onClick={handleAddUpsell}
                     disabled={addingUpsell || !newUpsellName.trim()}
-                    className="flex items-center gap-2 bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 bg-blue-500 text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-500/90 transition-all disabled:opacity-50"
                   >
                     {addingUpsell ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                     Save Upsell
                   </button>
                   <button
                     onClick={() => { setShowAddUpsellForm(false); setNewUpsellName(''); setNewUpsellDescription(''); setNewUpsellRegularPrice(''); setNewUpsellBundlePrice(''); }}
-                    className="p-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all"
+                    className="p-2.5 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-2xl transition-all"
                   >
                     Cancel
                   </button>
@@ -1035,35 +1035,35 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
         {/* Upsells List */}
         {loadingUpsells ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] text-on-surface-variant gap-4">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem] text-zinc-400 gap-4">
+            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
             <p className="font-bold">Loading upsells...</p>
           </div>
         ) : upsellError && upsells.length === 0 ? (
-          <div className="text-center py-16 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
+          <div className="text-center py-16 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
             <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-on-surface mb-2">Supabase Error Detected</h3>
-            <p className="text-on-surface-variant max-w-lg mx-auto text-sm mb-6 bg-surface-container p-4 rounded-2xl font-mono break-all">
+            <h3 className="text-lg font-bold text-white mb-2">Supabase Error Detected</h3>
+            <p className="text-zinc-400 max-w-lg mx-auto text-sm mb-6 bg-zinc-900 p-4 rounded-2xl font-mono break-all">
               {upsellError}
             </p>
-            <p className="text-on-surface-variant max-w-md mx-auto text-sm mb-6">
+            <p className="text-white-variant max-w-md mx-auto text-sm mb-6">
               If the error says "relation does not exist", please ensure you have run the SQL script in your Supabase SQL Editor.
             </p>
             <button 
               onClick={() => { setUpsellError(null); fetchUpsells(); }}
-              className="text-primary font-bold hover:underline"
+              className="text-blue-500 font-bold hover:underline"
             >
               Try to refresh table connection →
             </button>
           </div>
         ) : upsells.length === 0 ? (
-          <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
+          <div className="text-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
             <ShoppingBag size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-on-surface mb-2">No upsell items yet</h3>
-            <p className="text-on-surface-variant mb-8 max-w-sm mx-auto">Add accessories and add-ons that customers can bundle with their repair.</p>
+            <h3 className="text-xl font-bold text-white mb-2">No upsell items yet</h3>
+            <p className="text-white-variant mb-8 max-w-sm mx-auto">Add accessories and add-ons that customers can bundle with their repair.</p>
             <button
               onClick={() => setShowAddUpsellForm(true)}
-              className="text-primary font-bold hover:underline"
+              className="text-blue-500 font-bold hover:underline"
             >
               Add your first upsell →
             </button>
@@ -1078,9 +1078,9 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-surface-container-low border border-outline-variant/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-primary/20 transition-all"
+                  className="bg-zinc-900/50 border border-zinc-800/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-blue-500/20 transition-all"
                 >
-                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary/60 shrink-0">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500/60 shrink-0">
                     <DollarSign size={20} />
                   </div>
 
@@ -1090,7 +1090,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.name}
                       onChange={(e) => setUpsells(upsells.map(u => u.id === item.id ? { ...u, name: e.target.value } : u))}
                       onBlur={(e) => handleUpdateUpsell(item.id, { name: e.target.value })}
-                      className="w-full text-lg font-bold text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                      className="w-full text-lg font-bold text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
                       placeholder="Upsell name..."
                     />
                     <input
@@ -1098,17 +1098,17 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.description}
                       onChange={(e) => setUpsells(upsells.map(u => u.id === item.id ? { ...u, description: e.target.value } : u))}
                       onBlur={(e) => handleUpdateUpsell(item.id, { description: e.target.value })}
-                      className="w-full text-sm text-on-surface-variant bg-transparent border-none focus:ring-0 p-0 mt-0.5 placeholder:text-outline outline-none"
+                      className="w-full text-sm text-white-variant bg-transparent border-none focus:ring-0 p-0 mt-0.5 placeholder:text-outline outline-none"
                       placeholder="Description..."
                     />
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
                         RRP ${Number(item.regular_price).toFixed(2)}
                       </span>
                       <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full">
                         Bundle ${Number(item.bundle_price).toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
                         Added {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -1120,7 +1120,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-bold text-xs ${
                         item.is_active
                           ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                          : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                       }`}
                     >
                       {item.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
@@ -1129,7 +1129,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
                     <button
                       onClick={() => handleDeleteUpsell(item.id)}
-                      className="p-3 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all"
+                      className="p-3 text-white-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all"
                     >
                       <Trash2 size={20} />
                     </button>

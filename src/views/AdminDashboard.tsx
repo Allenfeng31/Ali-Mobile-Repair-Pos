@@ -86,10 +86,10 @@ export function AdminDashboard({ onViewChange }: { onViewChange: (view: string) 
   if (!permissions?.is_super_admin) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center p-8 bg-error-container/10 border border-error/20 rounded-[2rem] max-w-md">
-          <ShieldCheck className="mx-auto mb-4 text-error" size={48} />
-          <h2 className="text-2xl font-black text-on-surface mb-2">Access Denied</h2>
-          <p className="text-on-surface-variant">You do not have the required permissions to access the Admin Dashboard.</p>
+        <div className="text-center p-8 bg-red-900/30/10 border border-red-500/20 rounded-[2rem] max-w-md">
+          <ShieldCheck className="mx-auto mb-4 text-red-500" size={48} />
+          <h2 className="text-2xl font-black text-white mb-2">Access Denied</h2>
+          <p className="text-zinc-400">You do not have the required permissions to access the Admin Dashboard.</p>
         </div>
       </div>
     );
@@ -113,10 +113,10 @@ export function AdminDashboard({ onViewChange }: { onViewChange: (view: string) 
   return (
     <div className="p-8 max-w-7xl mx-auto h-full flex flex-col">
       <div className="mb-12">
-        <h1 className="text-5xl font-black text-on-surface tracking-tighter mb-4">
-          Admin <span className="text-primary italic">Dashboard</span>
+        <h1 className="text-5xl font-black text-white tracking-tighter mb-4">
+          Admin <span className="text-blue-500 italic">Dashboard</span>
         </h1>
-        <p className="text-on-surface-variant max-w-2xl font-medium">
+        <p className="text-zinc-400 max-w-2xl font-medium">
           Welcome to the high-level management hub. Control permissions, analyze performance, and manage your infrastructure from a single premium interface.
         </p>
       </div>
@@ -141,25 +141,25 @@ export function AdminDashboard({ onViewChange }: { onViewChange: (view: string) 
                 setActiveModule(card.id);
               }
             }}
-            className="group relative flex flex-col items-start p-8 bg-surface-container-low rounded-[2.5rem] border border-outline-variant/10 shadow-sm hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 transition-all text-left overflow-hidden no-tap-highlight"
+            className="group relative flex flex-col items-start p-8 bg-zinc-900/50 rounded-[2.5rem] border border-zinc-800/10 shadow-sm hover:shadow-2xl hover:shadow-blue-500/5 hover:border-blue-500/20 transition-all text-left overflow-hidden no-tap-highlight"
           >
             {/* Background Decoration */}
             <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
             
-            <div className={`w-16 h-16 ${card.color} bg-white rounded-3xl flex items-center justify-center mb-6 shadow-inner border border-outline-variant/10 group-hover:scale-110 group-hover:rotate-3 transition-transform relative z-10`}>
+            <div className={`w-16 h-16 ${card.color} bg-white rounded-3xl flex items-center justify-center mb-6 shadow-inner border border-zinc-800/10 group-hover:scale-110 group-hover:rotate-3 transition-transform relative z-10`}>
               <card.icon size={32} strokeWidth={2.5} />
             </div>
             
-            <h3 className="text-2xl font-black text-on-surface mb-3 group-hover:text-primary transition-colors relative z-10">
+            <h3 className="text-2xl font-black text-white mb-3 group-hover:text-blue-500 transition-colors relative z-10">
               {card.title}
             </h3>
             
-            <p className="text-on-surface-variant font-medium leading-relaxed relative z-10">
+            <p className="text-zinc-400 font-medium leading-relaxed relative z-10">
               {card.description}
             </p>
 
             {/* Bottom Arrow Indicator */}
-            <div className="mt-8 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all relative z-10">
+            <div className="mt-8 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-blue-500 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all relative z-10">
               Open Module
               <motion.span 
                 animate={{ x: [0, 5, 0] }} 

@@ -729,10 +729,10 @@ export function CustomersView() {
       <div 
         key={customer.id}
         className={cn(
-          "rounded-2xl overflow-hidden transition-all duration-300 border border-outline-variant/10 shadow-sm",
+          "rounded-2xl overflow-hidden transition-all duration-300 border border-zinc-800/10 shadow-sm",
           isExpanded 
-            ? "bg-surface-container-low shadow-xl ring-1 ring-primary/20 scale-[1.01]" 
-            : "bg-surface-container-lowest hover:bg-surface-container-high hover:shadow-md"
+            ? "bg-zinc-900/50 shadow-xl ring-1 ring-blue-500/20 scale-[1.01]" 
+            : "bg-black hover:bg-zinc-800 hover:shadow-md"
         )}
       >
         <div 
@@ -742,20 +742,20 @@ export function CustomersView() {
           <div className="flex items-center gap-4">
             <div className={cn(
               "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all",
-              isExpanded ? "bg-primary text-on-primary rotate-3" : "bg-secondary-container text-on-secondary-container group-hover/card:rotate-3"
+              isExpanded ? "bg-blue-500 text-white rotate-3" : "bg-zinc-800 text-zinc-200 group-hover/card:rotate-3"
             )}>
               {customer.initials}
             </div>
             <div>
-              <h3 className="font-bold text-on-surface">{customer.name}</h3>
+              <h3 className="font-bold text-white">{customer.name}</h3>
               <div className="flex flex-col gap-1.5 mt-0.5">
-                <p className="text-xs text-on-surface-variant font-bold">{customer.phone}</p>
+                <p className="text-xs text-zinc-400 font-bold">{customer.phone}</p>
                 {customer.repairs.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                    <span className="text-[10px] font-black text-blue-500/70 bg-blue-500/5 px-2 py-0.5 rounded-full border border-blue-500/10">
                       {new Date(customer.repairs[0].timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </span>
-                    <span className="text-[10px] font-bold text-on-surface-variant/80 italic">
+                    <span className="text-[10px] font-bold text-zinc-400/80 italic">
                       {customer.repairs[0].modelNumber}
                     </span>
                   </div>
@@ -766,20 +766,20 @@ export function CustomersView() {
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <span className={cn(
-                "text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest transition-colors",
-                statusColor === 'tertiary' ? "bg-tertiary-container text-on-tertiary-container border border-tertiary/10" :
-                statusColor === 'error' ? "bg-error-container text-on-error-container border border-error/10" :
-                "bg-surface-container-highest text-on-surface-variant border border-outline-variant/10"
+                "text-[10px] font-black px-2.5 py-1 rounded-2xl uppercase tracking-widest transition-colors",
+                statusColor === 'tertiary' ? "bg-purple-900/30 text-purple-200 border border-tertiary/10" :
+                statusColor === 'error' ? "bg-red-900/30 text-red-200 border border-error/10" :
+                "bg-zinc-800 text-zinc-400 border border-zinc-800/10"
               )}>
                 {overallStatus}
               </span>
-              <p className="text-[10px] font-bold text-on-surface-variant mt-1.5">Price: ${customer.totalSpent.toFixed(2)}</p>
+              <p className="text-[10px] font-bold text-zinc-400 mt-1.5">Price: ${customer.totalSpent.toFixed(2)}</p>
             </div>
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <ChevronRight size={20} className="text-on-surface-variant" />
+              <ChevronRight size={20} className="text-zinc-400" />
             </motion.div>
           </div>
         </div>
@@ -792,26 +792,26 @@ export function CustomersView() {
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <div className="px-5 pb-6 pt-2 border-t border-outline-variant/5">
+              <div className="px-5 pb-6 pt-2 border-t border-zinc-800/5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Contact Details</p>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Contact Details</p>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-sm font-bold text-on-surface bg-surface-container-low/50 p-2 rounded-lg">
-                          <Mail size={16} className="text-primary" />
+                        <div className="flex items-center gap-3 text-sm font-bold text-white bg-zinc-900/50/50 p-2 rounded-2xl">
+                          <Mail size={16} className="text-blue-500" />
                           <span className="truncate">{customer.email}</span>
                         </div>
-                        <div className="flex items-center justify-between w-full bg-surface-container-low/50 p-2 rounded-lg">
-                          <div className="flex items-center gap-3 text-sm font-bold text-on-surface">
-                            <Phone size={16} className="text-primary" />
+                        <div className="flex items-center justify-between w-full bg-zinc-900/50/50 p-2 rounded-2xl">
+                          <div className="flex items-center gap-3 text-sm font-bold text-white">
+                            <Phone size={16} className="text-blue-500" />
                             {customer.phone}
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
                               className={cn(
-                                "px-3 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
+                                "px-3 py-1.5 rounded-2xl font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
                                 sendingReviewId === customer.id 
                                   ? "bg-green-100 text-green-800 border-green-200" 
                                   : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
@@ -835,14 +835,14 @@ export function CustomersView() {
                     <div className="flex gap-2">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); openEditModal(); }}
-                        className="flex-1 bg-surface-container-highest text-on-surface-variant py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-primary hover:text-on-primary transition-all shadow-sm"
+                        className="flex-1 bg-zinc-800 text-zinc-400 py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
                       >
                         <Edit3 size={14} />
                         Edit Profile
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); setIsViewingAllOrders(true); }}
-                        className="flex-1 bg-secondary-container text-on-secondary-container py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-sm"
+                        className="flex-1 bg-zinc-800 text-zinc-200 py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-sm"
                       >
                         Recent Activity
                       </button>
@@ -850,25 +850,25 @@ export function CustomersView() {
                   </div>
 
                   <div>
-                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Live Repairs</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Live Repairs</p>
                     <div className="space-y-2">
                       {customer.repairs.slice(0, 2).map(repair => (
                         <div 
                           key={repair.id}
                           onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
-                          className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 hover:border-primary/40 transition-all cursor-pointer flex justify-between items-center group/repair shadow-sm"
+                          className="bg-black p-3 rounded-2xl border border-zinc-800/10 hover:border-blue-500/40 transition-all cursor-pointer flex justify-between items-center group/repair shadow-sm"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/5 rounded-lg text-primary group-hover/repair:bg-primary group-hover/repair:text-on-primary transition-colors">
+                            <div className="p-2 bg-blue-500/5 rounded-2xl text-blue-500 group-hover/repair:bg-blue-500 group-hover/repair:text-white transition-colors">
                               <Smartphone size={16} />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-on-surface">{repair.repairItem}</p>
-                              <p className="text-[10px] font-bold text-on-surface-variant">{repair.modelNumber}</p>
+                              <p className="text-xs font-bold text-white">{repair.repairItem}</p>
+                              <p className="text-[10px] font-bold text-zinc-400">{repair.modelNumber}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs font-black text-primary">${repair.price.toFixed(2)}</p>
+                            <p className="text-xs font-black text-blue-500">${repair.price.toFixed(2)}</p>
                             {(repair.deposit || 0) > 0 && (
                               <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-200 block mt-0.5">
                                 💰 Deposit: ${repair.deposit.toFixed(2)}
@@ -879,9 +879,9 @@ export function CustomersView() {
                               className={cn(
                                 "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all shadow-sm block mt-1",
                                 repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
-                                repair.status === 'Urgent' ? "bg-error-container text-on-error-container border border-error/5" :
-                                repair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container border border-tertiary/5" :
-                                "bg-surface-container-highest text-on-surface-variant border border-outline-variant/5"
+                                repair.status === 'Urgent' ? "bg-red-900/30 text-red-200 border border-error/5" :
+                                repair.status === 'In Processing' ? "bg-purple-900/30 text-purple-200 border border-tertiary/5" :
+                                "bg-zinc-800 text-zinc-400 border border-zinc-800/5"
                               )}
                             >
                               {repair.status}
@@ -892,7 +892,7 @@ export function CustomersView() {
                       {customer.repairs.length > 2 && (
                         <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); setIsViewingAllOrders(true); }}
-                          className="w-full text-[10px] font-black text-primary uppercase tracking-widest text-center py-2 hover:underline bg-primary/5 rounded-lg"
+                          className="w-full text-[10px] font-black text-blue-500 uppercase tracking-widest text-center py-2 hover:underline bg-blue-500/5 rounded-2xl"
                         >
                           + {customer.repairs.length - 2} more records
                         </button>
@@ -914,12 +914,12 @@ export function CustomersView() {
       <section className="flex-1 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-primary">Customers</h2>
-            <p className="text-on-surface-variant text-sm font-medium">Manage your technical client database</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-blue-500">Customers</h2>
+            <p className="text-zinc-400 text-sm font-medium">Manage your technical client database</p>
           </div>
           <button 
             onClick={() => setIsAdding(true)}
-            className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-md active:scale-95 transition-all"
+            className="bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-md active:scale-95 transition-all"
           >
             <UserPlus size={18} />
             Add New Customer
@@ -929,9 +929,9 @@ export function CustomersView() {
         {/* Search & Filter */}
         <div className="flex gap-4 mb-6">
           <div className="relative group flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
             <input 
-              className="w-full bg-surface-container-high border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-highest transition-all outline-none text-on-surface font-medium" 
+              className="w-full bg-zinc-800 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500/20 focus:bg-zinc-800 transition-all outline-none text-white font-medium" 
               placeholder="Search by name, phone, email or repair item..." 
               type="text"
               value={searchQuery}
@@ -944,7 +944,7 @@ export function CustomersView() {
               "px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 border-2",
               filterSyncedOnly 
                 ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100" 
-                : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:bg-surface-container-high hover:text-on-surface"
+                : "bg-black text-zinc-400 border-zinc-800/10 hover:bg-zinc-800 hover:text-white"
             )}
           >
             {filterSyncedOnly ? <Check size={16} /> : <Users size={16} />}
@@ -958,15 +958,15 @@ export function CustomersView() {
             // Skeleton loading state
             <div className="space-y-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/10 p-5 flex items-center gap-4 animate-pulse">
-                  <div className="w-12 h-12 rounded-2xl bg-surface-container-high flex-shrink-0" />
+                <div key={i} className="rounded-2xl overflow-hidden bg-black border border-zinc-800/10 p-5 flex items-center gap-4 animate-pulse">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex-shrink-0" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-surface-container-high rounded-lg w-1/3" />
-                    <div className="h-3 bg-surface-container-high rounded-lg w-1/4" />
+                    <div className="h-4 bg-zinc-800 rounded-2xl w-1/3" />
+                    <div className="h-3 bg-zinc-800 rounded-2xl w-1/4" />
                   </div>
                   <div className="space-y-2 text-right">
-                    <div className="h-5 bg-surface-container-high rounded-lg w-16" />
-                    <div className="h-3 bg-surface-container-high rounded-lg w-12" />
+                    <div className="h-5 bg-zinc-800 rounded-2xl w-16" />
+                    <div className="h-3 bg-zinc-800 rounded-2xl w-12" />
                   </div>
                 </div>
               ))}
@@ -977,9 +977,9 @@ export function CustomersView() {
               {inProcessingCustomers.length > 0 && (
                 <div className="mb-8 space-y-4">
                   <div className="flex items-center gap-3 px-2">
-                    <h3 className="text-sm font-black text-on-surface uppercase tracking-widest">In Processing</h3>
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest">In Processing</h3>
                     <div className="h-px flex-1 bg-outline-variant/10" />
-                    <span className="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-lg uppercase">
+                    <span className="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-2xl uppercase">
                       {inProcessingCustomers.length} Orders
                     </span>
                   </div>
@@ -993,9 +993,9 @@ export function CustomersView() {
               {completedCustomers.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
-                    <h3 className="text-sm font-black text-on-surface uppercase tracking-widest opacity-60">Completed</h3>
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest opacity-60">Completed</h3>
                     <div className="h-px flex-1 bg-outline-variant/10" />
-                    <span className="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-[10px] font-black rounded-lg uppercase">
+                    <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-[10px] font-black rounded-2xl uppercase">
                       {completedCustomers.length} Done
                     </span>
                   </div>
@@ -1006,8 +1006,8 @@ export function CustomersView() {
               )}
             </>
           ) : (
-            <div className="text-center py-20 bg-surface-container-lowest rounded-3xl border border-dashed border-outline-variant">
-              <p className="text-on-surface-variant font-bold">No customers found matching your search.</p>
+            <div className="text-center py-20 bg-black rounded-3xl border border-dashed border-zinc-800">
+              <p className="text-zinc-400 font-bold">No customers found matching your search.</p>
             </div>
           )}
         </div>
@@ -1022,22 +1022,22 @@ export function CustomersView() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="bg-surface-container-low rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/5"
+              className="bg-zinc-900/50 rounded-[2rem] overflow-hidden shadow-sm border border-zinc-800/5"
             >
-              <div className="h-32 bg-surface-container-high animate-pulse" />
+              <div className="h-32 bg-zinc-800 animate-pulse" />
               <div className="px-8 pb-10 -mt-12 relative">
-                <div className="w-24 h-24 rounded-3xl bg-surface-container-high animate-pulse" />
+                <div className="w-24 h-24 rounded-3xl bg-zinc-800 animate-pulse" />
                 <div className="mt-6 space-y-4 animate-pulse">
-                  <div className="h-6 bg-surface-container-high rounded-lg w-2/3" />
-                  <div className="h-4 bg-surface-container-high rounded-lg w-1/3" />
+                  <div className="h-6 bg-zinc-800 rounded-2xl w-2/3" />
+                  <div className="h-4 bg-zinc-800 rounded-2xl w-1/3" />
                   <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="h-20 bg-surface-container-high rounded-2xl" />
-                    <div className="h-20 bg-surface-container-high rounded-2xl" />
+                    <div className="h-20 bg-zinc-800 rounded-2xl" />
+                    <div className="h-20 bg-zinc-800 rounded-2xl" />
                   </div>
-                  <div className="h-5 bg-surface-container-high rounded-lg w-1/4 mt-4" />
+                  <div className="h-5 bg-zinc-800 rounded-2xl w-1/4 mt-4" />
                   <div className="space-y-3">
-                    <div className="h-16 bg-surface-container-high rounded-xl" />
-                    <div className="h-16 bg-surface-container-high rounded-xl" />
+                    <div className="h-16 bg-zinc-800 rounded-2xl" />
+                    <div className="h-16 bg-zinc-800 rounded-2xl" />
                   </div>
                 </div>
               </div>
@@ -1048,59 +1048,59 @@ export function CustomersView() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="bg-surface-container-low rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/5"
+            className="bg-zinc-900/50 rounded-[2rem] overflow-hidden shadow-sm border border-zinc-800/5"
           >
             {/* Header Gradient */}
-            <div className="h-32 signature-gradient relative p-6 flex items-end">
+            <div className="h-32 bg-blue-500 hover:bg-blue-600 relative p-6 flex items-end">
               <div className="absolute top-4 right-4 flex gap-2">
                 <button 
                   onClick={openEditModal}
-                  className="bg-white/10 backdrop-blur-md text-white p-2 rounded-xl hover:bg-white/20 transition-colors"
+                  className="bg-white/10 backdrop-blur-md text-white p-2 rounded-2xl hover:bg-white/20 transition-colors"
                 >
                   <Edit3 size={16} />
                 </button>
-                <button className="bg-white/10 backdrop-blur-md text-white p-2 rounded-xl hover:bg-white/20 transition-colors">
+                <button className="bg-white/10 backdrop-blur-md text-white p-2 rounded-2xl hover:bg-white/20 transition-colors">
                   <MoreVertical size={16} />
                 </button>
               </div>
             </div>
 
             <div className="px-8 pb-10 -mt-12 relative">
-              <div className="w-24 h-24 rounded-3xl bg-white p-1.5 shadow-xl flex items-center justify-center font-black text-3xl text-primary">
+              <div className="w-24 h-24 rounded-3xl bg-white p-1.5 shadow-xl flex items-center justify-center font-black text-3xl text-blue-500">
                 {selectedCustomer.initials}
               </div>
               <div className="mt-6">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-black text-on-surface tracking-tight">{selectedCustomer.name}</h2>
+                  <h2 className="text-2xl font-black text-white tracking-tight">{selectedCustomer.name}</h2>
                   <Star size={16} className="text-tertiary fill-tertiary" />
                 </div>
-                <p className="text-on-surface-variant font-bold text-sm">Customer ID: {selectedCustomer.id}</p>
+                <p className="text-zinc-400 font-bold text-sm">Customer ID: {selectedCustomer.id}</p>
               </div>
 
               <div className="mt-8 grid grid-cols-2 gap-4">
-                <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Email</p>
-                  <p className="text-xs font-bold truncate text-on-surface">{selectedCustomer.email}</p>
+                <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5">Email</p>
+                  <p className="text-xs font-bold truncate text-white">{selectedCustomer.email}</p>
                 </div>
-                <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1.5">Total Price</p>
-                  <p className="text-sm font-black text-primary">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5">Total Price</p>
+                  <p className="text-sm font-black text-blue-500">${selectedCustomer.totalSpent.toFixed(2)}</p>
                 </div>
               </div>
 
                 <div className="flex items-center justify-between gap-3">
                   <button
                     onClick={() => setShowPhonePopup(true)}
-                    className="flex items-center gap-3 text-on-surface-variant hover:text-primary transition-colors group flex-1"
+                    className="flex items-center gap-3 text-zinc-400 hover:text-blue-500 transition-colors group flex-1"
                   >
-                    <Phone size={16} className="text-primary" />
+                    <Phone size={16} className="text-blue-500" />
                     <span className="text-sm font-bold group-hover:underline">{selectedCustomer.phone}</span>
                   </button>
                   <div className="flex flex-col items-end gap-1">
                     <button
                       onClick={() => handleSendReview()}
                       className={cn(
-                        "px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all border shadow-sm",
+                        "px-4 py-2 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all border shadow-sm",
                         sendingReviewId === selectedCustomer.id 
                           ? "bg-green-100 text-green-800 border-green-200" 
                           : "bg-amber-50 text-amber-800 border-amber-100 hover:bg-amber-100"
@@ -1121,22 +1121,22 @@ export function CustomersView() {
                 </div>
 
               <div className="mt-10">
-                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-5">Repair History</h3>
+                <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-5">Repair History</h3>
                 <div className="space-y-3">
                   {selectedCustomer.repairs.map(item => (
                     <div 
                       key={item.id} 
                       onClick={() => setSelectedRepair(item)}
-                      className="bg-surface-container-lowest p-4 rounded-2xl flex gap-4 items-start border border-outline-variant/5 hover:border-primary/20 transition-colors cursor-pointer group"
+                      className="bg-black p-4 rounded-2xl flex gap-4 items-start border border-zinc-800/5 hover:border-blue-500/20 transition-colors cursor-pointer group"
                     >
-                      <div className="bg-secondary-container/30 p-2.5 rounded-xl text-secondary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                      <div className="bg-zinc-800/30 p-2.5 rounded-2xl text-zinc-300 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                         <Smartphone size={20} />
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-sm text-on-surface leading-tight">{item.repairItem}</h4>
+                          <h4 className="font-bold text-sm text-white leading-tight">{item.repairItem}</h4>
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-on-surface-variant">
+                            <span className="text-[10px] font-black text-zinc-400">
                               {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase()}
                             </span>
                             <button 
@@ -1145,7 +1145,7 @@ export function CustomersView() {
                                 setSelectedRepair(item);
                                 setIsConfirmingDeleteRepair(true);
                               }}
-                              className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-error/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
                               title="Delete Repair Record"
                             >
                               <Trash2 size={14} />
@@ -1153,9 +1153,9 @@ export function CustomersView() {
                           </div>
                         </div>
                         <div className="flex justify-between items-center mt-1.5">
-                          <p className="text-[11px] font-bold text-on-surface-variant">Model: {item.modelNumber}</p>
+                          <p className="text-[11px] font-bold text-zinc-400">Model: {item.modelNumber}</p>
                           <div className="text-right">
-                            <p className="text-[11px] font-black text-primary">${item.price.toFixed(2)}</p>
+                            <p className="text-[11px] font-black text-blue-500">${item.price.toFixed(2)}</p>
                             {(item.deposit || 0) > 0 && (
                               <p className="text-[9px] font-black text-green-600">💰 ${item.deposit.toFixed(2)}</p>
                             )}
@@ -1170,11 +1170,11 @@ export function CustomersView() {
               <div className="mt-10 flex gap-3">
                 <button 
                   onClick={() => setIsViewingAllOrders(true)}
-                  className="flex-1 bg-secondary-container text-on-secondary-container py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all"
+                  className="flex-1 bg-zinc-800 text-zinc-200 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all"
                 >
                   View All Orders
                 </button>
-                <button className="bg-primary text-on-primary px-5 py-3.5 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                <button className="bg-blue-500 text-white px-5 py-3.5 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
                   <MessageSquare size={20} />
                 </button>
               </div>
@@ -1200,10 +1200,10 @@ export function CustomersView() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 30, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="relative z-10 w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/10"
+              className="relative z-10 w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-zinc-800/10"
             >
               {/* Header */}
-              <div className="signature-gradient p-6 text-white">
+              <div className="bg-blue-500 hover:bg-blue-600 p-6 text-white">
                 <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-1">Contact</p>
                 <p className="text-2xl font-black">{selectedCustomer.name}</p>
                 <p className="text-sm font-bold opacity-80 mt-0.5">{selectedCustomer.phone}</p>
@@ -1213,28 +1213,28 @@ export function CustomersView() {
                 {/* Call */}
                 <a
                   href={`tel:${selectedCustomer.phone}`}
-                  className="flex items-center gap-4 p-4 bg-surface-container-low rounded-2xl hover:bg-primary hover:text-on-primary transition-all group"
+                  className="flex items-center gap-4 p-4 bg-zinc-900/50 rounded-2xl hover:bg-blue-500 hover:text-white transition-all group"
                 >
-                  <div className="w-10 h-10 bg-primary/10 group-hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors">
-                    <Phone size={20} className="text-primary group-hover:text-white" />
+                  <div className="w-10 h-10 bg-blue-500/10 group-hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors">
+                    <Phone size={20} className="text-blue-500 group-hover:text-white" />
                   </div>
                   <div>
                     <p className="font-black text-sm">Call Customer</p>
-                    <p className="text-xs text-on-surface-variant group-hover:text-white/70">Open dialler</p>
+                    <p className="text-xs text-zinc-400 group-hover:text-white/70">Open dialler</p>
                   </div>
                 </a>
 
                 {/* Copy */}
                 <button
                   onClick={handleCopyPhone}
-                  className="flex items-center gap-4 p-4 bg-surface-container-low rounded-2xl hover:bg-surface-container-high transition-all w-full text-left"
+                  className="flex items-center gap-4 p-4 bg-zinc-900/50 rounded-2xl hover:bg-zinc-800 transition-all w-full text-left"
                 >
-                  <div className="w-10 h-10 bg-secondary-container/40 rounded-xl flex items-center justify-center">
-                    {phoneCopied ? <Check size={20} className="text-green-600" /> : <Copy size={20} className="text-secondary" />}
+                  <div className="w-10 h-10 bg-zinc-800/40 rounded-2xl flex items-center justify-center">
+                    {phoneCopied ? <Check size={20} className="text-green-600" /> : <Copy size={20} className="text-zinc-300" />}
                   </div>
                   <div>
                     <p className="font-black text-sm">{phoneCopied ? 'Copied!' : 'Copy Number'}</p>
-                    <p className="text-xs text-on-surface-variant">Copy to clipboard</p>
+                    <p className="text-xs text-zinc-400">Copy to clipboard</p>
                   </div>
                 </button>
 
@@ -1243,7 +1243,7 @@ export function CustomersView() {
                   onClick={() => handleSendReview()}
                   className="flex items-center gap-4 p-4 bg-amber-50 rounded-2xl hover:bg-amber-100 transition-all w-full text-left border border-amber-200/50"
                 >
-                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center">
                     {reviewSent ? <Check size={20} className="text-green-600" /> : <Star size={20} className="text-amber-500" />}
                   </div>
                   <div>
@@ -1260,7 +1260,7 @@ export function CustomersView() {
 
               <button
                 onClick={() => setShowPhonePopup(false)}
-                className="w-full p-4 text-center text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors border-t border-outline-variant/10"
+                className="w-full p-4 text-center text-sm font-bold text-zinc-400 hover:text-white transition-colors border-t border-zinc-800/10"
               >
                 Cancel
               </button>
@@ -1284,21 +1284,21 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+              className="relative w-full max-w-lg bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10"
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
                   <div>
-                    <h3 className="text-2xl font-black text-primary tracking-tight">
+                    <h3 className="text-2xl font-black text-blue-500 tracking-tight">
                       {isEditing ? 'Edit Customer' : 'Add New Customer'}
                     </h3>
-                    <p className="text-on-surface-variant text-sm font-bold">
+                    <p className="text-zinc-400 text-sm font-bold">
                       {isEditing ? 'Update client information' : 'Register a new repair ticket'}
                     </p>
                   </div>
                   <button 
                     onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
-                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                    className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
                   >
                     <X size={24} />
                   </button>
@@ -1308,8 +1308,8 @@ export function CustomersView() {
                   <div className="grid grid-cols-1 gap-6">
                     {!isEditing && (
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Repair Time</label>
-                        <div className="bg-surface-container-high p-4 rounded-2xl flex items-center gap-3 text-on-surface-variant border border-outline-variant/5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Repair Time</label>
+                        <div className="bg-zinc-800 p-4 rounded-2xl flex items-center gap-3 text-zinc-400 border border-zinc-800/5">
                           <Clock size={18} />
                           <span className="text-sm font-bold">{new Date().toLocaleString()}</span>
                         </div>
@@ -1317,11 +1317,11 @@ export function CustomersView() {
                     )}
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Customer Name</label>
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Customer Name</label>
                       <input 
                         type="text"
                         placeholder="Full Name"
-                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                       />
@@ -1329,21 +1329,21 @@ export function CustomersView() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Phone</label>
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Phone</label>
                         <input 
                           type="tel"
                           placeholder="+1 (555) 000-0000"
-                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Email</label>
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Email</label>
                         <input 
                           type="email"
                           placeholder="email@example.com"
-                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                         />
@@ -1354,21 +1354,21 @@ export function CustomersView() {
                       <>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Repair Item</label>
+                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Repair Item</label>
                             <input 
                               type="text"
                               placeholder="e.g. Screen"
-                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                               value={formData.repairItem}
                               onChange={(e) => setFormData({...formData, repairItem: e.target.value})}
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Model Number</label>
+                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Model Number</label>
                             <input 
                               type="text"
                               placeholder="e.g. iPhone 14"
-                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                               value={formData.modelNumber}
                               onChange={(e) => setFormData({...formData, modelNumber: e.target.value})}
                             />
@@ -1377,22 +1377,22 @@ export function CustomersView() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Price ($)</label>
+                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Price ($)</label>
                             <input 
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                               value={formData.price}
                               onChange={(e) => setFormData({...formData, price: e.target.value})}
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Password</label>
+                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Password</label>
                             <input 
                               type="text"
                               placeholder="Device Passcode"
-                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                               value={formData.password}
                               onChange={(e) => setFormData({...formData, password: e.target.value})}
                             />
@@ -1400,19 +1400,19 @@ export function CustomersView() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI / Serial Number</label>
+                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">IMEI / Serial Number</label>
                           <div className="flex gap-2">
                             <input 
                               type="text"
                               placeholder="IMEI Number"
-                              className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                               value={formData.imei}
                               onChange={(e) => setFormData({...formData, imei: e.target.value})}
                             />
                             <button
                               type="button"
                               onClick={() => setScannerTarget('add')}
-                              className="bg-primary/10 text-primary p-4 rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center shrink-0"
+                              className="bg-blue-500/10 text-blue-500 p-4 rounded-2xl hover:bg-blue-500/20 transition-colors flex items-center justify-center shrink-0"
                               title="Scan IMEI using Camera"
                             >
                               <Scan size={20} />
@@ -1424,8 +1424,8 @@ export function CustomersView() {
                         {upsells.length > 0 && !isEditing && (
                           <div className="space-y-3 py-2">
                             <div className="flex items-center justify-between px-1">
-                              <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Add Accessories (Bundle Price)</label>
-                              <span className="text-[10px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">Upsell Opp</span>
+                              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Add Accessories (Bundle Price)</label>
+                              <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">Upsell Opp</span>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               {upsells.map(upsell => (
@@ -1436,19 +1436,19 @@ export function CustomersView() {
                                   className={cn(
                                     "flex items-center gap-3 p-3 rounded-2xl border transition-all text-left",
                                     selectedUpsells.includes(upsell.id)
-                                      ? "bg-primary/5 border-primary shadow-sm"
-                                      : "bg-surface-container-lowest border-outline-variant/10 hover:border-primary/30"
+                                      ? "bg-blue-500/5 border-blue-500 shadow-sm"
+                                      : "bg-black border-zinc-800/10 hover:border-blue-500/30"
                                   )}
                                 >
                                   <div className={cn(
-                                    "w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors",
-                                    selectedUpsells.includes(upsell.id) ? "bg-primary border-primary text-on-primary" : "border-outline-variant"
+                                    "w-5 h-5 rounded-2xl border-2 flex items-center justify-center shrink-0 transition-colors",
+                                    selectedUpsells.includes(upsell.id) ? "bg-blue-500 border-blue-500 text-white" : "border-zinc-800"
                                   )}>
                                     {selectedUpsells.includes(upsell.id) && <Check size={14} strokeWidth={4} />}
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="text-[10px] font-black text-on-surface truncate uppercase tracking-tighter">{upsell.name}</p>
-                                    <p className="text-[11px] font-black text-primary tracking-tighter">+${upsell.bundle_price}</p>
+                                    <p className="text-[10px] font-black text-white truncate uppercase tracking-tighter">{upsell.name}</p>
+                                    <p className="text-[11px] font-black text-blue-500 tracking-tighter">+${upsell.bundle_price}</p>
                                   </div>
                                 </button>
                               ))}
@@ -1457,7 +1457,7 @@ export function CustomersView() {
                         )}
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                             <DollarSign size={12} className="text-green-600" />
                             Deposit / 订金 (Optional)
                           </label>
@@ -1467,7 +1467,7 @@ export function CustomersView() {
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-on-surface font-bold"
+                              className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-white font-bold"
                               value={formData.deposit}
                               onChange={(e) => setFormData({...formData, deposit: e.target.value})}
                             />
@@ -1475,26 +1475,26 @@ export function CustomersView() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Remark</label>
+                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Remark</label>
                           <textarea 
                             placeholder="Special notes or instructions..."
-                            className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold min-h-[100px] resize-none"
+                            className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold min-h-[100px] resize-none"
                             value={formData.remark}
                             onChange={(e) => setFormData({...formData, remark: e.target.value})}
                           />
                         </div>
 
-                        <div className="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/10">
+                        <div className="flex items-center justify-between p-4 bg-black rounded-2xl border border-zinc-800/10">
                           <div className="flex items-center gap-3">
                             <div className={cn(
-                              "p-2 rounded-xl transition-colors",
-                              formData.liquidDamage ? "bg-error/10 text-error" : "bg-surface-container-high text-on-surface-variant"
+                              "p-2 rounded-2xl transition-colors",
+                              formData.liquidDamage ? "bg-error/10 text-red-500" : "bg-zinc-800 text-zinc-400"
                             )}>
                               <Droplets size={20} />
                             </div>
                             <div>
-                              <p className="text-xs font-black text-on-surface">Liquid Damage</p>
-                              <p className="text-[10px] font-bold text-on-surface-variant">Has the device been in water?</p>
+                              <p className="text-xs font-black text-white">Liquid Damage</p>
+                              <p className="text-[10px] font-bold text-zinc-400">Has the device been in water?</p>
                             </div>
                           </div>
                           <button 
@@ -1502,7 +1502,7 @@ export function CustomersView() {
                             onClick={() => setFormData({...formData, liquidDamage: !formData.liquidDamage})}
                             className={cn(
                               "w-12 h-6 rounded-full relative transition-colors duration-300",
-                              formData.liquidDamage ? "bg-error" : "bg-surface-container-highest"
+                              formData.liquidDamage ? "bg-error" : "bg-zinc-800"
                             )}
                           >
                             <div className={cn(
@@ -1520,13 +1520,13 @@ export function CustomersView() {
                       <button 
                         type="button"
                         onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
-                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-all"
+                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-zinc-400 bg-zinc-800 hover:bg-zinc-800 transition-all"
                       >
                         Cancel
                       </button>
                       <button 
                         type="submit"
-                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-on-primary bg-primary shadow-lg shadow-primary/20 hover:opacity-90 transition-all"
+                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white bg-blue-500 shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all"
                       >
                         {isEditing ? 'Update Info' : 'Save Customer'}
                       </button>
@@ -1535,7 +1535,7 @@ export function CustomersView() {
                       <button 
                         type="button"
                         onClick={() => setIsConfirmingDelete(true)}
-                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-red-500 bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
                       >
                         <Trash2 size={16} />
                         Delete Customer Profile
@@ -1564,14 +1564,14 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-md bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-md bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10 flex flex-col max-h-[90vh]"
             >
               <div className="p-8 pb-4">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-primary">
+                  <h3 className="text-xl font-black text-blue-500">
                     {isEditingRepair ? 'Edit Repair Record' : 'Repair Details'}
                   </h3>
-                  <button onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="p-2 hover:bg-surface-container-high rounded-full">
+                  <button onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="p-2 hover:bg-zinc-800 rounded-full">
                     <X size={20} />
                   </button>
                 </div>
@@ -1582,38 +1582,38 @@ export function CustomersView() {
                 {isEditingRepair ? (
                   <form onSubmit={handleUpdateRepair} className="space-y-5">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Repair Item</label>
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Repair Item</label>
                       <input 
                         type="text"
-                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                         value={repairFormData.repairItem}
                         onChange={(e) => setRepairFormData({...repairFormData, repairItem: e.target.value})}
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Model Number</label>
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Model Number</label>
                       <input 
                         type="text"
-                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                         value={repairFormData.modelNumber}
                         onChange={(e) => setRepairFormData({...repairFormData, modelNumber: e.target.value})}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Price ($)</label>
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Price ($)</label>
                         <input 
                           type="number"
                           step="0.01"
-                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                           value={repairFormData.price}
                           onChange={(e) => setRepairFormData({...repairFormData, price: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Status</label>
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Status</label>
                         <select 
-                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold appearance-none"
+                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold appearance-none"
                           value={repairFormData.status}
                           onChange={(e) => setRepairFormData({...repairFormData, status: e.target.value})}
                         >
@@ -1625,27 +1625,27 @@ export function CustomersView() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Password</label>
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Password</label>
                         <input 
                           type="text"
-                          className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                           value={repairFormData.password}
                           onChange={(e) => setRepairFormData({...repairFormData, password: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">IMEI / Serial Number</label>
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">IMEI / Serial Number</label>
                         <div className="flex gap-2">
                           <input 
                             type="text"
-                            className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold"
+                            className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
                             value={repairFormData.imei}
                             onChange={(e) => setRepairFormData({...repairFormData, imei: e.target.value})}
                           />
                           <button
                             type="button"
                             onClick={() => setScannerTarget('repair')}
-                            className="bg-primary/10 text-primary p-4 rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center shrink-0"
+                            className="bg-blue-500/10 text-blue-500 p-4 rounded-2xl hover:bg-blue-500/20 transition-colors flex items-center justify-center shrink-0"
                             title="Scan IMEI using Camera"
                           >
                             <Scan size={20} />
@@ -1655,7 +1655,7 @@ export function CustomersView() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                         <DollarSign size={12} className="text-green-600" />
                         Deposit / 订金
                       </label>
@@ -1665,7 +1665,7 @@ export function CustomersView() {
                           type="number"
                           step="0.01"
                           placeholder="0.00"
-                          className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-on-surface font-bold"
+                          className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-white font-bold"
                           value={repairFormData.deposit}
                           onChange={(e) => setRepairFormData({...repairFormData, deposit: e.target.value})}
                         />
@@ -1673,26 +1673,26 @@ export function CustomersView() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Remark</label>
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Remark</label>
                       <textarea 
                         placeholder="Special notes or instructions..."
-                        className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-bold min-h-[100px] resize-none"
+                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold min-h-[100px] resize-none"
                         value={repairFormData.remark}
                         onChange={(e) => setRepairFormData({...repairFormData, remark: e.target.value})}
                       />
                     </div>
                     
-                    <div className="flex items-center justify-between p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/10">
+                    <div className="flex items-center justify-between p-4 bg-black rounded-2xl border border-zinc-800/10">
                       <div className="flex items-center gap-3">
-                        <Droplets size={18} className={repairFormData.liquidDamage ? "text-error" : "text-on-surface-variant"} />
-                        <span className="text-xs font-bold text-on-surface">Liquid Damage</span>
+                        <Droplets size={18} className={repairFormData.liquidDamage ? "text-red-500" : "text-zinc-400"} />
+                        <span className="text-xs font-bold text-white">Liquid Damage</span>
                       </div>
                       <button 
                         type="button"
                         onClick={() => setRepairFormData({...repairFormData, liquidDamage: !repairFormData.liquidDamage})}
                         className={cn(
                           "w-10 h-5 rounded-full relative transition-colors",
-                          repairFormData.liquidDamage ? "bg-error" : "bg-surface-container-highest"
+                          repairFormData.liquidDamage ? "bg-error" : "bg-zinc-800"
                         )}
                       >
                         <div className={cn(
@@ -1707,13 +1707,13 @@ export function CustomersView() {
                         <button 
                           type="button"
                           onClick={() => setIsEditingRepair(false)}
-                          className="flex-1 py-3.5 bg-surface-container-high text-on-surface-variant rounded-2xl font-black text-xs uppercase tracking-widest"
+                          className="flex-1 py-3.5 bg-zinc-800 text-zinc-400 rounded-2xl font-black text-xs uppercase tracking-widest"
                         >
                           Cancel
                         </button>
                         <button 
                           type="submit"
-                          className="flex-1 py-3.5 bg-primary text-on-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20"
+                          className="flex-1 py-3.5 bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20"
                         >
                           Save Changes
                         </button>
@@ -1721,7 +1721,7 @@ export function CustomersView() {
                       <button 
                         type="button"
                         onClick={() => setIsConfirmingDeleteRepair(true)}
-                        className="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest text-red-500 bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
                       >
                         <Trash2 size={16} />
                         Delete Repair Record
@@ -1730,18 +1730,18 @@ export function CustomersView() {
                   </form>
                 ) : (
                   <div className="space-y-6">
-                    <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10">
+                    <div className="bg-black p-5 rounded-3xl border border-zinc-800/10">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-primary/10 p-3 rounded-2xl text-primary">
+                        <div className="bg-blue-500/10 p-3 rounded-2xl text-blue-500">
                           <Smartphone size={24} />
                         </div>
                         <div>
-                          <h4 className="font-black text-on-surface">{selectedRepair.repairItem}</h4>
-                          <p className="text-xs font-bold text-on-surface-variant">{selectedRepair.modelNumber}</p>
+                          <h4 className="font-black text-white">{selectedRepair.repairItem}</h4>
+                          <p className="text-xs font-bold text-zinc-400">{selectedRepair.modelNumber}</p>
                         </div>
                         <button 
                           onClick={() => setIsTicketModalOpen(true)}
-                          className="ml-auto p-3 bg-primary/10 text-primary rounded-2xl hover:bg-primary hover:text-on-primary transition-all flex items-center gap-2"
+                          className="ml-auto p-3 bg-blue-500/10 text-blue-500 rounded-2xl hover:bg-blue-500 hover:text-white transition-all flex items-center gap-2"
                           title="Print Repair Ticket"
                         >
                           <Printer size={18} />
@@ -1750,28 +1750,28 @@ export function CustomersView() {
                       </div>
                       
                       <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Status</p>
+                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Status</p>
                         <span 
                           onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, selectedRepair.id, selectedRepair.status); }}
                           className={cn(
                             "text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest transition-all",
                             selectedRepair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
-                            selectedRepair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
-                            selectedRepair.status === 'In Processing' ? "bg-tertiary-container text-on-tertiary-container" :
-                            "bg-surface-container-highest text-on-surface-variant"
+                            selectedRepair.status === 'Urgent' ? "bg-red-900/30 text-red-200" :
+                            selectedRepair.status === 'In Processing' ? "bg-purple-900/30 text-purple-200" :
+                            "bg-zinc-800 text-zinc-400"
                           )}
                         >
                           {selectedRepair.status}
                         </span>
                       </div>
-                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Price</p>
-                        <p className="text-sm font-black text-primary">${selectedRepair.price.toFixed(2)}</p>
+                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Price</p>
+                        <p className="text-sm font-black text-blue-500">${selectedRepair.price.toFixed(2)}</p>
                       </div>
-                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Date</p>
-                        <p className="text-sm font-bold text-on-surface">{new Date(selectedRepair.timestamp).toLocaleDateString()}</p>
+                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Date</p>
+                        <p className="text-sm font-bold text-white">{new Date(selectedRepair.timestamp).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </div>
@@ -1779,7 +1779,7 @@ export function CustomersView() {
                     {(selectedRepair.deposit || 0) > 0 && (
                       <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-2xl border-2 border-green-300 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-md shadow-green-200">
+                          <div className="w-10 h-10 bg-green-500 text-white rounded-2xl flex items-center justify-center shadow-md shadow-green-200">
                             <DollarSign size={22} />
                           </div>
                           <div>
@@ -1794,19 +1794,19 @@ export function CustomersView() {
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Password</p>
-                        <p className="text-sm font-bold text-on-surface">{selectedRepair.password || 'None'}</p>
+                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Password</p>
+                        <p className="text-sm font-bold text-white">{selectedRepair.password || 'None'}</p>
                       </div>
-                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">IMEI</p>
-                        <p className="text-sm font-bold text-on-surface truncate">{selectedRepair.imei || 'N/A'}</p>
+                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">IMEI</p>
+                        <p className="text-sm font-bold text-white truncate">{selectedRepair.imei || 'N/A'}</p>
                       </div>
                     </div>
 
                     <div className={cn(
                       "p-4 rounded-2xl flex items-center gap-3",
-                      selectedRepair.liquidDamage ? "bg-error/10 text-error" : "bg-success/10 text-success"
+                      selectedRepair.liquidDamage ? "bg-error/10 text-red-500" : "bg-success/10 text-success"
                     )}>
                       <Droplets size={18} />
                       <span className="text-xs font-black uppercase tracking-widest">
@@ -1815,9 +1815,9 @@ export function CustomersView() {
                     </div>
 
                     {selectedRepair.remark && (
-                      <div className="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                        <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Remark</p>
-                        <p className="text-sm font-bold text-on-surface whitespace-pre-wrap">{selectedRepair.remark}</p>
+                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Remark</p>
+                        <p className="text-sm font-bold text-white whitespace-pre-wrap">{selectedRepair.remark}</p>
                       </div>
                     )}
 
@@ -1825,14 +1825,14 @@ export function CustomersView() {
                       <div className="flex gap-3">
                         <button 
                           onClick={() => openEditRepairModal(selectedRepair)}
-                          className="flex-1 py-4 bg-secondary-container text-on-secondary-container rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                          className="flex-1 py-4 bg-zinc-800 text-zinc-200 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
                         >
                           <Edit3 size={16} />
                           Edit Record
                         </button>
                         <button 
                           onClick={() => setSelectedRepair(null)}
-                          className="flex-1 py-4 bg-primary text-on-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20"
+                          className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20"
                         >
                           Close Details
                         </button>
@@ -1864,7 +1864,7 @@ export function CustomersView() {
 
                       <button 
                         onClick={() => setIsConfirmingDeleteRepair(true)}
-                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-error bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-red-500 bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
                       >
                         <Trash2 size={16} />
                         Delete Repair Record
@@ -1893,17 +1893,17 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10"
+              className="relative w-full max-w-2xl bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10"
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
                   <div>
-                    <h3 className="text-2xl font-black text-primary tracking-tight">Order History</h3>
-                    <p className="text-on-surface-variant text-sm font-bold">All repairs for {selectedCustomer.name}</p>
+                    <h3 className="text-2xl font-black text-blue-500 tracking-tight">Order History</h3>
+                    <p className="text-zinc-400 text-sm font-bold">All repairs for {selectedCustomer.name}</p>
                   </div>
                   <button 
                     onClick={() => setIsViewingAllOrders(false)}
-                    className="p-2 hover:bg-surface-container-high rounded-full transition-colors"
+                    className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
                   >
                     <X size={24} />
                   </button>
@@ -1917,15 +1917,15 @@ export function CustomersView() {
                         setSelectedRepair(repair);
                         setIsViewingAllOrders(false);
                       }}
-                      className="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between border border-outline-variant/5 hover:border-primary/30 transition-all cursor-pointer group"
+                      className="bg-black p-5 rounded-2xl flex items-center justify-between border border-zinc-800/5 hover:border-blue-500/30 transition-all cursor-pointer group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="bg-primary/10 p-3 rounded-xl text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                        <div className="bg-blue-500/10 p-3 rounded-2xl text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                           <Smartphone size={20} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-on-surface">{repair.repairItem}</h4>
-                          <p className="text-xs font-bold text-on-surface-variant">{repair.modelNumber}</p>
+                          <h4 className="font-bold text-white">{repair.repairItem}</h4>
+                          <p className="text-xs font-bold text-zinc-400">{repair.modelNumber}</p>
                         </div>
                       </div>
                       <div className="text-right flex flex-col items-end gap-2">
@@ -1936,15 +1936,15 @@ export function CustomersView() {
                               setSelectedRepair(repair);
                               setIsConfirmingDeleteRepair(true);
                             }}
-                            className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-error/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
                             title="Delete Repair Record"
                           >
                             <Trash2 size={16} />
                           </button>
-                          <p className="font-black text-primary text-lg">${repair.price.toFixed(2)}</p>
+                          <p className="font-black text-blue-500 text-lg">${repair.price.toFixed(2)}</p>
                         </div>
                         {(repair.deposit || 0) > 0 && (
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded-lg bg-green-100 text-green-700 border border-green-200">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-2xl bg-green-100 text-green-700 border border-green-200">
                             💰 Deposit: ${repair.deposit.toFixed(2)}
                           </span>
                         )}
@@ -1954,15 +1954,15 @@ export function CustomersView() {
                             className={cn(
                               "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all",
                               (repair.status === 'In Processing' || repair.status === 'waiting for pay') && "cursor-pointer hover:opacity-70 active:scale-95",
-                              repair.status === 'Urgent' ? "bg-error-container text-on-error-container" :
-                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-tertiary-container text-on-tertiary-container" :
-                              repair.status === 'Ready for Pickup' ? "bg-success-container text-on-success-container" :
-                              "bg-surface-container-highest text-on-surface-variant"
+                              repair.status === 'Urgent' ? "bg-red-900/30 text-red-200" :
+                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-900/30 text-purple-200" :
+                              repair.status === 'Ready for Pickup' ? "bg-emerald-900/30 text-emerald-200" :
+                              "bg-zinc-800 text-zinc-400"
                             )}
                           >
                             {repair.status === 'waiting for pay' ? 'Waiting Part/Pay' : repair.status}
                           </span>
-                          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                             {new Date(repair.timestamp).toLocaleDateString()}
                           </p>
                         </div>
@@ -1971,14 +1971,14 @@ export function CustomersView() {
                   ))}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+                <div className="mt-8 pt-6 border-t border-zinc-800/10 flex justify-between items-center">
                   <div>
-                    <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">Total Price</p>
-                    <p className="text-2xl font-black text-primary">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Total Price</p>
+                    <p className="text-2xl font-black text-blue-500">${selectedCustomer.totalSpent.toFixed(2)}</p>
                   </div>
                   <button 
                     onClick={() => setIsViewingAllOrders(false)}
-                    className="px-8 py-3.5 bg-surface-container-highest text-on-surface font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-outline-variant/20 transition-all"
+                    className="px-8 py-3.5 bg-zinc-800 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-outline-variant/20 transition-all"
                   >
                     Close History
                   </button>
@@ -2003,19 +2003,19 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 p-8 text-center"
+              className="relative w-full max-w-sm bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10 p-8 text-center"
             >
-              <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-error/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Trash2 size={40} />
               </div>
-              <h3 className="text-2xl font-black text-on-surface mb-2">Delete Profile?</h3>
-              <p className="text-on-surface-variant font-medium mb-8">
+              <h3 className="text-2xl font-black text-white mb-2">Delete Profile?</h3>
+              <p className="text-zinc-400 font-medium mb-8">
                 This action is permanent and will delete all repair history for <strong>{selectedCustomer.name}</strong>.
               </p>
               <div className="flex gap-3">
                 <button 
                   onClick={() => setIsConfirmingDelete(false)}
-                  className="flex-1 py-4 bg-surface-container-high text-on-surface-variant rounded-2xl font-black text-xs uppercase tracking-widest"
+                  className="flex-1 py-4 bg-zinc-800 text-zinc-400 rounded-2xl font-black text-xs uppercase tracking-widest"
                 >
                   Cancel
                 </button>
@@ -2045,19 +2045,19 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-surface-container-low rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 p-8 text-center"
+              className="relative w-full max-w-sm bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10 p-8 text-center"
             >
-              <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-error/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Trash2 size={40} />
               </div>
-              <h3 className="text-2xl font-black text-on-surface mb-2">Delete Record?</h3>
-              <p className="text-on-surface-variant font-medium mb-8">
+              <h3 className="text-2xl font-black text-white mb-2">Delete Record?</h3>
+              <p className="text-zinc-400 font-medium mb-8">
                 Are you sure you want to delete this specific repair record? This action cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button 
                   onClick={() => setIsConfirmingDeleteRepair(false)}
-                  className="flex-1 py-4 bg-surface-container-high text-on-surface-variant rounded-2xl font-black text-xs uppercase tracking-widest"
+                  className="flex-1 py-4 bg-zinc-800 text-zinc-400 rounded-2xl font-black text-xs uppercase tracking-widest"
                 >
                   Cancel
                 </button>
@@ -2088,20 +2088,20 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95, y: 20 }} 
-              className="relative w-full max-w-sm bg-surface-container-lowest rounded-[2rem] shadow-2xl p-8 flex flex-col items-center"
+              className="relative w-full max-w-sm bg-black rounded-[2rem] shadow-2xl p-8 flex flex-col items-center"
             >
-               <h3 className="text-xl font-black text-on-surface mb-2 tracking-tight">Client Portal QR</h3>
-               <p className="text-center text-sm font-medium text-on-surface-variant mb-8 leading-relaxed">Customers can scan this code to drop-off a new repair or track their live ticket status.</p>
+               <h3 className="text-xl font-black text-white mb-2 tracking-tight">Client Portal QR</h3>
+               <p className="text-center text-sm font-medium text-zinc-400 mb-8 leading-relaxed">Customers can scan this code to drop-off a new repair or track their live ticket status.</p>
                
-               <div className="p-4 bg-white rounded-3xl shadow-lg border border-outline-variant/10 mb-8 transform hover:scale-105 transition-transform">
+               <div className="p-4 bg-white rounded-3xl shadow-lg border border-zinc-800/10 mb-8 transform hover:scale-105 transition-transform">
                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-48 h-48 rounded-2xl" />
                </div>
 
-               <p className="text-[10px] font-black text-primary uppercase tracking-widest text-center bg-primary/10 px-4 py-2 rounded-full">Point phone camera here</p>
+               <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest text-center bg-blue-500/10 px-4 py-2 rounded-full">Point phone camera here</p>
 
                <button 
                   onClick={() => setShowQR(false)}
-                  className="absolute top-4 right-4 p-2 bg-surface-container-high rounded-full hover:bg-surface-container-highest transition-colors text-on-surface-variant"
+                  className="absolute top-4 right-4 p-2 bg-zinc-800 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400"
                >
                  <X size={20} />
                </button>
@@ -2113,7 +2113,7 @@ export function CustomersView() {
       {/* FAB */}
       <button 
         onClick={() => setShowQR(true)}
-        className="fixed right-6 bottom-24 md:bottom-8 bg-primary text-on-primary w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[90] ring-4 ring-primary/20 hover:ring-primary/40"
+        className="fixed right-6 bottom-24 md:bottom-8 bg-blue-500 text-white w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[90] ring-4 ring-blue-500/20 hover:ring-blue-500/40"
       >
         <QrCode size={24} />
       </button>
