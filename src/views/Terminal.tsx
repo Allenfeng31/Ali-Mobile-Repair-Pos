@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Smartphone, 
-  Battery, 
-  Wrench, 
-  Camera, 
-  Plus, 
-  Trash2, 
-  Printer, 
+import {
+  Smartphone,
+  Battery,
+  Wrench,
+  Camera,
+  Plus,
+  Trash2,
+  Printer,
   ShoppingCart,
   ShieldCheck,
   ChevronRight,
@@ -25,7 +25,8 @@ import {
   Wifi,
   Cpu,
   Layout as LayoutIcon,
-  Zap
+  Zap,
+  Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InventoryItem, Order, OrderItem } from '../types';
@@ -111,7 +112,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   // Lock body scroll when any modal is open
   useScrollLock(isConfirming || showInvoice || !!numpadItem);
 
-
   React.useEffect(() => {
     setCurrentPage(1);
   }, [activeCategory, activeBrand, searchQuery]);
@@ -128,8 +128,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   const filteredItems = inventory.filter(item => {
     const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean);
-    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
-      (item.name || '').toLowerCase().includes(term) || 
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term =>
+      (item.name || '').toLowerCase().includes(term) ||
       (item.model || '').toLowerCase().includes(term) ||
       (item.device_model || '').toLowerCase().includes(term) ||
       (item.brand || '').toLowerCase().includes(term) ||
@@ -164,24 +164,24 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         matchesCategory = true;
       }
     }
-    
+
     const cleanItemBrand = getDisplayBrand(item.brand || '');
     const cleanActiveBrand = getDisplayBrand(activeBrand);
-    
+
     // Check direct equality, or prefix matching (P Apple === Apple), or fuzzy name match
-    const matchesBrand = activeBrand === 'All Brands' || 
-                         item.brand === activeBrand || 
-                         cleanItemBrand === cleanActiveBrand ||
-                         ((!item.brand || item.brand === 'Other') && 
-                          ((item.name || '').toLowerCase().includes(cleanActiveBrand.toLowerCase()) || 
-                           (item.model || '').toLowerCase().includes(cleanActiveBrand.toLowerCase())));
-                           
+    const matchesBrand = activeBrand === 'All Brands' ||
+      item.brand === activeBrand ||
+      cleanItemBrand === cleanActiveBrand ||
+      ((!item.brand || item.brand === 'Other') &&
+        ((item.name || '').toLowerCase().includes(cleanActiveBrand.toLowerCase()) ||
+          (item.model || '').toLowerCase().includes(cleanActiveBrand.toLowerCase())));
+
     return matchesCategory && matchesBrand;
   }).sort((a, b) => {
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase().trim();
       const terms = q.split(' ').filter(t => t.length > 0);
-      
+
       const calculateScore = (item: InventoryItem) => {
         let score = 0;
         const name = (item.name || '').toLowerCase();
@@ -189,7 +189,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         const device_model = (item.device_model || '').toLowerCase();
         const brand = (item.brand || '').toLowerCase();
         const fullName = `${brand} ${model} ${device_model} ${name}`.toLowerCase();
-        const fullWords = fullName.split(/[\\s-]+/).filter(Boolean);
+        const fullWords = fullName.split(/[\s-]+/).filter(Boolean);
 
         // 1. Exact or Prefix Matches (High Priority)
         if (device_model === q || model === q || name === q) score += 500;
@@ -200,9 +200,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           if (device_model.includes(t)) score += 80;
           if (model.includes(t)) score += 50;
           if (name.includes(t)) score += 30;
-          
+
           // Number matching (e.g. "7" matches "7th")
-          if (/^\\d+$/.test(t)) {
+          if (/^\d+$/.test(t)) {
             if (model.includes(`${t}th`) || name.includes(`${t}th`)) score += 40;
           }
         });
@@ -255,16 +255,15 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const displayBrands = ['All Brands', ...brands];
   const displayCategories = ['⭐ Quick Access', 'All Items', ...categories];
 
-
   const addToCart = (item: any) => {
     if (searchQuery) setSearchQuery('');
-    setCart(prev => [...prev, { 
-      id: Math.random().toString(36).substr(2, 9), 
-      name: item.name, 
-      sku: `SKU-${item.name.substring(0, 3).toUpperCase()}`, 
-      price: item.price, 
-      qty: 1, 
-      icon: item.icon 
+    setCart(prev => [...prev, {
+      id: Math.random().toString(36).substr(2, 9),
+      name: item.name,
+      sku: `SKU-${item.name.substring(0, 3).toUpperCase()}`,
+      price: item.price,
+      qty: 1,
+      icon: item.icon
     }]);
   };
 
@@ -286,13 +285,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     setError(null);
     setIsProcessing(true);
     setSuccessMessage(null);
-    
+
     try {
       // Calculate totals
       let grossMSRP = 0;
       let rawTotal = 0;
       let percentDiscountableTotal = 0;
-      
+
       cart.forEach(item => {
         let currentPrice = item.price;
         let isMarkupOrZero = false;
@@ -327,14 +326,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       let baseTotal = rawTotal - percentDiscountAmount;
 
       const gst = baseTotal / 11;
-      
+
       let surcharge = 0;
       if (paymentMethod === 'eftpos') {
         surcharge = baseTotal * 0.015;
       } else if (paymentMethod === 'mixed') {
         surcharge = mixedEftpos * 0.015;
       }
-      
+
       const finalTotal = baseTotal + surcharge;
 
       // Calculate profit for the order
@@ -342,7 +341,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       const orderItems: OrderItem[] = cart.map(item => {
         const invItem = inventory.find(i => i.name === item.name);
         const cost = invItem ? invItem.costPrice : 0;
-        
+
         let loggedPrice = item.price;
         if (item.overridePrice !== undefined && item.overridePrice > item.price) {
           loggedPrice = item.overridePrice; // Log at bumped price
@@ -397,9 +396,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         if (invItemIndex !== -1) {
           const invItem = updatedInventory[invItemIndex];
           const newStock = Math.max(0, invItem.stock - cartItem.qty);
-          const updateData = { 
-            stock: newStock, 
-            status: newStock <= invItem.minStock ? 'low-stock' : invItem.status 
+          const updateData = {
+            stock: newStock,
+            status: newStock <= invItem.minStock ? 'low-stock' : invItem.status
           };
           await api.updateInventoryItem(invItem.id, updateData);
           updatedInventory[invItemIndex] = { ...invItem, ...updateData };
@@ -415,7 +414,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       setDiscountPercent(0);
       setIsConfirming(false); // Only close on success
       setShowInvoice(true);
-      
+
       setSuccessMessage(t('term', 'success'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
@@ -459,12 +458,12 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   const lineDiscountAmount = grossMSRP - rawTotal;
   let percentDiscountAmount = percentDiscountableTotal * (discountPercent / 100);
-  
+
   // Cap the discount if a limit is set and user is not super admin
-  const discountExceeded = permissions?.is_super_admin === false && 
-                           permissions?.max_discount_limit !== undefined && 
-                           permissions.max_discount_limit > 0 &&
-                           percentDiscountAmount > permissions.max_discount_limit;
+  const discountExceeded = permissions?.is_super_admin === false &&
+    permissions?.max_discount_limit !== undefined &&
+    permissions.max_discount_limit > 0 &&
+    percentDiscountAmount > permissions.max_discount_limit;
 
   if (discountExceeded) {
     percentDiscountAmount = permissions.max_discount_limit;
@@ -474,14 +473,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
   const baseTotal = rawTotal - percentDiscountAmount;
   const gst = baseTotal / 11;
-  
+
   let surcharge = 0;
   if (paymentMethod === 'eftpos') {
     surcharge = baseTotal * 0.015;
   } else if (paymentMethod === 'mixed') {
     surcharge = mixedEftpos * 0.015;
   }
-  
+
   const finalTotal = baseTotal + surcharge;
 
   // Sync mixed values when total changes or mode changes to mixed
@@ -493,7 +492,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   }, [paymentMethod, baseTotal]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Left Column: Selection */}
       <div className="lg:col-span-8 space-y-8">
         <div>
@@ -504,7 +503,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         {/* Search and Categories */}
         <div className="space-y-4">
           <div className="relative">
-            <input 
+            <input
               type="text"
               placeholder={t('term', 'search')}
               value={searchQuery}
@@ -517,10 +516,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               className="w-full bg-neu-bg shadow-neu-pressed border border-transparent rounded-2xl py-3 px-11 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neu-text-secondary opacity-50">
-              {(() => {
-                const SearchIcon = (typeof Search !== 'undefined') ? Search : Package;
-                return <SearchIcon size={18} />;
-              })()}
+              <Search size={18} />
             </div>
           </div>
 
@@ -531,8 +527,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 onClick={() => handleCategoryClick(cat)}
                 className={cn(
                   "px-4 py-3 rounded-t-xl font-bold text-xs whitespace-nowrap transition-all border-b-2",
-                  activeCategory === cat 
-                    ? "border-blue-500 text-neu-accent bg-neu-accent/5" 
+                  activeCategory === cat
+                    ? "border-blue-500 text-neu-accent bg-neu-accent/5"
                     : "border-transparent text-neu-text-secondary hover:bg-neu-bg shadow-neu-flat hover:text-neu-text-primary"
                 )}
               >
@@ -548,8 +544,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 onClick={() => handleBrandClick(br)}
                 className={cn(
                   "px-4 py-2 rounded-2xl font-bold text-xs whitespace-nowrap transition-all",
-                  activeBrand === br 
-                    ? "bg-neu-bg shadow-neu-flat text-neu-text-primary shadow-sm border border-secondary/20" 
+                  activeBrand === br
+                    ? "bg-neu-bg shadow-neu-flat text-neu-text-primary shadow-sm border border-secondary/20"
                     : "bg-neu-bg text-neu-text-secondary hover:bg-neu-bg shadow-neu-flat border border-zinc-800/5 hover:text-neu-text-primary"
                 )}
               >
@@ -562,7 +558,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         {/* Items Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 auto-rows-fr bg-neu-bg shadow-neu-pressed p-4 rounded-3xl">
           {currentItems.map(item => (
-            <div 
+            <div
               key={item.id}
               onClick={() => addToCart(item)}
               className="bg-neu-bg shadow-neu-flat p-3 rounded-2xl transition-all duration-150 hover:ring-2 hover:ring-blue-500/20 group cursor-pointer relative overflow-hidden border border-zinc-800/5 flex flex-col justify-between h-full min-h-[140px] active:scale-[0.98] active:shadow-neu-pressed"
@@ -599,7 +595,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6 bg-neu-bg p-4 rounded-2xl border border-transparent">
-            <button 
+            <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="px-4 py-2 bg-neu-bg text-neu-text-primary rounded-2xl font-bold text-sm disabled:opacity-50 hover:bg-neu-bg shadow-neu-flat transition-colors"
@@ -609,7 +605,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             <span className="text-sm font-bold text-neu-text-secondary">
               Page {currentPage} of {totalPages}
             </span>
-            <button 
+            <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 bg-neu-accent text-neu-text-primary rounded-2xl font-bold text-sm disabled:opacity-50 hover:opacity-90 transition-colors"
@@ -620,12 +616,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         )}
       </div>
 
-      {/* Right Column: Cart */}
-      <aside className="lg:col-span-4 bg-neu-bg shadow-neu-pressed lg:border-l border-transparent p-6 flex flex-col rounded-3xl lg:rounded-none">
-        
-
-
-        <div className="flex items-center justify-between mb-8">
+      {/* Right Column: Cart (Sticky Sidebar) */}
+      <aside className="lg:col-span-4 bg-neu-bg shadow-neu-pressed lg:border-l border-transparent p-6 flex flex-col rounded-3xl lg:rounded-3xl sticky top-6 h-[calc(100vh-3rem)] overflow-hidden">
+        <div className="flex items-center justify-between mb-8 shrink-0">
           <h2 className="text-xl font-extrabold text-neu-text-primary [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)] tracking-tight">
             {t('term', 'cart')}
           </h2>
@@ -636,13 +629,13 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         </div>
 
         {successMessage && (
-          <div className="mb-4 p-3 bg-teal-50 text-teal-700 text-xs font-bold rounded-2xl border border-teal-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <div className="mb-4 p-3 bg-teal-50 text-teal-700 text-xs font-bold rounded-2xl border border-teal-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 shrink-0">
             <CheckCircle2 size={16} />
             {successMessage}
           </div>
         )}
 
-        <div className="flex-grow space-y-6 overflow-y-auto max-h-[500px] pr-2 no-scrollbar">
+        <div className="flex-grow space-y-6 overflow-y-auto pr-2 no-scrollbar custom-scrollbar">
           {cart.map(item => (
             <div key={item.id} className="flex items-start gap-4 group">
               <div className="w-12 h-12 rounded-2xl bg-neu-bg shadow-neu-flat flex items-center justify-center shrink-0">
@@ -658,7 +651,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     {item.overridePrice !== undefined && item.overridePrice < item.price && (
                       <span className="text-[10px] text-neu-text-secondary line-through mb-0.5">${item.price.toFixed(2)}</span>
                     )}
-                    <span 
+                    <span
                       className="font-bold text-sm cursor-pointer hover:text-neu-accent hover:underline transition-colors px-1 -mr-1 rounded bg-neu-accent/5 border border-blue-500/10"
                       title="Click to override price"
                       onClick={() => {
@@ -674,20 +667,20 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 </div>
                 <p className="text-[10px] text-neu-text-secondary mt-1 uppercase tracking-wider font-semibold">SKU: {item.sku}</p>
                 <div className="flex items-center gap-3 mt-2">
-                  <Trash2 
-                    size={14} 
-                    className="text-red-500 cursor-pointer hover:scale-110 transition-transform" 
+                  <Trash2
+                    size={14}
+                    className="text-red-500 cursor-pointer hover:scale-110 transition-transform"
                     onClick={() => removeFromCart(item.id)}
                   />
                   <div className="flex items-center gap-2 ml-auto">
-                    <button 
+                    <button
                       className="w-6 h-6 rounded bg-neu-bg flex items-center justify-center text-xs font-bold hover:bg-neu-bg shadow-neu-flat"
                       onClick={() => updateQty(item.id, -1)}
                     >
                       -
                     </button>
                     <span className="text-xs font-bold">{item.qty}</span>
-                    <button 
+                    <button
                       className="w-6 h-6 rounded bg-neu-bg flex items-center justify-center text-xs font-bold hover:bg-neu-bg shadow-neu-flat"
                       onClick={() => updateQty(item.id, 1)}
                     >
@@ -705,84 +698,86 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
           )}
         </div>
 
-        {cart.length > 0 && permissions?.can_give_discount !== false && (
-          <div className="space-y-2">
-            <div className={cn(
-              "flex items-center justify-between p-3 rounded-2xl border transition-all",
-              discountExceeded ? "bg-error/5 border-error/20 shadow-[inset_0_1px_4px_rgba(255,0,0,0.05)]" : "bg-neu-bg shadow-neu-flat border-transparent"
-            )}>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-neu-text-secondary uppercase tracking-widest">Apply Discount (%)</span>
-                {discountExceeded && (
-                  <span className="text-[10px] font-black text-red-500 uppercase tracking-tighter mt-0.5 animate-pulse">
-                    Limit Capped: ${permissions.max_discount_limit} Max
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  value={discountPercent === 0 ? '' : discountPercent}
-                  onChange={(e) => {
-                    const val = Math.min(100, Math.max(0, Number(e.target.value)));
-                    setDiscountPercent(val);
-                  }}
-                  placeholder="0"
-                  className={cn(
-                    "w-16 border rounded-2xl py-1.5 px-2 text-center text-sm font-bold focus:outline-none focus:ring-2 transition-all",
-                    discountExceeded 
-                      ? "bg-red-900/30 text-red-200 border-error/30 focus:ring-error/20" 
-                      : "bg-neu-bg border-transparent text-neu-text-primary focus:ring-blue-500/20"
+        <div className="mt-auto shrink-0 pt-6">
+          {cart.length > 0 && permissions?.can_give_discount !== false && (
+            <div className="space-y-2 mb-4">
+              <div className={cn(
+                "flex items-center justify-between p-3 rounded-2xl border transition-all",
+                discountExceeded ? "bg-error/5 border-error/20 shadow-[inset_0_1px_4px_rgba(255,0,0,0.05)]" : "bg-neu-bg shadow-neu-flat border-transparent"
+              )}>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-neu-text-secondary uppercase tracking-widest">Apply Discount (%)</span>
+                  {discountExceeded && (
+                    <span className="text-[10px] font-black text-red-500 uppercase tracking-tighter mt-0.5 animate-pulse">
+                      Limit Capped: ${permissions.max_discount_limit} Max
+                    </span>
                   )}
-                />
-                <span className={cn("text-sm font-bold", discountExceeded ? "text-red-500" : "text-neu-text-primary")}>%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={discountPercent === 0 ? '' : discountPercent}
+                    onChange={(e) => {
+                      const val = Math.min(100, Math.max(0, Number(e.target.value)));
+                      setDiscountPercent(val);
+                    }}
+                    placeholder="0"
+                    className={cn(
+                      "w-16 border rounded-2xl py-1.5 px-2 text-center text-sm font-bold focus:outline-none focus:ring-2 transition-all",
+                      discountExceeded
+                        ? "bg-red-900/30 text-red-200 border-error/30 focus:ring-error/20"
+                        : "bg-neu-bg border-transparent text-neu-text-primary focus:ring-blue-500/20"
+                    )}
+                  />
+                  <span className={cn("text-sm font-bold", discountExceeded ? "text-red-500" : "text-neu-text-primary")}>%</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {cart.length > 0 && !permissions?.can_give_discount && (
-          <div className="mt-4 flex items-center justify-center p-3 opacity-50 bg-neu-bg rounded-2xl border border-dashed border-transparent">
-            <span className="text-[10px] font-bold text-neu-text-secondary uppercase tracking-widest flex items-center gap-2">
-              <Lock size={12} />
-              Discounting Restricted
-            </span>
-          </div>
-        )}
+          {cart.length > 0 && !permissions?.can_give_discount && (
+            <div className="mb-4 flex items-center justify-center p-3 opacity-50 bg-neu-bg rounded-2xl border border-dashed border-transparent">
+              <span className="text-[10px] font-bold text-neu-text-secondary uppercase tracking-widest flex items-center gap-2">
+                <Lock size={12} />
+                Discounting Restricted
+              </span>
+            </div>
+          )}
 
-        <div className="mt-4 pt-6 border-t border-transparent">
-          <div className="space-y-2 mb-8">
-            <div className="flex justify-between">
-              <span className="text-neu-text-secondary text-sm font-medium">{t('term', 'subtotal')}</span>
-              <span className="font-bold text-sm">${(baseTotal - gst).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neu-text-secondary text-sm font-medium">{t('term', 'tax')}</span>
-              <span className="font-bold text-sm">${gst.toFixed(2)}</span>
-            </div>
-            {paymentMethod === 'eftpos' && (
-              <div className="flex justify-between animate-in fade-in slide-in-from-right-2">
-                <span className="text-neu-accent text-sm font-bold">EFTPOS Surcharge (1.5%)</span>
-                <span className="text-neu-accent font-bold text-sm">+${surcharge.toFixed(2)}</span>
+          <div className="border-t border-zinc-800/10 pt-4">
+            <div className="space-y-2 mb-6">
+              <div className="flex justify-between">
+                <span className="text-neu-text-secondary text-sm font-medium">{t('term', 'subtotal')}</span>
+                <span className="font-bold text-sm">${(baseTotal - gst).toFixed(2)}</span>
               </div>
-            )}
-            <div className="flex justify-between pt-4 border-t border-transparent mt-2">
-              <span className="text-lg font-extrabold">{t('term', 'total')}</span>
-              <span className="text-2xl font-black text-neu-accent">${finalTotal.toFixed(2)}</span>
+              <div className="flex justify-between">
+                <span className="text-neu-text-secondary text-sm font-medium">{t('term', 'tax')}</span>
+                <span className="font-bold text-sm">${gst.toFixed(2)}</span>
+              </div>
+              {paymentMethod === 'eftpos' && (
+                <div className="flex justify-between animate-in fade-in slide-in-from-right-2">
+                  <span className="text-neu-accent text-sm font-bold">EFTPOS Surcharge (1.5%)</span>
+                  <span className="text-neu-accent font-bold text-sm">+${surcharge.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between pt-4 border-t border-zinc-800/10 mt-2">
+                <span className="text-lg font-extrabold">{t('term', 'total')}</span>
+                <span className="text-2xl font-black text-neu-accent">${finalTotal.toFixed(2)}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-3">
-            <button 
-              disabled={cart.length === 0 || isProcessing}
-              onClick={() => setIsConfirming(true)}
-              className="w-full py-4 rounded-2xl bg-neu-bg text-neu-text-primary font-bold text-base flex items-center justify-center gap-2 shadow-neu-flat hover:opacity-90 transition-all duration-150 active:scale-[0.98] active:shadow-neu-pressed disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <CheckCircle2 size={20} />
-              {isProcessing ? t('term', 'processing') : t('term', 'confirm')}
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                disabled={cart.length === 0 || isProcessing}
+                onClick={() => setIsConfirming(true)}
+                className="w-full py-4 rounded-2xl bg-neu-bg text-neu-text-primary font-bold text-base flex items-center justify-center gap-2 shadow-neu-flat hover:opacity-90 transition-all duration-150 active:scale-[0.98] active:shadow-neu-pressed disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircle2 size={20} />
+                {isProcessing ? t('term', 'processing') : t('term', 'confirm')}
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -791,14 +786,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
       <AnimatePresence>
         {isConfirming && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-28 md:pb-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsConfirming(false)}
               className="absolute inset-0 bg-zinc-900/40"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -809,7 +804,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   <div className="w-12 h-12 rounded-2xl bg-blue-900/30/10 flex items-center justify-center text-neu-accent">
                     <ShoppingCart size={24} />
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       if (!isProcessing) {
                         setIsConfirming(false);
@@ -869,8 +864,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       onClick={() => setPaymentMethod('cash')}
                       className={cn(
                         "py-3 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all border-2",
-                        paymentMethod === 'cash' 
-                          ? "bg-neu-accent/10 border-blue-500 text-neu-accent" 
+                        paymentMethod === 'cash'
+                          ? "bg-neu-accent/10 border-blue-500 text-neu-accent"
                           : "bg-neu-bg/50 border-transparent text-neu-text-secondary hover:bg-neu-bg shadow-neu-flat"
                       )}
                     >
@@ -880,8 +875,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       onClick={() => setPaymentMethod('eftpos')}
                       className={cn(
                         "py-3 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all border-2",
-                        paymentMethod === 'eftpos' 
-                          ? "bg-neu-accent/10 border-blue-500 text-neu-accent" 
+                        paymentMethod === 'eftpos'
+                          ? "bg-neu-accent/10 border-blue-500 text-neu-accent"
                           : "bg-neu-bg/50 border-transparent text-neu-text-secondary hover:bg-neu-bg shadow-neu-flat"
                       )}
                     >
@@ -897,8 +892,8 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       }}
                       className={cn(
                         "py-3 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all border-2",
-                        paymentMethod === 'mixed' 
-                          ? "bg-neu-accent/10 border-blue-500 text-neu-accent" 
+                        paymentMethod === 'mixed'
+                          ? "bg-neu-accent/10 border-blue-500 text-neu-accent"
                           : "bg-neu-bg/50 border-transparent text-neu-text-secondary hover:bg-neu-bg shadow-neu-flat"
                       )}
                     >
@@ -907,7 +902,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   </div>
 
                   {paymentMethod === 'mixed' && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       className="grid grid-cols-2 gap-4 pt-2"
@@ -916,7 +911,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                         <label className="text-[10px] font-black text-neu-text-secondary uppercase tracking-widest ml-1">Cash Amount</label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neu-text-secondary font-bold">$</span>
-                          <input 
+                          <input
                             type="number"
                             value={mixedCash || ''}
                             onChange={(e) => {
@@ -932,7 +927,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                         <label className="text-[10px] font-black text-neu-text-secondary uppercase tracking-widest ml-1">Card Amount</label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neu-text-secondary font-bold">$</span>
-                          <input 
+                          <input
                             type="number"
                             value={mixedEftpos || ''}
                             onChange={(e) => {
@@ -946,8 +941,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       </div>
                     </motion.div>
                   )}
-
-
                 </div>
 
                 <div className="bg-neu-bg/50 rounded-2xl p-5 space-y-2">
@@ -974,7 +967,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                       {surcharge > 0 && (
                         <div className="flex justify-between items-center text-[10px] font-bold text-neu-accent">
                           <span>Card Surcharge (1.5%)</span>
-                           <span className="text-black">${surcharge.toFixed(2)}</span>
+                          <span className="text-black">${surcharge.toFixed(2)}</span>
                         </div>
                       )}
                     </>
@@ -989,7 +982,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 </div>
 
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     onClick={() => {
                       setIsConfirming(false);
                       setError(null);
@@ -999,7 +992,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     onClick={handleAction}
                     disabled={isProcessing}
                     className="flex-1 py-4 bg-neu-bg text-neu-text-primary rounded-2xl font-bold text-sm shadow-neu-flat hover:shadow-xl transition-all duration-150 active:scale-[0.98] active:shadow-neu-pressed disabled:opacity-50 flex items-center justify-center gap-2"
@@ -1018,12 +1011,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
         )}
       </AnimatePresence>
 
-
-
-      <InvoiceModal 
-        isOpen={showInvoice} 
-        onClose={() => setShowInvoice(false)} 
-        order={lastOrder} 
+      <InvoiceModal
+        isOpen={showInvoice}
+        onClose={() => setShowInvoice(false)}
+        order={lastOrder}
         t={t}
       />
 
@@ -1036,12 +1027,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* Backdrop */}
-            <div 
+            <div
               className="absolute inset-0 bg-zinc-900/40"
               onClick={() => { setNumpadItem(null); setNumpadValue(''); }}
             />
-
             <motion.div
               className="relative w-full max-w-sm bg-neu-bg rounded-t-3xl sm:rounded-3xl shadow-neu-floating p-6 z-10 select-none"
               initial={{ y: 60, opacity: 0 }}
@@ -1049,7 +1038,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
               exit={{ y: 60, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
             >
-              {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-xs text-neu-text-secondary font-semibold uppercase tracking-widest">Override Price</p>
@@ -1063,22 +1051,20 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 </button>
               </div>
 
-              {/* Display */}
               <div className="bg-neu-bg shadow-neu-flat rounded-2xl px-5 py-4 mb-5 text-right border border-transparent">
                 <p className="text-3xl font-black tracking-tight text-neu-text-primary">
                   ${numpadValue || '0'}
                 </p>
               </div>
 
-              {/* Keypad */}
               <div className="grid grid-cols-3 gap-3 touch-action-manipulation">
-                {['7','8','9','4','5','6','1','2','3'].map(k => (
+                {['7', '8', '9', '4', '5', '6', '1', '2', '3'].map(k => (
                   <button
                     key={k}
-                  onPointerDown={() => {
-                    setNumpadValue(prev => (isFirstStroke ? k : (prev === '0' ? k : prev + k)));
-                    setIsFirstStroke(false);
-                  }}
+                    onPointerDown={() => {
+                      setNumpadValue(prev => (isFirstStroke ? k : (prev === '0' ? k : prev + k)));
+                      setIsFirstStroke(false);
+                    }}
                     className="py-4 rounded-2xl bg-neu-bg shadow-neu-flat text-neu-text-primary text-xl font-bold hover:bg-neu-accent sm:hover:text-neu-text-primary active:scale-95 active:bg-neu-accent active:text-neu-text-primary transition-all duration-75"
                   >
                     {k}
@@ -1116,7 +1102,6 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                   ⌫
                 </button>
 
-                {/* Clear + Confirm spanning full row */}
                 <button
                   onPointerDown={() => { setNumpadValue('0'); setIsFirstStroke(true); }}
                   className="col-span-1 py-4 rounded-2xl bg-neu-bg shadow-neu-flat text-neu-text-secondary text-base font-bold hover:bg-red-900/30 hover:text-red-200 active:scale-95 active:bg-red-900/30 active:text-red-200 transition-all duration-75"
