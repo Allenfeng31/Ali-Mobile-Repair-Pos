@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Plus, 
-  Smartphone, 
-  Battery, 
-  Zap, 
-  Trash2, 
-  Edit3, 
+import {
+  Search,
+  Plus,
+  Smartphone,
+  Battery,
+  Zap,
+  Trash2,
+  Edit3,
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
@@ -58,7 +58,6 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     return br;
   };
 
-
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filter, activeBrandFilter, activeCategoryFilter]);
@@ -69,6 +68,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       setQualityTiers(tiers || []);
     }).catch(console.error);
   }, []);
+
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -132,7 +132,6 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
       const created: any[] = await api.bulkCreateInventoryItems(items);
 
-      // Normalize and append to local state
       const normalizedItems = created.map((raw: any) => {
         let b = 'Other', m = raw.model;
         if (typeof m === 'string' && m.includes('||')) {
@@ -147,7 +146,6 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       setSuccessMessage(`⚡️ Bulk generated ${created.length} repair items for ${bulkModel.trim()}!`);
       setTimeout(() => setSuccessMessage(null), 4000);
 
-      // Reset bulk fields
       setBulkModel('');
       setBulkDeviceModel('');
     } catch (err: any) {
@@ -161,7 +159,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
   const [newCategory, setNewCategory] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
-  
+
   const [newBrand, setNewBrand] = useState('');
   const [isAddingBrand, setIsAddingBrand] = useState(false);
 
@@ -173,7 +171,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       setCategories(updated);
       await api.updateSetting('ali_pos_categories', JSON.stringify(updated));
     }
-    setFormData({...formData, category: catName});
+    setFormData({ ...formData, category: catName });
     setIsAddingCategory(false);
     setNewCategory('');
   };
@@ -186,7 +184,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       setBrands(updated);
       await api.updateSetting('ali_pos_brands', JSON.stringify(updated));
     }
-    setFormData({...formData, brand: brName});
+    setFormData({ ...formData, brand: brName });
     setIsAddingBrand(false);
     setNewBrand('');
   };
@@ -198,7 +196,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       setCategories(updated);
       await api.updateSetting('ali_pos_categories', JSON.stringify(updated));
       if (formData.category === catToDelete) {
-        setFormData({...formData, category: updated[0]});
+        setFormData({ ...formData, category: updated[0] });
       }
     }
   };
@@ -210,7 +208,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       setBrands(updated);
       await api.updateSetting('ali_pos_brands', JSON.stringify(updated));
       if (formData.brand === brandToDelete) {
-        setFormData({...formData, brand: updated[0]});
+        setFormData({ ...formData, brand: updated[0] });
       }
     }
   };
@@ -232,10 +230,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   };
 
   const handleEdit = (item: InventoryItem) => {
-    // Find all variants for this item
-    const variants = inventory.filter(i => 
-      i.name === item.name && 
-      i.model === item.model && 
+    const variants = inventory.filter(i =>
+      i.name === item.name &&
+      i.model === item.model &&
       (i.device_model || '') === (item.device_model || '')
     ).map(v => ({
       id: v.id,
@@ -264,19 +261,19 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     if (e) e.preventDefault();
     if (!formData.name) return;
 
-    const baseIconName = formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' : 
-                         formData.name.toLowerCase().includes('battery') ? 'Battery' :
-                         formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
-                         formData.name.toLowerCase().includes('camera') ? 'Camera' :
-                         formData.name.toLowerCase().includes('housing') || formData.name.toLowerCase().includes('glass') || formData.name.toLowerCase().includes('back cover') ? 'Layout' :
-                         formData.name.toLowerCase().includes('logic board') || formData.name.toLowerCase().includes('motherboard') || formData.name.toLowerCase().includes('ic ') ? 'Cpu' :
-                         formData.name.toLowerCase().includes('speaker') || formData.name.toLowerCase().includes('buzzer') ? 'Volume2' :
-                         formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
-                         formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
-                         formData.category.toLowerCase().includes('watch') ? 'Watch' :
-                         formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
-                         formData.category.toLowerCase().includes('phone') ? 'Smartphone' : 
-                         formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package';
+    const baseIconName = formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' :
+      formData.name.toLowerCase().includes('battery') ? 'Battery' :
+        formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
+          formData.name.toLowerCase().includes('camera') ? 'Camera' :
+            formData.name.toLowerCase().includes('housing') || formData.name.toLowerCase().includes('glass') || formData.name.toLowerCase().includes('back cover') ? 'Layout' :
+              formData.name.toLowerCase().includes('logic board') || formData.name.toLowerCase().includes('motherboard') || formData.name.toLowerCase().includes('ic ') ? 'Cpu' :
+                formData.name.toLowerCase().includes('speaker') || formData.name.toLowerCase().includes('buzzer') ? 'Volume2' :
+                  formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
+                    formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
+                      formData.category.toLowerCase().includes('watch') ? 'Watch' :
+                        formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
+                          formData.category.toLowerCase().includes('phone') ? 'Smartphone' :
+                            formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package';
 
     const itemsToSave = formData.variants.map(variant => {
       const cost = parseFloat(variant.costPrice) || 0;
@@ -286,7 +283,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       const minStock = parseInt(variant.minStock) || 0;
 
       return {
-        ...(variant.id > 1000000000000 ? {} : { id: variant.id }), // If id is a timestamp, it's new
+        ...(variant.id > 1000000000000 ? {} : { id: variant.id }),
         name: formData.name,
         model: `${formData.brand}||${formData.model}`,
         device_model: formData.device_model,
@@ -333,7 +330,6 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         savedItems.push(updated);
       }
 
-      // Update local state
       setInventory(prev => {
         const next = [...prev];
         savedItems.forEach(saved => {
@@ -352,7 +348,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       clearForm();
     } catch (err: any) {
       console.error('Failed to save inventory items:', err);
-      const errorMsg = err?.message || 'Failed to save items. Check your database settings.';
+      const errorMsg = err?.message || 'Failed to save items.';
       setSuccessMessage(`Error: ${errorMsg}`);
       setTimeout(() => setSuccessMessage(null), 5000);
     } finally {
@@ -364,33 +360,26 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     let match = true;
     if (filter === 'Low Stock') match = item.status === 'low-stock';
     if (filter === 'Devices') match = item.status === 'device';
-    
-    if (match && activeBrandFilter !== 'All Brands') {
-      match = item.brand === activeBrandFilter;
-    }
-    
-    if (match && activeCategoryFilter !== 'All Categories') {
-      match = item.category === activeCategoryFilter;
-    }
+    if (match && activeBrandFilter !== 'All Brands') match = item.brand === activeBrandFilter;
+    if (match && activeCategoryFilter !== 'All Categories') match = item.category === activeCategoryFilter;
 
     if (match && searchQuery.trim() !== '') {
       const terms = searchQuery.toLowerCase().split(' ').filter(Boolean);
-      match = terms.every(t => 
-        (item.name || '').toLowerCase().includes(t) || 
-        (item.model || '').toLowerCase().includes(t) || 
+      match = terms.every(t =>
+        (item.name || '').toLowerCase().includes(t) ||
+        (item.model || '').toLowerCase().includes(t) ||
         (item.device_model || '').toLowerCase().includes(t) ||
         (item.brand || '').toLowerCase().includes(t) ||
         (item.sku || '').toLowerCase().includes(t) ||
         (item.category || '').toLowerCase().includes(t)
       );
     }
-    
     return match;
   }).sort((a, b) => {
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase().trim();
       const terms = q.split(' ').filter(t => t.length > 0);
-      
+
       const calculateScore = (item: InventoryItem) => {
         let score = 0;
         const name = (item.name || '').toLowerCase();
@@ -398,46 +387,32 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         const device_model = (item.device_model || '').toLowerCase();
         const brand = (item.brand || '').toLowerCase();
         const fullName = `${brand} ${model} ${device_model} ${name}`.toLowerCase();
-        const fullWords = fullName.split(/[\s-]+/).filter(Boolean);
 
-        // 1. Exact or Prefix Matches (High Priority)
         if (device_model === q || model === q || name === q) score += 500;
         if (device_model.startsWith(q) || model.startsWith(q) || name.startsWith(q)) score += 200;
 
-        // 2. Term Matches
         terms.forEach(t => {
           if (device_model.includes(t)) score += 80;
           if (model.includes(t)) score += 50;
           if (name.includes(t)) score += 30;
-          
-          // Number matching (e.g. "7" matches "7th")
           if (/^\d+$/.test(t)) {
             if (model.includes(`${t}th`) || name.includes(`${t}th`)) score += 40;
           }
         });
 
-        // 3. Penalty for "Distractors" (Crucial for iPad vs iPad mini)
-        // If user didn't type "mini", but item contains "mini", subtract points
         const modifiers = ['mini', 'air', 'pro', 'max', 'plus', 'ultra'];
         modifiers.forEach(m => {
-          if (!q.includes(m) && fullName.includes(m)) {
-            score -= 100; // Heavy penalty to push secondary models down
-          }
+          if (!q.includes(m) && fullName.includes(m)) score -= 100;
         });
-
-        // 4. Exact word count match (Reward shorter/more precise names)
-        if (fullWords.length <= terms.length + 1) score += 20;
 
         return score;
       };
 
       const scoreA = calculateScore(a);
       const scoreB = calculateScore(b);
-
       if (scoreA !== scoreB) return scoreB - scoreA;
     }
 
-    // Default: Sort by ID (Newest first)
     const idA = typeof a.id === 'string' ? parseInt(a.id, 10) || 0 : a.id;
     const idB = typeof b.id === 'string' ? parseInt(b.id, 10) || 0 : b.id;
     return idB - idA;
@@ -448,145 +423,154 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const currentItems = filteredInventory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-8 relative">
+    <div className="min-h-screen bg-[var(--color-neu-bg)] text-[var(--color-neu-text-primary)] font-body py-8 px-6 lg:px-12">
       {/* Toast Notification */}
       {successMessage && (
         <div className={cn(
-          "fixed top-6 right-6 md:right-12 z-[100] px-6 py-4 rounded-2xl shadow-2xl font-bold animate-in fade-in slide-in-from-top-6 flex items-center gap-3 border",
-          successMessage.startsWith('Error') 
-            ? "bg-red-900/30 text-red-200 border-error/20" 
-            : "bg-blue-500 text-white border-white/20"
+          "fixed top-6 right-6 md:right-12 z-[100] px-6 py-4 rounded-2xl shadow-[var(--shadow-neu-floating)] font-bold animate-in fade-in slide-in-from-top-6 flex items-center gap-3",
+          successMessage.startsWith('Error')
+            ? "bg-red-100 text-red-600"
+            : "bg-[var(--color-neu-bg)] text-blue-600"
         )}>
           {successMessage.startsWith('Error') ? <AlertTriangle size={20} /> : <Zap size={20} />}
           {successMessage}
         </div>
       )}
 
-      {/* Header & Search */}
-      <div className="h-full flex flex-col pt-6 pb-2 px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2">{t('inv', 'title')}</h1>
-          <p className="text-zinc-400 font-medium">{t('inv', 'sub')}</p>
-        </div>
-        <button 
-          onClick={clearForm}
-          className="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all flex items-center gap-2"
-        >
-          <Plus size={20} strokeWidth={3} />
-          {t('inv', 'addUrl')}
-        </button>
-      </div>
-
-      {/* Search Bar - Moved out of the grid to be consistently at the top on mobile */}
-      <div className="bg-zinc-900/50 border border-zinc-800/10 rounded-2xl p-4 shadow-sm mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-5 h-5 opacity-50" />
-          <input 
-            type="text" 
-            placeholder={t('inv', 'search')}
-            className="w-full pl-12 pr-4 py-3 bg-black border border-zinc-800/10 rounded-2xl focus:ring-2 focus:ring-blue-500/20 outline-none text-white font-medium placeholder:text-zinc-400/50 transition-all"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 items-start">
-        {/* Inventory List - Now order-first on mobile */}
-        <div className="lg:col-span-8 space-y-4 order-first lg:order-last w-full">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-            <div className="flex gap-2 p-1.5 bg-zinc-900 rounded-2xl overflow-x-auto no-scrollbar w-full sm:w-auto">
-              {['All Parts', 'Low Stock', 'Devices'].map(f => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={cn(
-                    "px-4 py-2 rounded-2xl font-bold text-xs whitespace-nowrap transition-all flex-1 sm:flex-none",
-                    filter === f 
-                      ? "bg-white text-blue-500 shadow-sm" 
-                      : "text-zinc-400 hover:text-white hover:bg-white/50"
-                  )}
-                >
-                  {f === 'All Parts' ? t('inv', 'filterAll') : f === 'Low Stock' ? t('inv', 'filterLow') : t('inv', 'filterDev')}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="flex items-center gap-2 bg-black border border-zinc-800/10 rounded-2xl px-3 py-2 flex-1 sm:flex-none">
-                <Filter size={14} className="text-blue-500" />
-                <select 
-                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-full sm:w-24"
-                  value={activeBrandFilter}
-                  onChange={e => setActiveBrandFilter(e.target.value)}
-                >
-                  <option value="All Brands">{t('term', 'brandAll') || 'All Brands'}</option>
-                  {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
-                </select>
-              </div>
-              <div className="flex items-center gap-2 bg-black border border-zinc-800/10 rounded-2xl px-3 py-2 flex-1 sm:flex-none">
-                <Filter size={14} className="text-blue-500" />
-                <select 
-                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-full sm:w-28"
-                  value={activeCategoryFilter}
-                  onChange={e => setActiveCategoryFilter(e.target.value)}
-                >
-                  <option value="All Categories">{t('term', 'categoryAll') || 'All Categories'}</option>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight mb-2 [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
+              {t('inv', 'title')}
+            </h1>
+            <p className="text-[var(--color-neu-text-secondary)] font-medium text-lg">
+              {t('inv', 'sub')}
+            </p>
           </div>
+          <button
+            onClick={clearForm}
+            className="bg-[var(--color-neu-bg)] text-blue-600 px-8 py-4 rounded-2xl font-bold shadow-[var(--shadow-neu-flat)] active:scale-[0.98] transition-all flex items-center gap-2"
+          >
+            <Plus size={20} strokeWidth={3} />
+            {t('inv', 'addUrl')}
+          </button>
+        </div>
 
-          <div className="bg-zinc-900/50 rounded-3xl overflow-hidden border border-zinc-800/10 shadow-sm">
-            <div className="hidden sm:grid grid-cols-12 px-6 py-4 bg-zinc-900 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-              <div className="col-span-12 sm:col-span-5">Item & Model</div>
-              <div className="col-span-2 text-center">Stock</div>
-              <div className="col-span-2 text-right">Selling</div>
-              <div className="col-span-3 text-right">Actions</div>
+        {/* Search Bar */}
+        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-2 mb-8">
+          <div className="relative">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--color-neu-text-secondary)] w-6 h-6 opacity-60" />
+            <input
+              type="text"
+              placeholder={t('inv', 'search')}
+              className="w-full pl-14 pr-6 py-4 bg-transparent border-none rounded-2xl focus:ring-0 outline-none text-black font-semibold text-lg placeholder:text-[var(--color-neu-text-secondary)]/50 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-10 items-start">
+          {/* Inventory List */}
+          <div className="lg:col-span-8 space-y-6 order-first lg:order-last w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex gap-3 p-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl overflow-x-auto no-scrollbar w-full sm:w-auto">
+                {['All Parts', 'Low Stock', 'Devices'].map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={cn(
+                      "px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex-1 sm:flex-none",
+                      filter === f
+                        ? "bg-[var(--color-neu-bg)] text-blue-600 shadow-[var(--shadow-neu-sm)]"
+                        : "text-[var(--color-neu-text-secondary)] hover:text-blue-500"
+                    )}
+                  >
+                    {f === 'All Parts' ? t('inv', 'filterAll') : f === 'Low Stock' ? t('inv', 'filterLow') : t('inv', 'filterDev')}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="flex items-center gap-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 py-2.5 flex-1 sm:flex-none">
+                  <Filter size={16} className="text-blue-500" />
+                  <select
+                    className="bg-transparent border-none text-sm font-bold text-black focus:outline-none w-full sm:w-28 cursor-pointer"
+                    value={activeBrandFilter}
+                    onChange={e => setActiveBrandFilter(e.target.value)}
+                  >
+                    <option value="All Brands">{t('term', 'brandAll') || 'All Brands'}</option>
+                    {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 py-2.5 flex-1 sm:flex-none">
+                  <Filter size={16} className="text-blue-500" />
+                  <select
+                    className="bg-transparent border-none text-sm font-bold text-black focus:outline-none w-full sm:w-32 cursor-pointer"
+                    value={activeCategoryFilter}
+                    onChange={e => setActiveCategoryFilter(e.target.value)}
+                  >
+                    <option value="All Categories">{t('term', 'categoryAll') || 'All Categories'}</option>
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
-            <div className="divide-y divide-outline-variant/10">
+
+            <div className="space-y-4">
               {currentItems.map(item => {
                 const isEditingThis = editingId === item.id;
                 return (
-                  <div key={item.id} className="flex flex-col bg-black">
-                    <div 
+                  <div key={item.id} className="group">
+                    <div
                       onClick={() => handleEdit(item)}
-                      className="grid grid-cols-12 px-4 sm:px-6 py-4 sm:py-5 items-center hover:bg-zinc-900/30 transition-colors group cursor-pointer"
+                      className={cn(
+                        "bg-[var(--color-neu-bg)] rounded-[2rem] p-5 sm:p-6 shadow-[var(--shadow-neu-flat)] active:scale-[0.98] transition-all cursor-pointer grid grid-cols-12 items-center gap-4 border border-white/20",
+                        isEditingThis && "shadow-[var(--shadow-neu-pressed)] scale-[0.99]"
+                      )}
                     >
-                      <div className="col-span-8 sm:col-span-5 flex items-center gap-3 sm:gap-4">
-                        <div className={cn(
-                          "w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-colors shrink-0",
-                          item.status === 'device' ? "bg-zinc-800 text-zinc-200" : "bg-blue-900/30/10 text-blue-500"
-                        )}>
-                          <item.icon size={20} />
+                      <div className="col-span-8 sm:col-span-6 flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600 shrink-0">
+                          <item.icon size={28} />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-white leading-tight text-sm sm:text-base truncate">{item.name}</p>
-                          <p className="text-[10px] sm:text-xs text-zinc-400 font-medium truncate">
-                            {item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model} 
-                            {item.device_model && <span className="ml-2 px-1.5 py-0.5 bg-blue-500/15 text-blue-500 rounded-md text-[9px] font-bold tracking-wider">{item.device_model}</span>}
-                            {item.quality_grade && item.quality_grade !== 'Standard' && <span className="ml-2 px-1.5 py-0.5 bg-amber-500/15 text-amber-600 rounded-md text-[9px] font-bold tracking-wider">{item.quality_grade}</span>}
-                          </p>
+                          <p className="font-black text-black leading-tight text-lg truncate">{item.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm text-[var(--color-neu-text-secondary)] font-bold">
+                              {item.brand ? `${getDisplayBrand(item.brand)} • ` : ''}{item.model}
+                            </span>
+                            {item.device_model && (
+                              <span className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] text-blue-600 px-2 py-0.5 rounded-lg text-[10px] font-black tracking-widest uppercase">
+                                {item.device_model}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="col-span-4 sm:col-span-2 text-right sm:text-center">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider",
-                          item.status === 'low-stock' ? "bg-red-900/30 text-red-200" : "bg-blue-500-fixed-dim text-blue-500"
-                        )}>
-                          {item.stock} {item.stock === 1 ? 'Unit' : 'Units'}
-                        </span>
+
+                      <div className="col-span-4 sm:col-span-2 flex flex-col items-end sm:items-center">
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] px-4 py-1.5 rounded-xl">
+                          <span className={cn(
+                            "text-xs font-black uppercase tracking-wider",
+                            item.status === 'low-stock' ? "text-red-600" : "text-green-600"
+                          )}>
+                            {item.stock} {item.stock === 1 ? 'Unit' : 'Units'}
+                          </span>
+                        </div>
                       </div>
+
                       <div className="hidden sm:block col-span-2 text-right">
-                        <p className="font-bold text-white">${item.price.toFixed(2)}</p>
-                        <p className="text-[10px] text-tertiary-container font-bold">{item.margin}% Margin</p>
+                        <p className="font-black text-black text-xl">${item.price.toFixed(2)}</p>
+                        <p className="text-[10px] text-gray-600 font-black tracking-tighter uppercase">
+                          {item.margin}% Margin
+                        </p>
                       </div>
-                      <div className="hidden sm:flex col-span-3 justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="p-2 text-zinc-400 rounded-2xl">
-                          <Edit3 size={18} className={cn(isEditingThis && "text-blue-500")} />
+
+                      <div className="hidden sm:flex col-span-2 justify-end gap-2">
+                        <div className="p-3 text-blue-500 rounded-2xl shadow-[var(--shadow-neu-sm)] bg-[var(--color-neu-bg)]">
+                          <Edit3 size={20} className={cn(isEditingThis && "scale-110")} />
                         </div>
-                        <button 
+                        <button
                           onClick={async (e) => {
                             e.stopPropagation();
                             if (!window.confirm(`Delete ${item.name}?`)) return;
@@ -595,223 +579,130 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               setInventory(prev => prev.filter(i => i.id !== item.id));
                             } catch (err: any) {
                               console.error(err);
-                              const errorMsg = err?.message || 'Failed to delete item.';
-                              setSuccessMessage(`Error: ${errorMsg}`);
+                              setSuccessMessage(`Error: ${err?.message || 'Delete failed'}`);
                               setTimeout(() => setSuccessMessage(null), 5000);
                             }
                           }}
-                          className="p-2 text-red-500 hover:bg-red-900/30 rounded-2xl transition-colors"
+                          className="p-3 text-red-500 rounded-2xl shadow-[var(--shadow-neu-sm)] bg-[var(--color-neu-bg)] active:shadow-[var(--shadow-neu-pressed)]"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={20} />
                         </button>
                       </div>
                     </div>
 
-                    {/* Quick Edit Panel - Slide down */}
+                    {/* Quick Edit Panel */}
                     <motion.div
                       initial={false}
                       animate={{ height: isEditingThis ? 'auto' : 0, opacity: isEditingThis ? 1 : 0 }}
-                      className="overflow-hidden bg-zinc-900/50"
+                      className="overflow-hidden"
                     >
-                      <div className="p-4 sm:p-6 border-t border-zinc-800/10 space-y-4">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Variants / Quality Tiers</label>
-                            <button 
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setFormData({
-                                  ...formData, 
-                                  variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
-                                });
-                              }}
-                              className="text-xs font-bold text-blue-500 flex items-center gap-1 hover:bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
-                            >
-                              <Plus size={14} /> Add Quality Tier
-                            </button>
-                          </div>
+                      <div className="mt-4 p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2.5rem] space-y-6">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-black text-gray-600 uppercase tracking-widest">Variants & Pricing</h4>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFormData({
+                                ...formData,
+                                variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
+                              });
+                            }}
+                            className="text-xs font-black text-blue-600 flex items-center gap-1.5 px-3 py-1.5 rounded-xl shadow-[var(--shadow-neu-sm)] bg-[var(--color-neu-bg)] active:shadow-[var(--shadow-neu-pressed)] transition-all"
+                          >
+                            <Plus size={14} strokeWidth={3} /> Add Tier
+                          </button>
+                        </div>
 
-                          <div className="space-y-3">
-                            {formData.variants.map((variant, index) => (
-                              <div key={variant.id} className="p-3 bg-zinc-800 border border-zinc-800/20 rounded-2xl relative">
-                                {formData.variants.length > 1 && (
-                                  <button 
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
+                        <div className="grid gap-4">
+                          {formData.variants.map((variant, index) => (
+                            <div key={variant.id} className="p-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-3xl relative">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Grade</label>
+                                  <select
+                                    className="w-full px-4 py-3 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-sm text-black font-bold focus:ring-0 outline-none appearance-none"
+                                    value={variant.quality_grade}
+                                    onChange={e => {
                                       const newVariants = [...formData.variants];
-                                      newVariants.splice(index, 1);
+                                      newVariants[index].quality_grade = e.target.value;
                                       setFormData({ ...formData, variants: newVariants });
                                     }}
-                                    className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
                                   >
-                                    <Trash2 size={12} />
-                                  </button>
-                                )}
-                                
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                  <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Grade</label>
-                                    <select 
-                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none font-medium"
-                                      value={variant.quality_grade}
-                                      onChange={e => {
-                                        const newVariants = [...formData.variants];
-                                        newVariants[index].quality_grade = e.target.value;
-                                        setFormData({ ...formData, variants: newVariants });
-                                      }}
-                                    >
-                                      {qualityTiers.length > 0 ? (
-                                        qualityTiers.map(tier => (
-                                          <option key={tier.id} value={tier.name}>{tier.name}</option>
-                                        ))
-                                      ) : (
-                                        <>
-                                          <option value="Standard">Standard</option>
-                                          <option value="Budget">Budget</option>
-                                          <option value="Premium">Premium</option>
-                                          <option value="Genuine">Genuine</option>
-                                        </>
-                                      )}
-                                    </select>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'qty')}</label>
-                                    <input 
-                                      type="number"
-                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
-                                      placeholder="0"
-                                      value={variant.stock}
-                                      onChange={e => {
-                                        const newVariants = [...formData.variants];
-                                        newVariants[index].stock = e.target.value;
-                                        setFormData({ ...formData, variants: newVariants });
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
-                                    <input 
-                                      type="number"
-                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
-                                      placeholder="0.00"
-                                      value={variant.costPrice}
-                                      onChange={e => {
-                                        const newVariants = [...formData.variants];
-                                        newVariants[index].costPrice = e.target.value;
-                                        setFormData({ ...formData, variants: newVariants });
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-                                      {t('inv', 'sell')} ($)
-                                      {!permissions?.can_change_inventory_price && <Lock size={8} />}
-                                    </label>
-                                    <input 
-                                      type="number"
-                                      disabled={!permissions?.can_change_inventory_price}
-                                      className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium text-blue-500 disabled:bg-zinc-900 disabled:cursor-not-allowed" 
-                                      placeholder="0.00"
-                                      value={variant.sellingPrice}
-                                      onChange={e => {
-                                        const newVariants = [...formData.variants];
-                                        newVariants[index].sellingPrice = e.target.value;
-                                        setFormData({ ...formData, variants: newVariants });
-                                      }}
-                                    />
-                                  </div>
+                                    {qualityTiers.map(tier => <option key={tier.id} value={tier.name}>{tier.name}</option>)}
+                                  </select>
                                 </div>
-                                <div className="mt-3 flex items-center justify-between border-t border-zinc-800/10 pt-2.5">
-                                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <span className="text-amber-500">⭐</span> Highlight / Recommend
-                                  </label>
-                                  <label className="relative inline-flex items-center cursor-pointer">
-                                    <input 
-                                      type="checkbox" 
-                                      className="sr-only peer"
-                                      checked={variant.is_recommended}
-                                      onChange={e => {
-                                        const newVariants = [...formData.variants];
-                                        newVariants[index].is_recommended = e.target.checked;
-                                        setFormData({ ...formData, variants: newVariants });
-                                      }}
-                                    />
-                                    <div className="w-8 h-4.5 bg-black peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
-                                  </label>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Stock</label>
+                                  <input
+                                    type="number"
+                                    className="w-full px-4 py-3 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-sm text-black font-bold focus:ring-0 outline-none"
+                                    value={variant.stock}
+                                    onChange={e => {
+                                      const newVariants = [...formData.variants];
+                                      newVariants[index].stock = e.target.value;
+                                      setFormData({ ...formData, variants: newVariants });
+                                    }}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Cost</label>
+                                  <input
+                                    type="number"
+                                    className="w-full px-4 py-3 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-sm text-black font-bold focus:ring-0 outline-none"
+                                    value={variant.costPrice}
+                                    onChange={e => {
+                                      const newVariants = [...formData.variants];
+                                      newVariants[index].costPrice = e.target.value;
+                                      setFormData({ ...formData, variants: newVariants });
+                                    }}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Selling</label>
+                                  <input
+                                    type="number"
+                                    disabled={!permissions?.can_change_inventory_price}
+                                    className="w-full px-4 py-3 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-sm text-blue-600 font-black focus:ring-0 outline-none disabled:opacity-50"
+                                    value={variant.sellingPrice}
+                                    onChange={e => {
+                                      const newVariants = [...formData.variants];
+                                      newVariants[index].sellingPrice = e.target.value;
+                                      setFormData({ ...formData, variants: newVariants });
+                                    }}
+                                  />
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                              {formData.variants.length > 1 && (
+                                <button
+                                  onClick={() => {
+                                    const v = [...formData.variants];
+                                    v.splice(index, 1);
+                                    setFormData({ ...formData, variants: v });
+                                  }}
+                                  className="absolute -top-3 -right-3 w-8 h-8 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] text-red-500 rounded-full flex items-center justify-center font-black active:shadow-[var(--shadow-neu-pressed)]"
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
                         </div>
 
-                        {/* Quick Edit Pinning Controls */}
-                        <div className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-                                <Zap size={14} className="text-blue-500" />
-                                Pin to POS Home
-                              </label>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                              <input 
-                                type="checkbox" 
-                                className="sr-only peer"
-                                checked={formData.is_pinned}
-                                onChange={e => setFormData({...formData, is_pinned: e.target.checked})}
-                              />
-                              <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-                            </label>
-                          </div>
-                          {formData.is_pinned && (
-                            <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2">
-                              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pin Order</label>
-                              <input 
-                                type="number"
-                                className="w-full px-3 py-1.5 bg-black border border-blue-500/10 rounded-2xl text-xs font-bold" 
-                                value={formData.pin_order}
-                                onChange={e => setFormData({...formData, pin_order: parseInt(e.target.value) || 0})}
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex justify-between items-center pt-2">
-                          {permissions?.is_super_admin && (
-                            <button 
-                              onClick={async () => {
-                                if (window.confirm(`Delete ${item.name}?`)) {
-                                  try {
-                                    await api.deleteInventoryItem(item.id);
-                                    setInventory(prev => prev.filter(i => i.id !== item.id));
-                                    setEditingId(null);
-                                  } catch (err: any) {
-                                    console.error(err);
-                                  }
-                                }
-                              }}
-                              className="text-red-500 text-xs font-bold hover:underline"
-                            >
-                              Delete Forever
-                            </button>
-                          )}
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => setEditingId(null)}
-                              className="px-4 py-2 bg-zinc-800 text-white rounded-2xl text-xs font-bold"
-                            >
-                              Cancel
-                            </button>
-                            <button 
-                              onClick={() => handleSave()}
-                              disabled={saving}
-                              className="px-6 py-2 bg-blue-500 text-white rounded-2xl text-xs font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50"
-                            >
-                              {saving ? 'Saving...' : 'Quick Save'}
-                            </button>
-                          </div>
+                        <div className="flex justify-end gap-4 pt-4">
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-6 py-3 bg-[var(--color-neu-bg)] text-black font-bold rounded-2xl shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleSave()}
+                            disabled={saving}
+                            className="px-10 py-3 bg-[var(--color-neu-bg)] text-blue-600 font-black rounded-2xl shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all disabled:opacity-50"
+                          >
+                            {saving ? 'Saving...' : 'Quick Save'}
+                          </button>
                         </div>
                       </div>
                     </motion.div>
@@ -819,459 +710,258 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 );
               })}
             </div>
-            <div className="px-6 py-4 flex items-center justify-between bg-zinc-900/50 border-t border-zinc-800/10">
-              <span className="text-[10px] sm:text-xs font-medium text-zinc-400">
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between pt-6">
+              <span className="text-sm font-bold text-[var(--color-neu-text-secondary)]">
                 Showing {filteredInventory.length === 0 ? 0 : Math.min((currentPage - 1) * itemsPerPage + 1, filteredInventory.length)} - {Math.min(currentPage * itemsPerPage, filteredInventory.length)} of {filteredInventory.length}
               </span>
-              <div className="flex gap-2">
-                <button 
+              <div className="flex gap-4">
+                <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="w-8 h-8 rounded-2xl flex items-center justify-center bg-black text-white border border-zinc-800/10 disabled:opacity-50"
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-30 transition-all text-blue-600"
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={20} strokeWidth={3} />
                 </button>
-                <div className="px-3 h-8 rounded-2xl flex items-center justify-center bg-blue-500 text-white text-[10px] font-bold">
+                <div className="px-6 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] text-black text-sm font-black">
                   {currentPage} / {totalPages}
                 </div>
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="w-8 h-8 rounded-2xl flex items-center justify-center bg-black text-white border border-zinc-800/10 disabled:opacity-50"
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-30 transition-all text-blue-600"
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={20} strokeWidth={3} />
                 </button>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Add/Edit Form - Now below the list on mobile */}
-        <aside className="lg:col-span-4 flex flex-col gap-6 order-last lg:order-first w-full">
-          {/* ── Bulk Generate Toggle ─────────────────────────── */}
-          <button
-            onClick={() => { setBulkMode(!bulkMode); setEditingId(null); }}
-            className={cn(
-              "w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl font-bold text-sm transition-all border shadow-lg",
-              bulkMode
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-orange-400/30 shadow-orange-500/25 hover:shadow-orange-500/40"
-                : "bg-zinc-900/50 text-white border-zinc-800/20 hover:border-blue-500/30 hover:shadow-blue-500/10"
-            )}
-          >
-            <Layers size={18} className={bulkMode ? "animate-pulse" : ""} />
-            {bulkMode ? '⚡️ Bulk Generate Mode ON' : '⚡️ Bulk Generate Repair Suite'}
-          </button>
+          {/* Sidebar Forms */}
+          <aside className="lg:col-span-4 flex flex-col gap-10 order-last lg:order-first w-full">
+            {/* Bulk Mode Toggle */}
+            <button
+              onClick={() => { setBulkMode(!bulkMode); setEditingId(null); }}
+              className={cn(
+                "w-full flex items-center justify-center gap-3 py-5 rounded-[2rem] font-black text-base transition-all active:scale-[0.98]",
+                bulkMode
+                  ? "bg-[var(--color-neu-bg)] text-orange-600 shadow-[var(--shadow-neu-pressed)]"
+                  : "bg-[var(--color-neu-bg)] text-blue-600 shadow-[var(--shadow-neu-flat)]"
+              )}
+            >
+              <Layers size={22} className={bulkMode ? "animate-pulse" : ""} strokeWidth={3} />
+              {bulkMode ? 'BULK MODE ON' : 'BULK GENERATE REPAIRS'}
+            </button>
 
-          {/* ── Bulk Generate Panel ─────────────────────────── */}
-          <motion.div
-            initial={false}
-            animate={{ height: bulkMode ? 'auto' : 0, opacity: bulkMode ? 1 : 0 }}
-            className="overflow-hidden"
-          >
-            <div className="bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-red-500/5 border border-orange-400/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-[100px] pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-tr-[60px] pointer-events-none"></div>
-
-              <h2 className="text-xl font-black text-white mb-1 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
-                  <Zap size={18} />
-                </div>
-                Bulk Generate
-              </h2>
-              <p className="text-xs text-zinc-400 font-medium mb-6 ml-11">Enter device info → auto-create {REPAIR_TEMPLATES.length} repair items</p>
-
-              <div className="space-y-4">
-                {/* Brand */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Device Brand</label>
-                  <select
-                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-orange-500/20 outline-none appearance-none font-medium"
-                    value={bulkBrand}
-                    onChange={e => setBulkBrand(e.target.value)}
-                  >
-                    {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
-                  </select>
-                </div>
-
-                {/* Model */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Device Model <span className="text-red-500">*</span></label>
-                  <input
-                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-zinc-400/40"
-                    placeholder="e.g. Galaxy A56 5G"
-                    value={bulkModel}
-                    onChange={e => setBulkModel(e.target.value)}
-                  />
-                </div>
-
-                {/* AU Model Code */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">AU Model Code</label>
-                  <input
-                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-orange-500/20 outline-none font-medium placeholder:text-zinc-400/40"
-                    placeholder="e.g. SM-A566B"
-                    value={bulkDeviceModel}
-                    onChange={e => setBulkDeviceModel(e.target.value)}
-                  />
-                </div>
-
-                {/* Preview chips */}
-                <div className="space-y-2 pt-2">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Will Generate:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {REPAIR_TEMPLATES.map((tmpl, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black border border-zinc-800/10 rounded-2xl text-[10px] font-bold text-zinc-400"
-                      >
-                        {React.createElement(getIconComponent(tmpl.iconName), { size: 10, className: 'text-orange-500' })}
-                        {bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label}
-                      </span>
-                    ))}
+            {/* Bulk Panel */}
+            <motion.div
+              initial={false}
+              animate={{ height: bulkMode ? 'auto' : 0, opacity: bulkMode ? 1 : 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-8 space-y-8">
+                <h2 className="text-2xl font-black text-black flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-orange-500">
+                    <Zap size={24} strokeWidth={3} />
                   </div>
-                </div>
+                  Bulk Generate
+                </h2>
 
-                {/* Generate button */}
-                <div className="pt-3">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Brand</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                      <select
+                        className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
+                        value={bulkBrand}
+                        onChange={e => setBulkBrand(e.target.value)}
+                      >
+                        {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Model Name</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                      <input
+                        className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none placeholder:text-black/20"
+                        placeholder="e.g. Galaxy S24 Ultra"
+                        value={bulkModel}
+                        onChange={e => setBulkModel(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
                   <button
                     onClick={handleBulkGenerate}
                     disabled={bulkGenerating || !bulkModel.trim()}
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 relative overflow-hidden"
+                    className="w-full py-5 bg-[var(--color-neu-bg)] text-orange-600 rounded-3xl font-black text-lg shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all disabled:opacity-40"
                   >
-                    <span className={cn(bulkGenerating ? "opacity-0" : "opacity-100", "flex items-center justify-center gap-2")}>
-                      <Zap size={18} />
-                      Generate {REPAIR_TEMPLATES.length} Repair Items
-                    </span>
-                    {bulkGenerating && (
-                      <div className="absolute inset-0 flex items-center justify-center gap-2">
-                        <RefreshCw size={18} className="animate-spin" />
-                        Generating...
-                      </div>
-                    )}
+                    {bulkGenerating ? 'Generating...' : 'CREATE 7 ITEMS'}
                   </button>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <div className={cn("bg-zinc-900/50 border border-zinc-800/20 rounded-[2rem] p-6 sm:p-8 shadow-xl relative overflow-hidden", bulkMode && "opacity-50 pointer-events-none")}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] pointer-events-none"></div>
-            
-            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                <Wrench size={18} />
-              </div>
-              {t('inv', 'itemDet')}
-            </h2>
-            
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'name')}</label>
-                <input 
-                  className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none" 
-                  placeholder="e.g. iPhone 13 Screen"
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                />
-              </div>
-              <div className="space-y-1.5 flex flex-col">
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1 space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'cat')}</label>
-                    <select 
-                      className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none"
-                      value={formData.category}
-                      onChange={e => setFormData({...formData, category: e.target.value})}
-                    >
-                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <button 
-                    type="button" 
-                    onClick={() => handleDeleteCategory(formData.category)}
-                    className="h-[44px] px-3 bg-error/10 text-red-500 rounded-2xl font-bold hover:bg-error/20 transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsAddingCategory(!isAddingCategory)}
-                    className="h-[44px] px-3 bg-blue-500/10 text-blue-500 rounded-2xl font-bold hover:bg-blue-500/20 transition-colors"
-                  >
-                    <Plus size={18} />
-                  </button>
+            {/* Manual Form */}
+            <div className={cn(
+              "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-8 space-y-8 transition-opacity",
+              bulkMode && "opacity-30 pointer-events-none"
+            )}>
+              <h2 className="text-2xl font-black text-black flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-500">
+                  <Wrench size={24} strokeWidth={3} />
                 </div>
-                {isAddingCategory && (
-                  <div className="flex gap-2 mt-2">
-                    <input 
-                      className="flex-1 px-4 py-2 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none text-sm" 
-                      placeholder={t('inv', 'addCat')}
-                      value={newCategory} 
-                      onChange={e => setNewCategory(e.target.value)} 
+                {t('inv', 'itemDet')}
+              </h2>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-600 uppercase tracking-widest">{t('inv', 'name')}</label>
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                    <input
+                      className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
+                      placeholder="e.g. iPhone 13 Screen"
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
                     />
-                    <button type="button" onClick={handleAddCategory} className="px-4 bg-blue-500 text-white rounded-2xl text-xs font-bold">Add</button>
                   </div>
-                )}
-              </div>
+                </div>
 
-              <div className="space-y-1.5 flex flex-col">
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1 space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'brand')}</label>
-                    <select 
-                      className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none"
-                      value={formData.brand}
-                      onChange={e => setFormData({...formData, brand: e.target.value})}
-                    >
-                      {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
-                    </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Model</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                      <input
+                        className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
+                        placeholder="iPhone 13"
+                        value={formData.model}
+                        onChange={e => setFormData({ ...formData, model: e.target.value })}
+                      />
+                    </div>
                   </div>
-                  <button 
-                    type="button" 
-                    onClick={() => handleDeleteBrand(formData.brand)}
-                    className="h-[44px] px-3 bg-error/10 text-red-500 rounded-2xl font-bold hover:bg-error/20 transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsAddingBrand(!isAddingBrand)}
-                    className="h-[44px] px-3 bg-blue-500/10 text-blue-500 rounded-2xl font-bold hover:bg-blue-500/20 transition-colors"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-                {isAddingBrand && (
-                  <div className="flex gap-2 mt-2">
-                    <input 
-                      className="flex-1 px-4 py-2 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none text-sm" 
-                      placeholder={t('inv', 'addBrand')} 
-                      value={newBrand} 
-                      onChange={e => setNewBrand(e.target.value)} 
-                    />
-                    <button type="button" onClick={handleAddBrand} className="px-4 bg-blue-500 text-white rounded-2xl text-xs font-bold">Add</button>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Code</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                      <input
+                        className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
+                        placeholder="A2633"
+                        value={formData.device_model}
+                        onChange={e => setFormData({ ...formData, device_model: e.target.value })}
+                      />
+                    </div>
                   </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'model')}</label>
-                  <input 
-                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none" 
-                    placeholder="iPhone 13 Pro"
-                    value={formData.model}
-                    onChange={e => setFormData({...formData, model: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">AU Model Code</label>
-                  <input 
-                    className="w-full px-4 py-2.5 bg-black border border-zinc-800/10 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none placeholder:text-zinc-400/40" 
-                    placeholder="e.g. A3102, SM-S928B"
-                    value={formData.device_model}
-                    onChange={e => setFormData({...formData, device_model: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              {/* Variants Section */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Variants / Quality Tiers</label>
-                  <button 
-                    type="button"
-                    onClick={() => setFormData({
-                      ...formData, 
-                      variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '0', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }]
-                    })}
-                    className="text-xs font-bold text-blue-500 flex items-center gap-1 hover:bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
-                  >
-                    <Plus size={14} /> Add Quality Tier
-                  </button>
                 </div>
 
-                <div className="space-y-3">
-                  {formData.variants.map((variant, index) => (
-                    <div key={variant.id} className="p-3 bg-zinc-800 border border-zinc-800/20 rounded-2xl relative">
+                <div className="space-y-4">
+                  <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Variants</label>
+                  {formData.variants.map((variant, idx) => (
+                    <div key={idx} className="p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex flex-col gap-3 relative">
                       {formData.variants.length > 1 && (
-                        <button 
-                          type="button"
+                        <button
                           onClick={() => {
-                            const newVariants = [...formData.variants];
-                            newVariants.splice(index, 1);
-                            setFormData({ ...formData, variants: newVariants });
+                            const v = [...formData.variants];
+                            v.splice(idx, 1);
+                            setFormData({ ...formData, variants: v });
                           }}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-error text-white rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
+                          className="absolute -top-3 -right-3 w-8 h-8 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] text-red-500 rounded-full flex items-center justify-center font-black active:shadow-[var(--shadow-neu-pressed)]"
                         >
-                          <Trash2 size={12} />
+                          ×
                         </button>
                       )}
-                      
-                      <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Grade</label>
-                          <select 
-                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none font-medium"
-                            value={variant.quality_grade}
-                            onChange={e => {
-                              const newVariants = [...formData.variants];
-                              newVariants[index].quality_grade = e.target.value;
-                              setFormData({ ...formData, variants: newVariants });
-                            }}
-                          >
-                            {qualityTiers.length > 0 ? (
-                              qualityTiers.map(tier => (
-                                <option key={tier.id} value={tier.name}>{tier.name}</option>
-                              ))
-                            ) : (
-                              <>
-                                <option value="Standard">Standard</option>
-                                <option value="Budget">Budget</option>
-                                <option value="Premium">Premium</option>
-                                <option value="Genuine">Genuine</option>
-                              </>
-                            )}
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'qty')}</label>
-                          <input 
+                      <div className="flex justify-between items-center">
+                        <select
+                          className="bg-transparent border-none text-sm font-black text-blue-600 focus:ring-0 outline-none cursor-pointer"
+                          value={variant.quality_grade}
+                          onChange={e => {
+                            const v = [...formData.variants];
+                            v[idx].quality_grade = e.target.value;
+                            setFormData({ ...formData, variants: v });
+                          }}
+                        >
+                          {qualityTiers.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                        </select>
+                        <div className="flex items-center gap-2">
+                          <label className="text-[10px] font-black text-gray-600 uppercase">Stock</label>
+                          <input
                             type="number"
-                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
-                            placeholder="0"
+                            className="w-16 px-2 py-1 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-lg text-xs font-bold"
                             value={variant.stock}
                             onChange={e => {
-                              const newVariants = [...formData.variants];
-                              newVariants[index].stock = e.target.value;
-                              setFormData({ ...formData, variants: newVariants });
+                              const v = [...formData.variants];
+                              v[idx].stock = e.target.value;
+                              setFormData({ ...formData, variants: v });
                             }}
                           />
                         </div>
                       </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'cost')} ($)</label>
-                          <input 
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-black text-gray-600 uppercase ml-1">Cost</label>
+                          <input
                             type="number"
-                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium" 
-                            placeholder="0.00"
+                            className="w-full px-3 py-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-xs font-bold"
                             value={variant.costPrice}
                             onChange={e => {
-                              const newVariants = [...formData.variants];
-                              newVariants[index].costPrice = e.target.value;
-                              setFormData({ ...formData, variants: newVariants });
+                              const v = [...formData.variants];
+                              v[idx].costPrice = e.target.value;
+                              setFormData({ ...formData, variants: v });
                             }}
                           />
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('inv', 'sell')} ($)</label>
-                          <input 
+                        <div className="flex-1">
+                          <label className="text-[10px] font-black text-gray-600 uppercase ml-1">Sell</label>
+                          <input
                             type="number"
-                            disabled={!permissions?.can_change_inventory_price}
-                            className="w-full px-3 py-2 bg-black border border-zinc-800/10 rounded-2xl text-sm text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-medium text-blue-500 disabled:bg-zinc-900 disabled:cursor-not-allowed" 
-                            placeholder="0.00"
+                            className="w-full px-3 py-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-xs font-black text-blue-600"
                             value={variant.sellingPrice}
                             onChange={e => {
-                              const newVariants = [...formData.variants];
-                              newVariants[index].sellingPrice = e.target.value;
-                              setFormData({ ...formData, variants: newVariants });
+                              const v = [...formData.variants];
+                              v[idx].sellingPrice = e.target.value;
+                              setFormData({ ...formData, variants: v });
                             }}
                           />
                         </div>
-                      </div>
-                      <div className="mt-3 flex items-center justify-between border-t border-zinc-800/10 pt-2.5">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                          <span className="text-amber-500">⭐</span> Highlight / Recommend
-                        </label>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="sr-only peer"
-                            checked={variant.is_recommended}
-                            onChange={e => {
-                              const newVariants = [...formData.variants];
-                              newVariants[index].is_recommended = e.target.checked;
-                              setFormData({ ...formData, variants: newVariants });
-                            }}
-                          />
-                          <div className="w-8 h-4.5 bg-black peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-amber-500"></div>
-                        </label>
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              <div className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <Zap size={14} className="text-blue-500" />
-                      Pin to POS Home
-                    </label>
-                    <p className="text-[10px] text-zinc-400 font-medium">Show in Quick Access for muscle memory</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer"
-                      checked={formData.is_pinned}
-                      onChange={e => setFormData({...formData, is_pinned: e.target.checked})}
-                    />
-                    <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  </label>
-                </div>
-
-                {formData.is_pinned && (
-                  <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pin Order (Lower numbers show first)</label>
-                    <input 
-                      type="number"
-                      className="w-full px-4 py-2.5 bg-black border border-blue-500/20 rounded-2xl text-white focus:ring-2 focus:ring-blue-500/20 outline-none font-bold" 
-                      placeholder="0"
-                      value={formData.pin_order}
-                      onChange={e => setFormData({...formData, pin_order: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-4 flex gap-3">
-                <button 
-                  onClick={() => handleSave()}
-                  disabled={saving || !formData.name || formData.variants.length === 0}
-                  className="flex-1 bg-blue-500 text-white py-3.5 rounded-2xl font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
-                >
-                  <span className={cn(saving ? "opacity-0" : "opacity-100")}>
-                    {editingId ? t('inv', 'update') : t('inv', 'save')}
-                  </span>
-                  {saving && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <RefreshCw size={20} className="animate-spin" />
-                    </div>
-                  )}
-                </button>
-                {editingId && (
-                  <button 
-                    onClick={clearForm}
-                    className="px-6 bg-zinc-800 text-white font-bold py-3.5 rounded-2xl hover:bg-zinc-800 transition-colors"
+                  <button
+                    onClick={() => setFormData({ ...formData, variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }] })}
+                    className="w-full py-3 text-xs font-black text-blue-600 rounded-2xl shadow-[var(--shadow-neu-sm)] active:shadow-[var(--shadow-neu-pressed)]"
                   >
-                    {t('inv', 'discard')}
+                    + ADD VARIANT
                   </button>
-                )}
+                </div>
+
+                <div className="pt-6 flex gap-4">
+                  <button
+                    onClick={() => handleSave()}
+                    disabled={saving || !formData.name}
+                    className="flex-1 py-5 bg-[var(--color-neu-bg)] text-blue-600 font-black text-xl rounded-3xl shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all disabled:opacity-40"
+                  >
+                    {saving ? '...' : editingId ? 'UPDATE' : 'SAVE'}
+                  </button>
+                  {editingId && (
+                    <button
+                      onClick={clearForm}
+                      className="px-6 py-5 bg-[var(--color-neu-bg)] text-red-500 font-black rounded-3xl shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)]"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </div>
+
+        {/* Floating Scanner */}
+        <button className="fixed right-10 bottom-10 bg-[var(--color-neu-bg)] text-blue-600 w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-[var(--shadow-neu-floating)] hover:scale-110 active:shadow-[var(--shadow-neu-pressed)] transition-all z-40 border-4 border-white/40">
+          <QrCode size={32} strokeWidth={3} />
+        </button>
       </div>
-      
-      {/* FAB */}
-      <button className="fixed right-6 bottom-24 md:bottom-8 bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-40">
-        <QrCode size={28} />
-      </button>
     </div>
-  </div>
-);
+  );
 }
