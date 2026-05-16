@@ -739,7 +739,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
           </div>
 
           {/* Sidebar Forms */}
-          <aside className="lg:col-span-4 flex flex-col gap-10 order-last lg:order-first w-full">
+          <aside className="lg:col-span-4 flex flex-col gap-10 order-last lg:order-first w-full sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
             {/* Bulk Mode Toggle */}
             <button
               onClick={() => { setBulkMode(!bulkMode); setEditingId(null); }}
