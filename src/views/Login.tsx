@@ -14,7 +14,7 @@ export function LoginView({ onLogin, lang = 'en', setLang }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Renamed from 'loading' to 'isLoading'
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +22,8 @@ export function LoginView({ onLogin, lang = 'en', setLang }: LoginProps) {
     setIsLoading(true);
 
     try {
-      // Dummy Email Mapping Pattern
       const mappedEmail = username.includes('@') ? username : `${username}@pos.local`;
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: mappedEmail,
         password
@@ -45,74 +44,88 @@ export function LoginView({ onLogin, lang = 'en', setLang }: LoginProps) {
   const t = (k: string) => dict[lang].login[k] || k;
 
   return (
-    <div className="min-h-screen bg-blue-500 hover:bg-blue-600 flex items-center justify-center p-4 relative">
-      {/* Top Right Toggle */}
+    <div className="min-h-screen bg-[var(--color-neu-bg)] flex items-center justify-center p-6 font-body">
+      {/* Language Toggle */}
       {setLang && (
-        <div className="absolute top-6 right-6 flex bg-white/20 backdrop-blur-md p-1 rounded-full shadow-lg border border-white/30 text-white font-bold text-xs">
-          <button 
-            onClick={() => setLang('en')} 
-            className={cn("px-4 py-2 rounded-full transition-all", lang === 'en' ? "bg-white text-blue-500" : "hover:bg-white/10")}
+        <div className="absolute top-8 right-8 flex bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-2 rounded-full border border-white/40">
+          <button
+            onClick={() => setLang('en')}
+            className={cn(
+              "px-6 py-2.5 rounded-full font-black text-xs transition-all uppercase tracking-widest",
+              lang === 'en'
+                ? "bg-blue-600 text-white shadow-[0_5px_15px_rgba(37,99,235,0.3)]"
+                : "text-gray-400 hover:text-black"
+            )}
           >
             EN
           </button>
-          <button 
-            onClick={() => setLang('zh')} 
-            className={cn("px-4 py-2 rounded-full transition-all", lang === 'zh' ? "bg-white text-blue-500" : "hover:bg-white/10")}
+          <button
+            onClick={() => setLang('zh')}
+            className={cn(
+              "px-6 py-2.5 rounded-full font-black text-xs transition-all uppercase tracking-widest",
+              lang === 'zh'
+                ? "bg-blue-600 text-white shadow-[0_5px_15px_rgba(37,99,235,0.3)]"
+                : "text-gray-400 hover:text-black"
+            )}
           >
             中文
           </button>
         </div>
       )}
 
-      {/* Decorative Elements */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-tertiary/20 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Main Login Card */}
+      <div className="max-w-md w-full bg-[var(--color-neu-bg)] rounded-[3.5rem] p-12 shadow-[var(--shadow-neu-flat)] border border-white/20 relative overflow-hidden">
+        {/* Subtle Background Glow */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-md w-full bg-zinc-900/50/80 backdrop-blur-xl rounded-[2.5rem] p-10 shadow-2xl border border-zinc-800/20 relative z-10">
-        <div className="text-center mb-10 relative z-10">
-          <div className="w-20 h-20 bg-blue-500/10 text-blue-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner border border-blue-500/20">
-            <Lock size={36} />
+        <div className="text-center mb-12">
+          <div className="w-24 h-24 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] text-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/60">
+            <Lock size={48} strokeWidth={3} />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight mb-2">{t('portal')}</h1>
-          <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('subtitle')}</p>
+          <h1 className="text-4xl font-black text-black tracking-tighter mb-3 uppercase [text-shadow:-2px_2px_4px_var(--color-neu-shadow-dark)]">
+            {t('portal')}
+          </h1>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] bg-white/50 px-6 py-2 rounded-full inline-block shadow-[var(--shadow-neu-sm)]">
+            {t('subtitle')}
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {error && (
-            <div className="p-4 bg-red-900/30 text-red-400 text-sm font-bold rounded-2xl flex items-center justify-center border border-red-500/20 shadow-inner">
-              {error}
+            <div className="p-5 bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-widest rounded-3xl border border-red-100 shadow-[var(--shadow-neu-sm)] text-center animate-shake">
+              ⚠️ {error}
             </div>
           )}
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 pl-2">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 pl-4">
                 {t('user')}
               </label>
-              <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2.5rem] p-1.5 border border-black/5 flex items-center px-5 transition-all focus-within:border-blue-500/20">
+                <User size={22} strokeWidth={3} className="text-gray-300 ml-2" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-zinc-900 border-2 border-transparent focus:border-blue-500/20 focus:bg-white rounded-2xl text-white font-semibold outline-none transition-all shadow-inner"
+                  className="w-full bg-transparent px-4 py-5 text-sm font-black text-black outline-none placeholder:text-gray-300"
                   placeholder={t('enterUser')}
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 pl-2">
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 pl-4">
                 {t('pass')}
               </label>
-              <div className="relative group">
-                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2.5rem] p-1.5 border border-black/5 flex items-center px-5 transition-all focus-within:border-blue-500/20">
+                <Key size={22} strokeWidth={3} className="text-gray-300 ml-2" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-zinc-900 border-2 border-transparent focus:border-blue-500/20 focus:bg-white rounded-2xl text-white font-semibold outline-none transition-all shadow-inner"
+                  className="w-full bg-transparent px-4 py-5 text-sm font-black text-black outline-none placeholder:text-gray-300"
                   placeholder={t('enterPass')}
                   required
                 />
@@ -123,19 +136,19 @@ export function LoginView({ onLogin, lang = 'en', setLang }: LoginProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 mt-4 bg-blue-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110 flex items-center justify-center gap-2"
+            className="w-full py-6 mt-6 bg-blue-600 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.2em] shadow-[0_15px_30px_rgba(37,99,235,0.4)] hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4"
           >
             {isLoading ? (
-              <div className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 {t('btn')}
-                <ArrowRight size={18} />
+                <ArrowRight size={24} strokeWidth={3} />
               </>
             )}
           </button>
         </form>
-      </div>    
+      </div>
     </div>
   );
 }
