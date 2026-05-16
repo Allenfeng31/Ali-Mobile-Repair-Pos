@@ -525,14 +525,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 return (
                   <div key={item.id} className="group">
                     <div
-                      onClick={() => handleEdit(item)}
+                      onClick={() => editingId === item.id ? setEditingId(null) : handleEdit(item)}
                       className={cn(
                         "bg-[var(--color-neu-bg)] rounded-[2rem] p-5 sm:p-6 shadow-[var(--shadow-neu-flat)] active:scale-[0.98] transition-all cursor-pointer flex flex-col sm:grid sm:grid-cols-12 items-start sm:items-center gap-4 border border-white/20",
                         isEditingThis && "shadow-[var(--shadow-neu-pressed)] scale-[0.99]"
                       )}
                     >
                       <div className="w-full sm:col-span-6 flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600 shrink-0">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow(--shadow-neu-sm)] flex items-center justify-center text-blue-600 shrink-0">
                           <item.icon size={28} />
                         </div>
                         <div className="min-w-0">
