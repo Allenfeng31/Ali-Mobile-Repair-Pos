@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  UserPlus, 
-  Edit3, 
-  MessageSquare, 
-  Laptop, 
-  Smartphone, 
+import {
+  Search,
+  UserPlus,
+  Edit3,
+  MessageSquare,
+  Laptop,
+  Smartphone,
   ChevronRight,
   MoreVertical,
   Star,
@@ -23,7 +23,8 @@ import {
   DollarSign,
   Scan,
   Users,
-  ArrowRight
+  ArrowRight,
+  Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -57,11 +58,11 @@ export function CustomersView() {
   const t = (_section: string, key: string) => key; // Simplified for now
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [hostIp, setHostIp] = useState('localhost');
-  
+
   const [selectedId, setSelectedId] = useState<string>('');
-  
+
   // Fetch customer data
   useEffect(() => {
     const loadData = async () => {
@@ -81,7 +82,7 @@ export function CustomersView() {
     loadData();
     api.getIp().then(ipRes => {
       if (ipRes?.ip) setHostIp(ipRes.ip);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,14 +110,14 @@ export function CustomersView() {
   }, []);
 
   useScrollLock(
-    isAdding || 
-    isEditing || 
-    isViewingAllOrders || 
-    !!selectedRepair || 
-    isConfirmingDelete || 
-    isConfirmingDeleteRepair || 
-    showQR || 
-    isTicketModalOpen || 
+    isAdding ||
+    isEditing ||
+    isViewingAllOrders ||
+    !!selectedRepair ||
+    isConfirmingDelete ||
+    isConfirmingDeleteRepair ||
+    showQR ||
+    isTicketModalOpen ||
     !!scannerTarget
   );
 
@@ -151,6 +152,11 @@ export function CustomersView() {
     return Math.max(...customer.repairs.map(r => new Date(r.timestamp).getTime()));
   };
 
+  const getOldestTimestamp = (customer: Customer) => {
+    if (customer.repairs.length === 0) return null;
+    return Math.min(...customer.repairs.map(r => new Date(r.timestamp).getTime()));
+  };
+
   const sortedCustomers = [...customers].map(c => ({
     ...c,
     repairs: [...c.repairs].sort((a, b) => {
@@ -164,7 +170,7 @@ export function CustomersView() {
     const statusA = getCustomerOverallStatus(a);
     const statusB = getCustomerOverallStatus(b);
     const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'waiting for pay': 1, 'Ready for Pickup': 1, 'Completed': 2 };
-    
+
     if (priority[statusA] !== priority[statusB]) {
       return priority[statusA] - priority[statusB];
     }
@@ -173,8 +179,8 @@ export function CustomersView() {
 
   const filteredCustomers = sortedCustomers.filter(c => {
     const query = searchQuery.toLowerCase();
-    const hasRepairMatch = c.repairs.some(r => 
-      (r.repairItem || '').toLowerCase().includes(query) || 
+    const hasRepairMatch = c.repairs.some(r =>
+      (r.repairItem || '').toLowerCase().includes(query) ||
       (r.modelNumber || '').toLowerCase().includes(query)
     );
     const matchesSearch = (
@@ -184,7 +190,7 @@ export function CustomersView() {
       (c.id || '').toLowerCase().includes(query) ||
       hasRepairMatch
     );
-    
+
     if (filterSyncedOnly && !c.synced_to_google) return false;
     return matchesSearch;
   });
@@ -205,24 +211,24 @@ export function CustomersView() {
   const handleSendReview = async (customer?: Customer) => {
     const target = customer || selectedCustomer;
     if (!target) return;
-    
+
     setSendingReviewId(target.id);
     try {
-      const response = await api.sendSms(target.phone, 'review', { 
+      const response = await api.sendSms(target.phone, 'review', {
         customerName: target.name,
         customerId: target.id
       });
-      
+
       if (response && response.lastReviewSent) {
-        setCustomers(prev => prev.map(c => 
+        setCustomers(prev => prev.map(c =>
           c.id === target.id ? { ...c, lastReviewSent: response.lastReviewSent } : c
         ));
       }
 
       setReviewSent(true);
-      setTimeout(() => { 
-        setReviewSent(false); 
-        setShowPhonePopup(false); 
+      setTimeout(() => {
+        setReviewSent(false);
+        setShowPhonePopup(false);
         setSendingReviewId(null);
       }, 2000);
     } catch (err) {
@@ -235,9 +241,9 @@ export function CustomersView() {
     if (!repair || !customer) return;
     setPartNotifiedId(repair.id);
     try {
-      await api.sendSms(customer.phone, 'partArrived', { 
+      await api.sendSms(customer.phone, 'partArrived', {
         customerName: customer.name,
-        deviceModel: repair.modelNumber 
+        deviceModel: repair.modelNumber
       });
       setTimeout(() => setPartNotifiedId(null), 3000);
     } catch (err) {
@@ -245,7 +251,7 @@ export function CustomersView() {
       setPartNotifiedId(null);
     }
   };
-  
+
   const getPortalUrl = () => {
     const origin = window.location.origin;
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
@@ -271,7 +277,7 @@ export function CustomersView() {
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     const existingCustomerIndex = customers.findIndex(c => c.phone === formData.phone);
-    
+
     try {
       if (existingCustomerIndex !== -1) {
         const existingCustomer = customers[existingCustomerIndex];
@@ -293,8 +299,8 @@ export function CustomersView() {
         const createdRepair = await api.createRepair(newRepairForApi);
         const updatedRepairs = [createdRepair, ...existingCustomer.repairs];
         const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
-        const newStatus = getCustomerOverallStatus({...existingCustomer, repairs: updatedRepairs});
-        
+        const newStatus = getCustomerOverallStatus({ ...existingCustomer, repairs: updatedRepairs });
+
         await api.updateCustomer(existingCustomer.id, {
           totalSpent: newTotalSpent,
           status: newStatus,
@@ -318,7 +324,7 @@ export function CustomersView() {
       } else {
         const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
         const price = parseFloat(formData.price) || 0;
-        
+
         const customerForApi = {
           id: Math.random().toString(36).substr(2, 9).toUpperCase(),
           name: formData.name,
@@ -374,7 +380,7 @@ export function CustomersView() {
     e.preventDefault();
     const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
     const updateData = { name: formData.name, phone: formData.phone, email: formData.email, initials };
-    
+
     try {
       await api.updateCustomer(selectedId, updateData);
       setCustomers(customers.map(c => c.id === selectedId ? { ...c, ...updateData } : c));
@@ -441,7 +447,7 @@ export function CustomersView() {
     try {
       const nextStatus = 'Completed';
       await api.updateRepair(repairId, { status: nextStatus });
-      
+
       let smsCustomer: Customer | undefined;
       let smsRepairItem = 'your device';
 
@@ -455,7 +461,7 @@ export function CustomersView() {
             }
             return r;
           });
-          const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
+          const newStatus = getCustomerOverallStatus({ ...c, repairs: updatedRepairs });
           api.updateCustomer(customerId, {
             status: newStatus, statusColor: getStatusColor(newStatus)
           }).catch(console.error);
@@ -467,7 +473,7 @@ export function CustomersView() {
       if (smsCustomer?.phone) {
         api.sendSms(smsCustomer.phone, 'completed', {
           customerName: smsCustomer.name, deviceModel: smsRepairItem
-        }).catch(() => {});
+        }).catch(() => { });
       }
       setCustomers(updatedCustomers);
     } catch (err) {
@@ -493,7 +499,7 @@ export function CustomersView() {
         if (c.id === selectedId) {
           const updatedRepairs = c.repairs.map(r => r.id === selectedRepair.id ? { ...r, ...updateData } : r);
           const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
-          const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
+          const newStatus = getCustomerOverallStatus({ ...c, repairs: updatedRepairs });
           api.updateCustomer(selectedId, {
             totalSpent: newTotalSpent, status: newStatus, statusColor: getStatusColor(newStatus)
           }).catch(console.error);
@@ -522,7 +528,7 @@ export function CustomersView() {
         if (c.id === selectedId) {
           const updatedRepairs = c.repairs.filter(r => r.id !== selectedRepair.id);
           const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
-          const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
+          const newStatus = getCustomerOverallStatus({ ...c, repairs: updatedRepairs });
           api.updateCustomer(selectedId, {
             totalSpent: newTotalSpent, status: newStatus, statusColor: getStatusColor(newStatus)
           }).catch(console.error);
@@ -545,13 +551,13 @@ export function CustomersView() {
     const overallStatus = getCustomerOverallStatus(customer);
 
     return (
-      <div 
+      <div
         key={customer.id}
         onClick={() => setSelectedId(customer.id)}
         className={cn(
           "p-6 rounded-[2.5rem] transition-all cursor-pointer group border border-white/20",
-          isActive 
-            ? "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] scale-[0.98]" 
+          isActive
+            ? "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] scale-[0.98]"
             : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] hover:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98]"
         )}
       >
@@ -566,7 +572,7 @@ export function CustomersView() {
             <div>
               <h3 className="font-black text-black text-lg tracking-tight leading-none mb-2">{customer.name}</h3>
               <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{customer.phone}</span>
+                <span className="text-[10px] font-black text-black uppercase tracking-widest">{customer.phone}</span>
                 {customer.repairs.length > 0 && (
                   <div className="flex items-center gap-2">
                     <div className="w-1 h-1 rounded-full bg-gray-300" />
@@ -583,9 +589,9 @@ export function CustomersView() {
               <span className={cn(
                 "text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/20",
                 overallStatus === 'Urgent' ? "bg-red-50 text-red-600" :
-                overallStatus === 'In Processing' ? "bg-purple-50 text-purple-600" :
-                overallStatus === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
-                "bg-gray-50 text-gray-600"
+                  overallStatus === 'In Processing' ? "bg-purple-50 text-purple-600" :
+                    overallStatus === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                      "bg-gray-50 text-gray-600"
               )}>
                 {overallStatus}
               </span>
@@ -600,8 +606,8 @@ export function CustomersView() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-      {/* Left Column: List */}
-      <section className="lg:col-span-7 space-y-10 order-2 lg:order-1">
+      {/* Customer List: Top on Mobile, Left on Desktop */}
+      <section className="lg:col-span-7 space-y-10 order-1 lg:order-1">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
             <span className="text-gray-600 font-black text-[10px] uppercase tracking-widest ml-1">Client Relations</span>
@@ -609,7 +615,7 @@ export function CustomersView() {
               Customers
             </h2>
           </div>
-          <button 
+          <button
             onClick={() => setIsAdding(true)}
             className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 px-8 py-4 rounded-[2rem] font-black text-sm flex items-center justify-center gap-3 active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
           >
@@ -622,9 +628,9 @@ export function CustomersView() {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1 group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" size={20} strokeWidth={3} />
-            <input 
-              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2rem] py-5 pl-14 pr-6 outline-none text-black font-black text-sm placeholder:text-gray-400/50 transition-all border border-black/5" 
-              placeholder="Search by name, phone, email or device..." 
+            <input
+              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2rem] py-5 pl-14 pr-6 outline-none text-black font-black text-sm placeholder:text-gray-400/50 transition-all border border-black/5"
+              placeholder="Search by name, phone, email or device..."
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -634,8 +640,8 @@ export function CustomersView() {
             onClick={() => setFilterSyncedOnly(!filterSyncedOnly)}
             className={cn(
               "px-8 py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 border border-white/20",
-              filterSyncedOnly 
-                ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" 
+              filterSyncedOnly
+                ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]"
                 : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 active:shadow-[var(--shadow-neu-pressed)]"
             )}
           >
@@ -693,8 +699,8 @@ export function CustomersView() {
         </div>
       </section>
 
-      {/* Right Column: Detail (Sticky Panel Architecture) */}
-      <aside className="lg:col-span-5 order-1 lg:order-2 sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar p-1">
+      {/* Customer Details: Bottom on Mobile, Right on Desktop */}
+      <aside className="lg:col-span-5 order-2 lg:order-2 sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar p-1">
         <AnimatePresence mode="wait">
           {!selectedCustomer ? (
             <motion.div
@@ -710,128 +716,174 @@ export function CustomersView() {
               <p className="text-xs font-bold text-gray-500 mt-2">Pick a client from the list to view profile and repair logs.</p>
             </motion.div>
           ) : (
-          <motion.div 
-            key={selectedCustomer.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[3rem] overflow-hidden border border-white/20"
-          >
-            {/* Header Visual */}
-            <div className="h-40 bg-blue-600 relative p-8 flex items-end">
-              <div className="absolute top-6 right-6 flex gap-3">
-                <button 
-                  onClick={openEditModal}
-                  className="w-12 h-12 bg-white/10 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all border border-white/10"
-                >
-                  <Edit3 size={20} strokeWidth={3} />
-                </button>
-              </div>
-              <div className="absolute -bottom-10 left-8 w-24 h-24 rounded-[2rem] bg-white shadow-[var(--shadow-neu-floating)] flex items-center justify-center font-black text-4xl text-blue-600 border-[6px] border-[var(--color-neu-bg)]">
-                {selectedCustomer.initials}
-              </div>
-            </div>
-
-            <div className="px-10 pb-12 pt-16 space-y-10">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-3xl font-black text-black tracking-tight">{selectedCustomer.name}</h2>
-                    <Star size={20} className="text-blue-600 fill-blue-600" />
-                  </div>
-                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1.5">ID: #{selectedCustomer.id}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
-                  <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Primary Email</p>
-                  <p className="text-xs font-black text-black truncate">{selectedCustomer.email || 'No email set'}</p>
-                </div>
-                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
-                  <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Lifetime Value</p>
-                  <p className="text-lg font-black text-blue-600 leading-none">${selectedCustomer.totalSpent.toFixed(2)}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-3xl border border-white/20 group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-[var(--shadow-neu-sm)]">
-                    <Phone size={20} strokeWidth={3} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Mobile Number</p>
-                    <p className="text-base font-black text-black">{selectedCustomer.phone}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowPhonePopup(true)}
-                  className="w-10 h-10 rounded-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-blue-600 active:shadow-[var(--shadow-neu-pressed)] transition-all"
-                >
-                  <ArrowRight size={20} strokeWidth={3} />
-                </button>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-6 px-2">
-                  <h3 className="text-xs font-black text-black uppercase tracking-widest">Repair Journey</h3>
-                  <button 
-                    onClick={() => setIsViewingAllOrders(true)}
-                    className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+            <motion.div
+              key={selectedCustomer.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[3rem] overflow-hidden border border-white/20"
+            >
+              {/* Header Visual */}
+              <div className="h-40 bg-blue-600 relative p-8 flex items-end">
+                <div className="absolute top-6 right-6 flex gap-3">
+                  <button
+                    onClick={openEditModal}
+                    className="w-12 h-12 bg-white/10 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all border border-white/10"
                   >
-                    View History
+                    <Edit3 size={20} strokeWidth={3} />
                   </button>
                 </div>
-                <div className="space-y-4">
-                  {selectedCustomer.repairs.slice(0, 3).map(item => (
-                    <div 
-                      key={item.id} 
-                      onClick={() => setSelectedRepair(item)}
-                      className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl flex gap-5 items-center border border-white/20 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer group active:scale-[0.98]"
-                    >
-                      <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-gray-600 group-hover:text-blue-600 transition-colors shrink-0">
-                        <Smartphone size={24} strokeWidth={3} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-black text-sm text-black truncate leading-tight mb-1">{item.repairItem}</h4>
-                          <span className="text-[10px] font-black text-gray-500 shrink-0">
-                            {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Model: {item.modelNumber}</p>
-                            {(item.deposit || 0) > 0 && (
-                              <p className="text-[9px] font-black text-green-600 mt-1">💰 Deposit: ${item.deposit.toFixed(2)}</p>
-                            )}
-                          </div>
-                          <p className="text-base font-black text-black leading-none">${item.price.toFixed(2)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {selectedCustomer.repairs.length === 0 && (
-                    <div className="text-center py-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl border border-black/5">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No Repairs Logged</p>
-                    </div>
-                  )}
+                <div className="absolute -bottom-10 left-8 w-24 h-24 rounded-[2rem] bg-white shadow-[var(--shadow-neu-floating)] flex items-center justify-center font-black text-4xl text-blue-600 border-[6px] border-[var(--color-neu-bg)]">
+                  {selectedCustomer.initials}
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-black/5 flex gap-4">
-                <button 
-                  onClick={() => setIsViewingAllOrders(true)}
-                  className="flex-1 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-xs uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
-                >
-                  Full Activity Audit
-                </button>
-                <button className="w-20 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl flex items-center justify-center active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20">
-                  <MessageSquare size={24} strokeWidth={3} />
-                </button>
+              <div className="px-10 pb-12 pt-16 space-y-10">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-3xl font-black text-black tracking-tight">{selectedCustomer.name}</h2>
+                      <Star size={20} className="text-blue-600 fill-blue-600" />
+                    </div>
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1.5">ID: #{selectedCustomer.id}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Primary Email</p>
+                    <p className="text-xs font-black text-black truncate">{selectedCustomer.email || 'No email set'}</p>
+                  </div>
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Lifetime Value</p>
+                    <p className="text-lg font-black text-black leading-none">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Member Since</p>
+                    <div className="flex items-center gap-2">
+                      <Calendar size={14} className="text-blue-600" />
+                      <p className="text-xs font-black text-black">
+                        {getOldestTimestamp(selectedCustomer)
+                          ? new Date(getOldestTimestamp(selectedCustomer)!).toLocaleDateString()
+                          : 'Today'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Service Status</p>
+                    <span className={cn(
+                      "text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/10",
+                      selectedCustomer.status === 'Urgent' ? "bg-red-50 text-red-600" :
+                        (selectedCustomer.status === 'In Processing' || selectedCustomer.status === 'waiting for pay') ? "bg-purple-50 text-purple-600" :
+                          selectedCustomer.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                            "bg-gray-50 text-gray-400"
+                    )}>
+                      {selectedCustomer.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-3xl border border-white/20 group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-[var(--shadow-neu-sm)]">
+                      <Phone size={20} strokeWidth={3} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Mobile Number</p>
+                      <p className="text-base font-black text-black">{selectedCustomer.phone}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowPhonePopup(true)}
+                    className="w-10 h-10 rounded-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-blue-600 active:shadow-[var(--shadow-neu-pressed)] transition-all"
+                  >
+                    <ArrowRight size={20} strokeWidth={3} />
+                  </button>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-6 px-2">
+                    <h3 className="text-xs font-black text-black uppercase tracking-widest">Repair Journey</h3>
+                    <button
+                      onClick={() => setIsViewingAllOrders(true)}
+                      className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                    >
+                      View History
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {selectedCustomer.repairs.slice(0, 3).map(item => (
+                      <div
+                        key={item.id}
+                        onClick={() => setSelectedRepair(item)}
+                        className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl flex gap-5 items-center border border-white/20 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer group active:scale-[0.98]"
+                      >
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-gray-600 group-hover:text-blue-600 transition-colors shrink-0">
+                          <Smartphone size={24} strokeWidth={3} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <h4 className="font-black text-sm text-black truncate leading-tight mb-1">{item.repairItem}</h4>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className="text-[9px] font-black text-gray-600 shrink-0 leading-none">
+                                {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                              </span>
+                              <span className="text-[8px] font-black text-gray-400 shrink-0 leading-none">
+                                {new Date(item.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-end">
+                            <div>
+                              <p className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Model: {item.modelNumber}</p>
+                              {(item.deposit || 0) > 0 && (
+                                <p className="text-[9px] font-black text-green-600 mt-1">💰 Deposit: ${item.deposit.toFixed(2)}</p>
+                              )}
+                            </div>
+                            <p className="text-base font-black text-black leading-none">${item.price.toFixed(2)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {selectedCustomer.repairs.length === 0 && (
+                      <div className="text-center py-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl border border-black/5">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No Repairs Logged</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-black/5 flex flex-col gap-4">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setIsViewingAllOrders(true)}
+                      className="flex-1 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-xs uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
+                    >
+                      Full Activity Audit
+                    </button>
+                    <button className="w-20 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl flex items-center justify-center active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20">
+                      <MessageSquare size={24} strokeWidth={3} />
+                    </button>
+                  </div>
+
+                  {/* RESTORED: Send Google Review Button */}
+                  <button
+                    onClick={() => handleSendReview()}
+                    disabled={sendingReviewId === selectedCustomer.id}
+                    className={cn(
+                      "w-full py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20",
+                      reviewSent ? "text-green-600" : "text-amber-600"
+                    )}
+                  >
+                    {reviewSent ? (
+                      <><Check size={18} strokeWidth={4} /> Review Link Sent</>
+                    ) : (
+                      <><Star size={18} strokeWidth={3} className="fill-amber-500" /> Send Google Review SMS</>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </aside>
@@ -910,7 +962,7 @@ export function CustomersView() {
         {(isAdding || isEditing) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }} className="absolute inset-0 bg-black/40" />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -926,7 +978,7 @@ export function CustomersView() {
                       {isEditing ? 'Update existing client core data' : 'Register a new repair ticket'}
                     </p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
                     className="w-12 h-12 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-600 hover:text-red-500 active:shadow-[var(--shadow-neu-pressed)] transition-all"
                   >
@@ -948,36 +1000,36 @@ export function CustomersView() {
 
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Legal Name</label>
-                      <input 
+                      <input
                         type="text"
                         placeholder="John Doe"
                         required
                         className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                         value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Phone</label>
-                        <input 
+                        <input
                           type="tel"
                           placeholder="+61 400 000 000"
                           required
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                           value={formData.phone}
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Email</label>
-                        <input 
+                        <input
                           type="email"
                           placeholder="client@mail.com"
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                           value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                       </div>
                     </div>
@@ -987,24 +1039,24 @@ export function CustomersView() {
                         <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Repair Target</label>
-                            <input 
+                            <input
                               type="text"
                               placeholder="e.g. Screen Fix"
                               required
                               className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.repairItem}
-                              onChange={(e) => setFormData({...formData, repairItem: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, repairItem: e.target.value })}
                             />
                           </div>
                           <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Model Code</label>
-                            <input 
+                            <input
                               type="text"
                               placeholder="e.g. iPhone 15 Pro"
                               required
                               className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.modelNumber}
-                              onChange={(e) => setFormData({...formData, modelNumber: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, modelNumber: e.target.value })}
                             />
                           </div>
                         </div>
@@ -1012,24 +1064,24 @@ export function CustomersView() {
                         <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Price ($)</label>
-                            <input 
+                            <input
                               type="number"
                               step="0.01"
                               placeholder="0.00"
                               required
                               className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.price}
-                              onChange={(e) => setFormData({...formData, price: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                             />
                           </div>
                           <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Device Passcode</label>
-                            <input 
+                            <input
                               type="text"
                               placeholder="None"
                               className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.password}
-                              onChange={(e) => setFormData({...formData, password: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             />
                           </div>
                         </div>
@@ -1037,12 +1089,12 @@ export function CustomersView() {
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">IMEI / Serial</label>
                           <div className="flex gap-4">
-                            <input 
+                            <input
                               type="text"
                               placeholder="Scan or Type..."
                               className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.imei}
-                              onChange={(e) => setFormData({...formData, imei: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
                             />
                             <button
                               type="button"
@@ -1093,24 +1145,24 @@ export function CustomersView() {
                           </label>
                           <div className="relative">
                             <span className="absolute left-5 top-1/2 -translate-y-1/2 text-green-600 font-black text-base">$</span>
-                            <input 
+                            <input
                               type="number"
                               step="0.01"
                               placeholder="0.00"
                               className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 pl-10 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-green-200/30"
                               value={formData.deposit}
-                              onChange={(e) => setFormData({...formData, deposit: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, deposit: e.target.value })}
                             />
                           </div>
                         </div>
 
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Internal Remarks</label>
-                          <textarea 
+                          <textarea
                             placeholder="Special tech notes..."
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5 min-h-[120px] resize-none"
                             value={formData.remark}
-                            onChange={(e) => setFormData({...formData, remark: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
                           />
                         </div>
 
@@ -1127,9 +1179,9 @@ export function CustomersView() {
                               <p className="text-[10px] font-bold text-gray-500 uppercase">Critical assessment</p>
                             </div>
                           </div>
-                          <button 
+                          <button
                             type="button"
-                            onClick={() => setFormData({...formData, liquidDamage: !formData.liquidDamage})}
+                            onClick={() => setFormData({ ...formData, liquidDamage: !formData.liquidDamage })}
                             className={cn(
                               "w-14 h-7 rounded-full relative transition-all duration-300 shadow-[var(--shadow-neu-sm)]",
                               formData.liquidDamage ? "bg-red-600" : "bg-gray-200"
@@ -1147,14 +1199,14 @@ export function CustomersView() {
 
                   <div className="pt-6 flex flex-col gap-4">
                     <div className="grid grid-cols-2 gap-6">
-                      <button 
+                      <button
                         type="button"
                         onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
                         className="py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-500 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
                       >
                         Abort
                       </button>
-                      <button 
+                      <button
                         type="submit"
                         className="py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95 transition-all"
                       >
@@ -1162,7 +1214,7 @@ export function CustomersView() {
                       </button>
                     </div>
                     {isEditing && (
-                      <button 
+                      <button
                         type="button"
                         onClick={() => setIsConfirmingDelete(true)}
                         className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-red-200/20 flex items-center justify-center gap-3"
@@ -1184,7 +1236,7 @@ export function CustomersView() {
         {selectedRepair && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="absolute inset-0 bg-black/40" />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -1206,39 +1258,39 @@ export function CustomersView() {
                   <form onSubmit={handleUpdateRepair} className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Repair Target</label>
-                      <input 
+                      <input
                         type="text"
                         className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                         value={repairFormData.repairItem}
-                        onChange={(e) => setRepairFormData({...repairFormData, repairItem: e.target.value})}
+                        onChange={(e) => setRepairFormData({ ...repairFormData, repairItem: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Model Code</label>
-                      <input 
+                      <input
                         type="text"
                         className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                         value={repairFormData.modelNumber}
-                        onChange={(e) => setRepairFormData({...repairFormData, modelNumber: e.target.value})}
+                        onChange={(e) => setRepairFormData({ ...repairFormData, modelNumber: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Price ($)</label>
-                        <input 
+                        <input
                           type="number"
                           step="0.01"
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                           value={repairFormData.price}
-                          onChange={(e) => setRepairFormData({...repairFormData, price: e.target.value})}
+                          onChange={(e) => setRepairFormData({ ...repairFormData, price: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Workflow Status</label>
-                        <select 
+                        <select
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5 appearance-none"
                           value={repairFormData.status}
-                          onChange={(e) => setRepairFormData({...repairFormData, status: e.target.value})}
+                          onChange={(e) => setRepairFormData({ ...repairFormData, status: e.target.value })}
                         >
                           <option value="In Processing">In Processing</option>
                           <option value="Urgent">Urgent</option>
@@ -1251,21 +1303,21 @@ export function CustomersView() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Passcode</label>
-                        <input 
+                        <input
                           type="text"
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                           value={repairFormData.password}
-                          onChange={(e) => setRepairFormData({...repairFormData, password: e.target.value})}
+                          onChange={(e) => setRepairFormData({ ...repairFormData, password: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">IMEI / SN</label>
                         <div className="flex gap-2">
-                          <input 
+                          <input
                             type="text"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                             value={repairFormData.imei}
-                            onChange={(e) => setRepairFormData({...repairFormData, imei: e.target.value})}
+                            onChange={(e) => setRepairFormData({ ...repairFormData, imei: e.target.value })}
                           />
                         </div>
                       </div>
@@ -1273,30 +1325,30 @@ export function CustomersView() {
 
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Remarks</label>
-                      <textarea 
+                      <textarea
                         className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5 min-h-[100px] resize-none"
                         value={repairFormData.remark}
-                        onChange={(e) => setRepairFormData({...repairFormData, remark: e.target.value})}
+                        onChange={(e) => setRepairFormData({ ...repairFormData, remark: e.target.value })}
                       />
                     </div>
 
                     <div className="pt-6 flex flex-col gap-4">
                       <div className="grid grid-cols-2 gap-6">
-                        <button 
+                        <button
                           type="button"
                           onClick={() => setIsEditingRepair(false)}
                           className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/20 active:shadow-[var(--shadow-neu-pressed)]"
                         >
                           Abort
                         </button>
-                        <button 
+                        <button
                           type="submit"
                           className="py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95"
                         >
                           Save Log
                         </button>
                       </div>
-                      <button 
+                      <button
                         type="button"
                         onClick={() => setIsConfirmingDeleteRepair(true)}
                         className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
@@ -1315,26 +1367,30 @@ export function CustomersView() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-2xl font-black text-black leading-tight tracking-tight mb-1">{selectedRepair.repairItem}</h4>
-                          <p className="text-xs font-black text-gray-500 uppercase tracking-widest">{selectedRepair.modelNumber}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest">{selectedRepair.modelNumber}</p>
+                            <div className="w-1 h-1 rounded-full bg-gray-300" />
+                            <p className="text-[10px] font-black text-blue-600">{new Date(selectedRepair.timestamp).toLocaleString()}</p>
+                          </div>
                         </div>
-                        <button 
+                        <button
                           onClick={() => setIsTicketModalOpen(true)}
                           className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.3)] active:scale-90 transition-all shrink-0"
                         >
                           <Printer size={20} strokeWidth={3} />
                         </button>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl border border-white/20">
                           <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5 leading-none">Workflow Status</p>
-                          <span 
+                          <span
                             onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, selectedRepair.id, selectedRepair.status); }}
                             className={cn(
                               "text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest transition-all shadow-[var(--shadow-neu-sm)]",
                               selectedRepair.status === 'Urgent' ? "bg-red-50 text-red-600" :
-                              selectedRepair.status === 'In Processing' ? "bg-purple-50 text-purple-600 cursor-pointer hover:scale-105" :
-                              "bg-gray-100 text-gray-600"
+                                selectedRepair.status === 'In Processing' ? "bg-purple-50 text-purple-600 cursor-pointer hover:scale-105" :
+                                  "bg-gray-100 text-gray-600"
                             )}
                           >
                             {selectedRepair.status}
@@ -1342,7 +1398,7 @@ export function CustomersView() {
                         </div>
                         <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl border border-white/20">
                           <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5 leading-none">Billable Value</p>
-                          <p className="text-lg font-black text-blue-600 leading-none">${selectedRepair.price.toFixed(2)}</p>
+                          <p className="text-lg font-black text-black leading-none">${selectedRepair.price.toFixed(2)}</p>
                         </div>
                       </div>
                     </div>
@@ -1395,28 +1451,28 @@ export function CustomersView() {
 
                     <div className="pt-6 flex flex-col gap-4">
                       <div className="grid grid-cols-2 gap-6">
-                        <button 
+                        <button
                           onClick={() => openEditRepairModal(selectedRepair)}
                           className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 border border-white/20 active:shadow-[var(--shadow-neu-pressed)]"
                         >
                           <Edit3 size={18} strokeWidth={3} />
                           Modify Log
                         </button>
-                        <button 
+                        <button
                           onClick={() => setSelectedRepair(null)}
                           className="py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95"
                         >
                           Dismiss
                         </button>
                       </div>
-                      
-                      <button 
+
+                      <button
                         onClick={() => handleNotifyPart(selectedRepair, selectedCustomer)}
                         disabled={partNotifiedId === selectedRepair.id}
                         className={cn(
                           "w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-[var(--shadow-neu-flat)] border border-white/20 active:shadow-[var(--shadow-neu-pressed)]",
-                          partNotifiedId === selectedRepair.id 
-                            ? "bg-green-600 text-white" 
+                          partNotifiedId === selectedRepair.id
+                            ? "bg-green-600 text-white"
                             : "bg-amber-50 text-amber-600"
                         )}
                       >
@@ -1427,7 +1483,7 @@ export function CustomersView() {
                         )}
                       </button>
 
-                      <button 
+                      <button
                         onClick={() => setIsConfirmingDeleteRepair(true)}
                         className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-red-200/20 flex items-center justify-center gap-3"
                       >
@@ -1448,7 +1504,7 @@ export function CustomersView() {
         {isViewingAllOrders && (
           <div className="fixed inset-0 z-[105] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsViewingAllOrders(false)} className="absolute inset-0 bg-black/40" />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1460,7 +1516,7 @@ export function CustomersView() {
                     <h3 className="text-3xl font-black text-black tracking-tight">Audit Trail</h3>
                     <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest mt-1">Full transaction history for {selectedCustomer.name}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setIsViewingAllOrders(false)}
                     className="w-12 h-12 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
                   >
@@ -1470,7 +1526,7 @@ export function CustomersView() {
 
                 <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-6 custom-scrollbar px-2">
                   {selectedCustomer.repairs.map((repair) => (
-                    <div 
+                    <div
                       key={repair.id}
                       onClick={() => {
                         setSelectedRepair(repair);
@@ -1484,7 +1540,12 @@ export function CustomersView() {
                         </div>
                         <div>
                           <h4 className="font-black text-black text-base mb-1 tracking-tight">{repair.repairItem}</h4>
-                          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{repair.modelNumber}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{repair.modelNumber}</p>
+                            <p className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">
+                              {new Date(repair.timestamp).toLocaleString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <div className="text-right flex flex-col items-end gap-3">
@@ -1493,18 +1554,15 @@ export function CustomersView() {
                           <ArrowRight size={18} className="text-blue-600 group-hover:translate-x-1 transition-transform" strokeWidth={3} />
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                           <span className={cn(
-                              "text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/10",
-                              repair.status === 'Urgent' ? "bg-red-50 text-red-600" :
+                          <span className={cn(
+                            "text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/10",
+                            repair.status === 'Urgent' ? "bg-red-50 text-red-600" :
                               (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-50 text-purple-600" :
-                              repair.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
-                              "bg-gray-50 text-gray-400"
-                            )}>
+                                repair.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                                  "bg-gray-50 text-gray-400"
+                          )}>
                             {repair.status}
                           </span>
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                            {new Date(repair.timestamp).toLocaleDateString()}
-                          </p>
                         </div>
                       </div>
                     </div>
@@ -1516,7 +1574,7 @@ export function CustomersView() {
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 leading-none">Lifetime Total</p>
                     <p className="text-3xl font-black text-blue-600 leading-none">${selectedCustomer.totalSpent.toFixed(2)}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setIsViewingAllOrders(false)}
                     className="px-10 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black font-black text-[10px] uppercase tracking-widest rounded-2xl active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
                   >
@@ -1534,7 +1592,7 @@ export function CustomersView() {
         {isConfirmingDelete && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDelete(false)} className="absolute inset-0 bg-black/40" />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -1548,13 +1606,13 @@ export function CustomersView() {
                 This action is permanent and will delete all technical history for <span className="text-black font-black">{selectedCustomer.name}</span>.
               </p>
               <div className="grid grid-cols-2 gap-6">
-                <button 
+                <button
                   onClick={() => setIsConfirmingDelete(false)}
                   className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20"
                 >
                   Abort
                 </button>
-                <button 
+                <button
                   onClick={handleDeleteCustomer}
                   className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
                 >
@@ -1571,7 +1629,7 @@ export function CustomersView() {
         {isConfirmingDeleteRepair && (
           <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDeleteRepair(false)} className="absolute inset-0 bg-black/40" />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -1585,13 +1643,13 @@ export function CustomersView() {
                 Are you sure you want to remove this transaction log? This cannot be undone.
               </p>
               <div className="grid grid-cols-2 gap-6">
-                <button 
+                <button
                   onClick={() => setIsConfirmingDeleteRepair(false)}
                   className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20"
                 >
                   Abort
                 </button>
-                <button 
+                <button
                   onClick={handleDeleteRepair}
                   className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
                 >
@@ -1608,34 +1666,34 @@ export function CustomersView() {
         {showQR && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowQR(false)} className="absolute inset-0 bg-black/40" />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 flex flex-col items-center border border-white/20"
             >
-               <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Portal Sync</h3>
-               <p className="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 leading-relaxed">Scan to drop-off or track tickets</p>
-               
-               <div className="p-6 bg-white rounded-[2.5rem] shadow-[var(--shadow-neu-floating)] mb-10 border border-black/5 transform hover:rotate-3 transition-transform">
-                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-52 h-52 rounded-2xl" />
-               </div>
+              <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Portal Sync</h3>
+              <p className="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 leading-relaxed">Scan to drop-off or track tickets</p>
 
-               <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest text-center bg-blue-50 px-6 py-3 rounded-full shadow-[var(--shadow-neu-sm)] border border-blue-200/30">Awaiting External Scan</p>
+              <div className="p-6 bg-white rounded-[2.5rem] shadow-[var(--shadow-neu-floating)] mb-10 border border-black/5 transform hover:rotate-3 transition-transform">
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-52 h-52 rounded-2xl" />
+              </div>
 
-               <button 
-                  onClick={() => setShowQR(false)}
-                  className="absolute top-6 right-6 w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-full flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
-               >
-                 <X size={20} strokeWidth={3} />
-               </button>
+              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest text-center bg-blue-50 px-6 py-3 rounded-full shadow-[var(--shadow-neu-sm)] border border-blue-200/30">Awaiting External Scan</p>
+
+              <button
+                onClick={() => setShowQR(false)}
+                className="absolute top-6 right-6 w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-full flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
+              >
+                <X size={20} strokeWidth={3} />
+              </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
       {/* FAB (Floating Physical Button) */}
-      <button 
+      <button
         onClick={() => setShowQR(true)}
         className="fixed right-8 bottom-28 md:bottom-10 bg-blue-600 text-white w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:scale-110 active:scale-90 transition-all z-[90] border-4 border-white/20"
       >
