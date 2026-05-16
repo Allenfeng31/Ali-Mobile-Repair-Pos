@@ -105,6 +105,9 @@ export function CustomersView() {
   const [scannerTarget, setScannerTarget] = useState<'add' | 'repair' | null>(null);
   const [upsells, setUpsells] = useState<any[]>([]);
   const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
+  
+  // NEW: Loading State Lock for API Submissions
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     api.getUpsells().then(setUpsells).catch(console.error);
@@ -277,6 +280,9 @@ export function CustomersView() {
 
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
+    setIsSaving(true);
+    
     const existingCustomerIndex = customers.findIndex(c => c.phone === formData.phone);
 
     try {
@@ -374,11 +380,16 @@ export function CustomersView() {
     } catch (err) {
       console.error('Failed to add customer/repair:', err);
       alert('Failed to save to database. Check console for details.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleEditCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
+    setIsSaving(true);
+    
     const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
     const updateData = { name: formData.name, phone: formData.phone, email: formData.email, initials };
 
@@ -390,6 +401,8 @@ export function CustomersView() {
     } catch (err) {
       console.error(err);
       alert('Failed to update customer');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -486,6 +499,8 @@ export function CustomersView() {
   const handleUpdateRepair = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRepair) return;
+    if (isSaving) return;
+    setIsSaving(true);
 
     const updateData = {
       repairItem: repairFormData.repairItem, modelNumber: repairFormData.modelNumber,
@@ -514,6 +529,8 @@ export function CustomersView() {
     } catch (err) {
       console.error(err);
       alert('Failed to update repair');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1133,7 +1150,7 @@ export function CustomersView() {
                           type="tel"
                           placeholder="+61 400 000 000"
                           required
-                          className="w-full bg-[var(--color-neu-bg)] shadow(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
+                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
@@ -1294,9 +1311,13 @@ export function CustomersView() {
                       </button>
                       <button
                         type="submit"
-                        className="py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95 transition-all"
+                        disabled={isSaving}
+                        className={cn(
+                          "py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all",
+                          isSaving ? "opacity-50 cursor-not-allowed" : "active:scale-95"
+                        )}
                       >
-                        {isEditing ? 'Save Profile' : 'Confirm Entry'}
+                        {isSaving ? 'Saving...' : (isEditing ? 'Save Profile' : 'Confirm Entry')}
                       </button>
                     </div>
                     {isEditing && (
@@ -1351,7 +1372,7 @@ export function CustomersView() {
                       <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Device Model</label>
                       <input
                         type="text"
-                        className="w-full bg-[var(--color-neu-bg)] shadow(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
+                        className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                         value={repairFormData.modelNumber}
                         onChange={(e) => setRepairFormData({ ...repairFormData, modelNumber: e.target.value })}
                       />
@@ -1452,9 +1473,13 @@ export function CustomersView() {
                         </button>
                         <button
                           type="submit"
-                          className="py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95"
+                          disabled={isSaving}
+                          className={cn(
+                            "py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all",
+                            isSaving ? "opacity-50 cursor-not-allowed" : "active:scale-95"
+                          )}
                         >
-                          Save Changes
+                          {isSaving ? 'Saving...' : 'Save Changes'}
                         </button>
                       </div>
                       <button
@@ -1569,7 +1594,7 @@ export function CustomersView() {
 
                       <button
                         onClick={() => setIsConfirmingDeleteRepair(true)}
-                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
                       >
                         <Trash2 size={18} strokeWidth={3} />
                         Purge Transaction
@@ -1674,7 +1699,7 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
+              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
             >
               <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-600 mx-auto mb-8">
                 <Trash2 size={40} strokeWidth={3} />
@@ -1708,7 +1733,7 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
+              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
             >
               <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-600 mx-auto mb-8">
                 <Trash2 size={40} strokeWidth={3} />
@@ -1742,7 +1767,7 @@ export function CustomersView() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 flex flex-col items-center border border-white/20"
+              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 flex flex-col items-center border border-white/20"
             >
               <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Portal Sync</h3>
               <p className="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 leading-relaxed">Scan to drop-off or track tickets</p>
