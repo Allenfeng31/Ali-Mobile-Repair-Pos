@@ -1,3 +1,5 @@
+// src/views/Reports.tsx
+
 import React, { useState, useMemo } from 'react';
 import {
   TrendingUp,
@@ -238,7 +240,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
       {/* Sticky Report Filter Panel (Operational Controls) */}
-      <aside className="lg:col-span-3 order-last lg:order-first sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] space-y-8 border border-white/20">
+      <aside className="lg:col-span-3 order-first sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] space-y-8 border border-white/20">
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">

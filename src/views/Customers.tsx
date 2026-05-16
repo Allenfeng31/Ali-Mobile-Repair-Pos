@@ -22,7 +22,8 @@ import {
   Printer,
   DollarSign,
   Scan,
-  Users
+  Users,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -32,81 +33,6 @@ import { api } from '../lib/api';
 import { OCRImeiScanner } from '../components/OCRImeiScanner';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
-
-const INITIAL_CUSTOMERS: Customer[] = [
-  { 
-    id: '1', 
-    name: 'Elias Henderson', 
-    phone: '+1 (555) 012-4492', 
-    email: 'elias.h@example.com',
-    repairs: [
-      {
-        id: 'R1',
-        timestamp: new Date().toISOString(),
-        repairItem: 'Screen Replacement',
-        modelNumber: 'iPhone 14 Pro Max',
-        price: 450.00,
-        liquidDamage: false,
-        password: '1234',
-        imei: '358293049283741',
-        status: 'Completed'
-      }
-    ],
-    status: 'Completed', 
-    statusColor: 'surface', 
-    lastVisit: '2 days ago', 
-    initials: 'EH',
-    totalSpent: 450.00
-  },
-  { 
-    id: '2', 
-    name: 'Adeline Miller', 
-    phone: '+1 (555) 019-8831', 
-    email: 'a.miller@design.co',
-    repairs: [
-      {
-        id: 'R2',
-        timestamp: new Date().toISOString(),
-        repairItem: 'Logic Board Repair',
-        modelNumber: 'MacBook Pro M1',
-        price: 1492.00,
-        liquidDamage: false,
-        password: 'admin',
-        imei: 'C02F9X8YMD6M',
-        status: 'Completed'
-      }
-    ],
-    status: 'Completed', 
-    statusColor: 'surface', 
-    lastVisit: '3 weeks ago', 
-    initials: 'AM',
-    totalSpent: 1492.00
-  },
-  { 
-    id: '3', 
-    name: 'Julian Weaver', 
-    phone: '+1 (555) 014-2209', 
-    email: 'j.weaver@tech.io',
-    repairs: [
-      {
-        id: 'R3',
-        timestamp: new Date().toISOString(),
-        repairItem: 'Battery Replacement',
-        modelNumber: 'Galaxy S22 Ultra',
-        price: 120.00,
-        liquidDamage: true,
-        password: 'pattern',
-        imei: '990000862471854',
-        status: 'Urgent'
-      }
-    ],
-    status: 'Urgent', 
-    statusColor: 'error', 
-    lastVisit: 'Today', 
-    initials: 'JW',
-    totalSpent: 120.00
-  },
-];
 
 const getCustomerOverallStatus = (customer: Customer) => {
   if (customer.repairs.some(r => r.status === 'Urgent')) return 'Urgent';
@@ -128,21 +54,23 @@ const getStatusColor = (status: string) => {
 
 export function CustomersView() {
   const { permissions } = useAuthStore();
-  const t = (section: string, key: string) => key; // Simplified for now
+  const t = (_section: string, key: string) => key; // Simplified for now
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const [hostIp, setHostIp] = useState('localhost');
   
-  const [selectedId, setSelectedId] = useState<string>('2');
+  const [selectedId, setSelectedId] = useState<string>('');
   
-  // Fetch customer data — load customers first (critical), then IP in background
+  // Fetch customer data
   useEffect(() => {
     const loadData = async () => {
       try {
         const data = await api.getCustomers();
         if (data && data.length > 0) {
           setCustomers(data);
+          // Set initial selection to first customer if none selected
+          if (!selectedId) setSelectedId(data[0].id);
         }
       } catch (err) {
         console.error('Failed to load customers:', err);
@@ -151,11 +79,11 @@ export function CustomersView() {
       }
     };
     loadData();
-    // Load IP in background (non-blocking)
     api.getIp().then(ipRes => {
       if (ipRes?.ip) setHostIp(ipRes.ip);
     }).catch(() => {});
   }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSyncedOnly, setFilterSyncedOnly] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -180,7 +108,6 @@ export function CustomersView() {
     api.getUpsells().then(setUpsells).catch(console.error);
   }, []);
 
-  // Lock body scroll when any modal is open
   useScrollLock(
     isAdding || 
     isEditing || 
@@ -193,7 +120,6 @@ export function CustomersView() {
     !!scannerTarget
   );
 
-  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -237,17 +163,11 @@ export function CustomersView() {
   })).sort((a, b) => {
     const statusA = getCustomerOverallStatus(a);
     const statusB = getCustomerOverallStatus(b);
-    
     const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'waiting for pay': 1, 'Ready for Pickup': 1, 'Completed': 2 };
     
     if (priority[statusA] !== priority[statusB]) {
       return priority[statusA] - priority[statusB];
     }
-    
-    if (statusA === 'Completed') {
-      return getLatestTimestamp(b) - getLatestTimestamp(a);
-    }
-    
     return getLatestTimestamp(b) - getLatestTimestamp(a);
   });
 
@@ -272,7 +192,7 @@ export function CustomersView() {
   const inProcessingCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed');
   const completedCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) === 'Completed');
 
-  const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || sortedCustomers[0] || null;
+  const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || null;
 
   const handleCopyPhone = () => {
     if (!selectedCustomer) return;
@@ -288,13 +208,12 @@ export function CustomersView() {
     
     setSendingReviewId(target.id);
     try {
-            const response = await api.sendSms(target.phone, 'review', { 
+      const response = await api.sendSms(target.phone, 'review', { 
         customerName: target.name,
         customerId: target.id
       });
       
       if (response && response.lastReviewSent) {
-        // Update local state with the new timestamp
         setCustomers(prev => prev.map(c => 
           c.id === target.id ? { ...c, lastReviewSent: response.lastReviewSent } : c
         ));
@@ -314,10 +233,9 @@ export function CustomersView() {
 
   const handleNotifyPart = async (repair: any, customer: Customer) => {
     if (!repair || !customer) return;
-    
     setPartNotifiedId(repair.id);
     try {
-            await api.sendSms(customer.phone, 'partArrived', { 
+      await api.sendSms(customer.phone, 'partArrived', { 
         customerName: customer.name,
         deviceModel: repair.modelNumber 
       });
@@ -331,7 +249,6 @@ export function CustomersView() {
   const getPortalUrl = () => {
     const origin = window.location.origin;
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      // Use the dynamically detected host IP instead of hardcoded loopback
       return origin.replace(/localhost|127\.0\.0\.1/, hostIp) + '/portal';
     }
     return origin + '/portal';
@@ -353,12 +270,10 @@ export function CustomersView() {
 
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     const existingCustomerIndex = customers.findIndex(c => c.phone === formData.phone);
     
     try {
       if (existingCustomerIndex !== -1) {
-        // Existing customer
         const existingCustomer = customers[existingCustomerIndex];
         const newRepairForApi = {
           id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
@@ -401,7 +316,6 @@ export function CustomersView() {
         setCustomers(updatedCustomers);
         setSelectedId(existingCustomer.id);
       } else {
-        // New customer
         const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
         const price = parseFloat(formData.price) || 0;
         
@@ -418,7 +332,6 @@ export function CustomersView() {
         };
 
         const createdCustomer = await api.createCustomer(customerForApi);
-
         const newRepairForApi = {
           id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
           customer_id: createdCustomer.id,
@@ -446,11 +359,9 @@ export function CustomersView() {
 
         const createdRepair = await api.createRepair(newRepairForApi);
         createdCustomer.repairs = [createdRepair];
-
         setCustomers([createdCustomer, ...customers]);
         setSelectedId(createdCustomer.id);
       }
-
       setIsAdding(false);
       resetForm();
     } catch (err) {
@@ -462,24 +373,11 @@ export function CustomersView() {
   const handleEditCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
-    
-    const updateData = {
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      initials
-    };
+    const updateData = { name: formData.name, phone: formData.phone, email: formData.email, initials };
     
     try {
-            await api.updateCustomer(selectedId, updateData);
-      
-      const updatedCustomers = customers.map(c => {
-        if (c.id === selectedId) {
-          return { ...c, ...updateData };
-        }
-        return c;
-      });
-      setCustomers(updatedCustomers);
+      await api.updateCustomer(selectedId, updateData);
+      setCustomers(customers.map(c => c.id === selectedId ? { ...c, ...updateData } : c));
       setIsEditing(false);
       resetForm();
     } catch (err) {
@@ -494,8 +392,7 @@ export function CustomersView() {
       return;
     }
     try {
-            await api.deleteCustomer(selectedId);
-      
+      await api.deleteCustomer(selectedId);
       const updatedCustomers = customers.filter(c => c.id !== selectedId);
       setCustomers(updatedCustomers);
       setIsConfirmingDelete(false);
@@ -515,58 +412,34 @@ export function CustomersView() {
   const resetForm = () => {
     setSelectedUpsells([]);
     setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      repairItem: '',
-      modelNumber: '',
-      price: '',
-      liquidDamage: false,
-      password: '',
-      imei: '',
-      remark: '',
-      deposit: ''
+      name: '', phone: '', email: '', repairItem: '', modelNumber: '',
+      price: '', liquidDamage: false, password: '', imei: '', remark: '', deposit: ''
     });
   };
 
   const openEditModal = () => {
     if (!selectedCustomer) return;
     setFormData({
-      name: selectedCustomer.name,
-      phone: selectedCustomer.phone,
-      email: selectedCustomer.email,
-      repairItem: '',
-      modelNumber: '',
-      price: '',
-      liquidDamage: false,
-      password: '',
-      imei: '',
-      remark: '',
-      deposit: ''
+      name: selectedCustomer.name, phone: selectedCustomer.phone, email: selectedCustomer.email,
+      repairItem: '', modelNumber: '', price: '', liquidDamage: false,
+      password: '', imei: '', remark: '', deposit: ''
     });
     setIsEditing(true);
   };
 
   const openEditRepairModal = (repair: any) => {
     setRepairFormData({
-      repairItem: repair.repairItem,
-      modelNumber: repair.modelNumber,
-      price: repair.price.toString(),
-      liquidDamage: repair.liquidDamage,
-      password: repair.password || '',
-      imei: repair.imei || '',
-      remark: repair.remark || '',
-      deposit: (repair.deposit || 0).toString(),
-      status: repair.status
+      repairItem: repair.repairItem, modelNumber: repair.modelNumber, price: repair.price.toString(),
+      liquidDamage: repair.liquidDamage, password: repair.password || '', imei: repair.imei || '',
+      remark: repair.remark || '', deposit: (repair.deposit || 0).toString(), status: repair.status
     });
     setIsEditingRepair(true);
   };
 
   const toggleRepairStatus = async (customerId: string, repairId: string, currentStatus: string) => {
     if (currentStatus !== 'In Processing' && currentStatus !== 'waiting for pay') return;
-
     try {
-            const nextStatus = 'Completed';
+      const nextStatus = 'Completed';
       await api.updateRepair(repairId, { status: nextStatus });
       
       let smsCustomer: Customer | undefined;
@@ -578,40 +451,24 @@ export function CustomersView() {
           const updatedRepairs = c.repairs.map(r => {
             if (r.id === repairId) {
               smsRepairItem = r.modelNumber || r.repairItem;
-              const updatedRepair = { ...r, status: nextStatus as any };
-              if (selectedRepair && selectedRepair.id === repairId) {
-                setSelectedRepair(updatedRepair);
-              }
-              return updatedRepair;
+              return { ...r, status: nextStatus as any };
             }
             return r;
           });
-          
           const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
-          
           api.updateCustomer(customerId, {
-            status: newStatus,
-            statusColor: getStatusColor(newStatus)
+            status: newStatus, statusColor: getStatusColor(newStatus)
           }).catch(console.error);
-          
-          return {
-            ...c,
-            repairs: updatedRepairs,
-            status: newStatus,
-            statusColor: getStatusColor(newStatus)
-          };
+          return { ...c, repairs: updatedRepairs, status: newStatus, statusColor: getStatusColor(newStatus) };
         }
         return c;
       });
 
-      // Fire completion SMS — non-blocking
       if (smsCustomer?.phone) {
         api.sendSms(smsCustomer.phone, 'completed', {
-          customerName: smsCustomer.name,
-          deviceModel: smsRepairItem
+          customerName: smsCustomer.name, deviceModel: smsRepairItem
         }).catch(() => {});
       }
-
       setCustomers(updatedCustomers);
     } catch (err) {
       console.error(err);
@@ -624,49 +481,26 @@ export function CustomersView() {
     if (!selectedRepair) return;
 
     const updateData = {
-      repairItem: repairFormData.repairItem,
-      modelNumber: repairFormData.modelNumber,
-      price: parseFloat(repairFormData.price) || 0,
-      liquidDamage: repairFormData.liquidDamage,
-      password: repairFormData.password,
-      imei: repairFormData.imei,
-      remark: repairFormData.remark,
-      deposit: parseFloat(repairFormData.deposit) || 0,
-      status: repairFormData.status
+      repairItem: repairFormData.repairItem, modelNumber: repairFormData.modelNumber,
+      price: parseFloat(repairFormData.price) || 0, liquidDamage: repairFormData.liquidDamage,
+      password: repairFormData.password, imei: repairFormData.imei, remark: repairFormData.remark,
+      deposit: parseFloat(repairFormData.deposit) || 0, status: repairFormData.status
     };
 
     try {
-            await api.updateRepair(selectedRepair.id, updateData);
-      
+      await api.updateRepair(selectedRepair.id, updateData);
       const updatedCustomers = customers.map(c => {
         if (c.id === selectedId) {
-          const updatedRepairs = c.repairs.map(r => {
-            if (r.id === selectedRepair.id) {
-              return { ...r, ...updateData };
-            }
-            return r;
-          });
-          
+          const updatedRepairs = c.repairs.map(r => r.id === selectedRepair.id ? { ...r, ...updateData } : r);
           const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
           const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
-          
           api.updateCustomer(selectedId, {
-            totalSpent: newTotalSpent,
-            status: newStatus,
-            statusColor: getStatusColor(newStatus)
+            totalSpent: newTotalSpent, status: newStatus, statusColor: getStatusColor(newStatus)
           }).catch(console.error);
-          
-          return {
-            ...c,
-            repairs: updatedRepairs,
-            totalSpent: newTotalSpent,
-            status: newStatus,
-            statusColor: getStatusColor(newStatus)
-          };
+          return { ...c, repairs: updatedRepairs, totalSpent: newTotalSpent, status: newStatus, statusColor: getStatusColor(newStatus) };
         }
         return c;
       });
-
       setCustomers(updatedCustomers);
       setIsEditingRepair(false);
       setSelectedRepair(null);
@@ -678,38 +512,24 @@ export function CustomersView() {
 
   const handleDeleteRepair = async () => {
     if (!selectedRepair) return;
-
     if (permissions?.can_delete_customers === false) {
       alert('You do not have permission to delete repair records.');
       return;
     }
-
     try {
-            await api.deleteRepair(selectedRepair.id);
-      
+      await api.deleteRepair(selectedRepair.id);
       const updatedCustomers = customers.map(c => {
         if (c.id === selectedId) {
           const updatedRepairs = c.repairs.filter(r => r.id !== selectedRepair.id);
           const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
           const newStatus = getCustomerOverallStatus({...c, repairs: updatedRepairs});
-          
           api.updateCustomer(selectedId, {
-            totalSpent: newTotalSpent,
-            status: newStatus,
-            statusColor: getStatusColor(newStatus)
+            totalSpent: newTotalSpent, status: newStatus, statusColor: getStatusColor(newStatus)
           }).catch(console.error);
-          
-          return {
-            ...c,
-            repairs: updatedRepairs,
-            totalSpent: newTotalSpent,
-            status: newStatus,
-            statusColor: getStatusColor(newStatus)
-          };
+          return { ...c, repairs: updatedRepairs, totalSpent: newTotalSpent, status: newStatus, statusColor: getStatusColor(newStatus) };
         }
         return c;
       });
-
       setCustomers(updatedCustomers);
       setIsConfirmingDeleteRepair(false);
       setIsEditingRepair(false);
@@ -721,41 +541,36 @@ export function CustomersView() {
   };
 
   const renderCustomerCard = (customer: Customer) => {
-    const isExpanded = selectedId === customer.id;
+    const isActive = selectedId === customer.id;
     const overallStatus = getCustomerOverallStatus(customer);
-    const statusColor = getStatusColor(overallStatus);
 
     return (
       <div 
         key={customer.id}
+        onClick={() => setSelectedId(customer.id)}
         className={cn(
-          "rounded-2xl overflow-hidden transition-all duration-300 border border-zinc-800/10 shadow-sm",
-          isExpanded 
-            ? "bg-zinc-900/50 shadow-xl ring-1 ring-blue-500/20 scale-[1.01]" 
-            : "bg-black hover:bg-zinc-800 hover:shadow-md"
+          "p-6 rounded-[2.5rem] transition-all cursor-pointer group border border-white/20",
+          isActive 
+            ? "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] scale-[0.98]" 
+            : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] hover:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98]"
         )}
       >
-        <div 
-          onClick={() => setSelectedId(isExpanded ? '' : customer.id)}
-          className="p-5 flex items-center justify-between cursor-pointer group/card"
-        >
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-5">
             <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all",
-              isExpanded ? "bg-blue-500 text-white rotate-3" : "bg-zinc-800 text-zinc-200 group-hover/card:rotate-3"
+              "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all shadow-[var(--shadow-neu-sm)]",
+              isActive ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" : "bg-[var(--color-neu-bg)] text-blue-600"
             )}>
               {customer.initials}
             </div>
             <div>
-              <h3 className="font-bold text-white">{customer.name}</h3>
-              <div className="flex flex-col gap-1.5 mt-0.5">
-                <p className="text-xs text-zinc-400 font-bold">{customer.phone}</p>
+              <h3 className="font-black text-black text-lg tracking-tight leading-none mb-2">{customer.name}</h3>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{customer.phone}</span>
                 {customer.repairs.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-blue-500/70 bg-blue-500/5 px-2 py-0.5 rounded-full border border-blue-500/10">
-                      {new Date(customer.repairs[0].timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </span>
-                    <span className="text-[10px] font-bold text-zinc-400/80 italic">
+                    <div className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
                       {customer.repairs[0].modelNumber}
                     </span>
                   </div>
@@ -763,176 +578,53 @@ export function CustomersView() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <div className="text-right hidden sm:block">
               <span className={cn(
-                "text-[10px] font-black px-2.5 py-1 rounded-2xl uppercase tracking-widest transition-colors",
-                statusColor === 'tertiary' ? "bg-purple-900/30 text-purple-200 border border-tertiary/10" :
-                statusColor === 'error' ? "bg-red-900/30 text-red-200 border border-error/10" :
-                "bg-zinc-800 text-zinc-400 border border-zinc-800/10"
+                "text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/20",
+                overallStatus === 'Urgent' ? "bg-red-50 text-red-600" :
+                overallStatus === 'In Processing' ? "bg-purple-50 text-purple-600" :
+                overallStatus === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                "bg-gray-50 text-gray-600"
               )}>
                 {overallStatus}
               </span>
-              <p className="text-[10px] font-bold text-zinc-400 mt-1.5">Price: ${customer.totalSpent.toFixed(2)}</p>
+              <p className="text-[10px] font-black text-black mt-2.5">Total: ${customer.totalSpent.toFixed(2)}</p>
             </div>
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronRight size={20} className="text-zinc-400" />
-            </motion.div>
+            <ArrowRight size={20} className={cn("transition-all", isActive ? "text-blue-600 translate-x-1" : "text-gray-300")} strokeWidth={3} />
           </div>
         </div>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <div className="px-5 pb-6 pt-2 border-t border-zinc-800/5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Contact Details</p>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-sm font-bold text-white bg-zinc-900/50/50 p-2 rounded-2xl">
-                          <Mail size={16} className="text-blue-500" />
-                          <span className="truncate">{customer.email}</span>
-                        </div>
-                        <div className="flex items-center justify-between w-full bg-zinc-900/50/50 p-2 rounded-2xl">
-                          <div className="flex items-center gap-3 text-sm font-bold text-white">
-                            <Phone size={16} className="text-blue-500" />
-                            {customer.phone}
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
-                              className={cn(
-                                "px-3 py-1.5 rounded-2xl font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 transition-all border",
-                                sendingReviewId === customer.id 
-                                  ? "bg-green-100 text-green-800 border-green-200" 
-                                  : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
-                              )}
-                            >
-                              {sendingReviewId === customer.id ? (
-                                <><Check size={12} /> Sent</>
-                              ) : (
-                                <><Star size={12} className="fill-amber-500 text-amber-500" /> Send Review</>
-                              )}
-                            </button>
-                            {customer.lastReviewSent && (
-                              <p className="text-[9px] font-black text-amber-600 mt-0.5 whitespace-nowrap">
-                                Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); openEditModal(); }}
-                        className="flex-1 bg-zinc-800 text-zinc-400 py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
-                      >
-                        <Edit3 size={14} />
-                        Edit Profile
-                      </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); setIsViewingAllOrders(true); }}
-                        className="flex-1 bg-zinc-800 text-zinc-200 py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-sm"
-                      >
-                        Recent Activity
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">Live Repairs</p>
-                    <div className="space-y-2">
-                      {customer.repairs.slice(0, 2).map(repair => (
-                        <div 
-                          key={repair.id}
-                          onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
-                          className="bg-black p-3 rounded-2xl border border-zinc-800/10 hover:border-blue-500/40 transition-all cursor-pointer flex justify-between items-center group/repair shadow-sm"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-500/5 rounded-2xl text-blue-500 group-hover/repair:bg-blue-500 group-hover/repair:text-white transition-colors">
-                              <Smartphone size={16} />
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold text-white">{repair.repairItem}</p>
-                              <p className="text-[10px] font-bold text-zinc-400">{repair.modelNumber}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs font-black text-blue-500">${repair.price.toFixed(2)}</p>
-                            {(repair.deposit || 0) > 0 && (
-                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-green-100 text-green-700 border border-green-200 block mt-0.5">
-                                💰 Deposit: ${repair.deposit.toFixed(2)}
-                              </span>
-                            )}
-                            <span 
-                              onClick={(e) => { e.stopPropagation(); toggleRepairStatus(customer.id, repair.id, repair.status); }}
-                              className={cn(
-                                "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all shadow-sm block mt-1",
-                                repair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
-                                repair.status === 'Urgent' ? "bg-red-900/30 text-red-200 border border-error/5" :
-                                repair.status === 'In Processing' ? "bg-purple-900/30 text-purple-200 border border-tertiary/5" :
-                                "bg-zinc-800 text-zinc-400 border border-zinc-800/5"
-                              )}
-                            >
-                              {repair.status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                      {customer.repairs.length > 2 && (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setSelectedId(customer.id); setIsViewingAllOrders(true); }}
-                          className="w-full text-[10px] font-black text-blue-500 uppercase tracking-widest text-center py-2 hover:underline bg-blue-500/5 rounded-2xl"
-                        >
-                          + {customer.repairs.length - 2} more records
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-10 relative">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
       {/* Left Column: List */}
-      <section className="flex-1 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <section className="lg:col-span-7 space-y-10 order-2 lg:order-1">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-blue-500">Customers</h2>
-            <p className="text-zinc-400 text-sm font-medium">Manage your technical client database</p>
+            <span className="text-gray-600 font-black text-[10px] uppercase tracking-widest ml-1">Client Relations</span>
+            <h2 className="text-5xl font-black tracking-tight text-black mt-1 [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
+              Customers
+            </h2>
           </div>
           <button 
             onClick={() => setIsAdding(true)}
-            className="bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-md active:scale-95 transition-all"
+            className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 px-8 py-4 rounded-[2rem] font-black text-sm flex items-center justify-center gap-3 active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
           >
-            <UserPlus size={18} />
-            Add New Customer
+            <UserPlus size={20} strokeWidth={3} />
+            Add New Client
           </button>
         </div>
 
-        {/* Search & Filter */}
-        <div className="flex gap-4 mb-6">
-          <div className="relative group flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
+        {/* Search & Filter (Recessed Bar) */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" size={20} strokeWidth={3} />
             <input 
-              className="w-full bg-zinc-800 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500/20 focus:bg-zinc-800 transition-all outline-none text-white font-medium" 
-              placeholder="Search by name, phone, email or repair item..." 
+              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2rem] py-5 pl-14 pr-6 outline-none text-black font-black text-sm placeholder:text-gray-400/50 transition-all border border-black/5" 
+              placeholder="Search by name, phone, email or device..." 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -941,106 +633,81 @@ export function CustomersView() {
           <button
             onClick={() => setFilterSyncedOnly(!filterSyncedOnly)}
             className={cn(
-              "px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 border-2",
+              "px-8 py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 border border-white/20",
               filterSyncedOnly 
-                ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100" 
-                : "bg-black text-zinc-400 border-zinc-800/10 hover:bg-zinc-800 hover:text-white"
+                ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" 
+                : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 active:shadow-[var(--shadow-neu-pressed)]"
             )}
           >
-            {filterSyncedOnly ? <Check size={16} /> : <Users size={16} />}
-            Google Synced
+            {filterSyncedOnly ? <Check size={16} strokeWidth={4} /> : <Users size={16} strokeWidth={3} />}
+            Google Sync Only
           </button>
         </div>
 
-        {/* List */}
-        <div className="space-y-4">
+        {/* List Containers */}
+        <div className="space-y-12">
           {isLoading ? (
-            // Skeleton loading state
-            <div className="space-y-4">
+            <div className="space-y-6">
               {[1, 2, 3].map(i => (
-                <div key={i} className="rounded-2xl overflow-hidden bg-black border border-zinc-800/10 p-5 flex items-center gap-4 animate-pulse">
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex-shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-zinc-800 rounded-2xl w-1/3" />
-                    <div className="h-3 bg-zinc-800 rounded-2xl w-1/4" />
-                  </div>
-                  <div className="space-y-2 text-right">
-                    <div className="h-5 bg-zinc-800 rounded-2xl w-16" />
-                    <div className="h-3 bg-zinc-800 rounded-2xl w-12" />
-                  </div>
-                </div>
+                <div key={i} className="h-28 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] animate-pulse" />
               ))}
             </div>
           ) : filteredCustomers.length > 0 ? (
             <>
-              {/* In Processing Section */}
               {inProcessingCustomers.length > 0 && (
-                <div className="mb-8 space-y-4">
-                  <div className="flex items-center gap-3 px-2">
-                    <h3 className="text-sm font-black text-white uppercase tracking-widest">In Processing</h3>
-                    <div className="h-px flex-1 bg-outline-variant/10" />
-                    <span className="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-2xl uppercase">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4 px-4">
+                    <h3 className="text-xs font-black text-black uppercase tracking-widest">Active Tickets</h3>
+                    <div className="h-px flex-1 bg-black/5" />
+                    <span className="text-[10px] font-black text-purple-600 bg-purple-50 px-3 py-1 rounded-full uppercase">
                       {inProcessingCustomers.length} Orders
                     </span>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {inProcessingCustomers.map(customer => renderCustomerCard(customer))}
                   </div>
                 </div>
               )}
 
-              {/* Completed Section */}
               {completedCustomers.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-2">
-                    <h3 className="text-sm font-black text-white uppercase tracking-widest opacity-60">Completed</h3>
-                    <div className="h-px flex-1 bg-outline-variant/10" />
-                    <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-[10px] font-black rounded-2xl uppercase">
-                      {completedCustomers.length} Done
+                <div className="space-y-6 pt-4">
+                  <div className="flex items-center gap-4 px-4">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">History Archive</h3>
+                    <div className="h-px flex-1 bg-black/5" />
+                    <span className="text-[10px] font-black text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase">
+                      {completedCustomers.length} Records
                     </span>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {completedCustomers.map(customer => renderCustomerCard(customer))}
                   </div>
                 </div>
               )}
             </>
           ) : (
-            <div className="text-center py-20 bg-black rounded-3xl border border-dashed border-zinc-800">
-              <p className="text-zinc-400 font-bold">No customers found matching your search.</p>
+            <div className="text-center py-32 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+              <Users className="mx-auto text-gray-200 mb-6" size={80} strokeWidth={1} />
+              <p className="text-gray-500 font-black text-xs uppercase tracking-widest">No matched client records</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* Right Column: Detail */}
-      <aside className="w-full lg:w-[450px] space-y-6">
+      {/* Right Column: Detail (Sticky Panel Architecture) */}
+      <aside className="lg:col-span-5 order-1 lg:order-2 sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar p-1">
         <AnimatePresence mode="wait">
-          {isLoading || !selectedCustomer ? (
+          {!selectedCustomer ? (
             <motion.div
-              key="skeleton"
+              key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="bg-zinc-900/50 rounded-[2rem] overflow-hidden shadow-sm border border-zinc-800/5"
+              className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] p-12 text-center border border-black/5 flex flex-col items-center justify-center min-h-[400px]"
             >
-              <div className="h-32 bg-zinc-800 animate-pulse" />
-              <div className="px-8 pb-10 -mt-12 relative">
-                <div className="w-24 h-24 rounded-3xl bg-zinc-800 animate-pulse" />
-                <div className="mt-6 space-y-4 animate-pulse">
-                  <div className="h-6 bg-zinc-800 rounded-2xl w-2/3" />
-                  <div className="h-4 bg-zinc-800 rounded-2xl w-1/3" />
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="h-20 bg-zinc-800 rounded-2xl" />
-                    <div className="h-20 bg-zinc-800 rounded-2xl" />
-                  </div>
-                  <div className="h-5 bg-zinc-800 rounded-2xl w-1/4 mt-4" />
-                  <div className="space-y-3">
-                    <div className="h-16 bg-zinc-800 rounded-2xl" />
-                    <div className="h-16 bg-zinc-800 rounded-2xl" />
-                  </div>
-                </div>
+              <div className="w-24 h-24 rounded-[2rem] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-gray-300 mb-8">
+                <Users size={40} />
               </div>
+              <h3 className="text-xl font-black text-black">Select a Customer</h3>
+              <p className="text-xs font-bold text-gray-500 mt-2">Pick a client from the list to view profile and repair logs.</p>
             </motion.div>
           ) : (
           <motion.div 
@@ -1048,134 +715,119 @@ export function CustomersView() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="bg-zinc-900/50 rounded-[2rem] overflow-hidden shadow-sm border border-zinc-800/5"
+            className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[3rem] overflow-hidden border border-white/20"
           >
-            {/* Header Gradient */}
-            <div className="h-32 bg-blue-500 hover:bg-blue-600 relative p-6 flex items-end">
-              <div className="absolute top-4 right-4 flex gap-2">
+            {/* Header Visual */}
+            <div className="h-40 bg-blue-600 relative p-8 flex items-end">
+              <div className="absolute top-6 right-6 flex gap-3">
                 <button 
                   onClick={openEditModal}
-                  className="bg-white/10 backdrop-blur-md text-white p-2 rounded-2xl hover:bg-white/20 transition-colors"
+                  className="w-12 h-12 bg-white/10 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all border border-white/10"
                 >
-                  <Edit3 size={16} />
+                  <Edit3 size={20} strokeWidth={3} />
                 </button>
-                <button className="bg-white/10 backdrop-blur-md text-white p-2 rounded-2xl hover:bg-white/20 transition-colors">
-                  <MoreVertical size={16} />
-                </button>
+              </div>
+              <div className="absolute -bottom-10 left-8 w-24 h-24 rounded-[2rem] bg-white shadow-[var(--shadow-neu-floating)] flex items-center justify-center font-black text-4xl text-blue-600 border-[6px] border-[var(--color-neu-bg)]">
+                {selectedCustomer.initials}
               </div>
             </div>
 
-            <div className="px-8 pb-10 -mt-12 relative">
-              <div className="w-24 h-24 rounded-3xl bg-white p-1.5 shadow-xl flex items-center justify-center font-black text-3xl text-blue-500">
-                {selectedCustomer.initials}
-              </div>
-              <div className="mt-6">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-black text-white tracking-tight">{selectedCustomer.name}</h2>
-                  <Star size={16} className="text-tertiary fill-tertiary" />
-                </div>
-                <p className="text-zinc-400 font-bold text-sm">Customer ID: {selectedCustomer.id}</p>
-              </div>
-
-              <div className="mt-8 grid grid-cols-2 gap-4">
-                <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5">Email</p>
-                  <p className="text-xs font-bold truncate text-white">{selectedCustomer.email}</p>
-                </div>
-                <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5">Total Price</p>
-                  <p className="text-sm font-black text-blue-500">${selectedCustomer.totalSpent.toFixed(2)}</p>
+            <div className="px-10 pb-12 pt-16 space-y-10">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-3xl font-black text-black tracking-tight">{selectedCustomer.name}</h2>
+                    <Star size={20} className="text-blue-600 fill-blue-600" />
+                  </div>
+                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1.5">ID: #{selectedCustomer.id}</p>
                 </div>
               </div>
 
-                <div className="flex items-center justify-between gap-3">
-                  <button
-                    onClick={() => setShowPhonePopup(true)}
-                    className="flex items-center gap-3 text-zinc-400 hover:text-blue-500 transition-colors group flex-1"
-                  >
-                    <Phone size={16} className="text-blue-500" />
-                    <span className="text-sm font-bold group-hover:underline">{selectedCustomer.phone}</span>
-                  </button>
-                  <div className="flex flex-col items-end gap-1">
-                    <button
-                      onClick={() => handleSendReview()}
-                      className={cn(
-                        "px-4 py-2 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all border shadow-sm",
-                        sendingReviewId === selectedCustomer.id 
-                          ? "bg-green-100 text-green-800 border-green-200" 
-                          : "bg-amber-50 text-amber-800 border-amber-100 hover:bg-amber-100"
-                      )}
-                    >
-                      {sendingReviewId === selectedCustomer.id ? (
-                        <><Check size={14} /> SMS Sent</>
-                      ) : (
-                        <><Star size={14} className="fill-amber-500 text-amber-500" /> Send Review</>
-                      )}
-                    </button>
-                    {selectedCustomer.lastReviewSent && (
-                      <p className="text-[10px] font-black text-amber-600 mt-1 pr-1 whitespace-nowrap">
-                        Last Sent: {new Date(selectedCustomer.lastReviewSent).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
-                      </p>
-                    )}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                  <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Primary Email</p>
+                  <p className="text-xs font-black text-black truncate">{selectedCustomer.email || 'No email set'}</p>
+                </div>
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                  <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2">Lifetime Value</p>
+                  <p className="text-lg font-black text-blue-600 leading-none">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-3xl border border-white/20 group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-[var(--shadow-neu-sm)]">
+                    <Phone size={20} strokeWidth={3} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Mobile Number</p>
+                    <p className="text-base font-black text-black">{selectedCustomer.phone}</p>
                   </div>
                 </div>
+                <button
+                  onClick={() => setShowPhonePopup(true)}
+                  className="w-10 h-10 rounded-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-blue-600 active:shadow-[var(--shadow-neu-pressed)] transition-all"
+                >
+                  <ArrowRight size={20} strokeWidth={3} />
+                </button>
+              </div>
 
-              <div className="mt-10">
-                <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-5">Repair History</h3>
-                <div className="space-y-3">
-                  {selectedCustomer.repairs.map(item => (
+              <div>
+                <div className="flex items-center justify-between mb-6 px-2">
+                  <h3 className="text-xs font-black text-black uppercase tracking-widest">Repair Journey</h3>
+                  <button 
+                    onClick={() => setIsViewingAllOrders(true)}
+                    className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                  >
+                    View History
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {selectedCustomer.repairs.slice(0, 3).map(item => (
                     <div 
                       key={item.id} 
                       onClick={() => setSelectedRepair(item)}
-                      className="bg-black p-4 rounded-2xl flex gap-4 items-start border border-zinc-800/5 hover:border-blue-500/20 transition-colors cursor-pointer group"
+                      className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl flex gap-5 items-center border border-white/20 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer group active:scale-[0.98]"
                     >
-                      <div className="bg-zinc-800/30 p-2.5 rounded-2xl text-zinc-300 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                        <Smartphone size={20} />
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-gray-600 group-hover:text-blue-600 transition-colors shrink-0">
+                        <Smartphone size={24} strokeWidth={3} />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-sm text-white leading-tight">{item.repairItem}</h4>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-zinc-400">
-                              {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase()}
-                            </span>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedRepair(item);
-                                setIsConfirmingDeleteRepair(true);
-                              }}
-                              className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-error/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
-                              title="Delete Repair Record"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
+                          <h4 className="font-black text-sm text-black truncate leading-tight mb-1">{item.repairItem}</h4>
+                          <span className="text-[10px] font-black text-gray-500 shrink-0">
+                            {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </span>
                         </div>
-                        <div className="flex justify-between items-center mt-1.5">
-                          <p className="text-[11px] font-bold text-zinc-400">Model: {item.modelNumber}</p>
-                          <div className="text-right">
-                            <p className="text-[11px] font-black text-blue-500">${item.price.toFixed(2)}</p>
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Model: {item.modelNumber}</p>
                             {(item.deposit || 0) > 0 && (
-                              <p className="text-[9px] font-black text-green-600">💰 ${item.deposit.toFixed(2)}</p>
+                              <p className="text-[9px] font-black text-green-600 mt-1">💰 Deposit: ${item.deposit.toFixed(2)}</p>
                             )}
                           </div>
+                          <p className="text-base font-black text-black leading-none">${item.price.toFixed(2)}</p>
                         </div>
                       </div>
                     </div>
                   ))}
+                  {selectedCustomer.repairs.length === 0 && (
+                    <div className="text-center py-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl border border-black/5">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No Repairs Logged</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-10 flex gap-3">
+              <div className="pt-6 border-t border-black/5 flex gap-4">
                 <button 
                   onClick={() => setIsViewingAllOrders(true)}
-                  className="flex-1 bg-zinc-800 text-zinc-200 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all"
+                  className="flex-1 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-xs uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
                 >
-                  View All Orders
+                  Full Activity Audit
                 </button>
-                <button className="bg-blue-500 text-white px-5 py-3.5 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20">
-                  <MessageSquare size={20} />
+                <button className="w-20 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl flex items-center justify-center active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20">
+                  <MessageSquare size={24} strokeWidth={3} />
                 </button>
               </div>
             </div>
@@ -1188,81 +840,65 @@ export function CustomersView() {
       <AnimatePresence>
         {showPhonePopup && selectedCustomer && (
           <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowPhonePopup(false)} className="absolute inset-0 bg-black/40" />
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowPhonePopup(false)}
-              className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 30, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="relative z-10 w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-zinc-800/10"
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="relative z-10 w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20"
             >
-              {/* Header */}
-              <div className="bg-blue-500 hover:bg-blue-600 p-6 text-white">
-                <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-1">Contact</p>
-                <p className="text-2xl font-black">{selectedCustomer.name}</p>
-                <p className="text-sm font-bold opacity-80 mt-0.5">{selectedCustomer.phone}</p>
+              <div className="bg-blue-600 p-8 text-white">
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Direct Contact</p>
+                <p className="text-3xl font-black tracking-tight">{selectedCustomer.name}</p>
+                <p className="text-sm font-black opacity-80 mt-1">{selectedCustomer.phone}</p>
               </div>
 
-              <div className="p-4 space-y-3">
-                {/* Call */}
+              <div className="p-6 space-y-4">
                 <a
                   href={`tel:${selectedCustomer.phone}`}
-                  className="flex items-center gap-4 p-4 bg-zinc-900/50 rounded-2xl hover:bg-blue-500 hover:text-white transition-all group"
+                  className="flex items-center gap-5 p-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem] hover:shadow-[var(--shadow-neu-pressed)] transition-all group active:scale-95 border border-white/20"
                 >
-                  <div className="w-10 h-10 bg-blue-500/10 group-hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors">
-                    <Phone size={20} className="text-blue-500 group-hover:text-white" />
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-[var(--shadow-neu-sm)]">
+                    <Phone size={22} strokeWidth={3} />
                   </div>
                   <div>
-                    <p className="font-black text-sm">Call Customer</p>
-                    <p className="text-xs text-zinc-400 group-hover:text-white/70">Open dialler</p>
+                    <p className="font-black text-sm text-black">Voice Call</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Open System Dialler</p>
                   </div>
                 </a>
 
-                {/* Copy */}
                 <button
                   onClick={handleCopyPhone}
-                  className="flex items-center gap-4 p-4 bg-zinc-900/50 rounded-2xl hover:bg-zinc-800 transition-all w-full text-left"
+                  className="flex items-center gap-5 p-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem] hover:shadow-[var(--shadow-neu-pressed)] transition-all group active:scale-95 border border-white/20 w-full text-left"
                 >
-                  <div className="w-10 h-10 bg-zinc-800/40 rounded-2xl flex items-center justify-center">
-                    {phoneCopied ? <Check size={20} className="text-green-600" /> : <Copy size={20} className="text-zinc-300" />}
+                  <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center shadow-[var(--shadow-neu-sm)]">
+                    {phoneCopied ? <Check size={22} strokeWidth={4} className="text-green-600" /> : <Copy size={22} strokeWidth={3} />}
                   </div>
                   <div>
-                    <p className="font-black text-sm">{phoneCopied ? 'Copied!' : 'Copy Number'}</p>
-                    <p className="text-xs text-zinc-400">Copy to clipboard</p>
+                    <p className="font-black text-sm text-black">{phoneCopied ? 'Copied' : 'Copy Number'}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Save to Clipboard</p>
                   </div>
                 </button>
 
-                {/* Send Review SMS */}
                 <button
                   onClick={() => handleSendReview()}
-                  className="flex items-center gap-4 p-4 bg-amber-50 rounded-2xl hover:bg-amber-100 transition-all w-full text-left border border-amber-200/50"
+                  className="flex items-center gap-5 p-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem] hover:shadow-[var(--shadow-neu-pressed)] transition-all group active:scale-95 border border-white/20 w-full text-left"
                 >
-                  <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center">
-                    {reviewSent ? <Check size={20} className="text-green-600" /> : <Star size={20} className="text-amber-500" />}
+                  <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shadow-[var(--shadow-neu-sm)]">
+                    {reviewSent ? <Check size={22} strokeWidth={4} className="text-green-600" /> : <Star size={22} strokeWidth={3} className="fill-amber-500" />}
                   </div>
                   <div>
-                    <p className="font-black text-sm text-amber-800">{reviewSent ? 'Review Link Sent! ⭐' : 'Request Google Review'}</p>
-                    <p className="text-xs text-amber-600">Send a review link via SMS</p>
-                    {selectedCustomer.lastReviewSent && (
-                      <p className="text-[10px] font-bold text-amber-700/50 mt-1">
-                        Last Sent: {new Date(selectedCustomer.lastReviewSent).toLocaleDateString('en-GB')}
-                      </p>
-                    )}
+                    <p className="font-black text-sm text-black">{reviewSent ? 'Link Sent' : 'Request Review'}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Send Google SMS</p>
                   </div>
                 </button>
               </div>
 
               <button
                 onClick={() => setShowPhonePopup(false)}
-                className="w-full p-4 text-center text-sm font-bold text-zinc-400 hover:text-white transition-colors border-t border-zinc-800/10"
+                className="w-full p-6 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-black transition-colors border-t border-black/5"
               >
-                Cancel
+                Dismiss
               </button>
             </motion.div>
           </div>
@@ -1273,77 +909,73 @@ export function CustomersView() {
       <AnimatePresence>
         {(isAdding || isEditing) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
-              className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }} className="absolute inset-0 bg-black/40" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10"
+              className="relative w-full max-w-lg bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20"
             >
-              <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
+              <div className="p-10">
+                <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h3 className="text-2xl font-black text-blue-500 tracking-tight">
-                      {isEditing ? 'Edit Customer' : 'Add New Customer'}
+                    <h3 className="text-3xl font-black text-black tracking-tight">
+                      {isEditing ? 'Profile Audit' : 'New Intake'}
                     </h3>
-                    <p className="text-zinc-400 text-sm font-bold">
-                      {isEditing ? 'Update client information' : 'Register a new repair ticket'}
+                    <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest mt-1">
+                      {isEditing ? 'Update existing client core data' : 'Register a new repair ticket'}
                     </p>
                   </div>
                   <button 
                     onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
-                    className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
+                    className="w-12 h-12 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-600 hover:text-red-500 active:shadow-[var(--shadow-neu-pressed)] transition-all"
                   >
-                    <X size={24} />
+                    <X size={24} strokeWidth={3} />
                   </button>
                 </div>
 
-                <form onSubmit={isEditing ? handleEditCustomer : handleAddCustomer} className="space-y-6 max-h-[70vh] overflow-y-auto px-1">
-                  <div className="grid grid-cols-1 gap-6">
+                <form onSubmit={isEditing ? handleEditCustomer : handleAddCustomer} className="space-y-8 max-h-[70vh] overflow-y-auto px-2 custom-scrollbar">
+                  <div className="space-y-6">
                     {!isEditing && (
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Repair Time</label>
-                        <div className="bg-zinc-800 p-4 rounded-2xl flex items-center gap-3 text-zinc-400 border border-zinc-800/5">
-                          <Clock size={18} />
-                          <span className="text-sm font-bold">{new Date().toLocaleString()}</span>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Session Timestamp</label>
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-[1.5rem] flex items-center gap-4 text-black border border-black/5">
+                          <Clock size={20} strokeWidth={3} className="text-blue-600" />
+                          <span className="text-sm font-black">{new Date().toLocaleString()}</span>
                         </div>
                       </div>
                     )}
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Customer Name</label>
+                      <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Legal Name</label>
                       <input 
                         type="text"
-                        placeholder="Full Name"
-                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                        placeholder="John Doe"
+                        required
+                        className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Phone</label>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Phone</label>
                         <input 
                           type="tel"
-                          placeholder="+1 (555) 000-0000"
-                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                          placeholder="+61 400 000 000"
+                          required
+                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Email</label>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Email</label>
                         <input 
                           type="email"
-                          placeholder="email@example.com"
-                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                          placeholder="client@mail.com"
+                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                         />
@@ -1352,47 +984,50 @@ export function CustomersView() {
 
                     {!isEditing && (
                       <>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Repair Item</label>
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Repair Target</label>
                             <input 
                               type="text"
-                              placeholder="e.g. Screen"
-                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                              placeholder="e.g. Screen Fix"
+                              required
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.repairItem}
                               onChange={(e) => setFormData({...formData, repairItem: e.target.value})}
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Model Number</label>
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Model Code</label>
                             <input 
                               type="text"
-                              placeholder="e.g. iPhone 14"
-                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                              placeholder="e.g. iPhone 15 Pro"
+                              required
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.modelNumber}
                               onChange={(e) => setFormData({...formData, modelNumber: e.target.value})}
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Price ($)</label>
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Price ($)</label>
                             <input 
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                              required
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.price}
                               onChange={(e) => setFormData({...formData, price: e.target.value})}
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Password</label>
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Device Passcode</label>
                             <input 
                               type="text"
-                              placeholder="Device Passcode"
-                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                              placeholder="None"
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.password}
                               onChange={(e) => setFormData({...formData, password: e.target.value})}
                             />
@@ -1400,55 +1035,50 @@ export function CustomersView() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">IMEI / Serial Number</label>
-                          <div className="flex gap-2">
+                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">IMEI / Serial</label>
+                          <div className="flex gap-4">
                             <input 
                               type="text"
-                              placeholder="IMEI Number"
-                              className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                              placeholder="Scan or Type..."
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                               value={formData.imei}
                               onChange={(e) => setFormData({...formData, imei: e.target.value})}
                             />
                             <button
                               type="button"
                               onClick={() => setScannerTarget('add')}
-                              className="bg-blue-500/10 text-blue-500 p-4 rounded-2xl hover:bg-blue-500/20 transition-colors flex items-center justify-center shrink-0"
-                              title="Scan IMEI using Camera"
+                              className="w-16 h-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-[1.5rem] flex items-center justify-center shrink-0 active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
                             >
-                              <Scan size={20} />
+                              <Scan size={24} strokeWidth={3} />
                             </button>
                           </div>
                         </div>
 
-                        {/* Accessory Upsells */}
-                        {upsells.length > 0 && !isEditing && (
-                          <div className="space-y-3 py-2">
-                            <div className="flex items-center justify-between px-1">
-                              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Add Accessories (Bundle Price)</label>
-                              <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">Upsell Opp</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
+                        {upsells.length > 0 && (
+                          <div className="space-y-4 pt-2">
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Bundled Accessories</label>
+                            <div className="grid grid-cols-2 gap-4">
                               {upsells.map(upsell => (
                                 <button
                                   key={upsell.id}
                                   type="button"
                                   onClick={() => toggleUpsell(upsell)}
                                   className={cn(
-                                    "flex items-center gap-3 p-3 rounded-2xl border transition-all text-left",
+                                    "flex items-center gap-4 p-4 rounded-2xl border transition-all text-left",
                                     selectedUpsells.includes(upsell.id)
-                                      ? "bg-blue-500/5 border-blue-500 shadow-sm"
-                                      : "bg-black border-zinc-800/10 hover:border-blue-500/30"
+                                      ? "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-blue-600/30"
+                                      : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border-white/20"
                                   )}
                                 >
                                   <div className={cn(
-                                    "w-5 h-5 rounded-2xl border-2 flex items-center justify-center shrink-0 transition-colors",
-                                    selectedUpsells.includes(upsell.id) ? "bg-blue-500 border-blue-500 text-white" : "border-zinc-800"
+                                    "w-6 h-6 rounded-lg shadow-[var(--shadow-neu-sm)] flex items-center justify-center shrink-0",
+                                    selectedUpsells.includes(upsell.id) ? "bg-blue-600 text-white" : "bg-[var(--color-neu-bg)]"
                                   )}>
                                     {selectedUpsells.includes(upsell.id) && <Check size={14} strokeWidth={4} />}
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="text-[10px] font-black text-white truncate uppercase tracking-tighter">{upsell.name}</p>
-                                    <p className="text-[11px] font-black text-blue-500 tracking-tighter">+${upsell.bundle_price}</p>
+                                    <p className="text-[9px] font-black text-black truncate uppercase leading-none mb-1">{upsell.name}</p>
+                                    <p className="text-[11px] font-black text-blue-600 tracking-tighter">+${upsell.bundle_price}</p>
                                   </div>
                                 </button>
                               ))}
@@ -1457,17 +1087,17 @@ export function CustomersView() {
                         )}
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                            <DollarSign size={12} className="text-green-600" />
-                            Deposit / 订金 (Optional)
+                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1 flex items-center gap-2">
+                            <DollarSign size={14} className="text-green-600" strokeWidth={3} />
+                            Deposit / Pre-payment
                           </label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 font-black text-sm">$</span>
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-green-600 font-black text-base">$</span>
                             <input 
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-white font-bold"
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 pl-10 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-green-200/30"
                               value={formData.deposit}
                               onChange={(e) => setFormData({...formData, deposit: e.target.value})}
                             />
@@ -1475,39 +1105,39 @@ export function CustomersView() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Remark</label>
+                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Internal Remarks</label>
                           <textarea 
-                            placeholder="Special notes or instructions..."
-                            className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold min-h-[100px] resize-none"
+                            placeholder="Special tech notes..."
+                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5 min-h-[120px] resize-none"
                             value={formData.remark}
                             onChange={(e) => setFormData({...formData, remark: e.target.value})}
                           />
                         </div>
 
-                        <div className="flex items-center justify-between p-4 bg-black rounded-2xl border border-zinc-800/10">
-                          <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem] border border-white/20">
+                          <div className="flex items-center gap-4">
                             <div className={cn(
-                              "p-2 rounded-2xl transition-colors",
-                              formData.liquidDamage ? "bg-error/10 text-red-500" : "bg-zinc-800 text-zinc-400"
+                              "w-12 h-12 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center transition-colors",
+                              formData.liquidDamage ? "bg-red-50 text-red-600" : "bg-gray-50 text-gray-400"
                             )}>
-                              <Droplets size={20} />
+                              <Droplets size={24} strokeWidth={3} />
                             </div>
                             <div>
-                              <p className="text-xs font-black text-white">Liquid Damage</p>
-                              <p className="text-[10px] font-bold text-zinc-400">Has the device been in water?</p>
+                              <p className="text-xs font-black text-black">Liquid Damage</p>
+                              <p className="text-[10px] font-bold text-gray-500 uppercase">Critical assessment</p>
                             </div>
                           </div>
                           <button 
                             type="button"
                             onClick={() => setFormData({...formData, liquidDamage: !formData.liquidDamage})}
                             className={cn(
-                              "w-12 h-6 rounded-full relative transition-colors duration-300",
-                              formData.liquidDamage ? "bg-error" : "bg-zinc-800"
+                              "w-14 h-7 rounded-full relative transition-all duration-300 shadow-[var(--shadow-neu-sm)]",
+                              formData.liquidDamage ? "bg-red-600" : "bg-gray-200"
                             )}
                           >
                             <div className={cn(
-                              "absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300",
-                              formData.liquidDamage ? "left-7" : "left-1"
+                              "absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300",
+                              formData.liquidDamage ? "left-8" : "left-1"
                             )} />
                           </button>
                         </div>
@@ -1515,29 +1145,29 @@ export function CustomersView() {
                     )}
                   </div>
 
-                  <div className="pt-4 flex flex-col gap-3">
-                    <div className="flex gap-4">
+                  <div className="pt-6 flex flex-col gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                       <button 
                         type="button"
                         onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
-                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-zinc-400 bg-zinc-800 hover:bg-zinc-800 transition-all"
+                        className="py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-gray-500 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
                       >
-                        Cancel
+                        Abort
                       </button>
                       <button 
                         type="submit"
-                        className="flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white bg-blue-500 shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all"
+                        className="py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95 transition-all"
                       >
-                        {isEditing ? 'Update Info' : 'Save Customer'}
+                        {isEditing ? 'Sync Profile' : 'Commit Ticket'}
                       </button>
                     </div>
                     {isEditing && (
                       <button 
                         type="button"
                         onClick={() => setIsConfirmingDelete(true)}
-                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-red-500 bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-red-200/20 flex items-center justify-center gap-3"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={16} strokeWidth={3} />
                         Delete Customer Profile
                       </button>
                     )}
@@ -1549,325 +1179,260 @@ export function CustomersView() {
         )}
       </AnimatePresence>
 
-      {/* Repair Detail Modal */}
+      {/* Repair Detail Modal (Recessed Audit Log) */}
       <AnimatePresence>
         {selectedRepair && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }}
-              className="absolute inset-0 bg-on-surface/60 backdrop-blur-md"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="absolute inset-0 bg-black/40" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-md bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10 flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-md bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20 flex flex-col max-h-[90vh]"
             >
-              <div className="p-8 pb-4">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-blue-500">
-                    {isEditingRepair ? 'Edit Repair Record' : 'Repair Details'}
+              <div className="p-10 pb-4">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-black text-black tracking-tight">
+                    {isEditingRepair ? 'Edit Log' : 'Audit Details'}
                   </h3>
-                  <button onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="p-2 hover:bg-zinc-800 rounded-full">
-                    <X size={20} />
+                  <button onClick={() => { setSelectedRepair(null); setIsEditingRepair(false); }} className="w-10 h-10 rounded-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]">
+                    <X size={20} strokeWidth={3} />
                   </button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-8 pb-8 custom-scrollbar">
-
+              <div className="flex-1 overflow-y-auto px-10 pb-10 custom-scrollbar">
                 {isEditingRepair ? (
-                  <form onSubmit={handleUpdateRepair} className="space-y-5">
+                  <form onSubmit={handleUpdateRepair} className="space-y-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Repair Item</label>
+                      <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Repair Target</label>
                       <input 
                         type="text"
-                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                        className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                         value={repairFormData.repairItem}
                         onChange={(e) => setRepairFormData({...repairFormData, repairItem: e.target.value})}
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Model Number</label>
+                      <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Model Code</label>
                       <input 
                         type="text"
-                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                        className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                         value={repairFormData.modelNumber}
                         onChange={(e) => setRepairFormData({...repairFormData, modelNumber: e.target.value})}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Price ($)</label>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Price ($)</label>
                         <input 
                           type="number"
                           step="0.01"
-                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                           value={repairFormData.price}
                           onChange={(e) => setRepairFormData({...repairFormData, price: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Status</label>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Workflow Status</label>
                         <select 
-                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold appearance-none"
+                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5 appearance-none"
                           value={repairFormData.status}
                           onChange={(e) => setRepairFormData({...repairFormData, status: e.target.value})}
                         >
                           <option value="In Processing">In Processing</option>
                           <option value="Urgent">Urgent</option>
                           <option value="Completed">Completed</option>
+                          <option value="waiting for pay">Waiting Part/Pay</option>
+                          <option value="Ready for Pickup">Ready for Pickup</option>
                         </select>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Password</label>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Passcode</label>
                         <input 
                           type="text"
-                          className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                           value={repairFormData.password}
                           onChange={(e) => setRepairFormData({...repairFormData, password: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">IMEI / Serial Number</label>
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">IMEI / SN</label>
                         <div className="flex gap-2">
                           <input 
                             type="text"
-                            className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold"
+                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                             value={repairFormData.imei}
                             onChange={(e) => setRepairFormData({...repairFormData, imei: e.target.value})}
                           />
-                          <button
-                            type="button"
-                            onClick={() => setScannerTarget('repair')}
-                            className="bg-blue-500/10 text-blue-500 p-4 rounded-2xl hover:bg-blue-500/20 transition-colors flex items-center justify-center shrink-0"
-                            title="Scan IMEI using Camera"
-                          >
-                            <Scan size={20} />
-                          </button>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                        <DollarSign size={12} className="text-green-600" />
-                        Deposit / 订金
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 font-black text-sm">$</span>
-                        <input 
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="w-full bg-green-50 border border-green-200 rounded-2xl p-4 pl-8 focus:ring-2 focus:ring-green-300/40 transition-all outline-none text-white font-bold"
-                          value={repairFormData.deposit}
-                          onChange={(e) => setRepairFormData({...repairFormData, deposit: e.target.value})}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Remark</label>
+                      <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Remarks</label>
                       <textarea 
-                        placeholder="Special notes or instructions..."
-                        className="w-full bg-black border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-white font-bold min-h-[100px] resize-none"
+                        className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5 min-h-[100px] resize-none"
                         value={repairFormData.remark}
                         onChange={(e) => setRepairFormData({...repairFormData, remark: e.target.value})}
                       />
                     </div>
-                    
-                    <div className="flex items-center justify-between p-4 bg-black rounded-2xl border border-zinc-800/10">
-                      <div className="flex items-center gap-3">
-                        <Droplets size={18} className={repairFormData.liquidDamage ? "text-red-500" : "text-zinc-400"} />
-                        <span className="text-xs font-bold text-white">Liquid Damage</span>
-                      </div>
-                      <button 
-                        type="button"
-                        onClick={() => setRepairFormData({...repairFormData, liquidDamage: !repairFormData.liquidDamage})}
-                        className={cn(
-                          "w-10 h-5 rounded-full relative transition-colors",
-                          repairFormData.liquidDamage ? "bg-error" : "bg-zinc-800"
-                        )}
-                      >
-                        <div className={cn(
-                          "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all",
-                          repairFormData.liquidDamage ? "left-5.5" : "left-0.5"
-                        )} />
-                      </button>
-                    </div>
 
-                    <div className="pt-4 flex flex-col gap-3">
-                      <div className="flex gap-3">
+                    <div className="pt-6 flex flex-col gap-4">
+                      <div className="grid grid-cols-2 gap-6">
                         <button 
                           type="button"
                           onClick={() => setIsEditingRepair(false)}
-                          className="flex-1 py-3.5 bg-zinc-800 text-zinc-400 rounded-2xl font-black text-xs uppercase tracking-widest"
+                          className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-white/20 active:shadow-[var(--shadow-neu-pressed)]"
                         >
-                          Cancel
+                          Abort
                         </button>
                         <button 
                           type="submit"
-                          className="flex-1 py-3.5 bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                          className="py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95"
                         >
-                          Save Changes
+                          Save Log
                         </button>
                       </div>
                       <button 
                         type="button"
                         onClick={() => setIsConfirmingDeleteRepair(true)}
-                        className="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest text-red-500 bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
                       >
-                        <Trash2 size={16} />
-                        Delete Repair Record
+                        <Trash2 size={16} strokeWidth={3} />
+                        Purge Record
                       </button>
                     </div>
                   </form>
                 ) : (
-                  <div className="space-y-6">
-                    <div className="bg-black p-5 rounded-3xl border border-zinc-800/10">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-blue-500/10 p-3 rounded-2xl text-blue-500">
-                          <Smartphone size={24} />
+                  <div className="space-y-8">
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-8 rounded-[2.5rem] border border-black/5">
+                      <div className="flex items-center gap-6 mb-8">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-[var(--shadow-neu-sm)]">
+                          <Smartphone size={32} strokeWidth={3} />
                         </div>
-                        <div>
-                          <h4 className="font-black text-white">{selectedRepair.repairItem}</h4>
-                          <p className="text-xs font-bold text-zinc-400">{selectedRepair.modelNumber}</p>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-2xl font-black text-black leading-tight tracking-tight mb-1">{selectedRepair.repairItem}</h4>
+                          <p className="text-xs font-black text-gray-500 uppercase tracking-widest">{selectedRepair.modelNumber}</p>
                         </div>
                         <button 
                           onClick={() => setIsTicketModalOpen(true)}
-                          className="ml-auto p-3 bg-blue-500/10 text-blue-500 rounded-2xl hover:bg-blue-500 hover:text-white transition-all flex items-center gap-2"
-                          title="Print Repair Ticket"
+                          className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.3)] active:scale-90 transition-all shrink-0"
                         >
-                          <Printer size={18} />
-                          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Ticket</span>
+                          <Printer size={20} strokeWidth={3} />
                         </button>
                       </div>
                       
-                      <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Status</p>
-                        <span 
-                          onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, selectedRepair.id, selectedRepair.status); }}
-                          className={cn(
-                            "text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest transition-all",
-                            selectedRepair.status === 'In Processing' && "cursor-pointer hover:opacity-70 active:scale-95",
-                            selectedRepair.status === 'Urgent' ? "bg-red-900/30 text-red-200" :
-                            selectedRepair.status === 'In Processing' ? "bg-purple-900/30 text-purple-200" :
-                            "bg-zinc-800 text-zinc-400"
-                          )}
-                        >
-                          {selectedRepair.status}
-                        </span>
-                      </div>
-                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Price</p>
-                        <p className="text-sm font-black text-blue-500">${selectedRepair.price.toFixed(2)}</p>
-                      </div>
-                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Date</p>
-                        <p className="text-sm font-bold text-white">{new Date(selectedRepair.timestamp).toLocaleDateString()}</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl border border-white/20">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5 leading-none">Workflow Status</p>
+                          <span 
+                            onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, selectedRepair.id, selectedRepair.status); }}
+                            className={cn(
+                              "text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest transition-all shadow-[var(--shadow-neu-sm)]",
+                              selectedRepair.status === 'Urgent' ? "bg-red-50 text-red-600" :
+                              selectedRepair.status === 'In Processing' ? "bg-purple-50 text-purple-600 cursor-pointer hover:scale-105" :
+                              "bg-gray-100 text-gray-600"
+                            )}
+                          >
+                            {selectedRepair.status}
+                          </span>
+                        </div>
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-5 rounded-3xl border border-white/20">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5 leading-none">Billable Value</p>
+                          <p className="text-lg font-black text-blue-600 leading-none">${selectedRepair.price.toFixed(2)}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
                     {(selectedRepair.deposit || 0) > 0 && (
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-2xl border-2 border-green-300 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-500 text-white rounded-2xl flex items-center justify-center shadow-md shadow-green-200">
-                            <DollarSign size={22} />
+                      <div className="bg-green-50/50 p-8 rounded-[2.5rem] shadow-[var(--shadow-neu-flat)] border border-green-200/30 flex flex-col gap-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-green-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/20">
+                            <DollarSign size={24} strokeWidth={3} />
                           </div>
                           <div>
-                            <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">Deposit Paid / 订金</p>
-                            <p className="text-lg font-black text-green-700">${selectedRepair.deposit.toFixed(2)}</p>
+                            <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">Initial Deposit</p>
+                            <p className="text-2xl font-black text-black leading-none mt-1">${selectedRepair.deposit.toFixed(2)}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Remaining</p>
-                          <p className="text-lg font-black text-green-700">${(selectedRepair.price - selectedRepair.deposit).toFixed(2)}</p>
+                        <div className="pt-6 border-t border-green-200/20 flex justify-between items-center">
+                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Final Balance Due</span>
+                          <span className="text-xl font-black text-green-700">${(selectedRepair.price - selectedRepair.deposit).toFixed(2)}</span>
                         </div>
                       </div>
                     )}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Password</p>
-                        <p className="text-sm font-bold text-white">{selectedRepair.password || 'None'}</p>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 leading-none">Device Access</p>
+                        <p className="text-sm font-black text-black">{selectedRepair.password || 'None'}</p>
                       </div>
-                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">IMEI</p>
-                        <p className="text-sm font-bold text-white truncate">{selectedRepair.imei || 'N/A'}</p>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-5 rounded-3xl border border-black/5">
+                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 leading-none">Tracking ID</p>
+                        <p className="text-sm font-black text-black truncate">{selectedRepair.imei || 'N/A'}</p>
                       </div>
                     </div>
 
                     <div className={cn(
-                      "p-4 rounded-2xl flex items-center gap-3",
-                      selectedRepair.liquidDamage ? "bg-error/10 text-red-500" : "bg-success/10 text-success"
+                      "p-6 rounded-[2rem] flex items-center gap-4 shadow-[var(--shadow-neu-sm)] border border-white/20",
+                      selectedRepair.liquidDamage ? "bg-red-50/50 text-red-600" : "bg-green-50/50 text-green-600"
                     )}>
-                      <Droplets size={18} />
+                      <Droplets size={20} strokeWidth={3} />
                       <span className="text-xs font-black uppercase tracking-widest">
-                        {selectedRepair.liquidDamage ? 'Liquid Damage Detected' : 'No Liquid Damage'}
+                        {selectedRepair.liquidDamage ? 'Water Damage Detected' : 'No Liquid Contact'}
                       </span>
                     </div>
 
                     {selectedRepair.remark && (
-                      <div className="bg-black p-4 rounded-2xl border border-zinc-800/10">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Remark</p>
-                        <p className="text-sm font-bold text-white whitespace-pre-wrap">{selectedRepair.remark}</p>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-6 rounded-[2rem] border border-black/5">
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Technical Journal</p>
+                        <p className="text-sm font-black text-black whitespace-pre-wrap leading-relaxed">{selectedRepair.remark}</p>
                       </div>
                     )}
 
-                    <div className="pt-4 flex flex-col gap-3">
-                      <div className="flex gap-3">
+                    <div className="pt-6 flex flex-col gap-4">
+                      <div className="grid grid-cols-2 gap-6">
                         <button 
                           onClick={() => openEditRepairModal(selectedRepair)}
-                          className="flex-1 py-4 bg-zinc-800 text-zinc-200 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                          className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 border border-white/20 active:shadow-[var(--shadow-neu-pressed)]"
                         >
-                          <Edit3 size={16} />
-                          Edit Record
+                          <Edit3 size={18} strokeWidth={3} />
+                          Modify Log
                         </button>
                         <button 
                           onClick={() => setSelectedRepair(null)}
-                          className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                          className="py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-95"
                         >
-                          Close Details
+                          Dismiss
                         </button>
                       </div>
                       
-                      {/* Notify Part Arrival Button */}
                       <button 
                         onClick={() => handleNotifyPart(selectedRepair, selectedCustomer)}
                         disabled={partNotifiedId === selectedRepair.id}
                         className={cn(
-                          "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all",
+                          "w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-[var(--shadow-neu-flat)] border border-white/20 active:shadow-[var(--shadow-neu-pressed)]",
                           partNotifiedId === selectedRepair.id 
-                            ? "bg-green-500 text-white" 
-                            : "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                            ? "bg-green-600 text-white" 
+                            : "bg-amber-50 text-amber-600"
                         )}
                       >
                         {partNotifiedId === selectedRepair.id ? (
-                          <>
-                            <Check size={16} />
-                            Notification Sent
-                          </>
+                          <><Check size={18} strokeWidth={4} /> SMS Notification Sent</>
                         ) : (
-                          <>
-                            <Package size={16} />
-                            Notify Part Arrival
-                          </>
+                          <><Package size={18} strokeWidth={3} /> Notify Part Arrival</>
                         )}
                       </button>
 
                       <button 
                         onClick={() => setIsConfirmingDeleteRepair(true)}
-                        className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-red-500 bg-error/10 hover:bg-error/20 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-red-200/20 flex items-center justify-center gap-3"
                       >
-                        <Trash2 size={16} />
-                        Delete Repair Record
+                        <Trash2 size={18} strokeWidth={3} />
+                        Purge Record
                       </button>
                     </div>
                   </div>
@@ -1878,38 +1443,32 @@ export function CustomersView() {
         )}
       </AnimatePresence>
 
-      {/* View All Orders Modal */}
+      {/* View All Orders Modal (Recessed List Layout) */}
       <AnimatePresence>
         {isViewingAllOrders && (
           <div className="fixed inset-0 z-[105] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsViewingAllOrders(false)}
-              className="absolute inset-0 bg-on-surface/50 backdrop-blur-sm"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsViewingAllOrders(false)} className="absolute inset-0 bg-black/40" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10"
+              className="relative w-full max-w-2xl bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20"
             >
-              <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
+              <div className="p-10">
+                <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h3 className="text-2xl font-black text-blue-500 tracking-tight">Order History</h3>
-                    <p className="text-zinc-400 text-sm font-bold">All repairs for {selectedCustomer.name}</p>
+                    <h3 className="text-3xl font-black text-black tracking-tight">Audit Trail</h3>
+                    <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest mt-1">Full transaction history for {selectedCustomer.name}</p>
                   </div>
                   <button 
                     onClick={() => setIsViewingAllOrders(false)}
-                    className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
+                    className="w-12 h-12 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
                   >
-                    <X size={24} />
+                    <X size={24} strokeWidth={3} />
                   </button>
                 </div>
 
-                <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-6 custom-scrollbar px-2">
                   {selectedCustomer.repairs.map((repair) => (
                     <div 
                       key={repair.id}
@@ -1917,52 +1476,33 @@ export function CustomersView() {
                         setSelectedRepair(repair);
                         setIsViewingAllOrders(false);
                       }}
-                      className="bg-black p-5 rounded-2xl flex items-center justify-between border border-zinc-800/5 hover:border-blue-500/30 transition-all cursor-pointer group"
+                      className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] p-6 rounded-[2rem] flex items-center justify-between border border-white/20 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer group active:scale-[0.98]"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="bg-blue-500/10 p-3 rounded-2xl text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                          <Smartphone size={20} />
+                      <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                          <Smartphone size={24} strokeWidth={3} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-white">{repair.repairItem}</h4>
-                          <p className="text-xs font-bold text-zinc-400">{repair.modelNumber}</p>
+                          <h4 className="font-black text-black text-base mb-1 tracking-tight">{repair.repairItem}</h4>
+                          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{repair.modelNumber}</p>
                         </div>
                       </div>
-                      <div className="text-right flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-3">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedRepair(repair);
-                              setIsConfirmingDeleteRepair(true);
-                            }}
-                            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-error/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
-                            title="Delete Repair Record"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                          <p className="font-black text-blue-500 text-lg">${repair.price.toFixed(2)}</p>
+                      <div className="text-right flex flex-col items-end gap-3">
+                        <div className="flex items-center gap-4">
+                          <p className="font-black text-black text-xl leading-none">${repair.price.toFixed(2)}</p>
+                          <ArrowRight size={18} className="text-blue-600 group-hover:translate-x-1 transition-transform" strokeWidth={3} />
                         </div>
-                        {(repair.deposit || 0) > 0 && (
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded-2xl bg-green-100 text-green-700 border border-green-200">
-                            💰 Deposit: ${repair.deposit.toFixed(2)}
+                        <div className="flex flex-col items-end gap-2">
+                           <span className={cn(
+                              "text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/10",
+                              repair.status === 'Urgent' ? "bg-red-50 text-red-600" :
+                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-50 text-purple-600" :
+                              repair.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                              "bg-gray-50 text-gray-400"
+                            )}>
+                            {repair.status}
                           </span>
-                        )}
-                        <div className="flex flex-col items-end gap-1 mt-1">
-                           <span 
-                            onClick={(e) => { e.stopPropagation(); toggleRepairStatus(selectedCustomer.id, repair.id, repair.status); }}
-                            className={cn(
-                              "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter transition-all",
-                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') && "cursor-pointer hover:opacity-70 active:scale-95",
-                              repair.status === 'Urgent' ? "bg-red-900/30 text-red-200" :
-                              (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-900/30 text-purple-200" :
-                              repair.status === 'Ready for Pickup' ? "bg-emerald-900/30 text-emerald-200" :
-                              "bg-zinc-800 text-zinc-400"
-                            )}
-                          >
-                            {repair.status === 'waiting for pay' ? 'Waiting Part/Pay' : repair.status}
-                          </span>
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
                             {new Date(repair.timestamp).toLocaleDateString()}
                           </p>
                         </div>
@@ -1971,14 +1511,14 @@ export function CustomersView() {
                   ))}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-zinc-800/10 flex justify-between items-center">
+                <div className="mt-10 pt-8 border-t border-black/5 flex justify-between items-center">
                   <div>
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Total Price</p>
-                    <p className="text-2xl font-black text-blue-500">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 leading-none">Lifetime Total</p>
+                    <p className="text-3xl font-black text-blue-600 leading-none">${selectedCustomer.totalSpent.toFixed(2)}</p>
                   </div>
                   <button 
                     onClick={() => setIsViewingAllOrders(false)}
-                    className="px-8 py-3.5 bg-zinc-800 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-outline-variant/20 transition-all"
+                    className="px-10 py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black font-black text-[10px] uppercase tracking-widest rounded-2xl active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
                   >
                     Close History
                   </button>
@@ -1988,84 +1528,74 @@ export function CustomersView() {
           </div>
         )}
       </AnimatePresence>
-      {/* Delete Confirmation Modal */}
+
+      {/* Delete Confirmation Modal (Safety Red) */}
       <AnimatePresence>
         {isConfirmingDelete && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsConfirmingDelete(false)}
-              className="absolute inset-0 bg-on-surface/60 backdrop-blur-md"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDelete(false)} className="absolute inset-0 bg-black/40" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10 p-8 text-center"
+              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20 p-10 text-center"
             >
-              <div className="w-20 h-20 bg-error/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Trash2 size={40} />
+              <div className="w-24 h-24 bg-red-50 text-red-600 rounded-[2rem] shadow-[var(--shadow-neu-flat)] flex items-center justify-center mx-auto mb-8 border border-red-200/30">
+                <Trash2 size={44} strokeWidth={3} />
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">Delete Profile?</h3>
-              <p className="text-zinc-400 font-medium mb-8">
-                This action is permanent and will delete all repair history for <strong>{selectedCustomer.name}</strong>.
+              <h3 className="text-2xl font-black text-black mb-3">Delete Profile?</h3>
+              <p className="text-xs font-bold text-gray-500 leading-relaxed mb-10 px-4">
+                This action is permanent and will delete all technical history for <span className="text-black font-black">{selectedCustomer.name}</span>.
               </p>
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 gap-6">
                 <button 
                   onClick={() => setIsConfirmingDelete(false)}
-                  className="flex-1 py-4 bg-zinc-800 text-zinc-400 rounded-2xl font-black text-xs uppercase tracking-widest"
+                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20"
                 >
-                  Cancel
+                  Abort
                 </button>
                 <button 
                   onClick={handleDeleteCustomer}
-                  className="flex-1 py-4 bg-error text-on-error rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-error/20"
+                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
                 >
-                  Delete Now
+                  Confirm
                 </button>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
       {/* Delete Repair Confirmation Modal */}
       <AnimatePresence>
         {isConfirmingDeleteRepair && (
           <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsConfirmingDeleteRepair(false)}
-              className="absolute inset-0 bg-on-surface/60 backdrop-blur-md"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDeleteRepair(false)} className="absolute inset-0 bg-black/40" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-zinc-900/50 rounded-[2.5rem] shadow-2xl overflow-hidden border border-zinc-800/10 p-8 text-center"
+              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20 p-10 text-center"
             >
-              <div className="w-20 h-20 bg-error/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Trash2 size={40} />
+              <div className="w-24 h-24 bg-red-50 text-red-600 rounded-[2rem] shadow-[var(--shadow-neu-flat)] flex items-center justify-center mx-auto mb-8 border border-red-200/30">
+                <Trash2 size={44} strokeWidth={3} />
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">Delete Record?</h3>
-              <p className="text-zinc-400 font-medium mb-8">
-                Are you sure you want to delete this specific repair record? This action cannot be undone.
+              <h3 className="text-2xl font-black text-black mb-3">Purge Record?</h3>
+              <p className="text-xs font-bold text-gray-500 leading-relaxed mb-10 px-4">
+                Are you sure you want to remove this transaction log? This cannot be undone.
               </p>
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 gap-6">
                 <button 
                   onClick={() => setIsConfirmingDeleteRepair(false)}
-                  className="flex-1 py-4 bg-zinc-800 text-zinc-400 rounded-2xl font-black text-xs uppercase tracking-widest"
+                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20"
                 >
-                  Cancel
+                  Abort
                 </button>
                 <button 
                   onClick={handleDeleteRepair}
-                  className="flex-1 py-4 bg-error text-on-error rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-error/20"
+                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
                 >
-                  Delete Now
+                  Confirm
                 </button>
               </div>
             </motion.div>
@@ -2073,49 +1603,43 @@ export function CustomersView() {
         )}
       </AnimatePresence>
 
-      {/* QR Modal */}
+      {/* QR Modal (Physical Card Presentation) */}
       <AnimatePresence>
         {showQR && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              onClick={() => setShowQR(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowQR(false)} className="absolute inset-0 bg-black/40" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95, y: 20 }} 
-              className="relative w-full max-w-sm bg-black rounded-[2rem] shadow-2xl p-8 flex flex-col items-center"
+              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 flex flex-col items-center border border-white/20"
             >
-               <h3 className="text-xl font-black text-white mb-2 tracking-tight">Client Portal QR</h3>
-               <p className="text-center text-sm font-medium text-zinc-400 mb-8 leading-relaxed">Customers can scan this code to drop-off a new repair or track their live ticket status.</p>
+               <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Portal Sync</h3>
+               <p className="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 leading-relaxed">Scan to drop-off or track tickets</p>
                
-               <div className="p-4 bg-white rounded-3xl shadow-lg border border-zinc-800/10 mb-8 transform hover:scale-105 transition-transform">
-                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-48 h-48 rounded-2xl" />
+               <div className="p-6 bg-white rounded-[2.5rem] shadow-[var(--shadow-neu-floating)] mb-10 border border-black/5 transform hover:rotate-3 transition-transform">
+                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-52 h-52 rounded-2xl" />
                </div>
 
-               <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest text-center bg-blue-500/10 px-4 py-2 rounded-full">Point phone camera here</p>
+               <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest text-center bg-blue-50 px-6 py-3 rounded-full shadow-[var(--shadow-neu-sm)] border border-blue-200/30">Awaiting External Scan</p>
 
                <button 
                   onClick={() => setShowQR(false)}
-                  className="absolute top-4 right-4 p-2 bg-zinc-800 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400"
+                  className="absolute top-6 right-6 w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-full flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
                >
-                 <X size={20} />
+                 <X size={20} strokeWidth={3} />
                </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* FAB */}
+      {/* FAB (Floating Physical Button) */}
       <button 
         onClick={() => setShowQR(true)}
-        className="fixed right-6 bottom-24 md:bottom-8 bg-blue-500 text-white w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-[90] ring-4 ring-blue-500/20 hover:ring-blue-500/40"
+        className="fixed right-8 bottom-28 md:bottom-10 bg-blue-600 text-white w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-[0_10px_25px_rgba(37,99,235,0.4)] hover:scale-110 active:scale-90 transition-all z-[90] border-4 border-white/20"
       >
-        <QrCode size={24} />
+        <QrCode size={28} strokeWidth={2.5} />
       </button>
 
       <RepairTicketModal
@@ -2126,7 +1650,6 @@ export function CustomersView() {
         t={t}
       />
 
-      {/* IMEI Camera Scanner Overlay */}
       <AnimatePresence>
         {scannerTarget && (
           <OCRImeiScanner

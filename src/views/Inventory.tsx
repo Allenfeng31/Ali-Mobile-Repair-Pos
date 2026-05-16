@@ -1,3 +1,5 @@
+// src/views/Inventory.tsx
+
 import React, { useState } from 'react';
 import {
   Search,
@@ -525,11 +527,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                     <div
                       onClick={() => handleEdit(item)}
                       className={cn(
-                        "bg-[var(--color-neu-bg)] rounded-[2rem] p-5 sm:p-6 shadow-[var(--shadow-neu-flat)] active:scale-[0.98] transition-all cursor-pointer grid grid-cols-12 items-center gap-4 border border-white/20",
+                        "bg-[var(--color-neu-bg)] rounded-[2rem] p-5 sm:p-6 shadow-[var(--shadow-neu-flat)] active:scale-[0.98] transition-all cursor-pointer flex flex-col sm:grid sm:grid-cols-12 items-start sm:items-center gap-4 border border-white/20",
                         isEditingThis && "shadow-[var(--shadow-neu-pressed)] scale-[0.99]"
                       )}
                     >
-                      <div className="col-span-8 sm:col-span-6 flex items-center gap-5">
+                      <div className="w-full sm:col-span-6 flex items-center gap-5">
                         <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600 shrink-0">
                           <item.icon size={28} />
                         </div>
@@ -548,7 +550,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         </div>
                       </div>
 
-                      <div className="col-span-4 sm:col-span-2 flex flex-col items-end sm:items-center">
+                      <div className="w-full sm:col-span-2 flex items-center justify-between sm:justify-center mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-black/5">
+                        <span className="sm:hidden text-[10px] font-black text-gray-400 uppercase tracking-widest">Current Stock</span>
                         <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] px-4 py-1.5 rounded-xl">
                           <span className={cn(
                             "text-xs font-black uppercase tracking-wider",
