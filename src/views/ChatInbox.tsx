@@ -32,6 +32,22 @@ const API_BASE = (() => {
 const INTRO_PREFIX = '[CUSTOMER_INFO]';
 const BOOKING_PREFIX = '[BOOKING_DATA]';
 
+/**
+ * Strips metadata from customer intro messages to reveal the actual feedback/message.
+ */
+const cleanMessageContent = (content: string) => {
+  if (!content.startsWith(INTRO_PREFIX)) return content;
+  return content
+    .split('\n')
+    .filter(line =>
+      !line.startsWith(INTRO_PREFIX) &&
+      !line.startsWith('Name:') &&
+      !line.startsWith('Phone:')
+    )
+    .join('\n')
+    .trim();
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatInbox() {
@@ -177,10 +193,16 @@ export function ChatInbox() {
 
   const getLastMessage = (session: ChatSession) => {
     const msgs = session.chat_messages || [];
-    const visible = msgs.filter(m => !m.content.startsWith(INTRO_PREFIX) && !m.content.startsWith(BOOKING_PREFIX));
+    const visible = msgs.filter(m => {
+      if (m.content.startsWith(BOOKING_PREFIX)) return false;
+      if (m.content.startsWith(INTRO_PREFIX)) return cleanMessageContent(m.content) !== '';
+      return true;
+    });
+
     if (visible.length > 0) {
       const msg = visible[visible.length - 1];
-      return { ...msg, content: msg.content.substring(0, 60) + (msg.content.length > 60 ? '...' : '') };
+      const cleaned = cleanMessageContent(msg.content);
+      return { ...msg, content: cleaned.substring(0, 60) + (cleaned.length > 60 ? '...' : '') };
     }
     const booking = msgs.find(m => m.content.startsWith(BOOKING_PREFIX));
     if (booking) return { ...booking, content: '📅 New Booking Request' };
@@ -222,7 +244,12 @@ export function ChatInbox() {
   if (activeSession) {
     const sessionIdx = sessions.findIndex(s => s.id === activeSession.id);
     const customerInfo = getCustomerInfo(activeSession);
-    const visibleMessages = messages.filter(m => !m.content.startsWith(INTRO_PREFIX));
+    const visibleMessages = messages.filter(m => {
+      if (m.content.startsWith(INTRO_PREFIX)) {
+        return cleanMessageContent(m.content) !== '';
+      }
+      return true;
+    });
 
     const handleStatusUpdate = async (apptId: string, status: 'confirmed' | 'declined') => {
       try {
@@ -342,8 +369,8 @@ export function ChatInbox() {
                           )}
                         </div>
                       );
-                    } catch (_) { return <div>{msg.content}</div>; }
-                  })() : msg.content}
+                    } catch (_) { return <div>{cleanMessageContent(msg.content)}</div>; }
+                  })() : cleanMessageContent(msg.content)}
                 </div>
               </div>
             </div>
