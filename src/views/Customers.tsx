@@ -554,7 +554,7 @@ export function CustomersView() {
     return (
       <div
         key={customer.id}
-        onClick={() => setSelectedId(customer.id)}
+        onClick={() => setSelectedId(prev => prev === customer.id ? '' : customer.id)}
         className={cn(
           "p-6 rounded-[2.5rem] transition-all cursor-pointer group border border-white/20",
           isActive
@@ -637,21 +637,35 @@ export function CustomersView() {
                         <span className="text-xs font-black text-black">{customer.phone}</span>
                       </div>
 
-                      {/* RESTORED: SEND REVIEW BUTTON (YELLOW) */}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
-                        disabled={sendingReviewId === customer.id}
-                        className={cn(
-                          "w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20",
-                          reviewSent && sendingReviewId === customer.id ? "bg-green-50 text-green-600" : "bg-amber-400 text-black"
+                      {/* RESTORED: SEND REVIEW BUTTON (YELLOW) + TIMESTAMP */}
+                      <div className="flex flex-col items-center">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
+                          disabled={sendingReviewId === customer.id}
+                          className={cn(
+                            "w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20",
+                            reviewSent && sendingReviewId === customer.id ? "bg-green-50 text-green-600" : "bg-amber-400 text-black"
+                          )}
+                        >
+                          {reviewSent && sendingReviewId === customer.id ? (
+                            <><Check size={16} strokeWidth={4} /> Sent</>
+                          ) : (
+                            <><Star size={16} strokeWidth={3} className="fill-black" /> Send Review</>
+                          )}
+                        </button>
+                        {customer.lastReviewSent && (
+                          <span className="text-[10px] text-orange-600 font-bold mt-2 block text-center">
+                            Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: false
+                            }).replace(',', '')}
+                          </span>
                         )}
-                      >
-                        {reviewSent && sendingReviewId === customer.id ? (
-                          <><Check size={16} strokeWidth={4} /> Sent</>
-                        ) : (
-                          <><Star size={16} strokeWidth={3} className="fill-black" /> Send Review</>
-                        )}
-                      </button>
+                      </div>
                     </div>
                   </div>
 
@@ -662,9 +676,13 @@ export function CustomersView() {
                       Live Repairs
                     </h4>
                     <div className="space-y-3">
-                      {customer.repairs.filter(r => r.status !== 'Completed').length > 0 ? (
-                        customer.repairs.filter(r => r.status !== 'Completed').map(repair => (
-                          <div key={repair.id} className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl p-3 flex items-center justify-between border border-white/10">
+                      {customer.repairs.length > 0 ? (
+                        customer.repairs.slice(0, 2).map(repair => (
+                          <div
+                            key={repair.id}
+                            onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
+                            className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl p-3 flex items-center justify-between border border-white/10 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer active:scale-[0.98]"
+                          >
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                                 <Smartphone size={16} strokeWidth={3} />
@@ -676,10 +694,21 @@ export function CustomersView() {
                             </div>
                             <div className="text-right">
                               <p className="text-[10px] font-black text-black leading-none mb-1">${repair.price.toFixed(2)}</p>
-                              <span className={cn(
-                                "text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tight",
-                                repair.status === 'Urgent' ? "bg-red-50 text-red-600" : "bg-purple-50 text-purple-600"
-                              )}>
+                              <span
+                                onClick={(e) => {
+                                  if (repair.status !== 'Completed') {
+                                    e.stopPropagation();
+                                    toggleRepairStatus(customer.id, repair.id, repair.status);
+                                  }
+                                }}
+                                className={cn(
+                                  "text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tight transition-all",
+                                  repair.status === 'Urgent' ? "bg-red-50 text-red-600 cursor-pointer hover:scale-110 active:scale-95" :
+                                    (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-50 text-purple-600 cursor-pointer hover:scale-110 active:scale-95" :
+                                      repair.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                                        "bg-gray-100 text-gray-500"
+                                )}
+                              >
                                 {repair.status}
                               </span>
                             </div>
@@ -1104,7 +1133,7 @@ export function CustomersView() {
                           type="tel"
                           placeholder="+61 400 000 000"
                           required
-                          className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
+                          className="w-full bg-[var(--color-neu-bg)] shadow(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
@@ -1322,7 +1351,7 @@ export function CustomersView() {
                       <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Device Model</label>
                       <input
                         type="text"
-                        className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
+                        className="w-full bg-[var(--color-neu-bg)] shadow(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm border border-black/5"
                         value={repairFormData.modelNumber}
                         onChange={(e) => setRepairFormData({ ...repairFormData, modelNumber: e.target.value })}
                       />
@@ -1540,7 +1569,7 @@ export function CustomersView() {
 
                       <button
                         onClick={() => setIsConfirmingDeleteRepair(true)}
-                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-red-200/20 flex items-center justify-center gap-3"
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
                       >
                         <Trash2 size={18} strokeWidth={3} />
                         Purge Transaction
@@ -1740,6 +1769,7 @@ export function CustomersView() {
             onClose={() => setIsTicketModalOpen(false)}
             customer={selectedCustomer}
             repair={selectedRepair}
+            t={t}
           />
         )}
       </AnimatePresence>
