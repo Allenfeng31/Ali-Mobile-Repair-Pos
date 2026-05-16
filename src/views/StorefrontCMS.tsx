@@ -696,15 +696,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       <div className="flex items-center gap-6 mb-12">
         <button
           onClick={onBack}
-          className="w-12 h-12 bg-zinc-900/50 rounded-2xl flex items-center justify-center text-zinc-400 hover:text-blue-500 hover:shadow-lg transition-all border border-zinc-800/10"
+          className="w-14 h-14 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-500 hover:text-blue-600 active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all border border-white/20"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={24} strokeWidth={3} />
         </button>
         <div>
-          <h1 className="text-4xl font-black text-white tracking-tighter">
-            Storefront <span className="text-blue-500 italic">CMS</span>
+          <h1 className="text-5xl font-black text-black tracking-tight [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
+            Storefront <span className="text-blue-600 italic">CMS</span>
           </h1>
-          <p className="text-zinc-400 font-medium">Manage announcements and blog content.</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 bg-white/50 px-4 py-1.5 rounded-full inline-block shadow-[var(--shadow-neu-sm)]">Announcements, Blogs & Upsells</p>
         </div>
       </div>
 
@@ -713,15 +713,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="mb-16">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Megaphone className="text-blue-500" size={24} />
+          <h2 className="text-xl font-black text-black flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600"><Megaphone size={22} strokeWidth={3} /></div>
             Top Announcement Bar
           </h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500/90 transition-all shadow-lg"
+            className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={3} />
             Add Announcement
           </button>
         </div>
@@ -735,29 +735,31 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-zinc-900/50 border border-blue-500/20 rounded-3xl p-6 flex items-center gap-4">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddAnnouncement()}
-                  placeholder="Type your announcement message..."
-                  autoFocus
-                  className="flex-1 text-lg font-bold text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
-                />
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-blue-600/20 rounded-3xl p-6 flex items-center gap-4">
+                <div className="flex-1 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddAnnouncement()}
+                    placeholder="Type your announcement message..."
+                    autoFocus
+                    className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                  />
+                </div>
                 <button
                   onClick={handleAddAnnouncement}
                   disabled={addingAnnouncement || !newMessage.trim()}
-                  className="flex items-center gap-2 bg-blue-500 text-white px-5 py-2.5 rounded-2xl font-bold text-sm hover:bg-blue-500/90 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-2xl font-black text-sm hover:brightness-110 transition-all disabled:opacity-50"
                 >
-                  {addingAnnouncement ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                  {addingAnnouncement ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} strokeWidth={3} />}
                   Save
                 </button>
                 <button
                   onClick={() => { setShowAddForm(false); setNewMessage(''); }}
-                  className="p-2.5 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-2xl transition-all"
+                  className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                 >
-                  <X size={18} />
+                  <X size={18} strokeWidth={3} />
                 </button>
               </div>
             </motion.div>
@@ -766,16 +768,16 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
         {/* Announcements List */}
         {loadingAnnouncements ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem] text-zinc-400 gap-4">
-            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-bold">Loading announcements...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] text-gray-400 gap-4 border border-black/5">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <p className="font-black text-sm uppercase tracking-widest">Loading announcements...</p>
           </div>
         ) : announcements.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
-            <Megaphone size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-white mb-2">No active announcements</h3>
-            <p className="text-zinc-400 mb-8 max-w-sm mx-auto">Create your first announcement to show it on the top bar of your public storefront.</p>
-            <button onClick={() => setShowAddForm(true)} className="text-blue-500 font-bold hover:underline">
+          <div className="text-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <Megaphone size={48} className="mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-black mb-2">No active announcements</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-bold">Create your first announcement to show it on the top bar of your public storefront.</p>
+            <button onClick={() => setShowAddForm(true)} className="text-blue-600 font-black hover:underline">
               Get started by adding one →
             </button>
           </div>
@@ -789,10 +791,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-zinc-900/50 border border-zinc-800/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-blue-500/20 transition-all"
+                  className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-white/20 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-[var(--shadow-neu-sm)] transition-all"
                 >
-                  <div className="w-10 h-10 bg-zinc-900 rounded-2xl flex items-center justify-center text-outline group-hover:text-blue-500/50 transition-colors">
-                    <GripVertical size={20} />
+                  <div className="w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                    <GripVertical size={20} strokeWidth={3} />
                   </div>
                   <div className="flex-1">
                     <input
@@ -800,14 +802,14 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.message}
                       onChange={(e) => setAnnouncements(announcements.map(a => a.id === item.id ? { ...a, message: e.target.value } : a))}
                       onBlur={(e) => handleUpdateAnnouncement(item.id, { message: e.target.value })}
-                      className="w-full text-lg font-bold text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                      className="w-full text-lg font-black text-black bg-transparent border-none focus:ring-0 p-0 placeholder:text-gray-300 outline-none"
                       placeholder="Enter announcement message..."
                     />
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Order #{item.display_order}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Added {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -815,20 +817,20 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleActive(item.id, item.is_active)}
-                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-bold text-xs ${
+                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-black text-xs ${
                         item.is_active
-                          ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                          : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                          ? 'bg-green-50 text-green-600 shadow-[var(--shadow-neu-pressed)] border border-green-100'
+                          : 'bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-400'
                       }`}
                     >
-                      {item.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                      {item.is_active ? <ToggleRight size={20} strokeWidth={3} /> : <ToggleLeft size={20} strokeWidth={3} />}
                       {item.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </button>
                     <button
                       onClick={() => handleDeleteAnnouncement(item.id)}
-                      className="p-3 text-zinc-400 hover:text-red-500 hover:bg-red-900/30/20 rounded-2xl transition-all"
+                      className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={20} strokeWidth={3} />
                     </button>
                   </div>
                 </motion.div>
@@ -838,8 +840,8 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         )}
 
         {announcementError && (
-          <div className="flex items-center gap-3 p-4 bg-red-900/30/20 border border-red-500/20 rounded-2xl text-red-500 text-sm font-bold mt-4">
-            <AlertCircle size={18} /> {announcementError}
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-black mt-4 shadow-[var(--shadow-neu-sm)]">
+            <AlertCircle size={18} strokeWidth={3} /> {announcementError}
           </div>
         )}
       </section>
@@ -849,38 +851,38 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <BookOpen className="text-blue-500" size={24} />
+          <h2 className="text-xl font-black text-black flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600"><BookOpen size={22} strokeWidth={3} /></div>
             Blog Management
           </h2>
           <button
             onClick={() => { setEditingPost(null); setEditorOpen(true); }}
-            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500/90 transition-all shadow-lg"
+            className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={3} />
             New Blog Post
           </button>
         </div>
 
         {loadingBlogs ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem] text-zinc-400 gap-4">
-            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-bold">Loading blog posts...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] text-gray-400 gap-4 border border-black/5">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <p className="font-black text-sm uppercase tracking-widest">Loading blog posts...</p>
           </div>
         ) : blogError ? (
-          <div className="text-center py-16 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
-            <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-white mb-2">Blog Table Not Found</h3>
-            <p className="text-zinc-400 max-w-md mx-auto text-sm mb-6">
-              Run <code className="bg-zinc-900 px-1.5 py-0.5 rounded text-blue-500 font-bold">storefront_blogs.sql</code> in your Supabase SQL Editor.
+          <div className="text-center py-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
+            <h3 className="text-lg font-black text-black mb-2">Blog Table Not Found</h3>
+            <p className="text-gray-500 max-w-md mx-auto text-sm mb-6 font-bold">
+              Run <code className="bg-blue-50 px-1.5 py-0.5 rounded text-blue-600 font-black">storefront_blogs.sql</code> in your Supabase SQL Editor.
             </p>
           </div>
         ) : blogPosts.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
-            <FileText size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-white mb-2">No blog posts yet</h3>
-            <p className="text-zinc-400 mb-8 max-w-sm mx-auto">Start creating content for your storefront blog.</p>
-            <button onClick={() => { setEditingPost(null); setEditorOpen(true); }} className="text-blue-500 font-bold hover:underline">
+          <div className="text-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <FileText size={48} className="mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-black mb-2">No blog posts yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-bold">Start creating content for your storefront blog.</p>
+            <button onClick={() => { setEditingPost(null); setEditorOpen(true); }} className="text-blue-600 font-black hover:underline">
               Write your first post →
             </button>
           </div>
@@ -894,38 +896,38 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-zinc-900/50 border border-zinc-800/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-blue-500/20 transition-all"
+                  className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-white/20 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-[var(--shadow-neu-sm)] transition-all"
                 >
                   {post.cover_image ? (
-                    <img src={post.cover_image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-zinc-800/20 shrink-0" />
+                    <img src={post.cover_image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-white/20 shadow-[var(--shadow-neu-sm)] shrink-0" />
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center shrink-0">
-                      <FileText size={24} className="text-outline" />
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] flex items-center justify-center shrink-0">
+                      <FileText size={24} className="text-gray-400" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-white truncate">{post.title}</h3>
+                    <h3 className="text-lg font-black text-black truncate">{post.title}</h3>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
-                        post.is_published ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600'
+                      <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full ${
+                        post.is_published ? 'bg-green-50 text-green-600 shadow-[var(--shadow-neu-sm)]' : 'bg-amber-50 text-amber-600 shadow-[var(--shadow-neu-sm)]'
                       }`}>
                         {post.is_published ? 'Published' : 'Draft'}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)] flex items-center gap-1">
                         <Calendar size={10} />
                         {post.published_at ? new Date(post.published_at).toLocaleDateString() : new Date(post.created_at || '').toLocaleDateString()}
                       </span>
-                      <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">/blog/{post.slug}</span>
+                      <span className="text-[10px] font-mono text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">/blog/{post.slug}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => { setEditingPost(post); setEditorOpen(true); }}
-                      className="p-3 text-zinc-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-2xl transition-all" title="Edit">
-                      <Pencil size={18} />
+                      className="p-3 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all" title="Edit">
+                      <Pencil size={18} strokeWidth={3} />
                     </button>
                     <button onClick={() => handleDeleteBlogPost(post.id!)}
-                      className="p-3 text-zinc-400 hover:text-red-500 hover:bg-red-900/30/20 rounded-2xl transition-all" title="Delete">
-                      <Trash2 size={18} />
+                      className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all" title="Delete">
+                      <Trash2 size={18} strokeWidth={3} />
                     </button>
                   </div>
                 </motion.div>
@@ -940,15 +942,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <ShoppingBag className="text-blue-500" size={24} />
+          <h2 className="text-xl font-black text-black flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600"><ShoppingBag size={22} strokeWidth={3} /></div>
             Cart Upsells & Accessories
           </h2>
           <button
             onClick={() => setShowAddUpsellForm(true)}
-            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500/90 transition-all shadow-lg"
+            className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={3} />
             Add Upsell
           </button>
         </div>
@@ -962,68 +964,76 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-zinc-900/50 border border-blue-500/20 rounded-3xl p-6 space-y-4">
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-blue-600/20 rounded-3xl p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-1.5">Name *</label>
-                    <input
-                      type="text"
-                      value={newUpsellName}
-                      onChange={(e) => setNewUpsellName(e.target.value)}
-                      placeholder="e.g. Premium Tempered Glass"
-                      autoFocus
-                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Name *</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="text"
+                        value={newUpsellName}
+                        onChange={(e) => setNewUpsellName(e.target.value)}
+                        placeholder="e.g. Premium Tempered Glass"
+                        autoFocus
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-1.5">Description</label>
-                    <input
-                      type="text"
-                      value={newUpsellDescription}
-                      onChange={(e) => setNewUpsellDescription(e.target.value)}
-                      placeholder="e.g. Protect your screen from scratches"
-                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Description</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="text"
+                        value={newUpsellDescription}
+                        onChange={(e) => setNewUpsellDescription(e.target.value)}
+                        placeholder="e.g. Protect your screen from scratches"
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-1.5">Regular Price ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={newUpsellRegularPrice}
-                      onChange={(e) => setNewUpsellRegularPrice(e.target.value)}
-                      placeholder="39.99"
-                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Regular Price ($)</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={newUpsellRegularPrice}
+                        onChange={(e) => setNewUpsellRegularPrice(e.target.value)}
+                        placeholder="39.99"
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-white-variant mb-1.5">Bundle Price ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={newUpsellBundlePrice}
-                      onChange={(e) => setNewUpsellBundlePrice(e.target.value)}
-                      placeholder="25.00"
-                      className="w-full text-base font-bold text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 placeholder:text-outline outline-none focus:border-blue-500/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Bundle Price ($)</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={newUpsellBundlePrice}
+                        onChange={(e) => setNewUpsellBundlePrice(e.target.value)}
+                        placeholder="25.00"
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 pt-2">
                   <button
                     onClick={handleAddUpsell}
                     disabled={addingUpsell || !newUpsellName.trim()}
-                    className="flex items-center gap-2 bg-blue-500 text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-500/90 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm hover:brightness-110 transition-all disabled:opacity-50"
                   >
-                    {addingUpsell ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                    {addingUpsell ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} strokeWidth={3} />}
                     Save Upsell
                   </button>
                   <button
                     onClick={() => { setShowAddUpsellForm(false); setNewUpsellName(''); setNewUpsellDescription(''); setNewUpsellRegularPrice(''); setNewUpsellBundlePrice(''); }}
-                    className="p-2.5 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-2xl transition-all"
+                    className="px-4 py-3 text-gray-500 hover:text-red-500 font-black text-sm rounded-2xl transition-all"
                   >
                     Cancel
                   </button>
@@ -1035,35 +1045,35 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
         {/* Upsells List */}
         {loadingUpsells ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem] text-zinc-400 gap-4">
-            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-bold">Loading upsells...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] text-gray-400 gap-4 border border-black/5">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <p className="font-black text-sm uppercase tracking-widest">Loading upsells...</p>
           </div>
         ) : upsellError && upsells.length === 0 ? (
-          <div className="text-center py-16 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
-            <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-white mb-2">Supabase Error Detected</h3>
-            <p className="text-zinc-400 max-w-lg mx-auto text-sm mb-6 bg-zinc-900 p-4 rounded-2xl font-mono break-all">
+          <div className="text-center py-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
+            <h3 className="text-lg font-black text-black mb-2">Supabase Error Detected</h3>
+            <p className="text-gray-500 max-w-lg mx-auto text-sm mb-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-4 rounded-2xl font-mono break-all">
               {upsellError}
             </p>
-            <p className="text-white-variant max-w-md mx-auto text-sm mb-6">
+            <p className="text-gray-500 max-w-md mx-auto text-sm mb-6 font-bold">
               If the error says "relation does not exist", please ensure you have run the SQL script in your Supabase SQL Editor.
             </p>
             <button 
               onClick={() => { setUpsellError(null); fetchUpsells(); }}
-              className="text-blue-500 font-bold hover:underline"
+              className="text-blue-600 font-black hover:underline"
             >
               Try to refresh table connection →
             </button>
           </div>
         ) : upsells.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-900/50 border-2 border-dashed border-zinc-800/20 rounded-[2.5rem]">
-            <ShoppingBag size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-white mb-2">No upsell items yet</h3>
-            <p className="text-white-variant mb-8 max-w-sm mx-auto">Add accessories and add-ons that customers can bundle with their repair.</p>
+          <div className="text-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <ShoppingBag size={48} className="mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-black mb-2">No upsell items yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-bold">Add accessories and add-ons that customers can bundle with their repair.</p>
             <button
               onClick={() => setShowAddUpsellForm(true)}
-              className="text-blue-500 font-bold hover:underline"
+              className="text-blue-600 font-black hover:underline"
             >
               Add your first upsell →
             </button>
@@ -1078,10 +1088,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-zinc-900/50 border border-zinc-800/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-blue-500/20 transition-all"
+                  className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-white/20 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-[var(--shadow-neu-sm)] transition-all"
                 >
-                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500/60 shrink-0">
-                    <DollarSign size={20} />
+                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0 shadow-[var(--shadow-neu-sm)]">
+                    <DollarSign size={20} strokeWidth={3} />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -1090,7 +1100,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.name}
                       onChange={(e) => setUpsells(upsells.map(u => u.id === item.id ? { ...u, name: e.target.value } : u))}
                       onBlur={(e) => handleUpdateUpsell(item.id, { name: e.target.value })}
-                      className="w-full text-lg font-bold text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                      className="w-full text-lg font-black text-black bg-transparent border-none focus:ring-0 p-0 placeholder:text-gray-300 outline-none"
                       placeholder="Upsell name..."
                     />
                     <input
@@ -1098,17 +1108,17 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.description}
                       onChange={(e) => setUpsells(upsells.map(u => u.id === item.id ? { ...u, description: e.target.value } : u))}
                       onBlur={(e) => handleUpdateUpsell(item.id, { description: e.target.value })}
-                      className="w-full text-sm text-white-variant bg-transparent border-none focus:ring-0 p-0 mt-0.5 placeholder:text-outline outline-none"
+                      className="w-full text-sm text-gray-500 bg-transparent border-none focus:ring-0 p-0 mt-0.5 placeholder:text-gray-300 outline-none font-bold"
                       placeholder="Description..."
                     />
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         RRP ${Number(item.regular_price).toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Bundle ${Number(item.bundle_price).toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Added {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -1117,21 +1127,21 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => toggleUpsellActive(item.id, item.is_active)}
-                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-bold text-xs ${
+                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-black text-xs ${
                         item.is_active
-                          ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                          : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                          ? 'bg-green-50 text-green-600 shadow-[var(--shadow-neu-pressed)] border border-green-100'
+                          : 'bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-400'
                       }`}
                     >
-                      {item.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                      {item.is_active ? <ToggleRight size={20} strokeWidth={3} /> : <ToggleLeft size={20} strokeWidth={3} />}
                       {item.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </button>
 
                     <button
                       onClick={() => handleDeleteUpsell(item.id)}
-                      className="p-3 text-white-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all"
+                      className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={20} strokeWidth={3} />
                     </button>
                   </div>
                 </motion.div>
@@ -1141,8 +1151,8 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         )}
 
         {upsellError && !loadingUpsells && upsells.length > 0 && (
-          <div className="flex items-center gap-3 p-4 bg-error-container/20 border border-error/20 rounded-2xl text-error text-sm font-bold mt-4">
-            <AlertCircle size={18} />
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-black mt-4 shadow-[var(--shadow-neu-sm)]">
+            <AlertCircle size={18} strokeWidth={3} />
             {upsellError}
           </div>
         )}

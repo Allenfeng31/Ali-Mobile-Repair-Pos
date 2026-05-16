@@ -1,6 +1,6 @@
 // src/views/Reports.tsx
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   TrendingUp,
   Wrench,
@@ -22,7 +22,12 @@ import {
   List,
   Printer,
   Package,
-  ArrowRight
+  ArrowRight,
+  Globe,
+  MousePointerClick,
+  Smartphone,
+  PhoneCall,
+  MessageSquare
 } from 'lucide-react';
 import {
   BarChart,
@@ -42,6 +47,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
+import { supabase } from '../lib/supabase';
 import { Lock } from 'lucide-react';
 
 interface ReportsViewProps {
@@ -67,6 +73,84 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const [searchOrderQuery, setSearchOrderQuery] = useState('');
   const [orderPage, setOrderPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  // ─── Web Analytics State ─────────────────────────────────────
+  const [analyticsEvents, setAnalyticsEvents] = useState<any[]>([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analyticsRange, setAnalyticsRange] = useState<'today' | '7d' | '30d'>('7d');
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [analyticsRange]);
+
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const now = new Date();
+      let startISO: string;
+      if (analyticsRange === 'today') {
+        const s = new Date(now); s.setHours(0, 0, 0, 0);
+        startISO = s.toISOString();
+      } else if (analyticsRange === '7d') {
+        const s = new Date(now); s.setDate(s.getDate() - 7); s.setHours(0, 0, 0, 0);
+        startISO = s.toISOString();
+      } else {
+        const s = new Date(now); s.setDate(s.getDate() - 30); s.setHours(0, 0, 0, 0);
+        startISO = s.toISOString();
+      }
+
+      const { data, error } = await supabase
+        .from('analytics_events')
+        .select('*')
+        .gte('created_at', startISO)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[Reports] Analytics fetch error:', error);
+        setAnalyticsEvents([]);
+      } else {
+        setAnalyticsEvents(data || []);
+      }
+    } catch (err) {
+      console.error('[Reports] Analytics fetch failed:', err);
+      setAnalyticsEvents([]);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  // Computed analytics metrics
+  const analyticsStats = useMemo(() => {
+    const totalPageViews = analyticsEvents.filter(e => e.event_type === 'page_view' || e.event_type === 'view').length;
+    const totalClicks = analyticsEvents.filter(e => e.event_type === 'click').length;
+    const totalConversions = analyticsEvents.filter(e => e.event_type === 'conversion').length;
+    const uniqueSessions = new Set(analyticsEvents.map(e => e.session_id).filter(Boolean)).size;
+
+    // Model click volumes
+    const modelClickMap: Record<string, number> = {};
+    analyticsEvents.filter(e => e.event_name === 'model_click' && e.model_name).forEach(e => {
+      modelClickMap[e.model_name] = (modelClickMap[e.model_name] || 0) + 1;
+    });
+    const modelClicks = Object.entries(modelClickMap)
+      .map(([model, clicks]) => ({ model, clicks }))
+      .sort((a, b) => b.clicks - a.clicks)
+      .slice(0, 10);
+
+    // Conversion breakdown
+    const conversionMap: Record<string, number> = {};
+    analyticsEvents.filter(e => e.event_type === 'conversion').forEach(e => {
+      conversionMap[e.event_name] = (conversionMap[e.event_name] || 0) + 1;
+    });
+
+    // Device type breakdown
+    const deviceMap: Record<string, number> = {};
+    analyticsEvents.forEach(e => {
+      const device = e.device_type || 'Unknown';
+      deviceMap[device] = (deviceMap[device] || 0) + 1;
+    });
+
+    return { totalPageViews, totalClicks, totalConversions, uniqueSessions, modelClicks, conversionMap, deviceMap };
+  }, [analyticsEvents]);
 
   useScrollLock(
     !!selectedOrder ||
@@ -585,6 +669,183 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* Web Analytics — Website Clicks & Phone Model Volumes      */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[3rem] p-10 border border-white/20">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+            <h3 className="text-2xl font-black text-black tracking-tight flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600">
+                <Globe size={24} strokeWidth={3} />
+              </div>
+              Website Analytics
+            </h3>
+            <div className="flex gap-2">
+              {(['today', '7d', '30d'] as const).map(range => (
+                <button
+                  key={range}
+                  onClick={() => setAnalyticsRange(range)}
+                  className={cn(
+                    "px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
+                    analyticsRange === range
+                      ? "bg-blue-600 text-white shadow-[0_8px_16px_rgba(37,99,235,0.3)]"
+                      : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 active:shadow-[var(--shadow-neu-pressed)]"
+                  )}
+                >
+                  {range === 'today' ? 'Today' : range === '7d' ? '7 Days' : '30 Days'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {analyticsLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            </div>
+          ) : analyticsEvents.length === 0 ? (
+            <div className="text-center py-16">
+              <Globe className="mx-auto text-gray-300 mb-4" size={48} strokeWidth={1.5} />
+              <p className="text-gray-500 text-sm font-black uppercase tracking-widest">No analytics data for this period</p>
+              <p className="text-gray-400 text-xs font-bold mt-2">Website events will appear here once tracked.</p>
+            </div>
+          ) : (
+            <div className="space-y-10">
+              {/* Analytics Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 border border-black/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Eye size={18} strokeWidth={3} className="text-blue-600" />
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Page Views</span>
+                  </div>
+                  <p className="text-3xl font-black text-black">{analyticsStats.totalPageViews.toLocaleString()}</p>
+                </div>
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 border border-black/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <MousePointerClick size={18} strokeWidth={3} className="text-purple-600" />
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Clicks</span>
+                  </div>
+                  <p className="text-3xl font-black text-black">{analyticsStats.totalClicks.toLocaleString()}</p>
+                </div>
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 border border-black/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <PhoneCall size={18} strokeWidth={3} className="text-green-600" />
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Conversions</span>
+                  </div>
+                  <p className="text-3xl font-black text-black">{analyticsStats.totalConversions.toLocaleString()}</p>
+                </div>
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 border border-black/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <TrendingUp size={18} strokeWidth={3} className="text-orange-600" />
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Unique Visitors</span>
+                  </div>
+                  <p className="text-3xl font-black text-black">{analyticsStats.uniqueSessions.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Two-column: Model Clicks + Conversion Breakdown */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Phone Model Click Volumes */}
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-8 border border-black/5">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Smartphone size={20} strokeWidth={3} className="text-blue-600" />
+                    <h4 className="text-lg font-black text-black">Top Phone Model Clicks</h4>
+                  </div>
+                  {analyticsStats.modelClicks.length === 0 ? (
+                    <p className="text-gray-400 text-sm font-bold italic py-8 text-center">No model click data yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {analyticsStats.modelClicks.map((item, i) => {
+                        const maxClicks = analyticsStats.modelClicks[0]?.clicks || 1;
+                        const pct = Math.round((item.clicks / maxClicks) * 100);
+                        return (
+                          <div key={item.model} className="flex items-center gap-4">
+                            <span className="w-6 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">#{i + 1}</span>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-center mb-1.5">
+                                <span className="text-sm font-black text-black truncate">{item.model}</span>
+                                <span className="text-sm font-black text-blue-600 ml-2 shrink-0">{item.clicks}</span>
+                              </div>
+                              <div className="h-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${pct}%` }}
+                                  transition={{ duration: 0.6, delay: i * 0.05 }}
+                                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Conversion Breakdown + Device Split */}
+                <div className="space-y-8">
+                  {/* Conversion Actions */}
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-8 border border-black/5">
+                    <div className="flex items-center gap-3 mb-6">
+                      <MousePointerClick size={20} strokeWidth={3} className="text-green-600" />
+                      <h4 className="text-lg font-black text-black">Conversion Actions</h4>
+                    </div>
+                    {Object.keys(analyticsStats.conversionMap).length === 0 ? (
+                      <p className="text-gray-400 text-sm font-bold italic py-4 text-center">No conversions recorded yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {Object.entries(analyticsStats.conversionMap)
+                          .sort(([, a], [, b]) => b - a)
+                          .map(([name, count]) => (
+                            <div key={name} className="flex items-center justify-between p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] rounded-2xl">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                <span className="text-sm font-black text-black capitalize">{name.replace(/_/g, ' ')}</span>
+                              </div>
+                              <span className="text-lg font-black text-green-600">{count}</span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Device Split */}
+                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-8 border border-black/5">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Smartphone size={20} strokeWidth={3} className="text-purple-600" />
+                      <h4 className="text-lg font-black text-black">Device Breakdown</h4>
+                    </div>
+                    <div className="space-y-3">
+                      {Object.entries(analyticsStats.deviceMap)
+                        .sort(([, a], [, b]) => b - a)
+                        .map(([device, count]) => {
+                          const total = analyticsEvents.length || 1;
+                          const pct = Math.round((count / total) * 100);
+                          return (
+                            <div key={device} className="flex items-center justify-between p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] rounded-2xl">
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "w-3 h-3 rounded-full",
+                                  device === 'Mobile' ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" :
+                                  device === 'Desktop' ? "bg-purple-500 shadow-[0_0_8px_rgba(147,51,234,0.5)]" :
+                                  "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]"
+                                )} />
+                                <span className="text-sm font-black text-black">{device}</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{pct}%</span>
+                                <span className="text-lg font-black text-black">{count}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

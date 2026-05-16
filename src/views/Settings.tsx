@@ -710,14 +710,14 @@ export function SettingsView({
                       value={newTierName}
                       onChange={(e) => setNewTierName(e.target.value)}
                       placeholder="Name (e.g. Premium)"
-                      className="w-full bg-neu-bg shadow-neu-flat rounded-2xl px-5 py-4 text-sm font-bold text-black focus:outline-none transition-all"
+                      className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-5 py-4 text-sm font-bold text-black focus:outline-none transition-all"
                     />
                     <input 
                       type="text" 
                       value={newTierDesc}
                       onChange={(e) => setNewTierDesc(e.target.value)}
                       placeholder="Tooltip Description..."
-                      className="md:col-span-2 w-full bg-neu-bg shadow-neu-flat rounded-2xl px-5 py-4 text-sm font-bold text-black focus:outline-none transition-all"
+                      className="md:col-span-2 w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-5 py-4 text-sm font-bold text-black focus:outline-none transition-all"
                     />
                   </div>
                   <button 
