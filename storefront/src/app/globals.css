@@ -484,48 +484,90 @@ input:checked + .toggle-slider:before {
   padding: 0 1.5rem;
 }
 
+/* ─── New Photo-Card Service Cards ───────────────── */
 .serviceCard {
-  background: var(--secondary);
-  border: 1px solid var(--layer-border);
-  border-radius: 20px;
-  padding: 2rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
   position: relative;
   overflow: hidden;
-}
-
-.serviceCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at top left, var(--primary-glow), transparent 40%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: #18181b; /* zinc-900 */
+  border-radius: 1.5rem; /* rounded-3xl */
+  padding: 2rem;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #27272a; /* zinc-800 */
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  text-decoration: none;
 }
 
 .serviceCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
 }
 
-.serviceCard:hover::before {
-  opacity: 1;
+/* Background image layer */
+.serviceCard .card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(100%) contrast(1.25);
+  opacity: 0.6;
+  transition: transform 0.7s ease-in-out;
+}
+
+.serviceCard:hover .card-bg {
+  transform: scale(1.1);
+}
+
+/* Gradient mask for text readability */
+.serviceCard .card-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: linear-gradient(to top, black 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Text content layer */
+.serviceCard .card-content {
+  position: relative;
+  z-index: 20;
 }
 
 .serviceCard h3 {
-  font-size: 1.4rem;
-  margin-bottom: 0.75rem;
-  position: relative;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .serviceCard p {
-  opacity: 0.7;
-  position: relative;
-  font-size: 0.95rem;
+  color: #d1d5db; /* gray-300 */
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.serviceCard .card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #60a5fa; /* blue-400 */
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+.serviceCard:hover .card-link {
+  color: #93c5fd; /* blue-300 */
 }
 
 /* ─── Map Section ────────────────────────────────── */
@@ -888,10 +930,11 @@ input:checked + .toggle-slider:before {
 
   .serviceCard {
     padding: 1.5rem;
+    min-height: 260px;
   }
 
   .serviceCard h3 {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
   }
 
   /* Map: shorter on mobile */

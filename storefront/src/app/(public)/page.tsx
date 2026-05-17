@@ -59,35 +59,39 @@ export default function Home() {
       <section className="servicesGrid" aria-labelledby="services-heading">
         <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
         <Link href="/repairs/phone" className="serviceCard">
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📱</div>
-          <h3>Phone Repair</h3>
-          <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
-          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            View Pricing →
+          <div className="card-bg" style={{ backgroundImage: "url('/images/services/phone-repair.jpg')" }} />
+          <div className="card-gradient" />
+          <div className="card-content">
+            <h3>Phone Repair</h3>
+            <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
+            <span className="card-link">View Pricing →</span>
           </div>
         </Link>
         <Link href="/repairs/tablet" className="serviceCard">
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📟</div>
-          <h3>Tablet & iPad Repair</h3>
-          <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
-          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            View Pricing →
+          <div className="card-bg" style={{ backgroundImage: "url('/images/services/tablet-repair.jpg')" }} />
+          <div className="card-gradient" />
+          <div className="card-content">
+            <h3>Tablet & iPad Repair</h3>
+            <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
+            <span className="card-link">View Pricing →</span>
           </div>
         </Link>
         <Link href="/repairs/laptop" className="serviceCard">
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💻</div>
-          <h3>Laptop & MacBook Repair</h3>
-          <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
-          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            View Pricing →
+          <div className="card-bg" style={{ backgroundImage: "url('/images/services/laptop-repair.jpg')" }} />
+          <div className="card-gradient" />
+          <div className="card-content">
+            <h3>Laptop & MacBook Repair</h3>
+            <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
+            <span className="card-link">View Pricing →</span>
           </div>
         </Link>
         <Link href="/repairs/watch" className="serviceCard">
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⌚</div>
-          <h3>Smart Watch Repair</h3>
-          <p>Apple Watch screen and battery repairs. Professional service for all series.</p>
-          <div style={{ marginTop: '1.5rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            View Pricing →
+          <div className="card-bg" style={{ backgroundImage: "url('/images/services/watch-repair.jpg')" }} />
+          <div className="card-gradient" />
+          <div className="card-content">
+            <h3>Smart Watch Repair</h3>
+            <p>Apple Watch screen and battery repairs. Professional service for all series.</p>
+            <span className="card-link">View Pricing →</span>
           </div>
         </Link>
       </section>
