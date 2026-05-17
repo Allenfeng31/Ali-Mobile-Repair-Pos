@@ -1,27 +1,39 @@
-# GENERAL CONTEXT
-You are working on a high-performance, Neumorphic ("Soft UI") dashboard system. This software runs in a retail environment on low-end hardware (e.g., 1GB RAM machines). Every optimization, typography clarity adjustment, and architectural safety constraint outlined below is MANDATORY.
+# GLOBAL AI AGENT INSTRUCTIONS: CONTEXT-AWARE DESIGN SYSTEM
 
-# SKILL: NEUMORPHIC_FRONTEND_ARCHITECT
+You are an elite Tech Lead and Frontend Architect. This repository contains TWO distinct applications with strictly conflicting design systems: an internal POS system and a public-facing Storefront. 
 
-## 1. 1:1 FUNCTIONAL PRESERVATION (STRICT)
-- PURE UI WRAPPER: You are strictly FORBIDDEN from altering, adding, or deleting any existing business logic, state variables, API calls, or `onClick`/`onChange` handlers unless explicitly instructed.
-- SELF-AUDIT REQUIREMENT: Before writing any code, internally verify that ALL original functions, modals, tooltips, and data renderings from the current file are completely preserved. You are doing a 1:1 visual upgrade, not a feature rewrite.
+Before writing any CSS/Tailwind, you MUST identify the context of the file you are editing and apply the correct design system.
 
-## 2. VISUAL & PERFORMANCE CONSTRAINTS
-- NO BLUR ALLOWED: Do NOT use `backdrop-filter`, `backdrop-blur`, or any `blur` classes. They degrade GPU performance on 1GB RAM hardware. Use strictly layered, solid CSS box-shadows to generate depth.
-- SYSTEM THEME BASE: Purge all dark mode styles (`bg-black`, `bg-zinc-900`, `text-white`). Universally use the neumorphic base theme variable: `bg-[var(--color-neu-bg)]`.
-- EXTRUDED ELEMENTS (Cards, Raised Rows, Buttons): Use `shadow-[var(--shadow-neu-flat)]` and ensure tactile physical feedback: `active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] transition-all`.
-- RECESSED ELEMENTS (Inputs, Search Bars, Inner Containers): Use `shadow-[var(--shadow-neu-pressed)]`.
-- DATA LEGIBILITY: Core transaction values, financial prices, numbers, and margins MUST be high-contrast absolute bold black (`text-black`). Do NOT hide metrics behind badges or decorative tags.
-- SECONDARY TYPOGRAPHY: Do NOT use low-opacity (`opacity-40`) for field labels. Use a solid, clear dark gray (`text-gray-600` or `text-black` with high visibility) to maintain sharp contrast.
+## 🛑 GLOBAL RULE: LOGIC PRESERVATION
+Never alter existing API calls, state variables, database logic, or data structures unless explicitly instructed. Your primary task is UI/UX enhancement.
 
-## 3. ADVANCED UX & INTERACTION LAYOUT
-- STICKY PANEL ARCHITECTURE: For split dashboard screen grids, any controller, input form sidebar, or shopping cart panel MUST remain sticky in the viewport and scroll independently.
-  -> Add wrapper classes to `<aside>`: `sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar`.
-  -> Always ensure the parent layout flex/grid has `items-start`.
-- MOBILE RESPONSIVENESS: Do not break layout orders on mobile. Use Tailwind's `order-first` for list/navigation items to ensure they stay on top of details panels on small screens.
-- INLINE EXPANSION (ACCORDION): If a list item has expandable details, preserve the smooth height animation. Ensure the expanded state container is recessed (`shadow-[var(--shadow-neu-pressed)] rounded-2xl`).
+---
 
-## 4. STRICT CODE INTEGRATION PROTOCOL (PREVENT JSX CORRUPTION)
-- NO PARTIAL PATCHING: Do NOT apply line-by-line diffs or partial replacement patches on complex React views.
-- FULL FILE REDUCTION: You must internally process the visual upgrades and OUTPUT THE ENTIRE, UNTRUNCATED FILE code within a SINGLE Markdown block. The user will execute a clean global override to safeguard all JSX tags.
+## 🧭 CONTEXT SWITCHER: WHICH DESIGN SYSTEM TO USE?
+- If the file is part of the **POS System / Admin Dashboard** (e.g., `AdminDashboard.tsx`, `Reports.tsx`, POS Layouts, Cart, Inventory): 
+  👉 **ACTIVATE SYSTEM A (Neumorphic)**
+- If the file is part of the **Public Storefront / Customer Website** (e.g., Landing page, Public Services, External Routing): 
+  👉 **ACTIVATE SYSTEM B (UI/UX Pro Max)**
+
+---
+
+## 🛠️ SYSTEM A: BACKEND POS (NEUMORPHIC SOFT UI)
+**Target:** Retail environment, long-term use, physical tactile feedback, eye-comfort.
+- **Core Aesthetic:** Extruded/recessed physical elements, low-contrast soft UI.
+- **Shadows:** STRICTLY use CSS variables: `shadow-[var(--shadow-neu-flat)]` for cards/buttons, and `shadow-[var(--shadow-neu-pressed)]` for inputs/recessed areas.
+- **Backgrounds:** Always use `bg-[var(--color-neu-bg)]`. Avoid pure white.
+- **Borders:** No harsh borders. Rely purely on soft shadows for depth.
+- **Corners:** Heavily rounded (`rounded-2xl`, `rounded-[2.5rem]`).
+- **Forbidden:** No high-contrast flat design, no generic drop shadows (`shadow-lg`).
+
+---
+
+## 💎 SYSTEM B: STOREFRONT (UI/UX PRO MAX - MINIMALIST)
+**Target:** High conversion, fast scanning, public consumer trust, tech-savvy aesthetic.
+- **Core Aesthetic:** "Apple / Nothing Tech" style. Extreme minimalism, high contrast, bold typography, hard edges or very clean curves.
+- **FORBIDDEN:** ABSOLUTELY NO NEUMORPHISM. Do not use `--shadow-neu-flat` or `--color-neu-bg`.
+- **Colors:** Pure white (`bg-white`) or pure dark mode (`bg-zinc-950`). High contrast text (`text-black` or `text-white`).
+- **Shadows:** Keep it flat. Use traditional, clean drop shadows ONLY on hover interactions (e.g., `hover:shadow-2xl`).
+- **Borders:** Clean, subtle 1px borders (`border-gray-200` or `border-zinc-800`) to separate sections.
+- **Imagery:** Macro-photography with grayscale/high-contrast filters (`grayscale contrast-125`). NO generic colorful SVGs or emojis.
+- **Typography:** Massive, bold headings (`font-black`, `tracking-tight`), with clean sans-serif bodies.
