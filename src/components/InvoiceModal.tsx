@@ -290,7 +290,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
               <div 
                 ref={invoiceRef}
                 id="printable-invoice"
-                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight"
+                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight print:bg-white print:shadow-none print:text-black print:rounded-none"
                 style={{ width: '80mm', backgroundColor: '#ffffff', color: '#000000' }}
               >
                 {/* Header */}

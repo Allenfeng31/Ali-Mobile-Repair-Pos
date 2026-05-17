@@ -40,3 +40,15 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@media print {
+  body, html, #root, main, aside, header, div, section, button, input, textarea, span, p, h1, h2, h3, h4, h5, h6, table, tr, td, th {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-radius: 0px !important;
+    border-color: #000000 !important;
+  }
+}

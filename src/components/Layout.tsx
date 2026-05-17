@@ -414,7 +414,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           >
             <Settings size={20} strokeWidth={2} />
           </button>
-          <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <span className="absolute left-full ml-4 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover/logo:opacity-100 transition-all z-50 whitespace-nowrap">
             Settings
           </span>
         </div>
@@ -441,7 +441,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                     <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-surface-container-low shadow-sm" />
                   )}
                 </div>
-                <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                <span className="absolute left-full ml-4 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover:opacity-100 transition-all z-50 whitespace-nowrap">
                   {item.label}
                 </span>
               </button>
