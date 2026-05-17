@@ -150,10 +150,10 @@ function BlogEditorInline({
 
   if (!editorReady) {
     return (
-      <div className="fixed inset-0 bg-surface z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-neu-bg z-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-500/20 border-t-primary rounded-full animate-spin" />
-          <p className="text-zinc-400 font-bold">Loading editor...</p>
+          <div className="w-12 h-12 border-4 border-neu-accent/20 border-t-neu-accent rounded-full animate-spin shadow-neu-sm" />
+          <p className="text-neu-text-secondary font-black uppercase tracking-widest text-xs">Loading premium editor...</p>
         </div>
       </div>
     );
@@ -314,27 +314,27 @@ function TipTapEditorWrapper({
   // Toolbar button helper
   const TB = ({ onClick, isActive = false, disabled = false, children, title: t }: any) => (
     <button type="button" onClick={onClick} disabled={disabled} title={t}
-      className={`p-2 rounded-2xl transition-all ${isActive ? 'bg-blue-500/10 text-blue-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'} ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
+      className={`p-2.5 rounded-2xl transition-all shadow-neu-flat active:shadow-neu-pressed active:scale-95 ${isActive ? 'bg-neu-bg shadow-neu-pressed text-neu-accent' : 'text-neu-text-secondary bg-neu-bg hover:text-neu-accent'} ${disabled ? 'opacity-30 cursor-not-allowed shadow-none' : ''}`}>
       {children}
     </button>
   );
 
   return (
-    <div className="fixed inset-0 bg-surface z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-neu-bg z-50 overflow-y-auto">
       {/* Top Bar */}
-      <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-xl border-b border-zinc-800/20">
+      <div className="sticky top-0 z-10 bg-neu-bg/80 backdrop-blur-xl shadow-neu-sm">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-          <button onClick={onCancel} className="flex items-center gap-2 text-zinc-400 hover:text-white font-bold transition-colors">
-            <ArrowLeft size={20} /> Back to CMS
+          <button onClick={onCancel} className="flex items-center gap-2 text-neu-text-secondary hover:text-neu-accent font-black uppercase tracking-widest text-xs transition-colors">
+            <ArrowLeft size={18} strokeWidth={3} /> Back to CMS
           </button>
           <div className="flex items-center gap-3">
             {error && <span className="text-red-500 text-sm font-bold mr-2">{error}</span>}
             <button onClick={() => handleSave(false)} disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl font-bold text-sm transition-all disabled:opacity-50">
+              className="flex items-center gap-2 px-5 py-2.5 bg-neu-bg text-neu-text-primary rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-neu-flat hover:shadow-neu-floating active:scale-[0.98] disabled:opacity-50">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save Draft
             </button>
             <button onClick={() => handleSave(true)} disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-500/90 text-white rounded-2xl font-bold text-sm transition-all shadow-lg disabled:opacity-50">
+              className="flex items-center gap-2 px-5 py-2.5 bg-neu-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-neu-flat shadow-neu-accent/20 hover:brightness-110 active:scale-[0.98] disabled:opacity-50">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {isPublished ? 'Update & Publish' : 'Publish'}
             </button>
@@ -344,52 +344,54 @@ function TipTapEditorWrapper({
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Meta Fields */}
-        <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800/10 p-8 mb-6">
-          <div className="grid gap-5">
+        <div className="bg-neu-bg rounded-[2.5rem] shadow-neu-flat p-8 mb-8 border border-white/20">
+          <div className="grid gap-6">
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Title</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Title</label>
               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Your blog post title..."
-                className="w-full text-2xl font-black text-white bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none" />
+                className="w-full text-4xl font-black text-neu-text-primary bg-transparent border-none focus:ring-0 p-0 placeholder:text-neu-text-secondary/30 outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Slug</label>
-              <div className="flex items-center gap-2">
-                <span className="text-zinc-400 text-sm font-mono">/blog/</span>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Slug</label>
+              <div className="flex items-center gap-2 bg-neu-bg shadow-neu-pressed rounded-2xl px-4 py-2 border border-black/5">
+                <span className="text-neu-text-secondary text-sm font-mono font-bold">/blog/</span>
                 <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugManuallyEdited(true); }}
                   placeholder="url-friendly-slug"
-                  className="flex-1 text-sm font-mono text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-3 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30 outline-none" />
+                  className="flex-1 text-sm font-mono font-black text-neu-text-primary bg-transparent border-none focus:ring-0 outline-none p-0" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Description / Excerpt</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief summary for SEO..."
-                rows={2} className="w-full text-sm text-white bg-zinc-900 border border-zinc-800/20 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Description / Excerpt</label>
+              <div className="bg-neu-bg shadow-neu-pressed rounded-2xl p-2 border border-black/5">
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief summary for SEO..."
+                  rows={2} className="w-full text-sm font-black text-neu-text-primary bg-transparent border-none focus:ring-0 px-4 py-2 outline-none resize-none" />
+              </div>
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Cover Image</label>
-              <div className="flex items-center gap-4">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-3 pl-2">Cover Image</label>
+              <div className="flex items-center gap-6">
                 {coverImage && (
-                  <div className="relative group">
-                    <img src={coverImage} alt="Cover" className="h-20 w-32 object-cover rounded-2xl border border-zinc-800/20" />
-                    <button onClick={() => setCoverImage('')}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <X size={12} />
-                    </button>
-                  </div>
+                   <div className="relative group">
+                     <img src={coverImage} alt="Cover" className="h-24 w-40 object-cover rounded-2xl border border-white/20 shadow-neu-flat" />
+                     <button onClick={() => setCoverImage('')}
+                       className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-xl shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity active:scale-90">
+                       <X size={16} strokeWidth={3} />
+                     </button>
+                   </div>
                 )}
                 <button onClick={handleCoverImageUpload} disabled={uploading}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 rounded-2xl text-sm font-bold transition-all">
-                  <ImageIcon size={16} /> {uploading ? 'Uploading...' : coverImage ? 'Change Image' : 'Upload Cover'}
+                  className="flex items-center gap-3 px-6 py-4 bg-neu-bg text-neu-text-secondary rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-neu-flat hover:shadow-neu-floating active:scale-[0.98] active:shadow-neu-pressed">
+                  <ImageIcon size={20} strokeWidth={3} /> {uploading ? 'Uploading...' : coverImage ? 'Change Image' : 'Upload Cover'}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Editor */}
-        <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800/10 overflow-hidden">
+        {/* Editor Card */}
+        <div className="bg-neu-bg rounded-[2.5rem] shadow-neu-flat overflow-hidden border border-white/20">
           {/* Toolbar */}
-          <div className="border-b border-zinc-800/20 px-4 py-2 flex items-center gap-1 flex-wrap bg-zinc-900/50">
+          <div className="bg-neu-bg/50 px-6 py-4 flex items-center gap-2 flex-wrap border-b border-black/5 shadow-neu-sm relative z-20">
             <TB onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="Bold"><Bold size={16} /></TB>
             <TB onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="Italic"><Italic size={16} /></TB>
             <TB onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Underline"><UnderlineIcon size={16} /></TB>
@@ -407,30 +409,34 @@ function TipTapEditorWrapper({
               {editor.isActive('link') ? <Unlink size={16} /> : <LinkIcon size={16} />}
             </TB>
             <TB onClick={handleImageUpload} disabled={uploading} title="Insert Image"><ImageIcon size={16} /></TB>
-            <div className="w-px h-6 bg-outline-variant/20 mx-1" />
-            <TB onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo"><Undo size={16} /></TB>
-            <TB onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo"><Redo size={16} /></TB>
-            {uploading && <span className="ml-3 text-xs text-blue-500 font-bold flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Uploading...</span>}
+            <div className="w-px h-8 bg-black/5 mx-2" />
+            <TB onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo"><Undo size={18} strokeWidth={3} /></TB>
+            <TB onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo"><Redo size={18} strokeWidth={3} /></TB>
+            {uploading && <span className="ml-4 text-xs text-neu-accent font-black uppercase tracking-widest flex items-center gap-2 animate-pulse"><Loader2 size={14} className="animate-spin" /> Uploading...</span>}
           </div>
           {/* Editor Area */}
-          <EditorContent editor={editor} />
+          <div className="p-4">
+            <div className="bg-neu-bg shadow-neu-pressed rounded-[2rem] border border-black/5 overflow-hidden">
+              <EditorContent editor={editor} />
+            </div>
+          </div>
           <style>{`
-            .tiptap { min-height: 400px; padding: 1.5rem; font-size: 1.05rem; line-height: 1.8; color: var(--on-surface, #1e293b); }
+            .tiptap { min-height: 400px; padding: 2rem; font-size: 1.1rem; line-height: 1.8; color: var(--color-neu-text-primary, #2d3748); }
             .tiptap:focus { outline: none; }
-            .tiptap p.is-editor-empty:first-child::before { color: #94a3b8; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
-            .tiptap h1 { font-size: 2rem; font-weight: 900; margin: 1.5rem 0 0.75rem; }
-            .tiptap h2 { font-size: 1.5rem; font-weight: 800; margin: 1.25rem 0 0.6rem; }
-            .tiptap h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; }
-            .tiptap p { margin-bottom: 0.75rem; }
-            .tiptap ul, .tiptap ol { padding-left: 1.5rem; margin-bottom: 1rem; }
-            .tiptap li { margin-bottom: 0.25rem; }
-            .tiptap blockquote { border-left: 4px solid var(--primary, #6366f1); padding: 0.75rem 1.25rem; margin: 1rem 0; background: var(--surface-container, #f1f5f9); border-radius: 0 12px 12px 0; font-style: italic; }
-            .tiptap pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 0.9rem; overflow-x: auto; margin: 1rem 0; }
-            .tiptap code { background: var(--surface-container, #f1f5f9); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
-            .tiptap pre code { background: none; color: inherit; padding: 0; }
-            .tiptap img { max-width: 100%; height: auto; border-radius: 12px; margin: 1.5rem 0; }
-            .tiptap a { color: #2563eb; font-weight: 600; text-decoration: underline; }
-            .tiptap strong { font-weight: 800; }
+            .tiptap p.is-editor-empty:first-child::before { color: #A3B1C6; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; font-weight: 700; }
+            .tiptap h1 { font-size: 2.5rem; font-weight: 900; margin: 2rem 0 1rem; color: #000; letter-spacing: -0.025em; }
+            .tiptap h2 { font-size: 1.75rem; font-weight: 800; margin: 1.5rem 0 0.75rem; color: #000; }
+            .tiptap h3 { font-size: 1.4rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #000; }
+            .tiptap p { margin-bottom: 1rem; }
+            .tiptap ul, .tiptap ol { padding-left: 1.75rem; margin-bottom: 1.25rem; }
+            .tiptap li { margin-bottom: 0.5rem; }
+            .tiptap blockquote { border-left: 6px solid var(--color-neu-accent); padding: 1rem 1.5rem; margin: 1.5rem 0; background: rgba(0,0,0,0.02); border-radius: 0 16px 16px 0; font-style: italic; font-weight: 500; }
+            .tiptap pre { background: #2d3748; color: #fff; padding: 1.25rem; border-radius: 16px; font-family: monospace; font-size: 0.95rem; overflow-x: auto; margin: 1.5rem 0; shadow: inset 4px 4px 8px rgba(0,0,0,0.2); }
+            .tiptap code { background: rgba(0,0,0,0.05); padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.9em; font-weight: 700; }
+            .tiptap pre code { background: none; color: inherit; padding: 0; font-weight: 400; }
+            .tiptap img { max-width: 100%; height: auto; border-radius: 20px; margin: 2rem 0; shadow: 8px 8px 16px rgba(0,0,0,0.1); }
+            .tiptap a { color: var(--color-neu-accent); font-weight: 700; text-decoration: underline; }
+            .tiptap strong { font-weight: 900; color: #000; }
           `}</style>
         </div>
       </div>

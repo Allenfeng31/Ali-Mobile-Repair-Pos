@@ -27,7 +27,8 @@ import {
   MousePointerClick,
   Smartphone,
   PhoneCall,
-  MessageSquare
+  MessageSquare,
+  ExternalLink
 } from 'lucide-react';
 import {
   BarChart,
@@ -408,11 +409,20 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
       {/* Main Content Area */}
       <div className="lg:col-span-9 space-y-10">
         {/* Title Header */}
-        <div>
-          <span className="text-gray-600 font-black text-[10px] uppercase tracking-widest ml-1">Performance Analytics</span>
-          <h2 className="text-5xl font-black tracking-tight text-black mt-1 [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
-            Sales Reports
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+          <div>
+            <span className="text-gray-600 font-black text-[10px] uppercase tracking-widest ml-1">Performance Analytics</span>
+            <h2 className="text-5xl font-black tracking-tight text-black mt-1 [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
+              Sales Reports
+            </h2>
+          </div>
+          <button
+            onClick={() => window.open('https://ali-mobile-repair-pos.vercel.app/dashboard/analytics', '_blank')}
+            className="flex items-center gap-3 px-6 py-4 bg-[var(--color-neu-bg)] text-blue-600 font-black text-xs uppercase tracking-widest rounded-2xl shadow-[var(--shadow-neu-flat)] hover:shadow-[var(--shadow-neu-floating)] active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20 mb-1"
+          >
+            <ExternalLink size={18} strokeWidth={3} />
+            View Full Web Analytics
+          </button>
         </div>
 
         {/* Stats Cards Grid */}
@@ -574,8 +584,14 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                           <span className="bg-red-500/10 text-red-600 px-1.5 py-0.5 rounded-lg text-[8px] font-black tracking-widest uppercase">Refunded</span>
                         )}
                       </div>
-                      <p className="text-[10px] font-black text-gray-600 uppercase tracking-tighter mt-0.5 truncate">
+                      <span className="text-[10px] font-bold text-gray-500 truncate block mt-1">
+                        {order.items.map(item => item.name).join(', ')}
+                      </span>
+                      <p className="text-[10px] font-black text-gray-600 uppercase tracking-tighter mt-1 truncate">
                         {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {order.items.length} Items
+                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-2">
+                          {order.paymentMethod || 'CASH'}
+                        </span>
                       </p>
                     </div>
                   </div>

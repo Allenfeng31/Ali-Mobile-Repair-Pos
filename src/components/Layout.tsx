@@ -174,7 +174,7 @@ function SettingsPanel({
                   value={header}
                   onChange={e => setHeader(e.target.value)}
                   placeholder="Store name, address, phone..."
-                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary shadow-neu-pressed resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
               </div>
 
@@ -188,7 +188,7 @@ function SettingsPanel({
                   value={footer}
                   onChange={e => setFooter(e.target.value)}
                   placeholder="Warranty terms, return policy..."
-                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary shadow-neu-pressed resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
               </div>
 
@@ -221,14 +221,14 @@ function SettingsPanel({
                       value={smsModel}
                       onChange={(e) => setSmsModel(e.target.value)}
                       placeholder="Model (e.g. iPhone 13)"
-                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <input 
                       type="text" 
                       value={smsRepair}
                       onChange={(e) => setSmsRepair(e.target.value)}
                       placeholder="Repair (e.g. Screen)"
-                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neu-text-secondary font-bold text-xs">$</span>
@@ -237,7 +237,7 @@ function SettingsPanel({
                         value={smsAmount}
                         onChange={(e) => setSmsAmount(e.target.value)}
                         placeholder="Price (Amount)"
-                        className="w-full bg-neu-bg rounded-2xl pl-7 pr-4 py-2.5 text-xs text-neu-text-primary outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-neu-bg rounded-2xl pl-7 pr-4 py-2.5 text-xs text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                       />
                     </div>
                   </div>
@@ -283,7 +283,7 @@ function SettingsPanel({
                         value={blogTopic}
                         onChange={e => setBlogTopic(e.target.value)}
                         placeholder="e.g. iPhone 17 Screen Care"
-                        className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
+                        className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
                       />
                       <PenTool size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-neu-text-secondary/40" />
                     </div>
@@ -405,7 +405,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-neu-bg flex-col items-center pt-10 pb-6 z-30 border-r border-transparent">
+      <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-neu-bg flex-col items-center pt-10 pb-6 z-30 shadow-neu-flat">
         {/* Settings button top-left (desktop) */}
         <div className="mb-4 relative group/logo">
           <button
@@ -431,8 +431,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 className={cn(
                   "p-3 rounded-2xl transition-all duration-200 relative group",
                   isActive
-                    ? "text-neu-accent bg-neu-bg shadow-neu-pressed ring-1 ring-primary/20"
-                    : "text-neu-text-secondary hover:text-neu-accent hover:bg-neu-bg"
+                    ? "text-neu-accent bg-neu-bg shadow-neu-pressed"
+                    : "text-neu-text-secondary hover:text-neu-accent hover:bg-neu-bg hover:shadow-neu-sm"
                 )}
               >
                 <div className="relative">
@@ -453,7 +453,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       {/* ── Main Content ─────────────────────────────────────────────── */}
       <div className="flex-1 md:ml-20 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="bg-neu-bg  sticky top-0 z-40 px-6 py-3 flex justify-between items-center border-b border-transparent">
+        <header className="bg-neu-bg sticky top-0 z-40 px-6 py-4 flex justify-between items-center shadow-neu-sm">
           <div className="flex items-center gap-4">
             {/* Mobile: hamburger opens settings panel */}
             <button
@@ -463,13 +463,15 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             >
               <Menu size={24} />
             </button>
-            <h1 className="text-xl font-extrabold text-black [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)] tracking-tight">Ali Mobile Repair POS</h1>
+            <h1 className="text-xl font-black text-neu-text-primary tracking-tight">
+              Ali Mobile <span className="text-neu-accent">Repair POS</span>
+            </h1>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => window.location.reload()}
-              className="p-2.5 rounded-2xl bg-neu-bg text-neu-text-secondary hover:text-neu-accent hover:bg-neu-accent/10 transition-all active:rotate-180 group relative mr-2"
+              className="p-2.5 rounded-2xl bg-neu-bg text-neu-text-secondary shadow-neu-flat hover:text-neu-accent active:rotate-180 group relative mr-2 transition-all active:shadow-neu-pressed"
               title="Refresh App"
             >
               <RotateCw size={18} />
@@ -478,8 +480,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
               </span>
             </button>
 
-            <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest mr-4 ${backendOk ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${backendOk ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+            <div className={`hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest mr-4 bg-neu-bg shadow-neu-pressed ${backendOk ? 'text-emerald-600' : 'text-red-500'}`}>
+              <div className={`w-2 h-2 rounded-full ${backendOk ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
               {backendOk ? 'Server Active' : 'Server Offline'}
             </div>
 
@@ -494,7 +496,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 {permissions?.is_super_admin ? 'Super Admin' : (currentUser?.role === 'authenticated' ? t('nav', 'staff') : (currentUser?.role || t('nav', 'staff')))}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-neu-accent/10 flex items-center justify-center text-neu-accent font-black uppercase text-lg border border-primary/20 shadow-neu-pressed">
+            <div className="w-10 h-10 rounded-2xl bg-neu-bg flex items-center justify-center text-neu-accent font-black uppercase text-lg shadow-neu-pressed border border-white/5">
               {(currentUser?.username || currentUser?.email || 'G').charAt(0).toUpperCase()}
             </div>
           </div>
@@ -527,7 +529,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                   "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-2xl relative",
                   isActive
                     ? "bg-neu-bg shadow-neu-pressed text-neu-accent scale-110"
-                    : "text-neu-text-secondary"
+                    : "text-neu-text-secondary shadow-neu-flat"
                 )}
               >
                 <div className="relative">
