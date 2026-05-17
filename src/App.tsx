@@ -8,6 +8,7 @@ import { SettingsView } from './views/Settings';
 import { ChatInbox } from './views/ChatInbox';
 import { LoginView } from './views/Login';
 import { AdminDashboard } from './views/AdminDashboard';
+import { EmployeeManagement } from './views/EmployeeManagement';
 import { StorefrontCMS } from './views/StorefrontCMS';
 import { SupplierPrices } from './views/SupplierPrices';
 import { UsbPrintTest } from './components/UsbPrintTest';
@@ -273,6 +274,8 @@ export default function App() {
         return <SettingsView onLogout={handleLogout} currentUser={currentUser} onUpdateUser={setCurrentUser} />;
       case 'admin':
         return <AdminDashboard onViewChange={setCurrentView} />;
+      case 'employees':
+        return <EmployeeManagement onBack={() => setCurrentView('admin')} />;
       case 'cms':
         return <StorefrontCMS onBack={() => setCurrentView('admin')} />;
       case 'supplier-prices':

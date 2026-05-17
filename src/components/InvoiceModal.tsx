@@ -263,16 +263,16 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-lg bg-surface-container-lowest rounded-[2.5rem] shadow-2xl overflow-hidden border border-outline-variant/10 flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-lg bg-neu-bg rounded-[2.5rem] shadow-neu-pressed overflow-hidden border border-transparent flex flex-col max-h-[90vh]"
           >
             {/* Header */}
-            <div className="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
+            <div className="p-6 border-b border-transparent flex justify-between items-center bg-transparent">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <Printer size={20} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-on-surface">{t('term', 'printTitle')}</h3>
+                  <h3 className="text-lg font-black text-neu-text-primary [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">{t('term', 'printTitle')}</h3>
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Order {order.id}</p>
                 </div>
               </div>
@@ -285,12 +285,12 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
             </div>
 
             {/* Invoice Preview Container */}
-            <div className="flex-grow overflow-y-auto p-8 bg-surface-container-high/30 custom-scrollbar">
+            <div className="flex-grow overflow-y-auto p-8 bg-transparent custom-scrollbar">
               {/* This is the part that will be printed/captured */}
               <div 
                 ref={invoiceRef}
                 id="printable-invoice"
-                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight"
+                className="p-4 mx-auto font-['Inter'] text-[12px] leading-tight print:bg-white print:shadow-none print:text-black print:rounded-none"
                 style={{ width: '80mm', backgroundColor: '#ffffff', color: '#000000' }}
               >
                 {/* Header */}
@@ -422,7 +422,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
             </div>
 
             {/* Feedback QR Toggle */}
-            <div className="px-6 pt-4 pb-2 bg-surface-container-low border-t border-outline-variant/10">
+            <div className="px-6 pt-4 pb-2 bg-transparent border-t border-transparent">
               <label className="flex items-center gap-3 cursor-pointer group select-none">
                 <input
                   type="checkbox"
@@ -437,7 +437,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
             </div>
 
             {/* Actions */}
-            <div className="px-6 pb-6 pt-2 bg-surface-container-low grid grid-cols-2 gap-4">
+            <div className="px-6 pb-6 pt-2 bg-transparent grid grid-cols-2 gap-4">
               {pdfInstance ? (
                 <button 
                   onClick={handleSavePDF}

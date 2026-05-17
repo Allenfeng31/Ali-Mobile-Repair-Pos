@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, Smartphone, Search, RefreshCw, ChevronLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function TrackStatusPage() {
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,6 @@ export function TrackStatusPage() {
   useEffect(() => {
     if (!repair || !id) return;
     
-    // Poll every 15 seconds to keep it live without hammering the server
     const interval = setInterval(() => {
       api.trackRepair(id).then(data => {
         setRepair({
@@ -59,80 +59,116 @@ export function TrackStatusPage() {
   };
 
   const StatusIcon = ({ status }: { status: string }) => {
-    if (status === 'Completed') return <CheckCircle className="text-green-500 w-16 h-16 sm:w-20 sm:h-20" />;
+    if (status === 'Completed') return <CheckCircle className="text-emerald-500 w-16 h-16 sm:w-20 sm:h-20" />;
     if (status === 'Urgent') return <AlertTriangle className="text-red-500 w-16 h-16 sm:w-20 sm:h-20" />;
     return <Clock className="text-blue-500 w-16 h-16 sm:w-20 sm:h-20" />;
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-20 px-4 w-full bg-slate-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-[var(--color-neu-bg)] flex flex-col items-center justify-center py-20 px-6 font-body">
       
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 overflow-hidden flex flex-col items-center border border-slate-100 dark:border-gray-700">
+      <div className="w-full max-w-lg bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-flat)] p-8 sm:p-12 relative overflow-hidden border border-white/20">
         
-        {/* 1. Portal Top Badge */}
-        <div className="absolute top-0 left-0 w-full bg-[#Edf7ed] text-[#1e4620] dark:bg-green-900/30 dark:text-green-400 text-[10px] font-bold py-1.5 flex justify-center items-center gap-1.5 tracking-widest uppercase">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#4caf50] animate-pulse"></span>
-          Connection Stable
+        {/* Status Badge */}
+        <div className="absolute top-0 left-0 w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] text-[10px] font-black py-2.5 flex justify-center items-center gap-2 tracking-[0.2em] uppercase text-emerald-600">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+          Live Repair Status
         </div>
 
-        {/* 2. Decorative Background Blob (Safe, absolute positioned) */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 bg-slate-50 dark:bg-gray-700/30 rounded-full z-0 pointer-events-none"></div>
-
-        {/* 3. Main Card Content */}
-        <div className="relative z-10 w-full flex flex-col items-center mt-6">
-          
-          {/* Brand Header */}
-          <div className="w-12 h-12 bg-slate-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mb-4">
-            <svg className="w-6 h-6 text-slate-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+        {/* Brand Header */}
+        <div className="flex flex-col items-center mt-10 mb-12">
+          <div className="w-16 h-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center mb-6 text-blue-600">
+            <Smartphone size={32} strokeWidth={2.5} />
           </div>
-          <h2 className="text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white">Ali Mobile Repair</h2>
-          <p className="text-xs text-slate-500 mb-8">Customer Service Portal</p>
-
-          {/* Dynamic State: Form vs Result */}
-          {!repair ? (
-            <div className="w-full text-center flex flex-col items-center">
-              <h3 className="text-lg font-bold mb-6 text-slate-800 dark:text-white">Track Your Repair</h3>
-              <form onSubmit={performCheck} className="w-full flex flex-col gap-3">
-                <input 
-                  type="text" 
-                  value={id} 
-                  onChange={(e) => setId(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-gray-700 border-transparent focus:border-slate-300 focus:ring-0 rounded-xl p-3.5 text-center text-slate-900 dark:text-white font-medium"
-                  placeholder="Order ID or Phone Number"
-                  required
-                />
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full bg-[#003B4A] text-white rounded-xl p-3.5 font-bold hover:bg-[#002a35] transition-colors disabled:opacity-50 mt-1"
-                >
-                  {loading ? "Searching..." : "Check Status"}
-                </button>
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-              </form>
-            </div>
-          ) : (
-            <div className="w-full text-center flex flex-col items-center">
-               <h3 className="text-xl font-bold mb-1 text-slate-800 dark:text-white">Hello, {repair.customerName || 'Customer'}!</h3>
-               <p className="text-sm text-slate-500 mb-6">Here is the live status of your repair.</p>
-               
-               {/* You can keep your existing repair details rendering here */}
-               <div className="w-full bg-slate-50 dark:bg-gray-700/50 rounded-2xl p-6 mb-2">
-                  <div className="flex justify-center mb-4">
-                    <StatusIcon status={repair.status} />
-                  </div>
-                  <p className="text-[#003B4A] dark:text-blue-400 font-black text-xl mb-1">{repair.status}</p>
-                  <p className="font-bold text-center text-slate-800 dark:text-white">{repair.repairItem}</p>
-                  <p className="text-sm text-slate-500 dark:text-gray-400 text-center font-medium mb-4">{repair.modelNumber}</p>
-               </div>
-
-               <button onClick={() => { setRepair(null); setId(''); }} className="mt-4 text-sm font-semibold text-slate-500 hover:text-slate-800 underline dark:hover:text-white">
-                 Start Over
-               </button>
-            </div>
-          )}
-
+          <h2 className="text-lg font-black tracking-[0.3em] uppercase text-black mb-1">Ali Mobile Repair</h2>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Customer Service Portal</p>
         </div>
+
+        {/* Dynamic Content */}
+        {!repair ? (
+          <div className="w-full">
+            <div className="text-center mb-10">
+              <h3 className="text-2xl font-black text-black mb-2">Track Your Repair</h3>
+              <p className="text-sm font-bold text-gray-500">Enter your Order ID or Phone Number below.</p>
+            </div>
+
+            <form onSubmit={performCheck} className="space-y-6">
+              <div className="space-y-2">
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                  <input 
+                    type="text" 
+                    value={id} 
+                    onChange={(e) => setId(e.target.value)}
+                    className="w-full bg-transparent border-none focus:ring-0 px-6 py-5 text-center text-black font-black text-lg placeholder:text-gray-400 placeholder:font-bold"
+                    placeholder="ID or Phone Number"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-[var(--color-neu-bg)] text-blue-600 rounded-[2rem] py-6 font-black text-sm uppercase tracking-widest shadow-[var(--shadow-neu-flat)] hover:opacity-90 active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {loading ? <RefreshCw className="animate-spin" size={20} /> : <Search size={20} strokeWidth={3} />}
+                {loading ? "SEARCHING..." : "CHECK STATUS"}
+              </button>
+
+              {error && (
+                <div className="mt-6 p-4 bg-red-50/50 rounded-2xl border border-red-100">
+                  <p className="text-red-500 text-xs font-bold text-center">{error}</p>
+                </div>
+              )}
+            </form>
+          </div>
+        ) : (
+          <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center mb-10">
+              <h3 className="text-2xl font-black text-black mb-1">Hello, {repair.customerName || 'Customer'}!</h3>
+              <p className="text-sm font-bold text-gray-500">Here is the live status of your device.</p>
+            </div>
+
+            <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[2.5rem] p-10 flex flex-col items-center mb-10">
+              <div className="mb-8 p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem]">
+                <StatusIcon status={repair.status} />
+              </div>
+              
+              <div className="text-center space-y-2">
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-blue-600 mb-2">Current Status</p>
+                <p className="text-3xl font-black text-black leading-tight mb-4 uppercase">{repair.status}</p>
+                
+                <div className="h-0.5 w-12 bg-gray-200 mx-auto mb-6 shadow-inner"></div>
+                
+                <div className="space-y-1">
+                  <p className="text-lg font-black text-black">{repair.repairItem}</p>
+                  <p className="text-xs font-bold text-gray-500 tracking-widest uppercase">{repair.modelNumber}</p>
+                </div>
+
+                {repair.totalPrice > 0 && (
+                  <div className="mt-8 pt-8 border-t border-black/5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Service Amount</p>
+                    <p className="text-2xl font-black text-black">${repair.totalPrice.toFixed(2)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => { setRepair(null); setId(''); }} 
+              className="w-full flex items-center justify-center gap-2 text-xs font-black text-gray-500 hover:text-blue-600 uppercase tracking-widest transition-all group"
+            >
+              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              Check Another Device
+            </button>
+          </div>
+        )}
+
+      </div>
+
+      {/* Footer Info */}
+      <div className="mt-12 text-center opacity-40">
+        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">© Ali Mobile Repair • Professional Tech Solutions</p>
       </div>
     </div>
   );

@@ -181,8 +181,6 @@ export function SettingsView({
     }
   };
 
-
-
   const handleToggleSmsAlerts = async () => {
     setSmsToggleLoading(true);
     try {
@@ -325,82 +323,79 @@ export function SettingsView({
     }
   };
 
-
-
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 min-h-screen bg-neu-bg p-4 md:p-8">
       {/* Header */}
       <div className="mb-10 text-left">
-        <h2 className="text-3xl font-extrabold text-primary tracking-tight mb-2">System Settings</h2>
-        <p className="text-on-surface-variant font-body">Manage your hardware connections and document preferences.</p>
+        <h2 className="text-3xl font-extrabold text-blue-600 tracking-tight mb-2">System Settings</h2>
+        <p className="text-gray-600 font-body">Manage your hardware connections and document preferences.</p>
       </div>
 
       {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
         {/* Left Column */}
-        <div className="md:col-span-5 flex flex-col gap-8">
-
+        <div className="md:col-span-5 flex flex-col gap-10">
 
           {/* Account Security & Profile */}
-          <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
-            <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em] mb-6">Employee Information</h3>
+          <section className="bg-neu-bg rounded-[2rem] p-8 shadow-neu-flat border-none">
+            <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-6">Employee Information</h3>
             
-            <div className="space-y-6">
-              <div className="flex gap-4 items-center mb-2">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-2xl border border-primary/20 shadow-inner uppercase">
+            <div className="space-y-8">
+              <div className="flex gap-6 items-center mb-2">
+                <div className="w-20 h-20 rounded-3xl bg-neu-bg shadow-neu-flat flex items-center justify-center text-blue-600 font-black text-3xl uppercase">
                   {(currentUser?.username || 'A').charAt(0)}
                 </div>
                 <div>
-                  <p className="text-lg font-black text-on-surface leading-tight">{currentUser?.username || 'Employee'}</p>
-                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{currentUser?.role || 'Staff'}</p>
+                  <p className="text-xl font-black text-black leading-tight">{currentUser?.username || 'Employee'}</p>
+                  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">{currentUser?.role || 'Staff'}</p>
                 </div>
               </div>
 
-              <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Update Name</label>
+              <div className="space-y-6 pt-2">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest pl-1">Update Name</label>
                   <input 
                     type="text" 
                     value={newName} 
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Enter new display name..."
-                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-5 py-4 text-sm font-bold text-black placeholder:text-gray-400 focus:outline-none transition-all"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Change Password</label>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest pl-1">Change Password</label>
                   <input 
                     type="password" 
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password..."
-                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-5 py-4 text-sm font-bold text-black placeholder:text-gray-400 focus:outline-none transition-all"
                   />
                 </div>
                 <button 
                   onClick={handleUpdateProfile}
-                  className="w-full bg-primary text-on-primary py-3.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-95 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="w-full bg-neu-bg text-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-neu-flat hover:opacity-90 active:shadow-neu-pressed transition-all flex items-center justify-center gap-3"
                 >
-                  {isSyncing ? <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-rotate"></div> : <Save size={14} />}
+                  {isSyncing ? <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div> : <Save size={16} />}
                   Save Employee Updates
                 </button>
               </div>
 
-              <div className="h-px bg-outline-variant/10 my-8"></div>
+              <div className="h-0.5 bg-gray-300/20 my-8 shadow-inner"></div>
 
-              <div className="flex items-center justify-between bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10 shadow-sm opacity-60">
+              <div className="flex items-center justify-between bg-neu-bg p-6 rounded-3xl shadow-neu-pressed">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-error/10 rounded-xl text-error">
+                  <div className="p-3 bg-neu-bg shadow-neu-flat rounded-2xl text-red-500">
                     <LogOut size={22} />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-on-surface uppercase tracking-wider">End Session</p>
-                    <p className="text-[10px] font-bold text-on-surface-variant mt-0.5">Logout for security</p>
+                    <p className="text-sm font-black text-black uppercase tracking-wider">End Session</p>
+                    <p className="text-[10px] font-bold text-gray-600 mt-0.5">Logout for security</p>
                   </div>
                 </div>
                 <button 
                   onClick={onLogout}
-                  className="bg-surface-container-high text-error px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-error/20 hover:bg-error hover:text-white transition-all"
+                  className="bg-neu-bg text-red-500 px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-neu-flat hover:text-white hover:bg-red-500 active:shadow-neu-pressed transition-all"
                 >
                   Sign Out
                 </button>
@@ -409,17 +404,17 @@ export function SettingsView({
           </section>
 
           {/* Push Notifications */}
-          <section className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
-            <div className="flex items-center gap-3 mb-6">
+          <section className="bg-neu-bg rounded-[2rem] p-8 shadow-neu-flat border-none">
+            <div className="flex items-center gap-3 mb-8">
               <div className={cn(
-                "p-2 rounded-xl transition-colors",
-                pushEnabled ? "bg-emerald-50 text-emerald-600" : "bg-surface-container-high text-on-surface-variant"
+                "p-3 rounded-2xl transition-all shadow-neu-flat",
+                pushEnabled ? "text-emerald-600" : "text-gray-400"
               )}>
                 {pushEnabled ? <BellRing size={22} /> : <Bell size={22} />}
               </div>
               <div>
-                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Push Notifications</h3>
-                <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">Push Notifications</h3>
+                <p className="text-[10px] text-gray-600 mt-1">
                   {pushStatus === 'unsupported' && 'Not supported on this browser'}
                   {pushStatus === 'denied' && 'Blocked — check browser settings'}
                   {pushStatus === 'granted' && pushEnabled && 'Active — you will receive alerts'}
@@ -429,16 +424,16 @@ export function SettingsView({
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Status indicator */}
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant/10">
+              <div className="flex items-center gap-4 p-5 rounded-3xl shadow-neu-pressed">
                 <div className={cn(
-                  "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
-                  pushEnabled ? "bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse" : "bg-on-surface-variant/20"
+                  "w-4 h-4 rounded-full flex-shrink-0 transition-all",
+                  pushEnabled ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)] animate-pulse" : "bg-gray-300"
                 )} />
                 <span className={cn(
                   "text-sm font-bold",
-                  pushEnabled ? "text-emerald-500" : "text-on-surface-variant"
+                  pushEnabled ? "text-emerald-600" : "text-gray-600"
                 )}>
                   {pushEnabled ? 'Notifications Active' : 'Notifications Off'}
                 </span>
@@ -450,18 +445,18 @@ export function SettingsView({
                 onClick={handleTogglePush}
                 disabled={pushLoading || pushStatus === 'unsupported'}
                 className={cn(
-                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50",
+                  "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:shadow-neu-pressed flex items-center justify-center gap-3 disabled:opacity-50",
                   pushEnabled 
-                    ? "bg-surface-container-high text-on-surface-variant border border-outline-variant/10 hover:bg-error/10 hover:text-error hover:border-error/20 shadow-none" 
-                    : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-200"
+                    ? "bg-neu-bg text-gray-600 shadow-neu-flat hover:text-red-500" 
+                    : "bg-neu-bg text-emerald-600 shadow-neu-flat"
                 )}
               >
                 {pushLoading ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : pushEnabled ? (
-                  <BellOff size={16} />
+                  <BellOff size={18} />
                 ) : (
-                  <Bell size={16} />
+                  <Bell size={18} />
                 )}
                 {pushEnabled ? 'Disable Notifications' : 'Enable Push Notifications'}
               </button>
@@ -472,52 +467,54 @@ export function SettingsView({
                   id="push-notification-test"
                   onClick={handleTestPush}
                   className={cn(
-                    "w-full py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                    "w-full py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-neu-flat active:shadow-neu-pressed",
                     testPushSent 
-                      ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                      : "bg-surface-container-highest text-on-surface-variant border border-outline-variant/10 hover:text-primary hover:border-primary/20"
+                      ? "text-emerald-600"
+                      : "text-blue-600"
                   )}
                 >
-                  {testPushSent ? <CheckCircle2 size={14} /> : <BellRing size={14} />}
+                  {testPushSent ? <CheckCircle2 size={16} /> : <BellRing size={16} />}
                   {testPushSent ? 'Test Notification Sent!' : 'Send Test Notification'}
                 </button>
               )}
 
               {pushStatus === 'denied' && (
-                <p className="text-[10px] text-error font-bold leading-relaxed">
-                  ⚠️ Notifications are blocked. Open your browser settings and allow notifications for this site, then try again.
-                </p>
+                <div className="p-4 rounded-2xl shadow-neu-pressed">
+                  <p className="text-[10px] text-red-500 font-bold leading-relaxed text-center">
+                    ⚠️ Notifications are blocked. Open your browser settings and allow notifications for this site, then try again.
+                  </p>
+                </div>
               )}
             </div>
           </section>
 
           {/* SMS Alerts Toggle */}
-          <section id="sms-alerts-section" className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
-            <div className="flex items-center gap-3 mb-6">
+          <section id="sms-alerts-section" className="bg-neu-bg rounded-[2rem] p-8 shadow-neu-flat border-none">
+            <div className="flex items-center gap-3 mb-8">
               <div className={cn(
-                "p-2 rounded-xl transition-colors",
-                smsAlertsEnabled ? "bg-amber-50 text-amber-600" : "bg-surface-container-high text-on-surface-variant"
+                "p-3 rounded-2xl transition-all shadow-neu-flat",
+                smsAlertsEnabled ? "text-amber-600" : "text-gray-400"
               )}>
                 {smsAlertsEnabled ? <SmartphoneNfc size={22} /> : <Smartphone size={22} />}
               </div>
               <div>
-                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">SMS Alerts</h3>
-                <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">SMS Alerts</h3>
+                <p className="text-[10px] text-gray-600 mt-1">
                   Receive text messages for new customer chats
                 </p>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Status indicator */}
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant/10">
+              <div className="flex items-center gap-4 p-5 rounded-3xl shadow-neu-pressed">
                 <div className={cn(
-                  "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
-                  smsAlertsEnabled ? "bg-amber-500 shadow-lg shadow-amber-500/50 animate-pulse" : "bg-on-surface-variant/20"
+                  "w-4 h-4 rounded-full flex-shrink-0 transition-all",
+                  smsAlertsEnabled ? "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.5)] animate-pulse" : "bg-gray-300"
                 )} />
                 <span className={cn(
                   "text-sm font-bold",
-                  smsAlertsEnabled ? "text-amber-500" : "text-on-surface-variant"
+                  smsAlertsEnabled ? "text-amber-600" : "text-gray-600"
                 )}>
                   {smsAlertsEnabled ? 'SMS Alerts Active' : 'SMS Alerts Off'}
                 </span>
@@ -529,56 +526,58 @@ export function SettingsView({
                 onClick={handleToggleSmsAlerts}
                 disabled={smsToggleLoading}
                 className={cn(
-                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50",
+                  "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:shadow-neu-pressed flex items-center justify-center gap-3 disabled:opacity-50",
                   smsAlertsEnabled
-                    ? "bg-surface-container-high text-on-surface-variant border border-outline-variant/10 hover:bg-error/10 hover:text-error hover:border-error/20 shadow-none"
-                    : "bg-amber-500 text-white hover:bg-amber-400 shadow-amber-200"
+                    ? "bg-neu-bg text-gray-600 shadow-neu-flat hover:text-red-500"
+                    : "bg-neu-bg text-amber-600 shadow-neu-flat"
                 )}
               >
                 {smsToggleLoading ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : smsAlertsEnabled ? (
-                  <BellOff size={16} />
+                  <BellOff size={18} />
                 ) : (
-                  <Smartphone size={16} />
+                  <Smartphone size={18} />
                 )}
                 {smsAlertsEnabled ? 'Disable SMS Alerts' : 'Enable SMS Alerts'}
               </button>
 
               {/* Cost-saving info */}
-              <p className="text-[10px] text-on-surface-variant/60 leading-relaxed px-1">
-                💡 Turn this off to stop receiving text messages and save Twilio credits.
-                Desktop/PWA push notifications will still work.
-              </p>
+              <div className="px-1 text-center">
+                <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                  💡 Turn this off to stop receiving text messages and save Twilio credits.
+                  Push notifications will still work.
+                </p>
+              </div>
             </div>
           </section>
 
           {/* Google Contacts Sync */}
-          <section id="google-sync-section" className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/5">
-            <div className="flex items-center gap-3 mb-6">
+          <section id="google-sync-section" className="bg-neu-bg rounded-[2rem] p-8 shadow-neu-flat border-none">
+            <div className="flex items-center gap-3 mb-8">
               <div className={cn(
-                "p-2 rounded-xl transition-colors",
-                googleSyncEnabled ? "bg-blue-50 text-blue-600" : "bg-surface-container-high text-on-surface-variant"
+                "p-3 rounded-2xl transition-all shadow-neu-flat",
+                googleSyncEnabled ? "text-blue-600" : "text-gray-400"
               )}>
                 <Users size={22} />
               </div>
               <div>
-                <h3 className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.2em]">Google Contacts Sync</h3>
-                <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">Google Contacts Sync</h3>
+                <p className="text-[10px] text-gray-600 mt-1">
                   Automatically add new customers to Google Contacts
                 </p>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant/10">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 p-5 rounded-3xl shadow-neu-pressed">
                 <div className={cn(
-                  "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
-                  googleSyncEnabled ? "bg-blue-500 shadow-lg shadow-blue-500/50 animate-pulse" : "bg-on-surface-variant/20"
+                  "w-4 h-4 rounded-full flex-shrink-0 transition-all",
+                  googleSyncEnabled ? "bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.5)] animate-pulse" : "bg-gray-300"
                 )} />
                 <span className={cn(
                   "text-sm font-bold",
-                  googleSyncEnabled ? "text-blue-500" : "text-on-surface-variant"
+                  googleSyncEnabled ? "text-blue-600" : "text-gray-600"
                 )}>
                   {googleSyncEnabled ? 'Auto-Sync Active' : 'Auto-Sync Off'}
                 </span>
@@ -589,16 +588,16 @@ export function SettingsView({
                 onClick={handleToggleGoogleSync}
                 disabled={googleSyncLoading}
                 className={cn(
-                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50",
+                  "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:shadow-neu-pressed flex items-center justify-center gap-3 disabled:opacity-50",
                   googleSyncEnabled
-                    ? "bg-surface-container-high text-on-surface-variant border border-outline-variant/10 hover:bg-error/10 hover:text-error hover:border-error/20 shadow-none"
-                    : "bg-blue-500 text-white hover:bg-blue-400 shadow-blue-200"
+                    ? "bg-neu-bg text-gray-600 shadow-neu-flat hover:text-red-500"
+                    : "bg-neu-bg text-blue-600 shadow-neu-flat"
                 )}
               >
                 {googleSyncLoading ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Users size={16} />
+                  <Users size={18} />
                 )}
                 {googleSyncEnabled ? 'Disable Auto-Sync' : 'Enable Auto-Sync'}
               </button>
@@ -607,79 +606,81 @@ export function SettingsView({
         </div>
 
         {/* Right Column */}
-        <div className="md:col-span-7">
-          <section className="bg-surface-container-low rounded-[2rem] p-8 h-full flex flex-col border border-outline-variant/5">
-            <div className="flex items-center gap-3 mb-10">
-              <Receipt className="text-primary" size={24} />
-              <h3 className="text-xl font-black text-primary tracking-tight">Invoice Templates</h3>
+        <div className="md:col-span-7 flex flex-col gap-10">
+          <section className="bg-neu-bg rounded-[2.5rem] p-10 shadow-neu-flat border-none flex flex-col h-full">
+            <div className="flex items-center gap-4 mb-10">
+              <div className="p-3 bg-neu-bg shadow-neu-flat rounded-2xl">
+                <Receipt className="text-blue-600" size={24} />
+              </div>
+              <h3 className="text-2xl font-black text-black tracking-tight">Invoice Templates</h3>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 flex-grow">
-              <div className="space-y-8">
-                <div className="space-y-3">
-                  <label className="block text-[10px] font-black text-on-surface-variant uppercase tracking-[0.15em]">Invoice Header</label>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 flex-grow">
+              <div className="space-y-10">
+                <div className="space-y-4">
+                  <label className="block text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] pl-1">Invoice Header</label>
                   <textarea 
-                    className="w-full bg-surface-container-high border-none rounded-2xl text-sm p-5 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-highest transition-all resize-none font-medium h-32" 
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-3xl text-sm p-6 focus:outline-none transition-all resize-none font-bold text-black h-40" 
                     value={header}
                     onChange={(e) => setHeader(e.target.value)}
                   />
                 </div>
-                <div className="space-y-3">
-                  <label className="block text-[10px] font-black text-on-surface-variant uppercase tracking-[0.15em]">Footer Disclaimer</label>
+                <div className="space-y-4">
+                  <label className="block text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] pl-1">Footer Disclaimer</label>
                   <textarea 
-                    className="w-full bg-surface-container-high border-none rounded-2xl text-sm p-5 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-highest transition-all resize-none font-medium h-32" 
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-3xl text-sm p-6 focus:outline-none transition-all resize-none font-bold text-black h-40" 
                     value={footer}
                     onChange={(e) => setFooter(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-4 pt-4">
+                <div className="flex gap-6 pt-4">
                   <button 
                     onClick={handleSave}
-                    className="flex-1 signature-gradient text-on-primary py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
+                    className="flex-1 bg-neu-bg text-blue-600 py-5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-neu-flat hover:opacity-90 active:shadow-neu-pressed transition-all"
                   >
-                    {isSaved ? <CheckCircle2 size={16} /> : <Save size={16} />}
+                    {isSaved ? <CheckCircle2 size={18} /> : <Save size={18} />}
                     {isSaved ? 'SAVED' : 'SAVE CHANGES'}
                   </button>
-                  <button className="bg-secondary-container text-on-secondary-container px-6 rounded-2xl font-black hover:bg-secondary-fixed transition-all">
-                    <Eye size={20} />
+                  <button className="bg-neu-bg text-gray-600 p-5 rounded-2xl shadow-neu-flat hover:text-blue-600 active:shadow-neu-pressed transition-all">
+                    <Eye size={24} />
                   </button>
                 </div>
               </div>
 
               {/* Preview */}
-              <div className="relative hidden lg:block">
-                <div className="absolute inset-0 bg-slate-200/50 rounded-3xl blur-sm"></div>
-                <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40 h-full flex flex-col">
-                  <div className="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
-                  <div className="text-center mb-10">
-                    <p className="text-[11px] font-black text-slate-900 leading-tight tracking-widest uppercase">{header.split('\n')[0]}</p>
-                    <p className="text-[9px] font-bold text-slate-400 mt-1">{header.split('\n')[1]}</p>
+              <div className="relative hidden xl:block">
+                <div className="absolute inset-0 bg-neu-bg rounded-[2rem] shadow-neu-pressed opacity-50"></div>
+                <div className="relative bg-white/95 rounded-[2rem] p-10 shadow-xl h-full flex flex-col border border-white/50">
+                  <div className="w-20 h-2 bg-gray-100 rounded-full mx-auto mb-10 shadow-inner"></div>
+                  <div className="text-center mb-12">
+                    <p className="text-[12px] font-black text-black leading-tight tracking-widest uppercase">{header.split('\n')[0]}</p>
+                    <p className="text-[10px] font-bold text-gray-500 mt-2">{header.split('\n')[1]}</p>
                   </div>
-                  <div className="flex-grow space-y-4">
-                    <div className="flex justify-between border-b border-slate-100 pb-2">
-                      <span className="text-[9px] font-bold text-slate-400">Qty 1 - iPhone 13 OLED</span>
-                      <span className="text-[9px] font-black text-slate-900">$189.00</span>
+                  <div className="flex-grow space-y-5">
+                    <div className="flex justify-between border-b border-gray-100 pb-3">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Qty 1 - iPhone 13 OLED</span>
+                      <span className="text-[10px] font-black text-black">$189.00</span>
                     </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-2">
-                      <span className="text-[9px] font-bold text-slate-400">Labor Fee</span>
-                      <span className="text-[9px] font-black text-slate-900">$65.00</span>
+                    <div className="flex justify-between border-b border-gray-100 pb-3">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Labor Fee</span>
+                      <span className="text-[10px] font-black text-black">$65.00</span>
                     </div>
-                    <div className="pt-4 flex justify-between">
-                      <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">TOTAL</span>
-                      <span className="text-[11px] font-black text-primary">$254.00</span>
+                    <div className="pt-6 flex justify-between">
+                      <span className="text-[12px] font-black text-black uppercase tracking-[0.2em]">TOTAL</span>
+                      <span className="text-[12px] font-black text-blue-600">$254.00</span>
                     </div>
                   </div>
-                  <div className="mt-10 text-center">
-                    <p className="text-[8px] font-bold text-slate-400 leading-relaxed italic">"{footer.substring(0, 80)}..."</p>
-                    <div className="mt-6 flex flex-col items-center gap-1">
-                      <div className="w-full h-8 bg-slate-100 rounded flex items-center justify-center">
-                        <div className="flex gap-0.5">
+                  <div className="mt-12 text-center">
+                    <p className="text-[9px] font-bold text-gray-400 leading-relaxed italic px-4">"{footer.substring(0, 80)}..."</p>
+                    <div className="mt-10 flex flex-col items-center gap-2">
+                      <div className="w-full h-10 bg-gray-50 rounded-xl flex items-center justify-center shadow-inner border border-gray-100">
+                        <div className="flex gap-1 opacity-60">
                           {[...Array(20)].map((_, i) => (
-                            <div key={i} className={cn("w-0.5 bg-slate-300", i % 3 === 0 ? "h-5" : "h-4")}></div>
+                            <div key={i} className={cn("w-1 bg-gray-400", i % 3 === 0 ? "h-6" : "h-4")}></div>
                           ))}
                         </div>
                       </div>
-                      <span className="text-[7px] font-bold text-slate-300 uppercase tracking-[0.3em]">RP-8829-X9</span>
+                      <span className="text-[8px] font-black text-gray-300 uppercase tracking-[0.4em]">RP-8829-X9</span>
                     </div>
                   </div>
                 </div>
@@ -689,50 +690,50 @@ export function SettingsView({
 
           {/* Quality Tiers Management (Super Admin Only) */}
           {isSuperAdmin && (
-            <section className="bg-surface-container-low rounded-[2rem] p-8 border border-outline-variant/5 mt-8">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-amber-50 rounded-xl text-amber-600">
+            <section className="bg-neu-bg rounded-[2.5rem] p-10 shadow-neu-flat border-none mt-4">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="p-3 bg-neu-bg shadow-neu-flat rounded-2xl text-amber-600">
                   <Layers size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-primary tracking-tight">Quality Tiers Management</h3>
-                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-1">Super Admin Dictionary</p>
+                  <h3 className="text-2xl font-black text-black tracking-tight">Quality Tiers</h3>
+                  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">Super Admin Dictionary</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="bg-surface-container-highest p-5 rounded-2xl border border-outline-variant/10 space-y-4">
-                  <h4 className="text-xs font-black text-on-surface uppercase tracking-wider">Add New Tier</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-8">
+                <div className="bg-neu-bg p-8 rounded-[2rem] shadow-neu-pressed space-y-6">
+                  <h4 className="text-xs font-black text-black uppercase tracking-wider pl-1">Add New Tier</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <input 
                       type="text" 
                       value={newTierName}
                       onChange={(e) => setNewTierName(e.target.value)}
                       placeholder="Name (e.g. Premium)"
-                      className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
+                      className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-5 py-4 text-sm font-bold text-black focus:outline-none transition-all"
                     />
                     <input 
                       type="text" 
                       value={newTierDesc}
                       onChange={(e) => setNewTierDesc(e.target.value)}
                       placeholder="Tooltip Description..."
-                      className="md:col-span-2 w-full bg-surface-container-lowest border border-outline-variant/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
+                      className="md:col-span-2 w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-5 py-4 text-sm font-bold text-black focus:outline-none transition-all"
                     />
                   </div>
                   <button 
                     onClick={handleCreateTier}
                     disabled={!newTierName || !newTierDesc}
-                    className="bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amber-600 transition-all disabled:opacity-50"
+                    className="bg-neu-bg text-amber-600 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest shadow-neu-flat hover:opacity-90 active:shadow-neu-pressed transition-all disabled:opacity-50"
                   >
                     Create Tier
                   </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {qualityTiers.map(tier => (
-                    <div key={tier.id} className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div key={tier.id} className="bg-neu-bg p-6 rounded-3xl shadow-neu-flat flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all hover:shadow-neu-floating">
                       <div className="flex-1">
-                        <span className="inline-block px-2 py-1 bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded mb-2">
+                        <span className="inline-block px-3 py-1 bg-neu-bg shadow-neu-pressed text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-lg mb-3">
                           {tier.name}
                         </span>
                         {editingTierId === tier.id ? (
@@ -740,41 +741,41 @@ export function SettingsView({
                             type="text" 
                             value={editingTierDesc}
                             onChange={(e) => setEditingTierDesc(e.target.value)}
-                            className="w-full bg-surface-container-high border border-outline-variant/10 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                            className="w-full bg-neu-bg shadow-neu-pressed rounded-xl px-4 py-3 text-sm font-bold text-black focus:outline-none"
                           />
                         ) : (
-                          <p className="text-xs text-on-surface-variant font-medium">{tier.description}</p>
+                          <p className="text-xs text-gray-600 font-bold leading-relaxed">{tier.description}</p>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         {editingTierId === tier.id ? (
                           <>
                             <button 
                               onClick={() => handleUpdateTierDesc(tier.id)}
-                              className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
+                              className="p-3 bg-neu-bg shadow-neu-flat text-emerald-600 rounded-2xl hover:bg-emerald-50 active:shadow-neu-pressed transition-all"
                             >
-                              <CheckCircle2 size={16} />
+                              <CheckCircle2 size={18} />
                             </button>
                             <button 
                               onClick={() => { setEditingTierId(null); setEditingTierDesc(''); }}
-                              className="p-2 bg-error/5 text-error rounded-lg hover:bg-error/10 transition-colors"
+                              className="p-3 bg-neu-bg shadow-neu-flat text-red-500 rounded-2xl hover:bg-red-50 hover:text-red-600 active:shadow-neu-pressed transition-all"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </>
                         ) : (
                           <>
                             <button 
                               onClick={() => { setEditingTierId(tier.id); setEditingTierDesc(tier.description); }}
-                              className="p-2 bg-secondary-container text-on-secondary-container rounded-lg hover:opacity-80 transition-opacity"
+                              className="p-3 bg-neu-bg shadow-neu-flat text-blue-600 rounded-2xl hover:opacity-80 active:shadow-neu-pressed transition-all"
                             >
-                              <Edit2 size={16} />
+                              <Edit2 size={18} />
                             </button>
                             <button 
                               onClick={() => handleDeleteTier(tier.id)}
-                              className="p-2 bg-error/5 text-error rounded-lg hover:bg-error/10 transition-colors"
+                              className="p-3 bg-neu-bg shadow-neu-flat text-red-500 rounded-2xl hover:text-red-600 active:shadow-neu-pressed transition-all"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </>
                         )}
@@ -786,92 +787,88 @@ export function SettingsView({
             </section>
           )}
 
-
-
           {/* Quick SMS Generator */}
-          <section className="bg-surface-container-low rounded-[2rem] p-8 border border-outline-variant/5 mt-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-2 bg-blue-50 rounded-xl text-blue-600">
+          <section className="bg-neu-bg rounded-[2.5rem] p-10 shadow-neu-flat border-none">
+            <div className="flex items-center gap-4 mb-10">
+              <div className="p-3 bg-neu-bg shadow-neu-flat rounded-2xl text-blue-600">
                 <MessageSquare size={24} />
               </div>
-              <h3 className="text-xl font-black text-primary tracking-tight">Quick SMS Generator</h3>
+              <h3 className="text-2xl font-black text-black tracking-tight">Quick SMS Generator</h3>
             </div>
 
-            <div className="space-y-6">
-              <p className="text-sm font-medium text-on-surface-variant leading-relaxed">
+            <div className="space-y-8">
+              <p className="text-sm font-bold text-gray-600 leading-relaxed pl-1">
                 Generate a ready-to-send SMS with repair quote and shop details.
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Model</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest pl-1">Model</label>
                   <input 
                     type="text" 
                     value={smsModel}
                     onChange={(e) => setSmsModel(e.target.value)}
                     placeholder="e.g. iPhone 13"
-                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-6 py-5 text-sm font-bold text-black focus:outline-none transition-all"
                   />
                 </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Repair</label>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest pl-1">Repair</label>
                   <input 
                     type="text" 
                     value={smsRepair}
                     onChange={(e) => setSmsRepair(e.target.value)}
                     placeholder="e.g. Screen Replacement"
-                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl px-6 py-5 text-sm font-bold text-black focus:outline-none transition-all"
                   />
                 </div>
               </div>
               
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest pl-1">Price (Amount)</label>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest pl-1">Price (Amount)</label>
                 <div className="relative">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
+                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-black">$</span>
                   <input 
                     type="number" 
                     value={smsAmount}
                     onChange={(e) => setSmsAmount(e.target.value)}
                     placeholder="200"
-                    className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-2xl pl-9 pr-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full bg-neu-bg shadow-neu-pressed rounded-2xl pl-12 pr-6 py-5 text-sm font-bold text-black focus:outline-none transition-all"
                   />
                 </div>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-4">
                 <button 
                   onClick={handleCopySMS}
                   className={cn(
-                    "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3",
+                    "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:shadow-neu-pressed flex items-center justify-center gap-3 shadow-neu-flat",
                     isCopied 
-                      ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-200" 
-                      : "bg-blue-600 text-white hover:bg-blue-500 shadow-blue-200"
+                      ? "text-emerald-600" 
+                      : "text-blue-600"
                   )}
                 >
-                  {isCopied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                  {isCopied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
                   {isCopied ? 'Copied to Clipboard!' : 'Generate & Copy SMS'}
                 </button>
               </div>
 
               {/* Preview Box */}
               {(smsModel || smsRepair || smsAmount) && (
-                <div className="mt-6 p-4 bg-surface-container-highest rounded-xl border border-outline-variant/10 text-sm whitespace-pre-wrap font-medium text-on-surface-variant">
+                <div className="mt-10 p-8 bg-neu-bg rounded-[2rem] shadow-neu-pressed text-sm whitespace-pre-wrap font-bold text-gray-600 leading-relaxed">
                   {`Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair || '[Repair]'} for ${smsModel || '[Model]'} is $${smsAmount || '0'}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood Square Shopping Centre, Ringwood 3134\nPhone: 0481 058 514`}
                 </div>
               )}
             </div>
           </section>
-
-
         </div>
       </div>
 
       {/* Failsafe Debug: shows raw user object when super admin check fails */}
       {!isSuperAdmin && (
-        <details className="mt-4 opacity-30 hover:opacity-100 transition-opacity text-[10px] text-on-surface-variant">
-          <summary className="cursor-pointer font-mono">🔍 Auth Debug (dev only)</summary>
-          <pre className="mt-2 p-3 bg-surface-container-high rounded-xl overflow-auto max-h-40 font-mono text-[9px] leading-tight">
+        <details className="mt-8 opacity-40 hover:opacity-100 transition-opacity text-[10px] text-gray-500">
+          <summary className="cursor-pointer font-mono p-2">🔍 Auth Debug (dev only)</summary>
+          <pre className="mt-4 p-6 bg-neu-bg shadow-neu-pressed rounded-3xl overflow-auto max-h-60 font-mono text-[9px] leading-relaxed text-gray-600">
             {JSON.stringify(currentUser, null, 2)}
           </pre>
         </details>

@@ -17,7 +17,8 @@ import {
   Trash2,
   FileText,
   Copy,
-  Shield
+  Shield,
+  Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -138,7 +139,7 @@ function SettingsPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-neu-bg/40  z-50"
           />
           {/* Slide-out panel from right */}
           <motion.div
@@ -146,17 +147,17 @@ function SettingsPanel({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-            className="fixed right-0 top-0 h-full w-80 bg-surface-container-low border-l border-outline-variant/10 z-50 flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 h-full w-80 bg-neu-bg border-l border-transparent z-50 flex flex-col shadow-neu-floating"
           >
             {/* Panel header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/10">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-transparent">
               <div className="flex items-center gap-2.5">
-                <Settings size={18} className="text-primary" />
-                <span className="font-black text-on-surface tracking-tight">Settings</span>
+                <Settings size={18} className="text-neu-accent" />
+                <span className="font-black text-neu-text-primary tracking-tight">Settings</span>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-all"
+                className="p-1.5 rounded-lg hover:bg-neu-bg text-neu-text-secondary transition-all"
               >
                 <X size={18} />
               </button>
@@ -166,7 +167,7 @@ function SettingsPanel({
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
               {/* Invoice header */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">
+                <label className="text-[10px] font-black text-neu-text-secondary uppercase tracking-widest">
                   Invoice Header
                 </label>
                 <textarea
@@ -174,13 +175,13 @@ function SettingsPanel({
                   value={header}
                   onChange={e => setHeader(e.target.value)}
                   placeholder="Store name, address, phone..."
-                  className="w-full bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary shadow-neu-pressed resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
               </div>
 
               {/* Invoice footer */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">
+                <label className="text-[10px] font-black text-neu-text-secondary uppercase tracking-widest">
                   Invoice Footer / Disclaimer
                 </label>
                 <textarea
@@ -188,14 +189,14 @@ function SettingsPanel({
                   value={footer}
                   onChange={e => setFooter(e.target.value)}
                   placeholder="Warranty terms, return policy..."
-                  className="w-full bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary shadow-neu-pressed resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
               </div>
 
               {/* Save */}
               <button
                 onClick={handleSave}
-                className="w-full signature-gradient text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
+                className="w-full bg-neu-accent hover:bg-blue-600 text-neu-text-primary py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-neu-flat shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98]"
               >
                 {saved ? <CheckCircle2 size={15} /> : <Save size={15} />}
                 {saved ? 'Saved!' : 'Save Changes'}
@@ -206,12 +207,12 @@ function SettingsPanel({
               {/* QUICK SMS GENERATOR */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <MessageSquare size={16} className="text-blue-500" />
-                  <span className="text-xs font-black text-on-surface uppercase tracking-tight">Quick SMS</span>
+                  <MessageSquare size={16} className="text-neu-accent" />
+                  <span className="text-xs font-black text-neu-text-primary uppercase tracking-tight">Quick SMS</span>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-[10px] font-bold text-on-surface-variant leading-relaxed">
+                  <p className="text-[10px] font-bold text-neu-text-secondary leading-relaxed">
                     Generate an SMS quote instantly.
                   </p>
                   
@@ -221,23 +222,23 @@ function SettingsPanel({
                       value={smsModel}
                       onChange={(e) => setSmsModel(e.target.value)}
                       placeholder="Model (e.g. iPhone 13)"
-                      className="w-full bg-surface-container-high rounded-xl px-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <input 
                       type="text" 
                       value={smsRepair}
                       onChange={(e) => setSmsRepair(e.target.value)}
                       placeholder="Repair (e.g. Screen)"
-                      className="w-full bg-surface-container-high rounded-xl px-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-neu-bg rounded-2xl px-4 py-2.5 text-xs text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     />
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-xs">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neu-text-secondary font-bold text-xs">$</span>
                       <input 
                         type="number" 
                         value={smsAmount}
                         onChange={(e) => setSmsAmount(e.target.value)}
                         placeholder="Price (Amount)"
-                        className="w-full bg-surface-container-high rounded-xl pl-7 pr-4 py-2.5 text-xs text-on-surface outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-neu-bg rounded-2xl pl-7 pr-4 py-2.5 text-xs text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                       />
                     </div>
                   </div>
@@ -245,10 +246,10 @@ function SettingsPanel({
                   <button
                     onClick={handleCopySMS}
                     className={cn(
-                      "w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98]",
+                      "w-full py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98]",
                       isCopied 
-                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200" 
-                        : "bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-500"
+                        ? "bg-emerald-600 text-neu-text-primary shadow-neu-flat shadow-emerald-200" 
+                        : "bg-blue-600 text-neu-text-primary shadow-neu-flat shadow-blue-200 hover:bg-neu-accent"
                     )}
                   >
                     {isCopied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
@@ -256,7 +257,7 @@ function SettingsPanel({
                   </button>
 
                   {(smsModel || smsRepair || smsAmount) && (
-                    <div className="p-3 bg-surface-container-highest rounded-xl text-[9px] whitespace-pre-wrap font-medium text-on-surface-variant border border-outline-variant/10 leading-relaxed mt-2">
+                    <div className="p-3 bg-neu-bg shadow-neu-pressed rounded-2xl text-[9px] whitespace-pre-wrap font-medium text-neu-text-secondary border border-transparent leading-relaxed mt-2">
                       {`Hi there, this is Ali Mobile Repair,\n\nThe ${smsRepair || '[Repair]'} for ${smsModel || '[Model]'} is $${smsAmount || '0'}.\n\nYou are welcome to walk in or book an appointment here: https://alimobile.com.au\nAddress: Kiosk C1 Ringwood\nPhone: 0481 058 514`}
                     </div>
                   )}
@@ -269,12 +270,12 @@ function SettingsPanel({
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Sparkles size={16} className="text-purple-500" />
-                  <span className="text-xs font-black text-on-surface uppercase tracking-tight">AI Blog Marketing</span>
+                  <span className="text-xs font-black text-neu-text-primary uppercase tracking-tight">AI Blog Marketing</span>
                 </div>
 
                 {!blogDraft ? (
                   <div className="space-y-3">
-                    <p className="text-[10px] font-bold text-on-surface-variant leading-relaxed">
+                    <p className="text-[10px] font-bold text-neu-text-secondary leading-relaxed">
                       Transform a topic into an SEO-ready repair guide for your website.
                     </p>
                     <div className="relative">
@@ -283,14 +284,14 @@ function SettingsPanel({
                         value={blogTopic}
                         onChange={e => setBlogTopic(e.target.value)}
                         placeholder="e.g. iPhone 17 Screen Care"
-                        className="w-full bg-surface-container-high rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
+                        className="w-full bg-neu-bg rounded-2xl px-4 py-3 text-sm text-neu-text-primary shadow-neu-pressed outline-none focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-10"
                       />
-                      <PenTool size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40" />
+                      <PenTool size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-neu-text-secondary/40" />
                     </div>
                     <button
                       onClick={handleGenerateBlog}
                       disabled={isGenerating || !blogTopic.trim()}
-                      className="w-full bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all disabled:opacity-50"
+                      className="w-full bg-slate-900 text-neu-text-primary py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all disabled:opacity-50"
                     >
                       {isGenerating ? <RotateCw size={14} className="animate-spin" /> : <Sparkles size={14} className="text-purple-400" />}
                       {isGenerating ? 'Generating...' : 'Generate Draft'}
@@ -298,7 +299,7 @@ function SettingsPanel({
                   </div>
                 ) : (
                   <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="bg-surface-container-high rounded-2xl overflow-hidden border border-outline-variant/10 shadow-sm">
+                    <div className="bg-neu-bg rounded-2xl overflow-hidden border border-transparent shadow-sm">
                       <div className="aspect-video relative">
                         <img 
                           src={`http://localhost:3001/api/blog/proxy-image?url=${encodeURIComponent(blogDraft.image)}`} 
@@ -306,11 +307,11 @@ function SettingsPanel({
                           className="w-full h-full object-cover" 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
-                          <h4 className="text-white font-black text-xs leading-tight line-clamp-2">{blogDraft.title}</h4>
+                          <h4 className="text-neu-text-primary font-black text-xs leading-tight line-clamp-2">{blogDraft.title}</h4>
                         </div>
                       </div>
                       <div className="p-3">
-                        <p className="text-[9px] text-on-surface-variant font-medium line-clamp-2 leading-relaxed italic">
+                        <p className="text-[9px] text-neu-text-secondary font-medium line-clamp-2 leading-relaxed italic">
                           "{blogDraft.description}"
                         </p>
                       </div>
@@ -318,14 +319,14 @@ function SettingsPanel({
                     <div className="grid grid-cols-2 gap-2">
                        <button
                          onClick={() => setBlogDraft(null)}
-                         className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-surface-container-highest text-on-surface-variant"
+                         className="flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-neu-bg shadow-neu-pressed text-neu-text-secondary"
                        >
                          <Trash2 size={12} />
                          Discard
                        </button>
                        <button
                          onClick={handlePublishBlog}
-                         className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-200"
+                         className="flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-emerald-600 text-neu-text-primary shadow-neu-flat shadow-emerald-200"
                        >
                          <CheckCircle2 size={12} />
                          Publish
@@ -337,10 +338,10 @@ function SettingsPanel({
             </div>
 
             {/* Logout at bottom */}
-            <div className="px-6 py-5 border-t border-outline-variant/10">
+            <div className="px-6 py-5 border-t border-transparent">
               <button
                 onClick={onLogout}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-all font-black text-xs uppercase tracking-widest"
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-neu-text-primary transition-all font-black text-xs uppercase tracking-widest"
               >
                 <LogOut size={16} />
                 Sign Out
@@ -359,6 +360,55 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   const { permissions } = useAuthStore();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [unreadChats, setUnreadChats] = React.useState(0);
+
+  // ── Quick Quote (Cmd+K) State ───────────────────────────────────────────
+  const [isQuickSearchOpen, setIsQuickSearchOpen] = React.useState(false);
+  const [quickSearchQuery, setQuickSearchQuery] = React.useState('');
+  const [inventoryCache, setInventoryCache] = React.useState<any[]>([]);
+  const [inventoryLoading, setInventoryLoading] = React.useState(false);
+  const quickSearchInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut: Cmd+K / Ctrl+K
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsQuickSearchOpen(prev => !prev);
+      }
+      if (e.key === 'Escape' && isQuickSearchOpen) {
+        setIsQuickSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isQuickSearchOpen]);
+
+  // Fetch inventory when modal opens (cache it)
+  React.useEffect(() => {
+    if (isQuickSearchOpen && inventoryCache.length === 0 && !inventoryLoading) {
+      setInventoryLoading(true);
+      api.getInventory()
+        .then((data: any[]) => setInventoryCache(data))
+        .catch(console.error)
+        .finally(() => setInventoryLoading(false));
+    }
+    if (isQuickSearchOpen) {
+      setQuickSearchQuery('');
+      setTimeout(() => quickSearchInputRef.current?.focus(), 100);
+    }
+  }, [isQuickSearchOpen]);
+
+  // Filter results
+  const quickSearchResults = React.useMemo(() => {
+    if (!quickSearchQuery.trim()) return [];
+    const q = quickSearchQuery.toLowerCase();
+    return inventoryCache
+      .filter((item: any) => {
+        const searchable = `${item.name} ${item.model || ''} ${item.brand || ''} ${item.category || ''} ${item.sku || ''}`.toLowerCase();
+        return searchable.includes(q);
+      })
+      .slice(0, 20); // Cap at 20 results
+  }, [quickSearchQuery, inventoryCache]);
 
   // Poll backend server health
   React.useEffect(() => {
@@ -405,16 +455,16 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-surface-container-low flex-col items-center pt-10 pb-6 z-30 border-r border-outline-variant/10">
+      <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-neu-bg flex-col items-center pt-10 pb-6 z-30 shadow-neu-flat">
         {/* Settings button top-left (desktop) */}
         <div className="mb-4 relative group/logo">
           <button
             onClick={() => setSettingsOpen(true)}
-            className="w-10 h-10 rounded-xl signature-gradient flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-2xl bg-neu-accent hover:bg-blue-600 flex items-center justify-center text-neu-text-primary shadow-neu-flat hover:scale-105 active:scale-95 transition-all"
           >
             <Settings size={20} strokeWidth={2} />
           </button>
-          <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <span className="absolute left-full ml-4 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover/logo:opacity-100 transition-all z-50 whitespace-nowrap">
             Settings
           </span>
         </div>
@@ -429,10 +479,10 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
                 className={cn(
-                  "p-3 rounded-xl transition-all duration-200 relative group",
+                  "p-3 rounded-2xl transition-all duration-200 relative group",
                   isActive
-                    ? "text-primary bg-primary-container/10 ring-1 ring-primary/20"
-                    : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
+                    ? "text-neu-accent bg-neu-bg shadow-neu-pressed"
+                    : "text-neu-text-secondary hover:text-neu-accent hover:bg-neu-bg hover:shadow-neu-sm"
                 )}
               >
                 <div className="relative">
@@ -441,7 +491,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                     <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-surface-container-low shadow-sm" />
                   )}
                 </div>
-                <span className="absolute left-full ml-4 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                <span className="absolute left-full ml-4 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover:opacity-100 transition-all z-50 whitespace-nowrap">
                   {item.label}
                 </span>
               </button>
@@ -453,48 +503,62 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       {/* ── Main Content ─────────────────────────────────────────────── */}
       <div className="flex-1 md:ml-20 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="bg-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex justify-between items-center border-b border-outline-variant/10">
+        <header className="bg-neu-bg sticky top-0 z-40 px-6 py-4 flex justify-between items-center shadow-neu-sm">
           <div className="flex items-center gap-4">
             {/* Mobile: hamburger opens settings panel */}
             <button
-              className="md:hidden text-primary cursor-pointer p-1"
+              className="md:hidden text-neu-accent cursor-pointer p-1"
               onClick={() => setSettingsOpen(true)}
               aria-label="Settings"
             >
               <Menu size={24} />
             </button>
-            <h1 className="text-xl font-extrabold text-primary tracking-tight">Ali Mobile Repair POS</h1>
+            <h1 className="text-xl font-black text-neu-text-primary tracking-tight">
+              Ali Mobile <span className="text-neu-accent">Repair POS</span>
+            </h1>
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Quick Quote Search Button */}
+            <button
+              onClick={() => setIsQuickSearchOpen(true)}
+              className="p-2.5 rounded-2xl bg-neu-bg text-neu-text-secondary shadow-neu-flat hover:text-neu-accent hover:shadow-neu-floating active:scale-[0.98] active:shadow-neu-pressed group relative mr-1 transition-all"
+              title="Quick Price Lookup (⌘K)"
+            >
+              <Search size={18} strokeWidth={2.5} />
+              <span className="absolute top-full right-0 mt-2 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover:opacity-100 transition-all z-50 whitespace-nowrap">
+                Quick Quote ⌘K
+              </span>
+            </button>
+
             <button
               onClick={() => window.location.reload()}
-              className="p-2.5 rounded-xl bg-surface-container-high text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all active:rotate-180 group relative mr-2"
+              className="p-2.5 rounded-2xl bg-neu-bg text-neu-text-secondary shadow-neu-flat hover:text-neu-accent active:rotate-180 group relative mr-2 transition-all active:shadow-neu-pressed"
               title="Refresh App"
             >
               <RotateCw size={18} />
-              <span className="absolute top-full right-0 mt-2 px-2 py-1 bg-on-surface text-surface text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              <span className="absolute top-full right-0 mt-2 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover:opacity-100 transition-all z-50 whitespace-nowrap">
                 Refresh App
               </span>
             </button>
 
-            <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest mr-4 ${backendOk ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${backendOk ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+            <div className={`hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest mr-4 bg-neu-bg shadow-neu-pressed ${backendOk ? 'text-emerald-600' : 'text-red-500'}`}>
+              <div className={`w-2 h-2 rounded-full ${backendOk ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
               {backendOk ? 'Server Active' : 'Server Offline'}
             </div>
 
             <div className="hidden sm:flex flex-col items-end mr-3">
               <span 
-                className="text-xs font-black text-on-surface uppercase tracking-wide cursor-help"
+                className="text-xs font-black text-neu-text-primary uppercase tracking-wide cursor-help"
                 title={`User ID: ${currentUser?.id || 'Unknown'}`}
               >
                 {currentUser?.username || currentUser?.email?.replace('@pos.local', '') || t('nav', 'guest')}
               </span>
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-neu-text-secondary uppercase tracking-widest">
                 {permissions?.is_super_admin ? 'Super Admin' : (currentUser?.role === 'authenticated' ? t('nav', 'staff') : (currentUser?.role || t('nav', 'staff')))}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black uppercase text-lg border border-primary/20 shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-neu-bg flex items-center justify-center text-neu-accent font-black uppercase text-lg shadow-neu-pressed border border-white/5">
               {(currentUser?.username || currentUser?.email || 'G').charAt(0).toUpperCase()}
             </div>
           </div>
@@ -514,7 +578,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         </main>
 
         {/* Bottom Nav - Mobile */}
-        <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-surface/90 backdrop-blur-lg border-t border-outline-variant/10 z-50">
+        <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-neu-bg backdrop-blur-lg border-t border-transparent z-50">
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -524,10 +588,10 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
                 className={cn(
-                  "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-xl relative",
+                  "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-2xl relative",
                   isActive
-                    ? "bg-primary-container/10 text-primary scale-110"
-                    : "text-on-surface-variant"
+                    ? "bg-neu-bg shadow-neu-pressed text-neu-accent scale-110"
+                    : "text-neu-text-secondary shadow-neu-flat"
                 )}
               >
                 <div className="relative">
@@ -549,6 +613,120 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         onClose={() => setSettingsOpen(false)}
         onLogout={onLogout}
       />
+
+      {/* ── Quick Quote Search Modal ──────────────────────────────────── */}
+      <AnimatePresence>
+        {isQuickSearchOpen && (
+          <div className="fixed inset-0 z-[100] flex justify-center">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsQuickSearchOpen(false)}
+              className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            />
+
+            {/* Search Card */}
+            <motion.div
+              initial={{ opacity: 0, y: -30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-2xl mt-20 mx-4 h-fit"
+            >
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-6 border border-white/20">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-blue-600 border border-white/30">
+                      <Search size={20} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-black tracking-tight">Quick Quote</h3>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Read-Only Price Lookup</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsQuickSearchOpen(false)}
+                    className="p-2 rounded-xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-500 hover:text-red-500 active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all"
+                  >
+                    <X size={18} strokeWidth={2.5} />
+                  </button>
+                </div>
+
+                {/* Search Input (Recessed) */}
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 mb-4 border border-black/5">
+                  <input
+                    ref={quickSearchInputRef}
+                    type="text"
+                    value={quickSearchQuery}
+                    onChange={(e) => setQuickSearchQuery(e.target.value)}
+                    placeholder="Search device or repair... (Esc to close)"
+                    className="w-full px-5 py-4 bg-transparent text-black font-bold text-base placeholder:text-gray-400 placeholder:font-bold focus:outline-none"
+                  />
+                </div>
+
+                {/* Keyboard hint */}
+                <div className="flex items-center gap-2 mb-4">
+                  <kbd className="px-2 py-0.5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/20">⌘K</kbd>
+                  <span className="text-[10px] font-bold text-gray-400">to toggle</span>
+                  <kbd className="px-2 py-0.5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/20 ml-2">ESC</kbd>
+                  <span className="text-[10px] font-bold text-gray-400">to close</span>
+                </div>
+
+                {/* Results */}
+                <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
+                  {inventoryLoading ? (
+                    <div className="py-12 text-center">
+                      <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                      <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Loading Inventory...</p>
+                    </div>
+                  ) : !quickSearchQuery.trim() ? (
+                    <div className="py-10 text-center">
+                      <Search size={32} className="mx-auto text-gray-300 mb-3" />
+                      <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Type to search prices</p>
+                      <p className="text-[10px] font-bold text-gray-400 mt-1">{inventoryCache.length} items indexed</p>
+                    </div>
+                  ) : quickSearchResults.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <p className="text-sm font-black text-gray-400">No results for "{quickSearchQuery}"</p>
+                      <p className="text-[10px] font-bold text-gray-400 mt-1">Try a different search term</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {quickSearchResults.map((item: any) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between px-5 py-3.5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] rounded-2xl border border-white/10 hover:shadow-[var(--shadow-neu-flat)] transition-all"
+                        >
+                          <div className="min-w-0 flex-1 mr-4">
+                            <p className="text-sm font-black text-black truncate">{item.name}</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">
+                              {item.category}{item.model ? ` · ${item.model}` : ''}{item.quality_grade ? ` · ${item.quality_grade}` : ''}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-lg font-black text-blue-600">${item.price?.toFixed(2)}</p>
+                            {item.stock !== undefined && (
+                              <p className={`text-[9px] font-black uppercase tracking-widest ${item.stock > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                {item.stock > 0 ? `${item.stock} In Stock` : 'Out of Stock'}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {quickSearchResults.length >= 20 && (
+                        <p className="text-center text-[10px] font-bold text-gray-400 py-2">Showing first 20 results. Refine your search for more.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

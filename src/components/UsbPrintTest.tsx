@@ -257,50 +257,50 @@ export function UsbPrintTest() {
   const isWebUsbSupported = typeof navigator !== 'undefined' && 'usb' in navigator;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+    <div className="max-w-2xl mx-auto p-6 space-y-8">
+      {/* Header Card */}
+      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-8 border border-white/20">
+        <div className="flex items-center gap-5 mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-blue-600 border border-white/40">
             <Usb size={28} />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-gray-900 tracking-tight">WebUSB Printer Test</h2>
-            <p className="text-sm font-bold text-gray-500">SAM4S ELLIX 30IIs — ESC/POS Direct Print</p>
+            <h2 className="text-2xl font-black text-black tracking-tight">WebUSB Printer Test</h2>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">SAM4S ELLIX 30IIs — ESC/POS Direct Print</p>
           </div>
         </div>
 
         {/* WebUSB Support Check */}
         {!isWebUsbSupported && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
+          <div className="bg-red-50/20 border border-red-200/50 shadow-[var(--shadow-neu-pressed)] rounded-2xl p-5 mb-8 flex items-start gap-4">
             <AlertTriangle size={20} className="text-red-500 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-700">WebUSB Not Supported</p>
-              <p className="text-xs text-red-600 mt-1">Your browser does not support WebUSB. Use Chrome or Edge on desktop. Safari and Firefox do not support this API.</p>
+              <p className="text-sm font-black text-red-700 uppercase tracking-wide">WebUSB Not Supported</p>
+              <p className="text-xs font-bold text-red-600/80 mt-1 leading-relaxed">Your browser does not support WebUSB. Use Chrome or Edge on desktop. Safari and Firefox do not support this API.</p>
             </div>
           </div>
         )}
 
         {/* Status Indicator */}
-        <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-2xl">
+        <div className="flex items-center gap-3 mb-8 p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl border border-black/5">
           <div className={`w-3 h-3 rounded-full ${status === 'connecting' || status === 'printing' ? 'animate-pulse bg-amber-400' : status === 'connected' || status === 'success' ? 'bg-green-400' : status === 'error' ? 'bg-red-400' : 'bg-gray-300'}`} />
-          <span className={`text-sm font-bold ${statusColor}`}>{statusLabel}</span>
-          {deviceName && <span className="text-xs font-bold text-gray-400 ml-auto">{deviceName}</span>}
+          <span className={`text-xs font-black uppercase tracking-wider ${statusColor}`}>{statusLabel}</span>
+          {deviceName && <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-auto bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] px-3 py-1 rounded-lg border border-white/20">{deviceName}</span>}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           {status === 'idle' || status === 'error' ? (
             <button
               onClick={handleConnect}
               disabled={!isWebUsbSupported}
-              className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
+              className="flex-1 py-4 bg-[var(--color-neu-bg)] text-blue-600 font-black rounded-2xl shadow-[var(--shadow-neu-flat)] active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] hover:shadow-[var(--shadow-neu-floating)] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs border border-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plug size={18} />
               Connect USB Printer
             </button>
           ) : status === 'connecting' || status === 'printing' ? (
-            <button disabled className="flex-1 py-4 bg-gray-200 text-gray-500 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2">
+            <button disabled className="flex-1 py-4 bg-[var(--color-neu-bg)] text-gray-500 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-[var(--shadow-neu-pressed)] border border-black/5">
               <Loader2 size={18} className="animate-spin" />
               {status === 'connecting' ? 'Connecting...' : 'Printing...'}
             </button>
@@ -308,14 +308,14 @@ export function UsbPrintTest() {
             <>
               <button
                 onClick={handleTestPrint}
-                className="flex-1 py-4 bg-green-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-[0.97]"
+                className="flex-1 py-4 bg-[var(--color-neu-bg)] text-emerald-600 font-black rounded-2xl shadow-[var(--shadow-neu-flat)] active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] hover:shadow-[var(--shadow-neu-floating)] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs border border-white/20"
               >
                 <Printer size={18} />
                 Send Test Print
               </button>
               <button
                 onClick={handleDisconnect}
-                className="py-4 px-6 bg-gray-100 text-gray-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all active:scale-[0.97]"
+                className="py-4 px-6 bg-[var(--color-neu-bg)] text-red-500 font-black rounded-2xl shadow-[var(--shadow-neu-flat)] active:scale-[0.98] active:shadow-[var(--shadow-neu-pressed)] hover:shadow-[var(--shadow-neu-floating)] transition-all uppercase tracking-widest text-xs border border-white/20"
               >
                 Disconnect
               </button>
@@ -325,33 +325,32 @@ export function UsbPrintTest() {
 
         {/* Error Display */}
         {errorMsg && (
-          <div className="mt-4 bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+          <div className="mt-6 bg-red-50/20 border border-red-200/50 shadow-[var(--shadow-neu-pressed)] rounded-2xl p-5 flex items-start gap-4">
             <AlertTriangle size={18} className="text-red-500 mt-0.5 shrink-0" />
-            <p className="text-sm font-bold text-red-700 break-all">{errorMsg}</p>
+            <p className="text-xs font-bold text-red-700 leading-relaxed break-all">{errorMsg}</p>
           </div>
         )}
       </div>
 
       {/* Debug Log */}
-      <div className="bg-gray-900 rounded-3xl overflow-hidden shadow-sm border border-gray-800">
-        <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+      <div className="bg-black/90 rounded-[2.5rem] overflow-hidden shadow-[var(--shadow-neu-pressed)] border border-black/10">
+        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Info size={14} className="text-gray-500" />
-            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Debug Console</span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Debug Console</span>
           </div>
           <span className="text-[10px] font-bold text-gray-600">{logs.length} entries</span>
         </div>
         <div
           ref={logContainerRef}
-          className="p-4 max-h-[320px] overflow-y-auto font-mono text-xs space-y-1"
-          style={{ scrollbarWidth: 'thin' }}
+          className="p-6 max-h-[320px] overflow-y-auto font-mono text-xs space-y-1.5 custom-scrollbar"
         >
           {logs.length === 0 ? (
             <p className="text-gray-600 italic">Click "Connect USB Printer" to begin...</p>
           ) : (
             logs.map((log, i) => (
-              <div key={i} className="flex gap-2">
-                <span className="text-gray-600 shrink-0">{log.time}</span>
+              <div key={i} className="flex gap-3 leading-relaxed">
+                <span className="text-gray-600 shrink-0 select-none">{log.time}</span>
                 <span className={
                   log.type === 'success' ? 'text-green-400' :
                   log.type === 'error' ? 'text-red-400' :
@@ -365,16 +364,16 @@ export function UsbPrintTest() {
       </div>
 
       {/* Instructions */}
-      <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200">
+      <div className="bg-amber-50/10 rounded-[2rem] p-6 border border-amber-200/40 shadow-[var(--shadow-neu-pressed)]">
         <p className="text-xs font-black text-amber-700 uppercase tracking-widest mb-3">Troubleshooting Tips</p>
-        <ul className="space-y-2 text-sm text-amber-800">
+        <ul className="space-y-2.5 text-xs font-bold text-amber-800/90 leading-relaxed">
           <li className="flex gap-2">
             <span className="font-black shrink-0">1.</span>
             <span>If the device doesn't appear in the picker, check that no other application (e.g., POS driver software) has claimed the USB port.</span>
           </li>
           <li className="flex gap-2">
             <span className="font-black shrink-0">2.</span>
-            <span>On macOS, you may need to unload the system printer driver: <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs font-bold">kextunload</code> for the relevant USB class driver.</span>
+            <span>On macOS, you may need to unload the system printer driver: <code className="bg-amber-100/40 px-1.5 py-0.5 rounded font-black">kextunload</code> for the relevant USB class driver.</span>
           </li>
           <li className="flex gap-2">
             <span className="font-black shrink-0">3.</span>

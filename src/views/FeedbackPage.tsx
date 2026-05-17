@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
 
 /**
  * Feedback Buffer Page
@@ -9,13 +11,15 @@ import { useState, useEffect } from 'react';
  * URL: /feedback?id=ORDER_ID
  */
 
-// ── Replace this with your actual Google Review link ──
-const GOOGLE_REVIEW_LINK = "https://g.page/r/CRGwjUq_bZMbEBM/review";
-
 export function FeedbackPage() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [view, setView] = useState<'ask' | 'negative' | 'submitted'>('ask');
   const [message, setMessage] = useState('');
+  
+  // New State for Contact Info
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -30,242 +34,145 @@ export function FeedbackPage() {
     setView('negative');
   };
 
-  const handleSubmitFeedback = (e: React.FormEvent) => {
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a future iteration, this could POST to Supabase or an API
-    console.log('[Feedback] Order:', orderId, 'Message:', message);
-    setView('submitted');
+    if (!message.trim() || !name.trim() || !phone.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Generate a unique session token for this feedback inquiry
+      const sessionToken = Math.random().toString(36).substring(2, 18);
+      
+      // 2. Create the chat session
+      await api.createChatSession(sessionToken);
+      
+      // 3. Format the payload exactly as required by ChatInbox.tsx parsing rules
+      const payload = `[CUSTOMER_INFO]\nName: ${name}\nPhone: ${phone}\n\nNegative Feedback:\n${message}`;
+      
+      // 4. Route the feedback directly to the Chat system
+      await api.sendChatMessage(sessionToken, payload);
+      
+      console.log('[Feedback] Routed to ChatInbox. Order:', orderId);
+      setView('submitted');
+    } catch (err) {
+      console.error('[Feedback] Submission failed:', err);
+      alert('Failed to send feedback. Please try again or call us.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-        color: '#f8fafc',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '480px',
-          width: '100%',
-          background: 'rgba(30, 41, 59, 0.8)',
-          backdropFilter: 'blur(16px)',
-          borderRadius: '24px',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          overflow: 'hidden',
-        }}
-      >
+    <div className="min-h-screen bg-[var(--color-neu-bg)] flex items-center justify-center p-6 font-body text-[var(--color-neu-text-primary)]">
+      <div className="max-w-[480px] w-full bg-[var(--color-neu-bg)] rounded-[2.5rem] shadow-[var(--shadow-neu-flat)] overflow-hidden flex flex-col">
+        
         {/* Header */}
-        <div
-          style={{
-            padding: '32px 24px 24px',
-            textAlign: 'center',
-            borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
-          }}
-        >
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>
+        <div className="p-10 pb-6 text-center">
+          <div className="w-20 h-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">
             {view === 'ask' ? '💬' : view === 'negative' ? '🙏' : '✅'}
           </div>
-          <h1
-            style={{
-              fontSize: '22px',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              margin: '0 0 4px',
-              color: '#f1f5f9',
-            }}
-          >
+          <h1 className="text-2xl font-black text-black tracking-tighter uppercase mb-1">
             ALI MOBILE REPAIRS
           </h1>
           {orderId && (
-            <p
-              style={{
-                fontSize: '12px',
-                color: '#64748b',
-                margin: 0,
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-              }}
-            >
+            <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">
               Order #{orderId}
             </p>
           )}
         </div>
 
         {/* Body */}
-        <div style={{ padding: '32px 24px' }}>
+        <div className="px-10 py-8 flex-grow">
           {/* ── Initial Question ── */}
           {view === 'ask' && (
-            <div style={{ textAlign: 'center' }}>
-              <h2
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 700,
-                  margin: '0 0 8px',
-                  color: '#e2e8f0',
-                }}
-              >
+            <div className="text-center">
+              <h2 className="text-xl font-black text-black mb-3 leading-tight">
                 Were you satisfied with your repair today?
               </h2>
-              <p
-                style={{
-                  fontSize: '14px',
-                  color: '#94a3b8',
-                  margin: '0 0 32px',
-                  lineHeight: 1.5,
-                }}
-              >
+              <p className="text-sm font-bold text-gray-600 mb-10 leading-relaxed">
                 Your feedback helps us improve our service.
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="flex flex-col gap-6">
                 <button
                   onClick={handlePositive}
-                  style={{
-                    padding: '16px 24px',
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    border: 'none',
-                    borderRadius: '16px',
-                    cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: 'white',
-                    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
-                  }}
+                  className="w-full py-5 px-6 rounded-2xl font-black text-lg shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98] transition-all bg-[var(--color-neu-bg)] text-emerald-600 flex items-center justify-center gap-4 group"
                 >
-                  <span style={{ fontSize: '24px' }}>😊</span>
+                  <span className="text-3xl group-hover:scale-110 transition-transform">😊</span>
                   Yes, I love it!
                 </button>
 
                 <button
                   onClick={handleNegative}
-                  style={{
-                    padding: '16px 24px',
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    border: '2px solid rgba(239, 68, 68, 0.3)',
-                    borderRadius: '16px',
-                    cursor: 'pointer',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    color: '#fca5a5',
-                    transition: 'transform 0.2s, background 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                  }}
+                  className="w-full py-5 px-6 rounded-2xl font-black text-lg shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98] transition-all bg-[var(--color-neu-bg)] text-red-500 flex items-center justify-center gap-4 group"
                 >
-                  <span style={{ fontSize: '24px' }}>😞</span>
+                  <span className="text-3xl group-hover:scale-110 transition-transform">😞</span>
                   No, I had an issue
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── Negative Feedback Form ── */}
+          {/* ── Negative Feedback Form (With Contact Capture & Chat Routing) ── */}
           {view === 'negative' && (
-            <div>
-              <h2
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 700,
-                  margin: '0 0 8px',
-                  color: '#e2e8f0',
-                  textAlign: 'center',
-                }}
-              >
+            <div className="text-center">
+              <h2 className="text-xl font-black text-black mb-3">
                 We're sorry to hear that!
               </h2>
-              <p
-                style={{
-                  fontSize: '14px',
-                  color: '#94a3b8',
-                  margin: '0 0 24px',
-                  lineHeight: 1.5,
-                  textAlign: 'center',
-                }}
-              >
-                Please tell us what went wrong so our manager can look into it and make things right.
+              <p className="text-sm font-bold text-gray-600 mb-8 leading-relaxed">
+                Please provide your contact details so our manager can reach out and resolve this personally.
               </p>
 
-              <form onSubmit={handleSubmitFeedback}>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Describe your experience..."
-                  required
-                  style={{
-                    width: '100%',
-                    minHeight: '120px',
-                    padding: '16px',
-                    fontSize: '15px',
-                    lineHeight: 1.6,
-                    border: '2px solid rgba(148, 163, 184, 0.15)',
-                    borderRadius: '16px',
-                    background: 'rgba(15, 23, 42, 0.6)',
-                    color: '#e2e8f0',
-                    resize: 'vertical',
-                    outline: 'none',
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.15)';
-                  }}
-                />
+              <form onSubmit={handleSubmitFeedback} className="space-y-6">
+                <div className="space-y-4">
+                  <div className="text-left">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1 mb-2 block">Your Name</label>
+                    <input 
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. John Smith"
+                      required
+                      className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl px-6 py-4 text-sm font-bold text-black placeholder:text-gray-400 outline-none transition-all"
+                    />
+                  </div>
+                  
+                  <div className="text-left">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1 mb-2 block">Phone Number</label>
+                    <input 
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="e.g. 0400 000 000"
+                      required
+                      className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl px-6 py-4 text-sm font-bold text-black placeholder:text-gray-400 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="text-left">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1 mb-2 block">What happened?</label>
+                    <textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Describe your experience..."
+                      required
+                      className="w-full min-h-[140px] p-6 text-sm font-bold bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl text-black placeholder:text-gray-400 outline-none transition-all resize-none"
+                    />
+                  </div>
+                </div>
+
                 <button
                   type="submit"
-                  disabled={!message.trim()}
-                  style={{
-                    width: '100%',
-                    padding: '16px',
-                    marginTop: '16px',
-                    fontSize: '15px',
-                    fontWeight: 700,
-                    border: 'none',
-                    borderRadius: '16px',
-                    cursor: message.trim() ? 'pointer' : 'not-allowed',
-                    background: message.trim()
-                      ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)'
-                      : 'rgba(100, 116, 139, 0.3)',
-                    color: message.trim() ? 'white' : '#64748b',
-                    boxShadow: message.trim() ? '0 4px 15px rgba(99, 102, 241, 0.3)' : 'none',
-                    transition: 'all 0.2s',
-                  }}
+                  disabled={isSubmitting || !message.trim() || !name.trim() || !phone.trim()}
+                  className={cn(
+                    "w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center",
+                    (message.trim() && name.trim() && phone.trim() && !isSubmitting)
+                      ? "shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98] text-blue-600 bg-[var(--color-neu-bg)]"
+                      : "opacity-50 cursor-not-allowed text-gray-400"
+                  )}
                 >
-                  Send Feedback
+                  {isSubmitting ? 'Sending...' : 'Send Feedback'}
                 </button>
               </form>
             </div>
@@ -273,61 +180,25 @@ export function FeedbackPage() {
 
           {/* ── Submitted Confirmation ── */}
           {view === 'submitted' && (
-            <div style={{ textAlign: 'center' }}>
-              <h2
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 700,
-                  margin: '0 0 12px',
-                  color: '#e2e8f0',
-                }}
-              >
-                Thank you for your feedback!
+            <div className="text-center">
+              <h2 className="text-2xl font-black text-black mb-4">
+                Feedback Received
               </h2>
-              <p
-                style={{
-                  fontSize: '14px',
-                  color: '#94a3b8',
-                  margin: '0 0 24px',
-                  lineHeight: 1.6,
-                }}
-              >
-                Our manager will review your message and get back to you as soon as possible.
-                We truly appreciate you taking the time to help us improve.
+              <p className="text-sm font-bold text-gray-600 mb-10 leading-relaxed">
+                Thank you, {name}. Your message has been sent directly to our support desk. 
+                Our manager will review it and contact you on {phone} as soon as possible.
               </p>
-              <div
-                style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                  fontSize: '13px',
-                  color: '#6ee7b7',
-                  fontWeight: 600,
-                }}
-              >
-                📞 If urgent, call us at 0481 058 514
+              <div className="p-6 rounded-3xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] flex flex-col items-center gap-2">
+                <p className="text-xs font-black text-emerald-600 uppercase tracking-widest">Urgent Issue?</p>
+                <p className="text-lg font-black text-black">📞 0481 058 514</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            padding: '16px 24px',
-            textAlign: 'center',
-            borderTop: '1px solid rgba(148, 163, 184, 0.08)',
-          }}
-        >
-          <p
-            style={{
-              fontSize: '11px',
-              color: '#475569',
-              margin: 0,
-              fontWeight: 500,
-            }}
-          >
+        <div className="p-8 text-center bg-[var(--color-neu-bg)]">
+          <p className="text-[10px] font-black text-gray-400 leading-relaxed uppercase tracking-widest px-4">
             Ali Mobile Repairs · Kiosk C1, Ringwood Square Shopping Centre
           </p>
         </div>

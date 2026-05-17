@@ -150,10 +150,10 @@ function BlogEditorInline({
 
   if (!editorReady) {
     return (
-      <div className="fixed inset-0 bg-surface z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-neu-bg z-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-          <p className="text-on-surface-variant font-bold">Loading editor...</p>
+          <div className="w-12 h-12 border-4 border-neu-accent/20 border-t-neu-accent rounded-full animate-spin shadow-neu-sm" />
+          <p className="text-neu-text-secondary font-black uppercase tracking-widest text-xs">Loading premium editor...</p>
         </div>
       </div>
     );
@@ -314,27 +314,27 @@ function TipTapEditorWrapper({
   // Toolbar button helper
   const TB = ({ onClick, isActive = false, disabled = false, children, title: t }: any) => (
     <button type="button" onClick={onClick} disabled={disabled} title={t}
-      className={`p-2 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'} ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}>
+      className={`p-2.5 rounded-2xl transition-all shadow-neu-flat active:shadow-neu-pressed active:scale-95 ${isActive ? 'bg-neu-bg shadow-neu-pressed text-neu-accent' : 'text-neu-text-secondary bg-neu-bg hover:text-neu-accent'} ${disabled ? 'opacity-30 cursor-not-allowed shadow-none' : ''}`}>
       {children}
     </button>
   );
 
   return (
-    <div className="fixed inset-0 bg-surface z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-neu-bg z-50 overflow-y-auto">
       {/* Top Bar */}
-      <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/20">
+      <div className="sticky top-0 z-10 bg-neu-bg/80 backdrop-blur-xl shadow-neu-sm">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-          <button onClick={onCancel} className="flex items-center gap-2 text-on-surface-variant hover:text-on-surface font-bold transition-colors">
-            <ArrowLeft size={20} /> Back to CMS
+          <button onClick={onCancel} className="flex items-center gap-2 text-neu-text-secondary hover:text-neu-accent font-black uppercase tracking-widest text-xs transition-colors">
+            <ArrowLeft size={18} strokeWidth={3} /> Back to CMS
           </button>
           <div className="flex items-center gap-3">
-            {error && <span className="text-error text-sm font-bold mr-2">{error}</span>}
+            {error && <span className="text-red-500 text-sm font-bold mr-2">{error}</span>}
             <button onClick={() => handleSave(false)} disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-2xl font-bold text-sm transition-all disabled:opacity-50">
+              className="flex items-center gap-2 px-5 py-2.5 bg-neu-bg text-neu-text-primary rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-neu-flat hover:shadow-neu-floating active:scale-[0.98] disabled:opacity-50">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save Draft
             </button>
             <button onClick={() => handleSave(true)} disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-on-primary rounded-2xl font-bold text-sm transition-all shadow-lg disabled:opacity-50">
+              className="flex items-center gap-2 px-5 py-2.5 bg-neu-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-neu-flat shadow-neu-accent/20 hover:brightness-110 active:scale-[0.98] disabled:opacity-50">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {isPublished ? 'Update & Publish' : 'Publish'}
             </button>
@@ -344,52 +344,54 @@ function TipTapEditorWrapper({
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Meta Fields */}
-        <div className="bg-surface-container-low rounded-3xl border border-outline-variant/10 p-8 mb-6">
-          <div className="grid gap-5">
+        <div className="bg-neu-bg rounded-[2.5rem] shadow-neu-flat p-8 mb-8 border border-white/20">
+          <div className="grid gap-6">
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Title</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Title</label>
               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Your blog post title..."
-                className="w-full text-2xl font-black text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none" />
+                className="w-full text-4xl font-black text-neu-text-primary bg-transparent border-none focus:ring-0 p-0 placeholder:text-neu-text-secondary/30 outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Slug</label>
-              <div className="flex items-center gap-2">
-                <span className="text-on-surface-variant text-sm font-mono">/blog/</span>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Slug</label>
+              <div className="flex items-center gap-2 bg-neu-bg shadow-neu-pressed rounded-2xl px-4 py-2 border border-black/5">
+                <span className="text-neu-text-secondary text-sm font-mono font-bold">/blog/</span>
                 <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugManuallyEdited(true); }}
                   placeholder="url-friendly-slug"
-                  className="flex-1 text-sm font-mono text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-3 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 outline-none" />
+                  className="flex-1 text-sm font-mono font-black text-neu-text-primary bg-transparent border-none focus:ring-0 outline-none p-0" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Description / Excerpt</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief summary for SEO..."
-                rows={2} className="w-full text-sm text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none resize-none" />
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Description / Excerpt</label>
+              <div className="bg-neu-bg shadow-neu-pressed rounded-2xl p-2 border border-black/5">
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief summary for SEO..."
+                  rows={2} className="w-full text-sm font-black text-neu-text-primary bg-transparent border-none focus:ring-0 px-4 py-2 outline-none resize-none" />
+              </div>
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-2">Cover Image</label>
-              <div className="flex items-center gap-4">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-3 pl-2">Cover Image</label>
+              <div className="flex items-center gap-6">
                 {coverImage && (
-                  <div className="relative group">
-                    <img src={coverImage} alt="Cover" className="h-20 w-32 object-cover rounded-xl border border-outline-variant/20" />
-                    <button onClick={() => setCoverImage('')}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-error text-on-error rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <X size={12} />
-                    </button>
-                  </div>
+                   <div className="relative group">
+                     <img src={coverImage} alt="Cover" className="h-24 w-40 object-cover rounded-2xl border border-white/20 shadow-neu-flat" />
+                     <button onClick={() => setCoverImage('')}
+                       className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-xl shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity active:scale-90">
+                       <X size={16} strokeWidth={3} />
+                     </button>
+                   </div>
                 )}
                 <button onClick={handleCoverImageUpload} disabled={uploading}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface-variant rounded-xl text-sm font-bold transition-all">
-                  <ImageIcon size={16} /> {uploading ? 'Uploading...' : coverImage ? 'Change Image' : 'Upload Cover'}
+                  className="flex items-center gap-3 px-6 py-4 bg-neu-bg text-neu-text-secondary rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-neu-flat hover:shadow-neu-floating active:scale-[0.98] active:shadow-neu-pressed">
+                  <ImageIcon size={20} strokeWidth={3} /> {uploading ? 'Uploading...' : coverImage ? 'Change Image' : 'Upload Cover'}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Editor */}
-        <div className="bg-surface-container-low rounded-3xl border border-outline-variant/10 overflow-hidden">
+        {/* Editor Card */}
+        <div className="bg-neu-bg rounded-[2.5rem] shadow-neu-flat overflow-hidden border border-white/20">
           {/* Toolbar */}
-          <div className="border-b border-outline-variant/20 px-4 py-2 flex items-center gap-1 flex-wrap bg-surface-container/50">
+          <div className="bg-neu-bg/50 px-6 py-4 flex items-center gap-2 flex-wrap border-b border-black/5 shadow-neu-sm relative z-20">
             <TB onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="Bold"><Bold size={16} /></TB>
             <TB onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="Italic"><Italic size={16} /></TB>
             <TB onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Underline"><UnderlineIcon size={16} /></TB>
@@ -407,30 +409,34 @@ function TipTapEditorWrapper({
               {editor.isActive('link') ? <Unlink size={16} /> : <LinkIcon size={16} />}
             </TB>
             <TB onClick={handleImageUpload} disabled={uploading} title="Insert Image"><ImageIcon size={16} /></TB>
-            <div className="w-px h-6 bg-outline-variant/20 mx-1" />
-            <TB onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo"><Undo size={16} /></TB>
-            <TB onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo"><Redo size={16} /></TB>
-            {uploading && <span className="ml-3 text-xs text-primary font-bold flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Uploading...</span>}
+            <div className="w-px h-8 bg-black/5 mx-2" />
+            <TB onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo"><Undo size={18} strokeWidth={3} /></TB>
+            <TB onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} title="Redo"><Redo size={18} strokeWidth={3} /></TB>
+            {uploading && <span className="ml-4 text-xs text-neu-accent font-black uppercase tracking-widest flex items-center gap-2 animate-pulse"><Loader2 size={14} className="animate-spin" /> Uploading...</span>}
           </div>
           {/* Editor Area */}
-          <EditorContent editor={editor} />
+          <div className="p-4">
+            <div className="bg-neu-bg shadow-neu-pressed rounded-[2rem] border border-black/5 overflow-hidden">
+              <EditorContent editor={editor} />
+            </div>
+          </div>
           <style>{`
-            .tiptap { min-height: 400px; padding: 1.5rem; font-size: 1.05rem; line-height: 1.8; color: var(--on-surface, #1e293b); }
+            .tiptap { min-height: 400px; padding: 2rem; font-size: 1.1rem; line-height: 1.8; color: var(--color-neu-text-primary, #2d3748); }
             .tiptap:focus { outline: none; }
-            .tiptap p.is-editor-empty:first-child::before { color: #94a3b8; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
-            .tiptap h1 { font-size: 2rem; font-weight: 900; margin: 1.5rem 0 0.75rem; }
-            .tiptap h2 { font-size: 1.5rem; font-weight: 800; margin: 1.25rem 0 0.6rem; }
-            .tiptap h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; }
-            .tiptap p { margin-bottom: 0.75rem; }
-            .tiptap ul, .tiptap ol { padding-left: 1.5rem; margin-bottom: 1rem; }
-            .tiptap li { margin-bottom: 0.25rem; }
-            .tiptap blockquote { border-left: 4px solid var(--primary, #6366f1); padding: 0.75rem 1.25rem; margin: 1rem 0; background: var(--surface-container, #f1f5f9); border-radius: 0 12px 12px 0; font-style: italic; }
-            .tiptap pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 0.9rem; overflow-x: auto; margin: 1rem 0; }
-            .tiptap code { background: var(--surface-container, #f1f5f9); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
-            .tiptap pre code { background: none; color: inherit; padding: 0; }
-            .tiptap img { max-width: 100%; height: auto; border-radius: 12px; margin: 1.5rem 0; }
-            .tiptap a { color: #2563eb; font-weight: 600; text-decoration: underline; }
-            .tiptap strong { font-weight: 800; }
+            .tiptap p.is-editor-empty:first-child::before { color: #A3B1C6; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; font-weight: 700; }
+            .tiptap h1 { font-size: 2.5rem; font-weight: 900; margin: 2rem 0 1rem; color: #000; letter-spacing: -0.025em; }
+            .tiptap h2 { font-size: 1.75rem; font-weight: 800; margin: 1.5rem 0 0.75rem; color: #000; }
+            .tiptap h3 { font-size: 1.4rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #000; }
+            .tiptap p { margin-bottom: 1rem; }
+            .tiptap ul, .tiptap ol { padding-left: 1.75rem; margin-bottom: 1.25rem; }
+            .tiptap li { margin-bottom: 0.5rem; }
+            .tiptap blockquote { border-left: 6px solid var(--color-neu-accent); padding: 1rem 1.5rem; margin: 1.5rem 0; background: rgba(0,0,0,0.02); border-radius: 0 16px 16px 0; font-style: italic; font-weight: 500; }
+            .tiptap pre { background: #2d3748; color: #fff; padding: 1.25rem; border-radius: 16px; font-family: monospace; font-size: 0.95rem; overflow-x: auto; margin: 1.5rem 0; shadow: inset 4px 4px 8px rgba(0,0,0,0.2); }
+            .tiptap code { background: rgba(0,0,0,0.05); padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.9em; font-weight: 700; }
+            .tiptap pre code { background: none; color: inherit; padding: 0; font-weight: 400; }
+            .tiptap img { max-width: 100%; height: auto; border-radius: 20px; margin: 2rem 0; shadow: 8px 8px 16px rgba(0,0,0,0.1); }
+            .tiptap a { color: var(--color-neu-accent); font-weight: 700; text-decoration: underline; }
+            .tiptap strong { font-weight: 900; color: #000; }
           `}</style>
         </div>
       </div>
@@ -696,15 +702,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       <div className="flex items-center gap-6 mb-12">
         <button
           onClick={onBack}
-          className="w-12 h-12 bg-surface-container-low rounded-2xl flex items-center justify-center text-on-surface-variant hover:text-primary hover:shadow-lg transition-all border border-outline-variant/10"
+          className="w-14 h-14 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-500 hover:text-blue-600 active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all border border-white/20"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={24} strokeWidth={3} />
         </button>
         <div>
-          <h1 className="text-4xl font-black text-on-surface tracking-tighter">
-            Storefront <span className="text-primary italic">CMS</span>
+          <h1 className="text-5xl font-black text-black tracking-tight [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
+            Storefront <span className="text-blue-600 italic">CMS</span>
           </h1>
-          <p className="text-on-surface-variant font-medium">Manage announcements and blog content.</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 bg-white/50 px-4 py-1.5 rounded-full inline-block shadow-[var(--shadow-neu-sm)]">Announcements, Blogs & Upsells</p>
         </div>
       </div>
 
@@ -713,15 +719,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="mb-16">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-            <Megaphone className="text-primary" size={24} />
+          <h2 className="text-xl font-black text-black flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600"><Megaphone size={22} strokeWidth={3} /></div>
             Top Announcement Bar
           </h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg"
+            className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={3} />
             Add Announcement
           </button>
         </div>
@@ -735,29 +741,31 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-surface-container-low border border-primary/20 rounded-3xl p-6 flex items-center gap-4">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddAnnouncement()}
-                  placeholder="Type your announcement message..."
-                  autoFocus
-                  className="flex-1 text-lg font-bold text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
-                />
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-blue-600/20 rounded-3xl p-6 flex items-center gap-4">
+                <div className="flex-1 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddAnnouncement()}
+                    placeholder="Type your announcement message..."
+                    autoFocus
+                    className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                  />
+                </div>
                 <button
                   onClick={handleAddAnnouncement}
                   disabled={addingAnnouncement || !newMessage.trim()}
-                  className="flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-2xl font-black text-sm hover:brightness-110 transition-all disabled:opacity-50"
                 >
-                  {addingAnnouncement ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                  {addingAnnouncement ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} strokeWidth={3} />}
                   Save
                 </button>
                 <button
                   onClick={() => { setShowAddForm(false); setNewMessage(''); }}
-                  className="p-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all"
+                  className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                 >
-                  <X size={18} />
+                  <X size={18} strokeWidth={3} />
                 </button>
               </div>
             </motion.div>
@@ -766,16 +774,16 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
         {/* Announcements List */}
         {loadingAnnouncements ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] text-on-surface-variant gap-4">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-bold">Loading announcements...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] text-gray-400 gap-4 border border-black/5">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <p className="font-black text-sm uppercase tracking-widest">Loading announcements...</p>
           </div>
         ) : announcements.length === 0 ? (
-          <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
-            <Megaphone size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-on-surface mb-2">No active announcements</h3>
-            <p className="text-on-surface-variant mb-8 max-w-sm mx-auto">Create your first announcement to show it on the top bar of your public storefront.</p>
-            <button onClick={() => setShowAddForm(true)} className="text-primary font-bold hover:underline">
+          <div className="text-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <Megaphone size={48} className="mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-black mb-2">No active announcements</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-bold">Create your first announcement to show it on the top bar of your public storefront.</p>
+            <button onClick={() => setShowAddForm(true)} className="text-blue-600 font-black hover:underline">
               Get started by adding one →
             </button>
           </div>
@@ -789,10 +797,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-surface-container-low border border-outline-variant/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-primary/20 transition-all"
+                  className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-white/20 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-[var(--shadow-neu-sm)] transition-all"
                 >
-                  <div className="w-10 h-10 bg-surface-container rounded-xl flex items-center justify-center text-outline group-hover:text-primary/50 transition-colors">
-                    <GripVertical size={20} />
+                  <div className="w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                    <GripVertical size={20} strokeWidth={3} />
                   </div>
                   <div className="flex-1">
                     <input
@@ -800,14 +808,14 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.message}
                       onChange={(e) => setAnnouncements(announcements.map(a => a.id === item.id ? { ...a, message: e.target.value } : a))}
                       onBlur={(e) => handleUpdateAnnouncement(item.id, { message: e.target.value })}
-                      className="w-full text-lg font-bold text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                      className="w-full text-lg font-black text-black bg-transparent border-none focus:ring-0 p-0 placeholder:text-gray-300 outline-none"
                       placeholder="Enter announcement message..."
                     />
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Order #{item.display_order}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Added {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -815,20 +823,20 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleActive(item.id, item.is_active)}
-                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-bold text-xs ${
+                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-black text-xs ${
                         item.is_active
-                          ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                          ? 'bg-green-50 text-green-600 shadow-[var(--shadow-neu-pressed)] border border-green-100'
+                          : 'bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-400'
                       }`}
                     >
-                      {item.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                      {item.is_active ? <ToggleRight size={20} strokeWidth={3} /> : <ToggleLeft size={20} strokeWidth={3} />}
                       {item.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </button>
                     <button
                       onClick={() => handleDeleteAnnouncement(item.id)}
-                      className="p-3 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all"
+                      className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={20} strokeWidth={3} />
                     </button>
                   </div>
                 </motion.div>
@@ -838,8 +846,8 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         )}
 
         {announcementError && (
-          <div className="flex items-center gap-3 p-4 bg-error-container/20 border border-error/20 rounded-2xl text-error text-sm font-bold mt-4">
-            <AlertCircle size={18} /> {announcementError}
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-black mt-4 shadow-[var(--shadow-neu-sm)]">
+            <AlertCircle size={18} strokeWidth={3} /> {announcementError}
           </div>
         )}
       </section>
@@ -849,38 +857,38 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-            <BookOpen className="text-primary" size={24} />
+          <h2 className="text-xl font-black text-black flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600"><BookOpen size={22} strokeWidth={3} /></div>
             Blog Management
           </h2>
           <button
             onClick={() => { setEditingPost(null); setEditorOpen(true); }}
-            className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg"
+            className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={3} />
             New Blog Post
           </button>
         </div>
 
         {loadingBlogs ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] text-on-surface-variant gap-4">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-bold">Loading blog posts...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] text-gray-400 gap-4 border border-black/5">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <p className="font-black text-sm uppercase tracking-widest">Loading blog posts...</p>
           </div>
         ) : blogError ? (
-          <div className="text-center py-16 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
-            <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-on-surface mb-2">Blog Table Not Found</h3>
-            <p className="text-on-surface-variant max-w-md mx-auto text-sm mb-6">
-              Run <code className="bg-surface-container px-1.5 py-0.5 rounded text-primary font-bold">storefront_blogs.sql</code> in your Supabase SQL Editor.
+          <div className="text-center py-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
+            <h3 className="text-lg font-black text-black mb-2">Blog Table Not Found</h3>
+            <p className="text-gray-500 max-w-md mx-auto text-sm mb-6 font-bold">
+              Run <code className="bg-blue-50 px-1.5 py-0.5 rounded text-blue-600 font-black">storefront_blogs.sql</code> in your Supabase SQL Editor.
             </p>
           </div>
         ) : blogPosts.length === 0 ? (
-          <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
-            <FileText size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-on-surface mb-2">No blog posts yet</h3>
-            <p className="text-on-surface-variant mb-8 max-w-sm mx-auto">Start creating content for your storefront blog.</p>
-            <button onClick={() => { setEditingPost(null); setEditorOpen(true); }} className="text-primary font-bold hover:underline">
+          <div className="text-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <FileText size={48} className="mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-black mb-2">No blog posts yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-bold">Start creating content for your storefront blog.</p>
+            <button onClick={() => { setEditingPost(null); setEditorOpen(true); }} className="text-blue-600 font-black hover:underline">
               Write your first post →
             </button>
           </div>
@@ -894,38 +902,38 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-surface-container-low border border-outline-variant/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-primary/20 transition-all"
+                  className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-white/20 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-[var(--shadow-neu-sm)] transition-all"
                 >
                   {post.cover_image ? (
-                    <img src={post.cover_image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-outline-variant/20 shrink-0" />
+                    <img src={post.cover_image} alt="" className="w-16 h-16 rounded-2xl object-cover border border-white/20 shadow-[var(--shadow-neu-sm)] shrink-0" />
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shrink-0">
-                      <FileText size={24} className="text-outline" />
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] flex items-center justify-center shrink-0">
+                      <FileText size={24} className="text-gray-400" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-on-surface truncate">{post.title}</h3>
+                    <h3 className="text-lg font-black text-black truncate">{post.title}</h3>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
-                        post.is_published ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600'
+                      <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full ${
+                        post.is_published ? 'bg-green-50 text-green-600 shadow-[var(--shadow-neu-sm)]' : 'bg-amber-50 text-amber-600 shadow-[var(--shadow-neu-sm)]'
                       }`}>
                         {post.is_published ? 'Published' : 'Draft'}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)] flex items-center gap-1">
                         <Calendar size={10} />
                         {post.published_at ? new Date(post.published_at).toLocaleDateString() : new Date(post.created_at || '').toLocaleDateString()}
                       </span>
-                      <span className="text-[10px] font-mono text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">/blog/{post.slug}</span>
+                      <span className="text-[10px] font-mono text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">/blog/{post.slug}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => { setEditingPost(post); setEditorOpen(true); }}
-                      className="p-3 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-2xl transition-all" title="Edit">
-                      <Pencil size={18} />
+                      className="p-3 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all" title="Edit">
+                      <Pencil size={18} strokeWidth={3} />
                     </button>
                     <button onClick={() => handleDeleteBlogPost(post.id!)}
-                      className="p-3 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all" title="Delete">
-                      <Trash2 size={18} />
+                      className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all" title="Delete">
+                      <Trash2 size={18} strokeWidth={3} />
                     </button>
                   </div>
                 </motion.div>
@@ -940,15 +948,15 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       {/* ═══════════════════════════════════════ */}
       <section className="pb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-            <ShoppingBag className="text-primary" size={24} />
+          <h2 className="text-xl font-black text-black flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600"><ShoppingBag size={22} strokeWidth={3} /></div>
             Cart Upsells & Accessories
           </h2>
           <button
             onClick={() => setShowAddUpsellForm(true)}
-            className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg"
+            className="flex items-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:brightness-110 active:scale-95 transition-all"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={3} />
             Add Upsell
           </button>
         </div>
@@ -962,68 +970,76 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-4"
             >
-              <div className="bg-surface-container-low border border-primary/20 rounded-3xl p-6 space-y-4">
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-blue-600/20 rounded-3xl p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Name *</label>
-                    <input
-                      type="text"
-                      value={newUpsellName}
-                      onChange={(e) => setNewUpsellName(e.target.value)}
-                      placeholder="e.g. Premium Tempered Glass"
-                      autoFocus
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Name *</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="text"
+                        value={newUpsellName}
+                        onChange={(e) => setNewUpsellName(e.target.value)}
+                        placeholder="e.g. Premium Tempered Glass"
+                        autoFocus
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Description</label>
-                    <input
-                      type="text"
-                      value={newUpsellDescription}
-                      onChange={(e) => setNewUpsellDescription(e.target.value)}
-                      placeholder="e.g. Protect your screen from scratches"
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Description</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="text"
+                        value={newUpsellDescription}
+                        onChange={(e) => setNewUpsellDescription(e.target.value)}
+                        placeholder="e.g. Protect your screen from scratches"
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Regular Price ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={newUpsellRegularPrice}
-                      onChange={(e) => setNewUpsellRegularPrice(e.target.value)}
-                      placeholder="39.99"
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Regular Price ($)</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={newUpsellRegularPrice}
+                        onChange={(e) => setNewUpsellRegularPrice(e.target.value)}
+                        placeholder="39.99"
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-widest text-on-surface-variant mb-1.5">Bundle Price ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={newUpsellBundlePrice}
-                      onChange={(e) => setNewUpsellBundlePrice(e.target.value)}
-                      placeholder="25.00"
-                      className="w-full text-base font-bold text-on-surface bg-surface-container border border-outline-variant/20 rounded-xl px-4 py-3 placeholder:text-outline outline-none focus:border-primary/30 transition-colors"
-                    />
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 pl-2">Bundle Price ($)</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1.5 border border-black/5">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={newUpsellBundlePrice}
+                        onChange={(e) => setNewUpsellBundlePrice(e.target.value)}
+                        placeholder="25.00"
+                        className="w-full text-base font-black text-black bg-transparent px-4 py-3 placeholder:text-gray-300 outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 pt-2">
                   <button
                     onClick={handleAddUpsell}
                     disabled={addingUpsell || !newUpsellName.trim()}
-                    className="flex items-center gap-2 bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm hover:brightness-110 transition-all disabled:opacity-50"
                   >
-                    {addingUpsell ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                    {addingUpsell ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} strokeWidth={3} />}
                     Save Upsell
                   </button>
                   <button
                     onClick={() => { setShowAddUpsellForm(false); setNewUpsellName(''); setNewUpsellDescription(''); setNewUpsellRegularPrice(''); setNewUpsellBundlePrice(''); }}
-                    className="p-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all"
+                    className="px-4 py-3 text-gray-500 hover:text-red-500 font-black text-sm rounded-2xl transition-all"
                   >
                     Cancel
                   </button>
@@ -1035,35 +1051,35 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
         {/* Upsells List */}
         {loadingUpsells ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] text-on-surface-variant gap-4">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-bold">Loading upsells...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] text-gray-400 gap-4 border border-black/5">
+            <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <p className="font-black text-sm uppercase tracking-widest">Loading upsells...</p>
           </div>
         ) : upsellError && upsells.length === 0 ? (
-          <div className="text-center py-16 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
-            <AlertCircle size={48} className="mx-auto mb-4 text-amber-400" />
-            <h3 className="text-lg font-bold text-on-surface mb-2">Supabase Error Detected</h3>
-            <p className="text-on-surface-variant max-w-lg mx-auto text-sm mb-6 bg-surface-container p-4 rounded-2xl font-mono break-all">
+          <div className="text-center py-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
+            <h3 className="text-lg font-black text-black mb-2">Supabase Error Detected</h3>
+            <p className="text-gray-500 max-w-lg mx-auto text-sm mb-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] p-4 rounded-2xl font-mono break-all">
               {upsellError}
             </p>
-            <p className="text-on-surface-variant max-w-md mx-auto text-sm mb-6">
+            <p className="text-gray-500 max-w-md mx-auto text-sm mb-6 font-bold">
               If the error says "relation does not exist", please ensure you have run the SQL script in your Supabase SQL Editor.
             </p>
             <button 
               onClick={() => { setUpsellError(null); fetchUpsells(); }}
-              className="text-primary font-bold hover:underline"
+              className="text-blue-600 font-black hover:underline"
             >
               Try to refresh table connection →
             </button>
           </div>
         ) : upsells.length === 0 ? (
-          <div className="text-center py-20 bg-surface-container-low border-2 border-dashed border-outline-variant/20 rounded-[2.5rem]">
-            <ShoppingBag size={48} className="mx-auto mb-4 text-outline" />
-            <h3 className="text-xl font-bold text-on-surface mb-2">No upsell items yet</h3>
-            <p className="text-on-surface-variant mb-8 max-w-sm mx-auto">Add accessories and add-ons that customers can bundle with their repair.</p>
+          <div className="text-center py-20 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5">
+            <ShoppingBag size={48} className="mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-black mb-2">No upsell items yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-bold">Add accessories and add-ons that customers can bundle with their repair.</p>
             <button
               onClick={() => setShowAddUpsellForm(true)}
-              className="text-primary font-bold hover:underline"
+              className="text-blue-600 font-black hover:underline"
             >
               Add your first upsell →
             </button>
@@ -1078,10 +1094,10 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-surface-container-low border border-outline-variant/10 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-xl hover:border-primary/20 transition-all"
+                  className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] border border-white/20 rounded-3xl p-6 flex items-center gap-6 group hover:shadow-[var(--shadow-neu-sm)] transition-all"
                 >
-                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary/60 shrink-0">
-                    <DollarSign size={20} />
+                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0 shadow-[var(--shadow-neu-sm)]">
+                    <DollarSign size={20} strokeWidth={3} />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -1090,7 +1106,7 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.name}
                       onChange={(e) => setUpsells(upsells.map(u => u.id === item.id ? { ...u, name: e.target.value } : u))}
                       onBlur={(e) => handleUpdateUpsell(item.id, { name: e.target.value })}
-                      className="w-full text-lg font-bold text-on-surface bg-transparent border-none focus:ring-0 p-0 placeholder:text-outline outline-none"
+                      className="w-full text-lg font-black text-black bg-transparent border-none focus:ring-0 p-0 placeholder:text-gray-300 outline-none"
                       placeholder="Upsell name..."
                     />
                     <input
@@ -1098,17 +1114,17 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                       value={item.description}
                       onChange={(e) => setUpsells(upsells.map(u => u.id === item.id ? { ...u, description: e.target.value } : u))}
                       onBlur={(e) => handleUpdateUpsell(item.id, { description: e.target.value })}
-                      className="w-full text-sm text-on-surface-variant bg-transparent border-none focus:ring-0 p-0 mt-0.5 placeholder:text-outline outline-none"
+                      className="w-full text-sm text-gray-500 bg-transparent border-none focus:ring-0 p-0 mt-0.5 placeholder:text-gray-300 outline-none font-bold"
                       placeholder="Description..."
                     />
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         RRP ${Number(item.regular_price).toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Bundle ${Number(item.bundle_price).toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white/50 px-2.5 py-0.5 rounded-full shadow-[var(--shadow-neu-sm)]">
                         Added {new Date(item.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -1117,21 +1133,21 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => toggleUpsellActive(item.id, item.is_active)}
-                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-bold text-xs ${
+                      className={`p-3 rounded-2xl transition-all flex items-center gap-2 font-black text-xs ${
                         item.is_active
-                          ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20'
-                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                          ? 'bg-green-50 text-green-600 shadow-[var(--shadow-neu-pressed)] border border-green-100'
+                          : 'bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-400'
                       }`}
                     >
-                      {item.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                      {item.is_active ? <ToggleRight size={20} strokeWidth={3} /> : <ToggleLeft size={20} strokeWidth={3} />}
                       {item.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </button>
 
                     <button
                       onClick={() => handleDeleteUpsell(item.id)}
-                      className="p-3 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-2xl transition-all"
+                      className="p-3 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={20} strokeWidth={3} />
                     </button>
                   </div>
                 </motion.div>
@@ -1141,8 +1157,8 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
         )}
 
         {upsellError && !loadingUpsells && upsells.length > 0 && (
-          <div className="flex items-center gap-3 p-4 bg-error-container/20 border border-error/20 rounded-2xl text-error text-sm font-bold mt-4">
-            <AlertCircle size={18} />
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-black mt-4 shadow-[var(--shadow-neu-sm)]">
+            <AlertCircle size={18} strokeWidth={3} />
             {upsellError}
           </div>
         )}

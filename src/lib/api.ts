@@ -301,4 +301,22 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  // Chat
+  createChatSession: async (token: string) => {
+    const res = await fetch(`${API_URL}/chat/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    return handleResponse(res);
+  },
+  sendChatMessage: async (token: string, content: string) => {
+    const res = await fetch(`${API_URL}/chat/session/${token}/message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    return handleResponse(res);
+  },
 };

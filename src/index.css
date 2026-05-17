@@ -4,40 +4,32 @@
   --font-headline: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-primary: #004253;
-  --color-primary-container: #005b71;
-  --color-on-primary: #ffffff;
-  --color-secondary: #4a626b;
-  --color-secondary-container: #cde7f2;
-  --color-on-secondary-container: #506872;
-  --color-tertiary: #5c3200;
-  --color-tertiary-container: #784815;
-  --color-on-tertiary-container: #fdba7d;
-  --color-surface: #f7fafb;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f1f4f5;
-  --color-surface-container: #ebeeef;
-  --color-surface-container-high: #e6e9ea;
-  --color-surface-container-highest: #e0e3e4;
-  --color-on-surface: #181c1d;
-  --color-on-surface-variant: #40484c;
-  --color-outline: #70787d;
-  --color-outline-variant: #bfc8cc;
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
-  --color-on-error-container: #93000a;
-  --color-primary-fixed-dim: #8dd0e9;
+  /* Neumorphic Core Palette */
+  --color-neu-bg: #E0E5EC;
+  --color-neu-shadow-dark: #A3B1C6;
+  --color-neu-shadow-light: #ffffff;
+  --color-neu-accent: #00d2ff;
+  --color-neu-accent-hover: #3a86ff;
+  
+  /* Text Colors */
+  --color-neu-text-primary: #2d3748;
+  --color-neu-text-secondary: #718096;
+
+  /* Neumorphic Shadows (Depth created purely with box-shadow) */
+  --shadow-neu-flat: 8px 8px 16px var(--color-neu-shadow-dark), -8px -8px 16px var(--color-neu-shadow-light);
+  --shadow-neu-pressed: inset 6px 6px 12px var(--color-neu-shadow-dark), inset -6px -6px 12px var(--color-neu-shadow-light);
+  --shadow-neu-sm: 4px 4px 8px var(--color-neu-shadow-dark), -4px -4px 8px var(--color-neu-shadow-light);
+  --shadow-neu-floating: 12px 12px 24px var(--color-neu-shadow-dark), -12px -12px 24px var(--color-neu-shadow-light);
 }
 
 @layer base {
-  * {
-    @apply border-outline-variant/15;
-  }
   body {
-    @apply bg-surface text-on-surface font-body;
+    @apply bg-neu-bg text-neu-text-primary font-body;
+    /* Soft UI completely avoids harsh borders */
+    border: none;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline;
+    @apply font-headline text-neu-text-primary;
   }
 }
 
@@ -49,10 +41,14 @@
   scrollbar-width: none;
 }
 
-.glass {
-  @apply bg-white/80 backdrop-blur-md border border-white/20;
-}
-
-.signature-gradient {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
+@media print {
+  body, html, #root, main, aside, header, div, section, button, input, textarea, span, p, h1, h2, h3, h4, h5, h6, table, tr, td, th {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-radius: 0px !important;
+    border-color: #000000 !important;
+  }
 }

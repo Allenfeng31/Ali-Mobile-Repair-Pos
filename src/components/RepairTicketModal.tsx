@@ -262,7 +262,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
             <div className="flex-grow overflow-y-auto p-8 bg-gray-50 custom-scrollbar">
               <div 
                 ref={ticketRef}
-                className="p-6 mx-auto font-['Inter'] text-[12px] leading-tight bg-white text-black"
+                className="p-6 mx-auto font-['Inter'] text-[12px] leading-tight bg-white text-black print:bg-white print:shadow-none print:text-black print:rounded-none"
                 style={{ width: '80mm' }}
               >
                 <div className="text-center mb-6">
