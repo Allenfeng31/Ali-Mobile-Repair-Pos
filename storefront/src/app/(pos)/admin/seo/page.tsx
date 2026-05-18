@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { 
   Radar, 
   ArrowLeft, 
@@ -19,9 +19,10 @@ import Link from 'next/link';
 interface KeywordRecord {
   id: string;
   keyword: string;
-  source: string;
-  weight: number;
-  discoveredAt: string;
+  source?: string | null;
+  search_weight?: number | null;
+  created_at?: string;
+  updated_at?: string;
   status: 'pending' | 'approved' | 'blocked';
 }
 
@@ -31,59 +32,50 @@ interface ScoutSummary {
   timestamp: string;
 }
 
-const initialKeywords: KeywordRecord[] = [
-  {
-    id: '1',
-    keyword: 'iphone screen repair ringwood',
-    source: 'Google Scout',
-    weight: 95,
-    discoveredAt: 'Today, 10:24 AM',
-    status: 'pending'
-  },
-  {
-    id: '2',
-    keyword: 'cheap ipad battery swap vic 3134',
-    source: 'Bing Geospatial',
-    weight: 82,
-    discoveredAt: 'Yesterday, 4:15 PM',
-    status: 'pending'
-  },
-  {
-    id: '3',
-    keyword: 'samsung screen replacement ringwood square',
-    source: 'Google Map Scraper',
-    weight: 78,
-    discoveredAt: '2 days ago',
-    status: 'pending'
-  },
-  {
-    id: '4',
-    keyword: 'macbook water damage repair melbourne',
-    source: 'AI Content Ingestion',
-    weight: 64,
-    discoveredAt: '3 days ago',
-    status: 'pending'
-  }
-];
-
 export default function SeoGeoScoutConsole() {
-  const [keywords, setKeywords] = useState<KeywordRecord[]>(initialKeywords);
+  const [keywords, setKeywords] = useState<KeywordRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'blocked'>('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [isScouting, setIsScouting] = useState(false);
   const [scoutSummary, setScoutSummary] = useState<ScoutSummary | null>(null);
 
-  // Handle actions
-  const handleApprove = (id: string) => {
-    setKeywords(prev => 
-      prev.map(kw => kw.id === id ? { ...kw, status: 'approved' } : kw)
-    );
-  };
+  const loadRealKeywords = useCallback(async () => {
+    try {
+      const res = await fetch('/api/seo/scout', { credentials: 'include' });
+      const json = await res.json();
 
-  const handleBlock = (id: string) => {
-    setKeywords(prev => 
-      prev.map(kw => kw.id === id ? { ...kw, status: 'blocked' } : kw)
-    );
+      if (res.ok && json.status === 'SUCCESS') {
+        setKeywords(Array.isArray(json.data) ? json.data : []);
+      } else {
+        console.error('Failed to load real keywords:', json.error || json.message);
+      }
+    } catch (err) {
+      console.error('Failed to load real keywords:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadRealKeywords();
+  }, [loadRealKeywords]);
+
+  const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'blocked') => {
+    try {
+      const res = await fetch('/api/seo/scout', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id, status: newStatus })
+      });
+
+      if (res.ok) {
+        await loadRealKeywords();
+      } else {
+        const json = await res.json();
+        console.error('Triage update failed:', json.error || json.message);
+      }
+    } catch (err) {
+      console.error('Triage update failed:', err);
+    }
   };
 
   const handleTriggerScout = async () => {
@@ -115,6 +107,7 @@ export default function SeoGeoScoutConsole() {
           timestamp: data.data.timestamp
         });
         alert(`Scout completed! Discovered: ${data.data.discovered}, Blocked: ${data.data.blockedByRisk}`);
+        await loadRealKeywords();
       } else {
         alert(`Scout failed or locked: ${data.error || data.message}`);
       }
@@ -126,17 +119,29 @@ export default function SeoGeoScoutConsole() {
   };
 
   // Metrics calculations
-  const totalDiscovered = scoutSummary?.discovered ?? keywords.length;
+  const totalDiscovered = keywords.length;
   const builderQueueSize = keywords.filter(kw => kw.status === 'approved').length;
-  const violationsBlocked = scoutSummary?.blockedByRisk ?? keywords.filter(kw => kw.status === 'blocked').length;
+  const violationsBlocked = keywords.filter(kw => kw.status === 'blocked').length;
 
   // Filtered keywords to display
   const filteredKeywords = keywords.filter(kw => {
     const matchesTab = kw.status === activeTab;
     const matchesSearch = kw.keyword.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          kw.source.toLowerCase().includes(searchQuery.toLowerCase());
+                          (kw.source || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  const formatDiscoveredAt = (value?: string) => {
+    if (!value) return 'Unknown';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Unknown';
+
+    return new Intl.DateTimeFormat('en-AU', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+  };
 
   return (
     <div className="min-h-screen bg-[#f0f4f8] p-8 text-slate-800 antialiased font-sans">
@@ -315,18 +320,18 @@ export default function SeoGeoScoutConsole() {
                       {/* Source */}
                       <td className="py-5 px-4">
                         <span className="inline-block px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-[#f0f4f8] rounded-full text-slate-500 border border-white/50 shadow-[1px_1px_3px_#d1d9e6,-1px_-1px_3px_#ffffff]">
-                          {item.source}
+                          {item.source || 'SEO Scout'}
                         </span>
                       </td>
 
                       {/* Weight */}
                       <td className="py-5 px-4 text-center">
                         <span className={`inline-block px-2.5 py-1 text-xs font-black rounded-lg ${
-                          item.weight >= 85 
+                          (item.search_weight || 0) >= 85 
                             ? 'bg-emerald-50 text-emerald-600 shadow-[inset_1px_1px_3px_#d1d9e6,inset_-1px_-1px_3px_#ffffff]' 
                             : 'bg-cyan-50 text-cyan-600 shadow-[inset_1px_1px_3px_#d1d9e6,inset_-1px_-1px_3px_#ffffff]'
                         }`}>
-                          {item.weight}%
+                          {item.search_weight || 0}
                         </span>
                       </td>
 
@@ -334,7 +339,7 @@ export default function SeoGeoScoutConsole() {
                       <td className="py-5 px-4">
                         <div className="text-xs text-slate-400 font-bold flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
-                          {item.discoveredAt}
+                          {formatDiscoveredAt(item.created_at || item.updated_at)}
                         </div>
                       </td>
 
@@ -345,7 +350,7 @@ export default function SeoGeoScoutConsole() {
                           {item.status === 'pending' && (
                             <>
                               <button
-                                onClick={() => handleApprove(item.id)}
+                                onClick={() => handleStatusUpdate(item.id, 'approved')}
                                 className="w-9 h-9 bg-[#f0f4f8] text-emerald-600 rounded-xl flex items-center justify-center 
                                          shadow-[3px_3px_6px_#d1d9e6,-3px_-3px_6px_#ffffff] 
                                          hover:shadow-[inset_2px_2px_4px_#d1d9e6,inset_-2px_-2px_4px_#ffffff] 
@@ -356,7 +361,7 @@ export default function SeoGeoScoutConsole() {
                               </button>
                               
                               <button
-                                onClick={() => handleBlock(item.id)}
+                                onClick={() => handleStatusUpdate(item.id, 'blocked')}
                                 className="w-9 h-9 bg-[#f0f4f8] text-rose-600 rounded-xl flex items-center justify-center 
                                          shadow-[3px_3px_6px_#d1d9e6,-3px_-3px_6px_#ffffff] 
                                          hover:shadow-[inset_2px_2px_4px_#d1d9e6,inset_-2px_-2px_4px_#ffffff] 

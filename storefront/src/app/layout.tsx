@@ -1,6 +1,5 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { TopAnnouncementBar } from "@/components/TopAnnouncementBar";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -39,10 +38,8 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className="antialiased min-h-screen bg-slate-50">
-        <ThemeProvider>
-          <TopAnnouncementBar />
-          {children}
-        </ThemeProvider>
+        <TopAnnouncementBar />
+        {children}
       </body>
     </html>
   );

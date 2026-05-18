@@ -5,6 +5,9 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   maybeSingle: vi.fn(),
   insert: vi.fn(),
+  order: vi.fn(),
+  update: vi.fn(),
+  updateEq: vi.fn(),
   runScoutEngine: vi.fn(),
 }));
 
@@ -28,11 +31,15 @@ function createSupabaseMock() {
   const scoutLogsQuery = {
     select: vi.fn(() => scoutLogsQuery),
     eq: vi.fn(() => scoutLogsQuery),
-    order: vi.fn(() => scoutLogsQuery),
+    order: mocks.order,
     limit: vi.fn(() => scoutLogsQuery),
     maybeSingle: mocks.maybeSingle,
     insert: mocks.insert,
+    update: mocks.update,
   };
+
+  mocks.order.mockImplementation(() => scoutLogsQuery);
+  mocks.update.mockReturnValue({ eq: mocks.updateEq });
 
   return {
     auth: {
@@ -53,6 +60,7 @@ describe('/api/seo/scout route authorization', () => {
     mocks.createRouteHandlerClient.mockReturnValue(createSupabaseMock());
     mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
     mocks.insert.mockResolvedValue({ data: [{}], error: null });
+    mocks.updateEq.mockResolvedValue({ data: [{}], error: null });
     mocks.runScoutEngine.mockResolvedValue({ insertedCount: 3, blockedCount: 1 });
   });
 
@@ -158,5 +166,39 @@ describe('/api/seo/scout route authorization', () => {
         user_metadata: {},
       }
     );
+  });
+
+  it('fetches real keywords ordered by search weight for local development', async () => {
+    const keywords = [
+      { id: 'kw_1', keyword: 'iphone repair', search_weight: 8, status: 'pending' },
+    ];
+    mocks.order.mockResolvedValueOnce({ data: keywords, error: null });
+
+    const { GET } = await import('@/app/api/seo/scout/route');
+    const response = await GET(new Request('http://localhost:3000/api/seo/scout'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload).toEqual({ status: 'SUCCESS', data: keywords });
+    expect(mocks.order).toHaveBeenCalledWith('search_weight', { ascending: false });
+  });
+
+  it('updates keyword triage status through PUT for local development', async () => {
+    const { PUT } = await import('@/app/api/seo/scout/route');
+    const response = await PUT(
+      new Request('http://localhost:3000/api/seo/scout', {
+        method: 'PUT',
+        body: JSON.stringify({ id: 'kw_1', status: 'approved' }),
+      })
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.status).toBe('SUCCESS');
+    expect(mocks.update).toHaveBeenCalledWith({
+      status: 'approved',
+      updated_at: expect.any(String),
+    });
+    expect(mocks.updateEq).toHaveBeenCalledWith('id', 'kw_1');
   });
 });

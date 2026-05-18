@@ -47,11 +47,103 @@ function isLocalDevelopmentRequest(request: Request): boolean {
   return process.env.NODE_ENV !== 'production' && isLocalHost;
 }
 
+async function createSeoRouteSupabase() {
+  const cookieStore = await cookies();
+
+  return createRouteHandlerClient({
+    cookies: (() => cookieStore) as unknown as typeof cookies,
+  });
+}
+
 async function readRequestBody(request: Request): Promise<ScoutRequestBody> {
   try {
     return await request.json();
   } catch {
     return {};
+  }
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Internal Server Error';
+}
+
+async function assertCanAccessSeoScout(request: Request, supabase: ReturnType<typeof createRouteHandlerClient>) {
+  const isLocalDevRequest = isLocalDevelopmentRequest(request);
+
+  if (isLocalDevRequest) {
+    return { authorized: true, sessionUserId: 'local-dev-bypass' };
+  }
+
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    console.error('[seo-scout] Failed to fetch session:', sessionError);
+  }
+
+  if (!session || !isSuperAdminUser(session.user)) {
+    console.log("🚨 [Scout Auth Triaged Failed] Current Session User Data:", {
+      id: session?.user?.id,
+      role: session?.user?.role,
+      app_metadata: session?.user?.app_metadata,
+      user_metadata: session?.user?.user_metadata
+    });
+
+    return { authorized: false, sessionUserId: undefined };
+  }
+
+  return { authorized: true, sessionUserId: session.user.id };
+}
+
+export async function GET(request: Request) {
+  try {
+    const supabase = await createSeoRouteSupabase();
+    const { authorized } = await assertCanAccessSeoScout(request, supabase);
+
+    if (!authorized) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data, error } = await supabase
+      .from('seo_keywords')
+      .select('*')
+      .order('search_weight', { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ status: 'SUCCESS', data });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const { id, status } = await request.json();
+
+    if (!id || !['approved', 'blocked', 'pending'].includes(status)) {
+      return NextResponse.json({ error: 'Invalid keyword triage payload.' }, { status: 400 });
+    }
+
+    const supabase = await createSeoRouteSupabase();
+    const { authorized } = await assertCanAccessSeoScout(request, supabase);
+
+    if (!authorized) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { error } = await supabase
+      .from('seo_keywords')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ status: 'SUCCESS' });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -62,10 +154,7 @@ export async function POST(request: Request) {
     let sessionUserId = 'local-dev-bypass';
     let isLocalDevBypass = isLocalDevRequest;
 
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({
-      cookies: (() => cookieStore) as unknown as typeof cookies,
-    });
+    const supabase = await createSeoRouteSupabase();
 
     if (isLocalDevRequest) {
       console.warn('[seo-scout] Local development auth bypass enabled for scout route.');
@@ -188,7 +277,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    const message = getErrorMessage(error);
     console.error('[seo-scout] Internal failure:', error);
 
     return NextResponse.json(

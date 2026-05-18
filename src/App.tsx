@@ -38,7 +38,7 @@ import { InventoryItem, Order } from './types';
 import { Language, getTranslation } from './lib/i18n';
 
 const LOCAL_STOREFRONT_SEO_URL = 'http://localhost:3000/admin/seo';
-const PRODUCTION_STOREFRONT_SEO_URL = 'https://ali-mobile-repair-storefront.vercel.app/admin/seo';
+const PRODUCTION_STOREFRONT_SEO_URL = 'https://ali-mobile-repair-pos.vercel.app/admin/seo';
 
 const getSeoDashboardUrl = () => {
   const isLocal =

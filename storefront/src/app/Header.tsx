@@ -3,22 +3,33 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useTheme } from 'next-themes';
 import { useCart } from '@/context/CartContext';
 import { analytics } from '@/lib/analytics';
+
+type ThemeMode = 'light' | 'dark';
+
+function getInitialTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'dark';
+
+  const storedTheme = window.localStorage.getItem('theme');
+  if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
 
 export default function Header() {
   const { devices } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    const nextTheme: ThemeMode = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
   };
 
   return (
@@ -59,28 +70,27 @@ export default function Header() {
         {/* Right side: Book Repair + Hamburger */}
         <div className="nav-actions">
           {/* Theme Toggle - Desktop */}
-          {mounted && (
-            <div className="theme-toggle-container desktop-only-theme">
-              <label className="theme-switch">
-                <input 
-                  type="checkbox" 
-                  checked={theme === 'light'} 
-                  onChange={toggleTheme} 
-                  aria-label="Toggle theme" 
-                />
-                <span className="toggle-slider">
-                  <div className="toggle-icons">
-                    <svg className="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                    <svg className="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  </div>
-                </span>
-              </label>
-            </div>
-          )}
+          <div className="theme-toggle-container desktop-only-theme">
+            <label className="theme-switch">
+              <input 
+                type="checkbox" 
+                checked={theme === 'light'} 
+                onChange={toggleTheme} 
+                aria-label="Toggle theme"
+                suppressHydrationWarning
+              />
+              <span className="toggle-slider">
+                <div className="toggle-icons">
+                  <svg className="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                  <svg className="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+              </span>
+            </label>
+          </div>
 
           <Link 
             href="/book-repair" 
@@ -117,30 +127,28 @@ export default function Header() {
             Book Repair Now {devices.length > 0 && `(${devices.length})`}
           </Link>
           
-          {mounted && (
-            <div 
-              className="mobile-theme-toggle" 
-              onClick={toggleTheme} 
-              style={{ padding: '0.9rem 2rem', display: 'flex', alignItems: 'center', justifyItems: 'space-between', gap: '1rem', borderTop: '1px solid var(--layer-border)', cursor: 'pointer' }}
-            >
-              <span style={{ fontWeight: 600, fontSize: '1rem', flex: 1 }}>
-                {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          <div 
+            className="mobile-theme-toggle" 
+            onClick={toggleTheme} 
+            style={{ padding: '0.9rem 2rem', display: 'flex', alignItems: 'center', justifyItems: 'space-between', gap: '1rem', borderTop: '1px solid var(--layer-border)', cursor: 'pointer' }}
+          >
+            <span style={{ fontWeight: 600, fontSize: '1rem', flex: 1 }}>
+              {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            </span>
+            <label className="theme-switch" onClick={(e) => e.stopPropagation()}>
+              <input type="checkbox" checked={theme === 'light'} onChange={toggleTheme} suppressHydrationWarning />
+              <span className="toggle-slider">
+                <div className="toggle-icons">
+                  <svg className="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                  <svg className="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
               </span>
-              <label className="theme-switch" onClick={(e) => e.stopPropagation()}>
-                <input type="checkbox" checked={theme === 'light'} onChange={toggleTheme} />
-                <span className="toggle-slider">
-                  <div className="toggle-icons">
-                    <svg className="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                    <svg className="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  </div>
-                </span>
-              </label>
-            </div>
-          )}
+            </label>
+          </div>
         </nav>
       )}
     </header>
