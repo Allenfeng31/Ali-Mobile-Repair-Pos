@@ -35,6 +35,7 @@ import { api } from '../lib/api';
 import { OCRImeiScanner } from '../components/OCRImeiScanner';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
+import { formatRelativeDate } from '../utils/dateUtils';
 
 const getCustomerOverallStatus = (customer: Customer) => {
   if (customer.repairs.some(r => r.status === 'Urgent')) return 'Urgent';
@@ -589,16 +590,32 @@ export function CustomersView() {
             </div>
             <div>
               <h3 className="font-black text-black text-lg tracking-tight leading-none mb-2">{customer.name}</h3>
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-black uppercase tracking-widest">{customer.phone}</span>
-                {customer.repairs.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-1 rounded-full bg-gray-300" />
-                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                      {customer.repairs[0].modelNumber}
-                    </span>
-                  </div>
-                )}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0">
+                <span className="text-[10px] font-black text-black/60 uppercase tracking-widest shrink-0">{customer.phone}</span>
+                {customer.repairs.length > 0 && (() => {
+                  const repair = customer.repairs[0];
+                  const combinedText = [repair.modelNumber, repair.repairItem].filter(Boolean).join(' - ');
+                  return (
+                    <>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
+                        <span 
+                          className="text-[10px] font-black text-blue-600 uppercase tracking-widest truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[250px] md:max-w-[350px] block"
+                          title={combinedText}
+                        >
+                          {combinedText}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-500 font-bold text-[10px] shrink-0">
+                        <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
+                        <span className="flex items-center gap-1">
+                          <Calendar size={11} strokeWidth={3} className="text-gray-400" />
+                          {formatRelativeDate(repair.timestamp)}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
