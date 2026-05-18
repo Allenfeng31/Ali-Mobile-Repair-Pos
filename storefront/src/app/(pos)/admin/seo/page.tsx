@@ -89,6 +89,13 @@ export default function SeoGeoScoutConsole() {
   const handleTriggerScout = async () => {
     setIsScouting(true);
     try {
+      console.info('[seo-scout] Client request origin audit:', {
+        origin: window.location.origin,
+        hostname: window.location.hostname,
+        port: window.location.port || '(default)',
+        target: `${window.location.origin}/api/seo/scout`,
+      });
+
       const res = await fetch('/api/seo/scout', {
         method: 'POST',
         headers: {

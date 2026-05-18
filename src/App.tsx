@@ -37,6 +37,18 @@ import {
 import { InventoryItem, Order } from './types';
 import { Language, getTranslation } from './lib/i18n';
 
+const LOCAL_STOREFRONT_SEO_URL = 'http://localhost:3000/admin/seo';
+const PRODUCTION_STOREFRONT_SEO_URL = 'https://ali-mobile-repair-storefront.vercel.app/admin/seo';
+
+const getSeoDashboardUrl = () => {
+  const isLocal =
+    import.meta.env.DEV ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
+
+  return isLocal ? LOCAL_STOREFRONT_SEO_URL : PRODUCTION_STOREFRONT_SEO_URL;
+};
+
 const iconMap: Record<string, any> = {
   Smartphone,
   Battery,
@@ -283,7 +295,7 @@ export default function App() {
       case 'usb-print-test':
         return <UsbPrintTest />;
       case 'seo':
-        window.location.href = 'http://localhost:3000/admin/seo';
+        window.location.href = getSeoDashboardUrl();
         return null;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;

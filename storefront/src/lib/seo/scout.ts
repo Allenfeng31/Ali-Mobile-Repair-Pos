@@ -1,5 +1,5 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 // ---------------------------------------------------------------------------
@@ -179,8 +179,11 @@ export function validateJsonLd(schema: unknown): { valid: boolean; violations: s
  * Core SEO Scout Engine.
  * Fetches search suggestions, filters AI buzzwords, and upserts queued keywords with weight accumulation.
  */
-export async function runScoutEngine(params: ScoutParams): Promise<ScoutResult> {
-    const routeSupabase = createRouteHandlerClient({ cookies });
+export async function runScoutEngine(
+    params: ScoutParams,
+    injectedSupabase?: SupabaseClient
+): Promise<ScoutResult> {
+    const routeSupabase = injectedSupabase || createRouteHandlerClient({ cookies });
     let insertedCount = 0;
     let blockedCount = 0;
 

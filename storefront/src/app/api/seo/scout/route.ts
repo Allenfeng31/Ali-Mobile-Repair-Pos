@@ -14,12 +14,37 @@ type ScoutLog = {
   created_at: string;
 };
 
+type ScoutSessionUser = {
+  role?: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+};
+
+const SUPABASE_SYSTEM_ROLES = ['authenticated', 'anon', 'service_role'];
+
 function formatMelbourneTime(date: Date): string {
   return new Intl.DateTimeFormat('en-AU', {
     dateStyle: 'medium',
     timeStyle: 'medium',
     timeZone: MELBOURNE_TIME_ZONE,
   }).format(date);
+}
+
+function isSuperAdminUser(user: ScoutSessionUser | undefined): boolean {
+  const topLevelRole = user?.role || '';
+  const isSystemRole = SUPABASE_SYSTEM_ROLES.includes(topLevelRole.toLowerCase());
+  const customRole = !topLevelRole || isSystemRole
+    ? String(user?.app_metadata?.role || user?.user_metadata?.role || '')
+    : topLevelRole;
+
+  return customRole.toLowerCase().replace(/_/g, ' ') === 'super admin';
+}
+
+function isLocalDevelopmentRequest(request: Request): boolean {
+  const hostname = new URL(request.url).hostname;
+  const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+  return process.env.NODE_ENV !== 'production' && isLocalHost;
 }
 
 async function readRequestBody(request: Request): Promise<ScoutRequestBody> {
@@ -32,24 +57,70 @@ async function readRequestBody(request: Request): Promise<ScoutRequestBody> {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError) {
-      console.error('[seo-scout] Failed to fetch session:', sessionError);
-    }
-
-    if (!session || session.user.user_metadata?.role !== 'SUPER_ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized: Super Admin clearance required.' },
-        { status: 401 }
-      );
-    }
-
+    const isLocalDevRequest = isLocalDevelopmentRequest(request);
     const { forceRun = false } = await readRequestBody(request);
+    let sessionUserId = 'local-dev-bypass';
+    let isLocalDevBypass = isLocalDevRequest;
+
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({
+      cookies: (() => cookieStore) as unknown as typeof cookies,
+    });
+
+    if (isLocalDevRequest) {
+      console.warn('[seo-scout] Local development auth bypass enabled for scout route.');
+    } else {
+      isLocalDevBypass = false;
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error('[seo-scout] Failed to fetch session:', sessionError);
+      }
+
+      if (!session || !isSuperAdminUser(session.user)) {
+        console.log("🚨 [Scout Auth Triaged Failed] Current Session User Data:", {
+          id: session?.user?.id,
+          role: session?.user?.role,
+          app_metadata: session?.user?.app_metadata,
+          user_metadata: session?.user?.user_metadata
+        });
+
+        return NextResponse.json(
+          { error: 'Unauthorized: Super Admin clearance required.' },
+          { status: 401 }
+        );
+      }
+
+      sessionUserId = session.user.id;
+    }
+
+    if (isLocalDevBypass) {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session?.user?.id) {
+          sessionUserId = session.user.id;
+        }
+
+        if (session && !isSuperAdminUser(session.user)) {
+          console.log("🚨 [Scout Auth Triaged Failed] Current Session User Data:", {
+            id: session.user.id,
+            role: session.user.role,
+            app_metadata: session.user.app_metadata,
+            user_metadata: session.user.user_metadata
+          });
+        }
+      } catch (authError) {
+        console.warn('[seo-scout] Local development session lookup skipped after auth-helper failure:', authError);
+      } finally {
+        console.warn('[seo-scout] Local development auth bypass enabled for scout route.');
+      }
+    }
 
     const { data: lastRunLog, error: lastRunError } = await supabase
       .from('seo_scout_logs')
@@ -82,19 +153,22 @@ export async function POST(request: Request) {
       }
     }
 
-    const scoutResult = await runScoutEngine({
-      latitude: -37.8132,
-      longitude: 145.2285,
-      postalCode: '3134',
-      searchQueries: [
-        'iphone screen repair ringwood',
-        'samsung repair near me',
-        'ipad battery replacement',
-      ],
-    });
+    const scoutResult = await runScoutEngine(
+      {
+        latitude: -37.8132,
+        longitude: 145.2285,
+        postalCode: '3134',
+        searchQueries: [
+          'iphone screen repair ringwood',
+          'samsung repair near me',
+          'ipad battery replacement',
+        ],
+      },
+      supabase
+    );
 
     const { error: insertError } = await supabase.from('seo_scout_logs').insert({
-      triggered_by: session.user.id,
+      triggered_by: sessionUserId,
       keywords_found: scoutResult.insertedCount,
       violations_blocked: scoutResult.blockedCount,
       status: 'SUCCESS',
