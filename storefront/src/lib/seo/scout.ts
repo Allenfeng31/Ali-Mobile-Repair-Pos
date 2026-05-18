@@ -185,8 +185,6 @@ export async function runScoutEngine(params: ScoutParams): Promise<ScoutResult> 
     let blockedCount = 0;
 
     for (const baseQuery of params.searchQueries) {
-        const normalizedBaseQuery = baseQuery.trim().toLowerCase();
-
         try {
             const googleSuggestUrl = `https://suggestqueries.google.com/complete/search?client=chrome&hl=en-AU&gl=au&q=${encodeURIComponent(baseQuery)}`;
 
@@ -213,52 +211,24 @@ export async function runScoutEngine(params: ScoutParams): Promise<ScoutResult> 
 
             for (const rawKeyword of targetedScoutPayload) {
                 const keyword = rawKeyword.trim().toLowerCase();
-                if (!keyword || keyword === normalizedBaseQuery) continue;
+                if (!keyword || keyword === baseQuery) continue;
 
+                // Risk mitigation interception (Constraint 4)
                 if (containsAiPlasticLanguage(keyword)) {
                     blockedCount++;
                     continue;
                 }
 
-                const { data: existingRecord, error: existingRecordError } = await routeSupabase
-                    .from('seo_keywords')
-                    .select('id, search_weight')
-                    .eq('keyword', keyword)
-                    .maybeSingle();
+                // Constraint 3: Native Atomic Upsert via Postgres RPC (CRITICAL CLEAN REPLACE)
+                const { error: rpcError } = await routeSupabase.rpc('increment_seo_keyword', {
+                    target_keyword: keyword,
+                });
 
-                if (existingRecordError) {
-                    throw existingRecordError;
-                }
-
-                if (existingRecord) {
-                    const { error: updateError } = await routeSupabase
-                        .from('seo_keywords')
-                        .update({
-                            search_weight: (existingRecord.search_weight || 0) + 1,
-                            status: 'pending',
-                            updated_at: new Date().toISOString(),
-                        })
-                        .eq('id', existingRecord.id);
-
-                    if (updateError) {
-                        throw updateError;
-                    }
+                if (!rpcError) {
+                    insertedCount++;
                 } else {
-                    const { error: insertError } = await routeSupabase
-                        .from('seo_keywords')
-                        .insert({
-                            keyword,
-                            source: 'Google Suggest Scraper',
-                            search_weight: 1,
-                            status: 'pending',
-                        });
-
-                    if (insertError) {
-                        throw insertError;
-                    }
+                    console.error(`[RPC Error] Failed to upsert keyword "${keyword}":`, rpcError);
                 }
-
-                insertedCount++;
             }
         } catch (queryError) {
             console.error(`[Engine Individual Query Crash] for "${baseQuery}":`, queryError);

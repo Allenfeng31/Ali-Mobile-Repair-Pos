@@ -9,7 +9,6 @@ import {
   Sparkles, 
   ShieldAlert, 
   Clock, 
-  ListFilter, 
   Search,
   Database,
   ThumbsUp,
@@ -24,6 +23,12 @@ interface KeywordRecord {
   weight: number;
   discoveredAt: string;
   status: 'pending' | 'approved' | 'blocked';
+}
+
+interface ScoutSummary {
+  discovered: number;
+  blockedByRisk: number;
+  timestamp: string;
 }
 
 const initialKeywords: KeywordRecord[] = [
@@ -65,6 +70,8 @@ export default function SeoGeoScoutConsole() {
   const [keywords, setKeywords] = useState<KeywordRecord[]>(initialKeywords);
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'blocked'>('pending');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isScouting, setIsScouting] = useState(false);
+  const [scoutSummary, setScoutSummary] = useState<ScoutSummary | null>(null);
 
   // Handle actions
   const handleApprove = (id: string) => {
@@ -79,10 +86,42 @@ export default function SeoGeoScoutConsole() {
     );
   };
 
+  const handleTriggerScout = async () => {
+    setIsScouting(true);
+    try {
+      const res = await fetch('/api/seo/scout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ forceRun: true }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.status === 'SUCCESS') {
+        // Successfully swept long-tail keywords!
+        setScoutSummary({
+          discovered: data.data.discovered,
+          blockedByRisk: data.data.blockedByRisk,
+          timestamp: data.data.timestamp
+        });
+        alert(`Scout completed! Discovered: ${data.data.discovered}, Blocked: ${data.data.blockedByRisk}`);
+      } else {
+        alert(`Scout failed or locked: ${data.error || data.message}`);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    } finally {
+      setIsScouting(false);
+    }
+  };
+
   // Metrics calculations
-  const totalDiscovered = keywords.length;
+  const totalDiscovered = scoutSummary?.discovered ?? keywords.length;
   const builderQueueSize = keywords.filter(kw => kw.status === 'approved').length;
-  const violationsBlocked = keywords.filter(kw => kw.status === 'blocked').length;
+  const violationsBlocked = scoutSummary?.blockedByRisk ?? keywords.filter(kw => kw.status === 'blocked').length;
 
   // Filtered keywords to display
   const filteredKeywords = keywords.filter(kw => {
@@ -204,6 +243,27 @@ export default function SeoGeoScoutConsole() {
                 <Skull className="w-4 h-4" />
                 BLOCKED ({keywords.filter(k => k.status === 'blocked').length})
               </button>
+            </div>
+
+            <div className="shrink-0">
+              <button
+                type="button"
+                onClick={handleTriggerScout}
+                disabled={isScouting}
+                className={`flex items-center justify-center gap-2 rounded-2xl bg-[#f0f4f8] px-5 py-3.5 text-xs font-black uppercase tracking-wider text-cyan-600 transition-all border border-white/40 outline-none ${
+                  isScouting
+                    ? 'cursor-wait shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff] opacity-80'
+                    : 'shadow-[4px_4px_10px_#d1d9e6,-4px_-4px_10px_#ffffff] hover:shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff]'
+                }`}
+              >
+                <Radar className="w-4 h-4" strokeWidth={2.5} />
+                {isScouting ? 'Scouting Google Suggest...' : 'Trigger Scout'}
+              </button>
+              {scoutSummary && (
+                <p className="mt-2 text-center text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  Last sweep: {scoutSummary.timestamp}
+                </p>
+              )}
             </div>
 
             {/* Live Search Box */}
