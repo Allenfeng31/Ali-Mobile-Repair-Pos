@@ -1,4 +1,6 @@
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
 // ---------------------------------------------------------------------------
 // CONSTANTS & CONFIGURATIONS
@@ -19,6 +21,35 @@ const BLACKLISTED_AI_WORDS = [
     'paradigm', 'ecosystem', 'cutting-edge', 'revolutionary',
     'game-changing', 'best-in-class', 'world-class'
 ];
+
+interface ScoutParams {
+    latitude: number;
+    longitude: number;
+    postalCode: string;
+    searchQueries: string[];
+}
+
+interface ScoutResult {
+    insertedCount: number;
+    blockedCount: number;
+}
+
+const AI_BUZZWORD_BLACKLIST = [
+    'delve',
+    'revolutionary',
+    'holistic',
+    'comprehensive',
+    'transformative',
+    'streamline',
+    'synergy',
+    'testament',
+    'bespoke',
+];
+
+function containsAiPlasticLanguage(text: string): boolean {
+    const normalizedText = text.toLowerCase();
+    return AI_BUZZWORD_BLACKLIST.some((word) => normalizedText.includes(word));
+}
 
 // Instantiating Supabase Client (Will be intercepted by your Vitest mock)
 const supabase = createClient(
@@ -96,21 +127,25 @@ export async function buildUpsertPayload(keyword: string, source: string) {
 export async function persistKeyword(keyword: string, source: string) {
     const payload = await buildUpsertPayload(keyword, source);
 
-    // Destructure out the internal testing assertion configuration
-    const { onConflict, ...dbPayload } = payload;
-
     return await supabase
         .from('seo_keywords')
-        .upsert(dbPayload, { onConflict: 'keyword' });
+        .upsert(
+            {
+                keyword: payload.keyword,
+                source: payload.source,
+                search_weight: payload.search_weight,
+            },
+            { onConflict: payload.onConflict }
+        );
 }
 
 // ---------------------------------------------------------------------------
 // CONSTRAINT 4: Recursive AI Word Blacklist Filter
 // ---------------------------------------------------------------------------
-export function validateJsonLd(schema: any): { valid: boolean; violations: string[] } {
+export function validateJsonLd(schema: unknown): { valid: boolean; violations: string[] } {
     const violations: string[] = [];
 
-    function recursiveScan(obj: any) {
+    function recursiveScan(obj: unknown) {
         if (!obj) return;
 
         if (typeof obj === 'string') {
@@ -125,10 +160,8 @@ export function validateJsonLd(schema: any): { valid: boolean; violations: strin
                 recursiveScan(item);
             }
         } else if (typeof obj === 'object') {
-            for (const key in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    recursiveScan(obj[key]);
-                }
+            for (const value of Object.values(obj)) {
+                recursiveScan(value);
             }
         }
     }
@@ -140,4 +173,97 @@ export function validateJsonLd(schema: any): { valid: boolean; violations: strin
         valid: violations.length === 0,
         violations: Array.from(new Set(violations)), // Deduplicate violations
     };
+}
+
+/**
+ * Core SEO Scout Engine.
+ * Fetches search suggestions, filters AI buzzwords, and upserts queued keywords with weight accumulation.
+ */
+export async function runScoutEngine(params: ScoutParams): Promise<ScoutResult> {
+    const routeSupabase = createRouteHandlerClient({ cookies });
+    let insertedCount = 0;
+    let blockedCount = 0;
+
+    for (const baseQuery of params.searchQueries) {
+        const normalizedBaseQuery = baseQuery.trim().toLowerCase();
+
+        try {
+            const googleSuggestUrl = `https://suggestqueries.google.com/complete/search?client=chrome&hl=en-AU&gl=au&q=${encodeURIComponent(baseQuery)}`;
+
+            const response = await fetch(googleSuggestUrl, {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                },
+            });
+
+            if (!response.ok) continue;
+
+            const data = await response.json();
+            const googleSuggestions: string[] = Array.isArray(data?.[1]) ? data[1] : [];
+
+            const targetedScoutPayload = Array.from(
+                new Set([
+                    ...googleSuggestions,
+                    `${baseQuery} near me`,
+                    `${baseQuery} ${params.postalCode}`,
+                    `cheap ${baseQuery} school holidays`,
+                ])
+            );
+
+            for (const rawKeyword of targetedScoutPayload) {
+                const keyword = rawKeyword.trim().toLowerCase();
+                if (!keyword || keyword === normalizedBaseQuery) continue;
+
+                if (containsAiPlasticLanguage(keyword)) {
+                    blockedCount++;
+                    continue;
+                }
+
+                const { data: existingRecord, error: existingRecordError } = await routeSupabase
+                    .from('seo_keywords')
+                    .select('id, search_weight')
+                    .eq('keyword', keyword)
+                    .maybeSingle();
+
+                if (existingRecordError) {
+                    throw existingRecordError;
+                }
+
+                if (existingRecord) {
+                    const { error: updateError } = await routeSupabase
+                        .from('seo_keywords')
+                        .update({
+                            search_weight: (existingRecord.search_weight || 0) + 1,
+                            status: 'pending',
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq('id', existingRecord.id);
+
+                    if (updateError) {
+                        throw updateError;
+                    }
+                } else {
+                    const { error: insertError } = await routeSupabase
+                        .from('seo_keywords')
+                        .insert({
+                            keyword,
+                            source: 'Google Suggest Scraper',
+                            search_weight: 1,
+                            status: 'pending',
+                        });
+
+                    if (insertError) {
+                        throw insertError;
+                    }
+                }
+
+                insertedCount++;
+            }
+        } catch (queryError) {
+            console.error(`[Engine Individual Query Crash] for "${baseQuery}":`, queryError);
+        }
+    }
+
+    return { insertedCount, blockedCount };
 }
