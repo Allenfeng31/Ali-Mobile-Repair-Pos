@@ -282,6 +282,9 @@ export default function App() {
         return <SupplierPrices onBack={() => setCurrentView('admin')} />;
       case 'usb-print-test':
         return <UsbPrintTest />;
+      case 'seo':
+        window.location.href = 'http://localhost:3000/admin/seo';
+        return null;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }

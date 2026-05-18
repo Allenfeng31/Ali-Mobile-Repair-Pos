@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart, Usb } from 'lucide-react';
+import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart, Usb, Radar } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../hooks/useAuthStore';
 
@@ -76,6 +76,15 @@ const adminCards: AdminCard[] = [
     color: 'text-cyan-600',
     gradient: 'from-cyan-500/10 to-cyan-600/5',
     href: '/admin/usb-print-test',
+  },
+  {
+    id: 'seo-geo',
+    title: 'SEO & GEO Scout',
+    icon: Radar,
+    description: 'Automated Keyword Scraping & Content Generation',
+    color: 'text-cyan-600',
+    gradient: 'from-cyan-500/10 to-cyan-600/5',
+    href: '/admin/seo',
   },
 ];
 
