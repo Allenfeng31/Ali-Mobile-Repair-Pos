@@ -10,8 +10,10 @@ export default function Home() {
   return (
     <main>
       <LocalBusinessSchema />
-      <header className="w-full bg-white px-4 sm:px-6 lg:px-8 pt-44 md:pt-48">
+      <header className="w-full bg-white px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center text-center w-full max-w-5xl mx-auto pt-16 pb-12">
+          <div className="h-32 md:h-40" aria-hidden="true" />
+
           <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">
             Expert Mobile Phone &amp; Tablet Repair
             <span className="block mt-2 text-[2rem] md:text-[3.5rem] font-extrabold text-slate-500 tracking-tight">
@@ -28,11 +30,11 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-row flex-wrap justify-center items-center gap-4 mt-10">
-            <Link href="/book-repair" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all">
+          <div className="flex flex-row flex-wrap justify-center items-center gap-6 mt-12 w-full">
+            <Link href="/book-repair" className="inline-flex min-h-20 items-center justify-center px-14 py-7 bg-blue-600 hover:bg-blue-700 text-white text-2xl md:text-3xl font-black rounded-full shadow-[0_18px_45px_rgba(37,99,235,0.28)] transition-all">
               Book Repair Now
             </Link>
-            <Link href="/track-status" className="px-8 py-4 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-800 font-bold rounded-full transition-all">
+            <Link href="/track-status" className="inline-flex min-h-20 items-center justify-center px-14 py-7 bg-white border-4 border-slate-200 hover:border-slate-300 text-slate-800 text-2xl md:text-3xl font-black rounded-full shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all">
               Track Status
             </Link>
           </div>
