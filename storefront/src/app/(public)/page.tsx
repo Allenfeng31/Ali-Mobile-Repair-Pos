@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Script from "next/script";
 import dynamic from "next/dynamic";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 
@@ -12,48 +11,54 @@ export default function Home() {
     <main>
       <LocalBusinessSchema />
       <header className="hero">
-        <div className="hero-contact-pill">
-          <a href="https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7" target="_blank" rel="noopener noreferrer" className="contact-item">
-            <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-            </svg>
-            <span>Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</span>
-          </a>
-          <div className="contact-item">
-            <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-            </svg>
-            <span>0481 058 514</span>
-          </div>
-        </div>
-        
-        <div style={{ marginBottom: '1.5rem', opacity: 0.9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--primary)' }}>
-          Ali Mobile & Repair
-        </div>
-        <h1 className="hero-h1 !gap-1 !max-w-[920px] !tracking-[-0.04em] !leading-[1.1]">
-          <span className="hero-h1-main !text-slate-900 !leading-[1.1] !tracking-[-0.04em]">Expert Mobile Phone & Tablet Repair in</span>
-          <span className="hero-h1-gradient !bg-none !text-slate-600 ![-webkit-text-fill-color:#475569] !leading-[1.1] !tracking-[-0.04em]">Ringwood Square, Melbourne</span>
-        </h1>
-        
-        <div style={{ 
-          display: 'flex', 
-          gap: '1.5rem', 
-          justifyContent: 'center', 
-          flexWrap: 'wrap',
-          marginBottom: '2.5rem'
-        }}>
-          <div style={{ background: 'var(--layer)', padding: '0.6rem 1.2rem', borderRadius: '30px', border: '1px solid var(--layer-border)', fontSize: '0.9rem', fontWeight: 600 }}>
-            ✅ No FIX, No CHARGE
-          </div>
-          <div style={{ background: 'var(--layer)', padding: '0.6rem 1.2rem', borderRadius: '30px', border: '1px solid var(--layer-border)', fontSize: '0.9rem', fontWeight: 600 }}>
-            🛡️ 6-Month Warranty on All Repairs
-          </div>
-        </div>
+        <div className="hero-shell">
+          <div className="hero-copy-panel">
+            <div className="hero-contact-pill">
+              <a href="https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7" target="_blank" rel="noopener noreferrer" className="contact-item">
+                <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                <span>Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</span>
+              </a>
+              <div className="contact-item">
+                <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                </svg>
+                <span>0481 058 514</span>
+              </div>
+            </div>
+            
+            <div className="hero-kicker">Ali Mobile & Repair</div>
+            <h1 className="hero-h1">
+              <span className="hero-h1-main">Expert Mobile Phone & Tablet Repair in</span>
+              <span className="hero-h1-gradient">Ringwood Square, Melbourne</span>
+            </h1>
+            
+            <div className="hero-proof-row">
+              <div>No Fix, No Charge</div>
+              <div>6-Month Warranty on All Repairs</div>
+            </div>
 
-        <div className="hero-cta">
-          <Link href="/book-repair" className="primary-btn">Book Repair Now</Link>
-          <Link href="/track-status" className="secondary-btn">Track Status</Link>
+            <div className="hero-cta">
+              <Link href="/book-repair" className="primary-btn">Book Repair Now</Link>
+              <Link href="/track-status" className="secondary-btn">Track Status</Link>
+            </div>
+          </div>
+
+          <div className="hero-visual" aria-hidden="true">
+            <div className="hero-orbit" />
+            <div className="hero-device-card">
+              <div className="hero-device-icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="7.5" y="3" width="9" height="18" rx="2.4" stroke="currentColor" strokeWidth="1.7" />
+                  <path d="M10.5 6.25h3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  <path d="M11.25 17.75h1.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                </svg>
+              </div>
+              <span>Precision Repair</span>
+            </div>
+          </div>
         </div>
       </header>
 

@@ -41,7 +41,7 @@ export default function SeoGeoScoutConsole() {
 
   const loadRealKeywords = useCallback(async () => {
     try {
-      const res = await fetch('/api/seo/scout', {
+      const res = await fetch(`/api/seo/scout?t=${Date.now()}`, {
         cache: 'no-store',
         credentials: 'include',
       });
@@ -62,7 +62,14 @@ export default function SeoGeoScoutConsole() {
   }, [loadRealKeywords]);
 
   const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'blocked') => {
+    if (!id) {
+      console.error('CRITICAL: Keyword ID is missing!');
+      return;
+    }
     console.log(`[Triage Attempt] Sending PUT for ID: ${id} to status: ${newStatus}`);
+
+    // Optimistic UI update: instantly hide the row
+    setKeywords(prev => prev.filter(k => k.id !== id));
 
     try {
       const res = await fetch('/api/seo/scout', {
@@ -77,9 +84,11 @@ export default function SeoGeoScoutConsole() {
         await loadRealKeywords();
       } else {
         console.error('PUT Failed:', await res.text());
+        await loadRealKeywords();
       }
     } catch (err) {
       console.error('Triage update failed:', err);
+      await loadRealKeywords();
     }
   };
 
