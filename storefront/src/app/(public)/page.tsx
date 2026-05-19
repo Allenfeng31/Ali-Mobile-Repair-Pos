@@ -21,20 +21,20 @@ export default function Home() {
             </span>
           </h1>
 
-          <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-wrap justify-center gap-3 mt-12 md:mt-14">
-            <div className="px-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm font-semibold text-slate-700">
+          <div className="flex flex-wrap justify-center items-center gap-3 mb-8 w-full mt-10">
+            <div className="px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 whitespace-nowrap">
               No Fix, No Charge
             </div>
-            <div className="px-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm font-semibold text-slate-700">
+            <div className="px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 whitespace-nowrap">
               6-Month Warranty on All Repairs
             </div>
           </div>
 
-          <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-row flex-wrap justify-center items-center gap-5 mt-8">
-            <Link href="/book-repair" className="inline-flex min-h-14 md:min-h-16 items-center justify-center px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl md:text-2xl font-black rounded-full shadow-[0_14px_34px_rgba(37,99,235,0.24)] transition-all">
+          <div className="flex flex-row justify-center items-center gap-4 w-full">
+            <Link href="/book-repair" className="px-9 py-4 rounded-full bg-blue-600 !text-slate-50 font-bold tracking-wide shadow-lg shadow-blue-600/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 active:translate-y-0 active:scale-[0.98]">
               Book Repair Now
             </Link>
-            <Link href="/track-status" className="inline-flex min-h-14 md:min-h-16 items-center justify-center px-10 py-5 bg-white border-[3px] border-slate-200 hover:border-slate-300 text-slate-800 text-xl md:text-2xl font-black rounded-full shadow-[0_14px_34px_rgba(15,23,42,0.07)] transition-all">
+            <Link href="/track-status" className="px-8 py-3.5 rounded-full border-2 border-slate-200 bg-white text-slate-800 font-bold tracking-wide hover:border-slate-300 transition-all">
               Track Status
             </Link>
           </div>
