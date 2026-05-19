@@ -29,34 +29,24 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="hero-kicker">Ali Mobile & Repair</div>
-            <h1 className="hero-h1">
-              <span className="hero-h1-main">Expert Mobile Phone & Tablet Repair in</span>
-              <span className="hero-h1-gradient">Ringwood Square, Melbourne</span>
-            </h1>
-            
-            <div className="hero-proof-row">
-              <div>No Fix, No Charge</div>
-              <div>6-Month Warranty on All Repairs</div>
-            </div>
-
-            <div className="hero-cta">
-              <Link href="/book-repair" className="primary-btn">Book Repair Now</Link>
-              <Link href="/track-status" className="secondary-btn">Track Status</Link>
-            </div>
-          </div>
-
-          <div className="hero-visual" aria-hidden="true">
-            <div className="hero-orbit" />
-            <div className="hero-device-card">
-              <div className="hero-device-icon">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect x="7.5" y="3" width="9" height="18" rx="2.4" stroke="currentColor" strokeWidth="1.7" />
-                  <path d="M10.5 6.25h3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-                  <path d="M11.25 17.75h1.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-                </svg>
+            <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
+              <div className="hero-kicker">Ali Mobile & Repair</div>
+              <h1 className="text-5xl md:text-6xl font-black tracking-[-0.04em] leading-[1.1] text-slate-900">
+                Expert Mobile Phone &amp; Tablet Repair
+                <span className="block bg-gradient-to-r from-slate-800 via-slate-700 to-slate-500 bg-clip-text text-transparent">
+                  in Ringwood Square, Melbourne
+                </span>
+              </h1>
+              
+              <div className="hero-proof-row justify-center">
+                <div>No Fix, No Charge</div>
+                <div>6-Month Warranty on All Repairs</div>
               </div>
-              <span>Precision Repair</span>
+
+              <div className="flex justify-center gap-4 flex-wrap w-full">
+                <Link href="/book-repair" className="primary-btn">Book Repair Now</Link>
+                <Link href="/track-status" className="secondary-btn">Track Status</Link>
+              </div>
             </div>
           </div>
         </div>
