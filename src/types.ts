@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import type { ElementType } from 'react';
 
 export interface OrderItem {
   id: string;
@@ -38,7 +38,8 @@ export interface InventoryItem {
   costPrice: number;
   price: number;
   margin: number;
-  icon: string;
+  icon: ElementType;
+  iconName?: string;
   status: string;
   category: string;
   is_pinned?: boolean;

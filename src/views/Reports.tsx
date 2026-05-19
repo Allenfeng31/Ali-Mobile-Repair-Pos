@@ -28,7 +28,8 @@ import {
   Smartphone,
   PhoneCall,
   MessageSquare,
-  ExternalLink
+  ExternalLink,
+  PieChart as PieChartIcon
 } from 'lucide-react';
 import {
   BarChart,
@@ -39,7 +40,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-  PieChart,
+  PieChart as RechartsPieChart,
   Pie
 } from 'recharts';
 import { cn } from '@/lib/utils';
@@ -639,7 +640,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
         <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[3rem] p-10 border border-white/20">
           <h3 className="text-2xl font-black mb-10 text-black tracking-tight flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600">
-              <PieChart size={24} strokeWidth={3} />
+              <PieChartIcon size={24} strokeWidth={3} />
             </div>
             Service Mix Breakdown
           </h3>
@@ -663,7 +664,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             <div className="flex flex-col items-center justify-center relative">
               <div className="w-72 h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <RechartsPieChart>
                     <Pie
                       data={serviceSplit}
                       innerRadius={80}
@@ -676,7 +677,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                  </PieChart>
+                  </RechartsPieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Global</span>

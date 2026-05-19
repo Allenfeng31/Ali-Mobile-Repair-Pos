@@ -22,6 +22,19 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "storefront",
+    "scraper/scraper_venv",
+    "**/scraper_venv/**"
+  ]
 }

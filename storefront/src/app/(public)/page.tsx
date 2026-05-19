@@ -31,9 +31,9 @@ export default function Home() {
         <div style={{ marginBottom: '1.5rem', opacity: 0.9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--primary)' }}>
           Ali Mobile & Repair
         </div>
-        <h1 className="hero-h1">
-          <span className="hero-h1-main">Expert Mobile Phone & Tablet Repair in</span>
-          <span className="hero-h1-gradient">Ringwood Square, Melbourne</span>
+        <h1 className="hero-h1 !gap-1 !max-w-[920px] !tracking-[-0.04em] !leading-[1.1]">
+          <span className="hero-h1-main !text-slate-900 !leading-[1.1] !tracking-[-0.04em]">Expert Mobile Phone & Tablet Repair in</span>
+          <span className="hero-h1-gradient !bg-none !text-slate-600 ![-webkit-text-fill-color:#475569] !leading-[1.1] !tracking-[-0.04em]">Ringwood Square, Melbourne</span>
         </h1>
         
         <div style={{ 
