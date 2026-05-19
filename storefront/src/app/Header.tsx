@@ -5,16 +5,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { analytics } from '@/lib/analytics';
+import { Menu, X } from 'lucide-react';
 
 type ThemeMode = 'light' | 'dark';
 
 function getInitialTheme(): ThemeMode {
-  if (typeof window === 'undefined') return 'dark';
-
-  const storedTheme = window.localStorage.getItem('theme');
-  if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
-
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return 'light'; // Forced light mode MVP
 }
 
 export default function Header() {
@@ -27,9 +23,9 @@ export default function Header() {
     window.localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Lock to light mode, ignore toggles
   const toggleTheme = () => {
-    const nextTheme: ThemeMode = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
+    setTheme('light');
   };
 
   return (
@@ -48,108 +44,79 @@ export default function Header() {
         </a>
       </div>
 
-      <div className="nav-container">
-        <Link href="/" className="nav-logo">
-          <Image 
-            src="/images/logo.png" 
-            alt="Ali Mobile & Repair Ringwood" 
-            width={180} 
-            height={60} 
-            priority
-            style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
-          />
-        </Link>
+      <div className="grid grid-cols-2 md:grid-cols-3 items-center w-full max-w-[1200px] mx-auto px-4 md:px-8 py-1 lg:py-[0.35rem]">
+        <div className="flex justify-start">
+          <Link href="/" className="nav-logo">
+            <Image 
+              src="/images/logo.png" 
+              alt="Ali Mobile & Repair Ringwood" 
+              width={180} 
+              height={60} 
+              priority
+              style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
+            />
+          </Link>
+        </div>
 
         {/* Desktop nav links */}
-        <nav className="nav-links nav-links--desktop">
-          <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
-          <Link href="/about-us" prefetch={true}>About Us</Link>
-          <Link href="/blog" prefetch={true}>Blog</Link>
-        </nav>
+        <div className="hidden md:flex justify-center">
+          <nav className="nav-links nav-links--desktop">
+            <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
+            <Link href="/about-us" prefetch={true}>About Us</Link>
+            <Link href="/blog" prefetch={true}>Blog</Link>
+          </nav>
+        </div>
 
         {/* Right side: Book Repair + Hamburger */}
-        <div className="nav-actions">
-          {/* Theme Toggle - Desktop */}
-          <div className="theme-toggle-container desktop-only-theme">
-            <label className="theme-switch">
-              <input 
-                type="checkbox" 
-                checked={theme === 'light'} 
-                onChange={toggleTheme} 
-                aria-label="Toggle theme"
-                suppressHydrationWarning
-              />
-              <span className="toggle-slider">
-                <div className="toggle-icons">
-                  <svg className="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                  <svg className="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
-              </span>
-            </label>
-          </div>
-
+        <div className="flex justify-end items-center gap-3">
           <Link 
             href="/book-repair" 
             prefetch={true}
-            className="primary-btn"
-            style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            className="primary-btn hidden sm:flex"
+            style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', alignItems: 'center', gap: '0.5rem' }}
           >
             Book Repair {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>{devices.length}</span>}
           </Link>
 
           {/* Hamburger button – mobile only */}
           <button 
-            className="hamburger-btn"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-            aria-expanded={isMobileMenuOpen}
+            className="md:hidden flex items-center justify-center p-2 text-slate-800"
+            onClick={() => setIsMobileMenuOpen(true)}
+            aria-label="Open navigation menu"
           >
-            <span className={`hamburger-icon ${isMobileMenuOpen ? 'hamburger-icon--open' : ''}`}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
+            <Menu size={28} />
           </button>
         </div>
       </div>
 
-      {/* Mobile dropdown menu */}
+      {/* Full-screen Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <nav className="mobile-nav">
-          <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)} prefetch={true}>Service &amp; Repairs</Link>
-          <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)} prefetch={true}>About Us</Link>
-          <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)} prefetch={true}>Blog</Link>
-          <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="mobile-nav-cta" prefetch={true}>
-            Book Repair Now {devices.length > 0 && `(${devices.length})`}
-          </Link>
-          
-          <div 
-            className="mobile-theme-toggle" 
-            onClick={toggleTheme} 
-            style={{ padding: '0.9rem 2rem', display: 'flex', alignItems: 'center', justifyItems: 'space-between', gap: '1rem', borderTop: '1px solid var(--layer-border)', cursor: 'pointer' }}
-          >
-            <span style={{ fontWeight: 600, fontSize: '1rem', flex: 1 }}>
-              {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            </span>
-            <label className="theme-switch" onClick={(e) => e.stopPropagation()}>
-              <input type="checkbox" checked={theme === 'light'} onChange={toggleTheme} suppressHydrationWarning />
-              <span className="toggle-slider">
-                <div className="toggle-icons">
-                  <svg className="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                  <svg className="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
-              </span>
-            </label>
+        <div className="fixed inset-0 z-[9999] bg-white flex flex-col">
+          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+            <span className="font-bold text-xl text-slate-900">Menu</span>
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 text-slate-800"
+              aria-label="Close menu"
+            >
+              <X size={28} />
+            </button>
           </div>
-        </nav>
+          
+          <nav className="flex flex-col pt-2 overflow-y-auto">
+            <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-4 text-lg font-semibold border-b border-gray-100 text-slate-800">Services &amp; Repairs</Link>
+            <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-4 text-lg font-semibold border-b border-gray-100 text-slate-800">About Us</Link>
+            <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-4 text-lg font-semibold border-b border-gray-100 text-slate-800">Shop</Link>
+            <Link href="/track-status" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-4 text-lg font-semibold border-b border-gray-100 text-slate-800">Track Status</Link>
+            <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-4 text-lg font-semibold border-b border-gray-100 text-slate-800">Blog</Link>
+            
+            <div className="px-6 py-8">
+              <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="primary-btn w-full flex justify-center items-center gap-2 text-[1rem] py-3">
+                Book Repair Now {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.5rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800 }}>{devices.length}</span>}
+              </Link>
+            </div>
+          </nav>
+        </div>
       )}
     </header>
   );

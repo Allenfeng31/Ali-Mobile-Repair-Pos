@@ -78,7 +78,7 @@
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -133,6 +133,7 @@
 
 .service-name-price {
   flex-grow: 1;
+  min-width: 0;
 }
 
 .service-name {
@@ -359,6 +360,8 @@
   gap: 1.5rem;
   box-shadow: 0 8px 24px rgba(0, 122, 255, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .device-summary-card:hover {
@@ -368,6 +371,7 @@
 
 .summary-main {
   flex: 1;
+  min-width: 0;
 }
 
 .summary-title {
@@ -376,6 +380,7 @@
   color: var(--foreground);
   margin-bottom: 0.4rem;
   letter-spacing: -0.01em;
+  min-width: 0;
 }
 
 .summary-services {
@@ -385,6 +390,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .summary-services::before {
@@ -397,6 +403,7 @@
 .summary-actions {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .edit-summary-btn {
@@ -478,6 +485,8 @@
   align-items: center;
   gap: 1rem;
   animation: fadeIn 0.3s ease-out;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .upsell-text {
@@ -487,6 +496,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .add-upsell-btn {
