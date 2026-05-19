@@ -41,7 +41,10 @@ export default function SeoGeoScoutConsole() {
 
   const loadRealKeywords = useCallback(async () => {
     try {
-      const res = await fetch('/api/seo/scout', { credentials: 'include' });
+      const res = await fetch('/api/seo/scout', {
+        cache: 'no-store',
+        credentials: 'include',
+      });
       const json = await res.json();
 
       if (res.ok && json.status === 'SUCCESS') {
@@ -59,10 +62,13 @@ export default function SeoGeoScoutConsole() {
   }, [loadRealKeywords]);
 
   const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'blocked') => {
+    console.log(`[Triage Attempt] Sending PUT for ID: ${id} to status: ${newStatus}`);
+
     try {
       const res = await fetch('/api/seo/scout', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
         credentials: 'include',
         body: JSON.stringify({ id, status: newStatus })
       });
@@ -70,8 +76,7 @@ export default function SeoGeoScoutConsole() {
       if (res.ok) {
         await loadRealKeywords();
       } else {
-        const json = await res.json();
-        console.error('Triage update failed:', json.error || json.message);
+        console.error('PUT Failed:', await res.text());
       }
     } catch (err) {
       console.error('Triage update failed:', err);

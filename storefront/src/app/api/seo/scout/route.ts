@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { runScoutEngine } from '@/lib/seo/scout';
 
+export const dynamic = 'force-dynamic';
+
 const MELBOURNE_TIME_ZONE = 'Australia/Melbourne';
 const COOLDOWN_SECONDS = 12 * 60 * 60;
 
@@ -113,7 +115,14 @@ export async function GET(request: Request) {
 
     if (error) throw error;
 
-    return NextResponse.json({ status: 'SUCCESS', data });
+    return NextResponse.json(
+      { status: 'SUCCESS', data },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (error) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }

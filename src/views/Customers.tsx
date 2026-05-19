@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import {
   Search,
   UserPlus,
@@ -55,6 +55,56 @@ const getStatusColor = (status: string) => {
   }
 };
 
+type CustomerFormData = {
+  name: string;
+  phone: string;
+  email: string;
+  repairItem: string;
+  modelNumber: string;
+  price: string;
+  liquidDamage: boolean;
+  password: string;
+  imei: string;
+  remark: string;
+  deposit: string;
+};
+
+const createEmptyCustomerFormData = (): CustomerFormData => ({
+  name: '',
+  phone: '',
+  email: '',
+  repairItem: '',
+  modelNumber: '',
+  price: '',
+  liquidDamage: false,
+  password: '',
+  imei: '',
+  remark: '',
+  deposit: ''
+});
+
+const readCustomerFormData = (
+  form: HTMLFormElement,
+  currentFormData: CustomerFormData
+): CustomerFormData => {
+  const fields = new FormData(form);
+  const readField = (name: keyof CustomerFormData) => String(fields.get(name) ?? '');
+
+  return {
+    name: readField('name'),
+    phone: readField('phone'),
+    email: readField('email'),
+    repairItem: readField('repairItem'),
+    modelNumber: readField('modelNumber'),
+    price: readField('price'),
+    liquidDamage: currentFormData.liquidDamage,
+    password: readField('password'),
+    imei: readField('imei'),
+    remark: readField('remark'),
+    deposit: readField('deposit')
+  };
+};
+
 export function CustomersView() {
   const { permissions } = useAuthStore();
   const t = (_section: string, key: string) => key; // Simplified for now
@@ -106,6 +156,7 @@ export function CustomersView() {
   const [scannerTarget, setScannerTarget] = useState<'add' | 'repair' | null>(null);
   const [upsells, setUpsells] = useState<any[]>([]);
   const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
+  const customerFormRef = useRef<HTMLFormElement | null>(null);
   
   // NEW: Loading State Lock for API Submissions
   const [isSaving, setIsSaving] = useState(false);
@@ -162,7 +213,7 @@ export function CustomersView() {
     return Math.min(...customer.repairs.map(r => new Date(r.timestamp).getTime()));
   };
 
-  const sortedCustomers = [...customers].map(c => ({
+  const sortedCustomers = useMemo(() => [...customers].map(c => ({
     ...c,
     repairs: [...c.repairs].sort((a, b) => {
       const priority: Record<string, number> = { 'Urgent': 1, 'In Processing': 1, 'waiting for pay': 1, 'Ready for Pickup': 1, 'Completed': 2 };
@@ -180,9 +231,9 @@ export function CustomersView() {
       return priority[statusA] - priority[statusB];
     }
     return getLatestTimestamp(b) - getLatestTimestamp(a);
-  });
+  }), [customers]);
 
-  const filteredCustomers = sortedCustomers.filter(c => {
+  const filteredCustomers = useMemo(() => sortedCustomers.filter(c => {
     const query = searchQuery.toLowerCase();
     const hasRepairMatch = c.repairs.some(r =>
       (r.repairItem || '').toLowerCase().includes(query) ||
@@ -198,12 +249,21 @@ export function CustomersView() {
 
     if (filterSyncedOnly && !c.synced_to_google) return false;
     return matchesSearch;
-  });
+  }), [filterSyncedOnly, searchQuery, sortedCustomers]);
 
-  const inProcessingCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed');
-  const completedCustomers = filteredCustomers.filter(c => getCustomerOverallStatus(c) === 'Completed');
+  const inProcessingCustomers = useMemo(
+    () => filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed'),
+    [filteredCustomers]
+  );
+  const completedCustomers = useMemo(
+    () => filteredCustomers.filter(c => getCustomerOverallStatus(c) === 'Completed'),
+    [filteredCustomers]
+  );
 
-  const selectedCustomer = sortedCustomers.find(c => c.id === selectedId) || null;
+  const selectedCustomer = useMemo(
+    () => sortedCustomers.find(c => c.id === selectedId) || null,
+    [selectedId, sortedCustomers]
+  );
 
   const handleCopyPhone = () => {
     if (!selectedCustomer) return;
@@ -267,24 +327,30 @@ export function CustomersView() {
 
   const toggleUpsell = (upsell: any) => {
     const isSelected = selectedUpsells.includes(upsell.id);
-    const currentPrice = parseFloat(formData.price) || 0;
+    const priceInput = customerFormRef.current?.elements.namedItem('price') as HTMLInputElement | null;
+    const currentPrice = parseFloat(priceInput?.value || formData.price) || 0;
     const bundlePrice = parseFloat(upsell.bundle_price) || 0;
+    const nextPrice = (isSelected ? currentPrice - bundlePrice : currentPrice + bundlePrice).toFixed(2);
+
+    if (priceInput) {
+      priceInput.value = nextPrice;
+    }
 
     if (isSelected) {
       setSelectedUpsells(selectedUpsells.filter(id => id !== upsell.id));
-      setFormData({ ...formData, price: (currentPrice - bundlePrice).toFixed(2) });
     } else {
       setSelectedUpsells([...selectedUpsells, upsell.id]);
-      setFormData({ ...formData, price: (currentPrice + bundlePrice).toFixed(2) });
     }
+    setFormData({ ...formData, price: nextPrice });
   };
 
-  const handleAddCustomer = async (e: React.FormEvent) => {
+  const handleAddCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSaving) return;
     setIsSaving(true);
+    const submittedFormData = readCustomerFormData(e.currentTarget, formData);
     
-    const existingCustomerIndex = customers.findIndex(c => c.phone === formData.phone);
+    const existingCustomerIndex = customers.findIndex(c => c.phone === submittedFormData.phone);
 
     try {
       if (existingCustomerIndex !== -1) {
@@ -293,14 +359,14 @@ export function CustomersView() {
           id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
           customer_id: existingCustomer.id,
           timestamp: new Date().toISOString(),
-          repairItem: formData.repairItem,
-          modelNumber: formData.modelNumber,
-          price: parseFloat(formData.price) || 0,
-          liquidDamage: formData.liquidDamage,
-          password: formData.password,
-          imei: formData.imei,
-          remark: formData.remark,
-          deposit: parseFloat(formData.deposit) || 0,
+          repairItem: submittedFormData.repairItem,
+          modelNumber: submittedFormData.modelNumber,
+          price: parseFloat(submittedFormData.price) || 0,
+          liquidDamage: submittedFormData.liquidDamage,
+          password: submittedFormData.password,
+          imei: submittedFormData.imei,
+          remark: submittedFormData.remark,
+          deposit: parseFloat(submittedFormData.deposit) || 0,
           status: 'In Processing'
         };
 
@@ -330,14 +396,14 @@ export function CustomersView() {
         setCustomers(updatedCustomers);
         setSelectedId(existingCustomer.id);
       } else {
-        const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        const price = parseFloat(formData.price) || 0;
+        const initials = submittedFormData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        const price = parseFloat(submittedFormData.price) || 0;
 
         const customerForApi = {
           id: Math.random().toString(36).substr(2, 9).toUpperCase(),
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
+          name: submittedFormData.name,
+          phone: submittedFormData.phone,
+          email: submittedFormData.email,
           initials,
           status: 'In Processing',
           statusColor: 'tertiary',
@@ -350,14 +416,14 @@ export function CustomersView() {
           id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
           customer_id: createdCustomer.id,
           timestamp: new Date().toISOString(),
-          repairItem: formData.repairItem,
-          modelNumber: formData.modelNumber,
+          repairItem: submittedFormData.repairItem,
+          modelNumber: submittedFormData.modelNumber,
           price: price,
-          liquidDamage: formData.liquidDamage,
-          password: formData.password,
-          imei: formData.imei,
+          liquidDamage: submittedFormData.liquidDamage,
+          password: submittedFormData.password,
+          imei: submittedFormData.imei,
           remark: (() => {
-            let finalRemark = formData.remark;
+            let finalRemark = submittedFormData.remark;
             if (selectedUpsells.length > 0) {
               const accessoryNames = upsells
                 .filter(u => selectedUpsells.includes(u.id))
@@ -367,7 +433,7 @@ export function CustomersView() {
             }
             return finalRemark;
           })(),
-          deposit: parseFloat(formData.deposit) || 0,
+          deposit: parseFloat(submittedFormData.deposit) || 0,
           status: 'In Processing'
         };
 
@@ -386,13 +452,19 @@ export function CustomersView() {
     }
   };
 
-  const handleEditCustomer = async (e: React.FormEvent) => {
+  const handleEditCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSaving) return;
     setIsSaving(true);
+    const submittedFormData = readCustomerFormData(e.currentTarget, formData);
     
-    const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase();
-    const updateData = { name: formData.name, phone: formData.phone, email: formData.email, initials };
+    const initials = submittedFormData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const updateData = {
+      name: submittedFormData.name,
+      phone: submittedFormData.phone,
+      email: submittedFormData.email,
+      initials
+    };
 
     try {
       await api.updateCustomer(selectedId, updateData);
@@ -432,10 +504,7 @@ export function CustomersView() {
 
   const resetForm = () => {
     setSelectedUpsells([]);
-    setFormData({
-      name: '', phone: '', email: '', repairItem: '', modelNumber: '',
-      price: '', liquidDamage: false, password: '', imei: '', remark: '', deposit: ''
-    });
+    setFormData(createEmptyCustomerFormData());
   };
 
   const openEditModal = () => {
@@ -1122,7 +1191,7 @@ export function CustomersView() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-2xl bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar"
             >
-              <form onSubmit={isEditing ? handleEditCustomer : handleAddCustomer} className="p-10 space-y-10">
+              <form ref={customerFormRef} onSubmit={isEditing ? handleEditCustomer : handleAddCustomer} className="p-10 space-y-10">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-3xl font-black text-black tracking-tight">{isEditing ? 'Edit Client Profile' : 'New Repair Entry'}</h3>
@@ -1154,9 +1223,9 @@ export function CustomersView() {
                         type="text"
                         placeholder="John Doe"
                         required
+                        name="name"
                         className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        defaultValue={formData.name}
                       />
                     </div>
 
@@ -1167,9 +1236,9 @@ export function CustomersView() {
                           type="tel"
                           placeholder="+61 400 000 000"
                           required
+                          name="phone"
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          defaultValue={formData.phone}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1177,9 +1246,9 @@ export function CustomersView() {
                         <input
                           type="email"
                           placeholder="client@mail.com"
+                          name="email"
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          defaultValue={formData.email}
                         />
                       </div>
                     </div>
@@ -1201,9 +1270,9 @@ export function CustomersView() {
                             type="text"
                             placeholder="e.g. Screen Fix"
                             required
+                            name="repairItem"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            value={formData.repairItem}
-                            onChange={(e) => setFormData({ ...formData, repairItem: e.target.value })}
+                            defaultValue={formData.repairItem}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1212,9 +1281,9 @@ export function CustomersView() {
                             type="text"
                             placeholder="e.g. iPhone 15 Pro"
                             required
+                            name="modelNumber"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            value={formData.modelNumber}
-                            onChange={(e) => setFormData({ ...formData, modelNumber: e.target.value })}
+                            defaultValue={formData.modelNumber}
                           />
                         </div>
                       </div>
@@ -1226,9 +1295,9 @@ export function CustomersView() {
                             type="number"
                             step="0.01"
                             placeholder="0.00"
+                            name="price"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            defaultValue={formData.price}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1236,9 +1305,9 @@ export function CustomersView() {
                           <input
                             type="text"
                             placeholder="None"
+                            name="password"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            defaultValue={formData.password}
                           />
                         </div>
                       </div>
@@ -1249,9 +1318,9 @@ export function CustomersView() {
                           <input
                             type="text"
                             placeholder="Scan or Type..."
+                            name="imei"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            value={formData.imei}
-                            onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
+                            defaultValue={formData.imei}
                           />
                           <button
                             type="button"
@@ -1271,9 +1340,9 @@ export function CustomersView() {
                             type="number"
                             step="0.01"
                             placeholder="0.00"
+                            name="deposit"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] py-5 pl-12 pr-5 outline-none text-black font-black text-sm border border-black/5"
-                            value={formData.deposit}
-                            onChange={(e) => setFormData({ ...formData, deposit: e.target.value })}
+                            defaultValue={formData.deposit}
                           />
                         </div>
                       </div>
@@ -1282,9 +1351,9 @@ export function CustomersView() {
                         <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Internal Remarks</label>
                         <textarea
                           placeholder="Special tech notes..."
+                          name="remark"
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5 min-h-[120px] resize-none"
-                          value={formData.remark}
-                          onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
+                          defaultValue={formData.remark}
                         />
                       </div>
 
@@ -1829,6 +1898,10 @@ export function CustomersView() {
           <OCRImeiScanner
             onScan={(text) => {
               if (scannerTarget === 'add') {
+                const imeiInput = customerFormRef.current?.elements.namedItem('imei') as HTMLInputElement | null;
+                if (imeiInput) {
+                  imeiInput.value = text;
+                }
                 setFormData(prev => ({ ...prev, imei: text }));
               } else if (scannerTarget === 'repair') {
                 setRepairFormData(prev => ({ ...prev, imei: text }));

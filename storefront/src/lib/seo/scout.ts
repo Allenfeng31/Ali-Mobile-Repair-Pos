@@ -51,6 +51,54 @@ function containsAiPlasticLanguage(text: string): boolean {
     return AI_BUZZWORD_BLACKLIST.some((word) => normalizedText.includes(word));
 }
 
+export function isWithin15KmOfRingwood(keyword: string): boolean {
+    const lower = keyword.toLowerCase();
+
+    const interstateLocationNames = [
+        'adelaide',
+        'sydney',
+        'brisbane',
+        'perth',
+        'geelong',
+        'frankston',
+        'australia',
+    ];
+    const interstateStateCodes = [
+        'nsw',
+        'qld',
+        'sa',
+        'wa',
+    ];
+
+    if (interstateLocationNames.some((city) => lower.includes(city))) return false;
+    if (interstateStateCodes.some((state) => new RegExp(`\\b${state}\\b`).test(lower))) return false;
+
+    const localSuburbs = [
+        'ringwood',
+        '3134',
+        'mitcham',
+        'croydon',
+        'heathmont',
+        'wantirna',
+        'vermont',
+        'nunawading',
+        'donvale',
+        'warrandyte',
+        'blackburn',
+        'box hill',
+        'forest hill',
+        'bayswater',
+        'boronia',
+        'chirnside',
+        'lilydale',
+        'doncaster',
+        'near me',
+        'local',
+    ];
+
+    return localSuburbs.some((suburb) => lower.includes(suburb));
+}
+
 // Instantiating Supabase Client (Will be intercepted by your Vitest mock)
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co',
@@ -215,6 +263,8 @@ export async function runScoutEngine(
             for (const rawKeyword of targetedScoutPayload) {
                 const keyword = rawKeyword.trim().toLowerCase();
                 if (!keyword || keyword === baseQuery) continue;
+
+                if (!isWithin15KmOfRingwood(keyword)) continue;
 
                 // Risk mitigation interception (Constraint 4)
                 if (containsAiPlasticLanguage(keyword)) {

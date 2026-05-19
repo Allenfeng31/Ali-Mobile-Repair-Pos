@@ -31,8 +31,9 @@ export default function Home() {
         <div style={{ marginBottom: '1.5rem', opacity: 0.9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--primary)' }}>
           Ali Mobile & Repair
         </div>
-        <h1 style={{ marginBottom: '2rem' }}>
-          Expert Mobile Phone & Tablet Repair in Ringwood Square, Melbourne
+        <h1 className="hero-h1">
+          <span className="hero-h1-main">Expert Mobile Phone & Tablet Repair in</span>
+          <span className="hero-h1-gradient">Ringwood Square, Melbourne</span>
         </h1>
         
         <div style={{ 

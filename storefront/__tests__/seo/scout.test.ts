@@ -66,21 +66,6 @@ const RINGWOOD_GEO = {
   country: 'AU',
 } as const;
 
-const BLACKLISTED_AI_WORDS = [
-  'delve',
-  'tapestry',
-  'holistic',
-  'synergy',
-  'leverage',
-  'paradigm',
-  'ecosystem',
-  'cutting-edge',
-  'revolutionary',
-  'game-changing',
-  'best-in-class',
-  'world-class',
-] as const;
-
 const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
@@ -306,6 +291,29 @@ describe('/api/seo/scout — Module 1: The Scout', () => {
 
       expect(validation.valid).toBe(false);
       expect(validation.violations).toContain('revolutionary');
+    });
+  });
+
+  // =========================================================================
+  // CONSTRAINT 5: Local Search Geofence — Ringwood 15km Radius
+  // =========================================================================
+  describe('Local Geofence Filter', () => {
+    it('should allow Ringwood and nearby eastern-suburb search intent', async () => {
+      const scout = await loadScoutModule();
+
+      expect(scout.isWithin15KmOfRingwood('iphone screen repair ringwood')).toBe(true);
+      expect(scout.isWithin15KmOfRingwood('ipad battery replacement near me')).toBe(true);
+      expect(scout.isWithin15KmOfRingwood('samsung repair mitcham')).toBe(true);
+      expect(scout.isWithin15KmOfRingwood('phone repair 3134')).toBe(true);
+    });
+
+    it('should silently reject interstate or distant location contamination', async () => {
+      const scout = await loadScoutModule();
+
+      expect(scout.isWithin15KmOfRingwood('iphone screen repair adelaide')).toBe(false);
+      expect(scout.isWithin15KmOfRingwood('samsung repair sydney nsw')).toBe(false);
+      expect(scout.isWithin15KmOfRingwood('ipad battery replacement geelong')).toBe(false);
+      expect(scout.isWithin15KmOfRingwood('phone repair australia')).toBe(false);
     });
   });
 });
