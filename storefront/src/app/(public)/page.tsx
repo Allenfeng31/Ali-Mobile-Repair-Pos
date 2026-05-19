@@ -21,7 +21,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <div className="flex flex-wrap justify-center items-center gap-3 mb-8 w-full mt-10">
+          <div className="flex flex-wrap justify-center items-center gap-3 mb-12 w-full mt-12">
             <div className="px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 whitespace-nowrap">
               No Fix, No Charge
             </div>
@@ -30,11 +30,11 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-row justify-center items-center gap-4 w-full">
-            <Link href="/book-repair" className="px-9 py-4 rounded-full bg-blue-600 !text-slate-50 font-bold tracking-wide shadow-lg shadow-blue-600/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 active:translate-y-0 active:scale-[0.98]">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 w-full mb-8">
+            <Link href="/book-repair" className="px-12 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-extrabold rounded-full shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] tracking-wide">
               Book Repair Now
             </Link>
-            <Link href="/track-status" className="px-8 py-3.5 rounded-full border-2 border-slate-200 bg-white text-slate-800 font-bold tracking-wide hover:border-slate-300 transition-all">
+            <Link href="/track-status" className="px-12 py-5 bg-white border-2 border-slate-200 text-slate-800 text-xl font-bold rounded-full hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] tracking-wide">
               Track Status
             </Link>
           </div>
