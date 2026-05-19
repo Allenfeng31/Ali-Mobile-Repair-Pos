@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { startTransition, useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { TerminalView } from './views/Terminal';
 import { InventoryView } from './views/Inventory';
@@ -247,6 +247,14 @@ export default function App() {
     localStorage.setItem('pos_lang', l);
   };
 
+  const handleViewChange = (view: string) => {
+    if (view === currentView) return;
+
+    startTransition(() => {
+      setCurrentView(view);
+    });
+  };
+
   const handleLogin = (user: any) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
@@ -285,13 +293,13 @@ export default function App() {
       case 'settings':
         return <SettingsView onLogout={handleLogout} currentUser={currentUser} onUpdateUser={setCurrentUser} />;
       case 'admin':
-        return <AdminDashboard onViewChange={setCurrentView} />;
+        return <AdminDashboard onViewChange={handleViewChange} />;
       case 'employees':
-        return <EmployeeManagement onBack={() => setCurrentView('admin')} />;
+        return <EmployeeManagement onBack={() => handleViewChange('admin')} />;
       case 'cms':
-        return <StorefrontCMS onBack={() => setCurrentView('admin')} />;
+        return <StorefrontCMS onBack={() => handleViewChange('admin')} />;
       case 'supplier-prices':
-        return <SupplierPrices onBack={() => setCurrentView('admin')} />;
+        return <SupplierPrices onBack={() => handleViewChange('admin')} />;
       case 'usb-print-test':
         return <UsbPrintTest />;
       case 'seo':
@@ -303,7 +311,7 @@ export default function App() {
   };
 
   return (
-    <Layout currentView={currentView} onViewChange={setCurrentView} onLogout={handleLogout} currentUser={currentUser} t={t}>
+    <Layout currentView={currentView} onViewChange={handleViewChange} onLogout={handleLogout} currentUser={currentUser} t={t}>
       <AnimatePresence mode="wait">
         {renderView()}
       </AnimatePresence>

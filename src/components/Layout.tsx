@@ -568,10 +568,11 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
           <motion.div
             key={currentView}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 12, scale: 0.995 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.995 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="transform-gpu transition-all duration-300 ease-out will-change-[opacity,transform]"
           >
             {children}
           </motion.div>
