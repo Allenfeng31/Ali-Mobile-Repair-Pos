@@ -10,44 +10,31 @@ export default function Home() {
   return (
     <main>
       <LocalBusinessSchema />
-      <header className="hero">
-        <div className="hero-shell">
-          <div className="hero-copy-panel">
-            <div className="hero-contact-pill">
-              <a href="https://maps.app.goo.gl/3fR3uWqE9B7v4j4Y7" target="_blank" rel="noopener noreferrer" className="contact-item">
-                <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                </svg>
-                <span>Kiosk c1 Ringwood Square Shopping Centre, Ringwood 3134</span>
-              </a>
-              <div className="contact-item">
-                <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                </svg>
-                <span>0481 058 514</span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-              <div className="hero-kicker">Ali Mobile & Repair</div>
-              <h1 className="text-5xl md:text-6xl font-black tracking-[-0.04em] leading-[1.1] text-slate-900">
-                Expert Mobile Phone &amp; Tablet Repair
-                <span className="block bg-gradient-to-r from-slate-800 via-slate-700 to-slate-500 bg-clip-text text-transparent">
-                  in Ringwood Square, Melbourne
-                </span>
-              </h1>
-              
-              <div className="hero-proof-row justify-center">
-                <div>No Fix, No Charge</div>
-                <div>6-Month Warranty on All Repairs</div>
-              </div>
+      <header className="w-full bg-white px-4 sm:px-6 lg:px-8 pt-44 md:pt-48">
+        <div className="flex flex-col items-center justify-center text-center w-full max-w-5xl mx-auto pt-16 pb-12">
+          <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">
+            Expert Mobile Phone &amp; Tablet Repair
+            <span className="block mt-2 text-[2rem] md:text-[3.5rem] font-extrabold text-slate-500 tracking-tight">
+              in Ringwood Square, Melbourne
+            </span>
+          </h1>
 
-              <div className="flex justify-center gap-4 flex-wrap w-full">
-                <Link href="/book-repair" className="primary-btn">Book Repair Now</Link>
-                <Link href="/track-status" className="secondary-btn">Track Status</Link>
-              </div>
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            <div className="px-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm font-semibold text-slate-700">
+              No Fix, No Charge
             </div>
+            <div className="px-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm font-semibold text-slate-700">
+              6-Month Warranty on All Repairs
+            </div>
+          </div>
+
+          <div className="flex flex-row flex-wrap justify-center items-center gap-4 mt-10">
+            <Link href="/book-repair" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all">
+              Book Repair Now
+            </Link>
+            <Link href="/track-status" className="px-8 py-4 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-800 font-bold rounded-full transition-all">
+              Track Status
+            </Link>
           </div>
         </div>
       </header>
