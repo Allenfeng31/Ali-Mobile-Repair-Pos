@@ -17,11 +17,11 @@ export default function Home() {
           <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">
             Expert Mobile Phone &amp; Tablet Repair
             <span className="block mt-2 text-[2rem] md:text-[3.5rem] font-extrabold text-slate-500 tracking-tight">
-              in Ringwood Square, Melbourne
+              in Ringwood Square
             </span>
           </h1>
 
-          <div className="flex flex-wrap justify-center gap-3 mt-8">
+          <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-wrap justify-center gap-3 mt-12 md:mt-14">
             <div className="px-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm font-semibold text-slate-700">
               No Fix, No Charge
             </div>
@@ -30,11 +30,11 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-row flex-wrap justify-center items-center gap-6 mt-12 w-full">
-            <Link href="/book-repair" className="inline-flex min-h-20 items-center justify-center px-14 py-7 bg-blue-600 hover:bg-blue-700 text-white text-2xl md:text-3xl font-black rounded-full shadow-[0_18px_45px_rgba(37,99,235,0.28)] transition-all">
+          <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-row flex-wrap justify-center items-center gap-5 mt-8">
+            <Link href="/book-repair" className="inline-flex min-h-14 md:min-h-16 items-center justify-center px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl md:text-2xl font-black rounded-full shadow-[0_14px_34px_rgba(37,99,235,0.24)] transition-all">
               Book Repair Now
             </Link>
-            <Link href="/track-status" className="inline-flex min-h-20 items-center justify-center px-14 py-7 bg-white border-4 border-slate-200 hover:border-slate-300 text-slate-800 text-2xl md:text-3xl font-black rounded-full shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all">
+            <Link href="/track-status" className="inline-flex min-h-14 md:min-h-16 items-center justify-center px-10 py-5 bg-white border-[3px] border-slate-200 hover:border-slate-300 text-slate-800 text-xl md:text-2xl font-black rounded-full shadow-[0_14px_34px_rgba(15,23,42,0.07)] transition-all">
               Track Status
             </Link>
           </div>
