@@ -572,7 +572,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.995 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="transform-gpu transition-all duration-300 ease-out will-change-[opacity,transform]"
+            className="transition-opacity duration-300 ease-out"
           >
             {children}
           </motion.div>

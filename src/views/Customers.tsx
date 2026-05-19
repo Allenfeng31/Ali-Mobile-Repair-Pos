@@ -1183,13 +1183,19 @@ export function CustomersView() {
         )}
 
         {(isAdding || isEditing) && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }} className="absolute inset-0 bg-black/40" />
+          <div className="fixed inset-0 z-[220] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
+              className="absolute inset-0 z-0 bg-slate-950/45 backdrop-blur-[2px]"
+            />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar"
+              className="relative z-10 w-full max-w-2xl bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar"
             >
               <form ref={customerFormRef} onSubmit={isEditing ? handleEditCustomer : handleAddCustomer} className="p-10 space-y-10">
                 <div className="flex justify-between items-center">
@@ -1200,6 +1206,7 @@ export function CustomersView() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => { setIsAdding(false); setIsEditing(false); resetForm(); }}
                     className="w-12 h-12 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-gray-600 hover:text-red-500 active:shadow-[var(--shadow-neu-pressed)] transition-all"
                   >
