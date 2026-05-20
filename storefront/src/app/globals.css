@@ -21,7 +21,8 @@
   --secondary: #ffffff;
   --accent: #ff3b30;
   --layer: rgba(255, 255, 255, 1);
-  --layer-border: rgba(0, 0, 0, 0.1); /* Slightly darker for better visibility */
+  --layer-border: rgba(0, 0, 0, 0.1);
+  /* Slightly darker for better visibility */
 }
 
 /* Explicit Dark Theme */
@@ -55,7 +56,8 @@
   margin: 0;
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden;
   width: 100%;
   margin: 0;
@@ -123,7 +125,8 @@ a {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  height: 85px; /* Increased size (approx 50% larger) */
+  height: 85px;
+  /* Increased size (approx 50% larger) */
 }
 
 .nav-logo img {
@@ -202,7 +205,8 @@ a {
 
 /* ─── Hamburger Button ───────────────────────────── */
 .hamburger-btn {
-  display: none; /* Hidden on desktop */
+  display: none;
+  /* Hidden on desktop */
   background: none;
   border: none;
   cursor: pointer;
@@ -248,7 +252,8 @@ a {
 
 /* ─── Mobile Dropdown Nav ────────────────────────── */
 .mobile-nav {
-  display: none; /* Hidden on desktop */
+  display: none;
+  /* Hidden on desktop */
   flex-direction: column;
   gap: 0;
   background: var(--secondary);
@@ -276,8 +281,15 @@ a {
 }
 
 @keyframes mobileNavSlideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── Theme Toggle ──────────────────────────────── */
@@ -319,7 +331,8 @@ a {
 }
 
 [data-theme='light'] .toggle-slider {
-  background-color: #e5e5e7; /* Light grey for visibility on white nav */
+  background-color: #e5e5e7;
+  /* Light grey for visibility on white nav */
   border-color: #d1d1d6;
 }
 
@@ -337,11 +350,11 @@ a {
   z-index: 2;
 }
 
-input:checked + .toggle-slider {
+input:checked+.toggle-slider {
   background-color: var(--primary);
 }
 
-input:checked + .toggle-slider:before {
+input:checked+.toggle-slider:before {
   transform: translateX(26px);
 }
 
@@ -693,15 +706,18 @@ input:checked + .toggle-slider:before {
   position: relative;
   z-index: 1;
   overflow: hidden;
-  background: #18181b; /* zinc-900 */
-  border-radius: 1.5rem; /* rounded-3xl */
+  background: #18181b;
+  /* zinc-900 */
+  border-radius: 1.5rem;
+  /* rounded-3xl */
   padding: 2rem;
   min-height: 320px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border: 1px solid #27272a; /* zinc-800 */
+  border: 1px solid #27272a;
+  /* zinc-800 */
   cursor: pointer;
   transition: transform 0.3s ease;
   text-decoration: none;
@@ -732,7 +748,7 @@ input:checked + .toggle-slider:before {
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: linear-gradient(to top, black 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  background: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
   pointer-events: none;
 }
 
@@ -752,7 +768,8 @@ input:checked + .toggle-slider:before {
 }
 
 .serviceCard p {
-  color: #d1d5db; /* gray-300 */
+  color: #d1d5db;
+  /* gray-300 */
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 1.25rem;
@@ -763,7 +780,8 @@ input:checked + .toggle-slider:before {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #60a5fa; /* blue-400 */
+  color: #60a5fa;
+  /* blue-400 */
   font-weight: 700;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -772,7 +790,8 @@ input:checked + .toggle-slider:before {
 }
 
 .serviceCard:hover .card-link {
-  color: #93c5fd; /* blue-300 */
+  color: #93c5fd;
+  /* blue-300 */
 }
 
 /* ─── Homepage Reviews Motion Layer ─────────────── */
@@ -791,7 +810,7 @@ input:checked + .toggle-slider:before {
   contain: paint;
 }
 
-.homepage-reviews-section > * {
+.homepage-reviews-section>* {
   position: relative;
   z-index: 1;
 }
@@ -842,7 +861,7 @@ input:checked + .toggle-slider:before {
   contain: paint;
 }
 
-.map-section > * {
+.map-section>* {
   position: relative;
   z-index: 1;
 }
@@ -879,7 +898,7 @@ input:checked + .toggle-slider:before {
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid var(--layer-border);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   height: 450px;
 }
 
@@ -933,7 +952,7 @@ input:checked + .toggle-slider:before {
   padding: 2.5rem;
   border-radius: 20px;
   border: 1px solid var(--layer-border);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .form-group {
@@ -1021,7 +1040,7 @@ input:checked + .toggle-slider:before {
 
 .model-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border-color: var(--primary-glow);
 }
 
@@ -1052,7 +1071,7 @@ input:checked + .toggle-slider:before {
   contain: paint;
 }
 
-.service-areas-container > * {
+.service-areas-container>* {
   position: relative;
   z-index: 1;
 }
@@ -1126,8 +1145,15 @@ input:checked + .toggle-slider:before {
 
 /* ─── Animations ─────────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes servicesTraceDrift {
@@ -1155,6 +1181,7 @@ input:checked + .toggle-slider:before {
 }
 
 @keyframes mapSignalPulse {
+
   0%,
   100% {
     transform: scale(0.92);
@@ -1180,6 +1207,7 @@ input:checked + .toggle-slider:before {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .homepage-services-motion::after,
   .homepage-reviews-section::after,
   .map-section::after,
@@ -1222,6 +1250,7 @@ input:checked + .toggle-slider:before {
 
 /* ─── Mobile (≤ 767px) ───────────────────────────── */
 @media (max-width: 767px) {
+
   .homepage-services-motion::before,
   .homepage-services-motion::after,
   .homepage-reviews-section::before,
@@ -1270,7 +1299,8 @@ input:checked + .toggle-slider:before {
 
   /* Hero: Adjust for dual-row navbar */
   .hero {
-    padding: 10rem 1.25rem 3rem; /* Adjusted for smaller 2-row navbar */
+    padding: 10rem 1.25rem 3rem;
+    /* Adjusted for smaller 2-row navbar */
     min-height: auto;
   }
 
@@ -1431,10 +1461,12 @@ input:checked + .toggle-slider:before {
 
 /* ─── Very small phones (≤ 380px) ───────────────── */
 @media (max-width: 380px) {
+
   .hero h1,
   .hero-h1 {
     font-size: 1.6rem;
   }
+
   .hero-h1-main,
   .hero-h1-gradient {
     font-size: 1.5rem;
@@ -1918,7 +1950,7 @@ input:checked + .toggle-slider:before {
 
 .brand-card-hero:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   border-color: var(--primary);
 }
 
@@ -1953,7 +1985,7 @@ input:checked + .toggle-slider:before {
 
 .brand-card-standard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border-color: var(--primary);
 }
 
@@ -1994,8 +2026,15 @@ input:checked + .toggle-slider:before {
 }
 
 @keyframes modalSlideUp {
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-close {
@@ -2101,12 +2140,10 @@ input:checked + .toggle-slider:before {
 /* ─── Skeleton Loading ───────────────────────────── */
 .skeleton {
   background: var(--layer);
-  background-image: linear-gradient(
-    90deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.05) 50%, 
-    rgba(255, 255, 255, 0) 100%
-  );
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0) 100%);
   background-size: 200% 100%;
   border-radius: 8px;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
@@ -2115,12 +2152,10 @@ input:checked + .toggle-slider:before {
 
 [data-theme='light'] .skeleton {
   background: #f3f4f6;
-  background-image: linear-gradient(
-    90deg, 
-    rgba(0, 0, 0, 0) 0%, 
-    rgba(0, 0, 0, 0.03) 50%, 
-    rgba(0, 0, 0, 0) 100%
-  );
+  background-image: linear-gradient(90deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.03) 50%,
+      rgba(0, 0, 0, 0) 100%);
 }
 
 @keyframes skeleton-pulse {
@@ -2128,10 +2163,12 @@ input:checked + .toggle-slider:before {
     opacity: 0.6;
     background-position: 100% 0;
   }
+
   50% {
     opacity: 1;
     background-position: 0% 0;
   }
+
   100% {
     opacity: 0.6;
     background-position: -100% 0;

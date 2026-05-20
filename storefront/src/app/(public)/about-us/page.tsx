@@ -7,10 +7,10 @@ export default function AboutUsPage() {
   return (
     <div style={{ background: 'var(--background)', color: 'var(--foreground)', minHeight: '100vh', fontFamily: '"Inter", sans-serif' }}>
       {/* Dynamic Hero Section */}
-      <section style={{ 
-        padding: '160px 20px 60px', 
-        textAlign: 'center', 
-        background: 'radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%)' 
+      <section style={{
+        padding: '160px 20px 60px',
+        textAlign: 'center',
+        background: 'radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%)'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
@@ -25,30 +25,30 @@ export default function AboutUsPage() {
       {/* Main Content */}
       <section style={{ padding: '40px 20px 100px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '60px', alignItems: 'center' }} className="responsive-about">
-          
+
           {/* Visual Side */}
           <div style={{ position: 'relative' }}>
-            <div style={{ 
-              position: 'absolute', 
-              top: '-20px', 
-              left: '-20px', 
-              width: '100%', 
-              height: '100%', 
-              border: '2px solid var(--primary)', 
-              borderRadius: '30px', 
-              zIndex: 0 
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              left: '-20px',
+              width: '100%',
+              height: '100%',
+              border: '2px solid var(--primary)',
+              borderRadius: '30px',
+              zIndex: 0
             }} />
-            <Image 
-              src="/images/about-us-new.jpg" 
-              alt="Ali Mobile & Repair Store Front" 
+            <Image
+              src="/images/about-us-new.jpg"
+              alt="Ali Mobile & Repair Store Front"
               width={600}
               height={400}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 height: 'auto',
-                borderRadius: '30px', 
-                boxShadow: '0 30px 60px rgba(0,0,0,0.3)', 
-                position: 'relative', 
+                borderRadius: '30px',
+                boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
+                position: 'relative',
                 zIndex: 1,
                 border: '1px solid var(--layer-border)',
                 transition: 'transform 0.5s ease'
@@ -74,7 +74,7 @@ export default function AboutUsPage() {
                 We take pride in offering the most competitive pricing in the area, often beating larger retail chains while providing a far more personalized and attentive service. From the moment you walk into our shop at <strong>Kiosk C1, Ringwood Square Shopping Centre</strong> (conveniently located inside near the main entrance with <strong>ample free parking</strong> available for our customers), you will experience a professional and friendly service that puts your needs first. Your satisfaction is our greatest reward.
               </p>
             </div>
-            
+
             {/* Core Values / Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginTop: '20px' }} className="mobile-values">
               {[
@@ -82,12 +82,12 @@ export default function AboutUsPage() {
                 { title: 'Local', sub: 'Ringwood Based', icon: '📍' },
                 { title: 'Best', sub: 'Local Pricing', icon: '💰' }
               ].map((val, idx) => (
-                <div key={idx} style={{ 
-                  background: 'var(--layer)', 
-                  padding: '20px 15px', 
-                  borderRadius: '20px', 
-                  textAlign: 'center', 
-                  border: '1px solid var(--layer-border)' 
+                <div key={idx} style={{
+                  background: 'var(--layer)',
+                  padding: '20px 15px',
+                  borderRadius: '20px',
+                  textAlign: 'center',
+                  border: '1px solid var(--layer-border)'
                 }}>
                   <div style={{ fontSize: '24px', marginBottom: '8px' }}>{val.icon}</div>
                   <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary)' }}>{val.title}</div>
@@ -101,12 +101,12 @@ export default function AboutUsPage() {
 
       {/* CTA Section */}
       <section style={{ paddingBottom: '100px', textAlign: 'center' }}>
-        <div style={{ 
-          maxWidth: '900px', 
-          margin: '0 auto 100px', 
-          padding: '60px 40px', 
-          background: 'linear-gradient(135deg, #007aff, #00c6ff)', 
-          borderRadius: '40px', 
+        <div style={{
+          maxWidth: '900px',
+          margin: '0 auto 100px',
+          padding: '60px 40px',
+          background: 'linear-gradient(135deg, #007aff, #00c6ff)',
+          borderRadius: '40px',
           color: 'white',
           boxShadow: '0 20px 40px rgba(0,122,255,0.3)',
         }}>
@@ -114,13 +114,13 @@ export default function AboutUsPage() {
           <p style={{ opacity: 0.9, fontSize: '1.1rem', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
             Don't let a broken device slow you down. Visit us today for a free quote.
           </p>
-          <a href="/book-repair" style={{ 
-            display: 'inline-block', 
-            padding: '1.2rem 3rem', 
-            background: 'white', 
-            color: '#007aff', 
-            borderRadius: '50px', 
-            fontWeight: 700, 
+          <a href="/book-repair" style={{
+            display: 'inline-block',
+            padding: '1.2rem 3rem',
+            background: 'white',
+            color: '#007aff',
+            borderRadius: '50px',
+            fontWeight: 700,
             fontSize: '1.1rem',
             boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
             transition: 'transform 0.2s ease'
