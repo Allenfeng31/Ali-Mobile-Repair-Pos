@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/apiBase';
 import { useAuthStore } from '@/hooks/useAuthStore';
 
 interface LayoutProps {
@@ -302,7 +303,7 @@ function SettingsPanel({
                     <div className="bg-neu-bg rounded-2xl overflow-hidden border border-transparent shadow-sm">
                       <div className="aspect-video relative">
                         <img 
-                          src={`http://localhost:3001/api/blog/proxy-image?url=${encodeURIComponent(blogDraft.image)}`} 
+                          src={`${getApiBaseUrl()}/blog/proxy-image?url=${encodeURIComponent(blogDraft.image)}`}
                           alt="Preview" 
                           className="w-full h-full object-cover" 
                         />
@@ -432,12 +433,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
 
   // Poll for unread customer messages — shows red dot on Chat icon
   React.useEffect(() => {
-    const API_BASE = (() => {
-      // @ts-ignore
-      const env = import.meta.env;
-      if (env?.PROD) return '/api';
-      return env?.VITE_API_URL || 'http://localhost:3001/api';
-    })();
+    const API_BASE = getApiBaseUrl();
 
     const checkUnread = async () => {
       try {

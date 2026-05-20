@@ -19,13 +19,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { getApiBaseUrl } from '../lib/apiBase';
 
-const API_BASE = (() => {
-  // @ts-ignore
-  const env = import.meta.env;
-  if (env?.PROD) return '/api';
-  return env?.VITE_API_URL || 'http://localhost:3001/api';
-})();
+const API_BASE = getApiBaseUrl();
 
 interface Employee {
   user_id: string;

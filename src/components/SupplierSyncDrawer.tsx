@@ -9,6 +9,7 @@ import {
   History
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getApiBaseUrl } from '@/lib/apiBase';
 
 interface SupplierSyncDrawerProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export const SupplierSyncDrawer: React.FC<SupplierSyncDrawerProps> = ({
     setSyncStarted(false);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/scraper/sync`, {
+      const response = await fetch(`${getApiBaseUrl()}/scraper/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

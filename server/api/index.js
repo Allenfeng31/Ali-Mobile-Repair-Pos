@@ -42,8 +42,20 @@ app.get('/', (req, res) => {
 // Initialize Supabase
 // Use service_role key if available (bypasses RLS, recommended for server-side use)
 // Get service_role key from: Supabase Dashboard → Settings → API → service_role (secret)
-const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project-url.supabase.co';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl =
+  process.env.SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ [Supabase] Missing Supabase environment variables. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the backend Vercel project.');
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 if (process.env.SUPABASE_SERVICE_ROLE_KEY) {

@@ -3,6 +3,7 @@ import { MessageSquare, ArrowLeft, Send, RefreshCw, Circle, Trash2, Smartphone, 
 import { api } from '@/lib/api';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { cn } from '@/lib/utils';
+import { getApiBaseUrl } from '@/lib/apiBase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,12 +23,7 @@ interface ChatSession {
   chat_messages: ChatMessage[];
 }
 
-const API_BASE = (() => {
-  // @ts-ignore
-  const env = import.meta.env;
-  if (env?.PROD) return '/api';
-  return env?.VITE_API_URL || 'http://localhost:3001/api';
-})();
+const API_BASE = getApiBaseUrl();
 
 const INTRO_PREFIX = '[CUSTOMER_INFO]';
 const BOOKING_PREFIX = '[BOOKING_DATA]';
