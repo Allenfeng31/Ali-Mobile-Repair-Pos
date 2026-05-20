@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { 
-  Radar, 
-  ArrowLeft, 
-  Check, 
-  X, 
-  Sparkles, 
-  ShieldAlert, 
-  Clock, 
-  Search,
-  Terminal,
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ArrowLeft,
+  Check,
+  Clock,
   Database,
-  ThumbsUp,
-  Skull
+  Eye,
+  FileText,
+  Loader2,
+  Radar,
+  Search,
+  ShieldAlert,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,17 +27,149 @@ interface KeywordRecord {
   status: 'pending' | 'approved' | 'queued' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'blocked';
 }
 
+interface CampaignRecord {
+  id: string;
+  keyword: string;
+  source?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  last_executed_at?: string | null;
+  payload?: CampaignPayload;
+}
+
+interface CampaignPayload {
+  keyword?: string;
+  draft?: {
+    title?: string;
+    description?: string;
+    content?: string;
+    readingTime?: string;
+    relatedKeywords?: string[];
+  };
+  agentWorkflow?: {
+    finalVerdict?: string;
+    rounds?: Array<{
+      round: number;
+      verdict: string;
+      critique: string;
+    }>;
+  };
+}
+
 interface ScoutSummary {
   discovered: number;
   blockedByRisk: number;
   timestamp: string;
 }
 
+type ActiveTab = 'pending' | 'approved' | 'blocked';
+
+const statusStyles: Record<string, string> = {
+  pending: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
+  approved: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+  queued: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+  PROCESSING: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
+  COMPLETED: 'border-blue-400/30 bg-blue-400/10 text-blue-200',
+  FAILED: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
+  blocked: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return 'Unknown';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Unknown';
+
+  return new Intl.DateTimeFormat('en-AU', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function buildPreviewDocument(campaign: CampaignRecord | null) {
+  const draft = campaign?.payload?.draft;
+
+  if (!campaign || !draft) {
+    return `
+      <html>
+        <body style="margin:0;font-family:Inter,system-ui,sans-serif;background:#f8fafc;color:#0f172a;display:grid;place-items:center;min-height:100vh;">
+          <main style="text-align:center;max-width:520px;padding:48px;">
+            <p style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#2563eb;font-weight:800;">No campaign selected</p>
+            <h1 style="font-size:34px;line-height:1.05;margin:12px 0 10px;">Choose an article to preview.</h1>
+            <p style="color:#64748b;line-height:1.7;">Completed SEO campaigns will render here using the public article layout structure.</p>
+          </main>
+        </body>
+      </html>
+    `;
+  }
+
+  return `
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          * { box-sizing: border-box; }
+          body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #0f172a; }
+          header { position: relative; overflow: hidden; padding: 64px 56px 48px; background: #020617; color: #fff; }
+          header::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(37,99,235,.18), transparent 42%), linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px); background-size: auto, 42px 42px, 42px 42px; opacity: .9; }
+          .hero { position: relative; max-width: 880px; }
+          .eyebrow { display: inline-flex; border: 1px solid rgba(96,165,250,.35); border-radius: 999px; padding: 8px 12px; color: #bfdbfe; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+          h1 { font-size: clamp(38px, 6vw, 72px); line-height: .96; letter-spacing: -0.045em; margin: 20px 0; }
+          .desc { color: #cbd5e1; font-size: 18px; line-height: 1.7; max-width: 760px; }
+          .shell { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 42px; padding: 52px 56px; max-width: 1220px; margin: 0 auto; }
+          article { font-size: 17px; line-height: 1.75; }
+          article h2 { font-size: 32px; line-height: 1.1; letter-spacing: -.025em; margin: 42px 0 12px; color: #0f172a; }
+          article h3 { font-size: 22px; margin: 30px 0 8px; }
+          article p, article li { color: #475569; }
+          article ul, article ol { padding-left: 24px; }
+          aside { align-self: start; position: sticky; top: 24px; border: 1px solid #dbeafe; border-radius: 28px; padding: 26px; background: rgba(255,255,255,.84); box-shadow: 0 24px 80px rgba(15,23,42,.1); }
+          aside h2 { margin: 0 0 10px; font-size: 25px; letter-spacing: -.03em; }
+          aside p { color: #64748b; line-height: 1.6; }
+          .cta { display: block; margin-top: 22px; border-radius: 999px; background: #2563eb; color: white; text-align: center; padding: 15px 18px; font-weight: 900; text-decoration: none; }
+          @media (max-width: 820px) { header, .shell { padding-left: 24px; padding-right: 24px; } .shell { grid-template-columns: 1fr; } aside { position: static; } }
+        </style>
+      </head>
+      <body>
+        <header>
+          <div class="hero">
+            <span class="eyebrow">Ali Mobile & Repair • Ringwood</span>
+            <h1>${escapeHtml(draft.title || campaign.keyword)}</h1>
+            <p class="desc">${escapeHtml(draft.description || '')}</p>
+          </div>
+        </header>
+        <main class="shell">
+          <article>${draft.content || '<p>No content available.</p>'}</article>
+          <aside>
+            <h2>Need this fixed?</h2>
+            <p>Get a practical quote from Kiosk C1 in Ringwood Square. No Fix, No Charge applies to eligible diagnostics.</p>
+            <a class="cta" href="/book-repair">Get a Live Quote</a>
+          </aside>
+        </main>
+      </body>
+    </html>
+  `;
+}
+
 export default function SeoGeoScoutConsole() {
   const [keywords, setKeywords] = useState<KeywordRecord[]>([]);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'blocked'>('pending');
+  const [campaigns, setCampaigns] = useState<CampaignRecord[]>([]);
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignRecord | null>(null);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [isScouting, setIsScouting] = useState(false);
+  const [isLoadingCampaign, setIsLoadingCampaign] = useState(false);
   const [scoutSummary, setScoutSummary] = useState<ScoutSummary | null>(null);
 
   const loadRealKeywords = useCallback(async () => {
@@ -58,18 +190,31 @@ export default function SeoGeoScoutConsole() {
     }
   }, []);
 
+  const loadCampaigns = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/seo/campaigns?t=${Date.now()}`, {
+        cache: 'no-store',
+        credentials: 'include',
+      });
+      const json = await res.json();
+
+      if (res.ok && json.status === 'SUCCESS') {
+        setCampaigns(Array.isArray(json.data) ? json.data : []);
+      } else {
+        console.error('Failed to load campaigns:', json.error || json.message);
+      }
+    } catch (err) {
+      console.error('Failed to load campaigns:', err);
+    }
+  }, []);
+
   useEffect(() => {
     void loadRealKeywords();
-  }, [loadRealKeywords]);
+    void loadCampaigns();
+  }, [loadCampaigns, loadRealKeywords]);
 
   const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'blocked') => {
-    if (!id) {
-      console.error('CRITICAL: Keyword ID is missing!');
-      return;
-    }
-    console.log(`[Triage Attempt] Sending PUT for ID: ${id} to status: ${newStatus}`);
-
-    // Optimistic UI update: instantly hide the row
+    if (!id) return;
     setKeywords(prev => prev.filter(k => k.id !== id));
 
     try {
@@ -78,15 +223,14 @@ export default function SeoGeoScoutConsole() {
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         credentials: 'include',
-        body: JSON.stringify({ id, status: newStatus })
+        body: JSON.stringify({ id, status: newStatus }),
       });
 
-      if (res.ok) {
-        await loadRealKeywords();
-      } else {
+      if (!res.ok) {
         console.error('PUT Failed:', await res.text());
-        await loadRealKeywords();
       }
+
+      await loadRealKeywords();
     } catch (err) {
       console.error('Triage update failed:', err);
       await loadRealKeywords();
@@ -96,18 +240,9 @@ export default function SeoGeoScoutConsole() {
   const handleTriggerScout = async () => {
     setIsScouting(true);
     try {
-      console.info('[seo-scout] Client request origin audit:', {
-        origin: window.location.origin,
-        hostname: window.location.hostname,
-        port: window.location.port || '(default)',
-        target: `${window.location.origin}/api/seo/scout`,
-      });
-
       const res = await fetch('/api/seo/scout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ forceRun: true }),
       });
@@ -115,13 +250,11 @@ export default function SeoGeoScoutConsole() {
       const data = await res.json();
 
       if (res.ok && data.status === 'SUCCESS') {
-        // Successfully swept long-tail keywords!
         setScoutSummary({
           discovered: data.data.discovered,
           blockedByRisk: data.data.blockedByRisk,
-          timestamp: data.data.timestamp
+          timestamp: data.data.timestamp,
         });
-        alert(`Scout completed! Discovered: ${data.data.discovered}, Blocked: ${data.data.blockedByRisk}`);
         await loadRealKeywords();
       } else {
         alert(`Scout failed or locked: ${data.error || data.message}`);
@@ -133,306 +266,302 @@ export default function SeoGeoScoutConsole() {
     }
   };
 
-  // Metrics calculations
+  const handleSelectCampaign = async (campaign: CampaignRecord) => {
+    setIsLoadingCampaign(true);
+    try {
+      const res = await fetch(`/api/seo/campaigns?id=${encodeURIComponent(campaign.id)}&t=${Date.now()}`, {
+        cache: 'no-store',
+        credentials: 'include',
+      });
+      const json = await res.json();
+
+      if (res.ok && json.status === 'SUCCESS') {
+        setSelectedCampaign(json.data);
+      } else {
+        console.error('Failed to load campaign detail:', json.error || json.message);
+      }
+    } catch (err) {
+      console.error('Failed to load campaign detail:', err);
+    } finally {
+      setIsLoadingCampaign(false);
+    }
+  };
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
   const totalDiscovered = keywords.length;
   const builderQueueSize = keywords.filter(kw => kw.status === 'approved' || kw.status === 'queued').length;
   const violationsBlocked = keywords.filter(kw => kw.status === 'blocked').length;
 
-  // Filtered keywords to display
-  const filteredKeywords = keywords.filter(kw => {
+  const filteredKeywords = useMemo(() => keywords.filter(kw => {
     const matchesTab = kw.status === activeTab;
-    const matchesSearch = kw.keyword.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (kw.source || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = !normalizedQuery ||
+      kw.keyword.toLowerCase().includes(normalizedQuery) ||
+      (kw.source || '').toLowerCase().includes(normalizedQuery);
     return matchesTab && matchesSearch;
-  });
+  }), [activeTab, keywords, normalizedQuery]);
 
-  const formatDiscoveredAt = (value?: string) => {
-    if (!value) return 'Unknown';
+  const filteredCampaigns = useMemo(() => campaigns.filter(campaign => {
+    if (!normalizedQuery) return true;
+    return campaign.keyword.toLowerCase().includes(normalizedQuery) ||
+      (campaign.source || '').toLowerCase().includes(normalizedQuery);
+  }), [campaigns, normalizedQuery]);
 
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Unknown';
-
-    return new Intl.DateTimeFormat('en-AU', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date);
-  };
+  const previewDocument = useMemo(() => buildPreviewDocument(selectedCampaign), [selectedCampaign]);
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] p-8 text-slate-800 antialiased font-sans">
-      <div className="max-w-6xl mx-auto">
-        
-        {/* Header Ribbon */}
-        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
-          <div className="flex items-center gap-6">
-            <Link
-              href="/dashboard"
-              className="w-12 h-12 bg-[#f0f4f8] rounded-2xl flex items-center justify-center text-slate-600 
-                       shadow-[4px_4px_10px_#d1d9e6,-4px_-4px_10px_#ffffff] 
-                       hover:shadow-[inset_2px_2px_5px_#d1d9e6,inset_-2px_-2px_5px_#ffffff] 
-                       transition-all border border-white/20 outline-none"
-            >
-              <ArrowLeft size={20} strokeWidth={2.5} />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                <span className="p-2 bg-[#f0f4f8] rounded-xl shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff] text-cyan-500">
-                  <Radar className="w-8 h-8" strokeWidth={2.5} />
-                </span>
-                SEO & GEO <span className="text-cyan-500 italic font-medium">Scout</span>
-              </h1>
-              <p className="text-sm text-slate-500 font-bold tracking-tight mt-1">SEO & GEO Keyword Intelligence Console</p>
+    <div className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+      <div className="mx-auto max-w-[1720px] px-5 py-6 lg:px-8">
+        <header className="mb-6 rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-slate-300 transition hover:border-blue-400/50 hover:text-blue-200"
+                aria-label="Back to dashboard"
+              >
+                <ArrowLeft size={19} strokeWidth={2.5} />
+              </Link>
+              <div>
+                <div className="mb-1 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.24em] text-blue-300">
+                  <Radar className="h-4 w-4" />
+                  SEO Command Center
+                </div>
+                <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                  Scout Triage + Generated Campaign Preview
+                </h1>
+              </div>
             </div>
-          </div>
-          <div className="text-[10px] font-black uppercase tracking-wider text-cyan-600 bg-[#f0f4f8] px-4 py-2 rounded-full border border-white/40 shadow-[inset_2px_2px_5px_#d1d9e6,inset_-2px_-2px_5px_#ffffff]">
-            Super Admin Access Enabled
+
+            <div className="relative w-full xl:max-w-xl">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search keywords, sources, generated articles..."
+                className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900/90 pl-11 pr-4 text-sm font-bold text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/50 focus:ring-4 focus:ring-blue-500/10"
+              />
+            </div>
           </div>
         </header>
 
-        <section className="mb-10 rounded-2xl border border-cyan-200/80 bg-cyan-50 px-6 py-5 text-cyan-950 shadow-[6px_6px_14px_#d1d9e6,-6px_-6px_14px_#ffffff]">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700 shadow-[inset_2px_2px_5px_rgba(14,116,144,0.18),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
-              <Terminal className="h-6 w-6" strokeWidth={2.5} />
-            </div>
-            <p className="text-sm font-extrabold leading-6 tracking-tight">
-              Background Worker Required: To automatically process 'QUEUED' keywords, you must run{' '}
-              <code className="rounded-lg border border-cyan-200 bg-white/80 px-2 py-1 font-mono text-xs font-black text-cyan-700 shadow-sm">
-                npm run worker:seo
-              </code>{' '}
-              in a separate terminal tab.
-            </p>
-          </div>
+        <section className="mb-6 grid gap-4 lg:grid-cols-4">
+          {[
+            { label: 'Total Discovered', value: totalDiscovered, icon: Database, tone: 'text-blue-200' },
+            { label: 'Builder Queue', value: builderQueueSize, icon: Sparkles, tone: 'text-emerald-200' },
+            { label: 'Blocked', value: violationsBlocked, icon: ShieldAlert, tone: 'text-rose-200' },
+            { label: 'Generated Campaigns', value: campaigns.length, icon: FileText, tone: 'text-cyan-200' },
+          ].map((metric) => {
+            const Icon = metric.icon;
+            return (
+              <div key={metric.label} className="rounded-3xl border border-white/10 bg-white/[0.045] p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{metric.label}</p>
+                    <p className={`mt-2 text-3xl font-black tabular-nums ${metric.tone}`}>{metric.value}</p>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-900">
+                    <Icon className={`h-5 w-5 ${metric.tone}`} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </section>
 
-        {/* Top Summary Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          
-          {/* Card 1: Total Discovered */}
-          <div className="bg-[#f0f4f8] p-6 rounded-[2rem] border border-white/40 shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff] flex items-center justify-between group">
-            <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Total Discovered</h3>
-              <p className="text-4xl font-extrabold text-slate-800 tabular-nums">{totalDiscovered}</p>
-            </div>
-            <div className="w-14 h-14 bg-[#f0f4f8] rounded-2xl flex items-center justify-center text-cyan-500 shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff]">
-              <Database className="w-6 h-6" strokeWidth={2.5} />
-            </div>
-          </div>
-
-          {/* Card 2: Builder Queue Size */}
-          <div className="bg-[#f0f4f8] p-6 rounded-[2rem] border border-white/40 shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff] flex items-center justify-between group">
-            <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Builder Queue Size</h3>
-              <p className="text-4xl font-extrabold text-emerald-600 tabular-nums">{builderQueueSize}</p>
-            </div>
-            <div className="w-14 h-14 bg-[#f0f4f8] rounded-2xl flex items-center justify-center text-emerald-500 shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff]">
-              <Sparkles className="w-6 h-6" strokeWidth={2.5} />
-            </div>
-          </div>
-
-          {/* Card 3: AI Violations Blocked */}
-          <div className="bg-[#f0f4f8] p-6 rounded-[2rem] border border-white/40 shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff] flex items-center justify-between group">
-            <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">AI Violations Blocked</h3>
-              <p className="text-4xl font-extrabold text-rose-600 tabular-nums">{violationsBlocked}</p>
-            </div>
-            <div className="w-14 h-14 bg-[#f0f4f8] rounded-2xl flex items-center justify-center text-rose-500 shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff]">
-              <ShieldAlert className="w-6 h-6" strokeWidth={2.5} />
-            </div>
-          </div>
-
-        </section>
-
-        {/* Main Triage Console */}
-        <main className="bg-[#f0f4f8] rounded-[2.5rem] border border-white/40 shadow-[10px_10px_20px_#d1d9e6,-10px_-10px_20px_#ffffff] p-8 overflow-hidden">
-          
-          {/* Controls Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 pb-6 border-b border-slate-200">
-            
-            {/* Filter Tabs */}
-            <div className="flex bg-[#f0f4f8] p-1.5 rounded-2xl shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff] border border-white/10 shrink-0">
-              <button
-                onClick={() => setActiveTab('pending')}
-                className={`flex items-center gap-2 px-5 py-2.5 text-xs font-black rounded-xl transition-all outline-none ${
-                  activeTab === 'pending'
-                    ? 'bg-[#f0f4f8] text-amber-600 shadow-[2px_2px_5px_#d1d9e6,-2px_-2px_5px_#ffffff] border border-white/40'
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                <Clock className="w-4 h-4" />
-                PENDING ({keywords.filter(k => k.status === 'pending').length})
-              </button>
-              
-              <button
-                onClick={() => setActiveTab('approved')}
-                className={`flex items-center gap-2 px-5 py-2.5 text-xs font-black rounded-xl transition-all outline-none ${
-                  activeTab === 'approved'
-                    ? 'bg-[#f0f4f8] text-emerald-600 shadow-[2px_2px_5px_#d1d9e6,-2px_-2px_5px_#ffffff] border border-white/40'
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                <ThumbsUp className="w-4 h-4" />
-                APPROVED ({keywords.filter(k => k.status === 'approved').length})
-              </button>
-
-              <button
-                onClick={() => setActiveTab('blocked')}
-                className={`flex items-center gap-2 px-5 py-2.5 text-xs font-black rounded-xl transition-all outline-none ${
-                  activeTab === 'blocked'
-                    ? 'bg-[#f0f4f8] text-rose-600 shadow-[2px_2px_5px_#d1d9e6,-2px_-2px_5px_#ffffff] border border-white/40'
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                <Skull className="w-4 h-4" />
-                BLOCKED ({keywords.filter(k => k.status === 'blocked').length})
-              </button>
-            </div>
-
-            <div className="shrink-0">
+        <main className="grid gap-6 xl:grid-cols-2">
+          <section className="min-w-0 rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+            <div className="mb-5 flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="text-lg font-black text-white">Keyword Triage</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-500">Pending, ingestion source, and search weight.</p>
+              </div>
               <button
                 type="button"
                 onClick={handleTriggerScout}
                 disabled={isScouting}
-                className={`flex items-center justify-center gap-2 rounded-2xl bg-[#f0f4f8] px-5 py-3.5 text-xs font-black uppercase tracking-wider text-cyan-600 transition-all border border-white/40 outline-none ${
-                  isScouting
-                    ? 'cursor-wait shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff] opacity-80'
-                    : 'shadow-[4px_4px_10px_#d1d9e6,-4px_-4px_10px_#ffffff] hover:shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff]'
-                }`}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-blue-400/30 bg-blue-500/10 px-4 text-xs font-black uppercase tracking-[0.16em] text-blue-100 transition hover:bg-blue-500/20 disabled:cursor-wait disabled:opacity-70"
               >
-                <Radar className="w-4 h-4" strokeWidth={2.5} />
-                {isScouting ? 'Scouting Google Suggest...' : 'Trigger Scout'}
+                {isScouting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
+                {isScouting ? 'Scouting' : 'Trigger Scout'}
               </button>
-              {scoutSummary && (
-                <p className="mt-2 text-center text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  Last sweep: {scoutSummary.timestamp}
-                </p>
-              )}
             </div>
 
-            {/* Live Search Box */}
-            <div className="relative flex-1 max-w-md w-full">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search keywords or sources..."
-                className="w-full bg-[#f0f4f8] text-sm text-slate-800 font-bold placeholder:text-slate-400/80 px-5 py-3.5 pl-12 rounded-2xl
-                         shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff] border-none outline-none focus:ring-1 focus:ring-cyan-500/30 transition-all"
-              />
-              <Search className="absolute left-4 top-4 w-4 h-4 text-slate-400 pointer-events-none" />
+            <div className="mb-5 flex flex-wrap gap-2">
+              {(['pending', 'approved', 'blocked'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`rounded-2xl border px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition ${
+                    activeTab === tab
+                      ? statusStyles[tab]
+                      : 'border-white/10 bg-slate-900/80 text-slate-500 hover:text-slate-200'
+                  }`}
+                >
+                  {tab} ({keywords.filter((keyword) => keyword.status === tab).length})
+                </button>
+              ))}
             </div>
 
-          </div>
+            {scoutSummary && (
+              <div className="mb-5 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-xs font-bold text-cyan-100">
+                Last sweep: {scoutSummary.timestamp} • {scoutSummary.discovered} discovered • {scoutSummary.blockedByRisk} blocked
+              </div>
+            )}
 
-          {/* Ingestion Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr>
-                  <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Keyword Context</th>
-                  <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ingestion Source</th>
-                  <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Score / Weight</th>
-                  <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Discovered At</th>
-                  <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Triage Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredKeywords.length > 0 ? (
-                  filteredKeywords.map(item => (
-                    <tr key={item.id} className="border-b border-slate-200/50 hover:bg-slate-100/30 transition-colors group">
-                      
-                      {/* Keyword */}
-                      <td className="py-5 px-4">
-                        <div className="font-extrabold text-slate-800 text-sm tracking-tight">
-                          {item.keyword}
-                        </div>
-                      </td>
-
-                      {/* Source */}
-                      <td className="py-5 px-4">
-                        <span className="inline-block px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-[#f0f4f8] rounded-full text-slate-500 border border-white/50 shadow-[1px_1px_3px_#d1d9e6,-1px_-1px_3px_#ffffff]">
-                          {item.source || 'SEO Scout'}
-                        </span>
-                      </td>
-
-                      {/* Weight */}
-                      <td className="py-5 px-4 text-center">
-                        <span className={`inline-block px-2.5 py-1 text-xs font-black rounded-lg ${
-                          (item.search_weight || 0) >= 85 
-                            ? 'bg-emerald-50 text-emerald-600 shadow-[inset_1px_1px_3px_#d1d9e6,inset_-1px_-1px_3px_#ffffff]' 
-                            : 'bg-cyan-50 text-cyan-600 shadow-[inset_1px_1px_3px_#d1d9e6,inset_-1px_-1px_3px_#ffffff]'
-                        }`}>
-                          {item.search_weight || 0}
-                        </span>
-                      </td>
-
-                      {/* Discovered At */}
-                      <td className="py-5 px-4">
-                        <div className="text-xs text-slate-400 font-bold flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5" />
-                          {formatDiscoveredAt(item.created_at || item.updated_at)}
-                        </div>
-                      </td>
-
-                      {/* Triage Actions */}
-                      <td className="py-5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-3.5">
-                          
-                          {item.status === 'pending' && (
-                            <>
+            <div className="overflow-hidden rounded-3xl border border-white/10">
+              <div className="max-h-[660px] overflow-auto">
+                <table className="w-full min-w-[720px] border-collapse text-left">
+                  <thead className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur">
+                    <tr>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Keyword</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Source</th>
+                      <th className="px-4 py-4 text-center text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Score</th>
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Discovered</th>
+                      <th className="px-4 py-4 text-right text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredKeywords.length > 0 ? filteredKeywords.map((item) => (
+                      <tr key={item.id} className="border-t border-white/10 transition hover:bg-white/[0.035]">
+                        <td className="px-4 py-4">
+                          <div className="max-w-[260px] text-sm font-black leading-snug text-white">{item.keyword}</div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="rounded-full border border-white/10 bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                            {item.source || 'SEO Scout'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-center">
+                          <span className="rounded-xl border border-blue-400/20 bg-blue-400/10 px-2.5 py-1 text-xs font-black text-blue-100">
+                            {item.search_weight || 0}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-500">{formatDate(item.created_at || item.updated_at)}</td>
+                        <td className="px-4 py-4 text-right">
+                          {item.status === 'pending' ? (
+                            <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => handleStatusUpdate(item.id, 'approved')}
-                                className="w-9 h-9 bg-[#f0f4f8] text-emerald-600 rounded-xl flex items-center justify-center 
-                                         shadow-[3px_3px_6px_#d1d9e6,-3px_-3px_6px_#ffffff] 
-                                         hover:shadow-[inset_2px_2px_4px_#d1d9e6,inset_-2px_-2px_4px_#ffffff] 
-                                         hover:text-emerald-500 active:bg-emerald-50 transition-all border border-white/20"
-                                title="Approve & Push to Builder Queue"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-200 transition hover:bg-emerald-400/20"
+                                title="Approve"
                               >
-                                <Check className="w-4 h-4" strokeWidth={3} />
+                                <Check className="h-4 w-4" strokeWidth={3} />
                               </button>
-                              
                               <button
                                 onClick={() => handleStatusUpdate(item.id, 'blocked')}
-                                className="w-9 h-9 bg-[#f0f4f8] text-rose-600 rounded-xl flex items-center justify-center 
-                                         shadow-[3px_3px_6px_#d1d9e6,-3px_-3px_6px_#ffffff] 
-                                         hover:shadow-[inset_2px_2px_4px_#d1d9e6,inset_-2px_-2px_4px_#ffffff] 
-                                         hover:text-rose-500 active:bg-rose-50 transition-all border border-white/20"
-                                title="Block Keyword"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-400/20 bg-rose-400/10 text-rose-200 transition hover:bg-rose-400/20"
+                                title="Block"
                               >
-                                <X className="w-4 h-4" strokeWidth={3} />
+                                <X className="h-4 w-4" strokeWidth={3} />
                               </button>
-                            </>
-                          )}
-
-                          {item.status === 'approved' && (
-                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-lg">
-                              Queued
+                            </div>
+                          ) : (
+                            <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusStyles[item.status] || statusStyles.pending}`}>
+                              {item.status}
                             </span>
                           )}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-14 text-center text-sm font-bold text-slate-500">
+                          No keyword records found in this category.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
 
-                          {item.status === 'blocked' && (
-                            <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest bg-rose-50 px-3 py-1.5 rounded-lg">
-                              Blocked
-                            </span>
-                          )}
+          <section className="min-w-0 rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+            <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-5">
+              <div>
+                <h2 className="text-lg font-black text-white">Generated Campaigns</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-500">Click a completed long-tail page to render the live preview.</p>
+              </div>
+              <Eye className="h-5 w-5 text-blue-300" />
+            </div>
 
-                        </div>
-                      </td>
+            <div className="grid gap-5 lg:grid-cols-[310px_minmax(0,1fr)]">
+              <div className="min-h-[660px] rounded-3xl border border-white/10 bg-slate-950/60 p-3">
+                <div className="mb-3 flex items-center justify-between px-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Articles</span>
+                  <span className="text-[10px] font-black text-slate-500">{filteredCampaigns.length}</span>
+                </div>
 
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-12 text-center text-slate-400 font-bold">
-                      No keyword records found in this category.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                <div className="max-h-[625px] space-y-2 overflow-auto pr-1">
+                  {filteredCampaigns.length > 0 ? filteredCampaigns.map((campaign) => (
+                    <button
+                      key={campaign.id}
+                      type="button"
+                      onClick={() => handleSelectCampaign(campaign)}
+                      className={`w-full rounded-2xl border p-3 text-left transition ${
+                        selectedCampaign?.id === campaign.id
+                          ? 'border-blue-400/50 bg-blue-500/15'
+                          : 'border-white/10 bg-white/[0.035] hover:border-white/20 hover:bg-white/[0.06]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm font-black leading-snug text-white">{campaign.keyword}</p>
+                        <span className={`shrink-0 rounded-full border px-2 py-1 text-[9px] font-black uppercase ${statusStyles[campaign.status || 'pending'] || statusStyles.pending}`}>
+                          {campaign.status || 'pending'}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatDate(campaign.updated_at || campaign.created_at || campaign.last_executed_at)}
+                      </div>
+                    </button>
+                  )) : (
+                    <div className="rounded-2xl border border-dashed border-white/10 p-5 text-center text-sm font-bold text-slate-500">
+                      No generated campaigns yet.
+                    </div>
+                  )}
+                </div>
+              </div>
 
+              <div className="min-h-[660px] overflow-hidden rounded-3xl border border-white/10 bg-slate-900">
+                <div className="flex h-12 items-center justify-between border-b border-white/10 bg-slate-950/80 px-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                      {selectedCampaign?.payload?.draft?.title || selectedCampaign?.keyword || 'Preview'}
+                    </p>
+                  </div>
+                  {isLoadingCampaign && <Loader2 className="h-4 w-4 animate-spin text-blue-300" />}
+                </div>
+                <iframe
+                  title="Generated SEO Campaign Preview"
+                  sandbox=""
+                  srcDoc={previewDocument}
+                  className="h-[610px] w-full bg-white"
+                />
+              </div>
+            </div>
+
+            {selectedCampaign?.payload?.agentWorkflow?.rounds && (
+              <div className="mt-5 rounded-3xl border border-white/10 bg-slate-950/60 p-4">
+                <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Dual-Agent Audit Trail</p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {selectedCampaign.payload.agentWorkflow.rounds.map((round) => (
+                    <div key={round.round} className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-black text-white">Round {round.round}</span>
+                        <span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${round.verdict === 'PASS' ? statusStyles.approved : statusStyles.PROCESSING}`}>
+                          {round.verdict}
+                        </span>
+                      </div>
+                      <p className="line-clamp-3 text-xs font-semibold leading-5 text-slate-500">{round.critique}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
         </main>
-
       </div>
     </div>
   );
