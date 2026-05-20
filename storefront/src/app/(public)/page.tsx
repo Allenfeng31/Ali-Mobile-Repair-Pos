@@ -1,6 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
+import styles from "./page.module.css";
 
 const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"));
 const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"));
@@ -10,8 +11,8 @@ export default function Home() {
   return (
     <main>
       <LocalBusinessSchema />
-      <header className="w-full bg-white px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-16 pb-12">
+      <header className={`${styles.heroSection} w-full px-4 sm:px-6 lg:px-8`}>
+        <div className={`${styles.heroInner} flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-16 pb-12`}>
           <div className="h-32 md:h-40" aria-hidden="true" />
 
           <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">

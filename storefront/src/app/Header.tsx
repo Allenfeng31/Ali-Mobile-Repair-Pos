@@ -29,79 +29,83 @@ export default function Header() {
   };
 
   return (
-    <header className="navbar">
-      {/* Mobile Top Bar */}
-      <div className="mobile-top-bar">
-        <a 
-          href="tel:0481058514" 
-          className="mobile-top-call"
-          onClick={() => analytics.trackCallNow()}
-        >
-          <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '16px', height: '16px' }}>
-            <path d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" />
-          </svg>
-          CALL NOW: 0481 058 514
-        </a>
-      </div>
-
-      <div className="flex items-center justify-between relative w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-[0.35rem]">
-        {/* Left: Logo */}
-        <div className="flex items-center">
-          <Link href="/" className="nav-logo">
-            <Image 
-              src="/images/logo.png" 
-              alt="Ali Mobile & Repair Ringwood" 
-              width={180} 
-              height={60} 
-              priority
-              style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
-            />
-          </Link>
+    <>
+      <header className="navbar">
+        {/* Mobile Top Bar */}
+        <div className="mobile-top-bar">
+          <a 
+            href="tel:0481058514" 
+            className="mobile-top-call"
+            onClick={() => analytics.trackCallNow()}
+          >
+            <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '16px', height: '16px' }}>
+              <path d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" />
+            </svg>
+            CALL NOW: 0481 058 514
+          </a>
         </div>
 
-        {/* Center: Desktop nav links (Absolute Center) */}
-        <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <nav className="nav-links nav-links--desktop">
-            <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
-            <Link href="/about-us" prefetch={true}>About Us</Link>
-            <Link href="/blog" prefetch={true}>Blog</Link>
-          </nav>
+        <div className="flex items-center justify-between relative w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-[0.35rem]">
+          {/* Left: Logo */}
+          <div className="flex items-center">
+            <Link href="/" className="nav-logo">
+              <Image 
+                src="/images/logo.png" 
+                alt="Ali Mobile & Repair Ringwood" 
+                width={180} 
+                height={60} 
+                priority
+                style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
+              />
+            </Link>
+          </div>
+
+          {/* Center: Desktop nav links (Absolute Center) */}
+          <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <nav className="nav-links nav-links--desktop">
+              <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
+              <Link href="/about-us" prefetch={true}>About Us</Link>
+              <Link href="/blog" prefetch={true}>Blog</Link>
+            </nav>
+          </div>
+
+          {/* Right: Book Repair + Hamburger */}
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Desktop Book Repair */}
+            <Link 
+              href="/book-repair" 
+              prefetch={true}
+              className="primary-btn hidden md:flex"
+              style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', alignItems: 'center', gap: '0.5rem' }}
+            >
+              Book Repair {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>{devices.length}</span>}
+            </Link>
+
+            {/* Mobile-only condensed Book Now */}
+            <Link 
+              href="/book-repair" 
+              prefetch={true}
+              className="md:hidden flex bg-blue-600 text-white rounded-full font-bold shadow-sm hover:bg-blue-700 transition-colors"
+              style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
+            >
+              BOOK NOW {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.35rem', borderRadius: '8px', fontSize: '0.65rem' }}>{devices.length}</span>}
+            </Link>
+
+            {/* Hamburger button – mobile only */}
+            <button 
+              className="md:hidden flex items-center justify-center p-1 text-slate-800 ml-1"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              <Menu size={28} />
+            </button>
+          </div>
         </div>
+      </header>
 
-        {/* Right: Book Repair + Hamburger */}
-        <div className="flex items-center gap-2 md:gap-3">
-          {/* Desktop Book Repair */}
-          <Link 
-            href="/book-repair" 
-            prefetch={true}
-            className="primary-btn hidden md:flex"
-            style={{ padding: '0.6rem 1.4rem', whiteSpace: 'nowrap', fontSize: '0.85rem', alignItems: 'center', gap: '0.5rem' }}
-          >
-            Book Repair {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>{devices.length}</span>}
-          </Link>
-
-          {/* Mobile-only condensed Book Now */}
-          <Link 
-            href="/book-repair" 
-            prefetch={true}
-            className="md:hidden flex bg-blue-600 text-white rounded-full font-bold shadow-sm hover:bg-blue-700 transition-colors"
-            style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
-          >
-            BOOK NOW {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.35rem', borderRadius: '8px', fontSize: '0.65rem' }}>{devices.length}</span>}
-          </Link>
-
-          {/* Hamburger button – mobile only */}
-          <button 
-            className="md:hidden flex items-center justify-center p-1 text-slate-800 ml-1"
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Open navigation menu"
-          >
-            <Menu size={28} />
-          </button>
-        </div>
-      </div>
-
-      {/* Full-screen Mobile Menu Overlay */}
+      {/* Full-screen Mobile Menu Overlay — MUST be outside <header> because
+          .navbar's backdrop-filter creates a containing block that traps
+          position:fixed children to the header's box instead of the viewport. */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white/95 backdrop-blur-sm flex flex-col">
           <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200/50">
@@ -139,6 +143,6 @@ export default function Header() {
           </nav>
         </div>
       )}
-    </header>
+    </>
   );
 }

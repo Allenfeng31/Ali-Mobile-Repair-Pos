@@ -23,10 +23,18 @@
 .inner {
   position: relative;
   z-index: 1;
+  width: min(100%, 1470px);
+  max-width: 1470px;
+  margin: 0 auto;
 }
 
 .header {
-  max-width: 680px;
+  display: flex;
+  width: 100%;
+  max-width: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto clamp(2rem, 5vw, 3.5rem);
   text-align: center;
 }
@@ -59,8 +67,12 @@
 
 .grid {
   display: grid;
+  width: min(100%, 1024px);
+  max-width: 1024px;
   grid-template-columns: 1fr;
   gap: clamp(1rem, 2vw, 1.25rem);
+  margin-left: 0;
+  margin-right: auto;
 }
 
 .card {
@@ -79,10 +91,7 @@
     0 24px 70px rgba(15, 23, 42, 0.08);
   overflow: hidden;
   transform: translateY(0);
-  transition:
-    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 360ms ease,
-    background 360ms ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:nth-child(1) {
@@ -115,11 +124,9 @@
 
 .card:hover,
 .cardOpen {
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 34px 90px rgba(15, 23, 42, 0.12),
-    0 14px 36px rgba(37, 99, 235, 0.08);
-  transform: translateY(-5px);
+  border-color: rgba(0, 112, 243, 0.2);
+  box-shadow: 0 12px 40px -8px rgba(0, 112, 243, 0.12);
+  transform: translateY(-4px);
 }
 
 .card:hover::after,
@@ -232,17 +239,50 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
+}
 
-  .card:nth-child(2),
-  .card:nth-child(3) {
-    transform: translateY(1.25rem);
+@media (min-width: 1180px) {
+  .inner::before,
+  .inner::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
   }
 
-  .card:nth-child(2):hover,
-  .card:nth-child(3):hover,
-  .card:nth-child(2).cardOpen,
-  .card:nth-child(3).cardOpen {
-    transform: translateY(0.75rem);
+  .inner::before {
+    top: clamp(12rem, 22vw, 19rem);
+    right: 0;
+    width: clamp(18rem, 27vw, 26rem);
+    height: clamp(22rem, 38vw, 34rem);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 2rem;
+    background:
+      linear-gradient(115deg, transparent 0 42%, rgba(37, 99, 235, 0.1) 48%, transparent 55%),
+      repeating-linear-gradient(90deg, rgba(37, 99, 235, 0.08) 0 1px, transparent 1px 42px),
+      repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.055) 0 1px, transparent 1px 42px),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(37, 99, 235, 0.035));
+    box-shadow:
+      0 24px 80px rgba(15, 23, 42, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.64);
+    mask-image: linear-gradient(to right, transparent, black 14%, black 86%, transparent);
+    animation: faqBlueprintSweep 9s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  .inner::after {
+    top: clamp(14rem, 24vw, 21rem);
+    right: clamp(2rem, 5vw, 5rem);
+    width: clamp(11rem, 17vw, 16rem);
+    height: clamp(14rem, 23vw, 21rem);
+    border-radius: 1.5rem;
+    background:
+      linear-gradient(90deg, transparent 0 16%, rgba(37, 99, 235, 0.28) 16% 17%, transparent 17% 100%),
+      linear-gradient(0deg, transparent 0 24%, rgba(37, 99, 235, 0.18) 24% 25%, transparent 25% 100%),
+      linear-gradient(90deg, transparent 0 58%, rgba(202, 138, 4, 0.24) 58% 59%, transparent 59% 100%),
+      linear-gradient(0deg, transparent 0 72%, rgba(202, 138, 4, 0.16) 72% 73%, transparent 73% 100%);
+    opacity: 0.74;
+    filter: drop-shadow(0 18px 34px rgba(37, 99, 235, 0.11));
+    animation: faqCircuitDrift 7s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
   }
 }
 
@@ -269,18 +309,41 @@
   .card,
   .card::after,
   .icon,
-  .answer {
+  .answer,
+  .inner::before,
+  .inner::after {
     transition: none;
+    animation: none;
   }
 
   .card:hover,
   .cardOpen,
-  .card:nth-child(2),
-  .card:nth-child(3),
-  .card:nth-child(2):hover,
-  .card:nth-child(3):hover,
-  .card:nth-child(2).cardOpen,
-  .card:nth-child(3).cardOpen {
+  .card:nth-child(3) {
     transform: none;
+  }
+}
+
+@keyframes faqBlueprintSweep {
+  0%,
+  100% {
+    background-position: -180px 0, 0 0, 0 0, 0 0;
+    opacity: 0.62;
+  }
+
+  50% {
+    background-position: 260px 0, 18px 0, 0 18px, 0 0;
+    opacity: 0.9;
+  }
+}
+
+@keyframes faqCircuitDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.48;
+  }
+
+  to {
+    transform: translate3d(-0.75rem, 0.9rem, 0);
+    opacity: 0.82;
   }
 }

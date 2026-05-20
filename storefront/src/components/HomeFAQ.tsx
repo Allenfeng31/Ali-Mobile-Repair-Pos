@@ -52,7 +52,7 @@ export default function HomeFAQ() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
 
-      <div className={`max-w-5xl mx-auto ${styles.inner}`}>
+      <div className={styles.inner}>
         <div className={styles.header}>
           <span className={styles.kicker}>Repair clarity</span>
           <h2 className={styles.title}>Frequently Asked Questions</h2>
