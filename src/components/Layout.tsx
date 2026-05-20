@@ -412,7 +412,19 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
 
   // Poll backend server health
   React.useEffect(() => {
-    const check = () => api.getIp().then(() => setBackendOk(true)).catch(() => setBackendOk(false));
+    const check = async () => {
+      try {
+        await api.getIp();
+        setBackendOk(true);
+      } catch (error) {
+        console.error('[POS Health] Server Offline badge triggered by health check failure.', {
+          error,
+          diagnostics: api.getDebugInfo(),
+        });
+        setBackendOk(false);
+      }
+    };
+
     check();
     const interval = setInterval(check, 10000);
     return () => clearInterval(interval);

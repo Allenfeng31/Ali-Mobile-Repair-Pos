@@ -9,6 +9,7 @@ import {
   groupServicesByBaseName, GroupedService
 } from '@/lib/inventoryUtils';
 import { smartSortModels } from '@/lib/modelSortConfig';
+import { Pencil, Trash2 } from 'lucide-react';
 import './RepairCart.css';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -345,18 +346,30 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   if (device.isConfirmed) {
     return (
       <div className="device-summary-card-wrapper animate-fade">
-        <div className="device-summary-card">
-          <div className="summary-main">
-            <div className="summary-title">
+        <div className="device-summary-card flex flex-row items-center justify-between gap-3 !p-4 md:!p-6 w-full">
+          <div className="summary-main flex-1 min-w-0">
+            <div className="summary-title truncate">
               {formatDeviceTitle(device.brand, device.model)}
             </div>
-            <div className="summary-services">
+            <div className="summary-services truncate">
               {device.services.filter(s => !String(s.id).startsWith('upsell-')).map(s => s.name).join(", ")}
             </div>
           </div>
-          <div className="summary-actions">
-            <button className="edit-summary-btn" onClick={onEdit}>Edit</button>
-            <button className="remove-summary-btn" onClick={onRemove}>Remove</button>
+          <div className="summary-actions flex shrink-0 items-center gap-2">
+            <button 
+              className="edit-summary-btn !p-2 md:!px-4 md:!py-2 flex items-center justify-center gap-1.5" 
+              onClick={onEdit}
+            >
+              <Pencil size={18} />
+              <span className="hidden md:inline">Edit</span>
+            </button>
+            <button 
+              className="remove-summary-btn !p-2 md:!px-4 md:!py-2 flex items-center justify-center gap-1.5 !bg-red-50 !text-red-500 !border-red-100 hover:!bg-red-500 hover:!text-white" 
+              onClick={onRemove}
+            >
+              <Trash2 size={18} />
+              <span className="hidden md:inline">Remove</span>
+            </button>
           </div>
         </div>
         
@@ -410,7 +423,15 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
         <div className="device-title">
           {formatDeviceTitle(selectedBrand, selectedModel)}
         </div>
-        {!isFirst && <button className="remove-device-btn" onClick={onRemove}>Remove</button>}
+        {!isFirst && (
+          <button 
+            className="remove-device-btn flex items-center justify-center gap-1.5 !bg-red-50 !text-red-500 !border-red-100 hover:!bg-red-500 hover:!text-white transition-all px-3 py-1.5 rounded-lg font-semibold" 
+            onClick={onRemove}
+          >
+            <Trash2 size={16} />
+            <span className="hidden md:inline">Remove</span>
+          </button>
+        )}
       </div>
 
       <div className="category-selector-row">

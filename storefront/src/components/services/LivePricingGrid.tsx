@@ -2,62 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-interface RawItem {
-  id: number;
-  name: string;
-  model: string;
-  price: number;
-  category: string;
-}
-
-interface ParsedItem {
-  brand: string;
-  deviceModel: string;
-  service: string;
-  price: number;
-  deviceType: string;
-}
-
-function detectDeviceType(brand: string): string {
-  const first = brand.trim().charAt(0).toUpperCase();
-  if (first === "T") return "tablet";
-  if (first === "C") return "computer";
-  if (first === "W") return "watch";
-  return "phone";
-}
-
-function parseItem(raw: RawItem): ParsedItem | null {
-  const cat = (raw.category || "").toLowerCase();
-  if (cat.includes("accessor") || cat === "other") return null;
-
-  let brand = "";
-  let modelName = "";
-  
-  if (typeof raw.model === "string") {
-    let parts = raw.model.split(/\|\||\|/).map(p => p.trim()).filter(Boolean);
-    if (parts.length >= 2) {
-       brand = parts[0];
-       modelName = parts.slice(1).join(" ");
-       if (brand.toLowerCase() === "other" && parts.length >= 3) {
-          brand = parts[1];
-          modelName = parts.slice(2).join(" ");
-       }
-    } else if (parts.length === 1) {
-       brand = parts[0];
-    }
-  }
-
-  if (!brand || brand.toLowerCase() === "other") return null;
-
-  return {
-    brand: brand.replace(/^[PTCWptcw] .+/, match => match.slice(2).trim()),
-    deviceModel: modelName || "Other",
-    service: raw.name,
-    price: raw.price || 0,
-    deviceType: detectDeviceType(brand),
-  };
-}
+import { RawItem, ParsedItem, parseItem } from '@/lib/inventoryUtils';
 
 import QuoteRequestModal from './QuoteRequestModal';
 
@@ -202,4 +147,3 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
     </div>
   );
 }
-

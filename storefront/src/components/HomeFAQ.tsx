@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Script from 'next/script';
+import { ChevronDown } from 'lucide-react';
 
 const faqs = [
   {
@@ -22,6 +24,8 @@ const faqs = [
 ];
 
 export default function HomeFAQ() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -35,37 +39,54 @@ export default function HomeFAQ() {
     }))
   };
 
+  const toggleFaq = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
   return (
-    <section style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-20 bg-slate-50/50">
       <Script
         id="faq-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       
-      <h2 style={{ fontSize: '2.5rem', fontWeight: 800, textAlign: 'center', marginBottom: '3rem' }}>
+      <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-950 mb-12 text-center">
         Frequently Asked Questions
       </h2>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {faqs.map((faq, index) => (
-          <div 
-            key={index} 
-            style={{ 
-              background: 'var(--layer)', 
-              padding: '1.5rem', 
-              borderRadius: '16px', 
-              border: '1px solid var(--layer-border)' 
-            }}
-          >
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
-              {faq.question}
-            </h3>
-            <p style={{ opacity: 0.85, lineHeight: 1.6 }}>
-              {faq.answer}
-            </p>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        {faqs.map((faq, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div 
+              key={index} 
+              onClick={() => toggleFaq(index)}
+              className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-1 cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 leading-snug">
+                    {faq.question}
+                  </h3>
+                  <div className="p-1.5 rounded-full bg-slate-50 border border-slate-100/80 shrink-0">
+                    <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </div>
+                
+                <div 
+                  className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}
+                >
+                  <div className="overflow-hidden">
+                    <p className="text-slate-600 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

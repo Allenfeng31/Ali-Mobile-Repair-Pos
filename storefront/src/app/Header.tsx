@@ -44,9 +44,9 @@ export default function Header() {
         </a>
       </div>
 
-      <div className="grid grid-cols-3 items-center w-full max-w-[1200px] mx-auto px-4 md:px-8 py-2 lg:py-[0.35rem]">
+      <div className="flex items-center justify-between relative w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-[0.35rem]">
         {/* Left: Logo */}
-        <div className="justify-self-start flex items-center">
+        <div className="flex items-center">
           <Link href="/" className="nav-logo">
             <Image 
               src="/images/logo.png" 
@@ -59,8 +59,8 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Center: Desktop nav links */}
-        <div className="hidden md:flex justify-self-center">
+        {/* Center: Desktop nav links (Absolute Center) */}
+        <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <nav className="nav-links nav-links--desktop">
             <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
             <Link href="/about-us" prefetch={true}>About Us</Link>
@@ -69,7 +69,7 @@ export default function Header() {
         </div>
 
         {/* Right: Book Repair + Hamburger */}
-        <div className="flex justify-self-end items-center gap-2 md:gap-3 col-span-2 md:col-span-1 justify-end">
+        <div className="flex items-center gap-2 md:gap-3">
           {/* Desktop Book Repair */}
           <Link 
             href="/book-repair" 

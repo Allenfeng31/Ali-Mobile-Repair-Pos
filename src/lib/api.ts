@@ -17,11 +17,63 @@ const getApiUrl = () => {
 
 const API_URL = getApiUrl();
 
+const getApiDiagnostics = () => {
+  // @ts-ignore
+  const env = import.meta.env;
+
+  return {
+    apiUrl: API_URL,
+    mode: env?.MODE,
+    prod: Boolean(env?.PROD),
+    viteApiUrl: env?.VITE_API_URL || null,
+    browserOrigin: typeof window !== 'undefined' ? window.location.origin : null,
+    browserHostname: typeof window !== 'undefined' ? window.location.hostname : null,
+  };
+};
+
+const logApiFailure = (message: string, details: Record<string, unknown>) => {
+  console.error(`[POS API] ${message}`, {
+    ...getApiDiagnostics(),
+    ...details,
+  });
+};
+
 const handleResponse = async (res: Response) => {
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'API Request Failed');
+  const rawBody = await res.text();
+  let data: any = null;
+
+  try {
+    data = rawBody ? JSON.parse(rawBody) : null;
+  } catch (parseError) {
+    logApiFailure('Response body was not valid JSON.', {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
+      bodyPreview: rawBody.slice(0, 500),
+      parseError,
+    });
   }
+
+  if (!res.ok) {
+    logApiFailure('HTTP request failed.', {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
+      responseBody: data || rawBody.slice(0, 1000),
+    });
+
+    throw new Error(data?.error || data?.message || `API Request Failed (${res.status} ${res.statusText})`);
+  }
+
+  if (data === null) {
+    logApiFailure('Successful response had no parseable JSON payload.', {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
+      bodyPreview: rawBody.slice(0, 500),
+    });
+  }
+
   return data;
 };
 
@@ -167,9 +219,20 @@ export const api = {
   },
   
   // System
+  getDebugInfo: () => getApiDiagnostics(),
   getIp: async () => {
-    const res = await fetch(`${API_URL}/ip`);
-    return handleResponse(res);
+    const url = `${API_URL}/ip`;
+
+    try {
+      const res = await fetch(url);
+      return handleResponse(res);
+    } catch (error) {
+      logApiFailure('Health check network/request failure.', {
+        url,
+        error,
+      });
+      throw error;
+    }
   },
 
   // SMS Notifications

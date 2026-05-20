@@ -11,7 +11,7 @@ export default function Home() {
     <main>
       <LocalBusinessSchema />
       <header className="w-full bg-white px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center text-center w-full max-w-5xl mx-auto pt-16 pb-12">
+        <div className="flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-16 pb-12">
           <div className="h-32 md:h-40" aria-hidden="true" />
 
           <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">
@@ -21,27 +21,23 @@ export default function Home() {
             </span>
           </h1>
 
-          <div className="flex flex-wrap justify-center items-center gap-3 mb-12 w-full mt-12">
-            <div className="px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 whitespace-nowrap">
-              No Fix, No Charge
-            </div>
-            <div className="px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 whitespace-nowrap">
-              6-Month Warranty on All Repairs
-            </div>
+          <div className="hero-contact-pill gap-6">
+            <span className="contact-item">No Fix, No Charge</span>
+            <span className="contact-item">6-Month Warranty on All Repairs</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 w-full mb-8">
-            <Link href="/book-repair" className="px-12 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-extrabold rounded-full shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-[0.98] tracking-wide">
+          <div className="hero-cta">
+            <a className="primary-btn" href="/book-repair">
               Book Repair Now
-            </Link>
-            <Link href="/track-status" className="px-12 py-5 bg-white border-2 border-slate-200 text-slate-800 text-xl font-bold rounded-full hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] tracking-wide">
+            </a>
+            <a className="secondary-btn" href="/track-status">
               Track Status
-            </Link>
+            </a>
           </div>
         </div>
       </header>
 
-      <section className="servicesGrid" aria-labelledby="services-heading">
+      <section className="servicesGrid !mt-24 md:!mt-32" aria-labelledby="services-heading">
         <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
         <Link href="/repairs/phone" className="serviceCard">
           <div className="card-bg" style={{ backgroundImage: "url('/images/services/phone-repair.jpg')" }} />

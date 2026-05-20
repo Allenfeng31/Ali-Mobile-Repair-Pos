@@ -10,6 +10,7 @@ import {
   ShieldAlert, 
   Clock, 
   Search,
+  Terminal,
   Database,
   ThumbsUp,
   Skull
@@ -23,7 +24,7 @@ interface KeywordRecord {
   search_weight?: number | null;
   created_at?: string;
   updated_at?: string;
-  status: 'pending' | 'approved' | 'blocked';
+  status: 'pending' | 'approved' | 'queued' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'blocked';
 }
 
 interface ScoutSummary {
@@ -134,7 +135,7 @@ export default function SeoGeoScoutConsole() {
 
   // Metrics calculations
   const totalDiscovered = keywords.length;
-  const builderQueueSize = keywords.filter(kw => kw.status === 'approved').length;
+  const builderQueueSize = keywords.filter(kw => kw.status === 'approved' || kw.status === 'queued').length;
   const violationsBlocked = keywords.filter(kw => kw.status === 'blocked').length;
 
   // Filtered keywords to display
@@ -187,6 +188,21 @@ export default function SeoGeoScoutConsole() {
             Super Admin Access Enabled
           </div>
         </header>
+
+        <section className="mb-10 rounded-2xl border border-cyan-200/80 bg-cyan-50 px-6 py-5 text-cyan-950 shadow-[6px_6px_14px_#d1d9e6,-6px_-6px_14px_#ffffff]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700 shadow-[inset_2px_2px_5px_rgba(14,116,144,0.18),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
+              <Terminal className="h-6 w-6" strokeWidth={2.5} />
+            </div>
+            <p className="text-sm font-extrabold leading-6 tracking-tight">
+              Background Worker Required: To automatically process 'QUEUED' keywords, you must run{' '}
+              <code className="rounded-lg border border-cyan-200 bg-white/80 px-2 py-1 font-mono text-xs font-black text-cyan-700 shadow-sm">
+                npm run worker:seo
+              </code>{' '}
+              in a separate terminal tab.
+            </p>
+          </div>
+        </section>
 
         {/* Top Summary Cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">

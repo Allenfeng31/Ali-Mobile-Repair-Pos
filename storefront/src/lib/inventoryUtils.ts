@@ -73,6 +73,82 @@ export function displayBrand(brand: string): string {
   return brand;
 }
 
+const BRAND_MODEL_PREFIXES = [
+  { brand: "T iPad", aliases: ["ipad"] },
+  { brand: "T Samsung", aliases: ["samsung", "galaxy tab", "tab"] },
+  { brand: "C MacBook", aliases: ["macbook"] },
+  { brand: "W Apple Watch", aliases: ["apple watch", "watch"] },
+  { brand: "P iPhone", aliases: ["iphone"] },
+  { brand: "P Samsung", aliases: ["samsung", "galaxy"] },
+  { brand: "P Google Pixel", aliases: ["google pixel", "pixel"] },
+  { brand: "P Oppo", aliases: ["oppo"] },
+];
+
+const REPAIR_NAME_MAP: Record<string, string> = {
+  "Screen Repair": "Screen Replacement",
+  "Battery Service": "Battery Replacement",
+  "Charging Port": "Charging Port Replacement",
+  "Front Camera": "Front Camera Replacement",
+  "Back Camera": "Back Camera Replacement",
+  "Back Glass": "Back Housing Replacement",
+  "Back Housing": "Back Housing Replacement",
+};
+
+const COMMON_SERVICES = [
+  "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
+  "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement",
+  "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement"
+];
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function standardizeRepairName(rawName: string): string {
+  return REPAIR_NAME_MAP[rawName] ?? rawName;
+}
+
+function findServiceName(raw: RawItem): string | null {
+  const haystacks = [raw.category, raw.name].filter(Boolean);
+  for (const service of COMMON_SERVICES) {
+    if (haystacks.some(value => new RegExp(`\\b${escapeRegExp(service)}\\b`, "i").test(value))) {
+      return standardizeRepairName(service);
+    }
+  }
+  return null;
+}
+
+function isAccessoryLike(raw: RawItem): boolean {
+  const text = `${raw.category || ""} ${raw.name || ""}`.toLowerCase();
+  return /accessor|protector|tempered glass|case|cover|cable|charger/.test(text);
+}
+
+function extractPrefixedBrandFromModelSegment(modelSegment: string): { brand: string; modelName: string } | null {
+  const normalized = modelSegment.trim().replace(/\s+/g, " ");
+
+  for (const candidate of BRAND_MODEL_PREFIXES) {
+    const prefix = candidate.brand.charAt(0);
+    const display = displayBrand(candidate.brand);
+
+    for (const alias of candidate.aliases) {
+      const match = normalized.match(new RegExp(`^${prefix}\\s+${escapeRegExp(alias)}(?:\\s+|$)`, "i"));
+      if (!match) continue;
+
+      let modelName = normalized.slice(match[0].length).trim();
+
+      // POS tablet rows often look like "T iPad iPad Pro 12.9-inch..."
+      // Keep the model's "iPad" when it is part of the actual model name.
+      if (display.toLowerCase() === alias.toLowerCase() && !modelName.toLowerCase().startsWith(alias.toLowerCase())) {
+        modelName = `${display} ${modelName}`.trim();
+      }
+
+      return { brand: candidate.brand, modelName };
+    }
+  }
+
+  return null;
+}
+
 /**
  * Formats device title by deduplicating brand and model names.
  * e.g. Brand="iPhone", Model="iPhone 17 Pro Max" -> "iPhone 17 Pro Max"
@@ -93,7 +169,9 @@ export function formatDeviceTitle(brand: string, model: string): string {
 export function parseItem(raw: RawItem): ParsedItem | null {
   // Skip non-repair items
   const cat = (raw.category || "").toLowerCase();
-  if (cat.includes("accessor") || cat === "other") return null;
+  const inferredService = findServiceName(raw);
+  if (isAccessoryLike(raw)) return null;
+  if (cat === "other" && !inferredService) return null;
 
   let brand = "";
   let modelName = "";
@@ -114,34 +192,38 @@ export function parseItem(raw: RawItem): ParsedItem | null {
     }
   }
 
-  // Skip items with "other" brand
-  if (!brand || brand.toLowerCase() === "other") return null;
+  const display = displayBrand(brand).toLowerCase();
+  if ((!brand || display === "other") && modelName) {
+    const recovered = extractPrefixedBrandFromModelSegment(modelName);
+    if (recovered) {
+      brand = recovered.brand;
+      modelName = recovered.modelName;
+    }
+  }
 
-  // Fix for MacBooks and iPads where model field might contain service name
-  const COMMON_SERVICES = [
-    "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
-    "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement", 
-    "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement"
-  ];
+  // Skip items with "other" brand
+  if (!brand || displayBrand(brand).toLowerCase() === "other") return null;
 
   for (const service of COMMON_SERVICES) {
     if (modelName.toLowerCase().endsWith(service.toLowerCase())) {
-      const regex = new RegExp(`\\s+${service.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}$`, "i");
+      const regex = new RegExp(`\\s+${escapeRegExp(service)}$`, "i");
       modelName = modelName.replace(regex, "").trim();
-      serviceName = raw.name.includes(service) ? service : raw.name;
+      serviceName = inferredService || (raw.name.includes(service) ? service : raw.name);
     }
   }
 
   // If we have a model name, try to extract the service part from the full name
   if (modelName && serviceName.toLowerCase().includes(modelName.toLowerCase()) && !modelName.toLowerCase().includes("service")) {
-    const regex = new RegExp(modelName.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&"), "i");
+    const regex = new RegExp(escapeRegExp(modelName), "i");
     serviceName = serviceName.replace(regex, "").trim();
     serviceName = serviceName.charAt(0).toUpperCase() + serviceName.slice(1);
   }
 
   if (!serviceName || serviceName.length < 3) {
-    serviceName = raw.name || "Repair Service";
+    serviceName = inferredService || raw.name || "Repair Service";
   }
+
+  serviceName = standardizeRepairName(serviceName);
 
   return {
     id: raw.id,
@@ -226,4 +308,3 @@ export function groupServicesByBaseName(items: ParsedItem[]): GroupedService[] {
 
   return Array.from(grouped.values());
 }
-

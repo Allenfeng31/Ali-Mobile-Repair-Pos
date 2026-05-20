@@ -12,7 +12,15 @@ export function PortalView() {
 
   // Check backend connection
   React.useEffect(() => {
-    api.getIp().then(() => setBackendOk(true)).catch(() => setBackendOk(false));
+    api.getIp()
+      .then(() => setBackendOk(true))
+      .catch((error) => {
+        console.error('[POS Portal Health] Server Offline status triggered by health check failure.', {
+          error,
+          diagnostics: api.getDebugInfo(),
+        });
+        setBackendOk(false);
+      });
   }, []);
 
   const [phone, setPhone] = useState('');
