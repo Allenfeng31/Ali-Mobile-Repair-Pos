@@ -1168,8 +1168,8 @@ input:checked + .toggle-slider:before {
 
   /* Forms full-width on mobile */
   .form-container {
-    margin: 1rem;
-    padding: 1.5rem;
+    margin: 1rem 0;
+    padding: 1.25rem 0.75rem;
   }
 }
 
@@ -1181,6 +1181,13 @@ input:checked + .toggle-slider:before {
   max-width: 800px;
   margin: 0 auto;
   min-height: 80vh;
+}
+
+@media (max-width: 767px) {
+  .page-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
 }
 
 /* ─── Very small phones (≤ 380px) ───────────────── */

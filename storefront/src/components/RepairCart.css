@@ -11,6 +11,13 @@
   color: var(--foreground);
 }
 
+@media (max-width: 767px) {
+  .cart-container {
+    padding: 1rem 0.75rem;
+    border-radius: 14px;
+  }
+}
+
 .cart-header {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -37,6 +44,13 @@
   border: 1px solid var(--layer-border);
   transition: all 0.3s ease;
   position: relative;
+}
+
+@media (max-width: 767px) {
+  .device-entry {
+    padding: 1rem 0.75rem;
+    border-radius: 14px;
+  }
 }
 
 .device-entry:hover {
@@ -306,6 +320,13 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--foreground);
+}
+
+@media (max-width: 767px) {
+  .category-pill {
+    min-width: 90px;
+    padding: 0.6rem 0.5rem;
+  }
 }
 
 .category-pill:hover {
