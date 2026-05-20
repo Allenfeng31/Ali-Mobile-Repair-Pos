@@ -1,7 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
-import styles from "./page.module.css";
+import heroStyles from "./HomeHero.module.css";
 
 const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"));
 const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"));
@@ -11,8 +11,8 @@ export default function Home() {
   return (
     <main>
       <LocalBusinessSchema />
-      <header className={`${styles.heroSection} w-full px-4 sm:px-6 lg:px-8`}>
-        <div className={`${styles.heroInner} flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-16 pb-12`}>
+      <header className={`${heroStyles.heroSection} w-full px-4 sm:px-6 lg:px-8`}>
+        <div className={`${heroStyles.heroInner} flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-16 pb-12`}>
           <div className="h-32 md:h-40" aria-hidden="true" />
 
           <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">
@@ -38,7 +38,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="servicesGrid !mt-24 md:!mt-32" aria-labelledby="services-heading">
+      <section className="servicesGrid homepage-services-motion !mt-24 md:!mt-32" aria-labelledby="services-heading">
         <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
         <Link href="/repairs/phone" className="serviceCard">
           <div className="card-bg" style={{ backgroundImage: "url('/images/services/phone-repair.jpg')" }} />

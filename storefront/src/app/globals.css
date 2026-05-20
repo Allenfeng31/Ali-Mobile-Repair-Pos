@@ -652,9 +652,46 @@ input:checked + .toggle-slider:before {
   padding: 0 1.5rem;
 }
 
+.homepage-services-motion {
+  position: relative;
+  isolation: isolate;
+}
+
+.homepage-services-motion::before,
+.homepage-services-motion::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.homepage-services-motion::before {
+  inset: -2.5rem -1rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(37, 99, 235, 0.08) 18% 18.15%, transparent 18.15% 100%),
+    linear-gradient(0deg, transparent 0 64%, rgba(202, 138, 4, 0.1) 64% 64.15%, transparent 64.15% 100%),
+    radial-gradient(circle at 18% 18%, rgba(37, 99, 235, 0.1), transparent 22rem);
+  opacity: 0.72;
+  contain: paint;
+}
+
+.homepage-services-motion::after {
+  top: -1.25rem;
+  left: 6%;
+  width: 18rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.55), rgba(202, 138, 4, 0.38), transparent);
+  opacity: 0.5;
+  transform: translate3d(0, 0, 0);
+  animation: servicesTraceDrift 8s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+  contain: paint;
+}
+
 /* ─── New Photo-Card Service Cards ───────────────── */
 .serviceCard {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   background: #18181b; /* zinc-900 */
   border-radius: 1.5rem; /* rounded-3xl */
@@ -738,12 +775,99 @@ input:checked + .toggle-slider:before {
   color: #93c5fd; /* blue-300 */
 }
 
+/* ─── Homepage Reviews Motion Layer ─────────────── */
+.homepage-reviews-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.homepage-reviews-section::before,
+.homepage-reviews-section::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  contain: paint;
+}
+
+.homepage-reviews-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.homepage-reviews-section::before {
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(37, 99, 235, 0.04) 0 1px, transparent 1px 64px),
+    radial-gradient(circle at 78% 12%, rgba(37, 99, 235, 0.08), transparent 24rem),
+    radial-gradient(circle at 18% 80%, rgba(202, 138, 4, 0.08), transparent 18rem);
+  mask-image: linear-gradient(to bottom, transparent, black 16%, black 86%, transparent);
+}
+
+.homepage-reviews-section::after {
+  top: 34%;
+  right: -6rem;
+  width: 34rem;
+  height: 34rem;
+  border: 1px solid rgba(37, 99, 235, 0.08);
+  border-radius: 999px;
+  background: radial-gradient(circle, transparent 0 58%, rgba(37, 99, 235, 0.055) 58% 59%, transparent 59%);
+  opacity: 0.62;
+  transform: translate3d(0, 0, 0) scale(1);
+  animation: reviewOrbitBreathe 11s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+}
+
+.homepage-reviews-shell {
+  position: relative;
+  z-index: 1;
+}
+
 /* ─── Map Section ────────────────────────────────── */
 .map-section {
+  position: relative;
+  isolation: isolate;
   max-width: 1200px;
   margin: 3rem auto 4rem;
   padding: 0 1.5rem;
   text-align: center;
+}
+
+.map-section::before,
+.map-section::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  contain: paint;
+}
+
+.map-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.map-section::before {
+  inset: 2.75rem 0 -1.5rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(120deg, transparent 0 46%, rgba(37, 99, 235, 0.08) 50%, transparent 56%),
+    repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.04) 0 1px, transparent 1px 52px),
+    repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.035) 0 1px, transparent 1px 52px);
+  opacity: 0.68;
+}
+
+.map-section::after {
+  right: clamp(2rem, 8vw, 8rem);
+  bottom: 2rem;
+  width: 9rem;
+  height: 9rem;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.11) 0 0.65rem, transparent 0.7rem);
+  opacity: 0.72;
+  transform: scale(1);
+  animation: mapSignalPulse 7s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .map-section h2 {
@@ -908,12 +1032,50 @@ input:checked + .toggle-slider:before {
 
 /* ─── Service Areas Local SEO Block ────────────────── */
 .service-areas-container {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   max-width: 1000px;
   margin: 4rem auto 2rem;
   padding: 3rem 2rem;
   background: var(--secondary);
   border: 1px solid var(--layer-border);
   border-radius: 24px;
+}
+
+.service-areas-container::before,
+.service-areas-container::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  contain: paint;
+}
+
+.service-areas-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.service-areas-container::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 22%, rgba(37, 99, 235, 0.075) 22% 22.15%, transparent 22.15% 100%),
+    linear-gradient(0deg, transparent 0 52%, rgba(202, 138, 4, 0.09) 52% 52.15%, transparent 52.15% 100%),
+    radial-gradient(circle at 82% 18%, rgba(37, 99, 235, 0.12), transparent 17rem);
+  opacity: 0.76;
+}
+
+.service-areas-container::after {
+  top: 1.25rem;
+  left: -7rem;
+  width: 20rem;
+  height: 20rem;
+  border: 1px solid rgba(37, 99, 235, 0.08);
+  border-radius: 999px;
+  opacity: 0.64;
+  transform: translate3d(0, 0, 0);
+  animation: serviceAreaHalo 10s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
 }
 
 .service-areas-header {
@@ -968,6 +1130,72 @@ input:checked + .toggle-slider:before {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes servicesTraceDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.32;
+  }
+
+  to {
+    transform: translate3d(22rem, 0, 0);
+    opacity: 0.7;
+  }
+}
+
+@keyframes reviewOrbitBreathe {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.96);
+    opacity: 0.42;
+  }
+
+  to {
+    transform: translate3d(-1.25rem, 0.75rem, 0) scale(1.04);
+    opacity: 0.7;
+  }
+}
+
+@keyframes mapSignalPulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.38;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.76;
+  }
+}
+
+@keyframes serviceAreaHalo {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.38;
+  }
+
+  to {
+    transform: translate3d(1.1rem, -0.65rem, 0) scale(1.06);
+    opacity: 0.66;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homepage-services-motion::after,
+  .homepage-reviews-section::after,
+  .map-section::after,
+  .service-areas-container::after {
+    animation: none;
+  }
+
+  .serviceCard,
+  .serviceCard .card-bg,
+  .review-card,
+  .suburb-tag,
+  .map-section::after {
+    transition: none !important;
+  }
+}
+
 /* ─── Tablet (768px – 1024px) ────────────────────── */
 @media (max-width: 1024px) {
   .nav-container {
@@ -994,6 +1222,17 @@ input:checked + .toggle-slider:before {
 
 /* ─── Mobile (≤ 767px) ───────────────────────────── */
 @media (max-width: 767px) {
+  .homepage-services-motion::before,
+  .homepage-services-motion::after,
+  .homepage-reviews-section::before,
+  .homepage-reviews-section::after,
+  .map-section::before,
+  .map-section::after,
+  .service-areas-container::before,
+  .service-areas-container::after {
+    display: none;
+  }
+
   /* Navbar: Simple flex row on mobile */
   .nav-container {
     padding: 0.4rem 1.2rem;

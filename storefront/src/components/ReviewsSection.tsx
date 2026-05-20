@@ -134,7 +134,7 @@ export default function ReviewsSection() {
   }, []);
 
   return (
-    <section style={{
+    <section className="homepage-reviews-section" style={{
       padding: '60px 20px',
       background: 'var(--background)',
       textAlign: 'center',
@@ -166,7 +166,7 @@ export default function ReviewsSection() {
       }}>
         Customer Reviews
       </h2>
-      <div style={{
+      <div className="homepage-reviews-shell" style={{
         width: '50px',
         height: '4px',
         background: 'var(--primary)',

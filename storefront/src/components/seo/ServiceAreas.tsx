@@ -16,8 +16,8 @@ export default function ServiceAreas() {
   return (
     <section className="service-areas-container">
       <div className="service-areas-header">
-        <h2>Proudly Serving Melbourne's Eastern Suburbs & Beyond</h2>
-        <p>Whether you're local or driving in from across Melbourne, we provide reliable, same-day device repair backed by our No Fix, No Charge policy.</p>
+        <h2>Proudly Serving Melbourne&apos;s Eastern Suburbs & Beyond</h2>
+        <p>Whether you&apos;re local or driving in from across Melbourne, we provide reliable, same-day device repair backed by our No Fix, No Charge policy.</p>
       </div>
 
       <div className="suburb-cloud">
