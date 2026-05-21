@@ -1,5 +1,6 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import heroStyles from "./HomeHero.module.css";
 
@@ -85,18 +86,58 @@ export default function Home() {
 
       <ServiceAreas />
 
-      <section className="map-section">
-        <h2>Visit Us in Melbourne</h2>
-        <div className="map-wrapper">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6303.831349042814!2d145.222375!3d-37.8154441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad63bd4323d01bd%3A0x1b936dbf4a8db011!2sAli%20Mobile%20%26%20Repair!5e0!3m2!1sen!2sau!4v1775003205754!5m2!1sen!2sau"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={false}
-            loading="lazy"
-            title="Ali Mobile Repair Location - Ringwood Melbourne"
-          ></iframe>
+      <section className="map-section" aria-labelledby="map-heading">
+        <div className="map-shell">
+          <div className="map-copy">
+            <span className="map-kicker">
+              <MapPin size={16} strokeWidth={2.5} aria-hidden="true" />
+              Visit the repair bench
+            </span>
+            <h2 id="map-heading">Find us inside Ringwood Square</h2>
+            <p>
+              Drop in at Kiosk C1 for a practical device check, quote confirmation, or same-day
+              repair path when parts are available.
+            </p>
+
+            <div className="map-info-grid">
+              <div>
+                <Navigation size={18} strokeWidth={2.5} aria-hidden="true" />
+                <span>Kiosk C1, 59-65 Maroondah Hwy</span>
+              </div>
+              <div>
+                <Clock3 size={18} strokeWidth={2.5} aria-hidden="true" />
+                <span>Call ahead for stock and timing</span>
+              </div>
+            </div>
+
+            <div className="map-actions">
+              <a
+                href="https://www.google.com/maps/dir/?api=1&destination=Ali+Mobile+%26+Repair+Ringwood"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="repair-primary-action"
+              >
+                Get Directions
+                <Navigation size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <a href="tel:0481058514" className="repair-secondary-action">
+                <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
+                Call Now
+              </a>
+            </div>
+          </div>
+
+          <div className="map-wrapper">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6303.831349042814!2d145.222375!3d-37.8154441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad63bd4323d01bd%3A0x1b936dbf4a8db011!2sAli%20Mobile%20%26%20Repair!5e0!3m2!1sen!2sau!4v1775003205754!5m2!1sen!2sau"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={false}
+              loading="lazy"
+              title="Ali Mobile Repair Location - Ringwood Melbourne"
+            ></iframe>
+          </div>
         </div>
       </section>
 

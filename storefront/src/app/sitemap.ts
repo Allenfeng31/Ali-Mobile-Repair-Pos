@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { fetchRepairCatalog } from '@/lib/api';
+import { SERVICE_AREAS } from '@/data/serviceAreas';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -28,6 +29,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const sitemapUrls = [...staticUrls, ...blogUrls];
+
+  const locationUrls: MetadataRoute.Sitemap = SERVICE_AREAS.map(area => ({
+    url: `${baseUrl}/locations/${area.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.65,
+  }));
 
   try {
     const catalog = await fetchRepairCatalog();
@@ -63,10 +71,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    return [...sitemapUrls, ...brandUrls, ...modelUrls, ...repairUrls];
+    return [...sitemapUrls, ...locationUrls, ...brandUrls, ...modelUrls, ...repairUrls];
   } catch (error) {
     console.error("Failed to generate dynamic sitemap:", error);
   }
 
-  return sitemapUrls;
+  return [...sitemapUrls, ...locationUrls];
 }

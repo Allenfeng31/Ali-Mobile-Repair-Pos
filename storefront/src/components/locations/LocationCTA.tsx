@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { analytics } from '@/lib/analytics';
+import { PhoneCall } from 'lucide-react';
 
 /**
  * LocationContent represents the core CTA buttons on the location page.
@@ -36,10 +37,11 @@ export function LocationCallCTA() {
   return (
     <a 
       href="tel:0481058514" 
-      className="text-3xl font-bold text-white hover:text-blue-400 transition"
+      className="inline-flex items-center gap-2 text-3xl font-bold text-white hover:text-blue-400 transition"
       onClick={() => analytics.trackCallNow()}
     >
-      📞 0481 058 514
+      <PhoneCall size={26} strokeWidth={2.6} aria-hidden="true" />
+      0481 058 514
     </a>
   );
 }

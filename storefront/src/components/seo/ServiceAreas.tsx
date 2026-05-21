@@ -1,27 +1,42 @@
-"use client";
-
-import React from 'react';
+import Link from "next/link";
+import { ArrowRight, MapPin, Navigation, ShieldCheck } from "lucide-react";
+import { SERVICE_AREAS } from "@/data/serviceAreas";
 
 export default function ServiceAreas() {
-  // Pre-shuffled array of local suburbs and major hubs for an organic tag cloud
-  const allSuburbs = [
-    "Croydon", "Box Hill", "Mitcham", "Glen Waverley", "Heathmont", 
-    "Wantirna", "Doncaster", "Bayswater", "Boronia", "Burwood", 
-    "Nunawading", "Balwyn", "Vermont", "Ringwood East", "Springvale", 
-    "Kilsyth", "Mooroolbark", "Clayton", "Lilydale", "Chirnside Park", 
-    "Ferntree Gully", "Knoxfield", "Rowville", "Donvale", "Park Orchards", 
-    "Warrandyte", "Blackburn"
-  ];
-
   return (
-    <section className="service-areas-container">
-      <div className="service-areas-header">
-        <h2>Proudly Serving Melbourne&apos;s Eastern Suburbs & Beyond</h2>
-        <p>Whether you&apos;re local or driving in from across Melbourne, we provide reliable, same-day device repair backed by our No Fix, No Charge policy.</p>
-      </div>
+    <section className="service-areas-container" aria-labelledby="service-areas-heading">
+      <div className="service-areas-layout">
+        <div className="service-areas-header">
+          <span className="service-areas-kicker">
+            <MapPin size={16} strokeWidth={2.5} aria-hidden="true" />
+            Local coverage
+          </span>
+          <h2 id="service-areas-heading">Proudly Serving Melbourne&apos;s Eastern Suburbs & Beyond</h2>
+          <p>
+            Customers visit our Ringwood Square repair bench from nearby suburbs for clear quotes,
+            No Fix No Charge diagnostics, and practical repair options before committing.
+          </p>
+          <div className="service-area-proof-row" aria-label="Local service highlights">
+            <span>
+              <Navigation size={15} strokeWidth={2.5} aria-hidden="true" />
+              Easy Ringwood access
+            </span>
+            <span>
+              <ShieldCheck size={15} strokeWidth={2.5} aria-hidden="true" />
+              Warranty-backed repairs
+            </span>
+          </div>
+        </div>
 
-      <div className="suburb-cloud">
-        {allSuburbs.map(s => <span key={s} className="suburb-tag">{s}</span>)}
+        <div className="suburb-cloud" aria-label="Service area suburb links">
+          {SERVICE_AREAS.map((area) => (
+            <Link key={area.slug} href={`/locations/${area.slug}`} className="suburb-tag">
+              <span>{area.name}</span>
+              <small>{area.driveTime}</small>
+              <ArrowRight size={14} strokeWidth={2.7} aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
