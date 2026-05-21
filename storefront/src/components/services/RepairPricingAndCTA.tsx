@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { analytics } from '@/lib/analytics';
-import { ThumbsUp } from 'lucide-react';
+import { PhoneCall, ThumbsUp } from 'lucide-react';
 
 interface RepairVariant {
   quality_grade: string;
@@ -194,7 +194,10 @@ export default function RepairPricingAndCTA({
           className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-white dark:bg-white border border-slate-200 dark:border-white text-slate-700 dark:text-black rounded-2xl hover:bg-slate-50 dark:hover:bg-gray-100 hover:border-slate-300 transition-all duration-200"
           onClick={() => analytics.trackCallNow(modelName, repairName)}
         >
-          📞 Call 0481 058 514
+          <span className="inline-flex items-center justify-center gap-2">
+            <PhoneCall size={19} strokeWidth={2.6} aria-hidden="true" />
+            Call 0481 058 514
+          </span>
         </a>
       </div>
     </div>

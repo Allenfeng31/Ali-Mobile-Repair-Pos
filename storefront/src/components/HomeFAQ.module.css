@@ -141,7 +141,7 @@
   align-items: start;
   gap: 1rem;
   width: 100%;
-  min-height: 100%;
+  min-height: 184px;
   padding: clamp(1.25rem, 3vw, 1.8rem);
   border: 0;
   background: transparent;
@@ -203,6 +203,11 @@
   color: #92400e;
   background: rgba(255, 255, 255, 0.92);
   transform: rotate(180deg);
+}
+
+.cardOpen .trigger {
+  min-height: auto;
+  padding-bottom: 0.75rem;
 }
 
 .answer {
@@ -294,6 +299,11 @@
 
   .trigger {
     grid-template-columns: 1fr auto;
+    min-height: 220px;
+  }
+
+  .cardOpen .trigger {
+    min-height: auto;
   }
 
   .index {

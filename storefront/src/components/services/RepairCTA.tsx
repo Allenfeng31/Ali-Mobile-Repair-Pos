@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { analytics } from '@/lib/analytics';
-import { Check } from 'lucide-react';
+import { Check, PhoneCall } from 'lucide-react';
 
 interface RepairVariant {
   quality_grade: string;
@@ -118,10 +118,10 @@ export default function RepairCTA({
           className="cta-call"
           onClick={() => analytics.trackCallNow(modelName, repairName)}
         >
-          📞 Call 0481 058 514
+          <PhoneCall size={18} strokeWidth={2.6} aria-hidden="true" />
+          Call 0481 058 514
         </a>
       </div>
     </div>
   );
 }
-

@@ -3,7 +3,7 @@ import { REPAIR_TYPES, LSI_KEYWORDS } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
 import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
-import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench, ShieldAlert } from 'lucide-react';
+import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench, ShieldAlert, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -237,15 +237,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         price={price}
       />
 
-      {/* ─── HERO SECTION ─────────────────────────────── */}
-      <div className="page-container" style={{ paddingBottom: '0' }}>
+      {/* Repair detail hero */}
+      <main className="repair-page-shell repair-page-shell-narrow" style={{ paddingBottom: '0' }}>
         <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
 
-        <div className="repair-hero">
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            {getRepairIcon(resolvedParams['repair-type'])}
-          </div>
+        <section className="repair-hero repair-detail-hero" aria-labelledby="repair-detail-heading">
+          <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
+          <p className="repair-detail-subtitle">Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.</p>
 
           <RepairPricingAndCTA 
             brandName={displayBrand}
@@ -269,9 +268,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
               6-Month Warranty
             </div>
+            <div className="trust-badge">
+              <span className="trust-badge-icon"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+              Clear Quote First
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
       <ReviewsSection />
@@ -284,4 +287,3 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     </>
   );
 }
-

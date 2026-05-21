@@ -53,6 +53,65 @@ function containsAiPlasticLanguage(text: string): boolean {
     return AI_BUZZWORD_BLACKLIST.some((word) => normalizedText.includes(word));
 }
 
+function hasLocalIntent(text: string): boolean {
+    const lower = text.toLowerCase();
+    return ['ringwood', '3134', 'melbourne', 'near me', 'local'].some((token) => lower.includes(token));
+}
+
+function isQuestionOrComparisonIntent(text: string): boolean {
+    const lower = text.toLowerCase();
+    return (
+        lower.includes(' vs ') ||
+        lower.startsWith('does ') ||
+        lower.startsWith('can ') ||
+        lower.startsWith('is it worth ') ||
+        lower.startsWith('why ') ||
+        lower.startsWith('how ')
+    );
+}
+
+function expandScoutQueryVariants(baseQuery: string, params: ScoutParams) {
+    const normalizedBase = baseQuery.trim().toLowerCase();
+    const variants = new Set<string>();
+
+    variants.add(normalizedBase);
+
+    if (!hasLocalIntent(normalizedBase)) {
+        variants.add(`${normalizedBase} ringwood`);
+        variants.add(`${normalizedBase} melbourne`);
+        variants.add(`${normalizedBase} ${params.postalCode}`);
+    }
+
+    if (!isQuestionOrComparisonIntent(normalizedBase)) {
+        variants.add(`${normalizedBase} near me`);
+    }
+
+    return Array.from(variants);
+}
+
+export function buildStrategicScoutQueries() {
+    return [
+        // Symptom-based intent
+        'iphone 15 pro max green screen after drop',
+        'iphone 15 screen glitching but no cracks',
+        'ipad pro battery draining fast when not in use',
+
+        // Technical / trust intent
+        'soft oled vs hard oled iphone 15 pro',
+        'does iphone 15 screen replacement disable true tone',
+        'iphone 15 non genuine display warning fix',
+
+        // Cost / value intent
+        'iphone 15 back glass repair cost',
+        'is it worth fixing iphone 15 screen or upgrade',
+        'cheap third party repair vs apple store iphone 15',
+
+        // Extreme-case intent
+        'can a completely shattered iphone 15 be fixed',
+        'iphone 15 pro max run over by car repair',
+    ];
+}
+
 export function isWithin15KmOfRingwood(keyword: string): boolean {
     const lower = keyword.toLowerCase();
 
@@ -78,6 +137,7 @@ export function isWithin15KmOfRingwood(keyword: string): boolean {
     const localSuburbs = [
         'ringwood',
         '3134',
+        'melbourne',
         'mitcham',
         'croydon',
         'heathmont',
@@ -91,6 +151,8 @@ export function isWithin15KmOfRingwood(keyword: string): boolean {
         'forest hill',
         'bayswater',
         'boronia',
+        'clayton',
+        '3128',
         'chirnside',
         'lilydale',
         'doncaster',
@@ -331,9 +393,7 @@ export async function runScoutEngine(
             const targetedScoutPayload = Array.from(
                 new Set([
                     ...googleSuggestions,
-                    `${baseQuery} near me`,
-                    `${baseQuery} ${params.postalCode}`,
-                    `cheap ${baseQuery} school holidays`,
+                    ...expandScoutQueryVariants(baseQuery, params),
                 ])
             );
 

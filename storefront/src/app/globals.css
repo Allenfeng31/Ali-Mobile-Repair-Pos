@@ -1989,6 +1989,551 @@ input:checked+.toggle-slider:before {
   border-color: var(--primary);
 }
 
+/* ─── Premium Repair Journey Pages ───────────────── */
+.repair-page-shell {
+  position: relative;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 170px clamp(1rem, 3vw, 2rem) 5rem;
+}
+
+.repair-page-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(225deg, rgba(202, 138, 4, 0.08), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 58%, #f1f5f9 100%);
+  background-size: 56px 56px, 56px 56px, auto, auto, auto;
+}
+
+.repair-page-shell-narrow {
+  width: min(100%, 1020px);
+}
+
+.repair-tech-hero,
+.repair-content-band,
+.repair-assist-panel,
+.repair-final-cta {
+  position: relative;
+  z-index: 1;
+}
+
+.repair-tech-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: clamp(1.25rem, 4vw, 3rem);
+  align-items: stretch;
+  margin-bottom: clamp(2rem, 5vw, 4rem);
+}
+
+.repair-tech-hero-compact {
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+}
+
+.repair-tech-hero-copy {
+  overflow: hidden;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 28px;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.82)),
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 42%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 28px 80px rgba(15, 23, 42, 0.08);
+}
+
+.repair-tech-hero-copy h1 {
+  max-width: 780px;
+  margin: 1rem 0 1rem;
+  color: #0f172a;
+  font-size: clamp(2.2rem, 6vw, 4.7rem);
+  font-weight: 950;
+  line-height: 0.98;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.repair-tech-hero-copy p {
+  max-width: 720px;
+  margin: 0;
+  color: #475569;
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  line-height: 1.75;
+}
+
+.repair-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  padding: 0.44rem 0.78rem;
+  background: rgba(255, 255, 255, 0.74);
+  color: #1d4ed8;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.repair-kicker-muted {
+  color: #475569;
+}
+
+.repair-hero-actions,
+.repair-assist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.repair-primary-action,
+.repair-secondary-action {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  padding: 0.86rem 1.25rem;
+  border: 1px solid transparent;
+  font-size: 0.96rem;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms ease,
+    border-color 260ms ease,
+    background 260ms ease;
+}
+
+.repair-primary-action {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 18px 42px rgba(37, 99, 235, 0.22);
+}
+
+.repair-secondary-action {
+  background: rgba(255, 255, 255, 0.84);
+  border-color: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
+}
+
+.repair-primary-action:hover,
+.repair-secondary-action:hover {
+  transform: translateY(-2px);
+}
+
+.repair-primary-action:hover {
+  background: #1d4ed8;
+  box-shadow: 0 20px 48px rgba(37, 99, 235, 0.28);
+}
+
+.repair-secondary-action:hover {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: #eff6ff;
+}
+
+.repair-hero-panel {
+  display: grid;
+  gap: 0.9rem;
+  align-content: center;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.68)),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), transparent 55%);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+}
+
+.repair-hero-panel > div {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.72);
+  color: #334155;
+  font-size: 0.94rem;
+  font-weight: 800;
+}
+
+.repair-hero-panel svg {
+  color: #2563eb;
+  flex: 0 0 auto;
+}
+
+.repair-content-band {
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.repair-section-header {
+  max-width: 760px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.repair-section-header span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #2563eb;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.repair-section-header h2,
+.repair-section-header h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
+  font-weight: 950;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.repair-section-header p {
+  margin: 0.75rem auto 0;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.repair-section-header-compact {
+  margin-top: 2rem;
+}
+
+.repair-empty-state {
+  border: 1px dashed rgba(37, 99, 235, 0.22);
+  border-radius: 20px;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.72);
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+
+.brand-grid-hero {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.brand-card-hero,
+.brand-card-standard,
+.model-card,
+.repair-option-card,
+.repair-faq-card,
+.repair-signal-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.76)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(37, 99, 235, 0.18), rgba(202, 138, 4, 0.16)) border-box;
+  border: 1px solid transparent;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 20px 58px rgba(15, 23, 42, 0.07);
+}
+
+.brand-card-hero {
+  justify-content: space-between;
+  min-height: 124px;
+  border-radius: 22px;
+  padding: 1.5rem;
+  font-size: 1.35rem;
+}
+
+.brand-card-hero svg {
+  color: #2563eb;
+  opacity: 0;
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
+.brand-card-hero:hover svg {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.brand-card-standard {
+  border-radius: 18px;
+  color: #334155;
+}
+
+.brand-card-hero:hover,
+.brand-card-standard:hover,
+.model-card:hover,
+.repair-option-card:hover,
+.repair-faq-card:hover,
+.repair-signal-card:hover {
+  border-color: rgba(37, 99, 235, 0.26);
+  box-shadow: 0 24px 62px rgba(37, 99, 235, 0.11);
+}
+
+.repair-assist-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: center;
+  margin: 0 0 clamp(2rem, 5vw, 3.5rem);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 26px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background:
+    linear-gradient(135deg, rgba(239, 246, 255, 0.82), rgba(255, 255, 255, 0.9)),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.07);
+}
+
+.repair-assist-panel h2 {
+  margin: 0.75rem 0 0.5rem;
+  color: #0f172a;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 950;
+  line-height: 1.08;
+}
+
+.repair-assist-panel p {
+  max-width: 620px;
+  margin: 0;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.repair-signal-grid,
+.repair-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.repair-signal-card,
+.repair-faq-card {
+  border-radius: 22px;
+  padding: 1.35rem;
+}
+
+.repair-signal-card > span {
+  display: inline-flex;
+  width: 2.15rem;
+  height: 2.15rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(37, 99, 235, 0.13);
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 950;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.repair-signal-card h3,
+.repair-faq-card h3 {
+  margin: 0 0 0.55rem;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.repair-signal-card p,
+.repair-faq-card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.repair-final-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.repair-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.repair-breadcrumb a:hover {
+  color: #2563eb;
+}
+
+.repair-chip-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: flex-end;
+}
+
+.repair-chip-cloud span {
+  border: 1px solid rgba(37, 99, 235, 0.13);
+  border-radius: 999px;
+  padding: 0.52rem 0.78rem;
+  background: rgba(255, 255, 255, 0.74);
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.search-container {
+  max-width: 680px;
+  margin-bottom: 2.25rem;
+  padding: 0;
+}
+
+.search-input {
+  min-height: 56px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+}
+
+.model-series-section {
+  margin-bottom: 2.2rem;
+}
+
+.model-series-title {
+  border-bottom: 0;
+  color: #0f172a;
+  font-size: 1.18rem;
+  font-weight: 950;
+}
+
+.model-card {
+  min-height: 72px;
+  border-radius: 20px;
+}
+
+.model-card-arrow,
+.repair-option-arrow {
+  color: #2563eb;
+  font-size: 1rem;
+}
+
+.repair-option-grid {
+  gap: 1rem;
+}
+
+.repair-option-card {
+  min-height: 92px;
+  border-radius: 22px;
+  padding: 1.25rem;
+}
+
+.repair-option-icon {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(37, 99, 235, 0.13);
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0;
+}
+
+.repair-option-name {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.repair-option-price {
+  color: #2563eb;
+  font-size: 0.9rem;
+  opacity: 1;
+}
+
+.repair-detail-hero {
+  max-width: 980px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 30px;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.8)),
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 44%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.86) inset,
+    0 28px 80px rgba(15, 23, 42, 0.08);
+}
+
+.repair-detail-icon {
+  display: inline-flex;
+  width: 4.25rem;
+  height: 4.25rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 24px;
+  background: #eff6ff;
+}
+
+.repair-detail-subtitle {
+  max-width: 650px;
+  margin: -0.75rem auto 0;
+  color: #64748b;
+  font-size: 1.03rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 820px) {
+  .repair-page-shell {
+    padding: 132px 1rem 4rem;
+  }
+
+  .repair-tech-hero,
+  .repair-tech-hero-compact,
+  .repair-assist-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .repair-tech-hero-copy,
+  .repair-hero-panel,
+  .repair-assist-panel,
+  .repair-detail-hero {
+    border-radius: 24px;
+  }
+
+  .repair-hero-actions,
+  .repair-assist-actions {
+    align-items: stretch;
+  }
+
+  .repair-primary-action,
+  .repair-secondary-action {
+    width: 100%;
+  }
+
+  .repair-signal-grid,
+  .repair-faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .repair-chip-cloud {
+    justify-content: flex-start;
+  }
+}
+
 /* ─── Glassmorphism Modal ───────────────────────── */
 .modal-overlay {
   position: fixed;

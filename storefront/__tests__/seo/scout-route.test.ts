@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   updateEq: vi.fn(),
   runScoutEngine: vi.fn(),
+  buildStrategicScoutQueries: vi.fn(),
 }));
 
 vi.mock('next/headers', () => ({
@@ -25,6 +26,7 @@ vi.mock('@supabase/auth-helpers-nextjs', () => ({
 
 vi.mock('@/lib/seo/scout', () => ({
   runScoutEngine: mocks.runScoutEngine,
+  buildStrategicScoutQueries: mocks.buildStrategicScoutQueries,
 }));
 
 function createSupabaseMock() {
@@ -62,6 +64,10 @@ describe('/api/seo/scout route authorization', () => {
     mocks.insert.mockResolvedValue({ data: [{}], error: null });
     mocks.updateEq.mockResolvedValue({ data: [{}], error: null });
     mocks.runScoutEngine.mockResolvedValue({ insertedCount: 3, blockedCount: 1 });
+    mocks.buildStrategicScoutQueries.mockReturnValue([
+      'iphone 15 pro max green screen after drop',
+      'soft oled vs hard oled iphone 15 pro',
+    ]);
   });
 
   it('allows Supabase users whose custom SUPER ADMIN role lives in app_metadata', async () => {

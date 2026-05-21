@@ -8,12 +8,23 @@ You are the system architect controlling the Google Search Scouting Agent (The S
 - **Zero Broad Keywords:** Never fetch or store generic head terms like "Phone Repair" or "iPhone Screen". 
 - **Strict Intent Filter:** Only extract Long-Tail, Informational, and Transactional queries matching the regex patterns of user pain points (e.g., "how to fix...", "error code X on...", "...not working near Ringwood").
 - **API Guardrails (Anti-Drainage):** All SerpApi/Google search fetching loops MUST have a hard-coded delay of minimum 2000ms between queries. Never exceed 20 Google requests per cron cycle. If an HTTP 429 is encountered, IMMEDIATELY trigger a hard circuit breaker (stop execution).
+- **High-Intent Keyword Classes:** Prefer seed queries from four buckets:
+  `Symptom-Based` such as `iphone 15 pro max green screen after drop`;
+  `Technical / Trust` such as `soft oled vs hard oled iphone 15 pro` or `does iphone 15 screen replacement disable true tone`;
+  `Cost / Value` such as `iphone 15 back glass repair cost` or `cheap third party repair vs apple store iphone 15`;
+  `Extreme Cases` such as `can a completely shattered iphone 15 be fixed` or `iphone 15 pro max run over by car repair`.
+- **Localisation Rule For Seeds:** The scout may expand these seeds with `Ringwood`, `Melbourne`, `3134`, or `near me` where it reads naturally. Do not force awkward local modifiers onto obvious question/comparison queries.
 
 ---
 
 ## 💎 MODULE 2: THE BUILDER (CONTENT & GEO INJECTION RULES)
 - **Master Repair Knowledge Base:** Before drafting or auditing any repair SEO content, load `.agents/knowledge/ali-mobile-repair-master-kb.md`. Use its device-specific repair insights, taxonomy, tone rules, conversion phrases, and claim-safety guardrails. Do not copy this file into public routes or expose it as website content.
 - **Humanized Technician Voice:** Articles must read like a real senior repair technician talking to a local customer. Open with the customer's lived symptom, explain quote confusion or repair trade-offs, reveal one hidden hardware detail from the workbench, compare repair paths honestly, then close with a calm local CTA.
+- **Keyword-Class Writing Logic:** Match the body structure to the search intent.
+  Symptom pages should start with visible failure symptoms and calm triage.
+  Technical/trust pages should explain the hardware trade-off or feature risk in plain language.
+  Cost/value pages should compare repair paths honestly and explain why quotes vary.
+  Extreme-damage pages should explain inspection order, salvageability, and when a workshop diagnosis matters more than an instant quote.
 - **Comparison Article Pattern:** For topics with multiple repair options, use a clear "budget route vs premium route" or "method 1 vs method 2" structure. Explain who each path suits, what can go wrong, and what the long-term feel or reliability trade-off is. Do not shame customers for choosing the cheaper option.
 - **No Placeholder Copy:** Never output CMS/editor placeholders such as "The preview text that appears..." in titles, descriptions, excerpts, or article bodies. Metadata must be finished customer-facing copy.
 - **iPad Battery Repair Knowledge:** For iPad battery content, use the private KB's model-specific quoting, glued display opening, flex-cable protection, battery adhesive removal, adhesive cleanup, re-sealing, and charging/touch/display test guidance. Avoid unsupported phrases such as "thermal transfer techniques" for iPad battery work.

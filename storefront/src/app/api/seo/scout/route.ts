@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { runScoutEngine } from '@/lib/seo/scout';
+import { buildStrategicScoutQueries, runScoutEngine } from '@/lib/seo/scout';
 
 export const dynamic = 'force-dynamic';
 
@@ -288,11 +288,7 @@ export async function POST(request: Request) {
         latitude: -37.8132,
         longitude: 145.2285,
         postalCode: '3134',
-        searchQueries: [
-          'iphone screen repair ringwood',
-          'samsung repair near me',
-          'ipad battery replacement',
-        ],
+        searchQueries: buildStrategicScoutQueries(),
       },
       supabase
     );

@@ -389,6 +389,11 @@ Rules:
 - Every literal newline inside JSON strings must be escaped as \n. Do not place raw multi-line text inside JSON string values.
 - content must be HTML only and include h2, h3, p, ul/ol, and a final CTA section.
 - Open with the customer's real-world symptom and daily-use frustration before explaining the technical repair.
+- Match the article angle to the keyword class:
+  * symptom-based keywords: urgent symptom first, likely hardware cause second, practical diagnostic path third.
+  * technical/trust keywords: compare the two technologies or explain the feature-retention concern in plain workshop language.
+  * cost/value keywords: explain why quotes vary, what Apple Store vs third-party repair changes, and who each path suits.
+  * extreme-damage keywords: stay calm, explain triage order, board/frame/screen risk, and when a bench inspection matters more than a blind quote.
 - If the keyword involves a repair decision or price gap, use a human comparison structure: budget route vs premium route, who each suits, what the hidden hardware trade-off is, and what the long-term reliability/feel difference may be.
 - Include one workbench-level detail from the master repair knowledge base when relevant, such as rivets, flex cables, calibration, adhesive, seal fit, frame assemblies, or paired hardware.
 - If the keyword includes a suburb or postcode outside Ringwood, be transparent that Ali Mobile & Repair is at Kiosk C1, Ringwood Square. Do not pretend there is a branch in that suburb. Give the reader useful repair/price/risk guidance first, then encourage a phone model check, online booking, kiosk visit, or asking whether pickup/drop-off can be arranged. Use broad, stable route guidance only; never invent exact travel times.

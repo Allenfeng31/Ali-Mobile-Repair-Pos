@@ -5,6 +5,7 @@ import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
+import { ArrowRight, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
@@ -43,119 +44,65 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
 
   return (
-    <div className="page-container" style={{ maxWidth: "1000px" }}>
-      <nav
-        aria-label="breadcrumb"
-        style={{
-          fontSize: "0.86rem",
-          marginBottom: "1.5rem",
-          opacity: 0.85,
-          textAlign: "center",
-        }}
-      >
-        <ol
-          style={{
-            listStyle: "none",
-            padding: 0,
-            display: "flex",
-            justifyContent: "center",
-            gap: "0.6rem",
-            flexWrap: "wrap",
-            margin: 0,
-          }}
-        >
-          <li>
-            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-              Home
-            </Link>
-          </li>
-          <li>&rsaquo;</li>
-          <li>
-            <Link href="/repairs" style={{ color: "inherit", textDecoration: "none" }}>
-              Repairs
-            </Link>
-          </li>
-          <li>&rsaquo;</li>
-          <li>
-            <span style={{ color: "var(--primary)", fontWeight: 600 }}>
-              {brandName}
-            </span>
-          </li>
-        </ol>
+    <main className="repair-page-shell repair-page-shell-narrow">
+      <nav className="repair-breadcrumb" aria-label="breadcrumb">
+        <Link href="/">Home</Link>
+        <span>/</span>
+        <Link href="/repairs">Repairs</Link>
+        <span>/</span>
+        <strong>{brandName}</strong>
       </nav>
 
-      <h1
-        style={{
-          fontSize: "clamp(1.8rem, 4.5vw, 2.8rem)",
-          fontWeight: 800,
-          textAlign: "center",
-          marginBottom: "0.5rem",
-          letterSpacing: "-0.5px",
-        }}
-      >
-        {brandName} Repair Services
-      </h1>
-      <p
-        style={{
-          textAlign: "center",
-          opacity: 0.7,
-          fontSize: "1rem",
-          maxWidth: "480px",
-          margin: "0 auto 3rem",
-        }}
-      >
-        Select your model below to view repair options and pricing in Ringwood.
-      </p>
+      <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="brand-repair-heading">
+        <div className="repair-tech-hero-copy">
+          <span className="repair-kicker">
+            <Smartphone size={15} strokeWidth={2.4} aria-hidden="true" />
+            Model selector
+          </span>
+          <h1 id="brand-repair-heading">{brandName} Repair Services</h1>
+          <p>Select your exact model below to view repair options and pricing at our Ringwood Square kiosk.</p>
+          <div className="repair-hero-actions">
+            <Link href={`/repairs/${categorySlug}`} className="repair-secondary-action">
+              Back to category
+            </Link>
+            <Link href="/book-repair" className="repair-primary-action">
+              Live Quote
+              <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+        <div className="repair-hero-panel" aria-label="Model selection support">
+          <div>
+            <Search size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>Search by model name or code</span>
+          </div>
+          <div>
+            <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>Transparent repair paths before booking</span>
+          </div>
+        </div>
+      </section>
 
-      <BrandModelSearch 
-        seriesGroups={seriesGroups} 
-        categorySlug={categorySlug} 
-        brandSlug={brandSlug} 
-      />
+      <section className="repair-content-band" aria-label={`${brandName} models`}>
+        <BrandModelSearch
+          seriesGroups={seriesGroups}
+          categorySlug={categorySlug}
+          brandSlug={brandSlug}
+        />
+      </section>
 
-      {/* Repair types nav */}
-      <div
-        style={{
-          marginTop: "2rem",
-          padding: "2rem",
-          background: "var(--secondary)",
-          borderRadius: "16px",
-          border: "1px solid var(--layer-border)",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 700,
-            marginBottom: "1rem",
-          }}
-        >
-          All {brandName} Repair Types
-        </h3>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.5rem",
-          }}
-        >
+      <section className="repair-assist-panel" aria-labelledby="brand-repair-types-heading">
+        <div>
+          <span className="repair-kicker repair-kicker-muted">Common services</span>
+          <h2 id="brand-repair-types-heading">All {brandName} Repair Types</h2>
+          <p>These are the repair paths we commonly support once you choose a model.</p>
+        </div>
+        <div className="repair-chip-cloud">
           {REPAIR_TYPES.map((rt) => (
-            <span
-              key={rt.slug}
-              style={{
-                padding: "0.5rem 1rem",
-                background: "var(--layer)",
-                border: "1px solid var(--layer-border)",
-                borderRadius: "8px",
-                fontSize: "0.85rem",
-                fontWeight: 500,
-              }}
-            >
-              {rt.name}
-            </span>
+            <span key={rt.slug}>{rt.name}</span>
           ))}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

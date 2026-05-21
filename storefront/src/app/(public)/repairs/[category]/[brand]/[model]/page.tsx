@@ -6,6 +6,7 @@ import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
+import { ArrowRight, ClipboardCheck, ShieldCheck, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -16,9 +17,9 @@ interface ModelPageProps {
 
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
-  
+
   // Limit to top 100 models to balance build time and SEO
-  const allModels = catalog.brands.flatMap(brand => 
+  const allModels = catalog.brands.flatMap(brand =>
     brand.models.map(model => ({
       category: brand.category,
       brand: brand.slug,
@@ -56,64 +57,63 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const repairTypes = data?.repairTypes || [];
 
   return (
-    <div className="page-container" style={{ maxWidth: "900px" }}>
+    <main className="repair-page-shell repair-page-shell-narrow">
       <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
 
-      <h1
-        style={{
-          fontSize: "clamp(1.8rem, 4.5vw, 2.8rem)",
-          fontWeight: 800,
-          textAlign: "center",
-          marginBottom: "0.5rem",
-          letterSpacing: "-0.5px",
-        }}
-      >
-        {modelName} Repair Services
-      </h1>
-      <p
-        style={{
-          textAlign: "center",
-          opacity: 0.7,
-          fontSize: "1rem",
-          maxWidth: "520px",
-          margin: "0 auto 2.5rem",
-        }}
-      >
-        Select the repair you need for your {modelName}. Walk-in or book online for same-day service in Ringwood.
-      </p>
+      <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="model-repair-heading">
+        <div className="repair-tech-hero-copy">
+          <span className="repair-kicker">
+            <Wrench size={15} strokeWidth={2.4} aria-hidden="true" />
+            Repair menu
+          </span>
+          <h1 id="model-repair-heading">{modelName} Repair Services</h1>
+          <p>Select the repair you need for your {modelName}. Walk in or book online for practical service at Ringwood Square.</p>
+          <div className="repair-hero-actions">
+            <a href="tel:0481058514" className="repair-secondary-action">
+              Call for model check
+            </a>
+            <a href="#repair-options" className="repair-primary-action">
+              View repair options
+              <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+            </a>
+          </div>
+        </div>
 
-      <RepairOptionsGrid 
-        repairTypes={repairTypes}
-        categorySlug={categorySlug}
-        brandSlug={brandSlug}
-        modelSlug={modelSlug}
-        modelName={modelName}
-      />
+        <div className="repair-hero-panel" aria-label="Repair process highlights">
+          <div>
+            <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>Clear quote before repair</span>
+          </div>
+          <div>
+            <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>6-month warranty on eligible repairs</span>
+          </div>
+        </div>
+      </section>
 
-      {/* CTA Section */}
-      <div
-        style={{
-          marginTop: "3rem",
-          background: "var(--secondary)",
-          borderRadius: "20px",
-          padding: "2.5rem",
-          border: "1px solid var(--layer-border)",
-          textAlign: "center",
-        }}
-      >
-        <h2 style={{ fontSize: "1.4rem", marginBottom: "0.5rem" }}>
-          Not sure what&apos;s wrong?
-        </h2>
-        <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
-          Bring your {modelName} to our Ringwood kiosk for a free diagnostic — no obligation.
-        </p>
-      <RepairCTA 
-        modelSlug={modelSlug}
-        repairSlug="general" // Default for model-level intent
-        modelName={modelName}
-        repairName="General Inquiry"
-      />
-      </div>
-    </div>
+      <section id="repair-options" className="repair-content-band" aria-label={`${modelName} repair options`}>
+        <RepairOptionsGrid
+          repairTypes={repairTypes}
+          categorySlug={categorySlug}
+          brandSlug={brandSlug}
+          modelSlug={modelSlug}
+          modelName={modelName}
+        />
+      </section>
+
+      <section className="repair-assist-panel" aria-labelledby="diagnostic-help-heading">
+        <div>
+          <span className="repair-kicker repair-kicker-muted">Free diagnostic</span>
+          <h2 id="diagnostic-help-heading">Not sure what&apos;s wrong?</h2>
+          <p>Bring your {modelName} to our Ringwood kiosk for a practical diagnostic before committing to a repair.</p>
+        </div>
+        <RepairCTA
+          modelSlug={modelSlug}
+          repairSlug="general"
+          modelName={modelName}
+          repairName="General Inquiry"
+        />
+      </section>
+    </main>
   );
 }

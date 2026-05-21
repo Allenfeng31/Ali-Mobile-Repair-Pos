@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { analytics } from "@/lib/analytics";
-import QuoteRequestModal from "./QuoteRequestModal";
+import { Battery, Camera, Droplet, Plug, Smartphone, Wrench } from "lucide-react";
 
 interface RepairVariant {
   quality_grade: string;
@@ -33,21 +32,19 @@ export default function RepairOptionsGrid({
   modelSlug,
   modelName,
 }: RepairOptionsGridProps) {
-  const router = useRouter();
-
-  const getRepairIcon = (slug: string): string => {
+  const getRepairIcon = (slug: string) => {
     switch (slug) {
-      case "screen-replacement": return "📱";
-      case "battery-replacement": return "🔋";
+      case "screen-replacement": return <Smartphone size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "battery-replacement": return <Battery size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "charging-port-repair":
-      case "charging-port-replacement": return "🔌";
-      case "water-damage-repair": return "💧";
+      case "charging-port-replacement": return <Plug size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "water-damage-repair": return <Droplet size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "back-glass-repair":
-      case "back-housing-replacement": return "🪟";
+      case "back-housing-replacement": return <Smartphone size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "camera-repair":
       case "front-camera-replacement":
-      case "back-camera-replacement": return "📷";
-      default: return "🔧";
+      case "back-camera-replacement": return <Camera size={23} strokeWidth={2.4} aria-hidden="true" />;
+      default: return <Wrench size={23} strokeWidth={2.4} aria-hidden="true" />;
     }
   };
 
@@ -88,4 +85,3 @@ export default function RepairOptionsGrid({
     </>
   );
 }
-

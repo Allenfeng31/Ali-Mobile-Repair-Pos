@@ -7,6 +7,7 @@ import LivePricingGrid from '@/components/services/LivePricingGrid';
 import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam } from '@/lib/inventoryUtils';
+import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -15,7 +16,7 @@ const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 
 // Predefined priority brands for UI highlighting (Most Popular section)
 const POPULAR_BRANDS_KEYS = [
-  'iPhone', 'iPad', 'Samsung', 'Google', 'Apple', 
+  'iPhone', 'iPad', 'Samsung', 'Google', 'Apple',
   'Microsoft', 'Dell', 'HP', 'Lenovo', 'Asus'
 ];
 
@@ -199,16 +200,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const { category: catRaw } = await params;
   const category = formatDynamicParam(catRaw).toLowerCase();
   const data = CATEGORY_SEO_DATA[category];
-  
+
   if (!data) return { title: 'Repair Services | Ali Mobile' };
   return data.metadata;
-}
-
-function getPillStyle(type: string) {
-  if (type === 'primary') return { background: 'rgba(0,122,255,0.1)', color: 'var(--primary)' };
-  if (type === 'warning') return { background: 'rgba(255,149,0,0.1)', color: '#ff9500' };
-  if (type === 'accent')  return { background: 'rgba(255,45,85,0.1)', color: 'var(--accent)' };
-  return { background: 'var(--layer)', color: 'var(--foreground)' };
 }
 
 export default async function CategoryHubPage({ params }: CategoryPageProps) {
@@ -236,134 +230,162 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         return indexA - indexB;
       });
   } else {
-    topBrands = validBrands.filter(b => 
+    topBrands = validBrands.filter(b =>
       POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
     );
   }
-  
+
   const otherBrands = validBrands
     .filter(b => !topBrands.some(tb => tb.slug === b.slug))
     .sort((a, b) => a.brand.localeCompare(b.brand));
 
   return (
     <>
-      <ServiceSchema 
+      <ServiceSchema
         serviceName={data.schema.serviceName}
         description={data.schema.description}
         faqs={data.faqs}
       />
-      
-      <div className="page-container">
-        {/* HERO INTRO */}
-        <div style={{ display: 'inline-block', padding: '0.4rem 1.2rem', borderRadius: '30px', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase', ...getPillStyle(data.hero.pillType) }}>
-          {data.hero.pillText}
-        </div>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', lineHeight: '1.2' }}>{data.hero.title}</h1>
-        
-        <p style={{ fontSize: '1.2rem', marginBottom: '1.5rem', lineHeight: '1.8' }}>
-          {/* using dangerouslySetInnerHTML to allow strong tags from standard text if needed, but the data has simple strings without tags right now, so we will use text directly */}
-          {data.hero.intro1}
-        </p>
 
-        {/* BRAND GRID (NEW CORE SECTION) */}
-        <div style={{ marginTop: '3rem', marginBottom: '1rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>Most Popular Brands</h2>
-        </div>
-        
-        {topBrands.length > 0 ? (
-          <div className="brand-grid-hero">
-            {topBrands.map(b => (
-              <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
-                {b.brand}
+      <main className="repair-page-shell">
+        <section className="repair-tech-hero" aria-labelledby="category-repair-heading">
+          <div className="repair-tech-hero-copy">
+            <span className="repair-kicker">
+              <Sparkles size={15} strokeWidth={2.4} aria-hidden="true" />
+              {data.hero.pillText}
+            </span>
+            <h1 id="category-repair-heading">{data.hero.title}</h1>
+            <p>{data.hero.intro1}</p>
+            <div className="repair-hero-actions">
+              <Link href="/book-repair" prefetch={true} className="repair-primary-action">
+                Get a Live Quote
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
               </Link>
-            ))}
-          </div>
-        ) : validBrands.length === 0 && (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--foreground)', opacity: 0.7 }}>
-            No active brands available in this category for now.
-          </div>
-        )}
-
-        {otherBrands.length > 0 && (
-          <>
-            <div style={{ marginTop: '2rem', marginBottom: '1rem', textAlign: 'center' }}>
-              <h3 style={{ fontSize: '1.4rem', opacity: 0.8, marginBottom: '0.5rem' }}>Other Supported Brands</h3>
+              <a href="tel:0481058514" className="repair-secondary-action">
+                <PhoneCall size={18} strokeWidth={2.6} aria-hidden="true" />
+                0481 058 514
+              </a>
             </div>
-            <div className="brand-grid-standard">
-              {otherBrands.map(b => (
-                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
-                  {b.brand}
+          </div>
+
+          <div className="repair-hero-panel" aria-label="Repair service highlights">
+            <div>
+              <Clock size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Fast turnaround when parts are in stock</span>
+            </div>
+            <div>
+              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>No Fix, No Charge diagnostics</span>
+            </div>
+            <div>
+              <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Kiosk C1, Ringwood Square</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="repair-content-band" aria-labelledby="popular-brands-heading">
+          <div className="repair-section-header">
+            <span>Choose your device path</span>
+            <h2 id="popular-brands-heading">Most Popular Brands</h2>
+            <p>Pick the brand first, then choose your exact model for live repair options and pricing.</p>
+          </div>
+
+          {topBrands.length > 0 ? (
+            <div className="brand-grid-hero">
+              {topBrands.map(b => (
+                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
+                  <span>{b.brand}</span>
+                  <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
                 </Link>
               ))}
             </div>
-          </>
-        )}
+          ) : validBrands.length === 0 && (
+            <div className="repair-empty-state">
+              No active brands available in this category for now.
+            </div>
+          )}
 
-        <div
-          style={{
-            marginTop: "1rem",
-            marginBottom: "3rem",
-            background: "var(--secondary)",
-            borderRadius: "20px",
-            padding: "2.5rem",
-            border: "1px solid var(--layer-border)",
-            textAlign: "center",
-          }}
-        >
-          <h2 style={{ fontSize: "1.6rem", marginBottom: "0.75rem" }}>
-            Not sure which model you have?
-          </h2>
-          <p style={{ opacity: 0.7, marginBottom: "1.5rem", fontSize: "1rem" }}>
-            Use our Live Quote tool or call us — we'll identify your device and give you an instant price.
-          </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", alignItems: 'center' }}>
-            <Link href="/book-repair" prefetch={true} className="primary-btn">
+          {otherBrands.length > 0 && (
+            <>
+              <div className="repair-section-header repair-section-header-compact">
+                <span>Extended catalogue</span>
+                <h3>Other Supported Brands</h3>
+              </div>
+              <div className="brand-grid-standard">
+                {otherBrands.map(b => (
+                  <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
+                    {b.brand}
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="repair-assist-panel" aria-labelledby="model-help-heading">
+          <div>
+            <span className="repair-kicker repair-kicker-muted">
+              <MessageCircle size={15} strokeWidth={2.4} aria-hidden="true" />
+              Model check
+            </span>
+            <h2 id="model-help-heading">Not sure which model you have?</h2>
+            <p>Use our Live Quote tool or call us. We can identify your device and give you a practical price before you travel.</p>
+          </div>
+          <div className="repair-assist-actions">
+            <Link href="/book-repair" prefetch={true} className="repair-primary-action">
               Get a Live Quote
             </Link>
-            <a href="tel:0481058514" className="secondary-btn">
-              📞 Call 0481 058 514
-            </a>
-            <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>or</span>
-            <ChatNowButton 
-              className="primary-btn" 
-              style={{ background: 'var(--foreground)', color: 'var(--background)' }}
-            />
+            <ChatNowButton className="repair-secondary-action" />
           </div>
-        </div>
+        </section>
 
-        {/* SEO CONTENT (BOTTOM) */}
-        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', lineHeight: '1.8', color: 'var(--primary)', fontWeight: 'bold' }}>
-          {data.hero.intro2}
-        </p>
+        <section className="repair-content-band" aria-labelledby="why-choose-heading">
+          <div className="repair-section-header">
+            <span>Repair clarity</span>
+            <h2 id="why-choose-heading">Why Choose Us?</h2>
+            <p>{data.hero.intro2}</p>
+          </div>
 
-        <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Why Choose Us?</h2>
-        <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.1rem' }}>
-          {data.features.map((f: any, idx: number) => (
-             <li key={idx}><strong>{f.t}:</strong> {f.d ? f.d : "Included standard with our service."}</li>
-          ))}
-        </ul>
+          <div className="repair-signal-grid">
+            {data.features.map((f: any, idx: number) => (
+              <article key={idx} className="repair-signal-card">
+                <span>{String(idx + 1).padStart(2, '0')}</span>
+                <h3>{f.t}</h3>
+                <p>{f.d ? f.d : 'Included standard with our service.'}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         {/* Live Pricing Section fetches from Backend */}
-        <LivePricingGrid 
+        <LivePricingGrid
           title={data.pricing.title}
           deviceType={data.pricing.deviceType}
           defaultItems={data.pricing.items}
         />
 
-        <h2 style={{ marginBottom: '1rem', marginTop: '3rem' }}>Frequently Asked Questions</h2>
-        {data.faqs.map((faq: any, index: number) => (
-          <div key={index} style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{faq.question}</h3>
-            <p style={{ opacity: 0.8, lineHeight: '1.6' }}>{faq.answer}</p>
+        <section className="repair-content-band" aria-labelledby="category-faq-heading">
+          <div className="repair-section-header">
+            <span>FAQ</span>
+            <h2 id="category-faq-heading">Frequently Asked Questions</h2>
           </div>
-        ))}
+          <div className="repair-faq-grid">
+            {data.faqs.map((faq: any, index: number) => (
+              <article key={index} className="repair-faq-card">
+                <h3>{faq.question}</h3>
+                <p>{faq.answer}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
-        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-          <Link href="/book-repair" prefetch={true} className="primary-btn">
+        <div className="repair-final-cta">
+          <Link href="/book-repair" prefetch={true} className="repair-primary-action">
             Book Your {category.charAt(0).toUpperCase() + category.slice(1)} Repair
           </Link>
         </div>
-      </div>
+      </main>
     </>
   );
 }

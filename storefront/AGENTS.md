@@ -15,9 +15,10 @@ The SEO automation path is intentionally staged and human-reviewed.
 - If Claude returns critique, Gemini rewrites from the critique and the worker records every round in `payload.agentWorkflow.rounds`.
 - If the max audit rounds are exhausted, mark the keyword `FAILED`; never stage low-confidence SEO pages.
 - Keep the worker serial and quota-safe: default batch size 1, randomized 10-20 second delay before each keyword, and exponential backoff for 429/quota errors.
-- Keep hard spend fuses in place: max 10 generated articles per run, max 25 generated articles per day, max 60 model calls per run, and stop on first 429/rate-limit by default.
+- Keep hard spend fuses in place: max 10 generated articles per run, max 20 generated articles per day in the local worker config, max 60 model calls per run, and stop on first 429/rate-limit by default.
 - Keywords that already exist in Supabase must not be duplicated by the scout. Repeated discoveries should increment `seo_keywords.search_weight` and preserve the existing status, including `pending`, `approved`, `FAILED`, `COMPLETED`, and `blocked`.
 - Suburb/postcode SEO pages must be honest about location: Ali Mobile & Repair is in Ringwood Square. For suburb/postcode terms, answer the repair question first, then encourage phone quote/model check, online booking, kiosk visit, or asking whether pickup/drop-off can be arranged. Do not invent exact travel times or pretend there is a branch in that suburb.
+- Scout seed queries should heavily favor four high-intent classes: visible symptoms, technical/trust concerns, cost/value comparisons, and extreme-damage scenarios. Localize them with Ringwood / Melbourne intent only where it still sounds like a real search.
 - Default to `gemini-3.1-flash-lite` for writing and `claude-haiku-4-5-20251001` for audit when cost control matters.
 - Required worker env vars: `GEMINI_API_KEY`, plus `ANTHROPIC_API_KEY` or `CLAUDE_API_KEY`.
 
