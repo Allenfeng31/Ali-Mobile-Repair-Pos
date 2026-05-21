@@ -261,15 +261,21 @@ export default function ChatWidget() {
         aria-label="Chat with us"
         style={{
           position: 'fixed', bottom: '1.5rem', right: '1.5rem',
-          width: '56px', height: '56px', borderRadius: '50%',
-          background: 'linear-gradient(135deg, #007aff, #00c6ff)',
-          border: 'none', cursor: 'pointer',
-          boxShadow: '0 4px 20px rgba(0,122,255,0.5)',
+          width: '60px', height: '60px', borderRadius: '50%',
+          background: 'linear-gradient(135deg, #2563eb, #0ea5e9)',
+          border: '1px solid rgba(255,255,255,0.82)', cursor: 'pointer',
+          boxShadow: '0 18px 44px rgba(37,99,235,0.32), 0 0 0 8px rgba(37,99,235,0.08)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, transition: 'transform 0.2s ease',
+          zIndex: 9999, transition: 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease',
         }}
-        onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-        onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'translateY(-3px) scale(1.04)';
+          e.currentTarget.style.boxShadow = '0 24px 58px rgba(37,99,235,0.38), 0 0 0 10px rgba(37,99,235,0.1)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 18px 44px rgba(37,99,235,0.32), 0 0 0 8px rgba(37,99,235,0.08)';
+        }}
       >
         {hasUnread && (
           <span style={{
@@ -295,35 +301,38 @@ export default function ChatWidget() {
           id="chat-widget-window"
           style={{
             position: 'fixed', bottom: '5rem', right: '1.5rem',
-            width: 'min(360px, calc(100vw - 2rem))',
-            height: '480px', borderRadius: '20px',
-            // Always dark — prevents white-text-on-white-bg bug in light mode
-            background: '#0f172a',
-            border: '1px solid rgba(255,255,255,0.12)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            width: 'min(392px, calc(100vw - 2rem))',
+            height: 'min(580px, calc(100vh - 7.25rem))', borderRadius: '28px',
+            background: 'rgba(255,255,255,0.88)',
+            border: '1px solid rgba(37,99,235,0.16)',
+            boxShadow: '0 28px 86px rgba(15,23,42,0.26), 0 1px 0 rgba(255,255,255,0.8) inset',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden', zIndex: 9998,
-            animation: 'chatSlideIn 0.25s ease',
+            animation: 'chatSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
             fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+            backdropFilter: 'blur(22px)',
+            WebkitBackdropFilter: 'blur(22px)',
           }}
         >
           {/* Header */}
           <div style={{
-            background: 'linear-gradient(135deg, #007aff, #00c6ff)',
-            padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 52%, #2563eb 100%)',
+            padding: '1rem 1.15rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+            borderBottom: '1px solid rgba(255,255,255,0.12)',
           }}>
             <div style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: 'rgba(255,255,255,0.25)',
+              width: '42px', height: '42px', borderRadius: '16px',
+              background: 'rgba(255,255,255,0.16)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 10px 28px rgba(0,0,0,0.2)',
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
               </svg>
             </div>
             <div>
-              <div style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>Ali Mobile Repair</div>
-              <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.75rem' }}>
+              <div style={{ color: 'white', fontWeight: 850, fontSize: '0.98rem', letterSpacing: '-0.01em' }}>Ali Mobile Repair</div>
+              <div style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.76rem', fontWeight: 650 }}>
                 {step === 'intro' ? 'Please introduce yourself first' : 'We typically reply within a few minutes'}
               </div>
             </div>
@@ -331,14 +340,14 @@ export default function ChatWidget() {
 
           {/* ── Intro Step ────────────────────────────────────────────── */}
           {step === 'intro' ? (
-            <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <p style={{ color: 'white', fontSize: '0.875rem', opacity: 0.85 }}>
-                👋 Before we begin, please tell us your name and phone number so we can assist you better.
+            <div style={{ flex: 1, padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'linear-gradient(180deg, rgba(248,250,252,0.95), rgba(239,246,255,0.72))' }}>
+              <p style={{ color: '#334155', fontSize: '0.95rem', lineHeight: 1.65, margin: 0 }}>
+                Before we begin, please tell us your name and phone number so our technician can match the chat to your repair request.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div>
-                  <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
+                  <label style={{ display: 'block', color: '#64748b', fontSize: '0.72rem', fontWeight: 850, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.45rem' }}>
                     Your Name
                   </label>
                   <input
@@ -349,21 +358,22 @@ export default function ChatWidget() {
                     placeholder="e.g. John Smith"
                     onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) submitIntro(); }}
                     style={{
-                      width: '100%', padding: '0.7rem 0.9rem',
-                      borderRadius: '10px',
-                      background: 'rgba(255,255,255,0.09)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      color: 'white',
-                      fontSize: '0.9rem',
+                      width: '100%', padding: '0.82rem 0.95rem',
+                      borderRadius: '16px',
+                      background: 'rgba(255,255,255,0.88)',
+                      border: '1px solid rgba(37,99,235,0.14)',
+                      color: '#0f172a',
+                      fontSize: '0.95rem',
                       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
                       outline: 'none',
                       boxSizing: 'border-box',
+                      boxShadow: '0 12px 32px rgba(15,23,42,0.045)',
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
+                  <label style={{ display: 'block', color: '#64748b', fontSize: '0.72rem', fontWeight: 850, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.45rem' }}>
                     Phone Number (Optional)
                   </label>
                   <input
@@ -374,32 +384,34 @@ export default function ChatWidget() {
                     placeholder="e.g. 0412 345 678"
                     onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) submitIntro(); }}
                     style={{
-                      width: '100%', padding: '0.7rem 0.9rem',
-                      borderRadius: '10px',
-                      background: 'rgba(255,255,255,0.09)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      color: 'white',
-                      fontSize: '0.9rem',
+                      width: '100%', padding: '0.82rem 0.95rem',
+                      borderRadius: '16px',
+                      background: 'rgba(255,255,255,0.88)',
+                      border: '1px solid rgba(37,99,235,0.14)',
+                      color: '#0f172a',
+                      fontSize: '0.95rem',
                       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
                       outline: 'none',
                       boxSizing: 'border-box',
+                      boxShadow: '0 12px 32px rgba(15,23,42,0.045)',
                     }}
                   />
                 </div>
 
                 {introError && (
-                  <p style={{ color: '#ff6b6b', fontSize: '0.8rem', margin: 0 }}>{introError}</p>
+                  <p style={{ color: '#dc2626', fontSize: '0.82rem', margin: 0, fontWeight: 750 }}>{introError}</p>
                 )}
 
                 <button
                   id="chat-start-btn"
                   onClick={submitIntro}
                   style={{
-                    width: '100%', padding: '0.85rem',
-                    borderRadius: '12px', border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #007aff, #00c6ff)',
-                    color: 'white', fontWeight: 700, fontSize: '0.9rem',
-                    marginTop: '0.25rem',
+                    width: '100%', padding: '0.95rem',
+                    borderRadius: '18px', border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #2563eb, #0ea5e9)',
+                    color: 'white', fontWeight: 850, fontSize: '0.95rem',
+                    marginTop: '0.3rem',
+                    boxShadow: '0 18px 42px rgba(37,99,235,0.24)',
                   }}
                 >
                   Start Chat →
@@ -412,10 +424,11 @@ export default function ChatWidget() {
               {/* Messages */}
               <div style={{
                 flex: 1, overflowY: 'auto',
-                padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem',
+                padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+                background: 'linear-gradient(180deg, rgba(248,250,252,0.96), rgba(239,246,255,0.72))',
               }}>
                 {messages.filter(m => !m.content.startsWith(INTRO_PREFIX)).length === 0 && (
-                  <div style={{ textAlign: 'center', opacity: 0.5, fontSize: '0.85rem', marginTop: '2rem', padding: '0 1rem' }}>
+                  <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.9rem', marginTop: '2rem', padding: '0 1rem', fontWeight: 700 }}>
                     How can we help you today?
                   </div>
                 )}
@@ -428,10 +441,12 @@ export default function ChatWidget() {
                         borderRadius: msg.sender === 'customer' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                         // Customer = blue, Staff = solid dark gray (always readable on dark bg)
                         background: msg.sender === 'customer'
-                          ? 'linear-gradient(135deg, #007aff, #00c6ff)'
-                          : '#334155',
-                        color: 'white',
+                          ? 'linear-gradient(135deg, #2563eb, #0ea5e9)'
+                          : 'rgba(255,255,255,0.94)',
+                        color: msg.sender === 'customer' ? 'white' : '#0f172a',
+                        border: msg.sender === 'customer' ? '1px solid rgba(255,255,255,0.22)' : '1px solid rgba(15,23,42,0.08)',
                         fontSize: '0.875rem', lineHeight: 1.5,
+                        boxShadow: msg.sender === 'customer' ? '0 14px 32px rgba(37,99,235,0.2)' : '0 10px 24px rgba(15,23,42,0.08)',
                       }}>
                         <div>{msg.content}</div>
                         <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.25rem', textAlign: 'right' }}>
@@ -446,8 +461,9 @@ export default function ChatWidget() {
               {/* Input */}
               <div style={{
                 padding: '0.75rem 1rem',
-                borderTop: '1px solid rgba(255,255,255,0.08)',
+                borderTop: '1px solid rgba(37,99,235,0.1)',
                 display: 'flex', gap: '0.5rem', alignItems: 'flex-end',
+                background: 'rgba(255,255,255,0.9)',
               }}>
                 <textarea
                   id="chat-input"
@@ -458,10 +474,10 @@ export default function ChatWidget() {
                   placeholder="Type a message..."
                   style={{
                     flex: 1,
-                    background: 'rgba(255,255,255,0.07)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    borderRadius: '12px',
-                    color: 'white',
+                    background: 'rgba(248,250,252,0.95)',
+                    border: '1px solid rgba(37,99,235,0.14)',
+                    borderRadius: '16px',
+                    color: '#0f172a',
                     padding: '0.7rem 0.9rem',
                     fontSize: '0.9rem',
                     lineHeight: '1.4',
@@ -473,7 +489,7 @@ export default function ChatWidget() {
                     transition: 'border-color 0.2s ease',
                   }}
                   onFocus={e => (e.currentTarget.style.borderColor = '#007aff')}
-                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(37,99,235,0.14)')}
                 />
                 <button
                   id="chat-send-btn"
@@ -481,7 +497,7 @@ export default function ChatWidget() {
                   disabled={sending || !input.trim()}
                   style={{
                     width: '40px', height: '40px', borderRadius: '50%',
-                    background: input.trim() ? 'linear-gradient(135deg, #007aff, #00c6ff)' : 'rgba(255,255,255,0.1)',
+                    background: input.trim() ? 'linear-gradient(135deg, #2563eb, #0ea5e9)' : 'rgba(148,163,184,0.24)',
                     border: 'none', cursor: input.trim() ? 'pointer' : 'not-allowed',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'background 0.2s ease', flexShrink: 0,
@@ -503,8 +519,26 @@ export default function ChatWidget() {
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         #chat-name-input::placeholder,
-        #chat-phone-input::placeholder { color: rgba(255,255,255,0.3); }
-        #chat-input::placeholder { color: rgba(255,255,255,0.3); }
+        #chat-phone-input::placeholder,
+        #chat-input::placeholder { color: rgba(100,116,139,0.62); }
+        #chat-name-input:focus,
+        #chat-phone-input:focus,
+        #chat-input:focus {
+          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10), 0 12px 32px rgba(15,23,42,0.05);
+        }
+        @media (max-width: 520px) {
+          #chat-widget-window {
+            right: 1rem !important;
+            bottom: 5rem !important;
+            width: calc(100vw - 2rem) !important;
+            height: min(560px, calc(100vh - 7rem)) !important;
+            border-radius: 24px !important;
+          }
+          #chat-widget-toggle {
+            right: 1rem !important;
+            bottom: 1rem !important;
+          }
+        }
       `}</style>
     </>
   );

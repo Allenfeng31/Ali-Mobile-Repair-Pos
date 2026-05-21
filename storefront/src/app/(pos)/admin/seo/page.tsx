@@ -100,7 +100,6 @@ function escapeHtml(value: string) {
 function buildPreviewDocument(campaign: CampaignRecord | null) {
   const draft = campaign?.payload?.draft;
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const publicPath = draft?.slug ? `/seo/${draft.slug}` : `/seo/${campaign?.keyword?.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || ''}`;
 
   if (!campaign || !draft) {
     return `
@@ -136,7 +135,6 @@ function buildPreviewDocument(campaign: CampaignRecord | null) {
           .navlinks a:hover { color: #2563eb; }
           .navActions { display: flex; align-items: center; gap: 10px; }
           .navButton { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border-radius: 999px; padding: 0 18px; background: #2563eb; color: #fff; font-size: 13px; font-weight: 900; text-decoration: none; box-shadow: 0 16px 34px rgba(37,99,235,.22); }
-          .navGhost { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border-radius: 999px; padding: 0 16px; border: 1px solid #dbeafe; color: #1d4ed8; font-size: 13px; font-weight: 900; text-decoration: none; background: #eff6ff; }
           header { position: relative; overflow: hidden; padding: 72px 56px 54px; background: #1c1917; color: #fff; }
           header::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(202,138,4,.18), transparent 46%), linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px); background-size: auto, 42px 42px, 42px 42px; opacity: .9; }
           .hero { position: relative; max-width: 920px; }
@@ -168,7 +166,6 @@ function buildPreviewDocument(campaign: CampaignRecord | null) {
             <a href="/blog" target="_top">Blog</a>
           </div>
           <div class="navActions">
-            <a class="navGhost" href="${publicPath}" target="_top">Open Page</a>
             <a class="navButton" href="/book-repair" target="_top">Book Repair</a>
           </div>
         </nav>

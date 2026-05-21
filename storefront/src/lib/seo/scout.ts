@@ -91,24 +91,81 @@ function expandScoutQueryVariants(baseQuery: string, params: ScoutParams) {
 
 export function buildStrategicScoutQueries() {
     return [
-        // Symptom-based intent
+        // ── iPhone symptom-based intent ──
         'iphone 15 pro max green screen after drop',
         'iphone 15 screen glitching but no cracks',
-        'ipad pro battery draining fast when not in use',
+        'iphone 14 screen flickering lines',
+        'iphone 13 ghost touch fix',
+        'iphone 16 pro face id not working after screen replacement',
+        'iphone overheating while charging',
+        'iphone battery health dropping fast',
+        'iphone speaker crackling during calls',
+        'iphone charging port loose not charging',
+        'iphone camera black screen fix',
 
-        // Technical / trust intent
+        // ── iPad / tablet symptoms ──
+        'ipad pro battery draining fast when not in use',
+        'ipad air screen unresponsive in corners',
+        'ipad mini screen replacement cost',
+        'ipad charging but not turning on',
+
+        // ── Samsung / Android symptoms ──
+        'samsung galaxy s24 screen crack repair',
+        'samsung fold screen crease getting worse',
+        'samsung phone water damage repair',
+        'google pixel screen replacement cost',
+
+        // ── MacBook / laptop repair intent ──
+        'macbook pro screen flickering fix',
+        'macbook air battery replacement cost',
+        'macbook pro keyboard not working repair',
+        'macbook water damage repair cost',
+        'macbook pro screen replacement aftermarket vs apple',
+        'macbook trackpad not clicking fix',
+        'macbook charging port repair usb c',
+        'macbook pro overheating fan loud fix',
+
+        // ── Apple Watch / wearable ──
+        'apple watch screen cracked repair cost',
+        'apple watch battery replacement',
+        'apple watch not charging fix',
+
+        // ── Technical / trust intent ──
         'soft oled vs hard oled iphone 15 pro',
         'does iphone 15 screen replacement disable true tone',
         'iphone 15 non genuine display warning fix',
+        'does third party screen void apple warranty',
+        'original vs aftermarket iphone screen quality',
+        'do third party batteries affect iphone performance',
 
-        // Cost / value intent
+        // ── Cost / value / pricing intent ──
         'iphone 15 back glass repair cost',
         'is it worth fixing iphone 15 screen or upgrade',
         'cheap third party repair vs apple store iphone 15',
+        'phone screen repair cost near me',
+        'how much does it cost to fix a cracked iphone screen',
+        'iphone battery replacement price comparison',
+        'macbook screen replacement price vs apple store',
+        'samsung screen repair cost vs buying new phone',
+        'iphone repair price rip off how to avoid',
+        'phone repair hidden fees to watch out for',
 
-        // Extreme-case intent
+        // ── Extreme-case / damage intent ──
         'can a completely shattered iphone 15 be fixed',
         'iphone 15 pro max run over by car repair',
+        'phone fell in water what to do',
+        'iphone bent frame can it be repaired',
+        'phone screen completely black but still vibrates',
+        'data recovery from water damaged phone',
+
+        // ── Local / near-me intent (broad catchment) ──
+        'phone repair near me',
+        'best phone repair shop melbourne east',
+        'iphone repair ringwood',
+        'phone repair croydon mitcham',
+        'macbook repair near me melbourne',
+        'same day phone repair melbourne',
+        'emergency phone repair near me',
     ];
 }
 
@@ -401,13 +458,12 @@ export async function runScoutEngine(
                 const keyword = rawKeyword.trim().toLowerCase();
                 if (!keyword || keyword === baseQuery) continue;
 
-                if (!isWithin15KmOfRingwood(keyword)) continue;
+                // Geo-filter relaxed: keywords no longer require a local suburb mention.
+                // Human triage in the admin console handles quality gating.
 
-                // Risk mitigation interception (Constraint 4)
-                if (containsAiPlasticLanguage(keyword)) {
-                    blockedCount++;
-                    continue;
-                }
+                // AI-buzzword filter relaxed: raw Google Suggest keywords are
+                // persisted as-is; the blocklist only applies to generated article
+                // content, not ingestion-stage keyword text.
 
                 if (generatedKeywordTexts.has(keyword)) {
                     await incrementExistingKeywordOccurrence(routeSupabase as SupabaseClient, keyword);

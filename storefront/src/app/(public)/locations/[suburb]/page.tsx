@@ -12,13 +12,125 @@ type LocationPageProps = {
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.alimobile.com.au";
 const suburbTransitGuide: Record<string, string[]> = {
-  vermont: [
-    " Catch Bus 742 directly from Vermont to Ringwood Station, followed by a short 5-minute walk to Ringwood Square Shopping Centre.",
-    " Board Bus 736 towards Mitcham Station, transfer to the Lilydale/Belgrave line train, and exit at Ringwood Station."
+  ringwood: [
+    " Walk or catch any local service into Ringwood Station, then continue about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive directly to Ringwood Square Shopping Centre on Maroondah Highway and park near the centre entry for Kiosk C1."
+  ],
+  ringwoodnorth: [
+    " Catch a local Ringwood-bound bus from the Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive south via Warrandyte Road into Ringwood, then enter Ringwood Square Shopping Centre from the Maroondah Highway side."
+  ],
+  croydon: [
+    " Catch the Lilydale line train towards Flinders Street from Croydon Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive west via Maroondah Highway or Mt Dandenong Road into Ringwood, park at Ringwood Square Shopping Centre, and walk directly to Kiosk C1."
   ],
   boxhill: [
-    " Take the Lilydale or Belgrave line express train directly from Box Hill Station to Ringwood Station (approx. 12 minutes).",
-    " For driving/bus commuters, head straight down Maroondah Highway directly into the Ringwood Square corridor."
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Box Hill Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east along Whitehorse Road and Maroondah Highway directly into the Ringwood Square corridor, then park inside Ringwood Square Shopping Centre."
+  ],
+  mitcham: [
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Mitcham Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east along Maroondah Highway from Mitcham into Ringwood, turn into Ringwood Square Shopping Centre, and walk to Kiosk C1."
+  ],
+  glenwaverley: [
+    " Catch Bus 742 from Glen Waverley Station towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Springvale Road, Canterbury Road, and Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  heathmont: [
+    " Catch the Belgrave line train towards the City from Heathmont Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive north via Canterbury Road and Heathmont Road toward Ringwood, then enter Ringwood Square Shopping Centre from the Maroondah Highway side."
+  ],
+  wantirna: [
+    " Catch SmartBus 901 towards Ringwood Station from the Wantirna Road or Canterbury Road corridor and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive north via Wantirna Road or EastLink toward Ringwood, then park at Ringwood Square Shopping Centre for direct access to Kiosk C1."
+  ],
+  doncaster: [
+    " Catch SmartBus 907 from Doncaster Road towards Mitcham Station, then transfer to the Lilydale/Belgrave line or SmartBus 901 towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Doncaster Road, Springvale Road, and Maroondah Highway, or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  bayswater: [
+    " Catch the Belgrave line train towards the City from Bayswater Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive west via Mountain Highway toward Ringwood, continue into the Ringwood Square corridor, and park at Ringwood Square Shopping Centre."
+  ],
+  boronia: [
+    " Catch the Belgrave line train towards the City from Boronia Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Boronia Road, Dorset Road, or Mountain Highway toward Ringwood, then use Ringwood Square Shopping Centre parking."
+  ],
+  burwood: [
+    " Catch Tram 75 towards Vermont South, then transfer to Bus 742 towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east along Burwood Highway, connect through Vermont South and Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  nunawading: [
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Nunawading Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east along Maroondah Highway from Nunawading through Mitcham into Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  balwyn: [
+    " Catch Bus 302 or 304 towards Box Hill, then transfer at Box Hill Station to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east via Whitehorse Road and Maroondah Highway through Box Hill and Mitcham into Ringwood Square Shopping Centre."
+  ],
+  vermont: [
+    " Catch Bus 742 directly from Vermont towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east via Canterbury Road, Heatherdale Road, or Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  ringwoodeast: [
+    " Catch the Lilydale line train towards the City from Ringwood East Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive west via Dublin Road or Maroondah Highway into Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  springvale: [
+    " Catch SmartBus 902 from Springvale Station towards Nunawading Station, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive north via Springvale Road and EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  kilsyth: [
+    " Catch Bus 690 towards Croydon Station, then transfer to the Lilydale line towards the City. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive west via Mt Dandenong Road and Maroondah Highway into Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  mooroolbark: [
+    " Catch the Lilydale line train towards the City from Mooroolbark Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Manchester Road, Canterbury Road, or Maroondah Highway toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  clayton: [
+    " Catch the Cranbourne/Pakenham line train from Clayton Station to Richmond, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Ferntree Gully Road and EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  lilydale: [
+    " Catch the Lilydale line train towards the City from Lilydale Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive west along Maroondah Highway from Lilydale through Chirnside Park and Croydon into Ringwood Square Shopping Centre."
+  ],
+  chirnsidepark: [
+    " Catch Bus 670 from Chirnside Park Shopping Centre towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive west along Maroondah Highway through Croydon into Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  ferntreegully: [
+    " Catch the Belgrave line train towards the City from Ferntree Gully Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive north via Burwood Highway, Dorset Road, or Mountain Highway toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  knoxfield: [
+    " Catch SmartBus 901 from the Stud Road or Burwood Highway corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive north via Stud Road and Boronia Road or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  rowville: [
+    " Catch SmartBus 901 from Stud Park Shopping Centre towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Stud Road, Ferntree Gully Road, or EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  donvale: [
+    " Catch SmartBus 902 from the Springvale Road corridor towards Nunawading Station, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Springvale Road and Maroondah Highway or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  parkorchards: [
+    " Catch Bus 364 from the Ringwood-Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive south via Park Road or Ringwood-Warrandyte Road into Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  warrandyte: [
+    " Catch Bus 364 from Warrandyte towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive via Ringwood-Warrandyte Road directly into Ringwood, then park at Ringwood Square Shopping Centre."
+  ],
+  blackburn: [
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Blackburn Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive east along Whitehorse Road and Maroondah Highway through Nunawading and Mitcham into Ringwood Square Shopping Centre."
+  ],
+  warranwood: [
+    " Catch a Ringwood-bound local bus from the Wonga Road or Ringwood-Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
+    " Drive south along Wonga Road, connect through Ringwood North, and park at Ringwood Square Shopping Centre."
   ]
 };
 
@@ -61,18 +173,18 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
   if (!area) notFound();
 
+  const currentSuburb = suburb.toLowerCase().replace(/-/g, "");
+  const transitSteps = suburbTransitGuide[currentSuburb] ?? [
+    " Get direct transit routes to Ringwood via local train or Maroondah Hwy bus corridors."
+  ];
   const routeOrigin = `${area.name}, Victoria, Australia`;
-  const routeDestination = "Ringwood Square Shopping Centre, 171-175 Maroondah Hwy, Ringwood VIC 3134";
+  const routeDestination = "Ringwood Square Shopping Centre, Ringwood VIC 3134";
   const encodedOrigin = encodeURIComponent(routeOrigin);
   const encodedDestination = encodeURIComponent(routeDestination);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const transitMapSrc = googleMapsApiKey
     ? `https://www.google.com/maps/embed/v1/directions?key=${googleMapsApiKey}&origin=${encodedOrigin}&destination=${encodedDestination}&mode=transit`
     : `https://www.google.com/maps?output=embed&saddr=${encodedOrigin}&daddr=${encodedDestination}&dirflg=r`;
-  const currentSuburb = suburb.toLowerCase();
-  const transitSteps = suburbTransitGuide[currentSuburb] ?? [
-    " Get direct transit routes to Ringwood via local train or Maroondah Hwy bus corridors."
-  ];
 
   const schema = {
     "@context": "https://schema.org",
@@ -145,18 +257,33 @@ export default async function LocationPage({ params }: LocationPageProps) {
           </div>
 
           <aside className="location-route-card location-map-card" aria-label={`Transit route from ${area.name} to Ringwood Square`}>
-            <iframe
-              src={transitMapSrc}
-              title={`Public transport directions from ${area.name} to Ali Mobile & Repair Ringwood`}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen={false}
-            />
-            <div className="location-map-caption">
-              <Clock size={18} strokeWidth={2.5} aria-hidden="true" />
-              <div>
-                <strong>{area.name} to Ringwood Square</strong>
-                <span>Transit route preview</span>
+            <div className="location-map-frame">
+              <iframe
+                src={transitMapSrc}
+                title={`Transit directions from ${area.name} to Ringwood Square Shopping Centre`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen={false}
+              />
+            </div>
+            <div className="location-map-panel">
+              <div className="location-route-stat">
+                <Clock size={20} strokeWidth={2.5} aria-hidden="true" />
+                <div>
+                  <strong>{area.driveTime}</strong>
+                  <span>Typical local trip</span>
+                </div>
+              </div>
+              <div className="location-route-stat">
+                <Navigation size={20} strokeWidth={2.5} aria-hidden="true" />
+                <div>
+                  <strong>{area.name} to Ringwood Square</strong>
+                  <span>Live Google route preview</span>
+                </div>
+              </div>
+              <div className="location-transit-preview">
+                <strong>Fastest practical route</strong>
+                <p>{transitSteps[0].trim()}</p>
               </div>
             </div>
           </aside>
@@ -187,15 +314,6 @@ export default async function LocationPage({ params }: LocationPageProps) {
               {area.landmarks.map((landmark) => (
                 <span key={landmark}>{landmark}</span>
               ))}
-            </div>
-            <div className="location-inline-map">
-              <iframe
-                src={transitMapSrc}
-                title={`Transit map from ${area.name} to Ringwood Square Shopping Centre`}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen={false}
-              />
             </div>
             <div className="location-transit-guide">
               <h3>Public transport options from {area.name}</h3>
