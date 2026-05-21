@@ -5,7 +5,7 @@ import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
-import { ArrowRight, Search, ShieldCheck, Smartphone } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
@@ -71,7 +71,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </Link>
           </div>
         </div>
-        <div className="repair-hero-panel" aria-label="Model selection support">
+        <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
+          <div className="repair-device-card" aria-hidden="true">
+            <span className="repair-device-frame">
+              <span />
+            </span>
+            <div>
+              <strong>{brandName}</strong>
+              <small>Choose model first</small>
+            </div>
+          </div>
           <div>
             <Search size={20} strokeWidth={2.4} aria-hidden="true" />
             <span>Search by model name or code</span>
@@ -79,6 +88,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           <div>
             <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
             <span>Transparent repair paths before booking</span>
+          </div>
+          <div>
+            <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>Exact model unlocks service pricing</span>
           </div>
         </div>
       </section>
@@ -91,15 +104,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         />
       </section>
 
-      <section className="repair-assist-panel" aria-labelledby="brand-repair-types-heading">
-        <div>
-          <span className="repair-kicker repair-kicker-muted">Common services</span>
-          <h2 id="brand-repair-types-heading">All {brandName} Repair Types</h2>
-          <p>These are the repair paths we commonly support once you choose a model.</p>
+      <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
+        <div className="repair-types-showcase-header">
+          <div>
+            <span className="repair-kicker repair-kicker-muted">Common services</span>
+            <h2 id="brand-repair-types-heading">All {brandName} Repair Types</h2>
+          </div>
+          <p>Choose your exact model first, then we show the right repair path, quote range, and booking options.</p>
         </div>
-        <div className="repair-chip-cloud">
-          {REPAIR_TYPES.map((rt) => (
-            <span key={rt.slug}>{rt.name}</span>
+        <div className="repair-type-card-grid">
+          {REPAIR_TYPES.map((rt, index) => (
+            <article key={rt.slug} className="repair-type-mini-card">
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{rt.name}</strong>
+              <small>Model-specific quote</small>
+            </article>
           ))}
         </div>
       </section>

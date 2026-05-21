@@ -6,7 +6,7 @@ import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
-import { ArrowRight, ClipboardCheck, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
+import { ArrowRight, Clock, ClipboardCheck, MapPin, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -80,7 +80,16 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </div>
         </div>
 
-        <div className="repair-hero-panel" aria-label="Repair process highlights">
+        <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Repair process highlights">
+          <div className="repair-device-card" aria-hidden="true">
+            <span className="repair-device-frame">
+              <span />
+            </span>
+            <div>
+              <strong>{modelName}</strong>
+              <small>Repair path preview</small>
+            </div>
+          </div>
           <div>
             <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
             <span>Clear quote before repair</span>
@@ -88,6 +97,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           <div>
             <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
             <span>6-month warranty on eligible repairs</span>
+          </div>
+          <div>
+            <Clock size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>Most common repairs can be checked while you wait</span>
+          </div>
+          <div>
+            <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
+            <span>Ringwood Square Kiosk C1</span>
           </div>
         </div>
       </section>
