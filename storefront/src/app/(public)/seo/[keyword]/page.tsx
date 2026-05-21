@@ -1,146 +1,221 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Clock, ShieldCheck, Calendar, ArrowRight, Wrench, Star } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
+import { ArrowRight, Calendar, Clock, ShieldCheck, Star, Wrench } from 'lucide-react';
 
-// Mock Supabase fetch logic
-async function getSeoArticle(keyword: string) {
-  const formattedKeyword = keyword.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+export const dynamic = 'force-dynamic';
+
+type CampaignPayload = {
+  draft?: {
+    title?: string;
+    description?: string;
+    content?: string;
+    slug?: string;
+    readingTime?: string;
+    relatedKeywords?: string[];
+  };
+  jsonLd?: unknown;
+};
+
+type CampaignRow = {
+  id: string;
+  keyword: string;
+  status?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  payload?: CampaignPayload | null;
+};
+
+type SeoArticle = {
+  title: string;
+  metaDescription: string;
+  author: string;
+  readingTime: string;
+  lastUpdated: string;
+  content: string;
+  relatedKeywords: string[];
+  rating: number;
+  reviewCount: number;
+  jsonLd?: unknown;
+};
+
+function getPublicSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase public credentials for SEO article page.');
+  }
+
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90);
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return 'Recently';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Recently';
+
+  return new Intl.DateTimeFormat('en-AU', {
+    dateStyle: 'medium',
+  }).format(date);
+}
+
+async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
+  const supabase = getPublicSupabaseClient();
+  const { data, error } = await supabase
+    .from('pending_seo_campaigns')
+    .select('*')
+    .order('created_at', { ascending: false, nullsFirst: false })
+    .limit(250);
+
+  if (error) {
+    console.error('[seo-page] Failed to load generated SEO campaigns:', error);
+    return null;
+  }
+
+  const campaigns = (data || []) as CampaignRow[];
+  const campaign = campaigns.find((row) => {
+    const draftSlug = row.payload?.draft?.slug;
+    return draftSlug === keywordSlug || slugify(row.keyword) === keywordSlug;
+  });
+  const draft = campaign?.payload?.draft;
+
+  if (!campaign || !draft?.title || !draft?.description || !draft?.content) {
+    return null;
+  }
 
   return {
-    title: `Expert ${formattedKeyword} in Ringwood: Fast, Reliable, & Affordable`,
-    metaTitle: `Best ${formattedKeyword} Services | Book Today`,
-    metaDescription: `Looking for professional ${formattedKeyword.toLowerCase()}? We offer fast turnaround times, premium parts, and a lifetime warranty. Book your repair today.`,
-    author: 'Ali Mobile Tech Team',
-    readingTime: '4 mins',
-    lastUpdated: 'Just recently',
-    content: `
-      <h2>Why You Need Professional ${formattedKeyword}</h2>
-      <p>When dealing with device issues, it's tempting to look for quick DIY fixes. However, modern smartphones and tablets are highly complex machines. Attempting a repair without the right tools and expertise can lead to further damage, voided warranties, and potential data loss.</p>
-      <p>Our certified technicians specialize in comprehensive diagnostics and precision repairs. We understand the intricate architecture of these devices, ensuring that every screw is replaced and every flex cable is correctly seated.</p>
-
-      <h2>Signs Your Device Needs Immediate Attention</h2>
-      <ul>
-        <li><strong>Unresponsive Touch:</strong> The screen registers phantom touches or completely ignores your input.</li>
-        <li><strong>Rapid Battery Drain:</strong> Your device shuts down unexpectedly even when it shows it has charge.</li>
-        <li><strong>Overheating:</strong> The back glass feels unusually hot during normal operation or charging.</li>
-        <li><strong>Physical Damage:</strong> Visible cracks, shattered glass, or bent frames that compromise the device's structural integrity.</li>
-      </ul>
-
-      <h2>Our Premium Repair Process</h2>
-      <p>We pride ourselves on transparency and quality. When you bring your device to us for ${formattedKeyword.toLowerCase()}, here is exactly what happens:</p>
-      <ol>
-        <li><strong>Free Comprehensive Diagnostic:</strong> We test all core functions (Face ID, cameras, microphones, charging ports) before opening the device.</li>
-        <li><strong>Genuine & Premium Parts:</strong> We use only the highest quality replacement components sourced from reputable suppliers.</li>
-        <li><strong>Precision Assembly:</strong> We restore all water-resistance seals and use calibrated tools to ensure factory-level fitment.</li>
-        <li><strong>Post-Repair Quality Control:</strong> A rigorous 25-point inspection is performed to guarantee everything works flawlessly.</li>
-      </ol>
-
-      <h2>The Cost of Waiting</h2>
-      <p>Many users delay getting their devices fixed due to perceived costs or inconvenience. However, a cracked screen can let moisture and dust into the logic board, turning a simple screen replacement into a complete data recovery nightmare. Addressing the issue early not only saves money but also extends the lifespan of your essential technology.</p>
-      
-      <blockquote>
-        <p>"A small crack today is a dead logic board tomorrow. Don't compromise your data for a delayed repair."</p>
-      </blockquote>
-
-      <h2>Ready to Get Started?</h2>
-      <p>Don't let a broken device disrupt your workflow. Our team in Ringwood is equipped and ready to provide top-tier ${formattedKeyword.toLowerCase()} services. With our extensive inventory of parts, most repairs are completed within 45 minutes.</p>
-    `,
-    relatedKeywords: ['screen repair', 'battery replacement', 'water damage'],
+    title: draft.title,
+    metaDescription: draft.description,
+    author: 'Ali Mobile Repair Technicians',
+    readingTime: draft.readingTime || '5 min read',
+    lastUpdated: formatDate(campaign.updated_at || campaign.created_at),
+    content: draft.content,
+    relatedKeywords: draft.relatedKeywords || ['phone repair', 'screen repair', 'battery replacement'],
     rating: 4.9,
-    reviewCount: 428
+    reviewCount: 150,
+    jsonLd: campaign.payload?.jsonLd,
+  };
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ keyword: string }> }): Promise<Metadata> {
+  const { keyword } = await params;
+  const article = await getSeoArticle(keyword);
+
+  if (!article) {
+    return {
+      title: 'SEO Article Not Found | Ali Mobile Repair',
+    };
+  }
+
+  return {
+    title: `${article.title} | Ali Mobile Repair`,
+    description: article.metaDescription,
   };
 }
 
 export default async function SeoArticlePage({ params }: { params: Promise<{ keyword: string }> }) {
-  const resolvedParams = await params;
-  const article = await getSeoArticle(resolvedParams.keyword);
+  const { keyword } = await params;
+  const article = await getSeoArticle(keyword);
+
+  if (!article) {
+    notFound();
+  }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] text-[#0C0A09] font-sans selection:bg-[#CA8A04] selection:text-white pb-24">
-      {/* High-Tech Header Visual */}
-      <div className="relative overflow-hidden bg-[#1C1917] text-white pt-32 pb-20 lg:pt-40 lg:pb-28 border-b border-[#44403C]">
-        {/* Soft Radial Gradient & Faint Grid Mesh */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="min-h-screen bg-[#FAFAF9] pb-24 font-sans text-[#0C0A09] selection:bg-[#CA8A04] selection:text-white">
+      {article.jsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(article.jsonLd) }}
+        />
+      ) : null}
+
+      <div className="relative overflow-hidden border-b border-[#44403C] bg-[#1C1917] pb-20 pt-32 text-white lg:pb-28 lg:pt-40">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(202,138,4,0.15),transparent_50%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 mask-image:linear-gradient(to_bottom,white,transparent)" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            {/* Meta Info Bar */}
-            <div className="flex flex-wrap items-center gap-4 mb-6 text-sm font-medium tracking-wide text-gray-300">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <ShieldCheck className="w-4 h-4" />
-                Verified Tech Article
+            <div className="mb-6 flex flex-wrap items-center gap-4 text-sm font-medium tracking-wide text-gray-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-400">
+                <ShieldCheck className="h-4 w-4" />
+                Technician-reviewed article
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-gray-400" />
+                <Clock className="h-4 w-4 text-gray-400" />
                 Reading Time: {article.readingTime}
               </span>
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-gray-400" />
+                <Calendar className="h-4 w-4 text-gray-400" />
                 Updated: {article.lastUpdated}
               </span>
             </div>
 
-            {/* Massive H1 Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.1] drop-shadow-sm">
+            <h1 className="mb-6 text-4xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-sm sm:text-5xl lg:text-6xl">
               {article.title}
             </h1>
-            
-            <p className="text-xl sm:text-2xl text-gray-400 leading-relaxed font-light">
+
+            <p className="text-xl font-light leading-relaxed text-gray-400 sm:text-2xl">
               {article.metaDescription}
             </p>
-            
-            {/* Author & Rating */}
-            <div className="flex items-center gap-6 mt-10 pt-10 border-t border-white/10">
+
+            <div className="mt-10 flex items-center gap-6 border-t border-white/10 pt-10">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 flex items-center justify-center text-[#1C1917] font-bold text-lg">
-                  {article.author.charAt(0)}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-lg font-bold text-[#1C1917]">
+                  A
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-white">{article.author}</div>
-                  <div className="text-xs text-gray-400">Master Technician</div>
+                  <div className="text-xs text-gray-400">Ringwood repair team</div>
                 </div>
               </div>
-              <div className="h-8 w-[1px] bg-white/10"></div>
+              <div className="h-8 w-px bg-white/10" />
               <div>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                   ))}
                   <span className="ml-1 text-sm font-bold text-white">{article.rating}</span>
                 </div>
-                <div className="text-xs text-gray-400">Based on {article.reviewCount} reviews</div>
+                <div className="text-xs text-gray-400">Based on {article.reviewCount}+ reviews</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content & Sidebar Layout */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-          
-          {/* Left Column: Article Content (70% ~ 8 cols) */}
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-8">
-            <article 
-              className="prose prose-slate lg:prose-xl max-w-none 
-                         prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-[#1C1917]
-                         prose-p:leading-relaxed prose-p:text-[#44403C]
-                         prose-a:text-[#CA8A04] prose-a:no-underline hover:prose-a:underline
-                         prose-strong:text-[#1C1917] prose-strong:font-semibold
-                         prose-li:text-[#44403C] prose-ul:list-disc
-                         prose-blockquote:border-l-4 prose-blockquote:border-[#CA8A04] prose-blockquote:bg-yellow-50/50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:text-[#1C1917]
-                         prose-img:rounded-2xl prose-img:shadow-xl"
+            <article
+              className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-[#1C1917] prose-p:leading-relaxed prose-p:text-[#44403C] prose-a:text-[#CA8A04] prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-[#1C1917] prose-li:text-[#44403C] prose-ul:list-disc prose-blockquote:border-l-4 prose-blockquote:border-[#CA8A04] prose-blockquote:bg-yellow-50/50 prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:italic prose-blockquote:text-[#1C1917] prose-img:rounded-2xl prose-img:shadow-xl lg:prose-xl"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
-            
-            {/* Tags / Related */}
-            <div className="mt-16 pt-8 border-t border-gray-200">
-              <h3 className="text-sm font-semibold text-[#1C1917] uppercase tracking-wider mb-4">Related Topics</h3>
+
+            <div className="mt-16 border-t border-gray-200 pt-8">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#1C1917]">Related Topics</h3>
               <div className="flex flex-wrap gap-2">
                 {article.relatedKeywords.map((tag) => (
-                  <span key={tag} className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-medium text-[#44403C] hover:border-[#CA8A04] hover:text-[#CA8A04] cursor-pointer transition-colors duration-200 shadow-sm">
+                  <span key={tag} className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-[#44403C] shadow-sm">
                     {tag}
                   </span>
                 ))}
@@ -148,73 +223,63 @@ export default async function SeoArticlePage({ params }: { params: Promise<{ key
             </div>
           </div>
 
-          {/* Right Column: Sticky Conversion Card (30% ~ 4 cols) */}
           <div className="lg:col-span-4">
             <div className="sticky top-32">
-              <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-                {/* Card Header with Premium Gradient */}
-                <div className="relative bg-[#1C1917] p-8 text-center overflow-hidden">
-                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#CA8A04] rounded-full blur-[40px] opacity-40"></div>
-                  <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-yellow-600 rounded-full blur-[40px] opacity-20"></div>
-                  <Wrench className="w-12 h-12 text-[#CA8A04] mx-auto mb-5 relative z-10" />
-                  <h3 className="text-2xl font-bold text-white tracking-tight mb-2 relative z-10">
-                    Need this fixed today?
+              <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+                <div className="relative overflow-hidden bg-[#1C1917] p-8 text-center">
+                  <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#CA8A04] opacity-40 blur-[40px]" />
+                  <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-yellow-600 opacity-20 blur-[40px]" />
+                  <Wrench className="relative z-10 mx-auto mb-5 h-12 w-12 text-[#CA8A04]" />
+                  <h3 className="relative z-10 mb-2 text-2xl font-bold tracking-tight text-white">
+                    Need a hands-on check?
                   </h3>
-                  <p className="text-gray-400 text-sm relative z-10">
-                    Skip the queue. Get a live quote now.
+                  <p className="relative z-10 text-sm text-gray-400">
+                    Get a practical quote from our Ringwood bench.
                   </p>
                 </div>
-                
-                {/* Card Body */}
-                <div className="p-8 space-y-8">
+
+                <div className="space-y-8 p-8">
                   <ul className="space-y-4">
                     {[
-                      'Live upfront pricing',
-                      'Usually fixed in 45 minutes',
-                      'Premium grade parts used',
-                      'Lifetime warranty included'
-                    ].map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      'Clear quote before repair',
+                      'Fast turnaround when parts are in stock',
+                      'Premium-grade parts available',
+                      '6-month warranty on eligible repairs',
+                    ].map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50">
+                          <svg className="h-3 w-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
                         </div>
                         <span className="text-sm font-medium text-[#44403C]">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <div className="pt-2">
-                    <Link href="/book-repair" className="group flex items-center justify-center w-full gap-2 px-6 py-4 bg-[#CA8A04] hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg shadow-yellow-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-yellow-500/30">
-                      Get a Live Quote Now
-                      <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  <div className="grid gap-3 pt-2">
+                    <Link href="/book-repair" className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[#CA8A04] px-6 py-4 font-bold text-white shadow-lg shadow-yellow-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-500 hover:shadow-xl hover:shadow-yellow-500/30">
+                      Book Repair
+                      <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
-                    <p className="text-center text-xs text-gray-400 mt-4 font-medium uppercase tracking-wider">
+                    <Link href="/" className="flex w-full items-center justify-center rounded-xl border border-blue-100 bg-blue-50 px-6 py-4 font-bold text-blue-700 transition hover:border-blue-200 hover:bg-blue-100">
+                      Back to Homepage
+                    </Link>
+                    <p className="mt-4 text-center text-xs font-medium uppercase tracking-wider text-gray-400">
                       No payment required to book
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Secondary Trust Card */}
-              <div className="mt-6 bg-[#FAFAF9] rounded-2xl p-6 border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <div className="flex -space-x-3">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="w-10 h-10 rounded-full bg-gray-200 border-2 border-[#FAFAF9] overflow-hidden shadow-sm">
-                        <img src={`https://i.pravatar.cc/100?img=${i + 12}`} alt="Customer" className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-[#1C1917]">Trusted locally</div>
-                    <div className="text-xs text-[#44403C] mt-0.5">Join 10,000+ happy customers</div>
-                  </div>
+              <div className="mt-6 rounded-2xl border border-gray-200 bg-[#FAFAF9] p-6 shadow-sm">
+                <div className="text-sm font-bold text-[#1C1917]">Ali Mobile & Repair</div>
+                <div className="mt-1 text-xs leading-5 text-[#44403C]">
+                  Kiosk C1, Ringwood Square Shopping Centre. Call 0481 058 514 for a quick model check.
                 </div>
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>

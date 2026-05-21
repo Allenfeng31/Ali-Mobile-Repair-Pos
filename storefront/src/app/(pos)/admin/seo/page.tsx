@@ -44,6 +44,7 @@ interface CampaignPayload {
     title?: string;
     description?: string;
     content?: string;
+    slug?: string;
     readingTime?: string;
     relatedKeywords?: string[];
   };
@@ -98,6 +99,8 @@ function escapeHtml(value: string) {
 
 function buildPreviewDocument(campaign: CampaignRecord | null) {
   const draft = campaign?.payload?.draft;
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const publicPath = draft?.slug ? `/seo/${draft.slug}` : `/seo/${campaign?.keyword?.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || ''}`;
 
   if (!campaign || !draft) {
     return `
@@ -119,12 +122,24 @@ function buildPreviewDocument(campaign: CampaignRecord | null) {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <base href="${origin}" />
         <style>
           * { box-sizing: border-box; }
-          body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #0f172a; }
-          header { position: relative; overflow: hidden; padding: 64px 56px 48px; background: #020617; color: #fff; }
-          header::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(37,99,235,.18), transparent 42%), linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px); background-size: auto, 42px 42px, 42px 42px; opacity: .9; }
-          .hero { position: relative; max-width: 880px; }
+          body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #fafaf9; color: #0f172a; }
+          a { color: inherit; }
+          .topbar { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 18px; border-bottom: 1px solid #e5e7eb; background: #fff; color: #111827; font-size: 14px; font-weight: 800; text-decoration: none; }
+          .navbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 18px 28px; border-bottom: 1px solid #e5e7eb; background: rgba(255,255,255,.92); backdrop-filter: blur(16px); }
+          .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: #111827; }
+          .brand img { width: 156px; height: auto; display: block; }
+          .navlinks { display: flex; align-items: center; justify-content: center; gap: 24px; font-size: 14px; font-weight: 850; color: #334155; }
+          .navlinks a { text-decoration: none; }
+          .navlinks a:hover { color: #2563eb; }
+          .navActions { display: flex; align-items: center; gap: 10px; }
+          .navButton { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border-radius: 999px; padding: 0 18px; background: #2563eb; color: #fff; font-size: 13px; font-weight: 900; text-decoration: none; box-shadow: 0 16px 34px rgba(37,99,235,.22); }
+          .navGhost { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border-radius: 999px; padding: 0 16px; border: 1px solid #dbeafe; color: #1d4ed8; font-size: 13px; font-weight: 900; text-decoration: none; background: #eff6ff; }
+          header { position: relative; overflow: hidden; padding: 72px 56px 54px; background: #1c1917; color: #fff; }
+          header::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(202,138,4,.18), transparent 46%), linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px); background-size: auto, 42px 42px, 42px 42px; opacity: .9; }
+          .hero { position: relative; max-width: 920px; }
           .eyebrow { display: inline-flex; border: 1px solid rgba(96,165,250,.35); border-radius: 999px; padding: 8px 12px; color: #bfdbfe; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
           h1 { font-size: clamp(38px, 6vw, 72px); line-height: .96; letter-spacing: -0.045em; margin: 20px 0; }
           .desc { color: #cbd5e1; font-size: 18px; line-height: 1.7; max-width: 760px; }
@@ -134,14 +149,29 @@ function buildPreviewDocument(campaign: CampaignRecord | null) {
           article h3 { font-size: 22px; margin: 30px 0 8px; }
           article p, article li { color: #475569; }
           article ul, article ol { padding-left: 24px; }
-          aside { align-self: start; position: sticky; top: 24px; border: 1px solid #dbeafe; border-radius: 28px; padding: 26px; background: rgba(255,255,255,.84); box-shadow: 0 24px 80px rgba(15,23,42,.1); }
+          aside { align-self: start; position: sticky; top: 24px; border: 1px solid #e5e7eb; border-radius: 28px; padding: 26px; background: rgba(255,255,255,.9); box-shadow: 0 24px 80px rgba(15,23,42,.1); }
           aside h2 { margin: 0 0 10px; font-size: 25px; letter-spacing: -.03em; }
           aside p { color: #64748b; line-height: 1.6; }
-          .cta { display: block; margin-top: 22px; border-radius: 999px; background: #2563eb; color: white; text-align: center; padding: 15px 18px; font-weight: 900; text-decoration: none; }
-          @media (max-width: 820px) { header, .shell { padding-left: 24px; padding-right: 24px; } .shell { grid-template-columns: 1fr; } aside { position: static; } }
+          .ctaStack { display: grid; gap: 10px; margin-top: 22px; }
+          .cta { display: block; border-radius: 999px; background: #2563eb; color: white; text-align: center; padding: 15px 18px; font-weight: 900; text-decoration: none; }
+          .cta.secondary { background: #f8fafc; color: #1d4ed8; border: 1px solid #bfdbfe; }
+          @media (max-width: 820px) { .navbar { flex-wrap: wrap; } .navlinks { order: 3; width: 100%; justify-content: flex-start; flex-wrap: wrap; } header, .shell { padding-left: 24px; padding-right: 24px; } .shell { grid-template-columns: 1fr; } aside { position: static; } }
         </style>
       </head>
       <body>
+        <a class="topbar" href="/book-repair" target="_top">Online Booking Discount: Save $5</a>
+        <nav class="navbar">
+          <a class="brand" href="/" target="_top"><img src="/images/logo.png" alt="Ali Mobile Repairs" /></a>
+          <div class="navlinks">
+            <a href="/repairs" target="_top">Service & Repairs</a>
+            <a href="/about-us" target="_top">About Us</a>
+            <a href="/blog" target="_top">Blog</a>
+          </div>
+          <div class="navActions">
+            <a class="navGhost" href="${publicPath}" target="_top">Open Page</a>
+            <a class="navButton" href="/book-repair" target="_top">Book Repair</a>
+          </div>
+        </nav>
         <header>
           <div class="hero">
             <span class="eyebrow">Ali Mobile & Repair • Ringwood</span>
@@ -152,9 +182,12 @@ function buildPreviewDocument(campaign: CampaignRecord | null) {
         <main class="shell">
           <article>${draft.content || '<p>No content available.</p>'}</article>
           <aside>
-            <h2>Need this fixed?</h2>
+            <h2>Need this checked?</h2>
             <p>Get a practical quote from Kiosk C1 in Ringwood Square. No Fix, No Charge applies to eligible diagnostics.</p>
-            <a class="cta" href="/book-repair">Get a Live Quote</a>
+            <div class="ctaStack">
+              <a class="cta" href="/book-repair" target="_top">Book Repair</a>
+              <a class="cta secondary" href="/" target="_top">Back to Homepage</a>
+            </div>
           </aside>
         </main>
       </body>
@@ -535,7 +568,7 @@ export default function SeoGeoScoutConsole() {
                 </div>
                 <iframe
                   title="Generated SEO Campaign Preview"
-                  sandbox=""
+                  sandbox="allow-top-navigation-by-user-activation"
                   srcDoc={previewDocument}
                   className="h-[610px] w-full bg-white"
                 />

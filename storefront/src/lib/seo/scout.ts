@@ -34,6 +34,8 @@ interface ScoutResult {
     blockedCount: number;
 }
 
+type KeywordOccurrenceResult = 'inserted' | 'existing';
+
 const AI_BUZZWORD_BLACKLIST = [
     'delve',
     'revolutionary',
@@ -111,16 +113,18 @@ const supabase = createClient(
 export async function checkQuotaLock() {
     const { data, error } = await supabase
         .from('pending_seo_campaigns')
-        .select('last_executed_at')
-        .order('last_executed_at', { ascending: false })
+        .select('created_at')
+        .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
-    if (error || !data || !data.last_executed_at) {
+    const lastRunAt = data?.created_at || (data as { last_executed_at?: string } | null)?.last_executed_at;
+
+    if (error || !data || !lastRunAt) {
         return { locked: false, statusCode: 200 };
     }
 
-    const lastRunLog = new Date(data.last_executed_at).getTime();
+    const lastRunLog = new Date(lastRunAt).getTime();
     const timeDelta = Date.now() - lastRunLog;
 
     if (timeDelta < TWELVE_HOURS_MS) {
@@ -187,6 +191,78 @@ export async function persistKeyword(keyword: string, source: string) {
         );
 }
 
+async function loadGeneratedKeywordTexts(client: SupabaseClient) {
+    const { data, error } = await client
+        .from('pending_seo_campaigns')
+        .select('keyword');
+
+    if (error) {
+        console.warn('[SEO Scout] Could not load generated campaign keywords for duplicate suppression:', error.message);
+        return new Set<string>();
+    }
+
+    return new Set(
+        ((data || []) as Array<{ keyword?: string | null }>)
+            .map((row) => row.keyword?.trim().toLowerCase())
+            .filter(Boolean) as string[]
+    );
+}
+
+async function incrementExistingKeywordOccurrence(client: SupabaseClient, keyword: string) {
+    const { data: existingKeyword, error: lookupError } = await client
+        .from('seo_keywords')
+        .select('id, search_weight')
+        .eq('keyword', keyword)
+        .maybeSingle<{ id: string; search_weight?: number | null }>();
+
+    if (lookupError) {
+        throw lookupError;
+    }
+
+    if (!existingKeyword) {
+        return false;
+    }
+
+    const { error: updateError } = await client
+        .from('seo_keywords')
+        .update({
+            search_weight: (existingKeyword.search_weight || 0) + 1,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingKeyword.id);
+
+    if (updateError) {
+        throw updateError;
+    }
+
+    return true;
+}
+
+async function persistKeywordOccurrence(client: SupabaseClient, keyword: string, source: string): Promise<KeywordOccurrenceResult> {
+    const incrementedExisting = await incrementExistingKeywordOccurrence(client, keyword);
+
+    if (incrementedExisting) {
+        return 'existing';
+    }
+
+    const { error: insertError } = await client
+        .from('seo_keywords')
+        .insert({
+            keyword,
+            source,
+            search_weight: 1,
+            status: 'pending',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+    if (insertError) {
+        throw insertError;
+    }
+
+    return 'inserted';
+}
+
 // ---------------------------------------------------------------------------
 // CONSTRAINT 4: Recursive AI Word Blacklist Filter
 // ---------------------------------------------------------------------------
@@ -232,6 +308,7 @@ export async function runScoutEngine(
     injectedSupabase?: SupabaseClient
 ): Promise<ScoutResult> {
     const routeSupabase = injectedSupabase || createRouteHandlerClient({ cookies });
+    const generatedKeywordTexts = await loadGeneratedKeywordTexts(routeSupabase as SupabaseClient);
     let insertedCount = 0;
     let blockedCount = 0;
 
@@ -272,15 +349,19 @@ export async function runScoutEngine(
                     continue;
                 }
 
-                // Constraint 3: Native Atomic Upsert via Postgres RPC (CRITICAL CLEAN REPLACE)
-                const { error: rpcError } = await routeSupabase.rpc('increment_seo_keyword', {
-                    target_keyword: keyword,
-                });
+                if (generatedKeywordTexts.has(keyword)) {
+                    await incrementExistingKeywordOccurrence(routeSupabase as SupabaseClient, keyword);
+                    continue;
+                }
 
-                if (!rpcError) {
+                const occurrenceResult = await persistKeywordOccurrence(
+                    routeSupabase as SupabaseClient,
+                    keyword,
+                    'Google Suggest Scraper'
+                );
+
+                if (occurrenceResult === 'inserted') {
                     insertedCount++;
-                } else {
-                    console.error(`[RPC Error] Failed to upsert keyword "${keyword}":`, rpcError);
                 }
             }
         } catch (queryError) {

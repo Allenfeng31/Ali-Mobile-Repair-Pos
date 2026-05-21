@@ -85,8 +85,8 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from('pending_seo_campaigns')
-      .select('id, keyword, source, status, last_executed_at, created_at, updated_at')
-      .order('updated_at', { ascending: false, nullsFirst: false })
+      .select('*')
+      .order('created_at', { ascending: false, nullsFirst: false })
       .limit(100);
 
     if (error) throw error;

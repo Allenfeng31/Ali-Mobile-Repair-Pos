@@ -100,6 +100,74 @@ Safe wording:
 - Good: "Factory IP rating cannot be guaranteed after any phone has been opened."
 - Avoid: "We restore official IP68 waterproof certification" unless a formal pressure-test and certification process exists for that device.
 
+### 3.4 MacBook Pro Keyboard And Top Case Repairs
+
+Example symptoms:
+
+- Double-typing, sticky keys, dead letters, unreliable spacebar, uneven key feel, or a keyboard that feels soft in the centre.
+
+Potential risk:
+
+- A standalone keyboard-only replacement can look cheaper upfront because the keyboard panel itself is less expensive.
+- On many MacBook Pro designs, the keyboard is fixed into the top case with a dense structure of tiny screws and factory rivets.
+- Removing only the keyboard often destroys the original rivet support. After that, the new keyboard relies more heavily on small screws and adhesive.
+- The result can be a keyboard that works electrically but loses the firm factory typing feel, especially after heat, travel, and months of heavy use.
+
+Ali repair approach:
+
+- Explain the difference between a keyboard-only repair and a complete Top Case Assembly replacement before quoting.
+- For premium outcomes, recommend a complete Top Case Assembly when the customer's model, budget, and usage justify it.
+- Move the logic board, display, trackpad, and related parts carefully into the replacement top case instead of forcing a compromised keyboard-only fit.
+- If the MacBook is also showing poor battery life or "Service Recommended", explain whether a top case with battery included is a smarter bundled repair.
+- Frame this as practical labour efficiency and long-term feel, not as fear-based selling.
+
+Safe wording:
+
+- Good: "A keyboard-only repair can save money upfront, but it may not restore the same factory typing rigidity."
+- Good: "For some MacBook models, a complete top case can be the cleaner repair path because the keyboard, palm rest, and battery area are handled as one assembly."
+- Good: "If your battery is already worn, we can check whether bundling the top case and battery makes financial sense."
+- Avoid: "Top Case replacement is always the only correct repair."
+- Avoid: "Every bundled top case gives guaranteed 100% battery health" unless the exact replacement part and battery condition are confirmed.
+- Avoid: "Cheap repair shops will ruin your MacBook." Keep the tone technical and fair.
+
+### 3.5 iPad Battery Replacement And iPad Opening Risk
+
+Example symptoms:
+
+- Battery drains quickly, iPad shuts down at 20-40%, device only works while plugged in, charging is slow, battery has expanded, screen is lifting, or parents notice the iPad cannot last through school holidays / travel / study use.
+
+Potential risk:
+
+- Most iPads are opened through the front glass/display assembly, not from a removable rear cover.
+- The display is held with strong perimeter adhesive. Opening it too cold, too quickly, or with uneven leverage can crack the glass, stress the LCD/OLED layer, or damage edge flex cables.
+- Some iPad models have delicate digitizer, home button, Touch ID, display, antenna, or battery connector flex cables close to the opening path.
+- Battery adhesive can be stubborn. Rushing removal can bend the frame, stress the logic board area, or leave residue that affects how the new battery sits.
+- A cheap battery repair may save money upfront but can cut corners on cell quality, adhesive cleanup, display re-sealing, or post-repair charging tests.
+
+Ali repair approach:
+
+- Confirm the exact iPad model before quoting because opening method, battery cost, adhesive layout, and risk level vary by generation.
+- Warm the display evenly, open with controlled pressure, and protect the flex-cable zones before lifting the screen.
+- Disconnect power safely before deeper work, then remove battery adhesive carefully instead of forcing the cell out.
+- Clean old adhesive from the frame before fitting the replacement battery and re-sealing the display.
+- Test charging behaviour, battery drain symptoms, sleep/wake, touch response, display alignment, cameras, speakers, Wi-Fi/Bluetooth, and button functions before handover.
+- If a screen is already cracked, lifting, or previously repaired, explain that battery replacement risk and quote structure may change.
+
+Safe wording:
+
+- Good: "iPad battery price depends on the exact model and the condition of the display before opening."
+- Good: "We open the iPad carefully, protect flex cables, clean old adhesive, and test charging behaviour before return."
+- Good: "A cheaper quote may not include the same level of adhesive cleanup, re-sealing, or post-repair testing."
+- Good: "If parts are in stock, many iPad battery jobs can be handled quickly, but we confirm after checking the model."
+- Avoid: "Every iPad battery repair is risk-free."
+- Avoid: "We guarantee the original water/dust seal after opening an iPad."
+- Avoid: "Your iPad battery will always show 100% health" because iPadOS does not expose battery health in the same way across all models.
+- Avoid: "Thermal transfer techniques" for iPad battery replacement unless describing controlled warming of adhesive, not chip or component transfer.
+
+Example customer-friendly sentence:
+
+- "The price difference with iPad battery replacement is often not just the battery itself; it is the time spent opening the glued display cleanly, protecting the flex cables, clearing old adhesive, and testing the iPad before it leaves the bench."
+
 ---
 
 ## 4. Hardware Taxonomy
@@ -157,6 +225,24 @@ For repair keywords, use this narrative flow:
 6. Data and warranty reassurance: data-safe approach, No Fix No Charge, warranty where eligible.
 7. CTA: call 0481 058 514, visit Kiosk C1 Ringwood Square, or book/quote online.
 8. FAQ: 3-5 practical questions, no exaggerated guarantees.
+
+For high-conversion technical comparison articles, use this humanized pattern:
+
+1. Start with the lived symptom: what the customer notices during work, study, travel, or daily use.
+2. Introduce the quote confusion: why one shop may be cheaper and why the difference is not always obvious.
+3. Ask the customer's real question in plain language, such as "Why is there such a big price gap?"
+4. Explain the hidden hardware architecture in workshop language without talking down to the reader.
+5. Compare two paths honestly: budget route, premium route, who each route suits, and what trade-offs exist.
+6. Add one practical technician tip that could save money or prevent a repeat repair.
+7. Close with a local, calm CTA for inspection, not a hard sell.
+
+Humanized writing cues:
+
+- Use "you might notice", "the part customers rarely see", "on the workbench", and "before we seal the device" when accurate.
+- Include one restrained rhetorical question per article if it matches the topic.
+- Prefer concrete nouns over marketing adjectives: rivets, adhesive, flex cable, top case, calibration, seal, frame, battery cycle count.
+- Avoid sounding like a generic brochure. The article should feel like a technician explaining the repair while the device is open on the bench.
+- Never publish placeholder copy such as "The preview text that appears..." or any CMS/editor instruction text.
 
 ---
 
