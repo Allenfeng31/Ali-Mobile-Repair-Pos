@@ -6,7 +6,7 @@ import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
-import { ArrowRight, ClipboardCheck, ShieldCheck, Wrench } from "lucide-react";
+import { ArrowRight, ClipboardCheck, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -68,9 +68,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </span>
           <h1 id="model-repair-heading">{modelName} Repair Services</h1>
           <p>Select the repair you need for your {modelName}. Walk in or book online for practical service at Ringwood Square.</p>
-          <div className="repair-hero-actions">
+          <div className="repair-hero-actions repair-model-actions">
             <a href="tel:0481058514" className="repair-secondary-action">
-              Call for model check
+              <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
+              Call Now
             </a>
             <a href="#repair-options" className="repair-primary-action">
               View repair options
