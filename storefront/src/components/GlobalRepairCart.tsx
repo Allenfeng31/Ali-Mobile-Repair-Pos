@@ -423,15 +423,13 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
         <div className="device-title">
           {formatDeviceTitle(selectedBrand, selectedModel)}
         </div>
-        {!isFirst && (
-          <button 
-            className="remove-device-btn flex items-center justify-center gap-1.5 !bg-red-50 !text-red-500 !border-red-100 hover:!bg-red-500 hover:!text-white transition-all px-3 py-1.5 rounded-lg font-semibold" 
-            onClick={onRemove}
-          >
-            <Trash2 size={16} />
-            <span className="hidden md:inline">Remove</span>
-          </button>
-        )}
+        <button 
+          className="remove-device-btn flex items-center justify-center gap-1.5 !bg-red-50 !text-red-500 !border-red-100 hover:!bg-red-500 hover:!text-white transition-all px-3 py-1.5 rounded-lg font-semibold" 
+          onClick={onRemove}
+        >
+          <Trash2 size={16} />
+          <span className="hidden md:inline">Remove</span>
+        </button>
       </div>
 
       <div className="category-selector-row">

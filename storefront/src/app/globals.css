@@ -2706,6 +2706,11 @@ input:checked+.toggle-slider:before {
   margin-bottom: clamp(1.5rem, 3.4vw, 2.8rem);
 }
 
+.repair-tech-hero-laptop {
+  grid-template-columns: minmax(0, 0.82fr) minmax(460px, 0.92fr);
+  align-items: center;
+}
+
 .repair-tech-hero-compact {
   grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
 }
@@ -2872,6 +2877,79 @@ input:checked+.toggle-slider:before {
   transform-origin: center;
   background: transparent;
   animation-fill-mode: forwards;
+}
+
+.repair-laptop-cinematic-card {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 590px);
+  min-height: 0;
+  justify-self: center;
+  overflow: visible;
+  background: transparent;
+  margin-top: 0.9rem;
+}
+
+.repair-laptop-cinematic-card::before {
+  content: "";
+  position: absolute;
+  inset: 7% -3% 34%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.12), transparent 68%);
+  filter: blur(18px);
+}
+
+.repair-laptop-float-video {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 580px);
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  object-fit: contain;
+  transform: translate3d(-12px, -16px, 0) scale(1.16);
+  transform-origin: center;
+  background: transparent;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+
+.repair-laptop-proof-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 22px;
+  padding: 0.9rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(248, 250, 252, 0.66)),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(202, 138, 4, 0.08));
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.repair-laptop-proof-panel div {
+  display: grid;
+  gap: 0.34rem;
+  min-width: 0;
+}
+
+.repair-laptop-proof-panel span {
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.repair-laptop-proof-panel p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.72rem;
+  line-height: 1.45;
 }
 
 .repair-hero-insight-panel {
@@ -3461,6 +3539,7 @@ input:checked+.toggle-slider:before {
 
   .repair-tech-hero,
   .repair-tech-hero-compact,
+  .repair-tech-hero-laptop,
   .repair-assist-panel {
     grid-template-columns: 1fr;
   }
@@ -3488,6 +3567,19 @@ input:checked+.toggle-slider:before {
 
   .repair-signal-grid,
   .repair-faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .repair-laptop-cinematic-card {
+    width: min(100%, 520px);
+    margin-top: 0.25rem;
+  }
+
+  .repair-laptop-float-video {
+    transform: translate3d(-8px, -10px, 0) scale(1.08);
+  }
+
+  .repair-laptop-proof-panel {
     grid-template-columns: 1fr;
   }
 

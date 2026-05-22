@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
+import LaptopHeroVideo from '@/components/services/LaptopHeroVideo';
 import PhoneHeroVideo from '@/components/services/PhoneHeroVideo';
 import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
@@ -18,7 +19,7 @@ const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 // Predefined priority brands for UI highlighting (Most Popular section)
 const POPULAR_BRANDS_KEYS = [
   'iPhone', 'iPad', 'Samsung', 'Google', 'Apple',
-  'Microsoft', 'Dell', 'HP', 'Lenovo', 'Asus'
+  'MacBook', 'Microsoft', 'Dell', 'HP', 'Lenovo', 'Asus'
 ];
 
 export async function generateStaticParams() {
@@ -230,6 +231,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         const indexB = PHONE_PRIORITY.findIndex(pk => b.brand.toLowerCase().includes(pk.toLowerCase()));
         return indexA - indexB;
       });
+  } else if (category === 'laptop') {
+    topBrands = validBrands.filter(b => b.brand.toLowerCase().includes('macbook'));
   } else {
     topBrands = validBrands.filter(b =>
       POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
@@ -249,7 +252,10 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
       />
 
       <main className="repair-page-shell">
-        <section className="repair-tech-hero" aria-labelledby="category-repair-heading">
+        <section
+          className={`repair-tech-hero ${category === 'laptop' ? 'repair-tech-hero-laptop' : ''}`}
+          aria-labelledby="category-repair-heading"
+        >
           <div className="repair-tech-hero-copy">
             <span className="repair-kicker">
               <Sparkles size={15} strokeWidth={2.4} aria-hidden="true" />
@@ -285,6 +291,35 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               }}
             >
               <PhoneHeroVideo />
+            </aside>
+          ) : category === 'laptop' ? (
+            <aside
+              className="repair-laptop-cinematic-card bg-transparent"
+              aria-label="Premium laptop repair preview"
+              style={{
+                position: 'relative',
+                justifySelf: 'center',
+                overflow: 'hidden',
+                background: 'transparent',
+                border: 0,
+                boxShadow: 'none',
+              }}
+            >
+              <LaptopHeroVideo />
+              <div className="repair-laptop-proof-panel" aria-label="MacBook repair highlights">
+                <div>
+                  <span>Fixed Fast</span>
+                  <p>Screen, battery, keyboard, and charging faults checked with clear same-day guidance.</p>
+                </div>
+                <div>
+                  <span>180-Day Warranty</span>
+                  <p>Premium parts, tested twice, backed by real local aftercare in Ringwood.</p>
+                </div>
+                <div>
+                  <span>No Fix. No Charge.</span>
+                  <p>Diagnosis first. You only pay when the repair makes sense.</p>
+                </div>
+              </div>
             </aside>
           ) : (
             <div className="repair-hero-panel" aria-label="Repair service highlights">
@@ -326,7 +361,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
           )}
 
-          {otherBrands.length > 0 && (
+          {category !== 'laptop' && otherBrands.length > 0 && (
             <>
               <div className="repair-section-header repair-section-header-compact">
                 <span>Extended catalogue</span>

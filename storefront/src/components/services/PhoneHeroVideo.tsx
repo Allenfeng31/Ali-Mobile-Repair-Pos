@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 const SAFARI_ALPHA_VIDEO = '/videos/iphone-17-pro-max-v3.mov?v=safari-alpha-2';
-const CHROME_ALPHA_VIDEO = '/videos/iphone-17-pro-max-v3.webm?v=chrome-alpha-2';
+const CHROME_ALPHA_VIDEO = '/videos/iphone-17-pro-max-v3.webm?v=chrome-alpha-3';
 
 function prefersSafariAlpha() {
   const userAgent = navigator.userAgent.toLowerCase();
