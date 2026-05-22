@@ -16,6 +16,7 @@ export interface ParsedItem {
   brand: string;      // raw full brand (e.g. "P iPhone", "C MacBook")
   deviceModel: string; // The model name (e.g. "iPhone 13 Pro")
   modelCode?: string; // e.g. "SM-S931B, A3102"
+  itemCode?: string; // Legacy SKU alias used by older cart fixtures
   service: string;     // The service part (e.g. "Screen Replacement")
   price: number;
   category: string;
@@ -231,6 +232,7 @@ export function parseItem(raw: RawItem): ParsedItem | null {
     brand,
     deviceModel: modelName || "Other Model",
     modelCode: raw.device_model || undefined,
+    itemCode: raw.sku || undefined,
     service: serviceName,
     price: raw.price ?? 0,
     category: raw.category,

@@ -15,6 +15,7 @@ describe('groupServicesByBaseName', () => {
         category: 'Phone Repair',
         deviceType: 'phone',
         quality_grade: 'Standard',
+        is_recommended: false,
       },
       {
         id: 2,
@@ -26,6 +27,7 @@ describe('groupServicesByBaseName', () => {
         category: 'Phone Repair',
         deviceType: 'phone',
         quality_grade: 'Premium',
+        is_recommended: true,
       },
       {
         id: 3,
@@ -37,6 +39,7 @@ describe('groupServicesByBaseName', () => {
         category: 'Phone Repair',
         deviceType: 'phone',
         quality_grade: 'Standard',
+        is_recommended: false,
       }
     ];
 

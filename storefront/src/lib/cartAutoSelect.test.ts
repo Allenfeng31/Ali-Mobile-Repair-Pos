@@ -11,7 +11,9 @@ describe('cartAutoSelect', () => {
       deviceModel: 'iPhone 14 Pro Max',
       service: 'Screen Replacement',
       price: 200,
+      deviceType: 'phone',
       quality_grade: 'Standard',
+      is_recommended: false,
       itemCode: 'IP14PM-SCR-STD',
       name: 'iPhone 14 Pro Max Screen Replacement Standard'
     },
@@ -22,7 +24,9 @@ describe('cartAutoSelect', () => {
       deviceModel: 'iPhone 14 Pro Max',
       service: 'Screen Replacement',
       price: 300,
+      deviceType: 'phone',
       quality_grade: 'Genuine',
+      is_recommended: true,
       itemCode: 'IP14PM-SCR-GEN',
       name: 'iPhone 14 Pro Max Screen Replacement Genuine'
     },
@@ -33,7 +37,9 @@ describe('cartAutoSelect', () => {
       deviceModel: 'iPhone 14 Pro Max',
       service: 'Battery Replacement',
       price: 150,
+      deviceType: 'phone',
       quality_grade: 'Standard',
+      is_recommended: false,
       itemCode: 'IP14PM-BAT-STD',
       name: 'iPhone 14 Pro Max Battery Replacement'
     }

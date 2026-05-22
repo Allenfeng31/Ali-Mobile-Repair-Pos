@@ -236,9 +236,9 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
       const existing = repairTypes[existingIdx];
       if (!existing.variants) {
         // Initialize variants with the existing item if it didn't have any
-        existing.variants = [{ quality_grade: 'Standard', price: existing.price }];
+        existing.variants = [{ quality_grade: 'Standard', price: existing.price, is_recommended: false }];
       }
-      existing.variants.push({
+      existing.variants!.push({
         quality_grade: item.quality_grade,
         price: item.price,
         is_recommended: item.is_recommended,

@@ -268,20 +268,62 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
           </div>
 
-          <div className="repair-hero-panel" aria-label="Repair service highlights">
-            <div>
-              <Clock size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Fast turnaround when parts are in stock</span>
+          {category === 'phone' ? (
+            <aside
+              className="repair-phone-cinematic-card"
+              aria-label="Premium phone repair promises"
+              style={{
+                position: 'relative',
+                isolation: 'isolate',
+                minHeight: '536px',
+                width: 'min(100%, 336px)',
+                justifySelf: 'center',
+                overflow: 'visible',
+                background: 'transparent',
+                border: 0,
+                boxShadow: 'none',
+              }}
+            >
+              <video
+                className="repair-phone-float-video"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  clipPath: 'inset(3% 13% 12% 0 round 34px)',
+                  transform: 'translate3d(-8px, -2px, 0) scale(1.14)',
+                  transformOrigin: 'center',
+                  filter: 'saturate(1.02) contrast(1.04) drop-shadow(0 28px 44px rgba(15, 23, 42, 0.18))',
+                }}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-hidden="true"
+              >
+                <source src="/videos/iphone17-display.mov" type='video/mp4; codecs="hvc1"' />
+                <source src="/videos/iphone17-display.webm" type="video/webm" />
+              </video>
+            </aside>
+          ) : (
+            <div className="repair-hero-panel" aria-label="Repair service highlights">
+              <div>
+                <Clock size={20} strokeWidth={2.4} aria-hidden="true" />
+                <span>Fast turnaround when parts are in stock</span>
+              </div>
+              <div>
+                <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+                <span>No Fix, No Charge diagnostics</span>
+              </div>
+              <div>
+                <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
+                <span>Kiosk C1, Ringwood Square</span>
+              </div>
             </div>
-            <div>
-              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>No Fix, No Charge diagnostics</span>
-            </div>
-            <div>
-              <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Kiosk C1, Ringwood Square</span>
-            </div>
-          </div>
+          )}
         </section>
 
         <section className="repair-content-band" aria-labelledby="popular-brands-heading">

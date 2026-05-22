@@ -1,8 +1,31 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, MapPin, Navigation, ShieldCheck } from "lucide-react";
-import { SERVICE_AREAS } from "@/data/serviceAreas";
+import { SERVICE_AREAS, type ServiceArea } from "@/data/serviceAreas";
 
 export default function ServiceAreas() {
+  const [showMore, setShowMore] = useState(false);
+
+  const featuredSlugs = [
+    "ringwood",
+    "ringwood-east",
+    "heathmont",
+    "mitcham",
+    "croydon",
+    "nunawading",
+    "boxhill",
+    "glenwaverley",
+    "doncaster",
+  ];
+
+  const featuredAreas = featuredSlugs
+    .map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
+    .filter((area): area is ServiceArea => Boolean(area));
+
+  const remainingAreas = SERVICE_AREAS.filter((area) => !featuredSlugs.includes(area.slug));
+
   return (
     <section className="service-areas-container" aria-labelledby="service-areas-heading">
       <div className="service-areas-layout">
@@ -29,13 +52,37 @@ export default function ServiceAreas() {
         </div>
 
         <div className="suburb-cloud" aria-label="Service area suburb links">
-          {SERVICE_AREAS.map((area) => (
+          {featuredAreas.map((area) => (
             <Link key={area.slug} href={`/locations/${area.slug}`} className="suburb-tag">
               <span>{area.name}</span>
               <small>{area.driveTime}</small>
               <ArrowRight size={14} strokeWidth={2.7} aria-hidden="true" />
             </Link>
           ))}
+
+          <div className="service-areas-more">
+            <button
+              type="button"
+              className="service-areas-more-toggle"
+              aria-expanded={showMore}
+              onClick={() => setShowMore((current) => !current)}
+            >
+              <span>{showMore ? "Show Fewer Suburbs ↑" : "Show More Suburbs ↓"}</span>
+              <small>{remainingAreas.length} more areas</small>
+            </button>
+
+            {showMore ? (
+              <div className="suburb-cloud suburb-cloud-expanded">
+                {remainingAreas.map((area) => (
+                  <Link key={area.slug} href={`/locations/${area.slug}`} className="suburb-tag">
+                    <span>{area.name}</span>
+                    <small>{area.driveTime}</small>
+                    <ArrowRight size={14} strokeWidth={2.7} aria-hidden="true" />
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>
