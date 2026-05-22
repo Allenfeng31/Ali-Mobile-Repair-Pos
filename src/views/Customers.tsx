@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import {
   Search,
   UserPlus,
@@ -36,6 +36,7 @@ import { OCRImeiScanner } from '../components/OCRImeiScanner';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { formatRelativeDate } from '../utils/dateUtils';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 const getCustomerOverallStatus = (customer: Customer) => {
   if (customer.repairs.some(r => r.status === 'Urgent')) return 'Urgent';
@@ -104,6 +105,335 @@ const readCustomerFormData = (
     deposit: readField('deposit')
   };
 };
+
+// Memoized customer card — only re-renders when its specific props change
+interface CustomerCardProps {
+  customer: Customer;
+  isActive: boolean;
+  onToggleSelect: (id: string) => void;
+  onSelectRepair: (repair: any) => void;
+  onEditProfile: () => void;
+  onViewAllOrders: () => void;
+  onSendReview: (customer: Customer) => void;
+  onToggleRepairStatus: (customerId: string, repairId: string, currentStatus: string) => void;
+  sendingReviewId: string | null;
+  reviewSent: boolean;
+}
+
+const CustomerCard = React.memo(function CustomerCard({
+  customer,
+  isActive,
+  onToggleSelect,
+  onSelectRepair,
+  onEditProfile,
+  onViewAllOrders,
+  onSendReview,
+  onToggleRepairStatus,
+  sendingReviewId,
+  reviewSent,
+}: CustomerCardProps) {
+  const overallStatus = getCustomerOverallStatus(customer);
+
+  return (
+    <div
+      onClick={() => onToggleSelect(customer.id)}
+      className={cn(
+        "p-6 rounded-[2.5rem] transition-all cursor-pointer group border border-white/20",
+        isActive
+          ? "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] scale-[0.98]"
+          : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] hover:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98]"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-5">
+          <div className={cn(
+            "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all shadow-[var(--shadow-neu-sm)]",
+            isActive ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" : "bg-[var(--color-neu-bg)] text-blue-600"
+          )}>
+            {customer.initials}
+          </div>
+          <div>
+            <h3 className="font-black text-black text-lg tracking-tight leading-none mb-2">{customer.name}</h3>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0">
+              <span className="text-[10px] font-black text-black/60 uppercase tracking-widest shrink-0">{customer.phone}</span>
+              {customer.repairs.length > 0 && (() => {
+                const repair = customer.repairs[0];
+                const combinedText = [repair.modelNumber, repair.repairItem].filter(Boolean).join(' - ');
+                return (
+                  <>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
+                      <span 
+                        className="text-[10px] font-black text-blue-600 uppercase tracking-widest truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[250px] md:max-w-[350px] block"
+                        title={combinedText}
+                      >
+                        {combinedText}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-500 font-bold text-[10px] shrink-0">
+                      <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
+                      <span className="flex items-center gap-1">
+                        <Calendar size={11} strokeWidth={3} className="text-gray-400" />
+                        {formatRelativeDate(repair.timestamp)}
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="text-right hidden sm:block">
+            <span className={cn(
+              "text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/20",
+              overallStatus === 'Urgent' ? "bg-red-50 text-red-600" :
+                overallStatus === 'In Processing' ? "bg-purple-50 text-purple-600" :
+                  overallStatus === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                    "bg-gray-50 text-gray-600"
+            )}>
+              {overallStatus}
+            </span>
+            <p className="text-[10px] font-black text-black mt-2.5">Total: ${customer.totalSpent.toFixed(2)}</p>
+          </div>
+          {isActive ? (
+            <ChevronDown size={20} className="text-blue-600" strokeWidth={3} />
+          ) : (
+            <ChevronRight size={20} className="text-gray-300 group-hover:text-blue-600 transition-colors" strokeWidth={3} />
+          )}
+        </div>
+      </div>
+
+      {/* Inline Accordion Expansion */}
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+            animate={{ height: 'auto', opacity: 1, marginTop: 24 }}
+            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 space-y-6 border border-black/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* CONTACT DETAILS SECTION */}
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-blue-600" />
+                    Contact Details
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-white shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600">
+                        <Mail size={14} strokeWidth={3} />
+                      </div>
+                      <span className="text-xs font-black text-black truncate">{customer.email || 'No email set'}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-white shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600">
+                        <Phone size={14} strokeWidth={3} />
+                      </div>
+                      <span className="text-xs font-black text-black">{customer.phone}</span>
+                    </div>
+
+                    {/* SEND REVIEW BUTTON (YELLOW) + TIMESTAMP */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onSendReview(customer); }}
+                        disabled={sendingReviewId === customer.id}
+                        className={cn(
+                          "w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20",
+                          reviewSent && sendingReviewId === customer.id ? "bg-green-50 text-green-600" : "bg-amber-400 text-black"
+                        )}
+                      >
+                        {reviewSent && sendingReviewId === customer.id ? (
+                          <><Check size={16} strokeWidth={4} /> Sent</>
+                        ) : (
+                          <><Star size={16} strokeWidth={3} className="fill-black" /> Send Review</>
+                        )}
+                      </button>
+                      {customer.lastReviewSent && (
+                        <span className="text-[10px] text-orange-600 font-bold mt-2 block text-center">
+                          Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                          }).replace(',', '')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* LIVE REPAIRS SECTION */}
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-purple-600" />
+                    Live Repairs
+                  </h4>
+                  <div className="space-y-3">
+                    {customer.repairs.length > 0 ? (
+                      customer.repairs.slice(0, 2).map(repair => (
+                        <div
+                          key={repair.id}
+                          onClick={(e) => { e.stopPropagation(); onSelectRepair(repair); }}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl p-3 flex items-center justify-between border border-white/10 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer active:scale-[0.98]"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                              <Smartphone size={16} strokeWidth={3} />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-black text-black leading-none mb-1">{repair.repairItem}</p>
+                              <p className="text-[8px] font-black text-gray-400 uppercase">{repair.modelNumber}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] font-black text-black leading-none mb-1">${repair.price.toFixed(2)}</p>
+                            <span
+                              onClick={(e) => {
+                                if (repair.status !== 'Completed') {
+                                  e.stopPropagation();
+                                  onToggleRepairStatus(customer.id, repair.id, repair.status);
+                                }
+                              }}
+                              className={cn(
+                                "text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tight transition-all",
+                                repair.status === 'Urgent' ? "bg-red-50 text-red-600 cursor-pointer hover:scale-110 active:scale-95" :
+                                  (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-50 text-purple-600 cursor-pointer hover:scale-110 active:scale-95" :
+                                    repair.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
+                                      "bg-gray-100 text-gray-500"
+                              )}
+                            >
+                              {repair.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="py-4 text-center border border-dashed border-gray-200 rounded-2xl">
+                        <p className="text-[9px] font-black text-gray-400 uppercase">No active tickets</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTTOM ACTION BUTTONS */}
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEditProfile(); }}
+                  className="py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onViewAllOrders(); }}
+                  className="py-4 bg-blue-50 shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-blue-200/20"
+                >
+                  Recent Activity
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+
+// Progressive-render list — caps initial DOM to INITIAL_RENDER_CAP items
+const INITIAL_RENDER_CAP = 30;
+const LOAD_MORE_STEP = 30;
+
+interface VirtualCustomerListProps {
+  customers: Customer[];
+  selectedId: string;
+  sectionTitle: string;
+  sectionColor: 'purple' | 'gray';
+  onToggleSelect: (id: string) => void;
+  onSelectRepair: (repair: any) => void;
+  onEditProfile: () => void;
+  onViewAllOrders: () => void;
+  onSendReview: (customer: Customer) => void;
+  onToggleRepairStatus: (customerId: string, repairId: string, currentStatus: string) => void;
+  sendingReviewId: string | null;
+  reviewSent: boolean;
+}
+
+function VirtualCustomerList({
+  customers,
+  selectedId,
+  sectionTitle,
+  sectionColor,
+  onToggleSelect,
+  onSelectRepair,
+  onEditProfile,
+  onViewAllOrders,
+  onSendReview,
+  onToggleRepairStatus,
+  sendingReviewId,
+  reviewSent,
+}: VirtualCustomerListProps) {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER_CAP);
+
+  // Reset visible count when filter changes
+  useEffect(() => {
+    setVisibleCount(INITIAL_RENDER_CAP);
+  }, [customers.length]);
+
+  const visibleCustomers = customers.slice(0, visibleCount);
+  const hasMore = visibleCount < customers.length;
+
+  const isPurple = sectionColor === 'purple';
+
+  return (
+    <div className={cn("space-y-6", !isPurple && "pt-4")}>
+      <div className="flex items-center gap-4 px-4">
+        <h3 className={cn(
+          "text-xs font-black uppercase tracking-widest",
+          isPurple ? "text-black" : "text-gray-400"
+        )}>
+          {sectionTitle}
+        </h3>
+        <div className="h-px flex-1 bg-black/5" />
+        <span className={cn(
+          "text-[10px] font-black px-3 py-1 rounded-full uppercase",
+          isPurple ? "text-purple-600 bg-purple-50" : "text-gray-400 bg-gray-100"
+        )}>
+          {customers.length} {isPurple ? 'Orders' : 'Records'}
+        </span>
+      </div>
+      <div className="space-y-6">
+        {visibleCustomers.map(customer => (
+          <CustomerCard
+            key={customer.id}
+            customer={customer}
+            isActive={selectedId === customer.id}
+            onToggleSelect={onToggleSelect}
+            onSelectRepair={onSelectRepair}
+            onEditProfile={onEditProfile}
+            onViewAllOrders={onViewAllOrders}
+            onSendReview={onSendReview}
+            onToggleRepairStatus={onToggleRepairStatus}
+            sendingReviewId={sendingReviewId}
+            reviewSent={reviewSent}
+          />
+        ))}
+      </div>
+      {hasMore && (
+        <button
+          onClick={() => setVisibleCount(prev => prev + LOAD_MORE_STEP)}
+          className="w-full py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem] font-black text-[10px] uppercase tracking-widest text-blue-600 active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20 hover:text-blue-700"
+        >
+          Show {Math.min(LOAD_MORE_STEP, customers.length - visibleCount)} More ({customers.length - visibleCount} remaining)
+        </button>
+      )}
+    </div>
+  );
+}
 
 export function CustomersView() {
   const { permissions } = useAuthStore();
@@ -233,8 +563,11 @@ export function CustomersView() {
     return getLatestTimestamp(b) - getLatestTimestamp(a);
   }), [customers]);
 
+  // Debounce search to avoid re-filtering on every keystroke
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
+
   const filteredCustomers = useMemo(() => sortedCustomers.filter(c => {
-    const query = searchQuery.toLowerCase();
+    const query = debouncedSearch.toLowerCase();
     const hasRepairMatch = c.repairs.some(r =>
       (r.repairItem || '').toLowerCase().includes(query) ||
       (r.modelNumber || '').toLowerCase().includes(query)
@@ -249,7 +582,7 @@ export function CustomersView() {
 
     if (filterSyncedOnly && !c.synced_to_google) return false;
     return matchesSearch;
-  }), [filterSyncedOnly, searchQuery, sortedCustomers]);
+  }), [filterSyncedOnly, debouncedSearch, sortedCustomers]);
 
   const inProcessingCustomers = useMemo(
     () => filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed'),
@@ -634,220 +967,18 @@ export function CustomersView() {
     }
   };
 
-  const renderCustomerCard = (customer: Customer) => {
-    const isActive = selectedId === customer.id;
-    const overallStatus = getCustomerOverallStatus(customer);
+  const handleToggleSelect = useCallback((customerId: string) => {
+    setSelectedId(prev => prev === customerId ? '' : customerId);
+  }, []);
 
-    return (
-      <div
-        key={customer.id}
-        onClick={() => setSelectedId(prev => prev === customer.id ? '' : customer.id)}
-        className={cn(
-          "p-6 rounded-[2.5rem] transition-all cursor-pointer group border border-white/20",
-          isActive
-            ? "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] scale-[0.98]"
-            : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] hover:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98]"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <div className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all shadow-[var(--shadow-neu-sm)]",
-              isActive ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" : "bg-[var(--color-neu-bg)] text-blue-600"
-            )}>
-              {customer.initials}
-            </div>
-            <div>
-              <h3 className="font-black text-black text-lg tracking-tight leading-none mb-2">{customer.name}</h3>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0">
-                <span className="text-[10px] font-black text-black/60 uppercase tracking-widest shrink-0">{customer.phone}</span>
-                {customer.repairs.length > 0 && (() => {
-                  const repair = customer.repairs[0];
-                  const combinedText = [repair.modelNumber, repair.repairItem].filter(Boolean).join(' - ');
-                  return (
-                    <>
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
-                        <span 
-                          className="text-[10px] font-black text-blue-600 uppercase tracking-widest truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[250px] md:max-w-[350px] block"
-                          title={combinedText}
-                        >
-                          {combinedText}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-500 font-bold text-[10px] shrink-0">
-                        <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
-                        <span className="flex items-center gap-1">
-                          <Calendar size={11} strokeWidth={3} className="text-gray-400" />
-                          {formatRelativeDate(repair.timestamp)}
-                        </span>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="text-right hidden sm:block">
-              <span className={cn(
-                "text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest shadow-[var(--shadow-neu-sm)] border border-white/20",
-                overallStatus === 'Urgent' ? "bg-red-50 text-red-600" :
-                  overallStatus === 'In Processing' ? "bg-purple-50 text-purple-600" :
-                    overallStatus === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
-                      "bg-gray-50 text-gray-600"
-              )}>
-                {overallStatus}
-              </span>
-              <p className="text-[10px] font-black text-black mt-2.5">Total: ${customer.totalSpent.toFixed(2)}</p>
-            </div>
-            {isActive ? (
-              <ChevronDown size={20} className="text-blue-600" strokeWidth={3} />
-            ) : (
-              <ChevronRight size={20} className="text-gray-300 group-hover:text-blue-600 transition-colors" strokeWidth={3} />
-            )}
-          </div>
-        </div>
+  const handleSelectRepair = useCallback((repair: any) => {
+    setSelectedRepair(repair);
+  }, []);
 
-        {/* RESTORED: Inline Accordion Expansion */}
-        <AnimatePresence>
-          {isActive && (
-            <motion.div
-              initial={{ height: 0, opacity: 0, marginTop: 0 }}
-              animate={{ height: 'auto', opacity: 1, marginTop: 24 }}
-              exit={{ height: 0, opacity: 0, marginTop: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 space-y-6 border border-black/5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* CONTACT DETAILS SECTION */}
-                  <div>
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-blue-600" />
-                      Contact Details
-                    </h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600">
-                          <Mail size={14} strokeWidth={3} />
-                        </div>
-                        <span className="text-xs font-black text-black truncate">{customer.email || 'No email set'}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-600">
-                          <Phone size={14} strokeWidth={3} />
-                        </div>
-                        <span className="text-xs font-black text-black">{customer.phone}</span>
-                      </div>
+  const handleViewAllOrders = useCallback(() => {
+    setIsViewingAllOrders(true);
+  }, []);
 
-                      {/* RESTORED: SEND REVIEW BUTTON (YELLOW) + TIMESTAMP */}
-                      <div className="flex flex-col items-center">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleSendReview(customer); }}
-                          disabled={sendingReviewId === customer.id}
-                          className={cn(
-                            "w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20",
-                            reviewSent && sendingReviewId === customer.id ? "bg-green-50 text-green-600" : "bg-amber-400 text-black"
-                          )}
-                        >
-                          {reviewSent && sendingReviewId === customer.id ? (
-                            <><Check size={16} strokeWidth={4} /> Sent</>
-                          ) : (
-                            <><Star size={16} strokeWidth={3} className="fill-black" /> Send Review</>
-                          )}
-                        </button>
-                        {customer.lastReviewSent && (
-                          <span className="text-[10px] text-orange-600 font-bold mt-2 block text-center">
-                            Sent: {new Date(customer.lastReviewSent).toLocaleString('en-GB', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              hour12: false
-                            }).replace(',', '')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* LIVE REPAIRS SECTION */}
-                  <div>
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-purple-600" />
-                      Live Repairs
-                    </h4>
-                    <div className="space-y-3">
-                      {customer.repairs.length > 0 ? (
-                        customer.repairs.slice(0, 2).map(repair => (
-                          <div
-                            key={repair.id}
-                            onClick={(e) => { e.stopPropagation(); setSelectedRepair(repair); }}
-                            className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl p-3 flex items-center justify-between border border-white/10 hover:shadow-[var(--shadow-neu-pressed)] transition-all cursor-pointer active:scale-[0.98]"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                                <Smartphone size={16} strokeWidth={3} />
-                              </div>
-                              <div>
-                                <p className="text-[10px] font-black text-black leading-none mb-1">{repair.repairItem}</p>
-                                <p className="text-[8px] font-black text-gray-400 uppercase">{repair.modelNumber}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[10px] font-black text-black leading-none mb-1">${repair.price.toFixed(2)}</p>
-                              <span
-                                onClick={(e) => {
-                                  if (repair.status !== 'Completed') {
-                                    e.stopPropagation();
-                                    toggleRepairStatus(customer.id, repair.id, repair.status);
-                                  }
-                                }}
-                                className={cn(
-                                  "text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tight transition-all",
-                                  repair.status === 'Urgent' ? "bg-red-50 text-red-600 cursor-pointer hover:scale-110 active:scale-95" :
-                                    (repair.status === 'In Processing' || repair.status === 'waiting for pay') ? "bg-purple-50 text-purple-600 cursor-pointer hover:scale-110 active:scale-95" :
-                                      repair.status === 'Ready for Pickup' ? "bg-green-50 text-green-600" :
-                                        "bg-gray-100 text-gray-500"
-                                )}
-                              >
-                                {repair.status}
-                              </span>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="py-4 text-center border border-dashed border-gray-200 rounded-2xl">
-                          <p className="text-[9px] font-black text-gray-400 uppercase">No active tickets</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* BOTTOM ACTION BUTTONS */}
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); openEditModal(); }}
-                    className="py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-white/20"
-                  >
-                    Edit Profile
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setIsViewingAllOrders(true); }}
-                    className="py-4 bg-blue-50 shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all border border-blue-200/20"
-                  >
-                    Recent Activity
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -906,33 +1037,37 @@ export function CustomersView() {
           ) : filteredCustomers.length > 0 ? (
             <>
               {inProcessingCustomers.length > 0 && (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 px-4">
-                    <h3 className="text-xs font-black text-black uppercase tracking-widest">Active Tickets</h3>
-                    <div className="h-px flex-1 bg-black/5" />
-                    <span className="text-[10px] font-black text-purple-600 bg-purple-50 px-3 py-1 rounded-full uppercase">
-                      {inProcessingCustomers.length} Orders
-                    </span>
-                  </div>
-                  <div className="space-y-6">
-                    {inProcessingCustomers.map(customer => renderCustomerCard(customer))}
-                  </div>
-                </div>
+                <VirtualCustomerList
+                  customers={inProcessingCustomers}
+                  selectedId={selectedId}
+                  sectionTitle="Active Tickets"
+                  sectionColor="purple"
+                  onToggleSelect={handleToggleSelect}
+                  onSelectRepair={handleSelectRepair}
+                  onEditProfile={openEditModal}
+                  onViewAllOrders={handleViewAllOrders}
+                  onSendReview={handleSendReview}
+                  onToggleRepairStatus={toggleRepairStatus}
+                  sendingReviewId={sendingReviewId}
+                  reviewSent={reviewSent}
+                />
               )}
 
               {completedCustomers.length > 0 && (
-                <div className="space-y-6 pt-4">
-                  <div className="flex items-center gap-4 px-4">
-                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">History Archive</h3>
-                    <div className="h-px flex-1 bg-black/5" />
-                    <span className="text-[10px] font-black text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase">
-                      {completedCustomers.length} Records
-                    </span>
-                  </div>
-                  <div className="space-y-6">
-                    {completedCustomers.map(customer => renderCustomerCard(customer))}
-                  </div>
-                </div>
+                <VirtualCustomerList
+                  customers={completedCustomers}
+                  selectedId={selectedId}
+                  sectionTitle="History Archive"
+                  sectionColor="gray"
+                  onToggleSelect={handleToggleSelect}
+                  onSelectRepair={handleSelectRepair}
+                  onEditProfile={openEditModal}
+                  onViewAllOrders={handleViewAllOrders}
+                  onSendReview={handleSendReview}
+                  onToggleRepairStatus={toggleRepairStatus}
+                  sendingReviewId={sendingReviewId}
+                  reviewSent={reviewSent}
+                />
               )}
             </>
           ) : (

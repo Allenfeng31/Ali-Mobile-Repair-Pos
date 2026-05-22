@@ -634,10 +634,14 @@ app.post('/api/orders', async (req, res) => {
 // CUSTOMERS
 // ----------------------------------------------------------------------
 app.get('/api/customers', async (req, res) => {
+  // Selective fields — only fetch what the UI actually needs for the list view
+  const customerFields = 'id, name, phone, email, initials, totalSpent, status, statusColor, lastVisit, lastReviewSent, synced_to_google';
+  const repairFields = 'id, customer_id, timestamp, repairItem, modelNumber, price, status, liquidDamage, deposit, password, imei, remark';
+
   // Run both queries in parallel for faster response
   const [customersResult, repairsResult] = await Promise.all([
-    supabase.from('customers').select('*').order('name', { ascending: true }),
-    supabase.from('repairs').select('*')
+    supabase.from('customers').select(customerFields).order('name', { ascending: true }),
+    supabase.from('repairs').select(repairFields)
   ]);
 
   if (customersResult.error) return res.status(500).json({ error: customersResult.error.message });
