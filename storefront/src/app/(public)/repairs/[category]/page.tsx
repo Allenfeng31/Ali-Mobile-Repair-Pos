@@ -270,42 +270,43 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
           {category === 'phone' ? (
             <aside
-              className="repair-phone-cinematic-card"
+              className="repair-phone-cinematic-card mt-12"
               aria-label="Premium phone repair promises"
               style={{
                 position: 'relative',
-                isolation: 'isolate',
-                minHeight: '536px',
-                width: 'min(100%, 336px)',
+                minHeight: '456px',
+                width: 'min(100%, 272px)',
                 justifySelf: 'center',
-                overflow: 'visible',
+                overflow: 'hidden',
                 background: 'transparent',
                 border: 0,
                 boxShadow: 'none',
               }}
             >
               <video
-                className="repair-phone-float-video"
+                className="repair-phone-float-video mix-blend-lighten scale-95 translate-x-[-10px]"
                 style={{
                   position: 'absolute',
                   inset: 0,
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  clipPath: 'inset(3% 13% 12% 0 round 34px)',
-                  transform: 'translate3d(-8px, -2px, 0) scale(1.14)',
+                  clipPath: 'inset(0 12% 0 0 round 30px)',
+                  transform: 'translate3d(-10px, 0, 0) scale(0.95)',
                   transformOrigin: 'center',
-                  filter: 'saturate(1.02) contrast(1.04) drop-shadow(0 28px 44px rgba(15, 23, 42, 0.18))',
+                  mixBlendMode: 'lighten',
+                  background: 'transparent',
+                  filter: 'saturate(1.02) contrast(1.04) drop-shadow(0 22px 36px rgba(15, 23, 42, 0.14))',
+                  animationFillMode: 'forwards',
                 }}
                 autoPlay
                 muted
-                loop
                 playsInline
                 preload="metadata"
                 aria-hidden="true"
               >
-                <source src="/videos/iphone17-display.mov" type='video/mp4; codecs="hvc1"' />
-                <source src="/videos/iphone17-display.webm" type="video/webm" />
+                <source src="/videos/iphone-17-pro-max-v3.mov" type='video/mp4; codecs="hvc1"' />
+                <source src="/videos/iphone-17-pro-max-v3.webm" type="video/webm" />
               </video>
             </aside>
           ) : (
