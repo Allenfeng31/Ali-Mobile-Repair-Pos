@@ -284,26 +284,13 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               }}
             >
               <video
-                className="repair-phone-float-video scale-[1.05] translate-x-[-10px]"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  transform: 'translate3d(-10px, 0, 0) scale(1.05)',
-                  transformOrigin: 'center',
-                  background: 'transparent',
-                  filter: 'saturate(1.02) contrast(1.04) drop-shadow(0 22px 36px rgba(15, 23, 42, 0.14))',
-                  animationFillMode: 'forwards',
-                }}
                 autoPlay
                 muted
                 playsInline
-                preload="metadata"
-                aria-hidden="true"
+                className="mix-blend-screen repair-phone-float-video h-[420px] w-auto scale-[1.10] translate-x-[-15px]"
+                style={{ animationFillMode: 'forwards' }}
               >
-                <source src="/videos/iphone-17-pro-max-v3.webm" type="video/webm" />
+                {/* 注意看这里：外层用单引号，内层用双引号，完美避开冲突 */}
                 <source src="/videos/iphone-17-pro-max-v3.mov" type='video/mp4; codecs="hvc1"' />
               </video>
             </aside>
