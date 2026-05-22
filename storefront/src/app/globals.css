@@ -2711,6 +2711,11 @@ input:checked+.toggle-slider:before {
   align-items: center;
 }
 
+.repair-tech-hero-device {
+  grid-template-columns: minmax(0, 0.84fr) minmax(380px, 0.72fr);
+  align-items: center;
+}
+
 .repair-tech-hero-compact {
   grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
 }
@@ -2950,6 +2955,63 @@ input:checked+.toggle-slider:before {
   color: #64748b;
   font-size: 0.72rem;
   line-height: 1.45;
+}
+
+.repair-static-device-card {
+  position: relative;
+  display: grid;
+  gap: 0.95rem;
+  width: min(100%, 500px);
+  justify-self: center;
+  align-self: center;
+  overflow: visible;
+  background: transparent;
+  margin-top: 0.5rem;
+}
+
+.repair-static-device-card::before {
+  content: "";
+  position: absolute;
+  inset: 8% 2% 42%;
+  z-index: -1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(202, 138, 4, 0.1), transparent 62%),
+    radial-gradient(circle at 46% 52%, rgba(37, 99, 235, 0.11), transparent 72%);
+  filter: blur(18px);
+}
+
+.repair-static-device-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  pointer-events: none;
+  filter: drop-shadow(0 26px 34px rgba(15, 23, 42, 0.16));
+}
+
+.repair-static-device-card-tablet .repair-static-device-image {
+  max-height: 318px;
+  transform: translate3d(-8px, -8px, 0) scale(1.08);
+  transform-origin: center;
+}
+
+.repair-static-device-card-watch {
+  width: min(100%, 430px);
+}
+
+.repair-static-device-card-watch .repair-static-device-image {
+  max-height: 352px;
+  transform: translate3d(4px, -8px, 0) scale(1.06);
+  transform-origin: center;
+}
+
+.repair-static-device-proof-panel {
+  margin-top: -0.15rem;
 }
 
 .repair-hero-insight-panel {
@@ -3540,6 +3602,7 @@ input:checked+.toggle-slider:before {
   .repair-tech-hero,
   .repair-tech-hero-compact,
   .repair-tech-hero-laptop,
+  .repair-tech-hero-device,
   .repair-assist-panel {
     grid-template-columns: 1fr;
   }
@@ -3581,6 +3644,17 @@ input:checked+.toggle-slider:before {
 
   .repair-laptop-proof-panel {
     grid-template-columns: 1fr;
+  }
+
+  .repair-static-device-card {
+    width: min(100%, 500px);
+    margin-top: 0.15rem;
+  }
+
+  .repair-static-device-card-tablet .repair-static-device-image,
+  .repair-static-device-card-watch .repair-static-device-image {
+    max-height: 300px;
+    transform: translate3d(0, -4px, 0) scale(1.02);
   }
 
   .repair-chip-cloud {

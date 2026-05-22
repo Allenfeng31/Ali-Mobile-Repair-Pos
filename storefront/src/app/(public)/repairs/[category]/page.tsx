@@ -16,6 +16,49 @@ export const dynamicParams = true;
 
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 
+const STATIC_DEVICE_HERO = {
+  tablet: {
+    image: '/images/repair-hero/ipad-hero.png?v=clean-1',
+    alt: 'iPad repair preview with premium service promises',
+    ariaLabel: 'Premium tablet repair preview',
+    proofLabel: 'iPad repair highlights',
+    highlights: [
+      {
+        title: 'Fixed Fast',
+        description: 'iPad screen, battery, and charging faults checked with clear parts guidance.',
+      },
+      {
+        title: '180-Day Warranty',
+        description: 'Premium displays and batteries tested before handover, backed by local aftercare.',
+      },
+      {
+        title: 'No Fix. No Charge.',
+        description: 'Clear diagnosis first. You only pay when the repair makes sense.',
+      },
+    ],
+  },
+  watch: {
+    image: '/images/repair-hero/apple-watch-hero.png?v=clean-1',
+    alt: 'Apple Watch repair preview with premium service promises',
+    ariaLabel: 'Premium watch repair preview',
+    proofLabel: 'Apple Watch repair highlights',
+    highlights: [
+      {
+        title: 'Careful Sealing',
+        description: 'Apple Watch screen, battery, and charging checks handled with precise fitment.',
+      },
+      {
+        title: '180-Day Warranty',
+        description: 'Premium parts tested carefully, backed by real local aftercare in Ringwood.',
+      },
+      {
+        title: 'No Fix. No Charge.',
+        description: 'Diagnosis first. We only proceed when the repair makes sense.',
+      },
+    ],
+  },
+};
+
 // Predefined priority brands for UI highlighting (Most Popular section)
 const POPULAR_BRANDS_KEYS = [
   'iPhone', 'iPad', 'Samsung', 'Google', 'Apple',
@@ -242,6 +285,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const otherBrands = validBrands
     .filter(b => !topBrands.some(tb => tb.slug === b.slug))
     .sort((a, b) => a.brand.localeCompare(b.brand));
+  const staticDeviceHero = STATIC_DEVICE_HERO[category as keyof typeof STATIC_DEVICE_HERO];
 
   return (
     <>
@@ -253,7 +297,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
       <main className="repair-page-shell">
         <section
-          className={`repair-tech-hero ${category === 'laptop' ? 'repair-tech-hero-laptop' : ''}`}
+          className={`repair-tech-hero ${category === 'laptop' ? 'repair-tech-hero-laptop' : ''} ${staticDeviceHero ? 'repair-tech-hero-device' : ''}`}
           aria-labelledby="category-repair-heading"
         >
           <div className="repair-tech-hero-copy">
@@ -319,6 +363,27 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <span>No Fix. No Charge.</span>
                   <p>Diagnosis first. You only pay when the repair makes sense.</p>
                 </div>
+              </div>
+            </aside>
+          ) : staticDeviceHero ? (
+            <aside
+              className={`repair-static-device-card repair-static-device-card-${category}`}
+              aria-label={staticDeviceHero.ariaLabel}
+            >
+              <img
+                className="repair-static-device-image"
+                src={staticDeviceHero.image}
+                alt={staticDeviceHero.alt}
+                loading="eager"
+                decoding="async"
+              />
+              <div className="repair-laptop-proof-panel repair-static-device-proof-panel" aria-label={staticDeviceHero.proofLabel}>
+                {staticDeviceHero.highlights.map((highlight) => (
+                  <div key={highlight.title}>
+                    <span>{highlight.title}</span>
+                    <p>{highlight.description}</p>
+                  </div>
+                ))}
               </div>
             </aside>
           ) : (
