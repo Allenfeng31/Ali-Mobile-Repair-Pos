@@ -165,7 +165,17 @@ export function buildStrategicScoutQueries() {
         'phone repair croydon mitcham',
         'macbook repair near me melbourne',
         'same day phone repair melbourne',
-        'emergency phone repair near me',
+        // ── Broad / Looser Intent (To generate wider long-tail variants) ──
+        'phone repair',
+        'screen replacement',
+        'battery replacement',
+        'samsung phone fix',
+        'ipad fix',
+        'macbook fix',
+        'laptop battery',
+        'apple watch screen',
+        'phone water damage',
+        'cheap phone repair',
     ];
 }
 
@@ -429,7 +439,7 @@ export async function runScoutEngine(
     const routeSupabase = injectedSupabase || createRouteHandlerClient({ cookies });
     const generatedKeywordTexts = await loadGeneratedKeywordTexts(routeSupabase as SupabaseClient);
     let insertedCount = 0;
-    let blockedCount = 0;
+    const blockedCount = 0;
 
     for (const baseQuery of params.searchQueries) {
         try {
@@ -456,7 +466,7 @@ export async function runScoutEngine(
 
             for (const rawKeyword of targetedScoutPayload) {
                 const keyword = rawKeyword.trim().toLowerCase();
-                if (!keyword || keyword === baseQuery) continue;
+                if (!keyword) continue;
 
                 // Geo-filter relaxed: keywords no longer require a local suburb mention.
                 // Human triage in the admin console handles quality gating.

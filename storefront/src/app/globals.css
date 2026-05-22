@@ -2872,11 +2872,6 @@ input:checked+.toggle-slider:before {
   transform-origin: center;
   background: transparent;
   animation-fill-mode: forwards;
-  filter:
-    saturate(1.02)
-    contrast(1.04)
-    drop-shadow(0 22px 36px rgba(15, 23, 42, 0.14))
-    drop-shadow(0 10px 24px rgba(217, 119, 6, 0.1));
 }
 
 .repair-hero-insight-panel {

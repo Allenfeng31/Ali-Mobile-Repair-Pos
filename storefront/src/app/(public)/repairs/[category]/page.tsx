@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
+import PhoneHeroVideo from '@/components/services/PhoneHeroVideo';
 import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam } from '@/lib/inventoryUtils';
@@ -270,7 +271,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
           {category === 'phone' ? (
             <aside
-              className="repair-phone-cinematic-card mt-8"
+              className="repair-phone-cinematic-card mt-8 bg-transparent"
               aria-label="Premium phone repair promises"
               style={{
                 position: 'relative',
@@ -283,16 +284,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 boxShadow: 'none',
               }}
             >
-              <video
-                autoPlay
-                muted
-                playsInline
-                className="mix-blend-screen repair-phone-float-video h-[420px] w-auto scale-[1.10] translate-x-[-15px]"
-                style={{ animationFillMode: 'forwards' }}
-              >
-                {/* 注意看这里：外层用单引号，内层用双引号，完美避开冲突 */}
-                <source src="/videos/iphone-17-pro-max-v3.mov" type='video/mp4; codecs="hvc1"' />
-              </video>
+              <PhoneHeroVideo />
             </aside>
           ) : (
             <div className="repair-hero-panel" aria-label="Repair service highlights">
