@@ -270,31 +270,29 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
           {category === 'phone' ? (
             <aside
-              className="repair-phone-cinematic-card mt-12"
+              className="repair-phone-cinematic-card mt-8"
               aria-label="Premium phone repair promises"
               style={{
                 position: 'relative',
-                minHeight: '456px',
-                width: 'min(100%, 272px)',
+                minHeight: '400px',
+                width: 'min(100%, 292px)',
                 justifySelf: 'center',
-                overflow: 'hidden',
+                overflow: 'visible',
                 background: 'transparent',
                 border: 0,
                 boxShadow: 'none',
               }}
             >
               <video
-                className="repair-phone-float-video mix-blend-lighten scale-95 translate-x-[-10px]"
+                className="repair-phone-float-video scale-[1.05] translate-x-[-10px]"
                 style={{
                   position: 'absolute',
                   inset: 0,
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  clipPath: 'inset(0 12% 0 0 round 30px)',
-                  transform: 'translate3d(-10px, 0, 0) scale(0.95)',
+                  transform: 'translate3d(-10px, 0, 0) scale(1.05)',
                   transformOrigin: 'center',
-                  mixBlendMode: 'lighten',
                   background: 'transparent',
                   filter: 'saturate(1.02) contrast(1.04) drop-shadow(0 22px 36px rgba(15, 23, 42, 0.14))',
                   animationFillMode: 'forwards',
@@ -305,8 +303,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 preload="metadata"
                 aria-hidden="true"
               >
-                <source src="/videos/iphone-17-pro-max-v3.mov" type='video/mp4; codecs="hvc1"' />
                 <source src="/videos/iphone-17-pro-max-v3.webm" type="video/webm" />
+                <source src="/videos/iphone-17-pro-max-v3.mov" type='video/mp4; codecs="hvc1"' />
               </video>
             </aside>
           ) : (
