@@ -7,6 +7,7 @@ import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wren
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import BackButton from '@/components/BackButton';
 import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
 
@@ -242,6 +243,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
 
         <section className="repair-hero repair-detail-hero" aria-labelledby="repair-detail-heading">
+          <BackButton fallbackHref={`/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}`} />
           <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
           <p className="repair-detail-subtitle">Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.</p>

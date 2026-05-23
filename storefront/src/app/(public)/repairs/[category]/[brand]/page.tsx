@@ -5,6 +5,7 @@ import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
+import BackButton from "@/components/BackButton";
 import { ArrowRight, ClipboardCheck, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
@@ -55,6 +56,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
 
       <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="brand-repair-heading">
         <div className="repair-tech-hero-copy">
+          <BackButton fallbackHref={`/repairs/${categorySlug}`} />
           <span className="repair-kicker">
             <Smartphone size={15} strokeWidth={2.4} aria-hidden="true" />
             Model selector
@@ -62,10 +64,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           <h1 id="brand-repair-heading">{brandName} Repair Services</h1>
           <p>Select your exact model below to view repair options and pricing at our Ringwood Square kiosk.</p>
           <div className="repair-hero-actions">
-            <Link href={`/repairs/${categorySlug}`} className="repair-secondary-action">
-              Back to category
-            </Link>
-            <Link href="/book-repair" className="repair-primary-action">
+            <a href="#models-list" className="repair-primary-action">
+              View model option
+            </a>
+            <Link href="/book-repair" className="repair-secondary-action">
               Live Quote
               <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
             </Link>
@@ -96,7 +98,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         </div>
       </section>
 
-      <section className="repair-content-band" aria-label={`${brandName} models`}>
+      <section id="models-list" className="repair-content-band" aria-label={`${brandName} models`}>
         <BrandModelSearch
           seriesGroups={seriesGroups}
           categorySlug={categorySlug}

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
 import { formatDynamicParam } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
 import { ArrowRight, Clock, ClipboardCheck, MapPin, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
@@ -62,6 +63,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
       <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="model-repair-heading">
         <div className="repair-tech-hero-copy">
+          <BackButton fallbackHref={`/repairs/${categorySlug}/${brandSlug}`} />
           <span className="repair-kicker">
             <Wrench size={15} strokeWidth={2.4} aria-hidden="true" />
             Repair menu
