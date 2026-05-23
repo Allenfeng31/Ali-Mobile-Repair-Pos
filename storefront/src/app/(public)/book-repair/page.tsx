@@ -6,6 +6,19 @@ import { useCart } from "@/context/CartContext";
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowRight,
+  CalendarPlus,
+  CheckCircle2,
+  Clock3,
+  Info,
+  MapPin,
+  PhoneCall,
+  RotateCcw,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+} from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -14,7 +27,7 @@ function generateICS(booking: any) {
   const start = new Date(datetime);
   const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour duration
 
-  const formatDate = (date: Date) => 
+  const formatDate = (date: Date) =>
     date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
   const icsLines = [
@@ -46,49 +59,71 @@ function generateICS(booking: any) {
 
 function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }) {
   return (
-    <div className="form-container" style={{ textAlign: "center", padding: "3rem 2rem", animation: "fadeIn 0.5s ease" }}>
-      <div style={{ fontSize: "4rem", marginBottom: "1.5rem" }}>🎉</div>
-      <h1 style={{ marginBottom: "1rem" }}>Booking Confirmed!</h1>
-      <p style={{ opacity: 0.8, marginBottom: "2rem" }}>
-        Thank you, <strong>{booking.name}</strong>. We've received your request for <strong>{formatDeviceTitle(booking.brand, booking.model)}</strong>.
-      </p>
+    <div className="booking-page-shell booking-success-shell">
+      <section className="booking-success-card">
+        <div className="booking-success-icon">
+          <CheckCircle2 size={40} strokeWidth={2.4} aria-hidden="true" />
+        </div>
+        <span className="booking-kicker">Appointment received</span>
+        <h1>Booking Confirmed</h1>
+        <p>
+          Thank you, <strong>{booking.name}</strong>. We have received your request for{" "}
+          <strong>{formatDeviceTitle(booking.brand, booking.model)}</strong> and will prepare the repair desk for your visit.
+        </p>
 
-      <div style={{ 
-        background: "var(--secondary)", 
-        borderRadius: "16px", 
-        padding: "1.5rem", 
-        textAlign: "left",
-        marginBottom: "2rem",
-        border: "1px solid var(--layer-border)"
-      }}>
-        <h3 style={{ fontSize: "1rem", marginBottom: "1rem", color: "var(--primary)" }}>Appointment Details</h3>
-        <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>📅 <strong>Time:</strong> {booking.displayDate}</p>
-        <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>🔧 <strong>Service:</strong> {booking.service}</p>
-        <p style={{ fontSize: "0.9rem" }}>📍 <strong>Location:</strong> Kiosk C1, Ringwood Square Shopping Centre</p>
-      </div>
+        <div className="booking-success-grid">
+          <div className="booking-confirmation-item">
+            <Clock3 size={18} strokeWidth={2.4} aria-hidden="true" />
+            <span>Appointment time</span>
+            <strong>{booking.displayDate}</strong>
+          </div>
+          <div className="booking-confirmation-item">
+            <Wrench size={18} strokeWidth={2.4} aria-hidden="true" />
+            <span>Repair request</span>
+            <strong>{booking.service}</strong>
+          </div>
+          <div className="booking-confirmation-item">
+            <MapPin size={18} strokeWidth={2.4} aria-hidden="true" />
+            <span>Store location</span>
+            <strong>Kiosk C1, Ringwood Square Shopping Centre</strong>
+          </div>
+        </div>
 
-      <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-        <button 
-          onClick={() => generateICS(booking)} 
-          className="primary-btn"
-          style={{ padding: "0.8rem 1.5rem" }}
-        >
-          📅 Add to Calendar
-        </button>
-        <button 
-          onClick={onReset} 
-          className="secondary-btn"
-          style={{ padding: "0.8rem 1.5rem" }}
-        >
-          Book Another Repair
-        </button>
-      </div>
+        <div className="booking-next-steps">
+          <h2>Before you arrive</h2>
+          <ul>
+            <li>Bring the device and passcode if a test after repair is needed.</li>
+            <li>No upfront payment is required. You pay in store after the repair path is confirmed.</li>
+            <li>If parts need ordering, our team will contact you before your visit.</li>
+          </ul>
+        </div>
 
-      <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-        <h4 style={{ marginBottom: "0.5rem" }}>Ali Mobile Repair Ringwood</h4>
-        <p style={{ fontSize: "0.85rem", opacity: 0.6 }}>📞 0481 058 514</p>
-        <p style={{ fontSize: "0.85rem", opacity: 0.6 }}>✉️ alimobileshop32@gmail.com</p>
-      </div>
+        <div className="booking-success-actions">
+          <button
+            onClick={() => generateICS(booking)}
+            className="booking-primary-action"
+          >
+            <CalendarPlus size={17} strokeWidth={2.5} aria-hidden="true" />
+            Add to Calendar
+          </button>
+          <button
+            onClick={onReset}
+            className="booking-secondary-action"
+          >
+            <RotateCcw size={17} strokeWidth={2.5} aria-hidden="true" />
+            Book Another Repair
+          </button>
+        </div>
+
+        <div className="booking-success-contact">
+          <strong>Ali Mobile & Repair Ringwood</strong>
+          <a href="tel:0481058514">
+            <PhoneCall size={15} strokeWidth={2.4} aria-hidden="true" />
+            0481 058 514
+          </a>
+          <span>alimobileshop32@gmail.com</span>
+        </div>
+      </section>
     </div>
   );
 }
@@ -100,7 +135,7 @@ export default function BookRepairPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<any>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
-  
+
   // Date/Time Selection
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
@@ -112,12 +147,12 @@ export default function BookRepairPage() {
   // ── VIC Public Holidays 2026/2027 ─────────────────────────────────────────
   const VIC_PUBLIC_HOLIDAYS = [
     // 2026
-    "2026-01-01", "2026-01-26", "2026-03-09", "2026-04-03", "2026-04-04", 
-    "2026-04-05", "2026-04-06", "2026-04-25", "2026-06-08", "2026-09-25", 
+    "2026-01-01", "2026-01-26", "2026-03-09", "2026-04-03", "2026-04-04",
+    "2026-04-05", "2026-04-06", "2026-04-25", "2026-06-08", "2026-09-25",
     "2026-11-03", "2026-12-25", "2026-12-26", "2026-12-28",
     // 2027
-    "2027-01-01", "2027-01-26", "2027-03-08", "2027-03-26", "2027-03-27", 
-    "2027-03-28", "2027-03-29", "2027-04-26", "2027-06-14", "2027-10-01", 
+    "2027-01-01", "2027-01-26", "2027-03-08", "2027-03-26", "2027-03-27",
+    "2027-03-28", "2027-03-29", "2027-04-26", "2027-06-14", "2027-10-01",
     "2027-11-02", "2027-12-25", "2027-12-27", "2027-12-28"
   ];
 
@@ -135,10 +170,10 @@ export default function BookRepairPage() {
       // Create a date object in local time
       const datetime = `${selectedDay}T${selectedSlot}:00`;
       const dateObj = new Date(datetime);
-      
+
       // Format as DD/MM/YYYY HH:mm for display
       const displayDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${selectedSlot}`;
-      
+
       const payload = {
         customer_name: formData.name,
         phone: formData.phone,
@@ -152,7 +187,7 @@ export default function BookRepairPage() {
         datetime: dateObj.toISOString(),
         displayDate: displayDate,
         notes: formData.notes,
-        session_token: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null 
+        session_token: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null
       };
 
       const res = await fetch("/api/proxy/book-repair", {
@@ -162,7 +197,7 @@ export default function BookRepairPage() {
       });
 
       if (!res.ok) throw new Error("Failed to book");
-      
+
       setSuccessBooking({
         ...payload,
         name: formData.name,
@@ -197,115 +232,132 @@ export default function BookRepairPage() {
           })
         }}
       />
-      
-      <div className="page-container">
-        <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Book Your Repair</h1>
-        <p style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 2rem', opacity: 0.8 }}>
-          Get a real-time quote and schedule your repair with our experts. Walk-ins are also welcome!
-        </p>
 
-        {/* 1. Selection Step */}
-        <GlobalRepairCart />
-
-        {/* 2. Action Step */}
-        <div className={`form-container ${!hasConfirmedDevices ? 'opacity-40 pointer-events-none' : ''}`} style={{ marginTop: '2rem', transition: 'all 0.3s ease' }}>
-          <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>Schedule Your Visit</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label>Full Name</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  placeholder="John Smith" 
-                  required 
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label>Phone Number</label>
-                <input 
-                  type="tel" 
-                  className="form-control" 
-                  placeholder="04xx xxx xxx" 
-                  required 
-                  value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
+      <div className="booking-page-shell">
+        <section className="booking-hero-panel">
+          <div className="booking-hero-copy">
+            <span className="booking-kicker">
+              <Sparkles size={15} strokeWidth={2.5} aria-hidden="true" />
+              Priority repair booking
+            </span>
+            <h1>Book your repair with a clearer quote and a faster handoff.</h1>
+            <p>
+              Select your device, confirm the service, then choose a visit time at our Ringwood Square repair desk.
+              No upfront payment, and walk-ins remain welcome.
+            </p>
+            <div className="booking-trust-row" aria-label="Booking trust points">
+              <span>
+                <ShieldCheck size={16} strokeWidth={2.5} aria-hidden="true" />
+                No Fix, No Charge
+              </span>
+              <span>
+                <Wrench size={16} strokeWidth={2.5} aria-hidden="true" />
+                Warranty-backed repairs
+              </span>
+              <span>
+                <Clock3 size={16} strokeWidth={2.5} aria-hidden="true" />
+                Priority booking queue
+              </span>
             </div>
-            <div className="form-group">
-              <label>1. Select Date</label>
-              <div style={{ 
-                display: "flex", 
-                gap: "0.6rem", 
-                overflowX: "auto", 
-                padding: "0.5rem 0",
-                msOverflowStyle: "none",
-                scrollbarWidth: "none"
-              }} className="no-scrollbar">
-                {Array.from({ length: 14 }).map((_, i) => {
-                  const d = new Date();
-                  d.setDate(d.getDate() + i);
-                  const isSunday = d.getDay() === 0;
-                  const dayStr = d.toISOString().split('T')[0];
-                  const isHoliday = VIC_PUBLIC_HOLIDAYS.includes(dayStr);
-                  const isDisabled = isSunday || isHoliday;
-                  
-                  const isSelected = selectedDay === dayStr;
-                  const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-                  const dateNum = d.getDate();
-                  const monthName = d.toLocaleDateString('en-US', { month: 'short' });
-
-                  return (
-                    <button
-                      key={dayStr}
-                      type="button"
-                      disabled={isDisabled}
-                      onClick={() => { setSelectedDay(dayStr); setSelectedSlot(""); }}
-                      style={{
-                        flex: "0 0 70px",
-                        padding: "0.8rem 0.5rem",
-                        borderRadius: "12px",
-                        border: isSelected ? "2px solid var(--primary)" : "1px solid var(--layer-border)",
-                        background: isDisabled ? "transparent" : (isSelected ? "var(--primary)" : "var(--layer)"),
-                        color: isSelected ? "white" : "var(--foreground)",
-                        textAlign: "center",
-                        cursor: isDisabled ? "not-allowed" : "pointer",
-                        transition: "all 0.2s ease",
-                        opacity: isDisabled ? 0.3 : 1
-                      }}
-                    >
-                      <div style={{ fontSize: "0.7rem", opacity: isDisabled ? 0.3 : 0.6, textTransform: "uppercase" }}>{dayName}</div>
-                      <div style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0.2rem 0" }}>{dateNum} {isHoliday ? "🛡️" : ""}</div>
-                      <div style={{ fontSize: "0.7rem", opacity: isDisabled ? 0.3 : 0.6 }}>{monthName}</div>
-                    </button>
-                  );
-                })}
-              </div>
+          </div>
+          <aside className="booking-hero-aside" aria-label="Booking process">
+            <div>
+              <span>01</span>
+              <strong>Choose repair</strong>
+              <small>Pick device, model, and service.</small>
             </div>
+            <div>
+              <span>02</span>
+              <strong>Select visit time</strong>
+              <small>Choose an available weekday or Saturday slot.</small>
+            </div>
+            <div>
+              <span>03</span>
+              <strong>Pay in store</strong>
+              <small>Final price confirmed before work begins.</small>
+            </div>
+          </aside>
+        </section>
+
+        <section className="booking-workspace" aria-label="Repair booking form">
+          <GlobalRepairCart />
+
+          <div className={`booking-panel ${!hasConfirmedDevices ? 'booking-panel-disabled' : ''}`}>
+            <div className="booking-panel-header">
+              <span className="booking-kicker">Schedule</span>
+              <h2>Schedule Your Visit</h2>
+              <p>Once your repair cart is confirmed, add your contact details and select the best time to visit.</p>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="booking-field-grid form-group">
+                <div>
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="John Smith"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    className="form-control"
+                    placeholder="04xx xxx xxx"
+                    required
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>1. Select Date</label>
+                <div className="booking-date-strip no-scrollbar">
+                  {Array.from({ length: 14 }).map((_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + i);
+                    const isSunday = d.getDay() === 0;
+                    const dayStr = d.toISOString().split('T')[0];
+                    const isHoliday = VIC_PUBLIC_HOLIDAYS.includes(dayStr);
+                    const isDisabled = isSunday || isHoliday;
+
+                    const isSelected = selectedDay === dayStr;
+                    const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+                    const dateNum = d.getDate();
+                    const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+
+                    return (
+                      <button
+                        key={dayStr}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => { setSelectedDay(dayStr); setSelectedSlot(""); }}
+                        className={`booking-date-card ${isSelected ? "is-selected" : ""} ${isDisabled ? "is-disabled" : ""}`}
+                        aria-pressed={isSelected}
+                      >
+                        <span>{dayName}</span>
+                        <strong>{dateNum}</strong>
+                        <small>{isHoliday ? "Holiday" : monthName}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
             {selectedDay && (
-              <div className="form-group" style={{ animation: "fadeIn 0.3s ease" }}>
+              <div className="form-group booking-time-group">
                 <label>2. Select Time ({new Date(selectedDay).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })})</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(90px, 1fr))", gap: "0.6rem", marginTop: "0.8rem" }}>
+                <div className="booking-time-grid">
                   {TIME_SLOTS.map(slot => (
                     <button
                       key={slot}
                       type="button"
                       onClick={() => setSelectedSlot(slot)}
-                      style={{
-                        padding: "0.7rem",
-                        borderRadius: "10px",
-                        border: selectedSlot === slot ? "2px solid var(--primary)" : "1px solid var(--layer-border)",
-                        background: selectedSlot === slot ? "var(--primary)" : "var(--layer)",
-                        color: selectedSlot === slot ? "white" : "var(--foreground)",
-                        fontSize: "0.91rem",
-                        fontWeight: selectedSlot === slot ? 700 : 500,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease"
-                      }}
+                      className={`booking-time-slot ${selectedSlot === slot ? "is-selected" : ""}`}
+                      aria-pressed={selectedSlot === slot}
                     >
                       {slot}
                     </button>
@@ -315,145 +367,105 @@ export default function BookRepairPage() {
             )}
             <div className="form-group">
               <label>Confirmation - Estimated Cost (Pay In-Store)</label>
-              <div 
-                className="form-control" 
-                style={{ background: "var(--layer)", height: "auto", minHeight: "2.8rem", color: "var(--foreground)", border: "1px solid var(--layer-border)" }}
-              >
+              <div className="booking-summary-box">
                 {confirmedDevices.length > 0 ? (
                   <div>
                     {confirmedDevices.map((d, i) => (
-                      <div key={i} style={{ opacity: 0.9, marginBottom: '0.2rem' }}>
+                      <div key={i} className="booking-summary-line">
                         <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => s.name).join(', ')}
                       </div>
                     ))}
-                    <div style={{ marginTop: '0.8rem', borderTop: '1px solid var(--layer-border)', paddingTop: '0.8rem', fontWeight: 700, fontSize: '1.1rem' }}>
-                      Estimated Total: {totalPrice > 0 ? (
-                        <>
-                          ${totalPrice.toFixed(2)}
-                          {hasCustomQuote && <span style={{ color: '#ff9500' }}> + Custom Quote</span>}
-                        </>
-                      ) : (
-                        hasCustomQuote ? "Custom Quote" : "$0.00"
-                      )}
+                    <div className="booking-total-row">
+                      <span>Estimated Total</span>
+                      <strong>
+                        {totalPrice > 0 ? (
+                          <>
+                            ${totalPrice.toFixed(2)}
+                            {hasCustomQuote && <small> + Custom Quote</small>}
+                          </>
+                        ) : (
+                          hasCustomQuote ? "Custom Quote" : "$0.00"
+                        )}
+                      </strong>
                     </div>
-                    <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.5rem', fontWeight: 400 }}>
-                      💡 No upfront payment required. You only pay in-store after your device is successfully repaired.
+                    <p>
+                      <Info size={15} strokeWidth={2.4} aria-hidden="true" />
+                      No upfront payment required. You only pay in store after your device is successfully repaired.
                     </p>
                   </div>
                 ) : "No items in cart..."}
               </div>
             </div>
-            <div className="form-group">
-              <label>Additional Notes (optional)</label>
-              <textarea
-                className="form-control"
-                placeholder="Anything else we should know?"
-                rows={2}
-                value={formData.notes}
-                onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                style={{ resize: 'vertical' }}
-              />
-            </div>
-              <button 
-              type="submit" 
-              className="primary-btn" 
-              style={{ width: "100%", marginTop: "1.5rem" }}
-              disabled={isSubmitting || !hasConfirmedDevices}
-            >
-              {isSubmitting ? "Processing..." : "Confirm Appointment"}
-            </button>
-            <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.8rem', opacity: 0.6 }}>
-              No fix, no charge. Balance paid in-store only.
-            </p>
-          </form>
-        </div>
+              <div className="form-group">
+                <label>Additional Notes (optional)</label>
+                <textarea
+                  className="form-control"
+                  placeholder="Anything else we should know?"
+                  rows={2}
+                  value={formData.notes}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                />
+              </div>
+              <button
+                type="submit"
+                className="booking-submit-button"
+                disabled={isSubmitting || !hasConfirmedDevices}
+              >
+                {isSubmitting ? "Processing..." : "Confirm Appointment"}
+                {!isSubmitting && <ArrowRight size={18} strokeWidth={2.6} aria-hidden="true" />}
+              </button>
+              <p className="booking-payment-note">
+                No fix, no charge. Balance paid in-store only.
+              </p>
+            </form>
+          </div>
+        </section>
       </div>
 
       <AnimatePresence>
         {showDisclaimer && (
-          <div style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem"
-          }}>
-            <motion.div 
+          <div className="booking-modal-shell" role="dialog" aria-modal="true" aria-labelledby="booking-disclaimer-title">
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDisclaimer(false)}
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(0,0,0,0.8)",
-                backdropFilter: "blur(10px)"
-              }}
+              className="booking-modal-backdrop"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              style={{
-                position: "relative",
-                width: "100%",
-                maxWidth: "500px",
-                background: "var(--layer)",
-                borderRadius: "24px",
-                border: "1px solid var(--layer-border)",
-                padding: "2rem",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
-              }}
+              className="booking-modal-card"
             >
-              <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-                <div style={{ 
-                  width: "60px", 
-                  height: "60px", 
-                  background: "rgba(var(--primary-rgb), 0.1)", 
-                  borderRadius: "20px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.5rem",
-                  margin: "0 auto 1.5rem"
-                }}>
-                  ℹ️
+              <div className="booking-modal-content">
+                <div className="booking-modal-icon">
+                  <Info size={28} strokeWidth={2.4} aria-hidden="true" />
                 </div>
-                <h3 style={{ fontSize: "1.5rem", fontWeight: 900, marginBottom: "1rem" }}>Important Booking Note</h3>
-                <p style={{ 
-                  fontSize: "0.95rem", 
-                  lineHeight: "1.6", 
-                  opacity: 0.9,
-                  textAlign: "left",
-                  background: "rgba(255,255,255,0.03)",
-                  padding: "1.2rem",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255,255,255,0.05)"
-                }}>
-                  Please be advised that certain device parts and accessories may not be immediately in stock and can take 1-2 business days to arrive. 
+                <span className="booking-kicker">Before we confirm</span>
+                <h3 id="booking-disclaimer-title">Important Booking Note</h3>
+                <p>
+                  Please be advised that certain device parts and accessories may not be immediately in stock and can take 1-2 business days to arrive.
                   <br /><br />
-                  You may still proceed with this booking; our technicians will notify you promptly if any items need to be ordered. 
+                  You may still proceed with this booking; our technicians will notify you promptly if any items need to be ordered.
                   <br /><br />
                   If your device is damaged and unable to receive calls, please reach out via the chat support in the bottom-right corner. Thank you for your understanding.
                 </p>
               </div>
 
-              <div style={{ display: "flex", gap: "1rem" }}>
-                <button 
+              <div className="booking-modal-actions">
+                <button
                   onClick={() => setShowDisclaimer(false)}
-                  className="secondary-btn"
-                  style={{ flex: 1, padding: "1rem" }}
+                  className="booking-secondary-action"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={handleFinalSubmit}
-                  className="primary-btn"
-                  style={{ flex: 2, padding: "1rem" }}
+                  className="booking-primary-action"
                 >
                   Confirm & Book
+                  <ArrowRight size={17} strokeWidth={2.6} aria-hidden="true" />
                 </button>
               </div>
             </motion.div>
