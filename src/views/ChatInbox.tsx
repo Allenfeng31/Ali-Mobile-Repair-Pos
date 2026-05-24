@@ -10,6 +10,7 @@ import {
   Calendar,
   CalendarCheck,
   CheckCircle2,
+  BellRing,
   X,
   Clock3,
   Phone,
@@ -47,6 +48,8 @@ interface BookingRecord {
   notes?: string;
   status: 'pending' | 'confirmed' | 'declined' | string;
   created_at?: string;
+  reminder_sent_at?: string | null;
+  reminder_sms_sid?: string | null;
 }
 
 const API_BASE = getApiBaseUrl();
@@ -86,6 +89,7 @@ export function ChatInbox() {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
+  const [sendingReminderId, setSendingReminderId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -246,6 +250,37 @@ export function ChatInbox() {
       alert('Failed to update booking status');
     } finally {
       setUpdatingBookingId(null);
+    }
+  };
+
+  const sendAppointmentReminder = async (apptId: string) => {
+    setSendingReminderId(apptId);
+    try {
+      const res = await fetch(`${API_BASE}/appointments/${apptId}/reminder`, {
+        method: 'POST',
+      });
+
+      if (!res.ok) throw new Error('Failed to send reminder');
+
+      const data = await res.json();
+      const reminderSentAt = data.reminder_sent_at || data.appointment?.reminder_sent_at || new Date().toISOString();
+
+      setBookings(prev =>
+        prev.map(booking =>
+          booking.id === apptId
+            ? {
+                ...booking,
+                reminder_sent_at: reminderSentAt,
+                reminder_sms_sid: data.reminder_sms_sid || data.appointment?.reminder_sms_sid || booking.reminder_sms_sid || null,
+              }
+            : booking
+        )
+      );
+      await loadBookings();
+    } catch (_) {
+      alert('Failed to send reminder SMS');
+    } finally {
+      setSendingReminderId(null);
     }
   };
 
@@ -590,6 +625,23 @@ export function ChatInbox() {
                                 className="rounded-2xl bg-green-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(34,197,94,0.24)] transition-all active:scale-95 disabled:opacity-50"
                               >
                                 Confirm
+                              </button>
+                            )}
+                            {!isPending && (
+                              <button
+                                onClick={() => sendAppointmentReminder(booking.id)}
+                                disabled={Boolean(booking.reminder_sent_at) || sendingReminderId === booking.id}
+                                className={cn(
+                                  "rounded-2xl px-5 py-3 text-[10px] font-black uppercase tracking-widest shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:cursor-default disabled:active:scale-100",
+                                  booking.reminder_sent_at
+                                    ? "bg-green-100 text-green-700 disabled:opacity-100"
+                                    : "bg-[var(--color-neu-bg)] text-blue-600 disabled:opacity-55"
+                                )}
+                              >
+                                <span className="inline-flex items-center gap-1.5">
+                                  {booking.reminder_sent_at ? <CheckCircle2 size={13} strokeWidth={3} /> : <BellRing size={13} strokeWidth={3} />}
+                                  {booking.reminder_sent_at ? 'Sent' : sendingReminderId === booking.id ? 'Sending' : 'Reminder'}
+                                </span>
                               </button>
                             )}
                             <button

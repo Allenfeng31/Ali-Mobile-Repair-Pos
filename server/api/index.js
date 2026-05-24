@@ -179,6 +179,29 @@ const buildBookingConfirmationSMS = ({ customerName, deviceModel, bookingTime })
   return cleanSMS(body);
 };
 
+const buildRepairReminderSMS = (bookingTime) => {
+  const time = trimForSMS(bookingTime, 18, 'TBC');
+  return cleanSMS(
+    `Reminder: Your Ali Mobile repair booking is TOMORROW at ${time}! Loc: Kiosk C1, Ringwood Square Shopping Centre. Need to change? Call 0485058514.`
+  );
+};
+
+const REMINDER_SENT_NOTE_REGEX = /\[REMINDER_SENT_AT:([^;\]]+)(?:;SID:[^\]]+)?\]/;
+
+const getReminderSentAt = (appointment) => {
+  if (!appointment) return null;
+  if (appointment.reminder_sent_at) return appointment.reminder_sent_at;
+
+  const match = String(appointment.notes || '').match(REMINDER_SENT_NOTE_REGEX);
+  return match?.[1] || null;
+};
+
+const appendReminderSentNote = (notes, sentAt, sid) => {
+  const cleanNotes = String(notes || '').replace(REMINDER_SENT_NOTE_REGEX, '').trim();
+  const marker = `[REMINDER_SENT_AT:${sentAt}${sid ? `;SID:${sid}` : ''}]`;
+  return cleanNotes ? `${cleanNotes} ${marker}` : marker;
+};
+
 const SMS_MESSAGES = {
   dropoff: (name) =>
     `Hi ${name}, your device is checked in at Ali Mobile Repair. We'll text you when complete. Thank you!`,
@@ -194,6 +217,75 @@ const SMS_MESSAGES = {
 
   booking: (name, deviceModel, bookingTime) =>
     buildBookingConfirmationSMS({ customerName: name, deviceModel, bookingTime }),
+};
+
+const sendAdminPushNotification = async ({ title, body, url = '/admin/chat', unreadCount }) => {
+  if (!VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    console.warn('[Push] Missing VAPID keys. Skipping admin push notification.');
+    return { success: 0, failed: 0, skipped: true };
+  }
+
+  try {
+    const { data: subs, error } = await supabase
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth');
+
+    if (error) throw error;
+    if (!subs || subs.length === 0) {
+      return { success: 0, failed: 0, skipped: true };
+    }
+
+    let badgeCount = unreadCount;
+    if (typeof badgeCount !== 'number') {
+      const { count } = await supabase
+        .from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_read', false)
+        .eq('sender', 'customer');
+      badgeCount = count || 1;
+    }
+
+    webpush.setVapidDetails(
+      'mailto:admin@alimobile.com.au',
+      VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+
+    const payload = JSON.stringify({
+      title,
+      body,
+      url,
+      unreadCount: badgeCount,
+    });
+
+    const results = await Promise.allSettled(subs.map(async sub => {
+      const pushSub = {
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.p256dh, auth: sub.auth },
+      };
+
+      try {
+        await webpush.sendNotification(pushSub, payload);
+        return { success: true };
+      } catch (err) {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          await supabase
+            .from('push_subscriptions')
+            .delete()
+            .eq('endpoint', sub.endpoint);
+        }
+        throw err;
+      }
+    }));
+
+    const success = results.filter(result => result.status === 'fulfilled').length;
+    const failed = results.filter(result => result.status === 'rejected').length;
+    console.log(`[Push] Admin notification batch: ${success} success, ${failed} failed.`);
+    return { success, failed, skipped: false };
+  } catch (err) {
+    console.error('[Push] Admin notification failed:', err.message);
+    return { success: 0, failed: 1, skipped: false, error: err.message };
+  }
 };
 
   // Repairs
@@ -752,6 +844,79 @@ app.delete('/api/customers/:id', async (req, res) => {
 // ----------------------------------------------------------------------
 // APPOINTMENTS
 // ----------------------------------------------------------------------
+const isMissingReminderColumnError = (error) => {
+  const message = String(error?.message || '').toLowerCase();
+  return message.includes('reminder_sent_at') || message.includes('reminder_sms_sid');
+};
+
+const selectAppointmentForReminder = async (id) => {
+  const withReminderFields = await supabase
+    .from('appointments')
+    .select('id, customer_name, phone, brand, model, service, datetime, notes, status, reminder_sent_at, reminder_sms_sid')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (!withReminderFields.error) return withReminderFields;
+
+  if (!isMissingReminderColumnError(withReminderFields.error)) {
+    return withReminderFields;
+  }
+
+  const fallback = await supabase
+    .from('appointments')
+    .select('id, customer_name, phone, brand, model, service, datetime, notes, status')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (fallback.data) {
+    fallback.data.reminder_sent_at = getReminderSentAt(fallback.data);
+    fallback.data.reminder_sms_sid = null;
+  }
+
+  return fallback;
+};
+
+const markAppointmentReminderSent = async (appointment, sentAt, sid) => {
+  const id = appointment.id;
+
+  const fullUpdate = await supabase
+    .from('appointments')
+    .update({ reminder_sent_at: sentAt, reminder_sms_sid: sid || null })
+    .eq('id', id)
+    .select('id, reminder_sent_at, reminder_sms_sid')
+    .maybeSingle();
+
+  if (!fullUpdate.error) return fullUpdate.data;
+
+  if (!isMissingReminderColumnError(fullUpdate.error)) {
+    throw fullUpdate.error;
+  }
+
+  const partialUpdate = await supabase
+    .from('appointments')
+    .update({ reminder_sent_at: sentAt })
+    .eq('id', id)
+    .select('id, reminder_sent_at')
+    .maybeSingle();
+
+  if (!partialUpdate.error) return partialUpdate.data;
+
+  if (!isMissingReminderColumnError(partialUpdate.error)) {
+    throw partialUpdate.error;
+  }
+
+  const notes = appendReminderSentNote(appointment.notes, sentAt, sid);
+  const notesUpdate = await supabase
+    .from('appointments')
+    .update({ notes })
+    .eq('id', id)
+    .select('id, notes')
+    .maybeSingle();
+
+  if (notesUpdate.error) throw notesUpdate.error;
+  return { ...notesUpdate.data, reminder_sent_at: sentAt, reminder_sms_sid: sid || null };
+};
+
 app.post('/api/book-repair', async (req, res) => {
   const { customer_name, phone, devices, total, hasCustomQuote, datetime, notes, session_token } = req.body;
 
@@ -810,7 +975,18 @@ app.post('/api/book-repair', async (req, res) => {
   await supabase.from('chat_messages').insert({ session_id: sessionId, sender: 'customer', content: messageContent });
   await supabase.from('chat_sessions').update({ last_message_at: new Date().toISOString() }).eq('id', sessionId);
 
-  // 3. SMS Notification (Strict Segment)
+  // 3. Push notification for the POS PWA
+  try {
+    await sendAdminPushNotification({
+      title: 'New Repair Booking',
+      body: `${customer_name}: ${mainDeviceTitle} - ${mainServiceDescription}`,
+      url: '/admin/chat',
+    });
+  } catch (err) {
+    console.error('[Push] Booking notification failed:', err.message);
+  }
+
+  // 4. SMS Notification (Strict Segment)
   if (twilioClient) {
     try {
       const smsBody = SMS_MESSAGES.booking(
@@ -977,35 +1153,111 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
   res.json(appointment);
 });
 
+app.post('/api/appointments/:id/reminder', async (req, res) => {
+  try {
+    const { data: appointment, error } = await selectAppointmentForReminder(req.params.id);
+
+    if (error || !appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    const existingSentAt = getReminderSentAt(appointment);
+    if (existingSentAt) {
+      return res.json({
+        success: true,
+        alreadySent: true,
+        reminder_sent_at: existingSentAt,
+        appointment: { ...appointment, reminder_sent_at: existingSentAt },
+      });
+    }
+
+    if (!twilioClient || !twilioPhone) {
+      return res.status(503).json({ error: 'Twilio is not configured' });
+    }
+
+    const to = formatAustralianPhone(appointment.phone);
+    if (!to) return res.status(400).json({ error: 'Appointment phone number is missing' });
+
+    const smsBody = buildRepairReminderSMS(formatBookingTimeForSMS(appointment.datetime));
+    const message = await twilioClient.messages.create({
+      body: smsBody,
+      from: twilioPhone,
+      to,
+    });
+
+    const sentAt = new Date().toISOString();
+    const reminderUpdate = await markAppointmentReminderSent(appointment, sentAt, message.sid);
+
+    res.json({
+      success: true,
+      alreadySent: false,
+      reminder_sent_at: sentAt,
+      reminder_sms_sid: message.sid,
+      appointment: {
+        ...appointment,
+        ...reminderUpdate,
+        reminder_sent_at: sentAt,
+        reminder_sms_sid: message.sid,
+      },
+      messageLength: smsBody.length,
+    });
+  } catch (err) {
+    console.error('❌ [SMS] Appointment reminder failed:', err.message);
+    res.status(500).json({ error: err.message || 'Failed to send reminder' });
+  }
+});
+
 app.get('/api/appointments/upcoming', async (req, res) => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const { data, error } = await supabase
+  const withReminderFields = await supabase
     .from('appointments')
-    .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at')
+    .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at, reminder_sent_at, reminder_sms_sid')
     .gte('datetime', startOfToday.toISOString())
     .order('datetime', { ascending: true });
+
+  let data = withReminderFields.data;
+  let error = withReminderFields.error;
+
+  if (error && isMissingReminderColumnError(error)) {
+    const fallback = await supabase
+      .from('appointments')
+      .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at')
+      .gte('datetime', startOfToday.toISOString())
+      .order('datetime', { ascending: true });
+
+    data = (fallback.data || []).map((appointment) => ({
+      ...appointment,
+      reminder_sent_at: getReminderSentAt(appointment),
+      reminder_sms_sid: null,
+    }));
+    error = fallback.error;
+  }
 
   if (error) return res.status(500).json({ error: error.message });
 
   const visibleStatuses = new Set(['pending', 'confirmed']);
-  const upcoming = (data || []).filter((appointment) =>
-    visibleStatuses.has(String(appointment.status || '').toLowerCase())
-  );
+  const upcoming = (data || [])
+    .filter((appointment) => visibleStatuses.has(String(appointment.status || '').toLowerCase()))
+    .map((appointment) => ({
+      ...appointment,
+      reminder_sent_at: getReminderSentAt(appointment),
+    }));
 
   res.json(upcoming);
 });
 
 app.get('/api/appointments/:id', async (req, res) => {
-  const { data, error } = await supabase
-    .from('appointments')
-    .select('id, status')
-    .eq('id', req.params.id)
-    .maybeSingle();
+  const { data, error } = await selectAppointmentForReminder(req.params.id);
 
   if (error) return res.status(404).json({ error: 'Not found' });
-  res.json(data);
+  res.json({
+    id: data?.id,
+    status: data?.status,
+    reminder_sent_at: getReminderSentAt(data),
+    reminder_sms_sid: data?.reminder_sms_sid || null,
+  });
 });
 
 // ----------------------------------------------------------------------

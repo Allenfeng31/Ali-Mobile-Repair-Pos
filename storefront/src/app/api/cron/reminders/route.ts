@@ -20,9 +20,11 @@ type BookingRecord = Record<string, unknown>;
 
 type ReminderCandidate = {
   id: string;
+  idField: string;
   source: BookingSource;
   phone: string;
   bookingTime: string;
+  record: BookingRecord;
 };
 
 type ReminderResult = {
@@ -68,6 +70,16 @@ const getStringField = (record: BookingRecord, fields: string[]) => {
   }
 
   return '';
+};
+
+const getStringFieldEntry = (record: BookingRecord, fields: string[]) => {
+  for (const field of fields) {
+    const value = record[field];
+    if (typeof value === 'string' && value.trim()) return { field, value: value.trim() };
+    if (typeof value === 'number') return { field, value: String(value) };
+  }
+
+  return null;
 };
 
 const formatAustralianPhone = (phone: string) => {
@@ -170,6 +182,27 @@ const shouldSkipRecord = (record: BookingRecord) => {
   return ['cancelled', 'canceled', 'declined'].includes(status);
 };
 
+const REMINDER_SENT_NOTE_REGEX = /\[REMINDER_SENT_AT:([^;\]]+)(?:;SID:[^\]]+)?\]/;
+
+const getReminderSentAt = (record: BookingRecord) => {
+  const explicit = getStringField(record, ['reminder_sent_at', 'reminder_sms_sent_at', 'reminderSentAt']);
+  if (explicit) return explicit;
+
+  const notes = getStringField(record, ['notes', 'internal_notes']);
+  return notes.match(REMINDER_SENT_NOTE_REGEX)?.[1] || '';
+};
+
+const appendReminderSentNote = (notes: unknown, sentAt: string, sid?: string) => {
+  const cleanNotes = String(notes || '').replace(REMINDER_SENT_NOTE_REGEX, '').trim();
+  const marker = `[REMINDER_SENT_AT:${sentAt}${sid ? `;SID:${sid}` : ''}]`;
+  return cleanNotes ? `${cleanNotes} ${marker}` : marker;
+};
+
+const isMissingReminderColumnError = (error: unknown) => {
+  const message = getErrorMessage(error).toLowerCase();
+  return message.includes('reminder_sent_at') || message.includes('reminder_sms_sid');
+};
+
 const buildReminderSMS = (bookingTime: string) => {
   const time = trimForSMS(bookingTime, 18, 'TBC');
   return cleanSMS(
@@ -211,17 +244,63 @@ async function fetchAppointmentRows(supabase: SupabaseClient, tomorrowDate: stri
 
 const toCandidate = (record: BookingRecord, source: BookingSource, index: number): ReminderCandidate | null => {
   if (shouldSkipRecord(record)) return null;
+  if (getReminderSentAt(record)) return null;
 
   const phone = getStringField(record, ['phone', 'customer_phone', 'phone_number', 'mobile']);
   if (!phone) return null;
 
+  const idEntry = getStringFieldEntry(record, ['id', 'booking_id', 'appointment_id']);
+
   return {
-    id: getStringField(record, ['id', 'booking_id', 'appointment_id']) || `${source}-${index}`,
+    id: idEntry?.value || `${source}-${index}`,
+    idField: idEntry?.field || 'id',
     source,
     phone,
     bookingTime: getBookingTime(record),
+    record,
   };
 };
+
+async function markReminderSent(
+  supabase: SupabaseClient,
+  candidate: ReminderCandidate,
+  sentAt: string,
+  sid?: string
+) {
+  const updateWithSid = await supabase
+    .from(candidate.source)
+    .update({ reminder_sent_at: sentAt, reminder_sms_sid: sid || null })
+    .eq(candidate.idField, candidate.id);
+
+  if (!updateWithSid.error) return;
+
+  if (!isMissingReminderColumnError(updateWithSid.error)) {
+    throw updateWithSid.error;
+  }
+
+  const updateSentAtOnly = await supabase
+    .from(candidate.source)
+    .update({ reminder_sent_at: sentAt })
+    .eq(candidate.idField, candidate.id);
+
+  if (!updateSentAtOnly.error) return;
+
+  if (!isMissingReminderColumnError(updateSentAtOnly.error)) {
+    throw updateSentAtOnly.error;
+  }
+
+  const noteField = 'notes' in candidate.record ? 'notes' : 'internal_notes';
+  const existingNotes = candidate.record[noteField];
+  const notes = appendReminderSentNote(existingNotes, sentAt, sid);
+  const notesUpdate = await supabase
+    .from(candidate.source)
+    .update({ [noteField]: notes })
+    .eq(candidate.idField, candidate.id);
+
+  if (notesUpdate.error) {
+    throw notesUpdate.error;
+  }
+}
 
 async function runReminderJob() {
   try {
@@ -274,6 +353,9 @@ async function runReminderJob() {
           from: fromNumber,
           to,
         });
+        const sentAt = new Date().toISOString();
+
+        await markReminderSent(supabase, candidate, sentAt, message.sid);
 
         results.push({
           id: candidate.id,
