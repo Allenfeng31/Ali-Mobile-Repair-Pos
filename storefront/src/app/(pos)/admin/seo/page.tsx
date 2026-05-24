@@ -6,6 +6,7 @@ import {
   Check,
   Clock,
   Database,
+  Download,
   Eye,
   FileText,
   Loader2,
@@ -95,6 +96,15 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function normalizeKeywordStatus(status?: string | null) {
+  return (status || 'pending').trim();
+}
+
+function getDownloadFilename(contentDisposition: string | null) {
+  const match = contentDisposition?.match(/filename="?([^"]+)"?/i);
+  return match?.[1] || `ali-mobile-seo-master-inventory-${new Date().toISOString().slice(0, 10)}.md`;
 }
 
 function buildPreviewDocument(campaign: CampaignRecord | null) {
@@ -199,6 +209,7 @@ export default function SeoGeoScoutConsole() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [isScouting, setIsScouting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isLoadingCampaign, setIsLoadingCampaign] = useState(false);
   const [scoutSummary, setScoutSummary] = useState<ScoutSummary | null>(null);
 
@@ -296,6 +307,35 @@ export default function SeoGeoScoutConsole() {
     }
   };
 
+  const handleExportInventory = async () => {
+    setIsExporting(true);
+    try {
+      const res = await fetch(`/api/admin/seo/export?t=${Date.now()}`, {
+        cache: 'no-store',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = getDownloadFilename(res.headers.get('Content-Disposition'));
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      console.error('Export inventory failed:', err);
+      alert('Master Inventory export failed. Please refresh and try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleSelectCampaign = async (campaign: CampaignRecord) => {
     setIsLoadingCampaign(true);
     try {
@@ -319,11 +359,14 @@ export default function SeoGeoScoutConsole() {
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const totalDiscovered = keywords.length;
-  const builderQueueSize = keywords.filter(kw => kw.status === 'approved' || kw.status === 'queued').length;
-  const violationsBlocked = keywords.filter(kw => kw.status === 'blocked').length;
+  const builderQueueSize = keywords.filter(kw => {
+    const status = normalizeKeywordStatus(kw.status);
+    return status === 'approved' || status === 'queued';
+  }).length;
+  const violationsBlocked = keywords.filter(kw => normalizeKeywordStatus(kw.status) === 'blocked').length;
 
   const filteredKeywords = useMemo(() => keywords.filter(kw => {
-    const matchesTab = kw.status === activeTab;
+    const matchesTab = normalizeKeywordStatus(kw.status) === activeTab;
     const matchesSearch = !normalizedQuery ||
       kw.keyword.toLowerCase().includes(normalizedQuery) ||
       (kw.source || '').toLowerCase().includes(normalizedQuery);
@@ -406,15 +449,26 @@ export default function SeoGeoScoutConsole() {
                 <h2 className="text-lg font-black text-white">Keyword Triage</h2>
                 <p className="mt-1 text-sm font-semibold text-slate-500">Pending, ingestion source, and search weight.</p>
               </div>
-              <button
-                type="button"
-                onClick={handleTriggerScout}
-                disabled={isScouting}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-blue-400/30 bg-blue-500/10 px-4 text-xs font-black uppercase tracking-[0.16em] text-blue-100 transition hover:bg-blue-500/20 disabled:cursor-wait disabled:opacity-70"
-              >
-                {isScouting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
-                {isScouting ? 'Scouting' : 'Trigger Scout'}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportInventory}
+                  disabled={isExporting}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-sky-300/40 bg-sky-500/15 px-4 text-xs font-black uppercase tracking-[0.12em] text-sky-100 transition hover:bg-sky-500/25 disabled:cursor-wait disabled:opacity-70"
+                >
+                  {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  {isExporting ? 'Exporting' : '导出 Master Inventory (.md)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleTriggerScout}
+                  disabled={isScouting}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-blue-400/30 bg-blue-500/10 px-4 text-xs font-black uppercase tracking-[0.16em] text-blue-100 transition hover:bg-blue-500/20 disabled:cursor-wait disabled:opacity-70"
+                >
+                  {isScouting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
+                  {isScouting ? 'Scouting' : 'Trigger Scout'}
+                </button>
+              </div>
             </div>
 
             <div className="mb-5 flex flex-wrap gap-2">
@@ -429,7 +483,7 @@ export default function SeoGeoScoutConsole() {
                       : 'border-white/10 bg-slate-900/80 text-slate-500 hover:text-slate-200'
                   }`}
                 >
-                  {tab} ({keywords.filter((keyword) => keyword.status === tab).length})
+                  {tab} ({keywords.filter((keyword) => normalizeKeywordStatus(keyword.status) === tab).length})
                 </button>
               ))}
             </div>
@@ -453,48 +507,52 @@ export default function SeoGeoScoutConsole() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredKeywords.length > 0 ? filteredKeywords.map((item) => (
-                      <tr key={item.id} className="border-t border-white/10 transition hover:bg-white/[0.035]">
-                        <td className="px-4 py-4">
-                          <div className="max-w-[260px] text-sm font-black leading-snug text-white">{item.keyword}</div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="rounded-full border border-white/10 bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
-                            {item.source || 'SEO Scout'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          <span className="rounded-xl border border-blue-400/20 bg-blue-400/10 px-2.5 py-1 text-xs font-black text-blue-100">
-                            {item.search_weight || 0}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-500">{formatDate(item.created_at || item.updated_at)}</td>
-                        <td className="px-4 py-4 text-right">
-                          {item.status === 'pending' ? (
-                            <div className="flex justify-end gap-2">
-                              <button
-                                onClick={() => handleStatusUpdate(item.id, 'approved')}
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-200 transition hover:bg-emerald-400/20"
-                                title="Approve"
-                              >
-                                <Check className="h-4 w-4" strokeWidth={3} />
-                              </button>
-                              <button
-                                onClick={() => handleStatusUpdate(item.id, 'blocked')}
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-400/20 bg-rose-400/10 text-rose-200 transition hover:bg-rose-400/20"
-                                title="Block"
-                              >
-                                <X className="h-4 w-4" strokeWidth={3} />
-                              </button>
-                            </div>
-                          ) : (
-                            <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusStyles[item.status] || statusStyles.pending}`}>
-                              {item.status}
+                    {filteredKeywords.length > 0 ? filteredKeywords.map((item) => {
+                      const itemStatus = normalizeKeywordStatus(item.status);
+
+                      return (
+                        <tr key={item.id} className="border-t border-white/10 transition hover:bg-white/[0.035]">
+                          <td className="px-4 py-4">
+                            <div className="max-w-[260px] text-sm font-black leading-snug text-white">{item.keyword}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="rounded-full border border-white/10 bg-slate-900 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                              {item.source || 'SEO Scout'}
                             </span>
-                          )}
-                        </td>
-                      </tr>
-                    )) : (
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <span className="rounded-xl border border-blue-400/20 bg-blue-400/10 px-2.5 py-1 text-xs font-black text-blue-100">
+                              {item.search_weight || 0}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-xs font-bold text-slate-500">{formatDate(item.created_at || item.updated_at)}</td>
+                          <td className="px-4 py-4 text-right">
+                            {itemStatus === 'pending' ? (
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => handleStatusUpdate(item.id, 'approved')}
+                                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-200 transition hover:bg-emerald-400/20"
+                                  title="Approve"
+                                >
+                                  <Check className="h-4 w-4" strokeWidth={3} />
+                                </button>
+                                <button
+                                  onClick={() => handleStatusUpdate(item.id, 'blocked')}
+                                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-400/20 bg-rose-400/10 text-rose-200 transition hover:bg-rose-400/20"
+                                  title="Block"
+                                >
+                                  <X className="h-4 w-4" strokeWidth={3} />
+                                </button>
+                              </div>
+                            ) : (
+                              <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusStyles[itemStatus] || statusStyles.pending}`}>
+                                {itemStatus}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    }) : (
                       <tr>
                         <td colSpan={5} className="px-4 py-14 text-center text-sm font-bold text-slate-500">
                           No keyword records found in this category.

@@ -249,6 +249,7 @@ interface DeviceSelectorProps {
 const DeviceSelector: React.FC<DeviceSelectorProps> = ({ 
   device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst, upsells, tierDescriptions 
 }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
   const [selectedModel, setSelectedModel] = useState(device.model || "");
@@ -341,11 +342,14 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     if (device.services.length === 0) return alert("Please select at least one repair service");
     onUpdateInfo(selectedBrand, selectedModel, selectedCategory);
     onConfirm();
+    setTimeout(() => {
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   if (device.isConfirmed) {
     return (
-      <div className="device-summary-card-wrapper animate-fade">
+      <div ref={containerRef} style={{ scrollMarginTop: '140px' }} className="device-summary-card-wrapper animate-fade">
         <div className="device-summary-card flex flex-row items-center justify-between gap-3 !p-4 md:!p-6 w-full">
           <div className="summary-main flex-1 min-w-0">
             <div className="summary-title truncate">
@@ -418,7 +422,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   }
 
   return (
-    <div className="device-entry animate-fade">
+    <div ref={containerRef} style={{ scrollMarginTop: '140px' }} className="device-entry animate-fade">
       <div className="device-info-header">
         <div className="device-title">
           {formatDeviceTitle(selectedBrand, selectedModel)}

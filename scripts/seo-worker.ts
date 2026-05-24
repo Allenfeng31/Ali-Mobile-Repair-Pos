@@ -357,11 +357,17 @@ function parseDraftJson(raw: string, keyword: string): GeneratedSeoDraft {
 function buildWriterPrompt(keyword: string, critique?: string, previousDraft?: GeneratedSeoDraft) {
   const rewriteContext = critique && previousDraft
     ? `
-Claude Auditor critique to fix:
+=== CRITICAL REVISION INSTRUCTIONS ===
+You are in a revision loop because the previous draft did not pass the SEO and humanizer audit. 
+Your single most important task is to edit the previous draft to address ALL the critiques listed below. 
+Do not start from scratch; keep the good sections of the previous draft and only change the sentences, words, structure, or content necessary to satisfy the critique points.
+
+CLAUDE AUDITOR CRITIQUE TO RESOLVE:
 ${critique}
 
-Previous draft JSON:
+PREVIOUS DRAFT JSON TO EDIT:
 ${JSON.stringify(previousDraft, null, 2)}
+======================================
 `
     : '';
 
@@ -382,6 +388,27 @@ Keyword to target:
 ${keyword}
 
 Write a human, local, conversion-focused long-form SEO article. It must read like an experienced repair technician explaining the issue to a real Ringwood customer, not like generic AI marketing copy.
+
+DE-AI PATTERN FILTERING & HUMANIZER RULES:
+You must strictly follow these humanizer rules to write natural, authentic copy. Avoid all signs of AI-generated text:
+1. NO AI Buzzwords: Do NOT use high-frequency AI words: actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (as verb), interplay, intricate/intricacies, key (as adjective), landscape (as abstract noun), pivotal, showcase, tapestry, testament, underscore, valuable, vibrant. Use simpler, more direct terms.
+2. NO Copula Avoidance: Use simple verbs like "is", "are", "has" instead of elaborate substitutes like "serves as", "stands as", "marks", "represents a", "boasts", "features", "offers". (e.g., write "We have a workshop..." instead of "Our workshop boasts...").
+3. NO Negative Parallelisms or Tailing Negations: State points directly. Avoid "Not only... but also..." or "It's not just about... it's..." structures. Avoid tailing negations like "...no waiting", "...no compromise", "...no guessing".
+4. NO Rule of Three: Do not force points into groups of three (e.g., "ideate, iterate, and deliver"). Keep lists natural, direct, and focused.
+5. NO Synonym Cycling (Elegant Variation): Repeat keywords naturally (like "screen replacement" or "iPad battery") if they are the clearest way to describe the service. Do not cycle through synonyms just to avoid repetition.
+6. NO False Ranges: Do not use "from X to Y" constructions unless they represent a logical, linear scale.
+7. Active Voice: Prefer active voice. Instead of "No configuration needed", use "You do not need to configure anything".
+8. Formatting Restrictions:
+   - Do not overuse em dashes (—). Use commas, periods, or parentheses instead.
+   - Do not overuse boldface. Avoid bolding words mechanically.
+   - NO Inline-Header Lists: Do not use bullet lists with bold inline headers followed by colons (e.g. "- **Quality:** We use..."). Write them as natural prose paragraphs or plain bullet points.
+   - Headings: Use Sentence case for headings (e.g. "Screen replacement options" instead of "Screen Replacement Options"). Do not use Title Case. Never use emojis in headings.
+   - Quotes: Use straight double quotes ("...") and straight single quotes ('...') instead of curly quotes (“...” or ‘...’).
+9. Meta & Structure Rules:
+   - NO Chatbot artifacts or meta-commentary (e.g. "I hope this helps", "let's dive in", "here's what you need to know"). Start directly with the content.
+   - NO Fragmented Headers: Do not place a single-sentence rhetorical warm-up paragraph immediately under a heading before starting the real content.
+   - NO Filler Phrases or Hedging: Use "to" instead of "in order to", "because" instead of "due to the fact that". Avoid excessive qualifications like "could potentially possibly be argued".
+   - NO Generic up-beat conclusions: End with specific local action points, shop hours (10am-5pm), address, or phone number instead of "the future looks bright".
 
 Rules:
 - Return ONLY valid JSON. No markdown fence.
@@ -421,6 +448,130 @@ JSON shape:
 
 ${rewriteContext}
 `;
+}
+
+const BANNED_AI_WORDS = [
+  'actually', 'additionally', 'align with', 'crucial', 'delve',
+  'emphasizing', 'enduring', 'fostering', 'garner', 'interplay',
+  'intricate', 'intricacies', 'landscape', 'pivotal', 'showcase',
+  'tapestry', 'testament', 'underscore', 'underscores', 'vibrant'
+];
+
+const COPULA_TRIGGERS = [
+  'serves as', 'stands as', 'represents a', 'boasts a', 'features a'
+];
+
+const TAILING_NEGATIONS = [
+  ', no waiting', ', no guessing', ', no compromise', ', no hassle', 'no wasted motion'
+];
+
+const SIGNPOSTING_PHRASES = [
+  "let's dive in", "let's explore", "let's break this down", "here's what you need to know", "without further ado"
+];
+
+const HEDGING_PHRASES = [
+  'could potentially', 'possibly be argued'
+];
+
+const GENERIC_CONCLUSIONS = [
+  'future looks bright', 'exciting times lie ahead', 'journey toward excellence'
+];
+
+function autoCorrectHumanizerPatterns(draft: GeneratedSeoDraft): GeneratedSeoDraft {
+  let content = draft.content || '';
+  let title = draft.title || '';
+  let description = draft.description || '';
+
+  // 1. Replace curly quotes with straight quotes
+  content = content
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'");
+  title = title
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'");
+  description = description
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'");
+
+  // 2. Remove emojis from HTML headings
+  const emojiRange = /[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F900}-\u{1F9FF}\u{1F000}-\u{1F09F}\u{1F1E0}-\u{1F1FF}\u{1F200}-\u{1F2FF}\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+  
+  content = content.replace(/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/gi, (match, openTag, text, closeTag) => {
+    const cleanedText = text.replace(emojiRange, '').trim();
+    return `${openTag}${cleanedText}${closeTag}`;
+  });
+
+  return {
+    ...draft,
+    title,
+    description,
+    content,
+  };
+}
+
+function checkHumanizerPatterns(draft: GeneratedSeoDraft): string[] {
+  const violations: string[] = [];
+  const fullText = `${draft.title} ${draft.description} ${draft.content}`.toLowerCase();
+
+  // 1. Check Banned Words
+  const bannedFound = BANNED_AI_WORDS.filter(word => {
+    const regex = new RegExp(`\\b${word}\\b`, 'i');
+    return regex.test(fullText);
+  });
+  if (bannedFound.length > 0) {
+    violations.push(`Banned AI vocabulary words found: ${bannedFound.map(w => `"${w}"`).join(', ')}. Please rewrite using simpler words.`);
+  }
+
+  // 2. Copula Avoidance
+  const copulaFound = COPULA_TRIGGERS.filter(phrase => fullText.includes(phrase));
+  if (copulaFound.length > 0) {
+    violations.push(`Elaborate copula avoidance phrases found: ${copulaFound.map(p => `"${p}"`).join(', ')}. Use simple "is", "are", or "has" instead.`);
+  }
+
+  // 3. Negative Parallelisms
+  if (/\bnot only\b.*\bbut also\b/i.test(fullText)) {
+    violations.push('Negative parallelism ("not only... but also...") detected. Write points directly.');
+  }
+  if (/\bit's not just about\b.*\bit's\b/i.test(fullText) || /\bit is not just about\b.*\bit is\b/i.test(fullText)) {
+    violations.push('Negative parallelism ("not just about... it\'s...") detected. State your point directly without the dramatic contrast.');
+  }
+
+  // 4. Tailing Negations
+  const tailingFound = TAILING_NEGATIONS.filter(phrase => fullText.includes(phrase));
+  if (tailingFound.length > 0) {
+    violations.push(`Tailing negation fragments detected: ${tailingFound.map(t => `"${t}"`).join(', ')}. Use a complete clause.`);
+  }
+
+  // 5. Signposting Announcements
+  const signpostingFound = SIGNPOSTING_PHRASES.filter(phrase => fullText.includes(phrase));
+  if (signpostingFound.length > 0) {
+    violations.push(`Meta-signposting/announcements found: ${signpostingFound.map(s => `"${s}"`).join(', ')}. Do not announce what you are about to write, just write it.`);
+  }
+
+  // 6. Excessive Hedging
+  const hedgingFound = HEDGING_PHRASES.filter(phrase => fullText.includes(phrase));
+  if (hedgingFound.length > 0) {
+    violations.push(`Excessive hedging phrases found: ${hedgingFound.map(h => `"${h}"`).join(', ')}. State points with clarity.`);
+  }
+
+  // 7. Generic Up-beat Conclusions
+  const conclusionsFound = GENERIC_CONCLUSIONS.filter(phrase => fullText.includes(phrase));
+  if (conclusionsFound.length > 0) {
+    violations.push(`Generic upbeat AI conclusion phrase found: ${conclusionsFound.map(c => `"${c}"`).join(', ')}. End with concrete Melbourne location details or CTA instead.`);
+  }
+
+  // 8. Emojis in headings
+  const headingEmojiRegex = /<h[1-6][^>]*>.*[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}].*<\/h[1-6]>/u;
+  if (headingEmojiRegex.test(draft.content)) {
+    violations.push('Emojis detected inside HTML headings. Headings must be clean text.');
+  }
+
+  // 9. Curly quotes
+  if (/[“”‘’]/.test(draft.content) || /[“”‘’]/.test(draft.title) || /[“”‘’]/.test(draft.description)) {
+    violations.push('Curly quotation marks (“” or ‘’) found. Use straight quotes.');
+  }
+
+  return violations;
 }
 
 async function callGeminiWriter(keyword: string, critique?: string, previousDraft?: GeneratedSeoDraft) {
@@ -480,7 +631,17 @@ Audit criteria:
 8. No placeholder/editor text in metadata or article content.
 9. For iPad battery topics, accepts the KB-supported points about model-specific quoting, glued display opening, flex-cable protection, battery adhesive removal, adhesive cleanup, display re-sealing, and post-repair charging/touch/display tests.
 10. For suburb or postcode keywords outside Ringwood, the draft must be transparent about the Ringwood Square location while still giving a useful reason to call, book, visit, or ask about pickup/drop-off. Do not invent exact travel times or fake branch locations.
-11. Clean HTML structure that can render in the public SEO template.`,
+11. Clean HTML structure that can render in the public SEO template.
+12. Strict compliance with Wikipedia's "Signs of AI writing" / humanizer rules: Check for and reject:
+    - High-frequency AI words (actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight, interplay, intricate/intricacies, key, landscape, pivotal, showcase, tapestry, testament, underscore, valuable, vibrant).
+    - Copula avoidance (reject elaborate constructions like "serves as", "stands as", "boasts", "features", "offers" in place of simple is/are/has).
+    - Negative parallelisms and tailing negations (reject "not only... but also...", "not just about... it's about...", "...no waiting", "...no compromise").
+    - Rule of three list patterns or elegant synonym cycling.
+    - Formatting tells (reject inline-header lists like "- **Title:** Text", Title Case headings, emojis, curly quotes, em dash overuse).
+    - Chatbot artifacts (reject "I hope this helps", "let's dive in", disclaimers).
+    - Fragmented headers (reject one-sentence rhetorical padding directly under headings before content starts).
+    - Filler and hedging (reject "in order to", "due to the fact that", "could potentially possibly").
+    - Generic conclusions (reject "future looks bright", "journey toward excellence").`,
         messages: [
           {
             role: 'user',
@@ -692,8 +853,26 @@ async function generateSeoDraft(keyword: string) {
       draft = await callGeminiWriter(keyword, jsonCritique, draft);
     }
 
-    const audit = await callClaudeAuditor(keyword, draft);
-    const verdict = auditPassed(audit) ? 'PASS' : 'REWRITE';
+    // Auto-correct minor humanizer violations (e.g., curly quotes, emojis in headings)
+    draft = autoCorrectHumanizerPatterns(draft);
+
+    // Run local check for any remaining humanizer/AI writing pattern violations
+    const localViolations = checkHumanizerPatterns(draft);
+    let audit: string;
+    let verdict: 'PASS' | 'REWRITE';
+
+    if (localViolations.length > 0) {
+      // Local pre-audit failed: skip Claude Auditor to save API cost/rate limits and force a rewrite
+      audit = `REWRITE: Local humanizer pre-audit failed with the following AI-like patterns:\n` +
+        localViolations.map((v, i) => `${i + 1}. ${v}`).join('\n') +
+        `\nPlease rewrite the draft carefully adhering to all DE-AI/humanizer rules.`;
+      verdict = 'REWRITE';
+      console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): FAILED (${localViolations.length} violations)`);
+    } else {
+      console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): PASSED. Running Claude Auditor...`);
+      audit = await callClaudeAuditor(keyword, draft);
+      verdict = auditPassed(audit) ? 'PASS' : 'REWRITE';
+    }
 
     auditTrail.push({
       round,
@@ -709,7 +888,7 @@ async function generateSeoDraft(keyword: string) {
     critique = audit;
   }
 
-  throw new Error(`Claude Auditor did not PASS "${keyword}" within ${MAX_AUDIT_ROUNDS} rounds. Last critique: ${critique || 'No critique returned.'}`);
+  throw new Error(`Claude Auditor / Local Humanizer did not PASS "${keyword}" within ${MAX_AUDIT_ROUNDS} rounds. Last critique: ${critique || 'No critique returned.'}`);
 }
 
 function buildCampaignPayload(row: SeoKeywordRow, draft: GeneratedSeoDraft, auditTrail: AuditRound[]) {

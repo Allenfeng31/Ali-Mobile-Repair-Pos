@@ -91,91 +91,33 @@ function expandScoutQueryVariants(baseQuery: string, params: ScoutParams) {
 
 export function buildStrategicScoutQueries() {
     return [
-        // ── iPhone symptom-based intent ──
-        'iphone 15 pro max green screen after drop',
-        'iphone 15 screen glitching but no cracks',
-        'iphone 14 screen flickering lines',
-        'iphone 13 ghost touch fix',
-        'iphone 16 pro face id not working after screen replacement',
-        'iphone overheating while charging',
-        'iphone battery health dropping fast',
-        'iphone speaker crackling during calls',
-        'iphone charging port loose not charging',
-        'iphone camera black screen fix',
+        // iPhone & phone repair: model-specific, local, high-intent terms.
+        'iphone 11 screen replacement ringwood',
+        'iphone 12 pro battery repair ringwood',
+        'iphone 13 back glass fix ringwood',
+        'iphone 14 screen replacement cost melbourne',
+        'iphone 15 pro max screen repair ringwood',
+        'samsung galaxy screen repair ringwood',
+        'google pixel screen replacement ringwood',
 
-        // ── iPad / tablet symptoms ──
-        'ipad pro battery draining fast when not in use',
-        'ipad air screen unresponsive in corners',
-        'ipad mini screen replacement cost',
-        'ipad charging but not turning on',
+        // MacBook & computer repair: premium commercial and urgent fault intent.
+        'macbook pro battery replacement ringwood',
+        'macbook air screen repair near me',
+        'macbook liquid damage fix ringwood',
+        'macbook keyboard repair ringwood',
+        'imac repair service ringwood',
 
-        // ── Samsung / Android symptoms ──
-        'samsung galaxy s24 screen crack repair',
-        'samsung fold screen crease getting worse',
-        'samsung phone water damage repair',
-        'google pixel screen replacement cost',
+        // Apple Watch & smart watch repair: lower-competition local intent.
+        'apple watch screen repair ringwood',
+        'apple watch battery replacement ringwood',
+        'iwatch screen fix ringwood square',
+        'samsung galaxy watch repair melbourne',
 
-        // ── MacBook / laptop repair intent ──
-        'macbook pro screen flickering fix',
-        'macbook air battery replacement cost',
-        'macbook pro keyboard not working repair',
-        'macbook water damage repair cost',
-        'macbook pro screen replacement aftermarket vs apple',
-        'macbook trackpad not clicking fix',
-        'macbook charging port repair usb c',
-        'macbook pro overheating fan loud fix',
-
-        // ── Apple Watch / wearable ──
-        'apple watch screen cracked repair cost',
-        'apple watch battery replacement',
-        'apple watch not charging fix',
-
-        // ── Technical / trust intent ──
-        'soft oled vs hard oled iphone 15 pro',
-        'does iphone 15 screen replacement disable true tone',
-        'iphone 15 non genuine display warning fix',
-        'does third party screen void apple warranty',
-        'original vs aftermarket iphone screen quality',
-        'do third party batteries affect iphone performance',
-
-        // ── Cost / value / pricing intent ──
-        'iphone 15 back glass repair cost',
-        'is it worth fixing iphone 15 screen or upgrade',
-        'cheap third party repair vs apple store iphone 15',
-        'phone screen repair cost near me',
-        'how much does it cost to fix a cracked iphone screen',
-        'iphone battery replacement price comparison',
-        'macbook screen replacement price vs apple store',
-        'samsung screen repair cost vs buying new phone',
-        'iphone repair price rip off how to avoid',
-        'phone repair hidden fees to watch out for',
-
-        // ── Extreme-case / damage intent ──
-        'can a completely shattered iphone 15 be fixed',
-        'iphone 15 pro max run over by car repair',
-        'phone fell in water what to do',
-        'iphone bent frame can it be repaired',
-        'phone screen completely black but still vibrates',
-        'data recovery from water damaged phone',
-
-        // ── Local / near-me intent (broad catchment) ──
-        'phone repair near me',
-        'best phone repair shop melbourne east',
-        'iphone repair ringwood',
-        'phone repair croydon mitcham',
-        'macbook repair near me melbourne',
-        'same day phone repair melbourne',
-        // ── Broad / Looser Intent (To generate wider long-tail variants) ──
-        'phone repair',
-        'screen replacement',
-        'battery replacement',
-        'samsung phone fix',
-        'ipad fix',
-        'macbook fix',
-        'laptop battery',
-        'apple watch screen',
-        'phone water damage',
-        'cheap phone repair',
+        // Tablet repair: screen, battery, and charging-port intent.
+        'ipad screen replacement ringwood',
+        'ipad battery repair near me',
+        'ipad charging port fix ringwood',
+        'samsung galaxy tab screen repair ringwood',
     ];
 }
 
@@ -340,9 +282,9 @@ async function loadGeneratedKeywordTexts(client: SupabaseClient) {
 async function incrementExistingKeywordOccurrence(client: SupabaseClient, keyword: string) {
     const { data: existingKeyword, error: lookupError } = await client
         .from('seo_keywords')
-        .select('id, search_weight')
+        .select('id, search_weight, status')
         .eq('keyword', keyword)
-        .maybeSingle<{ id: string; search_weight?: number | null }>();
+        .maybeSingle<{ id: string; search_weight?: number | null; status?: string | null }>();
 
     if (lookupError) {
         throw lookupError;
@@ -352,12 +294,22 @@ async function incrementExistingKeywordOccurrence(client: SupabaseClient, keywor
         return false;
     }
 
+    const nextPayload: {
+        search_weight: number;
+        updated_at: string;
+        status?: string;
+    } = {
+        search_weight: (existingKeyword.search_weight || 0) + 1,
+        updated_at: new Date().toISOString(),
+    };
+
+    if ((existingKeyword.status || '').trim().toUpperCase() === 'FAILED') {
+        nextPayload.status = 'pending';
+    }
+
     const { error: updateError } = await client
         .from('seo_keywords')
-        .update({
-            search_weight: (existingKeyword.search_weight || 0) + 1,
-            updated_at: new Date().toISOString(),
-        })
+        .update(nextPayload)
         .eq('id', existingKeyword.id);
 
     if (updateError) {
