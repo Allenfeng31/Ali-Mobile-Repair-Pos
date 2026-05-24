@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, ArrowLeft, Send, RefreshCw, Circle, Trash2, Smartphone, User, Calendar } from 'lucide-react';
-import { api } from '@/lib/api';
+import {
+  MessageSquare,
+  ArrowLeft,
+  Send,
+  RefreshCw,
+  Trash2,
+  Smartphone,
+  User,
+  Calendar,
+  CalendarCheck,
+  CheckCircle2,
+  X,
+  Clock3,
+  Phone,
+} from 'lucide-react';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { cn } from '@/lib/utils';
 import { getApiBaseUrl } from '@/lib/apiBase';
@@ -21,6 +34,19 @@ interface ChatSession {
   created_at: string;
   last_message_at: string;
   chat_messages: ChatMessage[];
+}
+
+interface BookingRecord {
+  id: string;
+  customer_name: string;
+  phone: string;
+  brand: string;
+  model: string;
+  service: string;
+  datetime: string;
+  notes?: string;
+  status: 'pending' | 'confirmed' | 'declined' | string;
+  created_at?: string;
 }
 
 const API_BASE = getApiBaseUrl();
@@ -56,6 +82,10 @@ export function ChatInbox() {
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [apptStatusCache, setApptStatusCache] = useState<Record<string, string>>({});
+  const [bookingsOpen, setBookingsOpen] = useState(false);
+  const [bookings, setBookings] = useState<BookingRecord[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -69,6 +99,17 @@ export function ChatInbox() {
     } catch (_) {
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const loadBookings = useCallback(async () => {
+    setBookingsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/appointments/upcoming`);
+      if (res.ok) setBookings(await res.json());
+    } catch (_) {
+    } finally {
+      setBookingsLoading(false);
     }
   }, []);
 
@@ -126,6 +167,12 @@ export function ChatInbox() {
   }, [loadSessions]);
 
   useEffect(() => {
+    loadBookings();
+    const interval = setInterval(loadBookings, 30000);
+    return () => clearInterval(interval);
+  }, [loadBookings]);
+
+  useEffect(() => {
     if (!activeSession) return;
     loadMessages(activeSession.id);
     const interval = setInterval(() => loadMessages(activeSession.id), 3000);
@@ -175,6 +222,33 @@ export function ChatInbox() {
     setDeleting(false);
   };
 
+  const updateAppointmentStatus = async (apptId: string, status: 'confirmed' | 'declined') => {
+    setUpdatingBookingId(apptId);
+    try {
+      const res = await fetch(`${API_BASE}/appointments/${apptId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update status');
+
+      setApptStatusCache(prev => ({ ...prev, [apptId]: status }));
+      setBookings(prev =>
+        status === 'declined'
+          ? prev.filter(booking => booking.id !== apptId)
+          : prev.map(booking => booking.id === apptId ? { ...booking, status } : booking)
+      );
+      await loadBookings();
+      await loadSessions();
+      if (activeSession) await loadMessages(activeSession.id);
+    } catch (_) {
+      alert('Failed to update booking status');
+    } finally {
+      setUpdatingBookingId(null);
+    }
+  };
+
   const formatTime = (iso: string) => {
     const d = new Date(iso);
     const now = new Date();
@@ -183,6 +257,21 @@ export function ChatInbox() {
       ? d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
       : d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
   };
+
+  const formatBookingTime = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleString('en-AU', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const pendingBookings = bookings.filter(booking => booking.status === 'pending');
+  const confirmedBookings = bookings.filter(booking => booking.status === 'confirmed');
+  const nextBooking = confirmedBookings[0] || bookings[0] || null;
 
   const getUnreadCount = (session: ChatSession) =>
     (session.chat_messages || []).filter(m => m.sender === 'customer' && !m.is_read).length;
@@ -246,22 +335,6 @@ export function ChatInbox() {
       }
       return true;
     });
-
-    const handleStatusUpdate = async (apptId: string, status: 'confirmed' | 'declined') => {
-      try {
-        const res = await fetch(`${API_BASE}/appointments/${apptId}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status }),
-        });
-        if (res.ok) {
-          setApptStatusCache(prev => ({ ...prev, [apptId]: status }));
-          loadMessages(activeSession.id);
-        }
-      } catch (_) {
-        alert('Failed to update status');
-      }
-    };
 
     return (
       <div className="flex flex-col h-full max-w-4xl mx-auto px-4" style={{ height: 'calc(100vh - 120px)' }}>
@@ -350,13 +423,15 @@ export function ChatInbox() {
                           ) : (
                             <div className="grid grid-cols-2 gap-4 pt-2">
                               <button
-                                onClick={() => handleStatusUpdate(data.appointmentId, 'confirmed')}
+                                onClick={() => updateAppointmentStatus(data.appointmentId, 'confirmed')}
+                                disabled={updatingBookingId === data.appointmentId}
                                 className="bg-green-500 text-white font-black py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-[0_5px_15px_rgba(34,197,94,0.3)] active:scale-95 transition-all"
                               >
                                 Accept
                               </button>
                               <button
-                                onClick={() => handleStatusUpdate(data.appointmentId, 'declined')}
+                                onClick={() => updateAppointmentStatus(data.appointmentId, 'declined')}
+                                disabled={updatingBookingId === data.appointmentId}
                                 className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-red-600 font-black py-3 rounded-xl text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all"
                               >
                                 Refuse
@@ -408,6 +483,138 @@ export function ChatInbox() {
   // ── SESSIONS LIST ──────────────────────────────────────────────────────────
   return (
     <div className="max-w-4xl mx-auto px-4 pb-20">
+      {bookingsOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-8">
+          <div className="w-full max-w-5xl max-h-[86vh] overflow-hidden rounded-[3rem] border border-white/30 bg-[var(--color-neu-bg)] shadow-[0_34px_90px_rgba(15,23,42,0.28)]">
+            <div className="flex flex-col gap-6 border-b border-white/40 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.24em] text-blue-600">Today & Upcoming</span>
+                <h2 className="mt-2 text-3xl font-black tracking-tight text-black">Booking Control</h2>
+                <p className="mt-2 text-xs font-bold text-gray-500">Pending approvals, confirmed repairs, and the next bookings on the bench.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={loadBookings}
+                  disabled={bookingsLoading}
+                  className="h-12 rounded-2xl bg-[var(--color-neu-bg)] px-5 text-[10px] font-black uppercase tracking-widest text-blue-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                >
+                  Refresh
+                </button>
+                <button
+                  onClick={() => setBookingsOpen(false)}
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-neu-bg)] text-gray-500 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)]"
+                  aria-label="Close booking control"
+                >
+                  <X size={22} strokeWidth={3} />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 px-6 pt-6 sm:grid-cols-3">
+              <div className="rounded-[2rem] bg-amber-50 p-5 shadow-[var(--shadow-neu-sm)]">
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-amber-600">Pending</p>
+                <p className="mt-2 text-3xl font-black text-black">{pendingBookings.length}</p>
+              </div>
+              <div className="rounded-[2rem] bg-green-50 p-5 shadow-[var(--shadow-neu-sm)]">
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-green-600">Confirmed</p>
+                <p className="mt-2 text-3xl font-black text-black">{confirmedBookings.length}</p>
+              </div>
+              <div className="rounded-[2rem] bg-blue-50 p-5 shadow-[var(--shadow-neu-sm)]">
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-blue-600">Next Repair</p>
+                <p className="mt-2 truncate text-sm font-black text-black">
+                  {nextBooking ? `${nextBooking.customer_name} · ${formatBookingTime(nextBooking.datetime)}` : 'No upcoming bookings'}
+                </p>
+              </div>
+            </div>
+
+            <div className="max-h-[52vh] overflow-y-auto px-6 py-6 custom-scrollbar">
+              {bookingsLoading && bookings.length === 0 ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-28 rounded-[2rem] bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] animate-pulse" />
+                  ))}
+                </div>
+              ) : bookings.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-[2.5rem] bg-[var(--color-neu-bg)] py-20 text-center shadow-[var(--shadow-neu-pressed)]">
+                  <CalendarCheck size={56} strokeWidth={1.4} className="mb-5 text-gray-300" />
+                  <h3 className="text-xl font-black text-black">No Future Bookings</h3>
+                  <p className="mt-2 text-xs font-bold text-gray-500">New customer bookings from today onward will appear here.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {bookings.map((booking) => {
+                    const isPending = booking.status === 'pending';
+                    const isUpdating = updatingBookingId === booking.id;
+
+                    return (
+                      <article
+                        key={booking.id}
+                        className="rounded-[2.25rem] border border-white/30 bg-[var(--color-neu-bg)] p-5 shadow-[var(--shadow-neu-flat)]"
+                      >
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-3 flex flex-wrap items-center gap-2">
+                              <span className={cn(
+                                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-widest",
+                                isPending ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                              )}>
+                                {isPending ? <Clock3 size={12} strokeWidth={3} /> : <CheckCircle2 size={12} strokeWidth={3} />}
+                                {isPending ? 'Pending Confirmation' : 'Confirmed Booking'}
+                              </span>
+                              <span className="rounded-full bg-white/60 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                                {formatBookingTime(booking.datetime)}
+                              </span>
+                            </div>
+                            <h3 className="truncate text-xl font-black text-black">{booking.customer_name}</h3>
+                            <div className="mt-2 grid gap-1 text-xs font-bold text-gray-500 sm:grid-cols-2">
+                              <p className="flex items-center gap-2">
+                                <Phone size={13} strokeWidth={3} className="text-blue-600" />
+                                {booking.phone}
+                              </p>
+                              <p className="truncate">
+                                {booking.brand} {booking.model} · {booking.service}
+                              </p>
+                            </div>
+                            {booking.notes && (
+                              <p className="mt-3 line-clamp-2 text-xs font-semibold leading-relaxed text-gray-500">
+                                {booking.notes.replace('[MULTI-DEVICE]', '').trim()}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
+                            {isPending && (
+                              <button
+                                onClick={() => updateAppointmentStatus(booking.id, 'confirmed')}
+                                disabled={isUpdating}
+                                className="rounded-2xl bg-green-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(34,197,94,0.24)] transition-all active:scale-95 disabled:opacity-50"
+                              >
+                                Confirm
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Cancel this booking request?')) {
+                                  updateAppointmentStatus(booking.id, 'declined');
+                                }
+                              }}
+                              disabled={isUpdating}
+                              className="rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
         <div>
           <span className="text-gray-600 font-black text-[10px] uppercase tracking-widest ml-1">Live Communications</span>
@@ -418,12 +625,29 @@ export function ChatInbox() {
             {sessions.length} Active Data Channels
           </p>
         </div>
-        <button
-          onClick={loadSessions}
-          className="w-14 h-14 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl flex items-center justify-center active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all border border-white/20"
-        >
-          <RefreshCw size={24} strokeWidth={3} className={loading ? "animate-spin" : ""} />
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => { setBookingsOpen(true); loadBookings(); }}
+            className="relative w-14 h-14 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl flex items-center justify-center active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all border border-white/20"
+            title="View bookings"
+            aria-label="View pending and confirmed bookings"
+          >
+            <CalendarCheck size={24} strokeWidth={3} />
+            {pendingBookings.length > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-400 px-1.5 text-[10px] font-black text-black shadow-[0_8px_18px_rgba(245,158,11,0.32)]">
+                {pendingBookings.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={loadSessions}
+            className="w-14 h-14 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-blue-600 rounded-2xl flex items-center justify-center active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all border border-white/20"
+            title="Refresh inbox"
+            aria-label="Refresh inbox"
+          >
+            <RefreshCw size={24} strokeWidth={3} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
       </div>
 
       {loading && sessions.length === 0 && (

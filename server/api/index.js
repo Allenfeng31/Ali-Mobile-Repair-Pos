@@ -118,11 +118,65 @@ if (VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 // (NOT in-memory Map — Maps die on Vercel serverless cold starts)
 const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
 
-const cleanSMS = (text) => {
-  return text
+const SMS_SEGMENT_LIMIT = 160;
+
+const normalizeSMSText = (text) => {
+  return String(text || '')
     .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') // Remove emojis
     .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII
-    .slice(0, 160); // Strict length limit
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const cleanSMS = (text) => {
+  return normalizeSMSText(text).slice(0, SMS_SEGMENT_LIMIT); // Strict length limit
+};
+
+const trimForSMS = (value, maxLength, fallback = '') => {
+  const normalized = normalizeSMSText(value || fallback);
+  return normalized.length > maxLength ? normalized.slice(0, maxLength).trim() : normalized;
+};
+
+const formatAustralianPhone = (phone) => {
+  const formatted = String(phone || '').replace(/[^\d+]/g, '');
+  if (formatted.startsWith('0')) return `+61${formatted.slice(1)}`;
+  if (formatted.startsWith('61')) return `+${formatted}`;
+  return formatted;
+};
+
+const formatBookingTimeForSMS = (datetime) => {
+  const date = new Date(datetime);
+  if (Number.isNaN(date.getTime())) return trimForSMS(datetime, 12, 'TBC');
+
+  return new Intl.DateTimeFormat('en-AU', {
+    timeZone: 'Australia/Melbourne',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date).replace(',', '');
+};
+
+const buildBookingConfirmationSMS = ({ customerName, deviceModel, bookingTime }) => {
+  let name = trimForSMS(customerName, 16, 'there');
+  let device = trimForSMS(deviceModel, 22, 'your device');
+  const time = trimForSMS(bookingTime, 12, 'TBC');
+
+  const build = () =>
+    `Hi ${name}, your repair for ${device} is CONFIRMED! Time: ${time}. Loc: Kiosk C1, Ringwood Square. Any concern? Call 0485058514.`;
+
+  let body = build();
+  if (body.length > SMS_SEGMENT_LIMIT) {
+    device = trimForSMS(device, Math.max(8, device.length - (body.length - SMS_SEGMENT_LIMIT)), 'device');
+    body = build();
+  }
+  if (body.length > SMS_SEGMENT_LIMIT) {
+    name = trimForSMS(name, Math.max(5, name.length - (body.length - SMS_SEGMENT_LIMIT)), 'there');
+    body = build();
+  }
+
+  return cleanSMS(body);
 };
 
 const SMS_MESSAGES = {
@@ -138,8 +192,8 @@ const SMS_MESSAGES = {
   partArrived: (name, device) =>
     `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
 
-  booking: (name) =>
-    `Hi ${name}, your booking at Ali Mobile Repair is confirmed! See you in-store. Address: Kiosk C1, Ringwood Square Shopping Centre, Ringwood.`,
+  booking: (name, deviceModel, bookingTime) =>
+    buildBookingConfirmationSMS({ customerName: name, deviceModel, bookingTime }),
 };
 
   // Repairs
@@ -759,9 +813,12 @@ app.post('/api/book-repair', async (req, res) => {
   // 3. SMS Notification (Strict Segment)
   if (twilioClient) {
     try {
-      const smsBody = cleanSMS(SMS_MESSAGES.booking(customer_name));
-      let formattedPhone = phone.replace(/\s/g, '');
-      if (formattedPhone.startsWith('0')) formattedPhone = '+61' + formattedPhone.slice(1);
+      const smsBody = SMS_MESSAGES.booking(
+        customer_name,
+        mainDeviceTitle,
+        formatBookingTimeForSMS(datetime)
+      );
+      const formattedPhone = formatAustralianPhone(phone);
 
       await twilioClient.messages.create({
         body: smsBody,
@@ -918,6 +975,26 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
   }
 
   res.json(appointment);
+});
+
+app.get('/api/appointments/upcoming', async (req, res) => {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at')
+    .gte('datetime', startOfToday.toISOString())
+    .order('datetime', { ascending: true });
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const visibleStatuses = new Set(['pending', 'confirmed']);
+  const upcoming = (data || []).filter((appointment) =>
+    visibleStatuses.has(String(appointment.status || '').toLowerCase())
+  );
+
+  res.json(upcoming);
 });
 
 app.get('/api/appointments/:id', async (req, res) => {

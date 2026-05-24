@@ -1,5 +1,11 @@
 {
   "regions": ["syd1"],
   "framework": "nextjs",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/cron/reminders",
+      "schedule": "0 17 * * *"
+    }
+  ]
 }

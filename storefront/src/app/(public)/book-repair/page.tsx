@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import GlobalRepairCart from "@/components/GlobalRepairCart";
 import { useCart } from "@/context/CartContext";
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
@@ -156,6 +156,45 @@ export default function BookRepairPage() {
     "2027-11-02", "2027-12-25", "2027-12-27", "2027-12-28"
   ];
 
+  const resetBookingFlow = useCallback(() => {
+    setSuccessBooking(null);
+    setShowDisclaimer(false);
+    setSelectedDay("");
+    setSelectedSlot("");
+    setIsSubmitting(false);
+    setFormData({ name: "", phone: "", notes: "" });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    if (!successBooking) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [successBooking]);
+
+  useEffect(() => {
+    const handleBookRepairLinkClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const link = target?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!link) return;
+
+      const href = link.getAttribute("href");
+      if (!href) return;
+
+      const path = href.startsWith("http")
+        ? new URL(href, window.location.origin).pathname
+        : href.split("?")[0];
+
+      if (path !== "/book-repair" || !successBooking) return;
+
+      event.preventDefault();
+      resetBookingFlow();
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    };
+
+    document.addEventListener("click", handleBookRepairLinkClick, true);
+    return () => document.removeEventListener("click", handleBookRepairLinkClick, true);
+  }, [resetBookingFlow, successBooking]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hasConfirmedDevices) return alert("Your cart is empty! Please select a device and service first, and click 'Confirm'.");
@@ -215,7 +254,7 @@ export default function BookRepairPage() {
   };
 
   if (successBooking) {
-    return <SuccessView booking={successBooking} onReset={() => setSuccessBooking(null)} />;
+    return <SuccessView booking={successBooking} onReset={resetBookingFlow} />;
   }
 
   return (
@@ -238,12 +277,11 @@ export default function BookRepairPage() {
           <div className="booking-hero-copy">
             <span className="booking-kicker">
               <Sparkles size={15} strokeWidth={2.5} aria-hidden="true" />
-              Priority repair booking
+              Quick repair booking
             </span>
-            <h1>Book your repair with a clearer quote and a faster handoff.</h1>
+            <h1>Book your repair in minutes.</h1>
             <p>
-              Select your device, confirm the service, then choose a visit time at our Ringwood Square repair desk.
-              No upfront payment, and walk-ins remain welcome.
+              Choose the repair, add your details, and pick a visit time. Clear pricing, short form, and payment only in store.
             </p>
             <div className="booking-trust-row" aria-label="Booking trust points">
               <span>
@@ -251,37 +289,21 @@ export default function BookRepairPage() {
                 No Fix, No Charge
               </span>
               <span>
-                <Wrench size={16} strokeWidth={2.5} aria-hidden="true" />
-                Warranty-backed repairs
+                <Clock3 size={16} strokeWidth={2.5} aria-hidden="true" />
+                Fast booking flow
               </span>
               <span>
-                <Clock3 size={16} strokeWidth={2.5} aria-hidden="true" />
-                Priority booking queue
+                <PhoneCall size={16} strokeWidth={2.5} aria-hidden="true" />
+                0481 058 514
               </span>
             </div>
           </div>
-          <aside className="booking-hero-aside" aria-label="Booking process">
-            <div>
-              <span>01</span>
-              <strong>Choose repair</strong>
-              <small>Pick device, model, and service.</small>
-            </div>
-            <div>
-              <span>02</span>
-              <strong>Select visit time</strong>
-              <small>Choose an available weekday or Saturday slot.</small>
-            </div>
-            <div>
-              <span>03</span>
-              <strong>Pay in store</strong>
-              <small>Final price confirmed before work begins.</small>
-            </div>
+          <aside className="booking-hero-cart" aria-label="Repair cart">
+            <GlobalRepairCart />
           </aside>
         </section>
 
         <section className="booking-workspace" aria-label="Repair booking form">
-          <GlobalRepairCart />
-
           <div className={`booking-panel ${!hasConfirmedDevices ? 'booking-panel-disabled' : ''}`}>
             <div className="booking-panel-header">
               <span className="booking-kicker">Schedule</span>
