@@ -1018,12 +1018,25 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
   const isArrival = status === 'arrived' && existingAppointment.status !== 'arrived';
 
   // 1. Update Appointment
-  const { data: appointment, error } = await supabase
+  const appointmentUpdate = isArrival
+    ? { status, arrived_at: new Date().toISOString() }
+    : { status };
+
+  let { data: appointment, error } = await supabase
     .from('appointments')
-    .update({ status })
+    .update(appointmentUpdate)
     .eq('id', id)
     .select()
     .maybeSingle();
+
+  if (error && String(error.message || '').toLowerCase().includes('arrived_at')) {
+    ({ data: appointment, error } = await supabase
+      .from('appointments')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .maybeSingle());
+  }
 
   if (error) {
     console.error(`❌ [Appointment] Failed to update: ${error.message}`);

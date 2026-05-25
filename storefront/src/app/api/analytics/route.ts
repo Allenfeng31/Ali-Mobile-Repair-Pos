@@ -79,6 +79,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const { data: appointments, error: appointmentError } = await supabaseAdmin
+      .from('appointments')
+      .select('id, status, datetime, created_at')
+      .gte('datetime', currentStartUTC.toISOString())
+      .lte('datetime', currentEndUTC.toISOString());
+
+    if (appointmentError) {
+      console.warn('[analytics-api] Appointments query skipped:', appointmentError.message);
+    }
+
     // -----------------------------------------------------------
     // 3. Return raw events + period boundaries so the client
     //    can do its charting / aggregation as before.
@@ -89,6 +99,7 @@ export async function GET(request: Request) {
       currentEndUTC: currentEndUTC.toISOString(),
       previousStartUTC: previousStartUTC.toISOString(),
       previousEndUTC: previousEndUTC.toISOString(),
+      appointments: appointmentError ? [] : appointments || [],
     });
   } catch (err: any) {
     console.error('[analytics-api] Unexpected error:', err);

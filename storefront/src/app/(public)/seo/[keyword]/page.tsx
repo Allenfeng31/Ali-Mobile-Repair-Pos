@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { ArrowRight, Calendar, Clock, ShieldCheck, Star, Wrench } from 'lucide-react';
+import SeoKeywordTracker from '@/components/analytics/SeoKeywordTracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,7 @@ type CampaignRow = {
 };
 
 type SeoArticle = {
+  keyword: string;
   title: string;
   metaDescription: string;
   author: string;
@@ -101,6 +103,7 @@ async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
   }
 
   return {
+    keyword: campaign.keyword,
     title: draft.title,
     metaDescription: draft.description,
     author: 'Ali Mobile Repair Technicians',
@@ -140,6 +143,7 @@ export default async function SeoArticlePage({ params }: { params: Promise<{ key
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] pb-24 font-sans text-[#0C0A09] selection:bg-[#CA8A04] selection:text-white">
+      <SeoKeywordTracker keyword={article.keyword} slug={keyword} />
       {article.jsonLd ? (
         <script
           type="application/ld+json"

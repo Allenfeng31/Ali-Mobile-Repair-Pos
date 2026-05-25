@@ -1,7 +1,16 @@
 import { supabase } from './supabase';
 
 export type AnalyticsEventType = 'click' | 'conversion' | 'page_view' | 'view';
-export type AnalyticsEventName = 'model_click' | 'call_now' | 'get_quote' | 'navigate' | 'repair_view' | 'book_repair';
+export type AnalyticsEventName =
+  | 'model_click'
+  | 'call_now'
+  | 'get_quote'
+  | 'navigate'
+  | 'repair_view'
+  | 'book_repair'
+  | 'seo_keyword_view'
+  | 'suburb_page_view'
+  | 'suburb_home_click';
 
 interface TrackEventParams {
   eventName: AnalyticsEventName;
@@ -158,4 +167,28 @@ export const analytics = {
 
   trackBookRepair: (modelName: string, repairCategory: string) =>
     trackEvent({ eventName: 'book_repair', eventType: 'conversion', modelName, repairCategory }),
+
+  trackSeoKeywordView: (keyword: string, slug: string) =>
+    trackEvent({
+      eventName: 'seo_keyword_view',
+      eventType: 'page_view',
+      modelName: keyword,
+      metadata: { keyword, slug },
+    }),
+
+  trackSuburbPageView: (suburb: string) =>
+    trackEvent({
+      eventName: 'suburb_page_view',
+      eventType: 'page_view',
+      modelName: suburb,
+      metadata: { suburb },
+    }),
+
+  trackSuburbHomeClick: (suburb: string) =>
+    trackEvent({
+      eventName: 'suburb_home_click',
+      eventType: 'conversion',
+      modelName: suburb,
+      metadata: { suburb },
+    }),
 };

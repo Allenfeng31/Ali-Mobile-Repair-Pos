@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Clock, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 import { SERVICE_AREAS, getServiceAreaBySlug } from "@/data/serviceAreas";
+import LocationAnalyticsTracker from "@/components/analytics/LocationAnalyticsTracker";
 
 type LocationPageProps = {
   params: Promise<{
@@ -226,6 +227,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
   return (
     <>
+      <LocationAnalyticsTracker suburb={area.name} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}

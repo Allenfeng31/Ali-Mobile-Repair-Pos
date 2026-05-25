@@ -391,9 +391,12 @@ Write a human, local, conversion-focused long-form SEO article. It must read lik
 
 DE-AI PATTERN FILTERING & HUMANIZER RULES:
 You must strictly follow these humanizer rules to write natural, authentic copy. Avoid all signs of AI-generated text:
-1. NO AI Buzzwords: Do NOT use high-frequency AI words: actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (as verb), interplay, intricate/intricacies, key (as adjective), landscape (as abstract noun), pivotal, showcase, tapestry, testament, underscore, valuable, vibrant. Use simpler, more direct terms.
-2. NO Copula Avoidance: Use simple verbs like "is", "are", "has" instead of elaborate substitutes like "serves as", "stands as", "marks", "represents a", "boasts", "features", "offers". (e.g., write "We have a workshop..." instead of "Our workshop boasts...").
-3. NO Negative Parallelisms or Tailing Negations: State points directly. Avoid "Not only... but also..." or "It's not just about... it's..." structures. Avoid tailing negations like "...no waiting", "...no compromise", "...no guessing".
+1. NO AI Buzzwords: Do NOT use high-frequency AI words: actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (as verb), interplay, intricate/intricacies, key (as adjective), landscape (as abstract noun), pivotal, showcase, tapestry, testament, underscore, valuable, vibrant, ensures, delicate, challenging.
+   - Replace "ensures" with "confirms", "verifies", "makes sure", or write directly.
+   - Replace "delicate" with "careful", "precision", or name the actual part (e.g., "flex cables, proximity sensors, and earpiece connectors" instead of "delicate sensors").
+   - Replace "challenging" with "tough", "difficult", or "hard".
+2. NO Copula Avoidance: Use simple verbs like "is", "are", "has" instead of elaborate substitutes like "serves as", "stands as", "marks", "represents a", "boasts", "features", "offers". (e.g., write "We have a workshop..." instead of "Our workshop boasts..."). Do not use "offers a display experience" (say "provides a display experience" or "is a display"). Do not use "helps keep features like Face ID... working" (say "Face ID remains functional" or test results show).
+3. NO Negative Parallelisms or Tailing Negations: State points directly. Avoid "Not only... but also..." or "It's not just about... it's..." structures. Avoid tailing negations like "...no waiting", "...no compromise", "...no guessing". For example, do not write "We don't erase your data to fix the power system." Instead, write "We keep your data intact during battery replacement."
 4. NO Rule of Three: Do not force points into groups of three (e.g., "ideate, iterate, and deliver"). Keep lists natural, direct, and focused.
 5. NO Synonym Cycling (Elegant Variation): Repeat keywords naturally (like "screen replacement" or "iPad battery") if they are the clearest way to describe the service. Do not cycle through synonyms just to avoid repetition.
 6. NO False Ranges: Do not use "from X to Y" constructions unless they represent a logical, linear scale.
@@ -403,12 +406,16 @@ You must strictly follow these humanizer rules to write natural, authentic copy.
    - Do not overuse boldface. Avoid bolding words mechanically.
    - NO Inline-Header Lists: Do not use bullet lists with bold inline headers followed by colons (e.g. "- **Quality:** We use..."). Write them as natural prose paragraphs or plain bullet points.
    - Headings: Use Sentence case for headings (e.g. "Screen replacement options" instead of "Screen Replacement Options"). Do not use Title Case. Never use emojis in headings.
-   - Quotes: Use straight double quotes ("...") and straight single quotes ('...') instead of curly quotes (“...” or ‘...’).
+   - Quotes: Use double quotes ("...") and single quotes ('...') instead of curly quotes (“...” or ‘...’).
 9. Meta & Structure Rules:
    - NO Chatbot artifacts or meta-commentary (e.g. "I hope this helps", "let's dive in", "here's what you need to know"). Start directly with the content.
    - NO Fragmented Headers: Do not place a single-sentence rhetorical warm-up paragraph immediately under a heading before starting the real content.
-   - NO Filler Phrases or Hedging: Use "to" instead of "in order to", "because" instead of "due to the fact that". Avoid excessive qualifications like "could potentially possibly be argued".
-   - NO Generic up-beat conclusions: End with specific local action points, shop hours (10am-5pm), address, or phone number instead of "the future looks bright".
+   - NO Filler Phrases or Hedging: Use "to" instead of "in order to", "because" instead of "due to the fact that". Avoid excessive qualifications like "could potentially possibly be argued" or instruction padding like "Treat your device with care around water and steam" (instead, just state the IP rating facts).
+   - NO Generic up-beat conclusions: End with specific local action points, shop hours (10am-5pm), address, or phone number instead of "book your diagnostic check today" or "the future looks bright".
+10. Claim Safety and KB rules:
+    - iPhone screen repairs: Explicitly write "We use a specialist programmer where the model supports it to transfer original display data and preserve True Tone behaviour." Make sure to explain the customer-visible outcome if skipped: "If this data transfer is skipped, you may see an Apple warning message or find that True Tone adapts differently than before."
+    - Samsung/Other screen repairs: Explicitly write "Factory IP rating cannot be guaranteed after any phone has been opened" rather than soft phrasing like "reduce its factory water resistance".
+    - iPad battery replacement cost: Include the KB example sentence exactly: "The price difference with iPad battery replacement is often not just the battery itself; it is the time spent opening the glued display cleanly, protecting the flex cables, clearing old adhesive, and testing the iPad before it leaves the bench."
 
 Rules:
 - Return ONLY valid JSON. No markdown fence.
@@ -454,11 +461,12 @@ const BANNED_AI_WORDS = [
   'actually', 'additionally', 'align with', 'crucial', 'delve',
   'emphasizing', 'enduring', 'fostering', 'garner', 'interplay',
   'intricate', 'intricacies', 'landscape', 'pivotal', 'showcase',
-  'tapestry', 'testament', 'underscore', 'underscores', 'vibrant'
+  'tapestry', 'testament', 'underscore', 'underscores', 'vibrant',
+  'ensures', 'delicate', 'challenging', 'enhance', 'valuable'
 ];
 
 const COPULA_TRIGGERS = [
-  'serves as', 'stands as', 'represents a', 'boasts a', 'features a'
+  'serves as', 'stands as', 'represents a', 'boasts a', 'features a', 'offers a display'
 ];
 
 const TAILING_NEGATIONS = [
@@ -582,7 +590,7 @@ async function callGeminiWriter(keyword: string, critique?: string, previousDraf
       contents: buildWriterPrompt(keyword, critique, previousDraft),
       config: {
         responseMimeType: 'application/json',
-        systemInstruction: 'You write production-ready local SEO landing page content as strict JSON for a repair business. Output only parseable JSON.',
+        systemInstruction: 'You write production-ready local SEO landing page content as strict JSON for a repair business. Output only parseable JSON. You MUST strictly follow the DE-AI PATTERN FILTERING & HUMANIZER RULES: write like an experienced repair technician explaining issues to a real customer in plain workshop language, avoid all marketing fluff, banned AI words (e.g., actually, delve, crucial, ensures, delicate, challenging, enhance, valuable), negative parallelisms, and generic CTA conclusions.',
       },
     });
   });

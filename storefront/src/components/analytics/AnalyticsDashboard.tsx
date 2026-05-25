@@ -10,7 +10,8 @@ import {
   Phone, MessageSquare, Navigation, Trophy, ArrowUpRight, TrendingUp,
   Download, Filter, ChevronDown, Apple, Smartphone as AndroidIcon,
   Search, AlertCircle, CheckCircle2, Clock, Map, ChevronRight,
-  TrendingDown, Info, Trash2, Laptop, ChevronUp, Tablet, Watch
+  TrendingDown, Info, Trash2, Laptop, ChevronUp, Tablet, Watch,
+  Home, FileText, Sparkles
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase'; // retained for potential future client-side use
 import { motion, AnimatePresence } from 'framer-motion';
@@ -72,6 +73,18 @@ interface PricingHealthItem {
   rate?: number;
 }
 
+interface KeywordVisitItem {
+  keyword: string;
+  visits: number;
+}
+
+interface SuburbConversionItem {
+  suburb: string;
+  views: number;
+  homepageClicks: number;
+  rate: number;
+}
+
 export default function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState('7d'); // 'today', '7d', '30d', 'custom'
   const [startDate, setStartDate] = useState(format(subDays(new Date(), 7), 'yyyy-MM-dd'));
@@ -92,6 +105,11 @@ export default function AnalyticsDashboard() {
     conversions: [],
     pricingHealth: [],
     topLocations: [],
+    appointmentFunnel: { bookingRequests: 0, confirmed: 0, arrived: 0, arrivalRate: 0 },
+    keywordVisits: { top: [], bottom: [] },
+    suburbConversions: [],
+    weeklyReport: null,
+    weeklyReportLoading: false,
     totalVisitors: 0,
     pageViews: 0,
     conversionRate: 0
@@ -136,7 +154,7 @@ export default function AnalyticsDashboard() {
         throw new Error(errBody.error || `API responded ${res.status}`);
       }
 
-      const { events: allEvents, currentStartUTC } = await res.json();
+      const { events: allEvents, currentStartUTC, appointments = [] } = await res.json();
       if (!allEvents || allEvents.length === 0) {
         console.warn('[dashboard] No events returned from API');
       }
@@ -216,7 +234,7 @@ export default function AnalyticsDashboard() {
           const item = healthMap.get(key);
           if (item) {
             if (e.event_name === 'repair_view') item.views++;
-            if (['call_now', 'get_quote', 'book_repair'].includes(e.event_name)) item.actions++;
+            if (e.event_name === 'book_repair') item.actions++;
           }
         }
       });
@@ -249,6 +267,45 @@ export default function AnalyticsDashboard() {
       const prevConversionsTotal = previousEvents.filter((e: any) => ['call_now', 'get_quote', 'book_repair'].includes(e.event_name)).length;
       const prevConvRate = prevVisits > 0 ? (prevConversionsTotal / prevVisits) * 100 : 0;
 
+      const appointmentStatuses = appointments.map((appointment: any) => String(appointment.status || '').toLowerCase().trim());
+      const bookingRequests = appointmentStatuses.filter((status: string) => status !== 'declined').length;
+      const confirmed = appointmentStatuses.filter((status: string) => status === 'confirmed' || status === 'arrived').length;
+      const arrived = appointmentStatuses.filter((status: string) => status === 'arrived').length;
+      const appointmentFunnel = {
+        bookingRequests,
+        confirmed,
+        arrived,
+        arrivalRate: confirmed > 0 ? (arrived / confirmed) * 100 : 0,
+      };
+
+      const suburbMap = new globalThis.Map<string, SuburbConversionItem>();
+      currentEvents.forEach((event: any) => {
+        if (event.event_name !== 'suburb_page_view' && event.event_name !== 'suburb_home_click') return;
+        const suburb = String(event.metadata?.suburb || event.model_name || 'Unknown').trim();
+        const item = suburbMap.get(suburb) || { suburb, views: 0, homepageClicks: 0, rate: 0 };
+        if (event.event_name === 'suburb_page_view') item.views += 1;
+        if (event.event_name === 'suburb_home_click') item.homepageClicks += 1;
+        suburbMap.set(suburb, item);
+      });
+      const suburbConversions = Array.from(suburbMap.values())
+        .map((item) => ({ ...item, rate: item.views > 0 ? (item.homepageClicks / item.views) * 100 : 0 }))
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 10);
+
+      const keywordMap = new globalThis.Map<string, number>();
+      currentEvents.forEach((event: any) => {
+        if (event.event_name !== 'seo_keyword_view') return;
+        const keyword = String(event.metadata?.keyword || event.model_name || 'Unknown keyword').trim();
+        keywordMap.set(keyword, (keywordMap.get(keyword) || 0) + 1);
+      });
+      const keywordItems = Array.from(keywordMap.entries())
+        .map(([keyword, visits]) => ({ keyword, visits }))
+        .sort((a, b) => b.visits - a.visits || a.keyword.localeCompare(b.keyword));
+      const keywordVisits = {
+        top: keywordItems.slice(0, 10),
+        bottom: [...keywordItems].sort((a, b) => a.visits - b.visits || a.keyword.localeCompare(b.keyword)).slice(0, 10),
+      };
+
       setData({
         eventCounts: timelineData,
         modelPopularity,
@@ -256,6 +313,9 @@ export default function AnalyticsDashboard() {
         pricingHealth,
         topLocations,
         deviceUsage,
+        appointmentFunnel,
+        suburbConversions,
+        keywordVisits,
         totalVisitors: currentVisits,
         pageViews: currentEvents.length,
         conversionRate: currentConvRate,
@@ -270,10 +330,61 @@ export default function AnalyticsDashboard() {
           rateUp: currentConvRate >= prevConvRate
         }
       });
+
+      fetchWeeklyReport();
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWeeklyReport = async () => {
+    setData((prev: any) => ({ ...prev, weeklyReportLoading: true }));
+    try {
+      const res = await fetch('/api/analytics/weekly-report');
+      if (!res.ok) throw new Error(`Weekly report API responded ${res.status}`);
+      const json = await res.json();
+      setData((prev: any) => ({
+        ...prev,
+        weeklyReport: json.report || null,
+        weeklyReportLoading: false,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch weekly report:', error);
+      setData((prev: any) => ({ ...prev, weeklyReportLoading: false }));
+    }
+  };
+
+  const downloadWeeklyReport = () => {
+    const report = data.weeklyReport;
+    if (!report?.markdown) return;
+
+    const blob = new Blob([report.markdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ali-mobile-weekly-report-${new Date(report.periodEnd || Date.now()).toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const generateWeeklyReportNow = async () => {
+    setData((prev: any) => ({ ...prev, weeklyReportLoading: true }));
+    try {
+      const res = await fetch('/api/analytics/weekly-report', { method: 'POST' });
+      if (!res.ok) throw new Error(`Weekly report API responded ${res.status}`);
+      const json = await res.json();
+      setData((prev: any) => ({
+        ...prev,
+        weeklyReport: json.report || null,
+        weeklyReportLoading: false,
+      }));
+    } catch (error) {
+      console.error('Failed to generate weekly report:', error);
+      setData((prev: any) => ({ ...prev, weeklyReportLoading: false }));
     }
   };
 
@@ -480,6 +591,103 @@ export default function AnalyticsDashboard() {
           />
         </div>
 
+        {/* Weekly Operations Snapshot */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="xl:col-span-1 bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 size={22} className="text-emerald-600" /> Arrival Funnel
+                </h2>
+                <p className="text-sm text-slate-400 font-medium">Arrived / confirmed appointments</p>
+              </div>
+              <div className="text-3xl font-black text-emerald-600 tabular-nums">
+                {data.appointmentFunnel.arrivalRate.toFixed(1)}%
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                ['Requests', data.appointmentFunnel.bookingRequests],
+                ['Confirmed', data.appointmentFunnel.confirmed],
+                ['Arrived', data.appointmentFunnel.arrived],
+              ].map(([label, value]) => (
+                <div key={String(label)} className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</div>
+                  <div className="mt-2 text-2xl font-black text-slate-900 tabular-nums">{String(value)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="xl:col-span-2 bg-slate-950 rounded-3xl shadow-sm border border-slate-800 p-8 text-white overflow-hidden relative">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:36px_36px] opacity-30" />
+            <div className="relative flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-2 text-blue-300 text-xs font-black uppercase tracking-[0.2em] mb-3">
+                  <Sparkles size={16} /> Gemini Operations Analyst
+                </div>
+                <h2 className="text-2xl font-black tracking-tight">Weekly report preview</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-300 max-w-2xl">
+                  Sunday 9am report using sales, repair-page demand, arrivals, suburb movement, and SEO keyword landing-page visits.
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={generateWeeklyReportNow}
+                  disabled={data.weeklyReportLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-wait disabled:text-slate-400"
+                >
+                  <Sparkles size={18} />
+                  Generate now
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadWeeklyReport}
+                  disabled={!data.weeklyReport?.markdown}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-950/30 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+                >
+                  <FileText size={18} />
+                  Download .md
+                </button>
+              </div>
+            </div>
+            <div className="relative mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+              {data.weeklyReportLoading ? (
+                <p className="text-sm font-medium text-slate-300">Building report...</p>
+              ) : data.weeklyReport?.json?.aiRecommendations ? (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Revenue</div>
+                      <div className="mt-2 text-2xl font-black tabular-nums">
+                        ${Math.round(data.weeklyReport.json.revenue.current).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vs last week</div>
+                      <div className="mt-2 text-2xl font-black tabular-nums">
+                        {data.weeklyReport.json.revenue.vsPreviousPct?.toFixed(1) ?? '0.0'}%
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vs last year</div>
+                      <div className="mt-2 text-2xl font-black tabular-nums">
+                        {data.weeklyReport.json.revenue.vsLastYearPct?.toFixed(1) ?? '0.0'}%
+                      </div>
+                    </div>
+                  </div>
+                  <pre className="whitespace-pre-wrap font-sans text-sm leading-6 text-slate-200">
+                    {data.weeklyReport.json.aiRecommendations}
+                  </pre>
+                </div>
+              ) : (
+                <p className="text-sm font-medium text-slate-300">No stored weekly report yet. Generate one manually or wait for Sunday 9am.</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Main Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
@@ -660,7 +868,7 @@ export default function AnalyticsDashboard() {
                     <button onClick={() => handleSort('actions')} className={`text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-0.5 ${
                       sortConfig.key === 'actions' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
                     }`}>
-                      Conversions <SortIndicator columnKey="actions" />
+                      Bookings <SortIndicator columnKey="actions" />
                     </button>
                   </th>
                   <th className="px-8 py-4 text-right">
@@ -812,6 +1020,74 @@ export default function AnalyticsDashboard() {
                 <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-3 border-2 border-dashed border-slate-100 rounded-2xl">
                   <MapPin size={32} opacity={0.3} />
                   <p className="text-sm font-medium">Gathering location insights...</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* SEO & Suburb Intelligence */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Search size={22} className="text-indigo-600" /> SEO Keyword Visits
+              </h2>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Landing-page sessions</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="mb-4 text-xs font-black uppercase tracking-widest text-emerald-600">Top 10</h3>
+                <div className="space-y-3">
+                  {data.keywordVisits.top.length ? data.keywordVisits.top.map((item: KeywordVisitItem, idx: number) => (
+                    <div key={item.keyword} className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 border border-slate-100 px-4 py-3">
+                      <span className="min-w-0 truncate text-sm font-bold text-slate-800">#{idx + 1} {item.keyword}</span>
+                      <span className="shrink-0 text-sm font-black text-slate-900 tabular-nums">{item.visits}</span>
+                    </div>
+                  )) : (
+                    <p className="rounded-2xl border border-dashed border-slate-200 p-5 text-sm font-medium text-slate-400">No SEO keyword visits yet.</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h3 className="mb-4 text-xs font-black uppercase tracking-widest text-rose-600">Lowest 10</h3>
+                <div className="space-y-3">
+                  {data.keywordVisits.bottom.length ? data.keywordVisits.bottom.map((item: KeywordVisitItem) => (
+                    <div key={item.keyword} className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 border border-slate-100 px-4 py-3">
+                      <span className="min-w-0 truncate text-sm font-bold text-slate-800">{item.keyword}</span>
+                      <span className="shrink-0 text-sm font-black text-slate-900 tabular-nums">{item.visits}</span>
+                    </div>
+                  )) : (
+                    <p className="rounded-2xl border border-dashed border-slate-200 p-5 text-sm font-medium text-slate-400">No SEO keyword visits yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Home size={22} className="text-indigo-600" /> Suburb to Homepage
+              </h2>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Suburb page movement</span>
+            </div>
+            <div className="space-y-4">
+              {data.suburbConversions.length ? data.suburbConversions.map((item: SuburbConversionItem) => (
+                <div key={item.suburb} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900">{item.suburb}</span>
+                    <span className="text-lg font-black text-indigo-600 tabular-nums">{item.rate.toFixed(1)}%</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs font-bold text-slate-400">
+                    <span>{item.homepageClicks} homepage clicks</span>
+                    <span>{item.views} suburb views</span>
+                  </div>
+                </div>
+              )) : (
+                <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-3 border-2 border-dashed border-slate-100 rounded-2xl">
+                  <Home size={32} opacity={0.3} />
+                  <p className="text-sm font-medium">Suburb page tracking starts from the next visits.</p>
                 </div>
               )}
             </div>

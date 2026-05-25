@@ -3,10 +3,14 @@
 
 ALTER TABLE public.appointments
 ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS reminder_sms_sid TEXT;
+ADD COLUMN IF NOT EXISTS reminder_sms_sid TEXT,
+ADD COLUMN IF NOT EXISTS arrived_at TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS idx_appointments_reminder_sent_at
 ON public.appointments (reminder_sent_at);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_arrived_at
+ON public.appointments (arrived_at);
 
 DO $$
 BEGIN
