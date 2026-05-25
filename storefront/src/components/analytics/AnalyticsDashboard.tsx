@@ -11,7 +11,7 @@ import {
   Download, Filter, ChevronDown, Apple, Smartphone as AndroidIcon,
   Search, AlertCircle, CheckCircle2, Clock, Map, ChevronRight,
   TrendingDown, Info, Trash2, Laptop, ChevronUp, Tablet, Watch,
-  Home, FileText, Sparkles
+  Home, FileText, Sparkles, FileDown
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase'; // retained for potential future client-side use
 import { motion, AnimatePresence } from 'framer-motion';
@@ -371,6 +371,29 @@ export default function AnalyticsDashboard() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadWeeklyReportPdf = async () => {
+    setData((prev: any) => ({ ...prev, weeklyReportLoading: true }));
+    try {
+      const res = await fetch('/api/analytics/weekly-report/pdf');
+      if (!res.ok) throw new Error(`Weekly report PDF responded ${res.status}`);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const periodEnd = data.weeklyReport?.periodEnd || Date.now();
+      link.href = url;
+      link.download = `ali-mobile-weekly-business-report-${new Date(periodEnd).toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download weekly report PDF:', error);
+    } finally {
+      setData((prev: any) => ({ ...prev, weeklyReportLoading: false }));
+    }
+  };
+
   const generateWeeklyReportNow = async () => {
     setData((prev: any) => ({ ...prev, weeklyReportLoading: true }));
     try {
@@ -643,12 +666,21 @@ export default function AnalyticsDashboard() {
                 </button>
                 <button
                   type="button"
+                  onClick={downloadWeeklyReportPdf}
+                  disabled={data.weeklyReportLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-950/30 transition hover:bg-blue-500 disabled:cursor-wait disabled:bg-slate-700 disabled:text-slate-400"
+                >
+                  <FileDown size={18} />
+                  Download PDF
+                </button>
+                <button
+                  type="button"
                   onClick={downloadWeeklyReport}
                   disabled={!data.weeklyReport?.markdown}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-950/30 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-slate-400"
                 >
                   <FileText size={18} />
-                  Download .md
+                  Audit .md
                 </button>
               </div>
             </div>

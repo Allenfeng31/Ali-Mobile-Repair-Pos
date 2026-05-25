@@ -31,7 +31,7 @@ export type RepairConversionItem = {
 
 type DeviceCategory = "Phones" | "Tablets" | "Computers" | "Watches";
 
-type WeeklyReportJson = {
+export type WeeklyReportJson = {
   generatedAt: string;
   windows: {
     current: ReportWindow;
@@ -333,6 +333,8 @@ async function callGeminiWeeklyAnalyst(json: Omit<WeeklyReportJson, "aiRecommend
   const prompt = [
     "You are an isolated weekly operations analyst for Ali Mobile & Repair in Ringwood.",
     "Do not write SEO articles. Do not use SEO writer prompts. Do not create campaigns.",
+    "News aggregation skill context has been provided separately from the SEO writer: follow its discipline of using only supplied source data, never inventing external news, separating signals by source and time, and keeping claims traceable.",
+    "No live news JSON is supplied in this run, so do not mention market news or competitor news. Use the business dataset only.",
     "Analyze only the numeric weekly dataset below and return constructive, practical recommendations in concise Markdown.",
     "Focus on revenue movement, repair-page demand, weak conversion repair items, appointment arrival leakage, suburb page movement, and SEO keyword landing-page visit demand.",
     "Keep advice specific and commercially useful. Mention when sample sizes are too small.",
