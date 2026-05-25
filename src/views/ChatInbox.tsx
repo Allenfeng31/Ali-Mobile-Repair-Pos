@@ -226,7 +226,7 @@ export function ChatInbox() {
     setDeleting(false);
   };
 
-  const updateAppointmentStatus = async (apptId: string, status: 'confirmed' | 'declined') => {
+  const updateAppointmentStatus = async (apptId: string, status: 'confirmed' | 'declined' | 'arrived') => {
     setUpdatingBookingId(apptId);
     try {
       const res = await fetch(`${API_BASE}/appointments/${apptId}/status`, {
@@ -239,7 +239,7 @@ export function ChatInbox() {
 
       setApptStatusCache(prev => ({ ...prev, [apptId]: status }));
       setBookings(prev =>
-        status === 'declined'
+        (status === 'declined' || status === 'arrived')
           ? prev.filter(booking => booking.id !== apptId)
           : prev.map(booking => booking.id === apptId ? { ...booking, status } : booking)
       );
@@ -448,12 +448,20 @@ export function ChatInbox() {
                             <p className="flex justify-between"><span className="text-gray-500">Requested:</span> <span className="text-black font-black">{new Date(data.time).toLocaleString()}</span></p>
                           </div>
 
-                          {(apptStatusCache[data.appointmentId] === 'confirmed' || apptStatusCache[data.appointmentId] === 'declined') ? (
+                          {(apptStatusCache[data.appointmentId] === 'confirmed' || apptStatusCache[data.appointmentId] === 'declined' || apptStatusCache[data.appointmentId] === 'arrived') ? (
                             <div className={cn(
                               "mt-4 py-3 rounded-xl text-center font-black text-[10px] uppercase tracking-widest shadow-[var(--shadow-neu-sm)]",
-                              apptStatusCache[data.appointmentId] === 'confirmed' ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                              apptStatusCache[data.appointmentId] === 'declined'
+                                ? "bg-red-100 text-red-600"
+                                : apptStatusCache[data.appointmentId] === 'arrived'
+                                  ? "bg-blue-100 text-blue-600"
+                                  : "bg-green-100 text-green-600"
                             )}>
-                              {apptStatusCache[data.appointmentId] === 'confirmed' ? 'System Confirmed' : 'Request Refused'}
+                              {apptStatusCache[data.appointmentId] === 'declined'
+                                ? 'Request Refused'
+                                : apptStatusCache[data.appointmentId] === 'arrived'
+                                  ? 'Arrived'
+                                  : 'System Confirmed'}
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-4 pt-2">
@@ -644,17 +652,28 @@ export function ChatInbox() {
                                 </span>
                               </button>
                             )}
-                            <button
-                              onClick={() => {
-                                if (window.confirm('Cancel this booking request?')) {
-                                  updateAppointmentStatus(booking.id, 'declined');
-                                }
-                              }}
-                              disabled={isUpdating}
-                              className="rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
-                            >
-                              Cancel
-                            </button>
+                            <div className="flex flex-col gap-2">
+                              {!isPending && booking.status !== 'arrived' && (
+                                <button
+                                  onClick={() => updateAppointmentStatus(booking.id, 'arrived')}
+                                  disabled={isUpdating}
+                                  className="rounded-2xl bg-blue-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(59,130,246,0.24)] transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                  Arrived
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  if (window.confirm('Cancel this booking request?')) {
+                                    updateAppointmentStatus(booking.id, 'declined');
+                                  }
+                                }}
+                                disabled={isUpdating}
+                                className="rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </article>

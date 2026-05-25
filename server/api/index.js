@@ -986,27 +986,6 @@ app.post('/api/book-repair', async (req, res) => {
     console.error('[Push] Booking notification failed:', err.message);
   }
 
-  // 4. SMS Notification (Strict Segment)
-  if (twilioClient) {
-    try {
-      const smsBody = SMS_MESSAGES.booking(
-        customer_name,
-        mainDeviceTitle,
-        formatBookingTimeForSMS(datetime)
-      );
-      const formattedPhone = formatAustralianPhone(phone);
-
-      await twilioClient.messages.create({
-        body: smsBody,
-        from: twilioPhone,
-        to: formattedPhone,
-      });
-      console.log(`✅ [SMS] Booking confirmation sent to ${formattedPhone}`);
-    } catch (err) {
-      console.error('❌ [SMS] Booking SMS failed:', err.message);
-    }
-  }
-
   res.json({ success: true, appointment });
 });
 
@@ -1014,11 +993,29 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
 
-  if (!['confirmed', 'declined'].includes(status)) {
+  if (!['confirmed', 'declined', 'arrived'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
 
   console.log(`📅 [Appointment] Updating status for ID ${id} to: ${status}`);
+
+  const { data: existingAppointment, error: existingAppointmentError } = await supabase
+    .from('appointments')
+    .select('id, status')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (existingAppointmentError) {
+    console.error(`❌ [Appointment] Failed to fetch current status: ${existingAppointmentError.message}`);
+    return res.status(500).json({ error: existingAppointmentError.message });
+  }
+
+  if (!existingAppointment) {
+    return res.status(404).json({ error: 'Appointment not found' });
+  }
+
+  const isFirstConfirmation = status === 'confirmed' && existingAppointment.status !== 'confirmed';
+  const isArrival = status === 'arrived' && existingAppointment.status !== 'arrived';
 
   // 1. Update Appointment
   const { data: appointment, error } = await supabase
@@ -1033,8 +1030,34 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  // 2. If confirmed, ensure customer is in the record list
-  if (status === 'confirmed') {
+  // 2. On confirmation, trigger Twilio SMS confirmation
+  if (isFirstConfirmation) {
+    const phone = appointment.phone;
+    const name = appointment.customer_name;
+
+    if (twilioClient && twilioPhone) {
+      try {
+        const smsBody = SMS_MESSAGES.booking(
+          name,
+          `${appointment.brand || ''} ${appointment.model || ''}`.trim() || 'your device',
+          formatBookingTimeForSMS(appointment.datetime)
+        );
+        const formattedPhone = formatAustralianPhone(phone);
+
+        await twilioClient.messages.create({
+          body: smsBody,
+          from: twilioPhone,
+          to: formattedPhone,
+        });
+        console.log(`✅ [SMS] Booking confirmation sent after manual approval to ${formattedPhone}`);
+      } catch (smsError) {
+        console.error('❌ [SMS] Approval-triggered booking SMS failed:', smsError.message);
+      }
+    }
+  }
+
+  // 3. On arrival, check/create customer, link repair record, and sync to Google Contacts
+  if (isArrival) {
     const phone = appointment.phone;
     const name = appointment.customer_name;
 
@@ -1048,6 +1071,8 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
 
     if (checkError) console.error(`⚠️ [Appointment] Error checking existing customer: ${checkError.message}`);
 
+    let customerId;
+
     if (!existing || existing.length === 0) {
       // Normalize phone for storage (optional, but good for matching)
       const cleanPhone = phone.replace(/\D/g, '');
@@ -1060,7 +1085,7 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       }
       initials = initials.toUpperCase().slice(0, 2);
 
-      const customerId = crypto.randomUUID();
+      customerId = crypto.randomUUID();
       console.log(`✨ [Appointment] Creating new customer record with ID ${customerId}: ${name} (${cleanPhone})`);
 
       const { error: insertError } = await supabase.from('customers').insert({
@@ -1086,9 +1111,13 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
           console.error('[Google Contacts] Sync failed:', err);
         }
       }
+    } else {
+      customerId = existing[0].id;
+      console.log(`ℹ️ [Appointment] Customer ${name} already exists (ID: ${customerId})`);
+    }
 
-      // 3. Create Repair Record
-      // Extract brand/model from the appointment
+    // Create Repair Record for new/existing customer
+    if (customerId) {
       const brand = appointment.brand || '';
       const model = appointment.model || '';
       const service = appointment.service || 'Repair';
@@ -1119,34 +1148,6 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       } else {
         console.log(`✅ [Appointment] Repair record successfully linked for ${name}`);
       }
-    } else {
-      console.log(`ℹ️ [Appointment] Customer ${name} already exists (ID: ${existing[0].id})`);
-
-      // Still create a repair record for existing customer
-      const existingCustomerId = existing[0].id;
-      const brand = appointment.brand || '';
-      const model = appointment.model || '';
-      const service = appointment.service || 'Repair';
-      const scheduledTime = appointment.datetime || '';
-      const dateObj = new Date(scheduledTime);
-      const displayTime = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
-
-      const repairId = `R-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-
-      const { error: repairError } = await supabase.from('repairs').insert({
-        id: repairId,
-        customer_id: existingCustomerId,
-        timestamp: new Date().toISOString(),
-        repairItem: service,
-        modelNumber: `${brand} ${model}`.trim(),
-        price: 0,
-        status: 'In Processing',
-        remark: `预约时间: ${displayTime}`,
-        liquidDamage: false,
-        password: '',
-        imei: ''
-      });
-      if (repairError) console.error(`❌ [Appointment] Failed to create repair for existing customer: ${repairError.message}`);
     }
   }
 
