@@ -28,11 +28,6 @@ type SeoKeywordRecord = {
   status?: string | null;
 };
 
-type GeneratedCampaignKeyword = {
-  keyword_id?: string | null;
-  keyword?: string | null;
-};
-
 const SUPABASE_SYSTEM_ROLES = ['authenticated', 'anon', 'service_role'];
 
 function formatMelbourneTime(date: Date): string {
@@ -126,29 +121,8 @@ export async function GET(request: Request) {
 
     if (error) throw error;
 
-    const { data: generatedCampaigns, error: campaignError } = await supabase
-      .from('pending_seo_campaigns')
-      .select('keyword_id, keyword');
-
-    if (campaignError) throw campaignError;
-
-    const generatedKeywordIds = new Set(
-      ((generatedCampaigns || []) as GeneratedCampaignKeyword[])
-        .map((campaign) => campaign.keyword_id)
-        .filter(Boolean)
-    );
-    const generatedKeywordTexts = new Set(
-      ((generatedCampaigns || []) as GeneratedCampaignKeyword[])
-        .map((campaign) => campaign.keyword?.trim().toLowerCase())
-        .filter(Boolean)
-    );
-    const visibleKeywords = ((data || []) as SeoKeywordRecord[]).filter((keyword) => {
-      const normalizedKeyword = keyword.keyword.trim().toLowerCase();
-      return !generatedKeywordIds.has(keyword.id) && !generatedKeywordTexts.has(normalizedKeyword);
-    });
-
     return NextResponse.json(
-      { status: 'SUCCESS', data: visibleKeywords },
+      { status: 'SUCCESS', data: (data || []) as SeoKeywordRecord[] },
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

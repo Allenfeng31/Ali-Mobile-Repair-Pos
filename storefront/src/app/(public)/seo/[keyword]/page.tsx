@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { ArrowRight, Calendar, Clock, ShieldCheck, Star, Wrench } from 'lucide-react';
 import SeoKeywordTracker from '@/components/analytics/SeoKeywordTracker';
+import { fetchRepairCatalog, type BrandEntry, type ModelEntry } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,14 @@ type SeoArticle = {
   rating: number;
   reviewCount: number;
   jsonLd?: unknown;
+  repairTarget: RepairTarget;
+};
+
+type RepairTarget = {
+  href: string;
+  label: string;
+  context: string;
+  precision: 'repair' | 'model' | 'brand' | 'category';
 };
 
 function getPublicSupabaseClient() {
@@ -65,6 +74,149 @@ function slugify(text: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 90);
+}
+
+function normalizeText(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function displayBrandName(brand: string) {
+  return /^[ptcw]\s+/i.test(brand) ? brand.slice(2).trim() : brand;
+}
+
+function getRepairIntent(text: string) {
+  const normalized = normalizeText(text);
+  const intents = [
+    { slug: 'screen-replacement', label: 'screen replacement', tokens: ['screen', 'display', 'lcd', 'oled', 'glass', 'cracked'] },
+    { slug: 'battery-replacement', label: 'battery replacement', tokens: ['battery', 'charging fast drain', 'not holding charge'] },
+    { slug: 'charging-port-replacement', label: 'charging port repair', tokens: ['charging port', 'charge port', 'not charging', 'charger port'] },
+    { slug: 'back-housing-replacement', label: 'back glass repair', tokens: ['back glass', 'back housing', 'rear glass', 'rear panel'] },
+    { slug: 'camera-repair', label: 'camera repair', tokens: ['camera', 'lens'] },
+    { slug: 'water-damage-repair', label: 'water damage repair', tokens: ['water damage', 'liquid damage', 'wet phone'] },
+  ];
+
+  return intents.find((intent) => intent.tokens.some((token) => normalized.includes(token))) || null;
+}
+
+function getCategoryIntent(text: string): 'phone' | 'tablet' | 'laptop' | 'watch' {
+  const normalized = normalizeText(text);
+  if (/\b(ipad|tablet|galaxy tab|tab)\b/.test(normalized)) return 'tablet';
+  if (/\b(macbook|laptop|imac|computer|pc)\b/.test(normalized)) return 'laptop';
+  if (/\b(apple watch|iwatch|galaxy watch|watch)\b/.test(normalized)) return 'watch';
+  return 'phone';
+}
+
+function getBrandAliases(brand: BrandEntry) {
+  const name = normalizeText(displayBrandName(brand.brand));
+  const aliases = new Set([name, normalizeText(brand.slug)]);
+
+  if (name.includes('iphone')) aliases.add('iphone');
+  if (name.includes('ipad')) aliases.add('ipad');
+  if (name.includes('samsung')) {
+    aliases.add('samsung');
+    aliases.add('galaxy');
+  }
+  if (name.includes('google') || name.includes('pixel')) {
+    aliases.add('google pixel');
+    aliases.add('pixel');
+  }
+  if (name.includes('oppo')) aliases.add('oppo');
+  if (name.includes('macbook')) aliases.add('macbook');
+  if (name.includes('watch')) {
+    aliases.add('apple watch');
+    aliases.add('iwatch');
+    aliases.add('watch');
+  }
+
+  return Array.from(aliases).filter(Boolean);
+}
+
+function getMatchedBrand(brands: BrandEntry[], text: string, category: string) {
+  const normalized = normalizeText(text);
+  const categoryBrands = brands.filter((brand) => brand.category === category);
+  return categoryBrands.find((brand) =>
+    getBrandAliases(brand).some((alias) => new RegExp(`\\b${alias.replace(/\s+/g, '\\s+')}\\b`).test(normalized))
+  ) || null;
+}
+
+function getModelScore(model: ModelEntry, text: string) {
+  const normalized = normalizeText(text);
+  const modelName = normalizeText(model.model);
+
+  if (!modelName) return 0;
+  if (normalized.includes(modelName)) return 100;
+  if (model.modelCode && normalizeText(model.modelCode).split(' ').some((code) => code.length >= 4 && normalized.includes(code))) return 90;
+
+  const tokens = modelName
+    .split(' ')
+    .filter((token) => token.length >= 2 && !['pro', 'max', 'plus', 'mini', 'ultra', 'series', 'gen', 'inch'].includes(token));
+  if (!tokens.length) return 0;
+
+  const matched = tokens.filter((token) => new RegExp(`\\b${token}\\b`).test(normalized)).length;
+  return matched === tokens.length ? 80 : matched;
+}
+
+function resolveRepairTarget(keyword: string, title: string, description: string): Promise<RepairTarget> {
+  const haystack = `${keyword} ${title} ${description}`;
+  const category = getCategoryIntent(haystack);
+  const repairIntent = getRepairIntent(haystack);
+
+  return fetchRepairCatalog().then((catalog) => {
+    const brand = getMatchedBrand(catalog.brands, haystack, category);
+
+    if (!brand) {
+      const categoryLabel = `${category.charAt(0).toUpperCase()}${category.slice(1)} repair`;
+      return {
+        href: `/repairs/${category}`,
+        label: `View ${categoryLabel}`,
+        context: `Matched the keyword to the ${category} repair hub.`,
+        precision: 'category',
+      };
+    }
+
+    const bestModel = brand.models
+      .map((model) => ({ model, score: getModelScore(model, haystack) }))
+      .sort((a, b) => b.score - a.score)[0];
+    const model = bestModel && bestModel.score >= 2 ? bestModel.model : null;
+
+    if (!model) {
+      const brandName = displayBrandName(brand.brand);
+      return {
+        href: `/repairs/${category}/${brand.slug}`,
+        label: `View ${brandName} repairs`,
+        context: repairIntent
+          ? `Matched ${brandName} and ${repairIntent.label}, but no exact model was named.`
+          : `Matched ${brandName}, but no exact model was named.`,
+        precision: 'brand',
+      };
+    }
+
+    if (repairIntent) {
+      const repair = model.repairTypes.find((item) => item.slug === repairIntent.slug)
+        || model.repairTypes.find((item) => normalizeText(item.name).includes(normalizeText(repairIntent.label).split(' ')[0]));
+
+      if (repair) {
+        return {
+          href: `/repairs/${category}/${brand.slug}/${model.slug}/${repair.slug}`,
+          label: `View ${model.model} ${repair.name}`,
+          context: `Matched this article to the closest repair service page.`,
+          precision: 'repair',
+        };
+      }
+    }
+
+    return {
+      href: `/repairs/${category}/${brand.slug}/${model.slug}`,
+      label: `View ${model.model} repairs`,
+      context: `Matched the keyword to this model page.`,
+      precision: 'model',
+    };
+  });
 }
 
 function formatDate(value?: string | null) {
@@ -102,6 +254,8 @@ async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
     return null;
   }
 
+  const repairTarget = await resolveRepairTarget(campaign.keyword, draft.title, draft.description);
+
   return {
     keyword: campaign.keyword,
     title: draft.title,
@@ -114,6 +268,7 @@ async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
     rating: 4.9,
     reviewCount: 150,
     jsonLd: campaign.payload?.jsonLd,
+    repairTarget,
   };
 }
 
@@ -262,15 +417,15 @@ export default async function SeoArticlePage({ params }: { params: Promise<{ key
                   </ul>
 
                   <div className="grid gap-3 pt-2">
-                    <Link href="/book-repair" className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[#CA8A04] px-6 py-4 font-bold text-white shadow-lg shadow-yellow-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-500 hover:shadow-xl hover:shadow-yellow-500/30">
-                      Book Repair
+                    <Link href={article.repairTarget.href} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[#CA8A04] px-6 py-4 font-bold text-white shadow-lg shadow-yellow-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-yellow-500 hover:shadow-xl hover:shadow-yellow-500/30">
+                      {article.repairTarget.label}
                       <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
-                    <Link href="/" className="flex w-full items-center justify-center rounded-xl border border-blue-100 bg-blue-50 px-6 py-4 font-bold text-blue-700 transition hover:border-blue-200 hover:bg-blue-100">
-                      Back to Homepage
+                    <Link href="/book-repair" className="flex w-full items-center justify-center rounded-xl border border-blue-100 bg-blue-50 px-6 py-4 font-bold text-blue-700 transition hover:border-blue-200 hover:bg-blue-100">
+                      Book Repair
                     </Link>
                     <p className="mt-4 text-center text-xs font-medium uppercase tracking-wider text-gray-400">
-                      No payment required to book
+                      {article.repairTarget.context}
                     </p>
                   </div>
                 </div>

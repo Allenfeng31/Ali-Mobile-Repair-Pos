@@ -440,6 +440,10 @@ Rules:
 - Obey the claim-safety rules from the master repair knowledge base. Never overpromise IP ratings, Apple warning removal, battery health display, data recovery, same-day turnaround, or original part source.
 - When relevant, include 1-2 concrete repair insights from the master repair knowledge base. If no insight fits the keyword, use the taxonomy and communication rules instead.
 - Target length: 900-1400 words in HTML content.
+- Treat this as a transaction-focused long-tail landing page, not a blog post. The page should capture the specific keyword intent and then hand the reader toward the matching repair service page.
+- Make every generated page materially different from other long-tail pages. Pick a keyword-specific angle based on the exact device, fault, location, price concern, timing concern, or repair-risk concern. Do not reuse the same intro, same heading sequence, same conclusion, or same explanation pattern across different keywords.
+- If the keyword names a specific model and repair type, write as if the page supports that exact model repair page. If the keyword only names a brand and repair type, write as a brand-level repair guide and avoid pretending you know the exact model. If the keyword only names a category, write as a category-level repair guide.
+- Include a final CTA section that naturally points readers to the matching repair service options before booking. Do not hardcode a URL in the article HTML; the public SEO renderer resolves the exact repair page link.
 
 JSON shape:
 {

@@ -71,6 +71,9 @@ const statusStyles: Record<string, string> = {
   pending: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
   approved: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
   queued: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+  processing: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
+  completed: 'border-blue-400/30 bg-blue-400/10 text-blue-200',
+  failed: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
   PROCESSING: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
   COMPLETED: 'border-blue-400/30 bg-blue-400/10 text-blue-200',
   FAILED: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
@@ -99,7 +102,14 @@ function escapeHtml(value: string) {
 }
 
 function normalizeKeywordStatus(status?: string | null) {
-  return (status || 'pending').trim();
+  return (status || 'pending').trim().toLowerCase();
+}
+
+function mapKeywordStatusToTab(status?: string | null): ActiveTab {
+  const normalized = normalizeKeywordStatus(status);
+  if (normalized === 'blocked') return 'blocked';
+  if (normalized === 'pending') return 'pending';
+  return 'approved';
 }
 
 function getDownloadFilename(contentDisposition: string | null) {
@@ -359,14 +369,11 @@ export default function SeoGeoScoutConsole() {
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const totalDiscovered = keywords.length;
-  const builderQueueSize = keywords.filter(kw => {
-    const status = normalizeKeywordStatus(kw.status);
-    return status === 'approved' || status === 'queued';
-  }).length;
-  const violationsBlocked = keywords.filter(kw => normalizeKeywordStatus(kw.status) === 'blocked').length;
+  const builderQueueSize = keywords.filter(kw => mapKeywordStatusToTab(kw.status) === 'approved').length;
+  const violationsBlocked = keywords.filter(kw => mapKeywordStatusToTab(kw.status) === 'blocked').length;
 
   const filteredKeywords = useMemo(() => keywords.filter(kw => {
-    const matchesTab = normalizeKeywordStatus(kw.status) === activeTab;
+    const matchesTab = normalizedQuery ? true : mapKeywordStatusToTab(kw.status) === activeTab;
     const matchesSearch = !normalizedQuery ||
       kw.keyword.toLowerCase().includes(normalizedQuery) ||
       (kw.source || '').toLowerCase().includes(normalizedQuery);
@@ -483,7 +490,7 @@ export default function SeoGeoScoutConsole() {
                       : 'border-white/10 bg-slate-900/80 text-slate-500 hover:text-slate-200'
                   }`}
                 >
-                  {tab} ({keywords.filter((keyword) => normalizeKeywordStatus(keyword.status) === tab).length})
+                  {tab} ({keywords.filter((keyword) => mapKeywordStatusToTab(keyword.status) === tab).length})
                 </button>
               ))}
             </div>
