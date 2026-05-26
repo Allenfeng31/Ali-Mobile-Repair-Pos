@@ -36,6 +36,69 @@ interface ScoutResult {
 
 type KeywordOccurrenceResult = 'inserted' | 'existing';
 
+const REPAIR_LANDING_PAGE_SEED_GROUPS = [
+    {
+        target: 'iphone 17 pro max screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', '3134'],
+    },
+    {
+        target: 'iphone 15 pro max screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', 'ringwood square'],
+    },
+    {
+        target: 'iphone 13 screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', '3134'],
+    },
+    {
+        target: 'iphone 11 screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', 'ringwood square'],
+    },
+    {
+        target: 'oppo screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'samsung galaxy screen repair',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', '3134'],
+    },
+    {
+        target: 'google pixel screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', 'ringwood square'],
+    },
+    {
+        target: 'ipad screen replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'ipad battery replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'samsung galaxy tab screen repair',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'macbook pro battery replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'macbook air screen repair',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'macbook liquid damage repair',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'apple watch screen repair',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+    {
+        target: 'apple watch battery replacement',
+        variants: ['ringwood', 'cost ringwood', 'near me', 'ringwood square', '3134'],
+    },
+] as const;
+
 const AI_BUZZWORD_BLACKLIST = [
     'delve',
     'revolutionary',
@@ -89,8 +152,14 @@ function expandScoutQueryVariants(baseQuery: string, params: ScoutParams) {
     return Array.from(variants);
 }
 
+function buildRepairLandingPageLongTailSeeds() {
+    return REPAIR_LANDING_PAGE_SEED_GROUPS.flatMap(({ target, variants }) => (
+        variants.map((variant) => `${target} ${variant}`)
+    ));
+}
+
 export function buildStrategicScoutQueries() {
-    return [
+    return Array.from(new Set([
         // iPhone & phone repair: model-specific, local, high-intent terms.
         'iphone 11 screen replacement ringwood',
         'iphone 12 pro battery repair ringwood',
@@ -118,7 +187,11 @@ export function buildStrategicScoutQueries() {
         'ipad battery repair near me',
         'ipad charging port fix ringwood',
         'samsung galaxy tab screen repair ringwood',
-    ];
+
+        // Deterministic repair-page seed matrix: 3-5 high-conversion long-tail
+        // terms per priority service cluster, independent of Google Suggest.
+        ...buildRepairLandingPageLongTailSeeds(),
+    ]));
 }
 
 export function isWithin15KmOfRingwood(keyword: string): boolean {
@@ -396,18 +469,27 @@ export async function runScoutEngine(
     for (const baseQuery of params.searchQueries) {
         try {
             const googleSuggestUrl = `https://suggestqueries.google.com/complete/search?client=chrome&hl=en-AU&gl=au&q=${encodeURIComponent(baseQuery)}`;
+            let googleSuggestions: string[] = [];
 
-            const response = await fetch(googleSuggestUrl, {
-                method: 'GET',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                },
-            });
+            try {
+                const response = await fetch(googleSuggestUrl, {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    },
+                });
 
-            if (!response.ok) continue;
+                if (response.ok) {
+                    const data = await response.json();
+                    googleSuggestions = Array.isArray(data?.[1]) ? data[1] : [];
+                }
+            } catch (suggestError) {
+                console.warn(`[SEO Scout] Google Suggest unavailable for "${baseQuery}". Falling back to deterministic repair seeds.`, suggestError);
+            }
 
-            const data = await response.json();
-            const googleSuggestions: string[] = Array.isArray(data?.[1]) ? data[1] : [];
+            const googleSuggestionLookup = new Set(
+                googleSuggestions.map((suggestion) => suggestion.trim().toLowerCase()).filter(Boolean)
+            );
 
             const targetedScoutPayload = Array.from(
                 new Set([
@@ -435,7 +517,7 @@ export async function runScoutEngine(
                 const occurrenceResult = await persistKeywordOccurrence(
                     routeSupabase as SupabaseClient,
                     keyword,
-                    'Google Suggest Scraper'
+                    googleSuggestionLookup.has(keyword) ? 'Google Suggest Scraper' : 'Repair Landing Page Seed Matrix'
                 );
 
                 if (occurrenceResult === 'inserted') {
