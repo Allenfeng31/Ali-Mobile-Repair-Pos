@@ -263,12 +263,14 @@ function getRepairKnowledgeBase() {
 }
 
 function slugify(text: string) {
-  return text
+  const words = text
     .toLowerCase()
     .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 90);
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/);
+  const uniqueWords = [...new Set(words)];
+  return uniqueWords.join('-').slice(0, 90);
 }
 
 function isUuid(value: string) {
@@ -391,11 +393,19 @@ Write a human, local, conversion-focused long-form SEO article. It must read lik
 
 DE-AI PATTERN FILTERING & HUMANIZER RULES:
 You must strictly follow these humanizer rules to write natural, authentic copy. Avoid all signs of AI-generated text:
-1. NO AI Buzzwords: Do NOT use high-frequency AI words: actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (as verb), interplay, intricate/intricacies, key (as adjective), landscape (as abstract noun), pivotal, showcase, tapestry, testament, underscore, valuable, vibrant, ensures, delicate, challenging.
+1. NO AI Buzzwords: Do NOT use high-frequency AI words: actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (as verb), interplay, intricate/intricacies, key (as adjective), landscape (as abstract noun), pivotal, showcase, tapestry, testament, underscore, valuable, vibrant, ensures, delicate, challenging, precise, transparency, discuss whether, vital, allows us, understand that, keep in mind, instead of rushing, we focus on, focus on.
    - Replace "ensures" with "confirms", "verifies", "makes sure", or write directly.
    - Replace "delicate" with "careful", "precision", or name the actual part (e.g., "flex cables, proximity sensors, and earpiece connectors" instead of "delicate sensors").
    - Replace "challenging" with "tough", "difficult", or "hard".
-2. NO Copula Avoidance: Use simple verbs like "is", "are", "has" instead of elaborate substitutes like "serves as", "stands as", "marks", "represents a", "boasts", "features", "offers". (e.g., write "We have a workshop..." instead of "Our workshop boasts..."). Do not use "offers a display experience" (say "provides a display experience" or "is a display"). Do not use "helps keep features like Face ID... working" (say "Face ID remains functional" or test results show).
+   - Replace "precise" with "exact", "accurate", or name the specific step.
+   - Replace "transparency" or "we are transparent that..." with direct, honest statements (e.g., "we explain clearly that...").
+   - Replace "discuss whether" with "assess", "check", or "examine".
+   - Replace "vital" with "important" or remove.
+   - Replace "allows us to" with "lets us" or write directly (e.g. "We confirm..." instead of "This allows us to confirm...").
+   - Replace "we understand that" or "understand that" with direct, simple statements (e.g. "Being without your phone is inconvenient" instead of "We understand that being without...").
+   - Replace "keep in mind" or "we keep data protection in mind" with direct statements (e.g. "We do not erase your data").
+   - Remove "instead of rushing through" or "we focus on... instead of rushing..." entirely. Just write directly: "We follow these checks:" or "We test...".
+2. NO Copula Avoidance: Use simple verbs like "is", "are", "has" instead of elaborate substitutes like "serves as", "stands as", "marks", "represents a", "boasts", "features", "offers". (e.g., write "We have a workshop..." instead of "Our workshop boasts..."). Do not use "offers a display experience" (say "provides a display experience" or "is a display"). Do not use "helps keep features like Face ID... working" (say "Face ID remains functional" or test results show). Do not use "discuss whether a frame adjustment is possible" (say "check if the frame is bent"). Do not use "consist of thin, fragile layers" (say "are made of thin, fragile layers"). Do not use "reflect the specific repair method chosen" (say "depend on the repair method"). Do not use "we find that separating these bonded layers exposes" (say "separating bonded layers exposes"). Do not use "vital for long-term reliability" (say "important for long-term reliability"). Do not use "has the colour accuracy" (say "gives you the colour accuracy"). Do not use "exposes internal components" (say "leaves internal components exposed").
 3. NO Negative Parallelisms or Tailing Negations: State points directly. Avoid "Not only... but also..." or "It's not just about... it's..." structures. Avoid tailing negations like "...no waiting", "...no compromise", "...no guessing". For example, do not write "We don't erase your data to fix the power system." Instead, write "We keep your data intact during battery replacement."
 4. NO Rule of Three: Do not force points into groups of three (e.g., "ideate, iterate, and deliver"). Keep lists natural, direct, and focused.
 5. NO Synonym Cycling (Elegant Variation): Repeat keywords naturally (like "screen replacement" or "iPad battery") if they are the clearest way to describe the service. Do not cycle through synonyms just to avoid repetition.
@@ -413,9 +423,18 @@ You must strictly follow these humanizer rules to write natural, authentic copy.
    - NO Filler Phrases or Hedging: Use "to" instead of "in order to", "because" instead of "due to the fact that". Avoid excessive qualifications like "could potentially possibly be argued" or instruction padding like "Treat your device with care around water and steam" (instead, just state the IP rating facts).
    - NO Generic up-beat conclusions: End with specific local action points, shop hours (10am-5pm), address, or phone number instead of "book your diagnostic check today" or "the future looks bright".
 10. Claim Safety and KB rules:
-    - iPhone screen repairs: Explicitly write "We use a specialist programmer where the model supports it to transfer original display data and preserve True Tone behaviour." Make sure to explain the customer-visible outcome if skipped: "If this data transfer is skipped, you may see an Apple warning message or find that True Tone adapts differently than before."
-    - Samsung/Other screen repairs: Explicitly write "Factory IP rating cannot be guaranteed after any phone has been opened" rather than soft phrasing like "reduce its factory water resistance".
-    - iPad battery replacement cost: Include the KB example sentence exactly: "The price difference with iPad battery replacement is often not just the battery itself; it is the time spent opening the glued display cleanly, protecting the flex cables, clearing old adhesive, and testing the iPad before it leaves the bench."
+     - iPhone screen repairs:
+       * For older models (like iPhone 11, iPhone XR): compare budget LCDs vs premium OEM-quality LCDs, write "We use a specialist programmer where the model supports it to transfer original display data and preserve True Tone behaviour. If this data transfer is skipped, you may see an Apple warning message or find that True Tone adapts differently than before."
+       * For flagship models (like iPhone 15 Pro Max and newer): do NOT claim data transfer. Instead write "We test True Tone and display calibration before return. For some iPhone models, we use specialist tools where supported to preserve original display behaviour. Skipping display calibration can cause True Tone loss or unexpected brightness jumps."
+       * Original parts wording: only say "genuine" or "original" when confirmed; otherwise use "original-grade", "premium", or "OEM-standard". For example, in FAQ answers, say "We source premium display assemblies matched to your iPhone model and explain the quality options during your visit."
+       * Warranty details: state clearly that "Screen replacements are covered by our 6-month warranty. This covers defects in the display panel, touch function, and seal. It does not cover accidental damage or liquid exposure after handover."
+       * Data Safety: do not write defensive or over-reassuring statements. Say "Your data remains on the device throughout a screen repair. We do not erase or reset your iPhone unless you ask."
+     - Samsung/Other screen repairs: Explicitly write "Factory IP rating cannot be guaranteed after any phone has been opened" rather than soft phrasing like "reduce its factory water resistance".
+     - iPad battery replacement cost: Include the KB example sentence exactly: "The price difference with iPad battery replacement is often not just the battery itself; it is the time spent opening the glued display cleanly, protecting the flex cables, clearing old adhesive, and testing the iPad before it leaves the bench."
+     - MacBook liquid damage: Explicitly describe the workbench diagnostic steps: disconnecting the battery first, microscope board inspection for corrosion/oxidation on connectors/flex cables, and checking for short circuits. State clearly that liquid damage repair eligibility for the 6-month warranty depends on the repair outcome; do not promise all liquid jobs are covered. Do not use phrases like "we will be honest about that" or "we keep data protection in mind". State facts directly: "Not every liquid-damaged MacBook can be salvaged; we inspect first and quote only for repairs we can complete."
+     - Unsupported models/brands (e.g. Apple Watch, Huawei, Nokia, etc.): If a device or repair category is not specifically detailed in sections 3.1-3.5 of the Knowledge Base, you MUST rely only on general repair principles (e.g. general digitizer, display assembly, flex cables, premium battery replacement, board-level diagnostics, data-safe handling). Do NOT invent technical claims (such as paired-chip calibration, custom thermal transfer, or specific IP68 waterproof ratings for that device) unless explicitly authorized by the KB. Mention that repair diagnostics are model-dependent and advise checking with a technician.
+     - Near Me Keywords: If the keyword contains "near me", the title MUST include "Near Me" or "Near You" (e.g. "iPhone 15 Pro Max Screen Replacement Near Me – Ringwood, Melbourne"). In the opening paragraph, explicitly state: "At Ali Mobile & Repair in Ringwood, we serve customers from Croydon, Mitcham, Heathmont, and across Melbourne's eastern suburbs."
+     - CTA Strength: Make all CTAs direct and specific. Instead of generic suggestions, write: "Call 0481 058 514 for a quick model check and current stock status before visiting, or visit Kiosk C1 at Ringwood Square Shopping Centre."
 
 Rules:
 - Return ONLY valid JSON. No markdown fence.
@@ -423,12 +442,21 @@ Rules:
 - Every literal newline inside JSON strings must be escaped as \n. Do not place raw multi-line text inside JSON string values.
 - content must be HTML only and include h2, h3, p, ul/ol, and a final CTA section.
 - Open with the customer's real-world symptom and daily-use frustration before explaining the technical repair.
+- Keyword Relevance: You MUST use the exact keyword in the title, description, first paragraph, and naturally throughout the content. If the keyword mentions a specific brand (like OPPO), the article must focus entirely on that brand (OPPO phones, OPPO screen replacements, OPPO models) and not generic "smartphones".
+- Specific device hardware naming: Older models like iPhone 11 and iPhone XR use LCD displays, not OLED. If writing about screen replacements for these models, compare budget LCDs vs premium OEM-quality LCDs and discuss True Tone restoration, rather than OLED screen trade-offs. Show a specific price anchor (e.g. "$240–$280 for a premium LCD with data transfer").
+- OPPO screen replacements: Mention that OPPO displays often use strong perimeter adhesive, and opening them requires controlled heat and careful handling to prevent digitizer damage. Note that most OPPO models are not water-sealed the same way as flagship iPhones, so the repair focuses on mechanical fit and touch function rather than water-resistance recovery.
+- Direct Phrasing & No Hedging: Write direct, factual statements instead of vague or soft marketing language. Instead of "may cost less" write "costs less". Instead of "may encounter" write "you may see". Instead of "involve trade-offs in colour accuracy" write "trade touch sensitivity and durability for lower cost". Instead of "we are transparent that a professional repair is not the same as a brand-new factory-sealed unit" write "a professional repair is not factory-sealed".
+- No Standalone Warning Sentences: Do not write standalone warning sentences (such as "If we rush this process, we risk damaging these internal components"). Fold warnings and risk details naturally into prose paragraphs.
+- Active Technician Voice: Do NOT use phrases like "we focus on", "focus on", "our goal is", "our aim is", "we prefer to", "because we carry", or "meaning we keep". Use direct, active verbs: "We test", "We calibrate", "We inspect", "We keep", "We carry".
+- Symptom-First Technical Explanations: Always start technical comparisons or quality sections by describing a customer-visible symptom first (e.g., a dim display, warning message, or weak touch responsiveness after a cheap repair), then explain the workbench cause (e.g., missing calibration or skipping display programming), then show how we resolve it.
+- Model-Specific Custom FAQs: Write custom FAQ questions specific to the exact device model and keyword, rather than generic warranty boilerplate. For example: "Will my screen repair remove the 'Genuine Apple Part' warning?", "Can you fix the screen if the frame is bent?", or "How long does the repair take if you have the part in stock?".
+- Location and Suburbs: Specify "Based in Ringwood, we handle walk-ins or can arrange pickup from your suburb if the repair takes longer." when serving surrounding areas.
 - Match the article angle to the keyword class:
   * symptom-based keywords: urgent symptom first, likely hardware cause second, practical diagnostic path third.
   * technical/trust keywords: compare the two technologies or explain the feature-retention concern in plain workshop language.
   * cost/value keywords: explain why quotes vary, what Apple Store vs third-party repair changes, and who each path suits.
   * extreme-damage keywords: stay calm, explain triage order, board/frame/screen risk, and when a bench inspection matters more than a blind quote.
-- If the keyword involves a repair decision or price gap, use a human comparison structure: budget route vs premium route, who each suits, what the hidden hardware trade-off is, and what the long-term reliability/feel difference may be.
+- If the keyword involves a repair decision or price gap, use a human comparison structure: budget route vs premium route, who each route suits, what the hidden hardware trade-off is, and what the long-term reliability/feel difference may be.
 - Include one workbench-level detail from the master repair knowledge base when relevant, such as rivets, flex cables, calibration, adhesive, seal fit, frame assemblies, or paired hardware.
 - If the keyword includes a suburb or postcode outside Ringwood, be transparent that Ali Mobile & Repair is at Kiosk C1, Ringwood Square. Do not pretend there is a branch in that suburb. Give the reader useful repair/price/risk guidance first, then encourage a phone model check, online booking, kiosk visit, or asking whether pickup/drop-off can be arranged. Use broad, stable route guidance only; never invent exact travel times.
 - Use a restrained rhetorical question only when it sounds like what a customer would genuinely ask.
@@ -466,7 +494,10 @@ const BANNED_AI_WORDS = [
   'emphasizing', 'enduring', 'fostering', 'garner', 'interplay',
   'intricate', 'intricacies', 'landscape', 'pivotal', 'showcase',
   'tapestry', 'testament', 'underscore', 'underscores', 'vibrant',
-  'ensures', 'delicate', 'challenging', 'enhance', 'valuable'
+  'ensures', 'delicate', 'challenging', 'enhance', 'valuable',
+  'precise', 'transparency', 'discuss whether', 'vital',
+  'allows us', 'understand that', 'keep in mind', 'instead of rushing', 'we focus on', 'focus on',
+  'focusing on', 'focused on', 'focuses on', 'inconvenience', 'spot hidden damage', 'prevent recurring issues', 'keep your data intact'
 ];
 
 const COPULA_TRIGGERS = [
@@ -594,7 +625,7 @@ async function callGeminiWriter(keyword: string, critique?: string, previousDraf
       contents: buildWriterPrompt(keyword, critique, previousDraft),
       config: {
         responseMimeType: 'application/json',
-        systemInstruction: 'You write production-ready local SEO landing page content as strict JSON for a repair business. Output only parseable JSON. You MUST strictly follow the DE-AI PATTERN FILTERING & HUMANIZER RULES: write like an experienced repair technician explaining issues to a real customer in plain workshop language, avoid all marketing fluff, banned AI words (e.g., actually, delve, crucial, ensures, delicate, challenging, enhance, valuable), negative parallelisms, and generic CTA conclusions.',
+        systemInstruction: 'You write production-ready local SEO landing page content as strict JSON for a repair business. Output only parseable JSON. You MUST strictly follow the DE-AI PATTERN FILTERING & HUMANIZER RULES: write like an experienced repair technician explaining issues to a real customer in plain workshop language, avoid all marketing fluff, banned AI words (e.g., actually, delve, crucial, ensures, delicate, challenging, enhance, valuable, precise, transparency, discuss whether, vital), negative parallelisms, and generic CTA conclusions.',
       },
     });
   });
