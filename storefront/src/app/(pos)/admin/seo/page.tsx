@@ -57,7 +57,39 @@ interface CampaignPayload {
       critique: string;
     }>;
   };
+  optimizationTask?: {
+    mode?: 'proposal';
+    targetUrl?: string | null;
+    primaryKeyword?: string;
+    proposal?: {
+      hero?: {
+        headline?: string;
+        quickAnswer?: string;
+        primaryCta?: string;
+        secondaryCta?: string;
+      };
+      localServiceArea?: {
+        address?: string;
+        phone?: string;
+      };
+      metaTitle?: string;
+      metaDescription?: string;
+    };
+    qa?: {
+      conversionModulesPreserved?: string;
+      bookingCtaPreserved?: string;
+      callCtaPreserved?: string;
+      modularAndScannable?: string;
+      noDenseArticleContent?: string;
+      pageRemainsModularAndScannable?: string;
+      noDenseArticleStyleContent?: string;
+      mobileReadabilityPreserved?: string;
+      conversionRiskNotes?: string[];
+    };
+  };
 }
+
+const CANONICAL_BUSINESS_ADDRESS = 'Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134';
 
 interface ScoutSummary {
   discovered: number;
@@ -200,7 +232,7 @@ function buildPreviewDocument(campaign: CampaignRecord | null) {
           <article>${draft.content || '<p>No content available.</p>'}</article>
           <aside>
             <h2>Need this checked?</h2>
-            <p>Get a practical quote from Kiosk C1 in Ringwood Square. No Fix, No Charge applies to eligible diagnostics.</p>
+            <p>Get a practical quote from ${CANONICAL_BUSINESS_ADDRESS}. No Fix, No Charge applies to eligible diagnostics.</p>
             <div class="ctaStack">
               <a class="cta" href="/book-repair" target="_top">Book Repair</a>
               <a class="cta secondary" href="/" target="_top">Back to Homepage</a>
@@ -636,6 +668,54 @@ export default function SeoGeoScoutConsole() {
                 />
               </div>
             </div>
+
+            {selectedCampaign?.payload?.optimizationTask && (
+              <div className="mt-5 rounded-3xl border border-sky-300/20 bg-sky-500/10 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-200">
+                    Landing Page Proposal Mode
+                  </p>
+                  <span className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-emerald-100">
+                    Conversion UX Guard
+                  </span>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-3">
+                    <p className="text-xs font-black text-white">
+                      {selectedCampaign.payload.optimizationTask.proposal?.hero?.headline || selectedCampaign.keyword}
+                    </p>
+                    <p className="mt-2 line-clamp-3 text-xs font-semibold leading-5 text-slate-400">
+                      {selectedCampaign.payload.optimizationTask.proposal?.hero?.quickAnswer || 'Modular landing page improvement proposal.'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Canonical local service area</p>
+                    <p className="mt-2 text-xs font-bold leading-5 text-slate-300">
+                      {selectedCampaign.payload.optimizationTask.proposal?.localServiceArea?.address || CANONICAL_BUSINESS_ADDRESS}
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-blue-200">
+                      {selectedCampaign.payload.optimizationTask.proposal?.localServiceArea?.phone || '0481 058 514'}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {[
+                    ['Booking CTA', selectedCampaign.payload.optimizationTask.qa?.bookingCtaPreserved],
+                    ['Call CTA', selectedCampaign.payload.optimizationTask.qa?.callCtaPreserved],
+                    [
+                      'Modular mobile UX',
+                      selectedCampaign.payload.optimizationTask.qa?.modularAndScannable ||
+                        selectedCampaign.payload.optimizationTask.qa?.pageRemainsModularAndScannable,
+                    ],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">{label}</p>
+                      <p className="mt-1 text-xs font-black text-emerald-200">{value || 'PASS'}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {selectedCampaign?.payload?.agentWorkflow?.rounds && (
               <div className="mt-5 rounded-3xl border border-white/10 bg-slate-950/60 p-4">

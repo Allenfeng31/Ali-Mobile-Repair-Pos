@@ -77,7 +77,7 @@ We understand that a broken device can be a major inconvenience. That's why our 
 
 Whether you're dealing with a cracked screen, a failing battery, or complex hardware issues, we're here to help. Located conveniently in **Ringwood**, we serve the greater Melbourne area with professional care.
 
-Visit our shop at **Shop 28, Ringwood Square Shopping Centre** or call us at **0481 058 514** for a free quote!
+Visit our shop at **Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134** or call us at **0481 058 514** for a free quote!
 `;
 
 if (isJsonMode) {

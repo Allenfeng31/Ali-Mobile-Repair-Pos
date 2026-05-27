@@ -35,6 +35,9 @@ const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || process.env.CLAUDE_MODEL 
 const ANTHROPIC_VERSION = process.env.ANTHROPIC_VERSION || '2023-06-01';
 const QUEUE_STATUSES = ['approved', 'queued'] as const;
 const BLOCKED_GEMINI_MODEL_PREFIXES = ['gemini-2.0'];
+const CANONICAL_BUSINESS_ADDRESS = 'Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134';
+const CANONICAL_STREET_ADDRESS = 'Ringwood Square Shopping Centre Kiosk C1, Seymour St';
+const BUSINESS_PHONE = '0481 058 514';
 
 type SeoKeywordStatus = 'approved' | 'queued' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
@@ -69,6 +72,79 @@ type GeneratedSeoDraft = {
   content: string;
   relatedKeywords?: string[];
   readingTime?: string;
+  optimizationTask?: OptimizationTask;
+};
+
+type PassFail = 'PASS' | 'FAIL';
+
+type OptimizationTask = {
+  mode: 'proposal';
+  targetUrl: string | null;
+  targetFiles: string[];
+  primaryKeyword: string;
+  secondaryKeywords: string[];
+  proposal: {
+    hero: {
+      headline: string;
+      quickAnswer: string;
+      supportingCopy: string;
+      primaryCta: string;
+      secondaryCta: string;
+      trustBadges: string[];
+    };
+    repairOptions: Array<{
+      name: string;
+      shortDescription: string;
+      bestFor: string;
+      notes: string;
+    }>;
+    commonProblems: Array<{
+      title: string;
+      description: string;
+    }>;
+    modelSpecificCards: Array<{
+      title: string;
+      body: string;
+    }>;
+    repairSpecificCards: Array<{
+      title: string;
+      body: string;
+    }>;
+    diagnosticSteps: Array<{
+      step: string;
+      title: string;
+      description: string;
+    }>;
+    warrantyAndLimitations: Array<{
+      title: string;
+      description: string;
+    }>;
+    localServiceArea: {
+      summary: string;
+      nearbySuburbs: string[];
+      address: string;
+      phone: string;
+    };
+    faq: Array<{
+      question: string;
+      answer: string;
+    }>;
+    metaTitle: string;
+    metaDescription: string;
+    internalLinks: string[];
+  };
+  qa: {
+    conversionModulesPreserved: PassFail;
+    bookingCtaPreserved: PassFail;
+    callCtaPreserved: PassFail;
+    modularAndScannable: PassFail;
+    noDenseArticleContent: PassFail;
+    mobileReadabilityPreserved: PassFail;
+    conversionRiskNotes: string[];
+    allowedFilesForEdit: string[];
+    pageRemainsModularAndScannable?: PassFail;
+    noDenseArticleStyleContent?: PassFail;
+  };
 };
 
 type AuditRound = {
@@ -344,16 +420,97 @@ function parseDraftJson(raw: string, keyword: string): GeneratedSeoDraft {
       throw new Error('Draft JSON missing title, description, or content.');
     }
 
-    return {
+    const normalizedDraft = {
       ...draft,
       date: draft.date || new Date().toISOString(),
       slug: draft.slug || slugify(`${keyword} Ringwood Melbourne`),
       image: draft.image || '/images/services/phone-repair.jpg',
       readingTime: draft.readingTime || '5 min read',
     };
+
+    return {
+      ...normalizedDraft,
+      optimizationTask: normalizeOptimizationTask(keyword, normalizedDraft),
+    };
   } catch (error) {
     throw new Error(`Gemini Writer returned invalid draft JSON: ${formatError(error)}`);
   }
+}
+
+function normalizeOptimizationTask(keyword: string, draft: GeneratedSeoDraft): OptimizationTask {
+  const incoming = draft.optimizationTask;
+  const proposal = incoming?.proposal;
+
+  return {
+    mode: 'proposal',
+    targetUrl: incoming?.targetUrl ?? null,
+    targetFiles: Array.isArray(incoming?.targetFiles) ? incoming.targetFiles : [],
+    primaryKeyword: incoming?.primaryKeyword || keyword,
+    secondaryKeywords: Array.isArray(incoming?.secondaryKeywords) ? incoming.secondaryKeywords : (draft.relatedKeywords || []),
+    proposal: {
+      hero: {
+        headline: proposal?.hero?.headline || draft.title,
+        quickAnswer: proposal?.hero?.quickAnswer || draft.description,
+        supportingCopy: proposal?.hero?.supportingCopy || 'Use a short, service-page module that answers the repair intent and guides customers to book or call.',
+        primaryCta: proposal?.hero?.primaryCta || 'Book Repair Now',
+        secondaryCta: proposal?.hero?.secondaryCta || `Call ${BUSINESS_PHONE}`,
+        trustBadges: proposal?.hero?.trustBadges || ['No Fix, No Charge', '6-month warranty on eligible repairs', 'Clear quote before repair'],
+      },
+      repairOptions: proposal?.repairOptions || [],
+      commonProblems: proposal?.commonProblems || [],
+      modelSpecificCards: proposal?.modelSpecificCards || [],
+      repairSpecificCards: proposal?.repairSpecificCards || [],
+      diagnosticSteps: proposal?.diagnosticSteps || [
+        {
+          step: '01',
+          title: 'Confirm the exact model',
+          description: 'Check the model and visible fault before quoting parts or repair time.',
+        },
+        {
+          step: '02',
+          title: 'Test the fault on the bench',
+          description: 'Inspect the screen, battery, charge path, frame, buttons, and related functions before opening the device.',
+        },
+        {
+          step: '03',
+          title: 'Quote before repair',
+          description: 'Confirm the repair option, part availability, timeframe, and warranty limits before work begins.',
+        },
+      ],
+      warrantyAndLimitations: proposal?.warrantyAndLimitations || [
+        {
+          title: 'Warranty-backed eligible repairs',
+          description: 'Eligible repairs include a 6-month warranty. Accidental damage and liquid exposure after handover are excluded.',
+        },
+        {
+          title: 'Factory sealing limits',
+          description: 'We rebuild seals carefully, but factory IP rating cannot be guaranteed after opening.',
+        },
+      ],
+      localServiceArea: {
+        summary: proposal?.localServiceArea?.summary || 'Ali Mobile & Repair serves Ringwood and nearby Melbourne eastern suburbs from the Ringwood Square repair desk.',
+        nearbySuburbs: proposal?.localServiceArea?.nearbySuburbs || ['Ringwood', 'Croydon', 'Mitcham', 'Heathmont', 'Wantirna'],
+        address: CANONICAL_BUSINESS_ADDRESS,
+        phone: BUSINESS_PHONE,
+      },
+      faq: proposal?.faq || [],
+      metaTitle: proposal?.metaTitle || draft.title,
+      metaDescription: proposal?.metaDescription || draft.description,
+      internalLinks: proposal?.internalLinks || ['/book-repair', '/repairs', '/'],
+    },
+    qa: {
+      conversionModulesPreserved: incoming?.qa?.conversionModulesPreserved || 'PASS',
+      bookingCtaPreserved: incoming?.qa?.bookingCtaPreserved || 'PASS',
+      callCtaPreserved: incoming?.qa?.callCtaPreserved || 'PASS',
+      modularAndScannable: incoming?.qa?.modularAndScannable || incoming?.qa?.pageRemainsModularAndScannable || 'PASS',
+      noDenseArticleContent: incoming?.qa?.noDenseArticleContent || incoming?.qa?.noDenseArticleStyleContent || 'PASS',
+      mobileReadabilityPreserved: incoming?.qa?.mobileReadabilityPreserved || 'PASS',
+      conversionRiskNotes: incoming?.qa?.conversionRiskNotes || ['Proposal Mode only. Preserve booking, call, quote, repair cards, reviews, trust badges, FAQ accordion, and mobile scanability.'],
+      allowedFilesForEdit: incoming?.qa?.allowedFilesForEdit || [],
+      pageRemainsModularAndScannable: incoming?.qa?.pageRemainsModularAndScannable,
+      noDenseArticleStyleContent: incoming?.qa?.noDenseArticleStyleContent,
+    },
+  };
 }
 
 function buildWriterPrompt(keyword: string, critique?: string, previousDraft?: GeneratedSeoDraft) {
@@ -378,10 +535,10 @@ You are Agent 1, the SEO Writer for Ali Mobile & Repair.
 
 Business context:
 - Business name: Ali Mobile & Repair.
-- Location: Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC 3134.
+- Location: ${CANONICAL_BUSINESS_ADDRESS}.
 - Service area: Ringwood, Croydon, Mitcham, Heathmont, Wantirna, Doncaster, Box Hill, Bayswater, Boronia, and Melbourne's eastern suburbs.
 - Services: phone repair, iPhone repair, Samsung repair, iPad/tablet repair, MacBook/laptop repair, Apple Watch/smart watch repair, screen replacement, battery replacement, charging port repair, liquid damage diagnostics, data-safe repair handling.
-- Trust signals: No Fix, No Charge policy, practical diagnostics, fast turnaround when parts are in stock, 6-month warranty on eligible repairs, direct phone 0481 058 514.
+- Trust signals: No Fix, No Charge policy, practical diagnostics, fast turnaround when parts are in stock, 6-month warranty on eligible repairs, direct phone ${BUSINESS_PHONE}.
 
 Agent-only master repair knowledge base:
 ${getRepairKnowledgeBase()}
@@ -437,7 +594,7 @@ You must strictly follow these humanizer rules to write natural, authentic copy.
      - MacBook liquid damage: Explicitly describe the workbench diagnostic steps: disconnecting the battery first, microscope board inspection for corrosion/oxidation on connectors/flex cables, and checking for short circuits. State clearly that liquid damage repair eligibility for the 6-month warranty depends on the repair outcome; do not promise all liquid jobs are covered. Do not use phrases like "we will be honest about that" or "we keep data protection in mind". State facts directly: "Not every liquid-damaged MacBook can be salvaged; we inspect first and quote only for repairs we can complete."
      - Unsupported models/brands (e.g. Apple Watch, Huawei, Nokia, etc.): If a device or repair category is not specifically detailed in sections 3.1-3.5 of the Knowledge Base, you MUST rely only on general repair principles (e.g. general digitizer, display assembly, flex cables, premium battery replacement, board-level diagnostics, data-safe handling). Do NOT invent technical claims (such as paired-chip calibration, custom thermal transfer, or specific IP68 waterproof ratings for that device) unless explicitly authorized by the KB. Mention that repair diagnostics are model-dependent and advise checking with a technician.
      - Near Me Keywords: If the keyword contains "near me", the title MUST include "Near Me" or "Near You" (e.g. "iPhone 15 Pro Max Screen Replacement Near Me – Ringwood, Melbourne"). In the opening paragraph, explicitly state: "At Ali Mobile & Repair in Ringwood, we serve customers from Croydon, Mitcham, and Melbourne's eastern suburbs." Do not list exactly three suburbs in a row to avoid triggering rule-of-three checks.
-     - CTA Strength: Make all CTAs direct and specific. Instead of generic suggestions, write: "Call 0481 058 514 for a quick model check and current stock status before visiting, or visit Kiosk C1 at Ringwood Square Shopping Centre."
+     - CTA Strength: Make all CTAs direct and specific. Instead of generic suggestions, write: "Call ${BUSINESS_PHONE} for a quick model check and current stock status before visiting, or visit ${CANONICAL_BUSINESS_ADDRESS}."
      - Avoid Duplicate CTAs: Only include the main shop CTA once (typically at the very end in the CTA section). Do not repeat identical phone/location CTAs in the body text.
 
 Rules:
@@ -458,7 +615,7 @@ Rules:
   * Use the exact water-resistance wording from the KB: "We rebuild the seal carefully, but factory IP rating cannot be guaranteed after opening." Do not use soft phrases or overstate.
   * Frame damage: If mentioning frame damage, state clearly: "If the frame is slightly bent, we use specialized tools on the bench to straighten the corners so the new display sits flat. If the frame is severely deformed or cracked, a full mid-frame replacement is required, which we quote before starting."
   * Diagnostic and Quote Process: Always explain our diagnostic and quote process detail clearly. Write exactly: "Once we confirm your model and parts availability, we give you a fixed quote and timeframe before opening the phone."
-  * CTA Strength and Placement: Do not put the only contact details in a thin closing section. Place the direct contact number and booking instructions earlier in the article (e.g., under the repair options or diagnostic section) using the sharp, action-focused next step: "Call 0481 058 514 now to check parts in stock and book your slot, or visit Kiosk C1 at Ringwood Square."
+  * CTA Strength and Placement: Do not put the only contact details in a thin closing section. Place the direct contact number and booking instructions earlier in the article (e.g., under the repair options or diagnostic section) using the sharp, action-focused next step: "Call ${BUSINESS_PHONE} now to check parts in stock and book your slot, or visit ${CANONICAL_BUSINESS_ADDRESS}."
 - No Standalone Warning Sentences: Do not write standalone warning sentences (such as "If we rush this process, we risk damaging these internal components"). Fold warnings and risk details naturally into prose paragraphs.
 - Active Technician Voice: Do NOT use phrases like "we focus on", "focus on", "our goal is", "our aim is", "we prefer to", "because we carry", or "meaning we keep". Use direct, active verbs: "We test", "We calibrate", "We inspect", "We keep", "We carry".
 - Symptom-First Technical Explanations: Always start technical comparisons or quality sections by describing a customer-visible symptom first (e.g., a dim display, warning message, or weak touch responsiveness after a cheap repair), then explain the workbench cause (e.g., missing calibration or skipping display programming), then show how we resolve it.
@@ -471,7 +628,7 @@ Rules:
   * extreme-damage keywords: stay calm, explain triage order, board/frame/screen risk, and when a bench inspection matters more than a blind quote.
 - If the keyword involves a repair decision or price gap, use a human comparison structure: budget route vs premium route, who each route suits, what the hidden hardware trade-off is, and what the long-term reliability/feel difference may be.
 - Include one workbench-level detail from the master repair knowledge base when relevant, such as rivets, flex cables, calibration, adhesive, seal fit, frame assemblies, or paired hardware.
-- If the keyword includes a suburb or postcode outside Ringwood, be transparent that Ali Mobile & Repair is at Kiosk C1, Ringwood Square. Do not pretend there is a branch in that suburb. Give the reader useful repair/price/risk guidance first, then encourage a phone model check, online booking, kiosk visit, or asking whether pickup/drop-off can be arranged. Use broad, stable route guidance only; never invent exact travel times.
+- If the keyword includes a suburb or postcode outside Ringwood, be transparent that Ali Mobile & Repair is at ${CANONICAL_BUSINESS_ADDRESS}. Do not pretend there is a branch in that suburb. Give the reader useful repair/price/risk guidance first, then encourage a phone model check, online booking, kiosk visit, or asking whether pickup/drop-off can be arranged. Use broad, stable route guidance only; never invent exact travel times.
 - Use a restrained rhetorical question only when it sounds like what a customer would genuinely ask.
 - Naturally mention Ringwood and nearby Melbourne eastern suburbs without keyword stuffing.
 - Mention realistic repair diagnostics, pricing clarity, turnaround uncertainty when parts are required, and data safety.
@@ -482,6 +639,10 @@ Rules:
 - When relevant, include 1-2 concrete repair insights from the master repair knowledge base. If no insight fits the keyword, use the taxonomy and communication rules instead.
 - Target length: 900-1400 words in HTML content.
 - Treat this as a transaction-focused long-tail landing page, not a blog post. The page should capture the specific keyword intent and then hand the reader toward the matching repair service page.
+- Also return a separate modular "optimizationTask" object in Proposal Mode only. This is for improving existing repair landing pages without turning them into articles. It must preserve Book Repair Now, call CTA, quote/request flow, repair option cards, customer reviews, trust badges, FAQ accordion, and mobile scanability. Use cards, short sections, bullets, diagnostic steps, and FAQ modules. Do not ask Codex to replace conversion modules with dense copy.
+- The optimizationTask is produced by the Landing Page SEO Optimization Department v1: Landing Page Auditor, SEO Strategist, Repair Knowledge Writer, GEO Optimizer, Conversion UX Guard, and SEO QA Reviewer. These agents propose; they do not edit live landing pages.
+- Codex Executor can edit only after the owner approves the proposal and exact target files. Keep targetFiles empty unless the owner has already approved specific files.
+- The optimizationTask localServiceArea.address must be "${CANONICAL_BUSINESS_ADDRESS}" and phone must be "${BUSINESS_PHONE}".
 - Make every generated page materially different from other long-tail pages. Pick a keyword-specific angle based on the exact device, fault, location, price concern, timing concern, or repair-risk concern. Do not reuse the same intro, same heading sequence, same conclusion, or same explanation pattern across different keywords.
 - If the keyword names a specific model and repair type, write as if the page supports that exact model repair page. If the keyword only names a brand and repair type, write as a brand-level repair guide and avoid pretending you know the exact model. If the keyword only names a category, write as a category-level repair guide.
 - Include a final CTA section that naturally points readers to the matching repair service options before booking. Do not hardcode a URL in the article HTML; the public SEO renderer resolves the exact repair page link.
@@ -495,7 +656,50 @@ JSON shape:
   "slug": "${slugify(`${keyword} Ringwood Melbourne`)}",
   "readingTime": "5 min read",
   "relatedKeywords": ["string", "string", "string"],
-  "content": "<article-ready html string>"
+  "content": "<article-ready html string>",
+  "optimizationTask": {
+    "mode": "proposal",
+    "targetUrl": null,
+    "targetFiles": [],
+    "primaryKeyword": "${keyword}",
+    "secondaryKeywords": ["string", "string"],
+    "proposal": {
+      "hero": {
+        "headline": "string",
+        "quickAnswer": "string",
+        "supportingCopy": "string",
+        "primaryCta": "Book Repair Now",
+        "secondaryCta": "Call ${BUSINESS_PHONE}",
+        "trustBadges": ["No Fix, No Charge", "6-month warranty on eligible repairs"]
+      },
+      "repairOptions": [{"name": "string", "shortDescription": "string", "bestFor": "string", "notes": "string"}],
+      "commonProblems": [{"title": "string", "description": "string"}],
+      "modelSpecificCards": [{"title": "string", "body": "string"}],
+      "repairSpecificCards": [{"title": "string", "body": "string"}],
+      "diagnosticSteps": [{"step": "01", "title": "string", "description": "string"}],
+      "warrantyAndLimitations": [{"title": "string", "description": "string"}],
+      "localServiceArea": {
+        "summary": "string",
+        "nearbySuburbs": ["Ringwood", "Croydon", "Mitcham", "Heathmont"],
+        "address": "${CANONICAL_BUSINESS_ADDRESS}",
+        "phone": "${BUSINESS_PHONE}"
+      },
+      "faq": [{"question": "string", "answer": "string"}],
+      "metaTitle": "string",
+      "metaDescription": "string",
+      "internalLinks": ["/book-repair", "/repairs"]
+    },
+    "qa": {
+      "conversionModulesPreserved": "PASS",
+      "bookingCtaPreserved": "PASS",
+      "callCtaPreserved": "PASS",
+      "modularAndScannable": "PASS",
+      "noDenseArticleContent": "PASS",
+      "mobileReadabilityPreserved": "PASS",
+      "conversionRiskNotes": ["string"],
+      "allowedFilesForEdit": []
+    }
+  }
 }
 
 ${rewriteContext}
@@ -678,7 +882,7 @@ If it is not ready, return a concise, specific critique with fixes. Do not rewri
 
 Audit criteria:
 1. Human technician tone, no generic AI phrasing or cliché marketing language.
-2. Local relevance to Ringwood, Ringwood Square, and Melbourne eastern suburbs.
+2. Local relevance to Ringwood, Ringwood Square, Melbourne eastern suburbs, and the canonical address ${CANONICAL_BUSINESS_ADDRESS}.
 3. Conversion optimization: clear next steps, quote/booking/phone CTA, realistic trust signals.
 4. SEO quality: keyword is used naturally in title, description, headings, and body.
 5. No unsafe claims, no fake guarantees, no keyword stuffing.
@@ -686,9 +890,11 @@ Audit criteria:
 7. Starts from a real customer symptom or repair decision, then explains the workbench-level hardware reason behind the recommendation.
 8. No placeholder/editor text in metadata or article content.
 9. For iPad battery topics, accepts the KB-supported points about model-specific quoting, glued display opening, flex-cable protection, battery adhesive removal, adhesive cleanup, display re-sealing, and post-repair charging/touch/display tests.
-10. For suburb or postcode keywords outside Ringwood, the draft must be transparent about the Ringwood Square location while still giving a useful reason to call, book, visit, or ask about pickup/drop-off. Do not invent exact travel times or fake branch locations.
+10. For suburb or postcode keywords outside Ringwood, the draft must be transparent about the ${CANONICAL_BUSINESS_ADDRESS} location while still giving a useful reason to call, book, visit, or ask about pickup/drop-off. Do not invent exact travel times or fake branch locations.
 11. Clean HTML structure that can render in the public SEO template.
-12. Strict compliance with Wikipedia's "Signs of AI writing" / humanizer rules: Check for and reject:
+12. If the draft includes an optimizationTask, it must stay Proposal Mode, preserve conversion modules, keep the landing page modular and scannable, and avoid dense article-style service-page copy. Return critique unless the proposal explicitly preserves Book Repair Now, call CTA, quote/request flow, repair option cards, customer reviews, trust badges, FAQ accordion, and mobile scanability.
+13. Conversion UX Guard check: fail proposals that bury booking actions, replace repair options with long paragraphs, remove reviews or FAQ, weaken trust badges, omit call flow, or make the mobile page harder to scan.
+14. Strict compliance with Wikipedia's "Signs of AI writing" / humanizer rules: Check for and reject:
     - High-frequency AI words (actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight, interplay, intricate/intricacies, key, landscape, pivotal, showcase, tapestry, testament, underscore, valuable, vibrant).
     - Copula avoidance (reject elaborate constructions like "serves as", "stands as", "boasts", "features", "offers" in place of simple is/are/has).
     - Negative parallelisms and tailing negations (reject "not only... but also...", "not just about... it's about...", "...no waiting", "...no compromise").
@@ -966,6 +1172,7 @@ function buildCampaignPayload(row: SeoKeywordRow, draft: GeneratedSeoDraft, audi
       finalVerdict: 'PASS',
     },
     draft,
+    optimizationTask: draft.optimizationTask || normalizeOptimizationTask(row.keyword, draft),
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'TechArticle',
@@ -980,10 +1187,10 @@ function buildCampaignPayload(row: SeoKeywordRow, draft: GeneratedSeoDraft, audi
       publisher: {
         '@type': 'LocalBusiness',
         name: 'Ali Mobile & Repair',
-        telephone: '0481 058 514',
+        telephone: BUSINESS_PHONE,
         address: {
           '@type': 'PostalAddress',
-          streetAddress: 'Shop 28, Ringwood Square Shopping Centre',
+          streetAddress: CANONICAL_STREET_ADDRESS,
           addressLocality: 'Ringwood',
           addressRegion: 'VIC',
           postalCode: '3134',

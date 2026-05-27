@@ -112,8 +112,8 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         .text('ALI MOBILE REPAIRS')
         .normalSize()
         .boldOn()
-        .text('Kiosk C1 Ringwood Square')
-        .text('Shopping Centre')
+        .text('Ringwood Square Shopping Centre Kiosk C1')
+        .text('Seymour St')
         .text('Ringwood VIC 3134')
         .text('Tel: 0481 058 514');
 
