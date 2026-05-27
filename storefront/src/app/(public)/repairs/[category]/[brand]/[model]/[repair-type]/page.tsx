@@ -113,7 +113,7 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
       question: `How long does the ${model} ${repairName} take?`,
       answer: isWaterDamage 
         ? `Water damage recovery typically takes around 1 hour. If the damage is extensive and requires more time for professional drying or component cleaning, our technicians will inform you beforehand.`
-        : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at our Ringwood Square location. Walk-ins are welcome on weekdays for same-day service.`,
+        : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. Walk-ins are welcome on weekdays for same-day service.`,
     },
     {
       question: `Do you use OEM parts for ${model} ${repairName.toLowerCase()}?`,

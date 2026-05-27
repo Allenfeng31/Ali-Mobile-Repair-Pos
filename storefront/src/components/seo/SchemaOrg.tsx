@@ -33,7 +33,7 @@ export function LocalBusinessSchema() {
     "description": "Expert mobile phone, tablet, and laptop repair service located in Ringwood Square Shopping Centre, Melbourne. Specializing in screen replacements, micro-soldering, Face ID repair, and using OEM parts.",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Kiosk C1, Ringwood Square Shopping Centre, 59-65 Maroondah Hwy",
+      "streetAddress": "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
       "addressLocality": "Ringwood",
       "addressRegion": "VIC",
       "postalCode": "3134",

@@ -179,7 +179,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
     " Get direct transit routes to Ringwood via local train or Maroondah Hwy bus corridors."
   ];
   const routeOrigin = `${area.name}, Victoria, Australia`;
-  const routeDestination = "Ringwood Square Shopping Centre, Ringwood VIC 3134";
+  const routeDestination = "Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134";
   const encodedOrigin = encodeURIComponent(routeOrigin);
   const encodedDestination = encodeURIComponent(routeDestination);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -198,7 +198,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
     image: `${baseUrl}/images/logo.png`,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Kiosk C1, Ringwood Square Shopping Centre, 59-65 Maroondah Hwy",
+      streetAddress: "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
       addressLocality: "Ringwood",
       addressRegion: "VIC",
       postalCode: "3134",

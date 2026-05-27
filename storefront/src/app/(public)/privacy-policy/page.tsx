@@ -54,14 +54,14 @@ export default function PrivacyPolicyPage() {
         <h2>5. Your Rights</h2>
         <p>
           You have the right to access, correct, or request deletion of your personal information held in our records. 
-          For any privacy-related inquiries, please visit us in-store at Ringwood Square Shopping Centre.
+          For any privacy-related inquiries, please visit us in-store at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
         </p>
       </section>
 
       <section style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--secondary)', borderRadius: '10px' }}>
         <h2>Contact Us</h2>
         <p>Ali Mobile Repair</p>
-        <p>Kiosk C1, Ringwood Square Shopping Centre, Ringwood, VIC 3134</p>
+        <p>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</p>
         <p>Phone: 0481 058 514</p>
       </section>
     </div>

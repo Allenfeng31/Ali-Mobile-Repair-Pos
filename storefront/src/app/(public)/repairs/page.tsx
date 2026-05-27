@@ -70,7 +70,7 @@ const processSteps = [
   },
   {
     title: "Drop Off or Book",
-    text: "Book online for priority service or bring the device to Kiosk C1 in Ringwood Square for a fast assessment.",
+    text: "Book online for priority service or bring the device to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a fast assessment.",
   },
 ];
 

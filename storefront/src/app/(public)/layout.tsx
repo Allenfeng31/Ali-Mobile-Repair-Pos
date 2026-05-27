@@ -52,7 +52,7 @@ export default function PublicLayout({
                 <span className="footer-kicker">Ringwood Square repair desk</span>
                 <h2>Need a clear repair price before you visit?</h2>
                 <p>
-                  Book online for priority service, call for part availability, or drop into Kiosk C1 for a practical device check.
+                  Book online for priority service, call for part availability, or drop into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check.
                 </p>
               </div>
               <div className="footer-cta-actions">
@@ -77,7 +77,7 @@ export default function PublicLayout({
                   />
                 </Link>
                 <p>
-                  Local phone, tablet, laptop, and Apple Watch repairs from Kiosk C1 inside Ringwood Square Shopping Centre.
+                  Local phone, tablet, laptop, and Apple Watch repairs from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
                   Clear diagnosis first, practical pricing, and warranty-backed workmanship.
                 </p>
                 <div className="footer-trust-strip" aria-label="Repair promises">
@@ -107,8 +107,8 @@ export default function PublicLayout({
                 >
                   <MapPin size={19} strokeWidth={2.4} aria-hidden="true" />
                   <span>Visit us in store</span>
-                  <strong>Kiosk C1, Ringwood Square</strong>
-                  <small>59-65 Maroondah Hwy, Ringwood VIC 3134.</small>
+                  <strong>Ringwood Square Shopping Centre Kiosk C1</strong>
+                  <small>Seymour St, Ringwood VIC 3134.</small>
                 </a>
                 <div className="footer-contact-card">
                   <Clock3 size={19} strokeWidth={2.4} aria-hidden="true" />

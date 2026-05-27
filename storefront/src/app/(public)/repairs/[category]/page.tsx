@@ -398,7 +398,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               </div>
               <div>
                 <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
-                <span>Kiosk C1, Ringwood Square</span>
+                <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
               </div>
             </div>
           )}

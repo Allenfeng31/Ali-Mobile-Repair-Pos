@@ -69,7 +69,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             Repair menu
           </span>
           <h1 id="model-repair-heading">{modelName} Repair Services</h1>
-          <p>Select the repair you need for your {modelName}. Walk in or book online for practical service at Ringwood Square.</p>
+          <p>Select the repair you need for your {modelName}. Walk in or book online for practical service at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.</p>
           <div className="repair-hero-actions repair-model-actions">
             <a href="tel:0481058514" className="repair-secondary-action">
               <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
@@ -106,7 +106,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </div>
           <div>
             <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Ringwood Square Kiosk C1</span>
+            <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
           </div>
         </div>
       </section>

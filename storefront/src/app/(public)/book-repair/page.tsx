@@ -41,7 +41,7 @@ function generateICS(booking: any) {
     `DTEND:${formatDate(end)}`,
     `SUMMARY:Repair Appointment: ${formatDeviceTitle(brand, model)} - ${service}`,
     `DESCRIPTION:Repair for ${name}\\nService: ${service}\\nDevice: ${formatDeviceTitle(brand, model)}\\n\\nAli Mobile Repair Ringwood`,
-    "LOCATION:Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC 3134",
+    "LOCATION:Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134",
     "END:VEVENT",
     "END:VCALENDAR"
   ];
@@ -85,7 +85,7 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
           <div className="booking-confirmation-item">
             <MapPin size={18} strokeWidth={2.4} aria-hidden="true" />
             <span>Store location</span>
-            <strong>Kiosk C1, Ringwood Square Shopping Centre</strong>
+            <strong>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</strong>
           </div>
         </div>
 

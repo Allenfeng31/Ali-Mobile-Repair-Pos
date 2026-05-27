@@ -62,7 +62,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             Model selector
           </span>
           <h1 id="brand-repair-heading">{brandName} Repair Services</h1>
-          <p>Select your exact model below to view repair options and pricing at our Ringwood Square kiosk.</p>
+          <p>Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.</p>
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
               View model option

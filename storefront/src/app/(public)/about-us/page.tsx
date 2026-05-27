@@ -87,8 +87,8 @@ export default function AboutUsPage() {
           </div>
           <div className={styles.storyText}>
             <p>
-              We are a specialist electronics repair shop based at Kiosk C1 inside Ringwood Square
-              Shopping Centre. Our work covers everyday device problems such as cracked screens and tired
+              We are a specialist electronics repair shop based at Ringwood Square Shopping Centre Kiosk C1,
+              Seymour St, Ringwood VIC 3134. Our work covers everyday device problems such as cracked screens and tired
               batteries, plus trickier issues like charging faults, water damage, and laptop repairs.
             </p>
             <p>
@@ -121,7 +121,7 @@ export default function AboutUsPage() {
           <span className={styles.kicker}>Free Quote</span>
           <h2>Bring the device in. We will tell you what is worth fixing.</h2>
           <p>
-            Visit Ringwood Square or book online for priority service. Most common screen and battery
+            Visit Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 or book online for priority service. Most common screen and battery
             repairs can be handled the same day.
           </p>
           <Link href="/book-repair" className={styles.primaryAction}>

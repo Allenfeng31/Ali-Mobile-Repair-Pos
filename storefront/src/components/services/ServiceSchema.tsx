@@ -20,7 +20,7 @@ export function ServiceSchema({ serviceName, description, faqs }: ServiceSchemaP
     "description": description,
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Kiosk C1, Ringwood Square Shopping Centre",
+      "streetAddress": "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
       "addressLocality": "Ringwood",
       "addressRegion": "VIC",
       "postalCode": "3134",

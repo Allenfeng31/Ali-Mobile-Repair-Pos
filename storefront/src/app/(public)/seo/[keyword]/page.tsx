@@ -434,7 +434,7 @@ export default async function SeoArticlePage({ params }: { params: Promise<{ key
               <div className="mt-6 rounded-2xl border border-gray-200 bg-[#FAFAF9] p-6 shadow-sm">
                 <div className="text-sm font-bold text-[#1C1917]">Ali Mobile & Repair</div>
                 <div className="mt-1 text-xs leading-5 text-[#44403C]">
-                  Kiosk C1, Ringwood Square Shopping Centre. Call 0481 058 514 for a quick model check.
+                  Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. Call 0481 058 514 for a quick model check.
                 </div>
               </div>
             </div>

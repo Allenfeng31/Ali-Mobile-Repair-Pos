@@ -34,8 +34,8 @@ const MAIN_STORE_CONFIG: StoreData = {
   image: 'https://www.alimobile.com.au/logo.png',
   telephone: '0481058514',
   address: {
-    streetAddress: 'Kiosk c1 Ringwood Square Shopping Centre',
-    addressLocality: 'Ringwood, Melbourne',
+    streetAddress: 'Ringwood Square Shopping Centre Kiosk C1, Seymour St',
+    addressLocality: 'Ringwood',
     addressRegion: 'VIC',
     postalCode: '3134',
     addressCountry: 'AU',

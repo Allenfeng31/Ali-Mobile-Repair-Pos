@@ -95,14 +95,14 @@ export default function Home() {
             </span>
             <h2 id="map-heading">Find us inside Ringwood Square</h2>
             <p>
-              Drop in at Kiosk C1 for a practical device check, quote confirmation, or same-day
+              Drop in at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check, quote confirmation, or same-day
               repair path when parts are available.
             </p>
 
             <div className="map-info-grid">
               <div>
                 <Navigation size={18} strokeWidth={2.5} aria-hidden="true" />
-                <span>Kiosk C1, 59-65 Maroondah Hwy</span>
+                <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
               </div>
               <div>
                 <Clock3 size={18} strokeWidth={2.5} aria-hidden="true" />
