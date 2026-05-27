@@ -30,6 +30,237 @@ interface RepairPageProps {
   }>;
 }
 
+interface RepairTypeSeoPocket {
+  quickAnswer: string;
+  repairOptions: Array<{
+    name: string;
+    shortDescription: string;
+    bestFor: string;
+    notes: string;
+  }>;
+  commonProblems: Array<{
+    title: string;
+    description: string;
+  }>;
+  diagnosticSteps: Array<{
+    step: string;
+    title: string;
+    description: string;
+  }>;
+  faq: Array<{
+    question: string;
+    answer: string;
+  }>;
+}
+
+const IPHONE_13_SCREEN_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
+  quickAnswer:
+    "Need iPhone 13 screen replacement in Ringwood? Ali Mobile & Repair checks cracked glass, OLED faults, touch issues, frame fit, Face ID area condition, and display option availability before quoting.",
+  repairOptions: [
+    {
+      name: "Standard display path",
+      shortDescription:
+        "A cost-conscious iPhone 13 screen replacement option for cracked glass, touch faults, or a display that needs a practical repair.",
+      bestFor:
+        "Customers who want the phone working again cleanly without choosing the highest display tier.",
+      notes:
+        "We still test brightness, touch response, speaker mesh alignment, camera area fit, and the frame edge before handover.",
+    },
+    {
+      name: "Premium OLED path",
+      shortDescription:
+        "A higher-grade OLED option for customers who care about deeper blacks, smoother viewing, and stronger colour consistency.",
+      bestFor:
+        "Customers who use their iPhone 13 heavily for photos, maps, work apps, videos, and daily messaging.",
+      notes:
+        "A bent frame can stress a fresh OLED panel, so we inspect the housing before fitting a premium display.",
+    },
+    {
+      name: "Diagnosis before display fitting",
+      shortDescription:
+        "Bench testing for black screen, green lines, flicker, partial touch failure, pressure marks, or uncertain impact damage.",
+      bestFor:
+        "Phones where the display fault may be linked to frame damage, liquid exposure, camera area damage, or another internal fault.",
+      notes:
+        "If a screen assembly will not solve the issue, we explain the next likely fault before any extra work.",
+    },
+  ],
+  commonProblems: [
+    {
+      title: "Cracked glass with working touch",
+      description:
+        "The phone may still unlock and swipe, but glass flakes, lifted corners, and pressure on the OLED layer can worsen after continued use.",
+    },
+    {
+      title: "Green lines, flicker, or black screen",
+      description:
+        "OLED faults can appear after a drop even when the outside glass is not badly shattered. We test display output before quoting.",
+    },
+    {
+      title: "Touch dead zones",
+      description:
+        "A damaged digitizer can leave parts of the display unresponsive. We test touch across the full panel before and after fitting.",
+    },
+    {
+      title: "Top sensor and Face ID area risk",
+      description:
+        "Impact around the earpiece, front camera, or sensor area can affect Face ID-related behaviour. We inspect that area before repair.",
+    },
+    {
+      title: "Frame bend or lifted screen edge",
+      description:
+        "A small housing bend can stop a replacement display from sitting cleanly, so frame fit is checked before the screen is installed.",
+    },
+    {
+      title: "True Tone and display message checks",
+      description:
+        "Where supported, display data and True Tone behaviour are checked carefully. Some iOS display messages can depend on part type and device pairing.",
+    },
+  ],
+  diagnosticSteps: [
+    {
+      step: "01",
+      title: "Inspect glass, OLED, and housing fit",
+      description:
+        "We check cracks, display lines, pressure marks, lifted corners, frame bends, and whether the device is safe to open.",
+    },
+    {
+      step: "02",
+      title: "Test touch, Face ID area, and sensors",
+      description:
+        "Before quoting, we test touch response, front camera area, proximity behaviour, earpiece mesh, and visible liquid indicators.",
+    },
+    {
+      step: "03",
+      title: "Confirm display tier and limitations",
+      description:
+        "We explain the available screen option, part availability, warranty limits, iOS display message considerations, and expected repair time before work begins.",
+    },
+    {
+      step: "04",
+      title: "Final handover checks",
+      description:
+        "After fitting, we test brightness, colour, touch, charging, cameras, speaker, microphone, buttons, and normal operation before return.",
+    },
+  ],
+  faq: [
+    {
+      question: "How long does iPhone 13 screen replacement take in Ringwood?",
+      answer:
+        "If the correct display assembly is in stock and there is no hidden frame or liquid damage, iPhone 13 screen replacement is usually completed in under 1 hour.",
+    },
+    {
+      question: "Can you fix an iPhone 13 with green lines, flicker, or a black screen?",
+      answer:
+        "Yes. Green lines, flicker, black display, and touch dead zones are common OLED or digitizer symptoms. We test the phone first to confirm whether a screen assembly is the right repair.",
+    },
+    {
+      question: "Do you check Face ID before replacing the iPhone 13 screen?",
+      answer:
+        "Yes. We check the Face ID area, front camera area, proximity behaviour, and earpiece mesh condition before repair because impact around the top of the display can affect those parts.",
+    },
+    {
+      question: "Will True Tone still work after an iPhone 13 screen replacement?",
+      answer:
+        "Where supported, we check display data and True Tone behaviour during the repair process. The result can depend on the display option, device condition, and whether the original screen data is readable.",
+    },
+    {
+      question: "Will my iPhone 13 still be water resistant after screen replacement?",
+      answer:
+        "We clean old adhesive and reseal carefully, but factory water resistance cannot be guaranteed after any phone has been opened. Keep the phone away from water after repair.",
+    },
+    {
+      question: "Do I need to book before visiting for iPhone 13 screen replacement?",
+      answer:
+        "Booking helps us prepare the right display option and gives you priority at the repair desk. Walk-ins are welcome, but part availability can vary.",
+    },
+  ],
+};
+
+function getRepairTypeSeoPocket(params: {
+  category: string;
+  brand: string;
+  model: string;
+  repairType: string;
+}): RepairTypeSeoPocket | null {
+  const category = slugify(params.category);
+  const brand = slugify(params.brand);
+  const model = slugify(params.model);
+  const repairType = slugify(params.repairType);
+
+  if (
+    category === "phone" &&
+    (brand === "iphone" || brand === "apple") &&
+    model === "iphone-13" &&
+    repairType === "screen-replacement"
+  ) {
+    return IPHONE_13_SCREEN_REPLACEMENT_SEO_POCKET;
+  }
+
+  return null;
+}
+
+function TechnicianWorkbenchProcess({ pocket }: { pocket: RepairTypeSeoPocket }) {
+  return (
+    <section className="repair-workbench-shell w-full flex flex-col justify-center items-center text-center mx-auto" aria-labelledby="technician-workbench-heading">
+      <details className="w-full rounded-[26px] border border-slate-200 bg-white/80 shadow-[0_16px_54px_rgba(15,23,42,0.06)]">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 marker:content-[''] sm:px-6 relative">
+          <div className="w-full text-center absolute left-0 right-0 mx-auto pointer-events-none z-0">
+            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">
+              Technician Workbench Process
+            </span>
+            <h2 id="technician-workbench-heading" className="mt-1 text-lg font-black tracking-tight text-slate-950">
+              iPhone 13 screen checks before we quote
+            </h2>
+          </div>
+          <span className="shrink-0 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
+            Details
+          </span>
+        </summary>
+
+        <div className="border-t border-slate-100 px-5 pb-6 pt-4 sm:px-6">
+          <p className="max-w-3xl text-sm font-semibold leading-6 text-slate-600">{pocket.quickAnswer}</p>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {pocket.repairOptions.map((option) => (
+              <article key={option.name} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-black text-slate-950">{option.name}</h3>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{option.shortDescription}</p>
+                <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-blue-600">Best for</p>
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{option.bestFor}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">{option.notes}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {pocket.commonProblems.map((problem) => (
+              <article key={problem.title} className="rounded-2xl border border-slate-200 bg-white p-4">
+                <h3 className="text-sm font-black text-slate-950">{problem.title}</h3>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{problem.description}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-3">
+            {pocket.diagnosticSteps.map((step) => (
+              <article key={step.step} className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[48px_1fr]">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-sm font-black text-white">
+                  {step.step}
+                </span>
+                <div>
+                  <h3 className="text-sm font-black text-slate-950">{step.title}</h3>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{step.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </details>
+    </section>
+  );
+}
+
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
   const params: { category: string; brand: string; model: string; 'repair-type': string }[] = [];
@@ -216,12 +447,18 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
+  const seoPocket = getRepairTypeSeoPocket({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+  });
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
   const finalRepairName = knownRepair?.name || repairTypeDerived;
 
-  const faqs = generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
+  const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
 
   return (
     <>
@@ -242,9 +479,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       <main className="repair-page-shell repair-page-shell-narrow" style={{ paddingBottom: '0' }}>
         <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
 
-        <section className="repair-hero repair-detail-hero" aria-labelledby="repair-detail-heading">
-          <BackButton fallbackHref={`/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}`} />
-          <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
+        <section className="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">
+          <div className="absolute top-6 left-6 sm:top-8 sm:left-8 flex justify-start text-left z-10">
+            <BackButton fallbackHref={`/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}`} />
+          </div>
+          <span className="repair-detail-icon mt-6">{getRepairIcon(resolvedParams['repair-type'])}</span>
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
           <p className="repair-detail-subtitle">Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.</p>
 
@@ -283,6 +522,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {/* ─── WATER DAMAGE POLICY ──────────────────────── */}
       {resolvedParams['repair-type'] === 'water-damage-repair' && <WaterDamagePolicySection />}
+
+      {seoPocket && <TechnicianWorkbenchProcess pocket={seoPocket} />}
 
       {/* ─── FAQ SECTION ──────────────────────────────── */}
       <FaqAccordion faqs={faqs} />

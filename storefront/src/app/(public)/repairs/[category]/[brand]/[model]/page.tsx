@@ -7,7 +7,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
-import { ArrowRight, Clock, ClipboardCheck, MapPin, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
+import { ArrowRight, PhoneCall, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -61,16 +61,22 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     <main className="repair-page-shell repair-page-shell-narrow">
       <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
 
-      <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="model-repair-heading">
-        <div className="repair-tech-hero-copy">
-          <BackButton fallbackHref={`/repairs/${categorySlug}/${brandSlug}`} />
-          <span className="repair-kicker">
-            <Wrench size={15} strokeWidth={2.4} aria-hidden="true" />
-            Repair menu
-          </span>
-          <h1 id="model-repair-heading">{modelName} Repair Services</h1>
-          <p>Select the repair you need for your {modelName}. Walk in or book online for practical service at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.</p>
-          <div className="repair-hero-actions repair-model-actions">
+      <section className="mb-5 rounded-[28px] border border-blue-100 bg-white/85 px-5 py-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:px-6" aria-labelledby="model-repair-heading">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="w-full max-w-2xl">
+            <BackButton fallbackHref={`/repairs/${categorySlug}/${brandSlug}`} />
+            <span className="repair-kicker mt-3">
+              <Wrench size={15} strokeWidth={2.4} aria-hidden="true" />
+              Repair menu
+            </span>
+            <h1 id="model-repair-heading" className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+              {modelName} repair options
+            </h1>
+            <p className="mt-3 max-w-xl text-base font-semibold leading-7 text-slate-600">
+              Choose the exact repair type below. Pricing and booking details unlock on the next step.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row lg:pb-1">
             <a href="tel:0481058514" className="repair-secondary-action">
               <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
               Call Now
@@ -79,34 +85,6 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               View repair options
               <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
             </a>
-          </div>
-        </div>
-
-        <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Repair process highlights">
-          <div className="repair-device-card" aria-hidden="true">
-            <span className="repair-device-frame">
-              <span />
-            </span>
-            <div>
-              <strong>{modelName}</strong>
-              <small>Repair path preview</small>
-            </div>
-          </div>
-          <div>
-            <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Clear quote before repair</span>
-          </div>
-          <div>
-            <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>6-month warranty on eligible repairs</span>
-          </div>
-          <div>
-            <Clock size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Most common repairs can be checked while you wait</span>
-          </div>
-          <div>
-            <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
           </div>
         </div>
       </section>

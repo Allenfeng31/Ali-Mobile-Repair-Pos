@@ -17,7 +17,7 @@ export default function BackButton({ fallbackHref }: { fallbackHref?: string }) 
           router.push('/repairs');
         }
       }}
-      className="inline-flex items-center gap-1.5 text-[15px] font-medium text-[var(--foreground)] opacity-60 hover:opacity-100 transition-opacity mb-5 self-start"
+      className="inline-flex items-center gap-1.5 text-[15px] font-medium text-[var(--foreground)] opacity-60 hover:opacity-100 transition-opacity mb-5 mr-auto block text-left"
       aria-label="Go back"
     >
       <ChevronLeft size={18} strokeWidth={2.5} />

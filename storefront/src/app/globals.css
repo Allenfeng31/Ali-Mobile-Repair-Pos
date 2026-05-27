@@ -4600,6 +4600,23 @@ input:checked+.toggle-slider:before {
     0 28px 80px rgba(15, 23, 42, 0.08);
 }
 
+.repair-detail-topbar {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+.repair-detail-topbar button {
+  margin-bottom: 0;
+}
+
+.repair-workbench-shell {
+  width: min(100%, 1048px);
+  margin: 0 auto;
+  padding: 0 1rem 0.5rem;
+}
+
 .repair-detail-icon {
   display: inline-flex;
   width: 4.25rem;
