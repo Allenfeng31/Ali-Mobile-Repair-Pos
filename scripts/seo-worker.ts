@@ -20,7 +20,7 @@ for (const envPath of [
 
 const POLL_INTERVAL_MS = Number(process.env.SEO_WORKER_POLL_INTERVAL_MS || 15_000);
 const MAX_BATCH_SIZE = Number(process.env.SEO_WORKER_BATCH_SIZE || 1);
-const MAX_AUDIT_ROUNDS = Number(process.env.SEO_WORKER_MAX_AUDIT_ROUNDS || 4);
+const MAX_AUDIT_ROUNDS = Number(process.env.SEO_WORKER_MAX_AUDIT_ROUNDS || 2);
 const KEYWORD_DELAY_MIN_MS = Number(process.env.SEO_WORKER_KEYWORD_DELAY_MIN_MS || 10_000);
 const KEYWORD_DELAY_MAX_MS = Number(process.env.SEO_WORKER_KEYWORD_DELAY_MAX_MS || 20_000);
 const RATE_LIMIT_BASE_BACKOFF_MS = Number(process.env.SEO_WORKER_RATE_LIMIT_BASE_BACKOFF_MS || 30_000);
