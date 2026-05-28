@@ -30,9 +30,8 @@ const MAX_ARTICLES_PER_RUN = Number(process.env.SEO_WORKER_MAX_ARTICLES_PER_RUN 
 const DAILY_ARTICLE_LIMIT = Number(process.env.SEO_WORKER_DAILY_ARTICLE_LIMIT || 25);
 const MAX_MODEL_CALLS_PER_RUN = Number(process.env.SEO_WORKER_MAX_MODEL_CALLS_PER_RUN || 60);
 const STOP_ON_RATE_LIMIT = process.env.SEO_WORKER_STOP_ON_RATE_LIMIT !== 'false';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || process.env.AI_MODEL || process.env.MODEL || 'gemini-3.1-flash-lite';
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || process.env.CLAUDE_MODEL || process.env.C_MODEL || 'claude-haiku-4-5-20251001';
-const ANTHROPIC_VERSION = process.env.ANTHROPIC_VERSION || '2023-06-01';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || process.env.AI_MODEL || process.env.MODEL || 'gemini-3.5-flash';
+const GEMINI_AUDITOR_MODEL = process.env.GEMINI_AUDITOR_MODEL || GEMINI_MODEL;
 const QUEUE_STATUSES = ['approved', 'queued'] as const;
 const BLOCKED_GEMINI_MODEL_PREFIXES = ['gemini-2.0'];
 const CANONICAL_BUSINESS_ADDRESS = 'Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134';
@@ -192,15 +191,7 @@ function assertModelConfigIsSafe() {
   }
 }
 
-function getAnthropicApiKey() {
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY || process.env.C_API_KEY;
 
-  if (!apiKey) {
-    throw new Error('Missing ANTHROPIC_API_KEY for SEO Auditor agent.');
-  }
-
-  return apiKey;
-}
 
 function getSupabaseClient() {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -852,30 +843,14 @@ async function callGeminiWriter(keyword: string, critique?: string, previousDraf
   return draft;
 }
 
-function extractAnthropicText(payload: unknown) {
-  const content = (payload as { content?: Array<{ type?: string; text?: string }> }).content;
-  if (!Array.isArray(content)) return '';
-
-  return content
-    .filter((part) => part.type === 'text' && typeof part.text === 'string')
-    .map((part) => part.text)
-    .join('\n')
-    .trim();
-}
-
-async function callClaudeAuditor(keyword: string, draft: GeneratedSeoDraft) {
-  const response = await withRateLimitBackoff(`Claude Auditor (${keyword})`, async () => {
-    const auditResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': getAnthropicApiKey(),
-        'anthropic-version': ANTHROPIC_VERSION,
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: 1200,
-        system: `You are Agent 2, a strict local SEO auditor for Ali Mobile & Repair in Ringwood, Melbourne.
+async function callGeminiAuditor(keyword: string, draft: GeneratedSeoDraft) {
+  const response = await withRateLimitBackoff(`Gemini Auditor (${keyword})`, async () => {
+    const ai = getGeminiClient();
+    return await ai.models.generateContent({
+      model: GEMINI_AUDITOR_MODEL,
+      contents: `Master repair knowledge base:\n${getRepairKnowledgeBase()}\n\nKeyword: ${keyword}\n\nDraft JSON:\n${JSON.stringify(draft, null, 2)}`,
+      config: {
+        systemInstruction: `You are Agent 2, a strict local SEO auditor for Ali Mobile & Repair in Ringwood, Melbourne.
 
 Return exactly PASS if the draft is ready.
 If it is not ready, return a concise, specific critique with fixes. Do not rewrite the whole article.
@@ -904,40 +879,11 @@ Audit criteria:
     - Fragmented headers (reject one-sentence rhetorical padding directly under headings before content starts).
     - Filler and hedging (reject "in order to", "due to the fact that", "could potentially possibly").
     - Generic conclusions (reject "future looks bright", "journey toward excellence").`,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Master repair knowledge base:\n${getRepairKnowledgeBase()}\n\nKeyword: ${keyword}\n\nDraft JSON:\n${JSON.stringify(draft, null, 2)}`,
-              },
-            ],
-          },
-        ],
-      }),
+      },
     });
-
-    if (auditResponse.status === 429) {
-      const payload = await auditResponse.text().catch(() => '');
-      throw new Error(`Claude Auditor rate-limited (429): ${payload.slice(0, 500)}`);
-    }
-
-    return auditResponse;
   });
 
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(`Claude Auditor failed (${response.status}): ${JSON.stringify(payload).slice(0, 500)}`);
-  }
-
-  const text = extractAnthropicText(payload);
-  if (!text) {
-    throw new Error('Claude Auditor returned no text content.');
-  }
-
-  return text;
+  return response.text || '';
 }
 
 function auditPassed(auditText: string) {
@@ -1131,8 +1077,8 @@ async function generateSeoDraft(keyword: string) {
       verdict = 'REWRITE';
       console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): FAILED (${localViolations.length} violations)`);
     } else {
-      console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): PASSED. Running Claude Auditor...`);
-      audit = await callClaudeAuditor(keyword, draft);
+      console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): PASSED. Running Gemini Auditor...`);
+      audit = await callGeminiAuditor(keyword, draft);
       verdict = auditPassed(audit) ? 'PASS' : 'REWRITE';
     }
 
@@ -1150,7 +1096,7 @@ async function generateSeoDraft(keyword: string) {
     critique = audit;
   }
 
-  throw new Error(`Claude Auditor / Local Humanizer did not PASS "${keyword}" within ${MAX_AUDIT_ROUNDS} rounds. Last critique: ${critique || 'No critique returned.'}`);
+  throw new Error(`Gemini Auditor / Local Humanizer did not PASS "${keyword}" within ${MAX_AUDIT_ROUNDS} rounds. Last critique: ${critique || 'No critique returned.'}`);
 }
 
 function buildCampaignPayload(row: SeoKeywordRow, draft: GeneratedSeoDraft, auditTrail: AuditRound[]) {
@@ -1165,8 +1111,8 @@ function buildCampaignPayload(row: SeoKeywordRow, draft: GeneratedSeoDraft, audi
         model: GEMINI_MODEL,
       },
       auditor: {
-        provider: 'anthropic',
-        model: ANTHROPIC_MODEL,
+        provider: 'google',
+        model: GEMINI_AUDITOR_MODEL,
       },
       rounds: auditTrail,
       finalVerdict: 'PASS',
@@ -1320,7 +1266,7 @@ async function runWorker() {
   console.log(
     `[seo-worker] Started in serial safety mode. Batch size ${MAX_BATCH_SIZE}. Run cap ${MAX_ARTICLES_PER_RUN} articles, daily cap ${DAILY_ARTICLE_LIMIT} articles, model call cap ${MAX_MODEL_CALLS_PER_RUN}. Keyword throttle ${KEYWORD_DELAY_MIN_MS / 1000}-${KEYWORD_DELAY_MAX_MS / 1000}s. Stop on 429: ${STOP_ON_RATE_LIMIT}. Polling every ${POLL_INTERVAL_MS / 1000}s for statuses: ${QUEUE_STATUSES.join(', ')}.`
   );
-  console.log(`[seo-worker] Models: Gemini Writer=${GEMINI_MODEL}; Claude Auditor=${ANTHROPIC_MODEL}.`);
+  console.log(`[seo-worker] Models: Gemini Writer=${GEMINI_MODEL}; Gemini Auditor=${GEMINI_AUDITOR_MODEL}.`);
 
   while (!shuttingDown) {
     try {
