@@ -7,7 +7,6 @@ import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wren
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import BackButton from '@/components/BackButton';
 import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
 
@@ -201,62 +200,88 @@ function getRepairTypeSeoPocket(params: {
 }
 
 function TechnicianWorkbenchProcess({ pocket }: { pocket: RepairTypeSeoPocket }) {
+  const primaryProblems = pocket.commonProblems.slice(0, 4);
+  const secondaryProblems = pocket.commonProblems.slice(4);
+
   return (
-    <section className="repair-workbench-shell w-full flex flex-col justify-center items-center text-center mx-auto" aria-labelledby="technician-workbench-heading">
-      <details className="w-full rounded-[26px] border border-slate-200 bg-white/80 shadow-[0_16px_54px_rgba(15,23,42,0.06)]">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 marker:content-[''] sm:px-6 relative">
-          <div className="w-full text-center absolute left-0 right-0 mx-auto pointer-events-none z-0">
-            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">
-              Technician Workbench Process
-            </span>
-            <h2 id="technician-workbench-heading" className="mt-1 text-lg font-black tracking-tight text-slate-950">
-              iPhone 13 screen checks before we quote
-            </h2>
-          </div>
-          <span className="shrink-0 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
-            Details
-          </span>
-        </summary>
+    <section className="repair-workbench-shell" aria-labelledby="technician-workbench-heading">
+      <div className="repair-workbench-heading">
+        <span>Repair clarity</span>
+        <h2 id="technician-workbench-heading">Technician Workbench Process</h2>
+        <p>{pocket.quickAnswer}</p>
+      </div>
 
-        <div className="border-t border-slate-100 px-5 pb-6 pt-4 sm:px-6">
-          <p className="max-w-3xl text-sm font-semibold leading-6 text-slate-600">{pocket.quickAnswer}</p>
-
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
+      <div className="repair-workbench-grid">
+        <details className="repair-workbench-box">
+          <summary>
+            <span className="repair-workbench-number">01</span>
+            <h3>Which screen path fits this iPhone 13?</h3>
+            <span className="repair-workbench-chevron" aria-hidden="true" />
+          </summary>
+          <div className="repair-workbench-box-content">
             {pocket.repairOptions.map((option) => (
-              <article key={option.name} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <h3 className="text-sm font-black text-slate-950">{option.name}</h3>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{option.shortDescription}</p>
-                <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-blue-600">Best for</p>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{option.bestFor}</p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">{option.notes}</p>
+              <article key={option.name} className="repair-workbench-mini-card">
+                <h3>{option.name}</h3>
+                <p>{option.shortDescription}</p>
+                <span>Best for</span>
+                <p>{option.bestFor}</p>
+                <small>{option.notes}</small>
               </article>
             ))}
           </div>
+        </details>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {pocket.commonProblems.map((problem) => (
-              <article key={problem.title} className="rounded-2xl border border-slate-200 bg-white p-4">
-                <h3 className="text-sm font-black text-slate-950">{problem.title}</h3>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{problem.description}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-5 grid gap-3">
+        <details className="repair-workbench-box">
+          <summary>
+            <span className="repair-workbench-number">02</span>
+            <h3>What do we test before quoting?</h3>
+            <span className="repair-workbench-chevron" aria-hidden="true" />
+          </summary>
+          <div className="repair-workbench-box-content">
             {pocket.diagnosticSteps.map((step) => (
-              <article key={step.step} className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[48px_1fr]">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-sm font-black text-white">
-                  {step.step}
-                </span>
+              <article key={step.step} className="repair-workbench-step-card">
+                <span>{step.step}</span>
                 <div>
-                  <h3 className="text-sm font-black text-slate-950">{step.title}</h3>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{step.description}</p>
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
                 </div>
               </article>
             ))}
           </div>
-        </div>
-      </details>
+        </details>
+
+        <details className="repair-workbench-box">
+          <summary>
+            <span className="repair-workbench-number">03</span>
+            <h3>Which symptoms matter most?</h3>
+            <span className="repair-workbench-chevron" aria-hidden="true" />
+          </summary>
+          <div className="repair-workbench-box-content">
+            {primaryProblems.map((problem) => (
+              <article key={problem.title} className="repair-workbench-mini-card">
+                <h3>{problem.title}</h3>
+                <p>{problem.description}</p>
+              </article>
+            ))}
+          </div>
+        </details>
+
+        <details className="repair-workbench-box">
+          <summary>
+            <span className="repair-workbench-number">04</span>
+            <h3>What can affect the final result?</h3>
+            <span className="repair-workbench-chevron" aria-hidden="true" />
+          </summary>
+          <div className="repair-workbench-box-content">
+            {secondaryProblems.map((problem) => (
+              <article key={problem.title} className="repair-workbench-mini-card">
+                <h3>{problem.title}</h3>
+                <p>{problem.description}</p>
+              </article>
+            ))}
+          </div>
+        </details>
+      </div>
     </section>
   );
 }
@@ -480,10 +505,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
 
         <section className="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">
-          <div className="absolute top-6 left-6 sm:top-8 sm:left-8 flex justify-start text-left z-10">
-            <BackButton fallbackHref={`/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}`} />
-          </div>
-          <span className="repair-detail-icon mt-6">{getRepairIcon(resolvedParams['repair-type'])}</span>
+          <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
           <p className="repair-detail-subtitle">Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.</p>
 
