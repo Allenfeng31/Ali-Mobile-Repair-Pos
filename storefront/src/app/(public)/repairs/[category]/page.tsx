@@ -4,8 +4,6 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
-import LaptopHeroVideo from '@/components/services/LaptopHeroVideo';
-import PhoneHeroVideo from '@/components/services/PhoneHeroVideo';
 import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam } from '@/lib/inventoryUtils';
@@ -16,46 +14,34 @@ export const dynamicParams = true;
 
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
 
-const STATIC_DEVICE_HERO = {
+const CATEGORY_HERO_MEDIA = {
+  phone: {
+    image: '/images/repair-hero/phone-exploded-544.png?v=hero-exploded-fit-1',
+    alt: 'Exploded phone repair parts showing screen, battery, charging assembly, and internal components',
+    ariaLabel: 'Exploded phone repair parts preview',
+    width: 544,
+    height: 544,
+  },
   tablet: {
-    image: '/images/repair-hero/ipad-hero.png?v=clean-1',
-    alt: 'iPad repair preview with premium service promises',
-    ariaLabel: 'Premium tablet repair preview',
-    proofLabel: 'iPad repair highlights',
-    highlights: [
-      {
-        title: 'Fixed Fast',
-        description: 'iPad screen, battery, and charging faults checked with clear parts guidance.',
-      },
-      {
-        title: '180-Day Warranty',
-        description: 'Premium displays and batteries tested before handover, backed by local aftercare.',
-      },
-      {
-        title: 'No Fix. No Charge.',
-        description: 'Clear diagnosis first. You only pay when the repair makes sense.',
-      },
-    ],
+    image: '/images/repair-hero/ipad-pro-exploded-544.png?v=hero-exploded-fit-1',
+    alt: 'Exploded iPad Pro repair parts showing display, battery, logic board, and internal components',
+    ariaLabel: 'Exploded iPad repair parts preview',
+    width: 544,
+    height: 544,
+  },
+  laptop: {
+    image: '/images/repair-hero/macbook-pro-exploded-548x447.png?v=hero-exploded-fit-1',
+    alt: 'Exploded MacBook Pro repair parts showing display, keyboard, logic board, battery, and chassis',
+    ariaLabel: 'Exploded MacBook repair parts preview',
+    width: 548,
+    height: 447,
   },
   watch: {
-    image: '/images/repair-hero/apple-watch-hero.png?v=clean-1',
-    alt: 'Apple Watch repair preview with premium service promises',
-    ariaLabel: 'Premium watch repair preview',
-    proofLabel: 'Apple Watch repair highlights',
-    highlights: [
-      {
-        title: 'Careful Sealing',
-        description: 'Apple Watch screen, battery, and charging checks handled with precise fitment.',
-      },
-      {
-        title: '180-Day Warranty',
-        description: 'Premium parts tested carefully, backed by real local aftercare in Ringwood.',
-      },
-      {
-        title: 'No Fix. No Charge.',
-        description: 'Diagnosis first. We only proceed when the repair makes sense.',
-      },
-    ],
+    image: '/images/repair-hero/apple-watch-exploded-430x487.png?v=hero-exploded-fit-1',
+    alt: 'Exploded Apple Watch repair parts showing display, frame, battery, sensors, and rear housing',
+    ariaLabel: 'Exploded Apple Watch repair parts preview',
+    width: 430,
+    height: 487,
   },
 };
 
@@ -285,7 +271,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const otherBrands = validBrands
     .filter(b => !topBrands.some(tb => tb.slug === b.slug))
     .sort((a, b) => a.brand.localeCompare(b.brand));
-  const staticDeviceHero = STATIC_DEVICE_HERO[category as keyof typeof STATIC_DEVICE_HERO];
+  const heroMedia = CATEGORY_HERO_MEDIA[category as keyof typeof CATEGORY_HERO_MEDIA];
 
   return (
     <>
@@ -297,7 +283,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
       <main className="repair-page-shell">
         <section
-          className={`repair-tech-hero ${category === 'laptop' ? 'repair-tech-hero-laptop' : ''} ${staticDeviceHero ? 'repair-tech-hero-device' : ''}`}
+          className={`repair-tech-hero repair-tech-hero-${category}`}
           aria-labelledby="category-repair-heading"
         >
           <div className="repair-tech-hero-copy">
@@ -319,72 +305,25 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
           </div>
 
-          {category === 'phone' ? (
+          {heroMedia ? (
             <aside
-              className="repair-phone-cinematic-card mt-8 bg-transparent"
-              aria-label="Premium phone repair promises"
+              className={`repair-exploded-hero repair-exploded-hero-${category}`}
+              aria-label={heroMedia.ariaLabel}
               style={{
-                position: 'relative',
-                minHeight: '400px',
-                width: 'min(100%, 292px)',
-                justifySelf: 'center',
-                overflow: 'visible',
-                background: 'transparent',
-                border: 0,
-                boxShadow: 'none',
-              }}
-            >
-              <PhoneHeroVideo />
-            </aside>
-          ) : category === 'laptop' ? (
-            <aside
-              className="repair-laptop-cinematic-card bg-transparent"
-              aria-label="Premium laptop repair preview"
-              style={{
-                position: 'relative',
-                justifySelf: 'center',
-                overflow: 'hidden',
-                background: 'transparent',
-                border: 0,
-                boxShadow: 'none',
-              }}
-            >
-              <LaptopHeroVideo />
-              <div className="repair-laptop-proof-panel" aria-label="MacBook repair highlights">
-                <div>
-                  <span>Fixed Fast</span>
-                  <p>Screen, battery, keyboard, and charging faults checked with clear same-day guidance.</p>
-                </div>
-                <div>
-                  <span>180-Day Warranty</span>
-                  <p>Premium parts, tested twice, backed by real local aftercare in Ringwood.</p>
-                </div>
-                <div>
-                  <span>No Fix. No Charge.</span>
-                  <p>Diagnosis first. You only pay when the repair makes sense.</p>
-                </div>
-              </div>
-            </aside>
-          ) : staticDeviceHero ? (
-            <aside
-              className={`repair-static-device-card repair-static-device-card-${category}`}
-              aria-label={staticDeviceHero.ariaLabel}
+                '--hero-media-width': `${heroMedia.width}px`,
+                '--hero-media-height': `${heroMedia.height}px`,
+              } as React.CSSProperties}
             >
               <img
-                className="repair-static-device-image"
-                src={staticDeviceHero.image}
-                alt={staticDeviceHero.alt}
+                className="repair-exploded-hero-image"
+                src={heroMedia.image}
+                alt={heroMedia.alt}
+                width={heroMedia.width}
+                height={heroMedia.height}
                 loading="eager"
                 decoding="async"
+                fetchPriority="high"
               />
-              <div className="repair-laptop-proof-panel repair-static-device-proof-panel" aria-label={staticDeviceHero.proofLabel}>
-                {staticDeviceHero.highlights.map((highlight) => (
-                  <div key={highlight.title}>
-                    <span>{highlight.title}</span>
-                    <p>{highlight.description}</p>
-                  </div>
-                ))}
-              </div>
             </aside>
           ) : (
             <div className="repair-hero-panel" aria-label="Repair service highlights">

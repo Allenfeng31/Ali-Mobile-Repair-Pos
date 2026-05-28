@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { generateFaqs } from './page';
+import { generateFaqs } from './repairFaqs';
 
 // Mocking Lucide icons and other components that might be imported in page.tsx
 // Since we are only testing the logic of generateFaqs, we just need to ensure the import doesn't fail.

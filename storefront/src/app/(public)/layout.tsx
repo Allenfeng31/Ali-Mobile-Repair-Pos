@@ -144,7 +144,12 @@ export default function PublicLayout({
             </div>
 
             <div className="footer-bottom">
-              <p>&copy; {new Date().getFullYear()} Ali Mobile & Repair. All rights reserved.</p>
+              <p>
+                &copy; 2026 Ali Mobile & Repair. All rights reserved.{" "}
+                <Link href="/disclaimer" className="text-gray-400 hover:text-gray-600 text-xs ml-2">
+                  [Disclaimer]
+                </Link>
+              </p>
               <div>
                 <span>Local Melbourne electronics repair business</span>
                 <span>

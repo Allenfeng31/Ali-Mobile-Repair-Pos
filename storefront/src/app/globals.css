@@ -3731,13 +3731,23 @@ input:checked+.toggle-slider:before {
   margin-bottom: clamp(1.5rem, 3.4vw, 2.8rem);
 }
 
-.repair-tech-hero-laptop {
-  grid-template-columns: minmax(0, 0.82fr) minmax(460px, 0.92fr);
+.repair-tech-hero-phone {
+  grid-template-columns: minmax(0, 0.9fr) minmax(544px, 0.6fr);
   align-items: center;
 }
 
-.repair-tech-hero-device {
-  grid-template-columns: minmax(0, 0.84fr) minmax(380px, 0.72fr);
+.repair-tech-hero-laptop {
+  grid-template-columns: minmax(0, 0.82fr) minmax(548px, 0.72fr);
+  align-items: center;
+}
+
+.repair-tech-hero-tablet {
+  grid-template-columns: minmax(0, 0.84fr) minmax(544px, 0.62fr);
+  align-items: center;
+}
+
+.repair-tech-hero-watch {
+  grid-template-columns: minmax(0, 0.92fr) minmax(430px, 0.5fr);
   align-items: center;
 }
 
@@ -3886,27 +3896,56 @@ input:checked+.toggle-slider:before {
   flex: 0 0 auto;
 }
 
-.repair-phone-cinematic-card {
+.repair-exploded-hero {
   position: relative;
-  min-height: 400px;
-  width: min(100%, 292px);
+  display: grid;
+  place-items: center;
+  width: min(100%, var(--hero-media-width));
+  height: var(--hero-media-height);
+  max-height: var(--hero-media-height);
   justify-self: center;
+  align-self: center;
   overflow: visible;
   background: transparent;
-  margin-top: 2rem;
+  margin-top: 0.25rem;
 }
 
-.repair-phone-float-video {
-  position: absolute;
-  inset: 0;
+.repair-exploded-hero-image {
+  position: relative;
   z-index: 1;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transform: translate3d(-10px, 0, 0) scale(1.05);
+  object-position: center;
   transform-origin: center;
   background: transparent;
-  animation-fill-mode: forwards;
+  filter: drop-shadow(0 28px 40px rgba(15, 23, 42, 0.16));
+  pointer-events: none;
+}
+
+.repair-exploded-hero-phone {
+  width: min(100%, 544px);
+  height: 544px;
+}
+
+.repair-exploded-hero-tablet {
+  width: min(100%, 544px);
+  height: 544px;
+}
+
+.repair-exploded-hero-watch {
+  width: min(100%, 430px);
+  height: 487px;
+}
+
+.repair-exploded-hero-laptop {
+  width: min(100%, 548px);
+  height: 447px;
+}
+
+.repair-exploded-hero-laptop .repair-exploded-hero-image {
+  filter: drop-shadow(0 30px 42px rgba(15, 23, 42, 0.14));
 }
 
 .repair-laptop-cinematic-card {
@@ -4889,8 +4928,10 @@ input:checked+.toggle-slider:before {
 
   .repair-tech-hero,
   .repair-tech-hero-compact,
+  .repair-tech-hero-phone,
+  .repair-tech-hero-tablet,
   .repair-tech-hero-laptop,
-  .repair-tech-hero-device,
+  .repair-tech-hero-watch,
   .repair-assist-panel {
     grid-template-columns: 1fr;
   }
@@ -4921,28 +4962,27 @@ input:checked+.toggle-slider:before {
     grid-template-columns: 1fr;
   }
 
-  .repair-laptop-cinematic-card {
-    width: min(100%, 520px);
-    margin-top: 0.25rem;
-  }
-
-  .repair-laptop-float-video {
-    transform: translate3d(-8px, -10px, 0) scale(1.08);
-  }
-
-  .repair-laptop-proof-panel {
-    grid-template-columns: 1fr;
-  }
-
-  .repair-static-device-card {
-    width: min(100%, 500px);
+  .repair-exploded-hero {
     margin-top: 0.15rem;
   }
 
-  .repair-static-device-card-tablet .repair-static-device-image,
-  .repair-static-device-card-watch .repair-static-device-image {
-    max-height: 300px;
-    transform: translate3d(0, -4px, 0) scale(1.02);
+  .repair-exploded-hero-phone,
+  .repair-exploded-hero-tablet {
+    width: min(100%, 544px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .repair-exploded-hero-watch {
+    width: min(100%, 430px);
+    height: auto;
+    aspect-ratio: 430 / 487;
+  }
+
+  .repair-exploded-hero-laptop {
+    width: min(100%, 548px);
+    height: auto;
+    aspect-ratio: 548 / 447;
   }
 
   .repair-chip-cloud {
