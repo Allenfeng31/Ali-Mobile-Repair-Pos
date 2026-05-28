@@ -7,6 +7,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
+import ModelSeoWorkbench from "@/components/services/ModelSeoWorkbench";
+import { getIphone13ModelSeoPocketSuite } from "@/data/modelSeoPockets";
 import { ArrowRight, PhoneCall, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
@@ -56,6 +58,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const repairTypes = data?.repairTypes || [];
+  const seoPocketSuite = getIphone13ModelSeoPocketSuite({
+    category: categorySlug,
+    brand: brandSlug,
+    model: modelSlug,
+  });
 
   return (
     <main className="repair-page-shell repair-page-shell-narrow">
@@ -98,6 +105,17 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           modelName={modelName}
         />
       </section>
+
+      {seoPocketSuite && (
+        <ModelSeoWorkbench
+          suite={seoPocketSuite}
+          repairTypes={repairTypes}
+          categorySlug={categorySlug}
+          brandSlug={brandSlug}
+          modelSlug={modelSlug}
+          modelName={modelName}
+        />
+      )}
 
       <section className="repair-assist-panel" aria-labelledby="diagnostic-help-heading">
         <div>

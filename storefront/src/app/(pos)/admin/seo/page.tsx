@@ -72,6 +72,7 @@ interface OptimizationTaskPayload {
 
 interface CampaignPayload {
   keyword?: string;
+  source?: string;
   draft?: {
     title?: string;
     description?: string;

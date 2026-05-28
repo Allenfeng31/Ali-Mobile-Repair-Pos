@@ -36,18 +36,50 @@ interface ScoutResult {
 
 type KeywordOccurrenceResult = 'inserted' | 'existing';
 
+const HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS = [
+    'ringwood',
+    'cost ringwood',
+    'near me',
+    'same day ringwood',
+    '3134',
+] as const;
+
 const REPAIR_LANDING_PAGE_SEED_GROUPS = [
     {
         target: 'iphone 17 pro max screen replacement',
-        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', '3134'],
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
     },
     {
         target: 'iphone 15 pro max screen replacement',
         variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', 'ringwood square'],
     },
     {
+        target: 'iphone 15 battery replacement',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'iphone 15 back glass repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'iphone 15 charging port repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
         target: 'iphone 13 screen replacement',
-        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', '3134'],
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'iphone 14 battery replacement',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'iphone 14 back glass repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'iphone 14 charging port repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
     },
     {
         target: 'iphone 11 screen replacement',
@@ -59,7 +91,43 @@ const REPAIR_LANDING_PAGE_SEED_GROUPS = [
     },
     {
         target: 'samsung galaxy screen repair',
-        variants: ['ringwood', 'cost ringwood', 'near me', 'same day ringwood', '3134'],
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s24 screen repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s24 battery replacement',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s24 charging port repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s23 screen repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s23 battery replacement',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s23 charging port repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s22 screen repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s22 battery replacement',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
+    },
+    {
+        target: 'samsung galaxy s22 charging port repair',
+        variants: HIGH_INTENT_RINGWOOD_REPAIR_VARIANTS,
     },
     {
         target: 'google pixel screen replacement',
@@ -165,8 +233,23 @@ export function buildStrategicScoutQueries() {
         'iphone 12 pro battery repair ringwood',
         'iphone 13 back glass fix ringwood',
         'iphone 14 screen replacement cost melbourne',
+        'iphone 14 battery replacement ringwood',
+        'iphone 14 back glass repair ringwood',
+        'iphone 14 charging port repair ringwood',
+        'iphone 15 battery replacement ringwood',
+        'iphone 15 back glass repair ringwood',
+        'iphone 15 charging port repair ringwood',
         'iphone 15 pro max screen repair ringwood',
         'samsung galaxy screen repair ringwood',
+        'samsung galaxy s24 screen repair ringwood',
+        'samsung galaxy s24 battery replacement ringwood',
+        'samsung galaxy s24 charging port repair ringwood',
+        'samsung galaxy s23 screen repair ringwood',
+        'samsung galaxy s23 battery replacement ringwood',
+        'samsung galaxy s23 charging port repair ringwood',
+        'samsung galaxy s22 screen repair ringwood',
+        'samsung galaxy s22 battery replacement ringwood',
+        'samsung galaxy s22 charging port repair ringwood',
         'google pixel screen replacement ringwood',
 
         // MacBook & computer repair: premium commercial and urgent fault intent.
