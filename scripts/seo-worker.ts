@@ -27,10 +27,10 @@ const RATE_LIMIT_BASE_BACKOFF_MS = Number(process.env.SEO_WORKER_RATE_LIMIT_BASE
 const RATE_LIMIT_MAX_BACKOFF_MS = Number(process.env.SEO_WORKER_RATE_LIMIT_MAX_BACKOFF_MS || 120_000);
 const RATE_LIMIT_MAX_RETRIES = Number(process.env.SEO_WORKER_RATE_LIMIT_MAX_RETRIES || 3);
 const MAX_ARTICLES_PER_RUN = Number(process.env.SEO_WORKER_MAX_ARTICLES_PER_RUN || 10);
-const DAILY_ARTICLE_LIMIT = Number(process.env.SEO_WORKER_DAILY_ARTICLE_LIMIT || 25);
+const DAILY_ARTICLE_LIMIT = Number(process.env.SEO_WORKER_DAILY_ARTICLE_LIMIT || 40);
 const MAX_MODEL_CALLS_PER_RUN = Number(process.env.SEO_WORKER_MAX_MODEL_CALLS_PER_RUN || 60);
 const STOP_ON_RATE_LIMIT = process.env.SEO_WORKER_STOP_ON_RATE_LIMIT !== 'false';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || process.env.AI_MODEL || process.env.MODEL || 'gemini-3.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || process.env.AI_MODEL || process.env.MODEL || 'gemini-3.1-flash-lite';
 const GEMINI_AUDITOR_MODEL = process.env.GEMINI_AUDITOR_MODEL || GEMINI_MODEL;
 const QUEUE_STATUSES = ['approved', 'queued'] as const;
 const BLOCKED_GEMINI_MODEL_PREFIXES = ['gemini-2.0'];
@@ -1058,6 +1058,8 @@ async function generateSeoDraft(keyword: string) {
       }
 
       const jsonCritique = `${formatError(error)}. Rewrite the draft as a single strict JSON object only. Do not include markdown fences, comments, raw newlines inside JSON strings, or any text before/after the JSON.`;
+      console.log(`[seo-worker] Gemini Writer returned invalid JSON. Sleeping 3s before retry...`);
+      await sleep(3000);
       draft = await callGeminiWriter(keyword, jsonCritique, draft);
     }
 
@@ -1077,7 +1079,8 @@ async function generateSeoDraft(keyword: string) {
       verdict = 'REWRITE';
       console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): FAILED (${localViolations.length} violations)`);
     } else {
-      console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): PASSED. Running Gemini Auditor...`);
+      console.log(`[seo-worker] Local pre-audit for "${keyword}" (round ${round}): PASSED. Sleeping 3s before Gemini Auditor...`);
+      await sleep(3000);
       audit = await callGeminiAuditor(keyword, draft);
       verdict = auditPassed(audit) ? 'PASS' : 'REWRITE';
     }

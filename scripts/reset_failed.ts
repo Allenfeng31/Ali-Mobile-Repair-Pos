@@ -19,10 +19,10 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-  console.log("Resetting FAILED keyword statuses to 'queued'...");
+  console.log("Resetting FAILED keyword statuses to 'approved'...");
   const { data, error } = await supabase
     .from('seo_keywords')
-    .update({ status: 'queued', updated_at: new Date().toISOString() })
+    .update({ status: 'approved', updated_at: new Date().toISOString() })
     .eq('status', 'FAILED')
     .select('keyword');
 

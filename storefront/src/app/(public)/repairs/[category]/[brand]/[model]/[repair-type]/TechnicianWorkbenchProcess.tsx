@@ -70,8 +70,10 @@ function WorkbenchBox({
 
 export default function TechnicianWorkbenchProcess({ pocket }: { pocket: RepairTypeSeoPocket }) {
   const [openPanel, setOpenPanel] = useState<OpenWorkbenchPanel>(null);
-  const primaryProblems = pocket.commonProblems.slice(0, 4);
-  const secondaryProblems = pocket.commonProblems.slice(4);
+  const splitIndex = Math.max(1, Math.ceil(pocket.commonProblems.length / 2));
+  const primaryProblems = pocket.commonProblems.slice(0, splitIndex);
+  const secondaryProblems = pocket.commonProblems.slice(splitIndex);
+  const outcomesProblems = secondaryProblems.length > 0 ? secondaryProblems : primaryProblems;
   const headings = pocket.workbenchHeadings || {
     options: "Which repair path fits this iPhone 13?",
     diagnostics: "What do we test before quoting?",
@@ -150,7 +152,7 @@ export default function TechnicianWorkbenchProcess({ pocket }: { pocket: RepairT
           isOpen={openPanel === "outcomes"}
           onToggle={togglePanel}
         >
-          {secondaryProblems.map((problem) => (
+          {outcomesProblems.map((problem) => (
             <article key={problem.title} className="repair-workbench-mini-card">
               <h3>{problem.title}</h3>
               <p>{problem.description}</p>
