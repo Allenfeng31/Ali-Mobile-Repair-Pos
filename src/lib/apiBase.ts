@@ -17,14 +17,14 @@ export const getApiBaseUrl = () => {
     // Production and HTTPS pages must never call a plain HTTP API. Browsers block
     // that as mixed content, which makes the POS look disconnected on devices.
     if (env?.PROD || protocol === 'https:') {
-      return configuredUrl && isSafeBrowserApiUrl(configuredUrl) ? configuredUrl : '/api';
+      return configuredUrl && isSafeBrowserApiUrl(configuredUrl) ? configuredUrl : 'https://api.alimobile.com.au/api';
     }
 
     if (configuredUrl) return configuredUrl;
-    if (!isLocalhost) return `http://${hostname}:3001/api`;
+    if (!isLocalhost) return 'https://api.alimobile.com.au/api';
   }
 
-  return configuredUrl || 'http://localhost:3001/api';
+  return configuredUrl || 'https://api.alimobile.com.au/api';
 };
 
 export const getApiDiagnostics = () => {
