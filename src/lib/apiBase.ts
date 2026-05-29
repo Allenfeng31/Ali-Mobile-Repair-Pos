@@ -6,9 +6,13 @@ const isSafeBrowserApiUrl = (value: string) =>
 export const getApiBaseUrl = () => {
   // @ts-ignore - Vite injects import.meta.env at build time.
   const env = import.meta.env;
-  const configuredUrl = typeof env?.VITE_API_URL === 'string'
+  let configuredUrl = typeof env?.VITE_API_URL === 'string'
     ? trimTrailingSlash(env.VITE_API_URL.trim())
     : '';
+
+  if (configuredUrl && !configuredUrl.endsWith('/api')) {
+    configuredUrl += '/api';
+  }
 
   if (typeof window !== 'undefined') {
     const { hostname, protocol } = window.location;
