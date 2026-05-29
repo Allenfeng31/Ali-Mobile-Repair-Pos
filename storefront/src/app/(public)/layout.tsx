@@ -26,7 +26,11 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.ico?v=ali-mobile-logo-1", sizes: "any" },
+      { url: "/favicon.png?v=ali-mobile-logo-1", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png?v=ali-mobile-logo-1",
   },
 };
 
