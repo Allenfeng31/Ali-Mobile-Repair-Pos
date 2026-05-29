@@ -3,6 +3,7 @@ import { REPAIR_TYPES } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
 import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
+import { safeSlugSegment } from '@/lib/inventoryUtils';
 import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench, ShieldAlert, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
@@ -2380,7 +2381,16 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
   const description = META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
 
-  return { title, description };
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
+  const canonicalUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${safeSlugSegment(resolvedParams.model)}/${safeSlugSegment(resolvedParams['repair-type'])}`;
+
+  return { 
+    title, 
+    description,
+    alternates: {
+      canonical: canonicalUrl
+    }
+  };
 }
 
 function WaterDamagePolicySection() {
