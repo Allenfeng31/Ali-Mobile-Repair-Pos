@@ -34,11 +34,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.className}>
-      <head>
-        <link rel="icon" href="/favicon.ico?v=ali-mobile-logo-1" sizes="any" />
-        <link rel="icon" href="/favicon.png?v=ali-mobile-logo-1" type="image/png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=ali-mobile-logo-1" />
-      </head>
       <body className="antialiased min-h-screen bg-slate-50">
         <TopAnnouncementBar />
         {children}
