@@ -310,7 +310,7 @@ const IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "Can Ali Mobile replace my iPhone 13 battery the same day in Ringwood?",
       answer:
-        "Yes, most iPhone 13 battery replacements are completed the same day at Ringwood Square when the correct battery is in stock and there is no hidden liquid, charging-port, or board damage.",
+        "Yes, most iPhone 13 battery replacements are completed the same day at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 when the correct battery is in stock and there is no hidden liquid, charging-port, or board damage.",
     },
     {
       question: "What battery symptoms should I check before visiting?",
@@ -555,7 +555,7 @@ const IPHONE_13_BACK_HOUSING_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "How long does iPhone 13 back glass repair take?",
       answer:
-        "Timing depends on rear glass damage, frame condition, and part availability. We confirm the expected turnaround after inspecting the phone at Ringwood Square.",
+        "Timing depends on rear glass damage, frame condition, and part availability. We confirm the expected turnaround after inspecting the phone at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
     },
   ],
 };
@@ -1353,12 +1353,12 @@ function formatModelVariantToken(token: string): string {
 
 function isGalaxyNotePhoneSlug(modelSlug: string): boolean {
   const normalized = slugify(modelSlug);
-  return /^(galaxy-)?note\d+/.test(normalized);
+  return /^(galaxy-)?note-?\d+/.test(normalized);
 }
 
 function deriveSamsungGalaxyNoteModelName(modelSlug: string): string | null {
   const normalized = slugify(modelSlug);
-  const match = normalized.match(/^(?:galaxy-)?note(\d+)(.*)$/);
+  const match = normalized.match(/^(?:galaxy-)?note-?(\d+)(.*)$/);
   if (!match) return null;
 
   const generation = match[1];
@@ -1369,7 +1369,7 @@ function deriveSamsungGalaxyNoteModelName(modelSlug: string): string | null {
 
 function getSamsungGalaxyNoteProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
   const normalized = slugify(modelSlug);
-  const match = normalized.match(/^(?:galaxy-)?note(\d+)(.*)$/);
+  const match = normalized.match(/^(?:galaxy-)?note-?(\d+)(.*)$/);
   if (!match) return null;
 
   const generation = Number.parseInt(match[1], 10);
@@ -2294,19 +2294,24 @@ function getRepairTypeSeoPocket(params: {
     const aPocket = getSamsungGalaxyARepairPocket(model, repairType);
     if (aPocket) return aPocket;
 
-    const notePocket = getSamsungGalaxyNoteRepairPocket(model, repairType);
+    const normalizedModel = model.replace(/note-(\d)/, "note$1");
+    const normalizedZModel = normalizedModel
+      .replace(/z-fold-(\d)/, "z-fold$1")
+      .replace(/z-flip-(\d)/, "z-flip$1");
+
+    const notePocket = getSamsungGalaxyNoteRepairPocket(normalizedModel, repairType);
     if (notePocket) return notePocket;
 
-    const zPocket = getSamsungGalaxyZRepairPocket(model, repairType);
+    const zPocket = getSamsungGalaxyZRepairPocket(normalizedZModel, repairType);
     if (zPocket) return zPocket;
   }
 
-  if (category === "phone" && (brand === "google" || brand === "google-pixel" || brand === "pixel")) {
+  if (category === "phone" && (brand === "google" || brand === "google-pixel" || brand === "googlepixel" || brand === "pixel")) {
     const googlePocket = getGooglePixelRepairPocket(model, repairType);
     if (googlePocket) return googlePocket;
   }
 
-  if (category === "phone" && brand === "oppo") {
+  if (category === "phone" && (brand === "oppo" || brand.startsWith("oppo-"))) {
     const oppoPocket = getOppoRepairPocket(model, repairType);
     if (oppoPocket) return oppoPocket;
   }

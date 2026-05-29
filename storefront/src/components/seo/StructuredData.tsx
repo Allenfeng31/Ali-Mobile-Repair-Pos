@@ -32,7 +32,7 @@ interface StoreData {
 const MAIN_STORE_CONFIG: StoreData = {
   name: 'Ali Mobile Repair',
   image: 'https://www.alimobile.com.au/logo.png',
-  telephone: '0481058514',
+  telephone: '0481 058 514',
   address: {
     streetAddress: 'Ringwood Square Shopping Centre Kiosk C1, Seymour St',
     addressLocality: 'Ringwood',

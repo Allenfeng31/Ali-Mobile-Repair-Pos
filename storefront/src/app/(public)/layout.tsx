@@ -49,7 +49,7 @@ export default function PublicLayout({
           <div className="footer-shell">
             <div className="footer-cta-panel">
               <div>
-                <span className="footer-kicker">Ringwood Square repair desk</span>
+                <span className="footer-kicker">Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 repair desk</span>
                 <h2>Need a clear repair price before you visit?</h2>
                 <p>
                   Book online for priority service, call for part availability, or drop into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check.
@@ -100,15 +100,14 @@ export default function PublicLayout({
                   <small>Ask about parts, timing, and live quote support.</small>
                 </a>
                 <a
-                  href="https://www.google.com/maps/dir/?api=1&destination=Ali+Mobile+%26+Repair+Ringwood"
+                  href="https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134"
                   className="footer-contact-card"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <MapPin size={19} strokeWidth={2.4} aria-hidden="true" />
                   <span>Visit us in store</span>
-                  <strong>Ringwood Square Shopping Centre Kiosk C1</strong>
-                  <small>Seymour St, Ringwood VIC 3134.</small>
+                  <strong>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</strong>
                 </a>
                 <div className="footer-contact-card">
                   <Clock3 size={19} strokeWidth={2.4} aria-hidden="true" />
@@ -154,7 +153,7 @@ export default function PublicLayout({
                 <span>Local Melbourne electronics repair business</span>
                 <span>
                   <Navigation size={14} strokeWidth={2.4} aria-hidden="true" />
-                  Ringwood Square Shopping Centre
+                  Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134
                 </span>
               </div>
             </div>

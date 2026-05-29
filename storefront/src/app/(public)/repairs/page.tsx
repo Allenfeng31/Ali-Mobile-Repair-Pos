@@ -56,7 +56,7 @@ const repairCategories = [
 const trustSignals = [
   { value: "No Fix", label: "No Charge Policy" },
   { value: "6 mo", label: "Warranty on Repairs" },
-  { value: "C1", label: "Ringwood Square" },
+  { value: "C1", label: "Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134" },
 ];
 
 const processSteps = [

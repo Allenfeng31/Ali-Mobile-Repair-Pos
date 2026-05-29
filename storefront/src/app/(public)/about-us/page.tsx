@@ -5,7 +5,7 @@ import styles from "./AboutUs.module.css";
 
 const proofPoints = [
   { value: "10+", label: "Years Experience" },
-  { value: "C1", label: "Ringwood Square" },
+  { value: "C1", label: "Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134" },
   { value: "0$", label: "No Fix, No Charge" },
 ];
 
@@ -53,7 +53,7 @@ export default function AboutUsPage() {
             <div className={styles.imageShell}>
               <Image
                 src="/images/about-us-new.jpg"
-                alt="Ali Mobile & Repair store front in Ringwood Square"
+                alt="Ali Mobile & Repair store front in Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134"
                 width={680}
                 height={460}
                 priority
@@ -87,8 +87,7 @@ export default function AboutUsPage() {
           </div>
           <div className={styles.storyText}>
             <p>
-              We are a specialist electronics repair shop based at Ringwood Square Shopping Centre Kiosk C1,
-              Seymour St, Ringwood VIC 3134. Our work covers everyday device problems such as cracked screens and tired
+              We are a specialist electronics repair shop based at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. Our work covers everyday device problems such as cracked screens and tired
               batteries, plus trickier issues like charging faults, water damage, and laptop repairs.
             </p>
             <p>

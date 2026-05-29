@@ -14,124 +14,124 @@ type LocationPageProps = {
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.alimobile.com.au";
 const suburbTransitGuide: Record<string, string[]> = {
   ringwood: [
-    " Walk or catch any local service into Ringwood Station, then continue about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive directly to Ringwood Square Shopping Centre on Maroondah Highway and park near the centre entry for Kiosk C1."
+    " Walk or catch any local service into Ringwood Station, then continue about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive directly to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 on Maroondah Highway and park near the centre entry for Kiosk C1."
   ],
   ringwoodnorth: [
-    " Catch a local Ringwood-bound bus from the Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive south via Warrandyte Road into Ringwood, then enter Ringwood Square Shopping Centre from the Maroondah Highway side."
+    " Catch a local Ringwood-bound bus from the Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive south via Warrandyte Road into Ringwood, then enter Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 from the Maroondah Highway side."
   ],
   croydon: [
-    " Catch the Lilydale line train towards Flinders Street from Croydon Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive west via Maroondah Highway or Mt Dandenong Road into Ringwood, park at Ringwood Square Shopping Centre, and walk directly to Kiosk C1."
+    " Catch the Lilydale line train towards Flinders Street from Croydon Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive west via Maroondah Highway or Mt Dandenong Road into Ringwood, park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134, and walk directly to Kiosk C1."
   ],
   boxhill: [
-    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Box Hill Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east along Whitehorse Road and Maroondah Highway directly into the Ringwood Square corridor, then park inside Ringwood Square Shopping Centre."
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Box Hill Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east along Whitehorse Road and Maroondah Highway directly into the Ringwood Square corridor, then park inside Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   mitcham: [
-    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Mitcham Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east along Maroondah Highway from Mitcham into Ringwood, turn into Ringwood Square Shopping Centre, and walk to Kiosk C1."
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Mitcham Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east along Maroondah Highway from Mitcham into Ringwood, turn into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134, and walk to Kiosk C1."
   ],
   glenwaverley: [
-    " Catch Bus 742 from Glen Waverley Station towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Springvale Road, Canterbury Road, and Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Bus 742 from Glen Waverley Station towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Springvale Road, Canterbury Road, and Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   heathmont: [
-    " Catch the Belgrave line train towards the City from Heathmont Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive north via Canterbury Road and Heathmont Road toward Ringwood, then enter Ringwood Square Shopping Centre from the Maroondah Highway side."
+    " Catch the Belgrave line train towards the City from Heathmont Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive north via Canterbury Road and Heathmont Road toward Ringwood, then enter Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 from the Maroondah Highway side."
   ],
   wantirna: [
-    " Catch SmartBus 901 towards Ringwood Station from the Wantirna Road or Canterbury Road corridor and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive north via Wantirna Road or EastLink toward Ringwood, then park at Ringwood Square Shopping Centre for direct access to Kiosk C1."
+    " Catch SmartBus 901 towards Ringwood Station from the Wantirna Road or Canterbury Road corridor and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive north via Wantirna Road or EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for direct access to Kiosk C1."
   ],
   doncaster: [
-    " Catch SmartBus 907 from Doncaster Road towards Mitcham Station, then transfer to the Lilydale/Belgrave line or SmartBus 901 towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Doncaster Road, Springvale Road, and Maroondah Highway, or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch SmartBus 907 from Doncaster Road towards Mitcham Station, then transfer to the Lilydale/Belgrave line or SmartBus 901 towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Doncaster Road, Springvale Road, and Maroondah Highway, or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   bayswater: [
-    " Catch the Belgrave line train towards the City from Bayswater Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive west via Mountain Highway toward Ringwood, continue into the Ringwood Square corridor, and park at Ringwood Square Shopping Centre."
+    " Catch the Belgrave line train towards the City from Bayswater Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive west via Mountain Highway toward Ringwood, continue into the Ringwood Square corridor, and park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   boronia: [
-    " Catch the Belgrave line train towards the City from Boronia Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Boronia Road, Dorset Road, or Mountain Highway toward Ringwood, then use Ringwood Square Shopping Centre parking."
+    " Catch the Belgrave line train towards the City from Boronia Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Boronia Road, Dorset Road, or Mountain Highway toward Ringwood, then use Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 parking."
   ],
   burwood: [
-    " Catch Tram 75 towards Vermont South, then transfer to Bus 742 towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east along Burwood Highway, connect through Vermont South and Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Tram 75 towards Vermont South, then transfer to Bus 742 towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east along Burwood Highway, connect through Vermont South and Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   nunawading: [
-    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Nunawading Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east along Maroondah Highway from Nunawading through Mitcham into Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Nunawading Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east along Maroondah Highway from Nunawading through Mitcham into Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   balwyn: [
-    " Catch Bus 302 or 304 towards Box Hill, then transfer at Box Hill Station to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east via Whitehorse Road and Maroondah Highway through Box Hill and Mitcham into Ringwood Square Shopping Centre."
+    " Catch Bus 302 or 304 towards Box Hill, then transfer at Box Hill Station to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east via Whitehorse Road and Maroondah Highway through Box Hill and Mitcham into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   vermont: [
-    " Catch Bus 742 directly from Vermont towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east via Canterbury Road, Heatherdale Road, or Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Bus 742 directly from Vermont towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east via Canterbury Road, Heatherdale Road, or Wantirna Road toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   ringwoodeast: [
-    " Catch the Lilydale line train towards the City from Ringwood East Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive west via Dublin Road or Maroondah Highway into Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch the Lilydale line train towards the City from Ringwood East Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive west via Dublin Road or Maroondah Highway into Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   springvale: [
-    " Catch SmartBus 902 from Springvale Station towards Nunawading Station, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive north via Springvale Road and EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch SmartBus 902 from Springvale Station towards Nunawading Station, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive north via Springvale Road and EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   kilsyth: [
-    " Catch Bus 690 towards Croydon Station, then transfer to the Lilydale line towards the City. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive west via Mt Dandenong Road and Maroondah Highway into Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Bus 690 towards Croydon Station, then transfer to the Lilydale line towards the City. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive west via Mt Dandenong Road and Maroondah Highway into Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   mooroolbark: [
-    " Catch the Lilydale line train towards the City from Mooroolbark Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Manchester Road, Canterbury Road, or Maroondah Highway toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch the Lilydale line train towards the City from Mooroolbark Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Manchester Road, Canterbury Road, or Maroondah Highway toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   clayton: [
-    " Catch the Cranbourne/Pakenham line train from Clayton Station to Richmond, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Ferntree Gully Road and EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch the Cranbourne/Pakenham line train from Clayton Station to Richmond, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Ferntree Gully Road and EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   lilydale: [
-    " Catch the Lilydale line train towards the City from Lilydale Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive west along Maroondah Highway from Lilydale through Chirnside Park and Croydon into Ringwood Square Shopping Centre."
+    " Catch the Lilydale line train towards the City from Lilydale Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive west along Maroondah Highway from Lilydale through Chirnside Park and Croydon into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   chirnsidepark: [
-    " Catch Bus 670 from Chirnside Park Shopping Centre towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive west along Maroondah Highway through Croydon into Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Bus 670 from Chirnside Park Shopping Centre towards Ringwood Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive west along Maroondah Highway through Croydon into Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   ferntreegully: [
-    " Catch the Belgrave line train towards the City from Ferntree Gully Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive north via Burwood Highway, Dorset Road, or Mountain Highway toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch the Belgrave line train towards the City from Ferntree Gully Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive north via Burwood Highway, Dorset Road, or Mountain Highway toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   knoxfield: [
-    " Catch SmartBus 901 from the Stud Road or Burwood Highway corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive north via Stud Road and Boronia Road or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch SmartBus 901 from the Stud Road or Burwood Highway corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive north via Stud Road and Boronia Road or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   rowville: [
-    " Catch SmartBus 901 from Stud Park Shopping Centre towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Stud Road, Ferntree Gully Road, or EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch SmartBus 901 from Stud Park Shopping Centre towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Stud Road, Ferntree Gully Road, or EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   donvale: [
-    " Catch SmartBus 902 from the Springvale Road corridor towards Nunawading Station, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Springvale Road and Maroondah Highway or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch SmartBus 902 from the Springvale Road corridor towards Nunawading Station, then transfer to the Lilydale/Belgrave line towards Ringwood. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Springvale Road and Maroondah Highway or use EastLink toward Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   parkorchards: [
-    " Catch Bus 364 from the Ringwood-Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive south via Park Road or Ringwood-Warrandyte Road into Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Bus 364 from the Ringwood-Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive south via Park Road or Ringwood-Warrandyte Road into Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   warrandyte: [
-    " Catch Bus 364 from Warrandyte towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive via Ringwood-Warrandyte Road directly into Ringwood, then park at Ringwood Square Shopping Centre."
+    " Catch Bus 364 from Warrandyte towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive via Ringwood-Warrandyte Road directly into Ringwood, then park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   blackburn: [
-    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Blackburn Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive east along Whitehorse Road and Maroondah Highway through Nunawading and Mitcham into Ringwood Square Shopping Centre."
+    " Catch the Lilydale or Belgrave line train towards Lilydale/Belgrave from Blackburn Station and depart at Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive east along Whitehorse Road and Maroondah Highway through Nunawading and Mitcham into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ],
   warranwood: [
-    " Catch a Ringwood-bound local bus from the Wonga Road or Ringwood-Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre.",
-    " Drive south along Wonga Road, connect through Ringwood North, and park at Ringwood Square Shopping Centre."
+    " Catch a Ringwood-bound local bus from the Wonga Road or Ringwood-Warrandyte Road corridor towards Ringwood Station. After getting off, walk about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
+    " Drive south along Wonga Road, connect through Ringwood North, and park at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134."
   ]
 };
 

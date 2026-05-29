@@ -163,7 +163,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { t: "Weekday Same-Day Repair", d: "Available for screens and batteries in stock." },
       { t: "Expert Data Preservation protocols", d: "" },
       { t: "Component-level motherboard repairs", d: "" },
-      { t: "Local Eastern Suburbs Shop in Ringwood Square", d: "" }
+      { t: "Local Eastern Suburbs Shop at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134", d: "" }
     ],
     pricing: {
       title: "Popular Computer Repair Pricing",
