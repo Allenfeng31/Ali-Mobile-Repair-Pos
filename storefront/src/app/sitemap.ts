@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { fetchRepairCatalog } from '@/lib/api';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
+import { safeSlugSegment } from '@/lib/inventoryUtils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -42,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Category hub URLs
     const categoryUrls: MetadataRoute.Sitemap = ['phone', 'tablet', 'laptop', 'watch'].map(category => ({
-      url: `${baseUrl}/repairs/${category}`,
+      url: `${baseUrl}/repairs/${safeSlugSegment(category)}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.85,
@@ -50,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Brand sub-hub URLs
     const brandUrls: MetadataRoute.Sitemap = catalog.brands.map(brand => ({
-      url: `${baseUrl}/repairs/${brand.category}/${brand.slug}`,
+      url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
@@ -63,14 +64,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
         modelUrls.push({
-          url: `${baseUrl}/repairs/${brand.category}/${brand.slug}/${model.slug}`,
+          url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${safeSlugSegment(model.slug)}`,
           lastModified: new Date(),
           changeFrequency: 'weekly' as const,
           priority: 0.7,
         });
         for (const repair of model.repairTypes) {
           repairUrls.push({
-            url: `${baseUrl}/repairs/${brand.category}/${brand.slug}/${model.slug}/${repair.slug}`,
+            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${safeSlugSegment(model.slug)}/${safeSlugSegment(repair.slug)}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,

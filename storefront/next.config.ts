@@ -88,6 +88,42 @@ const nextConfig: NextConfig = {
         source: '/repairs/macbook',
         destination: '/repairs/laptop/macbook',
         permanent: true,
+      },
+      // 5. FLEX CABLE CONSOLIDATION REDIRECTS
+      {
+        source: '/repairs/:category/:brand/:model/power-button',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
+      },
+      {
+        source: '/repairs/:category/:brand/:model/volume-button',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
+      },
+      {
+        source: '/repairs/:category/:brand/:model/power-flex',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
+      },
+      {
+        source: '/repairs/:category/:brand/:model/volume-flex',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
+      },
+      {
+        source: '/repairs/:category/:brand/:model/flash',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
+      },
+      {
+        source: '/repairs/:category/:brand/:model/flashlight',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
+      },
+      {
+        source: '/repairs/:category/:brand/:model/flash-flex',
+        destination: '/repairs/:category/:brand/:model/flex-cable',
+        permanent: true,
       }
     ];
   },

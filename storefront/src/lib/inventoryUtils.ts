@@ -25,6 +25,16 @@ export interface ParsedItem {
   is_recommended: boolean;
 }
 
+export function safeSlugSegment(input: unknown): string {
+  return encodeURIComponent(
+    String(input ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  );
+}
+
 export function slugify(text: string): string {
   if (!text) return "";
   return text.toLowerCase()
@@ -93,12 +103,18 @@ const REPAIR_NAME_MAP: Record<string, string> = {
   "Back Camera": "Back Camera Replacement",
   "Back Glass": "Back Housing Replacement",
   "Back Housing": "Back Housing Replacement",
+  "Power Button": "Flex Cable",
+  "Volume Button": "Flex Cable",
+  "Power Flex": "Flex Cable",
+  "Volume Flex": "Flex Cable",
+  "Flash Flex": "Flex Cable"
 };
 
 const COMMON_SERVICES = [
   "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
   "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement",
-  "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement"
+  "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement",
+  "Flex Cable", "Power Button", "Volume Button", "Power Flex", "Volume Flex", "Flash Flex"
 ];
 
 function escapeRegExp(value: string): string {

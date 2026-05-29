@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
-const { syncCustomerToGoogleContacts } = require('./googleContactsSync.js');
+const { syncCustomerToGoogleContacts, scheduleGoogleContactsSync } = require('./googleContactsSync.js');
 // Only load dotenv in local development (where .env file exists)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config({ path: path.join(__dirname, '../.env') });
@@ -837,12 +837,22 @@ app.post('/api/customers', async (req, res) => {
   const { data, error } = await supabase.from('customers').insert([customerData]).select();
   if (error) return res.status(500).json({ error: error.message });
 
-  // Sync to Google Contacts (Awaited to ensure Vercel doesn't kill the process early)
+  // Sync to Google Contacts (Non-blocking Outbox pattern)
   if (data && data[0]) {
     try {
-      await syncCustomerToGoogleContacts(data[0], supabase);
+      const { data: logData } = await supabase.from('failed_sync_logs').insert([{
+        customer_id: data[0].id,
+        sync_payload: data[0],
+        status: 'pending'
+      }]).select();
+      
+      const logId = (logData && logData[0]) ? logData[0].id : null;
+      
+      scheduleGoogleContactsSync({ customer: data[0], supabase, logId }).catch(err => {
+        console.warn('[Google Contacts Sync] Non-blocking sync failed:', err);
+      });
     } catch (err) {
-      console.error('[Google Contacts] Sync failed:', err);
+      console.error('[Google Contacts] Failed to init outbox sync:', err);
     }
   }
 
@@ -1108,7 +1118,10 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
 
     let customerId;
 
+    let isNewCustomer = false;
+
     if (!existing || existing.length === 0) {
+      isNewCustomer = true;
       // Normalize phone for storage (optional, but good for matching)
       const cleanPhone = phone.replace(/\D/g, '');
 
@@ -1139,12 +1152,6 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
         console.error(`❌ [Appointment] Failed to create customer: ${insertError.message}`);
       } else {
         console.log(`✅ [Appointment] Customer record successfully created for ${name}`);
-        // Sync to Google Contacts (Awaited to ensure Vercel doesn't kill the process early)
-        try {
-          await syncCustomerToGoogleContacts({ id: customerId, name: name.trim(), phone: phone.trim() }, supabase);
-        } catch (err) {
-          console.error('[Google Contacts] Sync failed:', err);
-        }
       }
     } else {
       customerId = existing[0].id;
@@ -1182,6 +1189,27 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
         console.error(`❌ [Appointment] Failed to create repair record: ${repairError.message}`);
       } else {
         console.log(`✅ [Appointment] Repair record successfully linked for ${name}`);
+        
+        if (isNewCustomer) {
+          // Sync to Google Contacts (Non-blocking Outbox pattern with booking_id)
+          try {
+            const syncPayload = { id: customerId, name: name.trim(), phone: phone.trim() };
+            const { data: logData } = await supabase.from('failed_sync_logs').insert([{
+              customer_id: customerId,
+              booking_id: repairId,
+              sync_payload: syncPayload,
+              status: 'pending'
+            }]).select();
+            
+            const logId = (logData && logData[0]) ? logData[0].id : null;
+            
+            scheduleGoogleContactsSync({ customer: syncPayload, supabase, logId }).catch(err => {
+              console.warn('[Google Contacts Sync] Non-blocking sync failed:', err);
+            });
+          } catch (err) {
+            console.error('[Google Contacts] Failed to init outbox sync:', err);
+          }
+        }
       }
     }
   }
@@ -2113,6 +2141,86 @@ app.post('/api/push/test', async (req, res) => {
   } catch (err) {
     console.error('❌ [Push] Test push error:', err.message);
     res.status(500).json({ error: 'Failed to send test push' });
+  }
+});
+
+// ----------------------------------------------------------------------
+// ADMIN SYNC ROUTES
+// ----------------------------------------------------------------------
+app.post('/api/admin/sync-contacts/retry', async (req, res) => {
+  try {
+    // 1. Strict Auth Verification
+    const authHeader = req.headers.authorization;
+    const adminSecret = process.env.ADMIN_SYNC_SECRET;
+    
+    if (!adminSecret) {
+      return res.status(500).json({ error: 'ADMIN_SYNC_SECRET is not configured on the server.' });
+    }
+    
+    if (authHeader !== `Bearer ${adminSecret}`) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid admin secret.' });
+    }
+
+    // 2. Query only pending/failed with a strict attempt ceiling (Max 5 attempts)
+    const { data: logs, error } = await supabase
+      .from('failed_sync_logs')
+      .select('*')
+      .in('status', ['pending', 'failed'])
+      .lt('attempts', 5);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    if (!logs || logs.length === 0) {
+      return res.json({ message: 'No actionable logs found.', processed: 0 });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const log of logs) {
+      // 3. Apply Processing Lock (Optimistic Locking) to avoid Vercel Cron race conditions
+      const { data: locked, error: lockError } = await supabase
+        .from('failed_sync_logs')
+        .update({ status: 'processing', attempts: (log.attempts || 0) + 1 })
+        .eq('id', log.id)
+        .in('status', ['pending', 'failed'])
+        .select();
+
+      // If lockError or no rows returned, another worker grabbed it
+      if (lockError || !locked || locked.length === 0) continue;
+
+      try {
+        const isSuccess = await syncCustomerToGoogleContacts(log.sync_payload, supabase);
+        if (isSuccess) {
+          await supabase.from('failed_sync_logs').update({ 
+            status: 'synced', 
+            error_reason: null, 
+            updated_at: new Date().toISOString() 
+          }).eq('id', log.id);
+          successCount++;
+        } else {
+          await supabase.from('failed_sync_logs').update({ 
+            status: 'failed', 
+            error_reason: 'Retry sync returned false (timeout or disabled)', 
+            updated_at: new Date().toISOString() 
+          }).eq('id', log.id);
+          failCount++;
+        }
+      } catch (err) {
+        await supabase.from('failed_sync_logs').update({ 
+          status: 'failed', 
+          error_reason: err.message, 
+          updated_at: new Date().toISOString() 
+        }).eq('id', log.id);
+        failCount++;
+      }
+    }
+
+    return res.json({ message: 'Retry complete', processed: successCount + failCount, successCount, failCount });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 });
 

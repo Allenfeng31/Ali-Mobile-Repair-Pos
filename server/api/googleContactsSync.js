@@ -1,5 +1,7 @@
 const { google } = require('googleapis');
 
+const GOOGLE_CONTACTS_TIMEOUT_MS = 3000;
+
 async function isGoogleContactsSyncEnabled(supabase) {
   const { data, error } = await supabase
     .from('settings')
@@ -43,10 +45,13 @@ async function syncCustomerToGoogleContacts(customer, supabase, googleClient = n
 
     // 1. Search for existing contacts by phone number
     console.log(`[Google Contacts] Searching for existing contact with phone: ${customer.phone}`);
-    const searchResponse = await client.people.searchContacts({
-      query: customer.phone,
-      readMask: 'names,phoneNumbers',
-    });
+    const searchResponse = await client.people.searchContacts(
+      {
+        query: customer.phone,
+        readMask: 'names,phoneNumbers',
+      },
+      { timeout: GOOGLE_CONTACTS_TIMEOUT_MS }
+    );
 
     const results = searchResponse.data.results || [];
     
@@ -54,21 +59,24 @@ async function syncCustomerToGoogleContacts(customer, supabase, googleClient = n
     if (results.length === 0) {
       console.log(`[Google Contacts] No existing contact found. Creating new contact...`);
       // Add new contact
-      await client.people.createContact({
-        requestBody: {
-          names: [
-            {
-              givenName: customer.name || 'Unknown',
-            },
-          ],
-          phoneNumbers: [
-            {
-              value: customer.phone,
-              type: 'mobile',
-            },
-          ],
+      await client.people.createContact(
+        {
+          requestBody: {
+            names: [
+              {
+                givenName: customer.name || 'Unknown',
+              },
+            ],
+            phoneNumbers: [
+              {
+                value: customer.phone,
+                type: 'mobile',
+              },
+            ],
+          },
         },
-      });
+        { timeout: GOOGLE_CONTACTS_TIMEOUT_MS }
+      );
       console.log(`[Google Contacts] Successfully synced customer ${customer.name}`);
     } else {
       console.log(`[Google Contacts] Customer ${customer.name} (${customer.phone}) already exists. Skipping creation.`);
@@ -95,9 +103,47 @@ async function syncCustomerToGoogleContacts(customer, supabase, googleClient = n
     return false;
   }
 }
+/**
+ * Schedule a non-blocking background sync with Outbox pattern.
+ * Safely updates failed_sync_logs status.
+ */
+async function scheduleGoogleContactsSync({ customer, supabase, logId }) {
+  try {
+    const success = await syncCustomerToGoogleContacts(customer, supabase);
+    
+    if (success && logId && supabase) {
+      await supabase
+        .from('failed_sync_logs')
+        .update({ status: 'synced', updated_at: new Date().toISOString() })
+        .eq('id', logId);
+    } else if (!success && logId && supabase) {
+      await supabase
+        .from('failed_sync_logs')
+        .update({ 
+          status: 'failed', 
+          error_reason: 'Sync returned false (maybe timeout, maybe API error or disabled)',
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', logId);
+    }
+  } catch (err) {
+    console.error('[Google Contacts] Uncaught error in scheduleGoogleContactsSync:', err.message);
+    if (logId && supabase) {
+      await supabase
+        .from('failed_sync_logs')
+        .update({ 
+          status: 'failed', 
+          error_reason: err.message,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', logId);
+    }
+  }
+}
 
 module.exports = {
   isGoogleContactsSyncEnabled,
   getGoogleContactsClient,
-  syncCustomerToGoogleContacts
+  syncCustomerToGoogleContacts,
+  scheduleGoogleContactsSync
 };
