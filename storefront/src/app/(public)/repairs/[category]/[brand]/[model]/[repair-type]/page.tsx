@@ -1533,12 +1533,16 @@ function getOppoProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null 
   const isFind = tokens.includes("find");
   const isReno = tokens.includes("reno");
   const aMatch = normalized.match(/^a(\d{2,3})/);
-  const aGeneration = aMatch ? Number.parseInt(aMatch[1], 10) : 0;
+  const isASeries = Boolean(aMatch);
   const supportsWirelessCharging = isFind;
   const hasInDisplayFingerprint = isFind || isReno;
 
   return {
-    display: hasInDisplayFingerprint ? "flat AMOLED display" : "flat LCD display",
+    display: hasInDisplayFingerprint
+      ? "flat AMOLED display"
+      : isASeries
+        ? "AMOLED or LCD display (variant dependent)"
+        : "flat LCD display",
     hasSPen: false,
     screenForm: "flat",
     cameraSummary: isFind
@@ -1551,13 +1555,13 @@ function getOppoProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null 
       : "USB-C charging and fast-charge checks",
     fingerprintSummary: hasInDisplayFingerprint
       ? "in-display fingerprint sensor behaviour"
-      : aGeneration > 0 && aGeneration <= 25
-        ? "side-mounted fingerprint sensor behaviour"
+      : isASeries
+        ? "fingerprint sensor behaviour"
         : "fingerprint sensor behaviour",
     fingerprintLabel: hasInDisplayFingerprint
       ? "in-display fingerprint sensor"
-      : aGeneration > 0 && aGeneration <= 25
-        ? "side-mounted fingerprint sensor"
+      : isASeries
+        ? "fingerprint sensor"
         : "fingerprint sensor",
     supportsWirelessCharging,
   };
