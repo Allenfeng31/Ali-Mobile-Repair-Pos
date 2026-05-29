@@ -3737,7 +3737,7 @@ input:checked+.toggle-slider:before {
 }
 
 .repair-tech-hero-laptop {
-  grid-template-columns: minmax(0, 0.82fr) minmax(548px, 0.72fr);
+  grid-template-columns: minmax(0, 0.82fr) minmax(544px, 0.72fr);
   align-items: center;
 }
 
@@ -3940,8 +3940,8 @@ input:checked+.toggle-slider:before {
 }
 
 .repair-exploded-hero-laptop {
-  width: min(100%, 548px);
-  height: 447px;
+  width: min(100%, 544px);
+  height: 544px;
 }
 
 .repair-exploded-hero-laptop .repair-exploded-hero-image {
@@ -4980,9 +4980,9 @@ input:checked+.toggle-slider:before {
   }
 
   .repair-exploded-hero-laptop {
-    width: min(100%, 548px);
+    width: min(100%, 544px);
     height: auto;
-    aspect-ratio: 548 / 447;
+    aspect-ratio: 1 / 1;
   }
 
   .repair-chip-cloud {

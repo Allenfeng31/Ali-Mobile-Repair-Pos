@@ -1124,13 +1124,46 @@ function personalizeIphoneRepairPocket(
   return applyIPhoneAccuracyRules(personalizedPocket, modelName, repairType, modelSlug);
 }
 
-interface SamsungGalaxySHardwareProfile {
+interface SamsungGalaxyHardwareProfile {
   display: string;
   hasSPen: boolean;
-  screenForm: "flat" | "edge";
+  screenForm: "flat" | "edge" | "foldable";
   cameraSummary: string;
   chargingNote: string;
+  fingerprintSummary: string;
+  fingerprintLabel: string;
+  supportsWirelessCharging: boolean;
 }
+
+interface AndroidRepairBrandContext {
+  brandName: string;
+  familyName: string;
+}
+
+const SAMSUNG_GALAXY_CONTEXT: AndroidRepairBrandContext = {
+  brandName: "Samsung",
+  familyName: "Galaxy",
+};
+
+const SAMSUNG_NOTE_CONTEXT: AndroidRepairBrandContext = {
+  brandName: "Samsung",
+  familyName: "Galaxy Note",
+};
+
+const SAMSUNG_Z_CONTEXT: AndroidRepairBrandContext = {
+  brandName: "Samsung",
+  familyName: "Galaxy Z",
+};
+
+const GOOGLE_PIXEL_CONTEXT: AndroidRepairBrandContext = {
+  brandName: "Google Pixel",
+  familyName: "Pixel",
+};
+
+const OPPO_CONTEXT: AndroidRepairBrandContext = {
+  brandName: "OPPO",
+  familyName: "OPPO",
+};
 
 function isGalaxySPhoneSlug(modelSlug: string): boolean {
   const normalized = slugify(modelSlug);
@@ -1162,7 +1195,7 @@ function deriveSamsungGalaxySModelName(modelSlug: string): string | null {
   return `Samsung Galaxy S${generation}${variantLabel}`;
 }
 
-function getSamsungGalaxySProfile(modelSlug: string): SamsungGalaxySHardwareProfile | null {
+function getSamsungGalaxySProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
   const normalized = slugify(modelSlug);
   const match = normalized.match(/^galaxy-s(\d+)(.*)$/);
   if (!match) return null;
@@ -1177,6 +1210,8 @@ function getSamsungGalaxySProfile(modelSlug: string): SamsungGalaxySHardwareProf
   const isLegacyEdgeSeries = generation >= 8 && generation <= 10;
   const isEdgeModel = isUltra || isLegacyEdgeSeries;
   const hasSPen = isUltra && generation >= 22;
+  const hasRearFingerprint = generation <= 9;
+  const hasSideFingerprint = isCompactE && generation >= 10;
 
   let cameraSummary = "main rear camera testing";
   if (isUltra) {
@@ -1201,38 +1236,371 @@ function getSamsungGalaxySProfile(modelSlug: string): SamsungGalaxySHardwareProf
     chargingNote: hasSPen
       ? "USB-C charging, fast wireless charging, Wireless PowerShare, and S Pen handover checks"
       : "USB-C charging, fast wireless charging, and Wireless PowerShare checks",
+    fingerprintSummary: hasRearFingerprint
+      ? "rear fingerprint sensor behaviour"
+      : hasSideFingerprint
+        ? "side-mounted fingerprint sensor behaviour"
+        : "in-display fingerprint behaviour",
+    fingerprintLabel: hasRearFingerprint
+      ? "rear fingerprint sensor"
+      : hasSideFingerprint
+        ? "side-mounted fingerprint sensor"
+        : "in-display fingerprint",
+    supportsWirelessCharging: true,
   };
 }
 
-function buildSamsungS23ScreenPocket(modelName: string, profile: SamsungGalaxySHardwareProfile): RepairTypeSeoPocket {
+function isGalaxyAPhoneSlug(modelSlug: string): boolean {
+  const normalized = slugify(modelSlug);
+  return /^(galaxy-)?a\d{2,3}[a-z]?(-|$)/.test(normalized);
+}
+
+function deriveSamsungGalaxyAModelName(modelSlug: string): string | null {
+  const normalized = slugify(modelSlug);
+  const match = normalized.match(/^(?:galaxy-)?a(\d{2,3})([a-z]?)(.*)$/);
+  if (!match) return null;
+
+  const generation = match[1];
+  const letterSuffix = match[2] ? match[2].toLowerCase() : "";
+  const suffixTokens = match[3].split("-").filter(Boolean);
+  const is5G = suffixTokens.includes("5g");
+  const baseModel = `A${generation}${letterSuffix}`;
+
+  return is5G ? `Samsung Galaxy ${baseModel} 5G` : `Samsung Galaxy ${baseModel}`;
+}
+
+function getSamsungGalaxyAProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
+  const normalized = slugify(modelSlug);
+  const match = normalized.match(/^(?:galaxy-)?a(\d{2,3})([a-z]?)(.*)$/);
+  if (!match) return null;
+
+  const generation = Number.parseInt(match[1], 10);
+  const suffixLetter = match[2] ? match[2].toLowerCase() : "";
+  const compactModelKey = `${generation}${suffixLetter}`;
+
+  const lcdModels = new Set([
+    "3", "5", "6", "10", "11", "12", "13", "14", "15", "16",
+    "20", "21", "22", "23",
+  ]);
+  const amoledModels = new Set([
+    "24", "25", "30", "31", "32", "33", "34", "35", "36",
+    "40", "41", "42",
+    "50", "51", "52", "52s", "53", "54", "55", "56",
+    "70", "71", "72", "73", "74", "80", "82", "90",
+  ]);
+
+  const sideFingerprintModels = new Set([
+    "3", "5", "6", "10", "11", "12", "13", "14", "15", "16",
+    "22", "23", "24", "25",
+  ]);
+  const rearFingerprintModels = new Set(["20", "21"]);
+
+  let display = "AMOLED or LCD display (variant dependent)";
+  if (amoledModels.has(compactModelKey) || (generation >= 30 && !lcdModels.has(compactModelKey))) {
+    display = "flat Super AMOLED display";
+  } else if (lcdModels.has(compactModelKey)) {
+    display = "flat LCD display";
+  }
+
+  let fingerprintSummary = "fingerprint sensor behaviour";
+  let fingerprintLabel = "fingerprint sensor";
+  if (sideFingerprintModels.has(compactModelKey)) {
+    fingerprintSummary = "side-mounted fingerprint sensor behaviour";
+    fingerprintLabel = "side-mounted fingerprint sensor";
+  } else if (rearFingerprintModels.has(compactModelKey)) {
+    fingerprintSummary = "rear fingerprint sensor behaviour";
+    fingerprintLabel = "rear fingerprint sensor";
+  } else if (amoledModels.has(compactModelKey) || generation >= 30 || generation >= 50) {
+    fingerprintSummary = "in-display fingerprint sensor behaviour";
+    fingerprintLabel = "in-display fingerprint sensor";
+  }
+
+  let cameraSummary = "main rear camera testing";
+  if (generation >= 50 || generation >= 70) {
+    cameraSummary = "main, ultra-wide, and supporting camera testing";
+  } else if (generation >= 30 || generation === 24 || generation === 25) {
+    cameraSummary = "main and ultra-wide rear camera testing";
+  } else if (generation >= 10) {
+    cameraSummary = "main and supporting rear camera testing";
+  }
+
+  return {
+    display,
+    hasSPen: false,
+    screenForm: "flat",
+    cameraSummary,
+    chargingNote: "USB-C charging and handover checks",
+    fingerprintSummary,
+    fingerprintLabel,
+    supportsWirelessCharging: false,
+  };
+}
+
+function formatModelVariantToken(token: string): string {
+  if (token === "xl") return "XL";
+  if (token === "fe") return "FE";
+  if (token === "pro") return "Pro";
+  if (token === "plus") return "Plus";
+  if (token === "ultra") return "Ultra";
+  if (token === "lite") return "Lite";
+  if (token === "flip") return "Flip";
+  if (token === "fold") return "Fold";
+  if (token === "neo") return "Neo";
+  if (token === "zoom") return "Zoom";
+  if (token === "5g") return "5G";
+  return token.charAt(0).toUpperCase() + token.slice(1);
+}
+
+function isGalaxyNotePhoneSlug(modelSlug: string): boolean {
+  const normalized = slugify(modelSlug);
+  return /^(galaxy-)?note\d+/.test(normalized);
+}
+
+function deriveSamsungGalaxyNoteModelName(modelSlug: string): string | null {
+  const normalized = slugify(modelSlug);
+  const match = normalized.match(/^(?:galaxy-)?note(\d+)(.*)$/);
+  if (!match) return null;
+
+  const generation = match[1];
+  const suffixTokens = match[2].split("-").filter(Boolean).map(formatModelVariantToken);
+  const suffix = suffixTokens.length ? ` ${suffixTokens.join(" ")}` : "";
+  return `Samsung Galaxy Note ${generation}${suffix}`;
+}
+
+function getSamsungGalaxyNoteProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
+  const normalized = slugify(modelSlug);
+  const match = normalized.match(/^(?:galaxy-)?note(\d+)(.*)$/);
+  if (!match) return null;
+
+  const generation = Number.parseInt(match[1], 10);
+  const suffixTokens = match[2].split("-").filter(Boolean);
+  const isUltra = suffixTokens.includes("ultra");
+  const isPlus = suffixTokens.includes("plus");
+  const isLite = suffixTokens.includes("lite");
+  const hasRearFingerprint = generation <= 9;
+  const isEdgeModel = !isLite && (isUltra || isPlus || generation >= 8);
+
+  return {
+    display: isEdgeModel
+      ? "edge AMOLED display with S Pen input support"
+      : "flat AMOLED display with S Pen input support",
+    hasSPen: true,
+    screenForm: isEdgeModel ? "edge" : "flat",
+    cameraSummary: generation >= 20
+      ? "main, ultra-wide, and telephoto camera testing"
+      : generation >= 10
+        ? "main and supporting rear camera testing"
+        : "main rear camera testing",
+    chargingNote: "USB-C charging, fast wireless charging, Wireless PowerShare, and S Pen handover checks",
+    fingerprintSummary: hasRearFingerprint
+      ? "rear fingerprint sensor behaviour"
+      : "in-display fingerprint sensor behaviour",
+    fingerprintLabel: hasRearFingerprint ? "rear fingerprint sensor" : "in-display fingerprint sensor",
+    supportsWirelessCharging: true,
+  };
+}
+
+function isGalaxyZPhoneSlug(modelSlug: string): boolean {
+  const normalized = slugify(modelSlug);
+  return /^(galaxy-)?z-(fold|flip)-?\d+/.test(normalized) || /^(galaxy-)?z(fold|flip)\d+/.test(normalized);
+}
+
+function deriveSamsungGalaxyZModelName(modelSlug: string): string | null {
+  const normalized = slugify(modelSlug);
+  const match = normalized.match(/^(?:galaxy-)?z-?(fold|flip)-?(\d+)(.*)$/);
+  if (!match) return null;
+
+  const family = formatModelVariantToken(match[1]);
+  const generation = match[2];
+  const suffixTokens = match[3].split("-").filter(Boolean).map(formatModelVariantToken);
+  const suffix = suffixTokens.length ? ` ${suffixTokens.join(" ")}` : "";
+  return `Samsung Galaxy Z ${family} ${generation}${suffix}`;
+}
+
+function getSamsungGalaxyZProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
+  const normalized = slugify(modelSlug);
+  const match = normalized.match(/^(?:galaxy-)?z-?(fold|flip)-?(\d+)(.*)$/);
+  if (!match) return null;
+
+  const family = match[1];
+  const generation = Number.parseInt(match[2], 10);
+  const isFold = family === "fold";
+  const hasSPen = isFold && generation >= 3;
+
+  return {
+    display: hasSPen
+      ? "foldable Dynamic AMOLED display with cover screen and S Pen support"
+      : "foldable AMOLED display with cover screen",
+    hasSPen,
+    screenForm: "foldable",
+    cameraSummary: isFold
+      ? "main, ultra-wide, and telephoto camera testing"
+      : "main and ultra-wide rear camera testing",
+    chargingNote: hasSPen
+      ? "USB-C charging, fast wireless charging, Wireless PowerShare, and S Pen handover checks"
+      : "USB-C charging, fast wireless charging, and Wireless PowerShare checks",
+    fingerprintSummary: "side-mounted fingerprint sensor behaviour",
+    fingerprintLabel: "side-mounted fingerprint sensor",
+    supportsWirelessCharging: true,
+  };
+}
+
+function isGooglePixelPhoneSlug(modelSlug: string): boolean {
+  const normalized = slugify(modelSlug);
+  return normalized.startsWith("pixel-") || normalized.startsWith("google-pixel-");
+}
+
+function deriveGooglePixelModelName(modelSlug: string): string | null {
+  const normalized = slugify(modelSlug).replace(/^google-/, "");
+  if (!normalized.startsWith("pixel-")) return null;
+
+  const tokens = normalized.replace(/^pixel-/, "").split("-").filter(Boolean).map(formatModelVariantToken);
+  if (tokens.length === 0) return "Google Pixel";
+  return `Google Pixel ${tokens.join(" ")}`;
+}
+
+function getGooglePixelProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
+  const normalized = slugify(modelSlug).replace(/^google-/, "");
+  if (!normalized.startsWith("pixel-")) return null;
+
+  const tokens = normalized.replace(/^pixel-/, "").split("-").filter(Boolean);
+  const generationMatch = normalized.match(/pixel-(\d+)/);
+  const generation = generationMatch ? Number.parseInt(generationMatch[1], 10) : 0;
+  const isFold = tokens.includes("fold");
+  const isPro = tokens.includes("pro");
+  const isXL = tokens.includes("xl");
+  const isA = tokens.includes("a");
+  const hasRearFingerprint = !isFold && generation > 0 && generation <= 5;
+  const supportsWirelessCharging = isFold
+    ? true
+    : isA
+      ? generation >= 7
+      : generation >= 4;
+
+  return {
+    display: isFold ? "foldable OLED display with cover screen" : "flat OLED display",
+    hasSPen: false,
+    screenForm: isFold ? "foldable" : "flat",
+    cameraSummary: isFold || isPro || isXL
+      ? "main, ultra-wide, and telephoto camera testing"
+      : generation >= 6
+        ? "main and ultra-wide rear camera testing"
+        : "main rear camera testing",
+    chargingNote: supportsWirelessCharging
+      ? "USB-C charging, wireless charging, and battery-share checks"
+      : "USB-C charging and handover checks",
+    fingerprintSummary: hasRearFingerprint
+      ? "rear fingerprint sensor behaviour"
+      : isFold
+        ? "side-mounted fingerprint sensor behaviour"
+        : "in-display fingerprint sensor behaviour",
+    fingerprintLabel: hasRearFingerprint
+      ? "rear fingerprint sensor"
+      : isFold
+        ? "side-mounted fingerprint sensor"
+        : "in-display fingerprint sensor",
+    supportsWirelessCharging,
+  };
+}
+
+function isOppoPhoneSlug(modelSlug: string): boolean {
+  const normalized = slugify(modelSlug);
+  return normalized.startsWith("find-") || normalized.startsWith("reno-") || /^a\d{2,3}/.test(normalized) || normalized.startsWith("oppo-");
+}
+
+function deriveOppoModelName(modelSlug: string): string | null {
+  const normalized = slugify(modelSlug).replace(/^oppo-/, "");
+  if (!normalized) return null;
+
+  const tokens = normalized.split("-").filter(Boolean);
+  if (tokens.length === 0) return "OPPO";
+
+  const modelName = tokens.map((token, idx) => {
+    if (idx === 0 && token === "find") return "Find";
+    if (idx === 0 && token === "reno") return "Reno";
+    if (idx === 0 && /^a\d{2,3}$/.test(token)) return token.toUpperCase();
+    return formatModelVariantToken(token);
+  }).join(" ");
+
+  return `OPPO ${modelName}`;
+}
+
+function getOppoProfile(modelSlug: string): SamsungGalaxyHardwareProfile | null {
+  const normalized = slugify(modelSlug).replace(/^oppo-/, "");
+  if (!normalized) return null;
+
+  const tokens = normalized.split("-").filter(Boolean);
+  const isFind = tokens.includes("find");
+  const isReno = tokens.includes("reno");
+  const aMatch = normalized.match(/^a(\d{2,3})/);
+  const aGeneration = aMatch ? Number.parseInt(aMatch[1], 10) : 0;
+  const supportsWirelessCharging = isFind;
+  const hasInDisplayFingerprint = isFind || isReno;
+
+  return {
+    display: hasInDisplayFingerprint ? "flat AMOLED display" : "flat LCD display",
+    hasSPen: false,
+    screenForm: "flat",
+    cameraSummary: isFind
+      ? "main, ultra-wide, and telephoto camera testing"
+      : isReno
+        ? "main and ultra-wide rear camera testing"
+        : "main and supporting rear camera testing",
+    chargingNote: supportsWirelessCharging
+      ? "USB-C charging, wireless charging, and fast-charge checks"
+      : "USB-C charging and fast-charge checks",
+    fingerprintSummary: hasInDisplayFingerprint
+      ? "in-display fingerprint sensor behaviour"
+      : aGeneration > 0 && aGeneration <= 25
+        ? "side-mounted fingerprint sensor behaviour"
+        : "fingerprint sensor behaviour",
+    fingerprintLabel: hasInDisplayFingerprint
+      ? "in-display fingerprint sensor"
+      : aGeneration > 0 && aGeneration <= 25
+        ? "side-mounted fingerprint sensor"
+        : "fingerprint sensor",
+    supportsWirelessCharging,
+  };
+}
+
+function buildSamsungS23ScreenPocket(
+  modelName: string,
+  profile: SamsungGalaxyHardwareProfile,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
   const edgeNote = profile.screenForm === "edge"
-    ? "The curved edge glass and S Pen digitizer path are checked before fitting so the display sits cleanly and pen input remains stable."
-    : "The flat frame edge is checked before fitting so the display sits cleanly without corner lift or pressure stress.";
+    ? profile.hasSPen
+      ? "The curved edge glass and S Pen digitizer path are checked before fitting so the display sits cleanly and pen input remains stable."
+      : "The curved edge glass and side-bond tension are checked before fitting so the display sits cleanly and touch remains stable."
+    : profile.screenForm === "foldable"
+      ? "Inner display and cover-screen seating are checked before fitting so fold movement, crease area behaviour, and frame pressure stay stable."
+      : "The flat frame edge is checked before fitting so the display sits cleanly without corner lift or pressure stress.";
+  const panelTerm = profile.display.toLowerCase().includes("lcd") ? "display panel" : "AMOLED panel";
 
   return {
     quickAnswer:
-      `Need ${modelName} screen replacement in Ringwood? Ali Mobile & Repair checks cracked glass, ${profile.display}, touch response, in-display fingerprint behaviour, frame alignment, and moisture indicators before quoting.`,
+      `Need ${modelName} screen replacement in Ringwood? Ali Mobile & Repair checks cracked glass, ${profile.display}, touch response, ${profile.fingerprintSummary}, frame alignment, and moisture indicators before quoting.`,
     workbenchHeadings: {
       options: `Which screen path fits this ${modelName}?`,
-      diagnostics: "What do we test before Samsung screen replacement?",
-      symptoms: "Which Galaxy display symptoms matter most?",
-      outcomes: "What can affect the Samsung display result?",
+      diagnostics: `What do we test before ${context.brandName} screen replacement?`,
+      symptoms: `Which ${context.familyName} display symptoms matter most?`,
+      outcomes: `What can affect the ${context.brandName} display result?`,
     },
     repairOptions: [
       {
         name: "Display assembly diagnosis",
         shortDescription:
-          `We test the ${profile.display}, touch layer, brightness, fingerprint area, and frame condition before opening the phone.`,
+          `We test the ${profile.display}, touch layer, brightness, ${profile.fingerprintLabel}, and frame condition before opening the phone.`,
         bestFor:
           "Cracked glass, black display, display lines, flicker, touch dead zones, or a phone that still vibrates but shows no image.",
         notes: edgeNote,
       },
       {
-        name: "Samsung display replacement path",
+        name: `${context.brandName} display replacement path`,
         shortDescription:
           "A model-matched display assembly path focused on clean fit, stable touch response, and normal daily viewing.",
         bestFor:
-          `Customers who want their ${modelName} restored with Samsung-specific display checks instead of generic phone copy.`,
+          `Customers who want their ${modelName} restored with ${context.brandName}-specific display checks instead of generic phone copy.`,
         notes:
           "We avoid promising factory water resistance after opening, but adhesive cleanup and resealing are handled carefully.",
       },
@@ -1257,12 +1625,12 @@ function buildSamsungS23ScreenPocket(modelName: string, profile: SamsungGalaxySH
       {
         title: "Display lines, flicker, or black screen",
         description:
-          "A damaged AMOLED panel can show lines, flashes, green tint, or no image after impact. We test output before quoting.",
+          `A damaged ${panelTerm} can show lines, flashes, tint shift, or no image after impact. We test output before quoting.`,
       },
       {
         title: "Touch or fingerprint faults",
         description:
-          "Touch dead zones and in-display fingerprint issues are checked before and after display replacement.",
+          `Touch dead zones and ${profile.fingerprintSummary} are checked before and after display replacement.`,
       },
       {
         title: profile.hasSPen ? "S Pen input faults" : "Frame pressure risk",
@@ -1281,7 +1649,7 @@ function buildSamsungS23ScreenPocket(modelName: string, profile: SamsungGalaxySH
       },
       {
         step: "02",
-        title: profile.hasSPen ? "Test touch, S Pen, and sensors" : "Test touch, fingerprint, and sensors",
+        title: profile.hasSPen ? "Test touch, S Pen, and sensors" : `Test touch, ${profile.fingerprintLabel}, and sensors`,
         description:
           profile.hasSPen
             ? "Touch, S Pen input, fingerprint behaviour, front camera area, speaker mesh, and visible moisture indicators are checked."
@@ -1295,7 +1663,7 @@ function buildSamsungS23ScreenPocket(modelName: string, profile: SamsungGalaxySH
       },
       {
         step: "04",
-        title: "Final Samsung handover checks",
+        title: `Final ${context.brandName} handover checks`,
         description:
           "Brightness, touch, fingerprint, cameras, charging, speaker, microphone, buttons, and normal operation are checked before return.",
       },
@@ -1304,14 +1672,14 @@ function buildSamsungS23ScreenPocket(modelName: string, profile: SamsungGalaxySH
       {
         question: `How long does ${modelName} screen replacement take in Ringwood?`,
         answer:
-          "Most Samsung screen repairs can be handled same day when the correct display assembly is available and there is no hidden frame, liquid, or board damage.",
+          `Most ${context.brandName} screen repairs can be handled same day when the correct display assembly is available and there is no hidden frame, liquid, or board damage.`,
       },
       {
         question: `Do you test fingerprint and touch after ${modelName} screen repair?`,
         answer:
           profile.hasSPen
             ? "Yes. We test touch, S Pen input, in-display fingerprint behaviour, brightness, cameras, charging, and normal phone functions before pickup."
-            : "Yes. We test touch response, in-display fingerprint behaviour, brightness, cameras, charging, and normal phone functions before pickup.",
+            : `Yes. We test touch response, ${profile.fingerprintSummary}, brightness, cameras, charging, and normal phone functions before pickup.`,
       },
       {
         question: `Will my ${modelName} stay water resistant after screen replacement?`,
@@ -1322,25 +1690,43 @@ function buildSamsungS23ScreenPocket(modelName: string, profile: SamsungGalaxySH
   };
 }
 
-function buildSamsungS23BatteryPocket(modelName: string): RepairTypeSeoPocket {
+function buildSamsungS23BatteryPocket(
+  modelName: string,
+  profile: SamsungGalaxyHardwareProfile,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
+  const wirelessContext = profile.supportsWirelessCharging ? ", wireless charging response," : ",";
+  const wirelessPath = profile.supportsWirelessCharging ? " and wireless charging response are tested." : " are tested.";
+  const wirelessProblem = profile.supportsWirelessCharging
+    ? "USB-C port wear, adapter issues, wireless charging faults, or board faults can mimic battery wear."
+    : "USB-C port wear, adapter issues, or board faults can mimic battery wear.";
+  const wirelessHandover = profile.supportsWirelessCharging
+    ? "Charging, wireless charging behaviour, boot stability, heat, and runtime expectations are checked before return."
+    : "Charging, boot stability, heat, and runtime expectations are checked before return.";
+  const wirelessFaq = profile.supportsWirelessCharging
+    ? "Yes. We test USB-C charging, wireless charging response, charge draw, boot stability, and heat before pickup."
+    : "Yes. We test USB-C charging, charge draw, boot stability, and heat before pickup.";
+
   return {
     quickAnswer:
-      `Need ${modelName} battery replacement in Ringwood? Ali Mobile & Repair checks battery health behaviour, heat, swelling risk, USB-C charging draw, wireless charging response, and post-repair runtime stability before handover.`,
+      `Need ${modelName} battery replacement in Ringwood? Ali Mobile & Repair checks battery health behaviour, heat, swelling risk, USB-C charging draw${wirelessContext} and post-repair runtime stability before handover.`,
     workbenchHeadings: {
       options: `Which battery path fits this ${modelName}?`,
-      diagnostics: "What do we test before Galaxy battery service?",
-      symptoms: "Which Samsung battery symptoms matter most?",
+      diagnostics: `What do we test before ${context.familyName} battery service?`,
+      symptoms: `Which ${context.brandName} battery symptoms matter most?`,
       outcomes: "What can affect battery results?",
     },
     repairOptions: [
       {
         name: "Battery and charging diagnosis",
         shortDescription:
-          "We test drain behaviour, heat, shutdowns, swelling signs, USB-C charging draw, and wireless charging response before quoting.",
+          `We test drain behaviour, heat, shutdowns, swelling signs, USB-C charging draw${wirelessContext} before quoting.`,
         bestFor:
           "Fast drain, slow charging, sudden shutdowns, swelling, heat, or a phone that no longer lasts through the day.",
         notes:
-          "A USB-C port, adapter, cable, wireless coil, or board fault can look like battery failure, so we test the power path first.",
+          profile.supportsWirelessCharging
+            ? "A USB-C port, adapter, cable, wireless coil, or board fault can look like battery failure, so we test the power path first."
+            : "A USB-C port, adapter, cable, or board fault can look like battery failure, so we test the power path first.",
       },
       {
         name: "Model-matched battery replacement",
@@ -1349,12 +1735,14 @@ function buildSamsungS23BatteryPocket(modelName: string): RepairTypeSeoPocket {
         bestFor:
           "Customers who want practical daily runtime restored with clear expectations.",
         notes:
-          "Samsung battery service focuses on function, safety, charging behaviour, and practical runtime rather than unrelated part-pairing messages.",
+          `${context.brandName} battery service focuses on function, safety, charging behaviour, and practical runtime rather than unrelated part-pairing messages.`,
       },
       {
         name: "Runtime and heat validation",
         shortDescription:
-          "After fitting, we confirm boot stability, charge acceptance, wireless charging behaviour, and heat under normal use.",
+          profile.supportsWirelessCharging
+            ? "After fitting, we confirm boot stability, charge acceptance, wireless charging behaviour, and heat under normal use."
+            : "After fitting, we confirm boot stability, charge acceptance, and heat under normal use.",
         bestFor:
           "Phones where battery wear may be mixed with charging or board-level symptoms.",
         notes:
@@ -1364,101 +1752,129 @@ function buildSamsungS23BatteryPocket(modelName: string): RepairTypeSeoPocket {
     commonProblems: [
       { title: "Fast drain", description: "A worn battery can drop percentage quickly or struggle under load." },
       { title: "Heat or swelling", description: "Heat and swelling are handled carefully because pressure can affect the display and frame." },
-      { title: "Slow or unstable charging", description: "USB-C port wear, adapter issues, wireless charging faults, or board faults can mimic battery wear." },
+      { title: "Slow or unstable charging", description: wirelessProblem },
       { title: "Unexpected shutdowns", description: "Voltage instability can cause shutdowns even when the displayed percentage is not empty." },
     ],
     diagnosticSteps: [
       { step: "01", title: "Check battery symptoms", description: "We review drain, heat, swelling, shutdowns, and customer-reported runtime." },
-      { step: "02", title: "Test charging paths", description: "USB-C charging, wireless charging, adapter response, and charge draw are tested." },
+      { step: "02", title: "Test charging paths", description: `USB-C charging, adapter response, and charge draw${wirelessPath}` },
       { step: "03", title: "Inspect safety risk", description: "Swelling, frame pressure, and liquid indicators are checked before opening." },
-      { step: "04", title: "Handover validation", description: "Charging, boot stability, heat, and runtime expectations are checked before return." },
+      { step: "04", title: "Handover validation", description: wirelessHandover },
     ],
     faq: [
       { question: `Can Ali Mobile replace my ${modelName} battery same day?`, answer: "Usually yes when the correct battery is available and no hidden liquid, charging, or board fault is found." },
-      { question: `Do you test USB-C and wireless charging after ${modelName} battery service?`, answer: "Yes. We test USB-C charging, wireless charging response, charge draw, boot stability, and heat before pickup." },
+      { question: `Do you test charging after ${modelName} battery service?`, answer: wirelessFaq },
       { question: `What if my ${modelName} still drains quickly after battery replacement?`, answer: "If drain continues after a known-good battery, we explain the next diagnostic path, such as app load, charging-port faults, or board-level current draw." },
     ],
   };
 }
 
-function buildSamsungS23ChargingPocket(modelName: string, profile: SamsungGalaxySHardwareProfile): RepairTypeSeoPocket {
+function buildSamsungS23ChargingPocket(
+  modelName: string,
+  profile: SamsungGalaxyHardwareProfile,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
   return {
     quickAnswer:
       `Need ${modelName} USB-C charging port repair in Ringwood? Ali Mobile & Repair checks lint, port wear, moisture alerts, charge draw, data transfer, microphone routing, ${profile.chargingNote} before quoting.`,
     workbenchHeadings: {
       options: `Which USB-C charging path fits this ${modelName}?`,
-      diagnostics: "What do we test before Samsung port repair?",
+      diagnostics: `What do we test before ${context.brandName} port repair?`,
       symptoms: "Which USB-C symptoms matter most?",
       outcomes: "What can affect charging-port results?",
     },
     repairOptions: [
       { name: "USB-C clean and cable-seat check", shortDescription: "We inspect compacted lint, debris, corrosion, and whether a known-good cable seats correctly.", bestFor: "Loose cables, charging only at one angle, or intermittent cable detection.", notes: "If cleaning solves the issue, we do not push a full port replacement." },
-      { name: "USB-C sub-board or flex replacement", shortDescription: "If pins, the port assembly, or lower board path has failed, we quote the correct replacement path.", bestFor: "No wired charging, data failure, moisture-damaged pins, or microphone symptoms linked to the lower assembly.", notes: "Samsung USB-C charging, microphone, speaker, and data functions can overlap in the lower assembly." },
+      { name: "USB-C sub-board or flex replacement", shortDescription: "If pins, the port assembly, or lower board path has failed, we quote the correct replacement path.", bestFor: "No wired charging, data failure, moisture-damaged pins, or microphone symptoms linked to the lower assembly.", notes: `${context.brandName} USB-C charging, microphone, speaker, and data functions can overlap in the lower assembly.` },
       { name: "Board-level charging diagnosis", shortDescription: "If a port replacement will not solve the issue, we explain the likely board-level path.", bestFor: "Phones that fail with known-good cables, adapters, batteries, and port assemblies.", notes: "Board work is quoted separately after port-level faults are ruled out." },
     ],
     commonProblems: [
       { title: "Cable only works at one angle", description: "Lint, worn USB-C contacts, or corrosion can stop the cable seating properly." },
-      { title: "Moisture or debris warning", description: "Samsung devices can report moisture or debris in the USB-C port; we inspect before charging attempts." },
+      { title: "Moisture or debris warning", description: `${context.brandName} devices can report moisture or debris in the USB-C port; we inspect before charging attempts.` },
       { title: "No data transfer", description: "A phone may charge but still fail USB data connection to a computer or accessory." },
-      { title: "Wireless charging still works", description: "If wireless charging works but USB-C does not, the wired charging path gets priority diagnosis." },
+      { title: profile.supportsWirelessCharging ? "Wireless charging still works" : "USB-C-only charging path fault", description: profile.supportsWirelessCharging ? "If wireless charging works but USB-C does not, the wired charging path gets priority diagnosis." : "If USB-C charging fails while battery condition is normal, we isolate the wired charging path first." },
     ],
     diagnosticSteps: [
       { step: "01", title: "Inspect USB-C socket", description: "We check cable seating, debris, corrosion, moisture alerts, and pin condition." },
-      { step: "02", title: "Measure charging response", description: "Charge draw, adapter response, battery condition, and wireless charging are tested." },
+      { step: "02", title: "Measure charging response", description: profile.supportsWirelessCharging ? "Charge draw, adapter response, battery condition, and wireless charging are tested." : "Charge draw, adapter response, and battery condition are tested." },
       { step: "03", title: "Validate data and audio", description: "USB data transfer, microphones, speaker behaviour, and accessory detection are checked." },
       { step: "04", title: "Confirm repair path", description: "We explain whether cleaning, port replacement, or board-level diagnosis is the right next step." },
     ],
     faq: [
       { question: `Does my ${modelName} USB-C port need cleaning or replacement?`, answer: "Not always. Many faults are caused by lint or debris, so we inspect and clean where safe before quoting replacement." },
-      { question: `Do you test data transfer after ${modelName} charging port repair?`, answer: "Yes. We test USB-C charging, data connection, cable fit, microphone behaviour, speaker output, wireless charging, and normal operation." },
+      { question: `Do you test data transfer after ${modelName} charging port repair?`, answer: profile.supportsWirelessCharging ? "Yes. We test USB-C charging, data connection, cable fit, microphone behaviour, speaker output, wireless charging, and normal operation." : "Yes. We test USB-C charging, data connection, cable fit, microphone behaviour, speaker output, and normal operation." },
       { question: `Can a ${modelName} charging fault be board-level?`, answer: "Yes. If known-good cables, batteries, and port assemblies do not solve the issue, we explain the board-level charging path before extra work." },
     ],
   };
 }
 
-function buildSamsungS23BackHousingPocket(modelName: string): RepairTypeSeoPocket {
+function buildSamsungS23BackHousingPocket(
+  modelName: string,
+  profile: SamsungGalaxyHardwareProfile,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
+  const coilCopy = profile.supportsWirelessCharging
+    ? "wireless charging coil, NFC area, antenna lines, and frame straightness"
+    : "NFC area, antenna lines, and frame straightness";
+  const coilNotes = profile.supportsWirelessCharging
+    ? "Wireless charging coil, NFC area, antenna lines, and camera rings are protected during repair."
+    : "NFC area, antenna lines, and camera rings are protected during repair.";
+  const coilRisk = profile.supportsWirelessCharging
+    ? "Impact near the coil can affect wireless charging or Wireless PowerShare."
+    : "Impact near the rear housing can affect NFC or antenna performance.";
+  const coilStep = profile.supportsWirelessCharging
+    ? "Wireless charging, NFC/payment area, antenna lines, camera rings, and rear microphone areas are handled carefully."
+    : "NFC/payment area, antenna lines, camera rings, and rear microphone areas are handled carefully.";
+  const coilFinal = profile.supportsWirelessCharging
+    ? "Wireless charging, cameras, buttons, frame edges, and normal handling are checked before return."
+    : "NFC/payment response, cameras, buttons, frame edges, and normal handling are checked before return.";
+
   return {
     quickAnswer:
-      `Need ${modelName} back glass or rear housing repair in Ringwood? Ali Mobile & Repair checks cracked rear glass, camera ring fit, wireless charging coil, NFC area, antenna lines, and frame straightness before bonding.`,
+      `Need ${modelName} back glass or rear housing repair in Ringwood? Ali Mobile & Repair checks cracked rear glass, camera ring fit, ${coilCopy} before bonding.`,
     workbenchHeadings: {
       options: `Which rear-housing path fits this ${modelName}?`,
-      diagnostics: "What do we inspect before Samsung rear repair?",
+      diagnostics: `What do we inspect before ${context.brandName} rear repair?`,
       symptoms: "Which rear-glass symptoms matter most?",
       outcomes: "What can affect rear-housing alignment?",
     },
     repairOptions: [
-      { name: "Rear glass replacement path", shortDescription: "For cracked back glass with a usable frame, we focus on controlled removal, cleanup, and clean rear panel bonding.", bestFor: "Cracked rear glass, lifted corners, or cosmetic damage without severe frame bend.", notes: "Wireless charging coil, NFC area, antenna lines, and camera rings are protected during repair." },
+      { name: "Rear glass replacement path", shortDescription: "For cracked back glass with a usable frame, we focus on controlled removal, cleanup, and clean rear panel bonding.", bestFor: "Cracked rear glass, lifted corners, or cosmetic damage without severe frame bend.", notes: coilNotes },
       { name: "Housing condition assessment", shortDescription: "If the side frame is bent or crushed, we check whether rear glass alone will sit correctly.", bestFor: "Corner dents, camera ring gaps, lifted back glass, or frame distortion after impact.", notes: "A bent frame can cause lifting or uneven bonding if ignored." },
-      { name: "Wireless charging and camera validation", shortDescription: "After repair, we check rear camera fit, wireless charging, NFC/payment awareness, buttons, and frame edges.", bestFor: "Customers who want cosmetic repair plus functional checks before pickup.", notes: "Existing coil or camera-area impact damage is explained before final approval." },
+      { name: profile.supportsWirelessCharging ? "Wireless charging and camera validation" : "Rear function and camera validation", shortDescription: profile.supportsWirelessCharging ? "After repair, we check rear camera fit, wireless charging, NFC/payment awareness, buttons, and frame edges." : "After repair, we check rear camera fit, NFC/payment awareness, buttons, and frame edges.", bestFor: "Customers who want cosmetic repair plus functional checks before pickup.", notes: "Existing coil or camera-area impact damage is explained before final approval." },
     ],
     commonProblems: [
       { title: "Cracked rear glass", description: "Broken glass can shed sharp flakes and allow dust or moisture into the rear housing area." },
-      { title: "Wireless charging inconsistency", description: "Impact near the coil can affect wireless charging or Wireless PowerShare." },
+      { title: profile.supportsWirelessCharging ? "Wireless charging inconsistency" : "Rear housing signal risk", description: coilRisk },
       { title: "Camera ring gaps", description: "Cracks around the camera rings need careful cleanup so the replacement panel sits cleanly." },
       { title: "Frame bend", description: "Frame distortion can stop the rear panel from bonding flat." },
     ],
     diagnosticSteps: [
       { step: "01", title: "Inspect glass and frame", description: "We check cracks, lifted corners, camera ring damage, side rail bends, and safety to open." },
-      { step: "02", title: "Protect coil and antenna areas", description: "Wireless charging, NFC/payment area, antenna lines, camera rings, and rear microphone areas are handled carefully." },
+      { step: "02", title: "Protect rear functional areas", description: coilStep },
       { step: "03", title: "Clean and align", description: "Glass residue and adhesive channels are cleared before panel fit is checked." },
-      { step: "04", title: "Final function checks", description: "Wireless charging, cameras, buttons, frame edges, and normal handling are checked before return." },
+      { step: "04", title: "Final function checks", description: coilFinal },
     ],
     faq: [
-      { question: `Can you repair cracked ${modelName} back glass in Ringwood?`, answer: "Yes. We handle Samsung rear glass and housing repair with controlled removal, adhesive cleanup, camera ring checks, and frame alignment before handover." },
-      { question: `Will ${modelName} back glass repair affect wireless charging?`, answer: "We protect the wireless charging coil and test wireless charging before return. Existing impact damage can still affect the coil, so we inspect first." },
+      { question: `Can you repair cracked ${modelName} back glass in Ringwood?`, answer: `Yes. We handle ${context.brandName} rear glass and housing repair with controlled removal, adhesive cleanup, camera ring checks, and frame alignment before handover.` },
+      { question: profile.supportsWirelessCharging ? `Will ${modelName} back glass repair affect wireless charging?` : `Can rear glass damage affect ${modelName} NFC or signal behaviour?`, answer: profile.supportsWirelessCharging ? "We protect the wireless charging coil and test wireless charging before return. Existing impact damage can still affect the coil, so we inspect first." : "Yes, impact around the rear housing can also affect NFC or antenna paths. We inspect those areas before and after repair." },
       { question: `Do you check NFC or payment-related areas during ${modelName} rear repair?`, answer: "We handle the rear housing, antenna, and NFC/payment areas carefully and explain any impact-related risk found during inspection." },
     ],
   };
 }
 
-function buildSamsungS23CameraPocket(modelName: string, profile: SamsungGalaxySHardwareProfile): RepairTypeSeoPocket {
+function buildSamsungS23CameraPocket(
+  modelName: string,
+  profile: SamsungGalaxyHardwareProfile,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
   return {
     quickAnswer:
       `Need ${modelName} camera repair in Ringwood? Ali Mobile & Repair checks lens glass, focus, stabilisation, ${profile.cameraSummary}, app behaviour, and rear housing impact before quoting.`,
     workbenchHeadings: {
       options: `Which camera repair path fits this ${modelName}?`,
-      diagnostics: "What do we test before Samsung camera repair?",
-      symptoms: "Which Galaxy camera symptoms matter most?",
+      diagnostics: `What do we test before ${context.brandName} camera repair?`,
+      symptoms: `Which ${context.familyName} camera symptoms matter most?`,
       outcomes: "What can affect camera repair results?",
     },
     repairOptions: [
@@ -1469,7 +1885,7 @@ function buildSamsungS23CameraPocket(modelName: string, profile: SamsungGalaxySH
     commonProblems: [
       { title: "Blurry or shaking camera", description: "Impact can damage focus or stabilisation, especially around the camera island." },
       { title: "Cracked lens glass", description: "Lens glass damage can let dust in and reduce photo clarity." },
-      { title: "Camera failed message", description: "Samsung camera app faults can be software, module, connector, or board related." },
+      { title: "Camera failed message", description: `${context.brandName} camera app faults can be software, module, connector, or board related.` },
       { title: "Zoom or lens switching failure", description: "Multi-camera models need each lens path tested, not just the main camera." },
     ],
     diagnosticSteps: [
@@ -1486,14 +1902,17 @@ function buildSamsungS23CameraPocket(modelName: string, profile: SamsungGalaxySH
   };
 }
 
-function buildSamsungS23WaterPocket(modelName: string): RepairTypeSeoPocket {
+function buildSamsungS23WaterPocket(
+  modelName: string,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
   return {
     quickAnswer:
       `Need ${modelName} water damage assessment in Ringwood? Ali Mobile & Repair prioritises power safety, USB-C moisture risk, corrosion inspection, screen and battery checks, data-preservation awareness, and clear reporting before major part replacement.`,
     workbenchHeadings: {
       options: `Which water-damage path fits this ${modelName}?`,
       diagnostics: "What do we inspect after liquid exposure?",
-      symptoms: "Which Samsung liquid symptoms matter most?",
+      symptoms: `Which ${context.brandName} liquid symptoms matter most?`,
       outcomes: "What can affect recovery?",
     },
     repairOptions: [
@@ -1502,7 +1921,7 @@ function buildSamsungS23WaterPocket(modelName: string): RepairTypeSeoPocket {
       { name: "Data-first recovery path", shortDescription: "If photos or files matter most, we prioritise safe stabilisation for backup where possible.", bestFor: "Customers who care more about data than cosmetic or full functional repair.", notes: "Success depends on corrosion level, board condition, and how quickly the device is assessed." },
     ],
     commonProblems: [
-      { title: "USB-C moisture warning", description: "Samsung devices can detect moisture or debris in the USB-C port. Do not keep testing chargers before assessment." },
+      { title: "USB-C moisture warning", description: `${context.brandName} devices can detect moisture or debris in the USB-C port. Do not keep testing chargers before assessment.` },
       { title: "No power or boot loop", description: "Liquid can affect battery, display, connectors, or board-level power paths." },
       { title: "Screen, speaker, or camera faults", description: "Moisture can reach display connectors, speaker mesh, camera lenses, and board areas." },
       { title: "Corrosion delay", description: "A phone can appear fine at first, then fail later as corrosion develops." },
@@ -1521,13 +1940,17 @@ function buildSamsungS23WaterPocket(modelName: string): RepairTypeSeoPocket {
   };
 }
 
-function buildSamsungS23LogicBoardPocket(modelName: string): RepairTypeSeoPocket {
+function buildSamsungS23LogicBoardPocket(
+  modelName: string,
+  profile: SamsungGalaxyHardwareProfile,
+  context: AndroidRepairBrandContext = SAMSUNG_GALAXY_CONTEXT
+): RepairTypeSeoPocket {
   return {
     quickAnswer:
       `Need ${modelName} logic board diagnosis in Ringwood? Ali Mobile & Repair checks no-power faults, USB-C charging paths, display connector behaviour, corrosion risk, short detection, and data-preservation priorities before quoting board work.`,
     workbenchHeadings: {
       options: `Which board diagnosis path fits this ${modelName}?`,
-      diagnostics: "What do we test before Samsung board work?",
+      diagnostics: `What do we test before ${context.brandName} board work?`,
       symptoms: "Which board-level symptoms matter most?",
       outcomes: "What can affect board repair results?",
     },
@@ -1548,7 +1971,9 @@ function buildSamsungS23LogicBoardPocket(modelName: string): RepairTypeSeoPocket
         bestFor:
           "Phones with no wired charging, unstable charging, or current draw that points beyond the lower port assembly.",
         notes:
-          "Wireless charging behaviour is also checked because it can help isolate the failed path.",
+          profile.supportsWirelessCharging
+            ? "Wireless charging behaviour is also checked because it can help isolate the failed path."
+            : "Wired charging behaviour is checked to isolate the failed power route.",
       },
       {
         name: "Data-first board recovery",
@@ -1597,7 +2022,7 @@ function getSamsungGalaxySRepairPocket(modelSlug: string, repairType: string): R
       return buildSamsungS23ScreenPocket(modelName, profile);
     case "battery-replacement":
     case "battery-service":
-      return buildSamsungS23BatteryPocket(modelName);
+      return buildSamsungS23BatteryPocket(modelName, profile);
     case "charging-port":
     case "charging-port-replacement":
     case "charging-port-repair":
@@ -1607,7 +2032,7 @@ function getSamsungGalaxySRepairPocket(modelSlug: string, repairType: string): R
     case "back-housing":
     case "back-glass-repair":
     case "rear-glass-repair":
-      return buildSamsungS23BackHousingPocket(modelName);
+      return buildSamsungS23BackHousingPocket(modelName, profile);
     case "camera-repair":
     case "front-camera-replacement":
     case "back-camera-replacement":
@@ -1617,7 +2042,222 @@ function getSamsungGalaxySRepairPocket(modelSlug: string, repairType: string): R
       return buildSamsungS23WaterPocket(modelName);
     case "logic-board":
     case "logic-board-repair":
-      return buildSamsungS23LogicBoardPocket(modelName);
+      return buildSamsungS23LogicBoardPocket(modelName, profile);
+    default:
+      return null;
+  }
+}
+
+function getSamsungGalaxyARepairPocket(modelSlug: string, repairType: string): RepairTypeSeoPocket | null {
+  const normalizedModel = slugify(modelSlug);
+  const normalizedRepairType = slugify(repairType);
+
+  if (!isGalaxyAPhoneSlug(normalizedModel)) return null;
+
+  const modelName = deriveSamsungGalaxyAModelName(normalizedModel);
+  const profile = getSamsungGalaxyAProfile(normalizedModel);
+
+  if (!modelName || !profile) return null;
+
+  switch (normalizedRepairType) {
+    case "screen-replacement":
+    case "screen-repair":
+      return buildSamsungS23ScreenPocket(modelName, profile);
+    case "battery-replacement":
+    case "battery-service":
+      return buildSamsungS23BatteryPocket(modelName, profile);
+    case "charging-port":
+    case "charging-port-replacement":
+    case "charging-port-repair":
+      return buildSamsungS23ChargingPocket(modelName, profile);
+    case "back-glass":
+    case "back-housing-replacement":
+    case "back-housing":
+    case "back-glass-repair":
+    case "rear-glass-repair":
+      return buildSamsungS23BackHousingPocket(modelName, profile);
+    case "camera-repair":
+    case "front-camera-replacement":
+    case "back-camera-replacement":
+      return buildSamsungS23CameraPocket(modelName, profile);
+    case "water-damage":
+    case "water-damage-repair":
+      return buildSamsungS23WaterPocket(modelName);
+    case "logic-board":
+    case "logic-board-repair":
+      return buildSamsungS23LogicBoardPocket(modelName, profile);
+    default:
+      return null;
+  }
+}
+
+function getSamsungGalaxyNoteRepairPocket(modelSlug: string, repairType: string): RepairTypeSeoPocket | null {
+  const normalizedModel = slugify(modelSlug);
+  const normalizedRepairType = slugify(repairType);
+
+  if (!isGalaxyNotePhoneSlug(normalizedModel)) return null;
+
+  const modelName = deriveSamsungGalaxyNoteModelName(normalizedModel);
+  const profile = getSamsungGalaxyNoteProfile(normalizedModel);
+
+  if (!modelName || !profile) return null;
+
+  switch (normalizedRepairType) {
+    case "screen-replacement":
+    case "screen-repair":
+      return buildSamsungS23ScreenPocket(modelName, profile, SAMSUNG_NOTE_CONTEXT);
+    case "battery-replacement":
+    case "battery-service":
+      return buildSamsungS23BatteryPocket(modelName, profile, SAMSUNG_NOTE_CONTEXT);
+    case "charging-port":
+    case "charging-port-replacement":
+    case "charging-port-repair":
+      return buildSamsungS23ChargingPocket(modelName, profile, SAMSUNG_NOTE_CONTEXT);
+    case "back-glass":
+    case "back-housing-replacement":
+    case "back-housing":
+    case "back-glass-repair":
+    case "rear-glass-repair":
+      return buildSamsungS23BackHousingPocket(modelName, profile, SAMSUNG_NOTE_CONTEXT);
+    case "camera-repair":
+    case "front-camera-replacement":
+    case "back-camera-replacement":
+      return buildSamsungS23CameraPocket(modelName, profile, SAMSUNG_NOTE_CONTEXT);
+    case "water-damage":
+    case "water-damage-repair":
+      return buildSamsungS23WaterPocket(modelName, SAMSUNG_NOTE_CONTEXT);
+    case "logic-board":
+    case "logic-board-repair":
+      return buildSamsungS23LogicBoardPocket(modelName, profile, SAMSUNG_NOTE_CONTEXT);
+    default:
+      return null;
+  }
+}
+
+function getSamsungGalaxyZRepairPocket(modelSlug: string, repairType: string): RepairTypeSeoPocket | null {
+  const normalizedModel = slugify(modelSlug);
+  const normalizedRepairType = slugify(repairType);
+
+  if (!isGalaxyZPhoneSlug(normalizedModel)) return null;
+
+  const modelName = deriveSamsungGalaxyZModelName(normalizedModel);
+  const profile = getSamsungGalaxyZProfile(normalizedModel);
+
+  if (!modelName || !profile) return null;
+
+  switch (normalizedRepairType) {
+    case "screen-replacement":
+    case "screen-repair":
+      return buildSamsungS23ScreenPocket(modelName, profile, SAMSUNG_Z_CONTEXT);
+    case "battery-replacement":
+    case "battery-service":
+      return buildSamsungS23BatteryPocket(modelName, profile, SAMSUNG_Z_CONTEXT);
+    case "charging-port":
+    case "charging-port-replacement":
+    case "charging-port-repair":
+      return buildSamsungS23ChargingPocket(modelName, profile, SAMSUNG_Z_CONTEXT);
+    case "back-glass":
+    case "back-housing-replacement":
+    case "back-housing":
+    case "back-glass-repair":
+    case "rear-glass-repair":
+      return buildSamsungS23BackHousingPocket(modelName, profile, SAMSUNG_Z_CONTEXT);
+    case "camera-repair":
+    case "front-camera-replacement":
+    case "back-camera-replacement":
+      return buildSamsungS23CameraPocket(modelName, profile, SAMSUNG_Z_CONTEXT);
+    case "water-damage":
+    case "water-damage-repair":
+      return buildSamsungS23WaterPocket(modelName, SAMSUNG_Z_CONTEXT);
+    case "logic-board":
+    case "logic-board-repair":
+      return buildSamsungS23LogicBoardPocket(modelName, profile, SAMSUNG_Z_CONTEXT);
+    default:
+      return null;
+  }
+}
+
+function getGooglePixelRepairPocket(modelSlug: string, repairType: string): RepairTypeSeoPocket | null {
+  const normalizedModel = slugify(modelSlug);
+  const normalizedRepairType = slugify(repairType);
+
+  if (!isGooglePixelPhoneSlug(normalizedModel)) return null;
+
+  const modelName = deriveGooglePixelModelName(normalizedModel);
+  const profile = getGooglePixelProfile(normalizedModel);
+
+  if (!modelName || !profile) return null;
+
+  switch (normalizedRepairType) {
+    case "screen-replacement":
+    case "screen-repair":
+      return buildSamsungS23ScreenPocket(modelName, profile, GOOGLE_PIXEL_CONTEXT);
+    case "battery-replacement":
+    case "battery-service":
+      return buildSamsungS23BatteryPocket(modelName, profile, GOOGLE_PIXEL_CONTEXT);
+    case "charging-port":
+    case "charging-port-replacement":
+    case "charging-port-repair":
+      return buildSamsungS23ChargingPocket(modelName, profile, GOOGLE_PIXEL_CONTEXT);
+    case "back-glass":
+    case "back-housing-replacement":
+    case "back-housing":
+    case "back-glass-repair":
+    case "rear-glass-repair":
+      return buildSamsungS23BackHousingPocket(modelName, profile, GOOGLE_PIXEL_CONTEXT);
+    case "camera-repair":
+    case "front-camera-replacement":
+    case "back-camera-replacement":
+      return buildSamsungS23CameraPocket(modelName, profile, GOOGLE_PIXEL_CONTEXT);
+    case "water-damage":
+    case "water-damage-repair":
+      return buildSamsungS23WaterPocket(modelName, GOOGLE_PIXEL_CONTEXT);
+    case "logic-board":
+    case "logic-board-repair":
+      return buildSamsungS23LogicBoardPocket(modelName, profile, GOOGLE_PIXEL_CONTEXT);
+    default:
+      return null;
+  }
+}
+
+function getOppoRepairPocket(modelSlug: string, repairType: string): RepairTypeSeoPocket | null {
+  const normalizedModel = slugify(modelSlug);
+  const normalizedRepairType = slugify(repairType);
+
+  if (!isOppoPhoneSlug(normalizedModel)) return null;
+
+  const modelName = deriveOppoModelName(normalizedModel);
+  const profile = getOppoProfile(normalizedModel);
+
+  if (!modelName || !profile) return null;
+
+  switch (normalizedRepairType) {
+    case "screen-replacement":
+    case "screen-repair":
+      return buildSamsungS23ScreenPocket(modelName, profile, OPPO_CONTEXT);
+    case "battery-replacement":
+    case "battery-service":
+      return buildSamsungS23BatteryPocket(modelName, profile, OPPO_CONTEXT);
+    case "charging-port":
+    case "charging-port-replacement":
+    case "charging-port-repair":
+      return buildSamsungS23ChargingPocket(modelName, profile, OPPO_CONTEXT);
+    case "back-glass":
+    case "back-housing-replacement":
+    case "back-housing":
+    case "back-glass-repair":
+    case "rear-glass-repair":
+      return buildSamsungS23BackHousingPocket(modelName, profile, OPPO_CONTEXT);
+    case "camera-repair":
+    case "front-camera-replacement":
+    case "back-camera-replacement":
+      return buildSamsungS23CameraPocket(modelName, profile, OPPO_CONTEXT);
+    case "water-damage":
+    case "water-damage-repair":
+      return buildSamsungS23WaterPocket(modelName, OPPO_CONTEXT);
+    case "logic-board":
+    case "logic-board-repair":
+      return buildSamsungS23LogicBoardPocket(modelName, profile, OPPO_CONTEXT);
     default:
       return null;
   }
@@ -1644,8 +2284,27 @@ function getRepairTypeSeoPocket(params: {
   }
 
   if (category === "phone" && (brand === "samsung" || brand === "galaxy")) {
-    const pocket = getSamsungGalaxySRepairPocket(model, repairType);
-    if (pocket) return pocket;
+    const sPocket = getSamsungGalaxySRepairPocket(model, repairType);
+    if (sPocket) return sPocket;
+
+    const aPocket = getSamsungGalaxyARepairPocket(model, repairType);
+    if (aPocket) return aPocket;
+
+    const notePocket = getSamsungGalaxyNoteRepairPocket(model, repairType);
+    if (notePocket) return notePocket;
+
+    const zPocket = getSamsungGalaxyZRepairPocket(model, repairType);
+    if (zPocket) return zPocket;
+  }
+
+  if (category === "phone" && (brand === "google" || brand === "google-pixel" || brand === "pixel")) {
+    const googlePocket = getGooglePixelRepairPocket(model, repairType);
+    if (googlePocket) return googlePocket;
+  }
+
+  if (category === "phone" && brand === "oppo") {
+    const oppoPocket = getOppoRepairPocket(model, repairType);
+    if (oppoPocket) return oppoPocket;
   }
 
   return null;

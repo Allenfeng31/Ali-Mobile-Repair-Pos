@@ -30,11 +30,11 @@ const CATEGORY_HERO_MEDIA = {
     height: 544,
   },
   laptop: {
-    image: '/images/repair-hero/macbook-pro-exploded-548x447.png?v=hero-exploded-fit-1',
+    image: '/images/repair-hero/macbook-pro-exploded-544@2x.png?v=hero-exploded-square-1',
     alt: 'Exploded MacBook Pro repair parts showing display, keyboard, logic board, battery, and chassis',
     ariaLabel: 'Exploded MacBook repair parts preview',
-    width: 548,
-    height: 447,
+    width: 544,
+    height: 544,
   },
   watch: {
     image: '/images/repair-hero/apple-watch-exploded-430x487.png?v=hero-exploded-fit-1',
