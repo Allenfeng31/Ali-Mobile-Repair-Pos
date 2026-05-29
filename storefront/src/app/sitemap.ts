@@ -40,9 +40,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const catalog = await fetchRepairCatalog();
 
+    // Category hub URLs
+    const categoryUrls: MetadataRoute.Sitemap = ['phone', 'tablet', 'laptop', 'watch'].map(category => ({
+      url: `${baseUrl}/repairs/${category}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    }));
+
     // Brand sub-hub URLs
     const brandUrls: MetadataRoute.Sitemap = catalog.brands.map(brand => ({
-      url: `${baseUrl}/repairs/${brand.slug}`,
+      url: `${baseUrl}/repairs/${brand.category}/${brand.slug}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
@@ -55,14 +63,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
         modelUrls.push({
-          url: `${baseUrl}/repairs/${brand.slug}/${model.slug}`,
+          url: `${baseUrl}/repairs/${brand.category}/${brand.slug}/${model.slug}`,
           lastModified: new Date(),
           changeFrequency: 'weekly' as const,
           priority: 0.7,
         });
         for (const repair of model.repairTypes) {
           repairUrls.push({
-            url: `${baseUrl}/repairs/${brand.slug}/${model.slug}/${repair.slug}`,
+            url: `${baseUrl}/repairs/${brand.category}/${brand.slug}/${model.slug}/${repair.slug}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,
@@ -71,7 +79,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    return [...sitemapUrls, ...locationUrls, ...brandUrls, ...modelUrls, ...repairUrls];
+    return [...sitemapUrls, ...locationUrls, ...categoryUrls, ...brandUrls, ...modelUrls, ...repairUrls];
   } catch (error) {
     console.error("Failed to generate dynamic sitemap:", error);
   }
