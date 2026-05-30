@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
-import { getPostData } from "@/lib/blog";
+import { getPostData, isRemovedBlogSlug } from "@/lib/blog";
 
 import styles from "./BlogPost.module.css";
 
@@ -24,7 +25,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function PostDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const postData = await getPostData(slug);
+  if (isRemovedBlogSlug(slug)) {
+    notFound();
+  }
+
+  let postData;
+  try {
+    postData = await getPostData(slug);
+  } catch {
+    notFound();
+  }
 
   const formattedDate = postData.date
     ? new Date(postData.date).toLocaleDateString("en-AU", {

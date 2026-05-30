@@ -8,6 +8,22 @@ import { createClient } from '@supabase/supabase-js';
 
 const postsDirectory = path.join(process.cwd(), 'src/content/blog');
 
+export const REMOVED_BLOG_SLUGS = new Set([
+  'professional-device-repair-ringwood-melbourne',
+  'google-pixel-screen-replacement-ringwood-melbourne',
+  'system-recovery-services-ringwood',
+  'samsung-battery-replacement-ringwood-melbourne',
+  'iphone-17-pro-screen-replacement-ringwood',
+  'fast-reliable-screen-replacement-ringwood',
+  'reliable-phone-repair-ringwood',
+  'professional-mobile-phone-repair-ringwood',
+  'tablet-repair-service-ringwood',
+]);
+
+export function isRemovedBlogSlug(slug: string) {
+  return REMOVED_BLOG_SLUGS.has((slug || '').trim());
+}
+
 // Server-side Supabase client for blog fetching
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -66,14 +82,14 @@ async function getSupabasePosts(): Promise<BlogPost[]> {
     }
 
       return (data || []).map((post: any) => ({
-      slug: post.slug || `post-${post.id}`,
-      title: post.title || 'Untitled Post',
-      date: post.published_at || post.created_at || new Date().toISOString(),
-      description: post.description || '',
-      image: post.cover_image || undefined,
-      contentHtml: post.content || '',
-      source: 'supabase' as const,
-    }));
+        slug: post.slug || `post-${post.id}`,
+        title: post.title || 'Untitled Post',
+        date: post.published_at || post.created_at || new Date().toISOString(),
+        description: post.description || '',
+        image: post.cover_image || undefined,
+        contentHtml: post.content || '',
+        source: 'supabase' as const,
+      })).filter((post) => !isRemovedBlogSlug(post.slug));
   } catch (err) {
     console.error('Failed to fetch Supabase blog posts:', err);
     return [];
@@ -91,6 +107,7 @@ export async function getSortedPostsData() {
     
     for (const fileName of fileNames) {
       const slug = fileName.replace(/\.md$/, '');
+      if (isRemovedBlogSlug(slug)) continue;
       const fullPath = path.join(postsDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
       const matterResult = matter(fileContents);
@@ -156,6 +173,10 @@ export async function getSortedPostsData() {
  * Get a single post by slug — checks Supabase first, then falls back to markdown.
  */
 export async function getPostData(slug: string): Promise<BlogPost> {
+  if (isRemovedBlogSlug(slug)) {
+    throw new Error(`Removed blog slug: ${slug}`);
+  }
+
   // Try Supabase first
   if (supabaseServer) {
     try {

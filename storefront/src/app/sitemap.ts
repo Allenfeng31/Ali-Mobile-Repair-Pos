@@ -1,23 +1,16 @@
 import { MetadataRoute } from 'next';
 import { fetchRepairCatalog } from '@/lib/api';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
+import { getSortedPostsData } from '@/lib/blog';
 import { safeSlugSegment } from '@/lib/inventoryUtils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   
-  // Blog posts
-  const blogPosts = [
-    'iphone-17-pro-screen-replacement-ringwood',
-    'fast-reliable-screen-replacement-ringwood',
-    'reliable-phone-repair-ringwood',
-    'professional-mobile-phone-repair-ringwood',
-    'system-recovery-services-ringwood'
-  ];
-
-  const blogUrls: MetadataRoute.Sitemap = blogPosts.map(slug => ({
-    url: `${baseUrl}/blog/${slug}`,
-    lastModified: new Date(),
+  const blogPosts = await getSortedPostsData();
+  const blogUrls: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: post.date ? new Date(post.date) : new Date(),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
