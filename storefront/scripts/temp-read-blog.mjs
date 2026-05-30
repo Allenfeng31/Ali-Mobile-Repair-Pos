@@ -14,7 +14,7 @@ async function run() {
   const { data, error } = await supabase
     .from('storefront_blogs')
     .select('id, slug, title, description, content, cover_image, is_published, published_at, updated_at')
-    .eq('slug', 'google-pixel-10-pro-xl-screen-replacement-the-hidden-fingerprint-trap-and-how-we')
+    .eq('slug', 'how-to-fix-face-id-on-iphone-15-and-newer-models-after-camera-replacement')
     .single();
 
   if (error) throw error;
