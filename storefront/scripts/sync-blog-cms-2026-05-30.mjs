@@ -1,12 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase env vars. Load .env.local first.');
+  console.error('Missing Supabase env vars. Ensure SUPABASE_SERVICE_ROLE_KEY is set.');
   process.exit(1);
 }
+
+const IS_DRY_RUN = process.env.DRY_RUN !== 'false';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -84,15 +86,23 @@ const MACBOOK_CONTENT = `
 
 async function run() {
   const report = {
+    mode: IS_DRY_RUN ? 'DRY_RUN' : 'WRITE',
+    table: 'storefront_blogs',
     removeRequested: REMOVE_SLUGS.length,
     removeFound: 0,
-    removeUpdated: 0,
     removeRows: [],
     keepRows: [],
     macBefore: null,
-    macAfter: null,
     warnings: [],
   };
+
+  if (IS_DRY_RUN) {
+    report.removeWouldUpdate = 0;
+    report.macPlanned = null;
+  } else {
+    report.removeUpdated = 0;
+    report.macAfter = null;
+  }
 
   const { data: removeRows, error: removeFetchError } = await supabase
     .from('storefront_blogs')
@@ -104,17 +114,21 @@ async function run() {
   report.removeFound = report.removeRows.length;
 
   if (report.removeRows.length > 0) {
-    const { data: updatedRows, error: removeUpdateError } = await supabase
-      .from('storefront_blogs')
-      .update({
-        is_published: false,
-        updated_at: new Date().toISOString(),
-      })
-      .in('slug', REMOVE_SLUGS)
-      .select('id, slug, is_published, updated_at');
+    if (IS_DRY_RUN) {
+      report.removeWouldUpdate = report.removeFound;
+    } else {
+      const { data: updatedRows, error: removeUpdateError } = await supabase
+        .from('storefront_blogs')
+        .update({
+          is_published: false,
+          updated_at: new Date().toISOString(),
+        })
+        .in('slug', REMOVE_SLUGS)
+        .select('id, slug, is_published, updated_at');
 
-    if (removeUpdateError) throw removeUpdateError;
-    report.removeUpdated = (updatedRows || []).length;
+      if (removeUpdateError) throw removeUpdateError;
+      report.removeUpdated = (updatedRows || []).length;
+    }
   }
 
   const { data: keepRows, error: keepError } = await supabase
@@ -151,32 +165,41 @@ async function run() {
     updated_at: macBefore.updated_at,
   };
 
-  const { data: macAfter, error: macUpdateError } = await supabase
-    .from('storefront_blogs')
-    .update({
+  if (IS_DRY_RUN) {
+    report.macPlanned = {
       title: MACBOOK_TITLE,
       description: MACBOOK_DESCRIPTION,
-      content: MACBOOK_CONTENT,
+      contentLength: MACBOOK_CONTENT.length,
       is_published: true,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', macBefore.id)
-    .select('id, slug, title, description, content, cover_image, is_published, published_at, updated_at')
-    .single();
+    };
+  } else {
+    const { data: macAfter, error: macUpdateError } = await supabase
+      .from('storefront_blogs')
+      .update({
+        title: MACBOOK_TITLE,
+        description: MACBOOK_DESCRIPTION,
+        content: MACBOOK_CONTENT,
+        is_published: true,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', macBefore.id)
+      .select('id, slug, title, description, content, cover_image, is_published, published_at, updated_at')
+      .single();
 
-  if (macUpdateError) throw macUpdateError;
+    if (macUpdateError) throw macUpdateError;
 
-  report.macAfter = {
-    id: macAfter.id,
-    slug: macAfter.slug,
-    title: macAfter.title,
-    description: macAfter.description,
-    contentLength: macAfter.content ? macAfter.content.length : 0,
-    cover_image: macAfter.cover_image,
-    is_published: macAfter.is_published,
-    published_at: macAfter.published_at,
-    updated_at: macAfter.updated_at,
-  };
+    report.macAfter = {
+      id: macAfter.id,
+      slug: macAfter.slug,
+      title: macAfter.title,
+      description: macAfter.description,
+      contentLength: macAfter.content ? macAfter.content.length : 0,
+      cover_image: macAfter.cover_image,
+      is_published: macAfter.is_published,
+      published_at: macAfter.published_at,
+      updated_at: macAfter.updated_at,
+    };
+  }
 
   console.log(JSON.stringify(report, null, 2));
 }
