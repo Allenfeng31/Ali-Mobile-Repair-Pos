@@ -8,8 +8,60 @@ export async function middleware(request: NextRequest) {
 
   const url = request.nextUrl;
   const path = url.pathname;
+  const host = request.headers.get('host') || '';
   
-  // Define POS restricted routes
+  // ==========================================
+  // STEALTH DOMAIN LOGIC (pos. / api.)
+  // ==========================================
+  const isSubdomain = host.includes('pos.alimobile.com.au') || host.includes('api.alimobile.com.au');
+  
+  if (isSubdomain) {
+    let isAuthorized = false;
+
+    // 1. WHITELIST: Open routes for customers
+    if (path === '/feedback' || path === '/portal') {
+      isAuthorized = true;
+    }
+
+    // 2. BACKDOOR: Query Param Gate & Cookie Session
+    const gatekey = url.searchParams.get('gatekey');
+    const secretKey = process.env.ADMIN_SYNC_SECRET || 'alimobile-stealth-key';
+    const stealthCookie = request.cookies.get('pos_device_ticket')?.value;
+
+    if (gatekey === secretKey) {
+      // Issue secure cookie and strip the query param to hide it
+      url.searchParams.delete('gatekey');
+      const stealthResponse = NextResponse.redirect(url);
+      stealthResponse.cookies.set('pos_device_ticket', secretKey, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 315360000 // 10 years for permanent POS device authorization
+      });
+      return stealthResponse;
+    }
+
+    if (stealthCookie === secretKey) {
+      isAuthorized = true;
+    }
+
+    // 3. API INTERNAL BYPASS: Allow Backend Cron/Webhooks with Bearer Token
+    const authHeader = request.headers.get('authorization');
+    if (host.includes('api.alimobile.com.au') && authHeader === `Bearer ${secretKey}`) {
+      isAuthorized = true;
+    }
+
+    // 4. STEALTH 404 BLOCK
+    if (!isAuthorized) {
+      // Force Next.js to render a 404 by rewriting to a non-existent path
+      url.pathname = '/__stealth_404_blackhole__';
+      const blockResponse = NextResponse.rewrite(url);
+      blockResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+      return blockResponse;
+    }
+  }
+
+  // Define POS restricted routes (for main domain or authorized subdomain traffic)
   const isPosRoute = path.startsWith('/dashboard') || path === '/login' || path.startsWith('/pos');
 
   if (isPosRoute) {

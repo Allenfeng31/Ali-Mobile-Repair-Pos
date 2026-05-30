@@ -108,13 +108,15 @@ function buildLocalBusinessSchema(payload: GoogleReviewsPayload) {
       latitude: -37.81534,
       longitude: 145.22851,
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: payload.aggregateRating.ratingValue,
-      reviewCount: payload.aggregateRating.reviewCount,
-      bestRating: "5",
-      worstRating: "1",
-    },
+    ...(payload.aggregateRating.ratingValue && payload.aggregateRating.reviewCount ? {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: payload.aggregateRating.ratingValue,
+        reviewCount: payload.aggregateRating.reviewCount,
+        bestRating: "5",
+        worstRating: "1",
+      }
+    } : {}),
     review: payload.reviews.slice(0, 5).map((review) => ({
       "@type": "Review",
       author: {
@@ -192,7 +194,7 @@ export default function ReviewsSection() {
   }, []);
 
   const marqueeReviews = useMemo(
-    () => [...payload.reviews, ...payload.reviews],
+    () => payload.reviews,
     [payload.reviews]
   );
   const localBusinessSchema = useMemo(() => buildLocalBusinessSchema(payload), [payload]);
@@ -210,12 +212,19 @@ export default function ReviewsSection() {
           <h2 id="reviews-heading" className={styles.title}>
             Customer Reviews
           </h2>
-          <div className={styles.summary} aria-label={`${payload.aggregateRating.ratingValue} out of 5 from ${payload.aggregateRating.reviewCount} reviews`}>
-            <StarRating />
-            <span>{payload.aggregateRating.ratingValue} rating</span>
-            <span className={styles.summaryDot} aria-hidden="true" />
-            <span>{payload.aggregateRating.reviewCount} reviews</span>
-          </div>
+          {payload.aggregateRating.ratingValue && payload.aggregateRating.reviewCount ? (
+            <div className={styles.summary} aria-label={`${payload.aggregateRating.ratingValue} out of 5 from ${payload.aggregateRating.reviewCount} reviews`}>
+              <StarRating />
+              <span>{payload.aggregateRating.ratingValue} rating</span>
+              <span className={styles.summaryDot} aria-hidden="true" />
+              <span>{payload.aggregateRating.reviewCount} reviews</span>
+            </div>
+          ) : (
+            <div className={styles.summary} aria-label="See our latest Google reviews">
+              <StarRating />
+              <span>See our latest Google reviews</span>
+            </div>
+          )}
         </header>
 
         <div className={styles.stage} aria-label="5-star customer review marquee">

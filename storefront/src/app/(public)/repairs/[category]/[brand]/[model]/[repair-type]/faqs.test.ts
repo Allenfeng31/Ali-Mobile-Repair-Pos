@@ -25,7 +25,7 @@ vi.mock('next/navigation', () => ({
 
 describe('generateFaqs', () => {
   it('should inject the screen tier comparison FAQ for iPhone screen repairs', () => {
-    const faqs = generateFaqs('iPhone 13', 'Screen Replacement', 'screen-replacement', 150, 'A2633', 'Apple');
+    const faqs = generateFaqs('iPhone 13', 'Screen Replacement', 'screen-replacement', 0, 'A2633', 'Apple');
     
     const comparisonFaq = faqs.find(f => f.question.includes('difference between Standard, Premium, and Genuine'));
     expect(comparisonFaq).toBeDefined();
@@ -34,8 +34,9 @@ describe('generateFaqs', () => {
     expect(comparisonFaq?.answer).toContain('Genuine (OEM)');
   });
 
-  it('should inject the screen tier comparison FAQ for brand "iPhone"', () => {
-    const faqs = generateFaqs('iPhone 13', 'Screen Replacement', 'screen-replacement', 150, 'A2633', 'iPhone');
+  it('should generate correctly with fallback values if exact brand missing', () => {
+    // If brand doesn't perfectly match our known cases, it shouldn't crash
+    const faqs = generateFaqs('iPhone 13', 'Screen Replacement', 'screen-replacement', 0, 'A2633', 'iPhone');
     
     const comparisonFaq = faqs.find(f => f.question.includes('difference between Standard, Premium, and Genuine'));
     expect(comparisonFaq).toBeDefined();

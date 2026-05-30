@@ -129,7 +129,17 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
 }
 
 export default function BookRepairPage() {
-  const { devices, totalPrice, hasConfirmedDevices, hasCustomQuote, clearCart } = useCart();
+  const {
+    devices,
+    totalPrice,
+    subtotalPrice,
+    discountRate,
+    discountAmount,
+    qualifyingRepairItemCount,
+    hasConfirmedDevices,
+    hasCustomQuote,
+    clearCart,
+  } = useCart();
   const confirmedDevices = devices.filter(d => d.isConfirmed);
   const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -223,6 +233,14 @@ export default function BookRepairPage() {
           services: d.services
         })),
         total: totalPrice,
+        hasCustomQuote,
+        pricing: {
+          subtotal: subtotalPrice,
+          discountRate,
+          discountAmount,
+          qualifyingRepairItemCount,
+          total: totalPrice,
+        },
         datetime: dateObj.toISOString(),
         displayDate: displayDate,
         notes: formData.notes,
@@ -401,15 +419,29 @@ export default function BookRepairPage() {
                       <span>Estimated Total</span>
                       <strong>
                         {totalPrice > 0 ? (
-                          <>
-                            ${totalPrice.toFixed(2)}
-                            {hasCustomQuote && <small> + Custom Quote</small>}
-                          </>
+                          discountRate > 0 ? (
+                            <span className="booking-discount-total">
+                              <small className="booking-original-total">${subtotalPrice.toFixed(2)}</small>
+                              <small className="booking-discount-chip">-{Math.round(discountRate * 100)}% Multi-Device</small>
+                              <span>${totalPrice.toFixed(2)}</span>
+                              {hasCustomQuote && <small> + Custom Quote</small>}
+                            </span>
+                          ) : (
+                            <>
+                              ${totalPrice.toFixed(2)}
+                              {hasCustomQuote && <small> + Custom Quote</small>}
+                            </>
+                          )
                         ) : (
                           hasCustomQuote ? "Custom Quote" : "$0.00"
                         )}
                       </strong>
                     </div>
+                    {discountRate > 0 && (
+                      <div className="booking-discount-note">
+                        Multi-device saving: -${discountAmount.toFixed(2)} across {qualifyingRepairItemCount} repair items.
+                      </div>
+                    )}
                     <p>
                       <Info size={15} strokeWidth={2.4} aria-hidden="true" />
                       No upfront payment required. You only pay in store after your device is successfully repaired.

@@ -58,6 +58,18 @@ interface Upsell {
   created_at: string;
 }
 
+interface StoreConfig {
+  multi_discount_tier_2: number;
+  multi_discount_tier_3: number;
+}
+
+const DEFAULT_STORE_CONFIG: StoreConfig = {
+  multi_discount_tier_2: 0.10,
+  multi_discount_tier_3: 0.15,
+};
+
+const rateToPercentInput = (rate: number) => String(Number((rate * 100).toFixed(2)));
+
 // ═══════════════════════════════════════
 // Main CMS Page
 // ═══════════════════════════════════════
@@ -87,6 +99,10 @@ export default function StorefrontCMSPage() {
   const [newUpsellDescription, setNewUpsellDescription] = useState('');
   const [newUpsellRegularPrice, setNewUpsellRegularPrice] = useState('');
   const [newUpsellBundlePrice, setNewUpsellBundlePrice] = useState('');
+  const [storeConfig, setStoreConfig] = useState<StoreConfig>(DEFAULT_STORE_CONFIG);
+  const [savingStoreConfig, setSavingStoreConfig] = useState(false);
+  const [storeConfigError, setStoreConfigError] = useState<string | null>(null);
+  const [storeConfigSaved, setStoreConfigSaved] = useState(false);
 
   // ═══════════════════════════════════════
   // Data Fetching
@@ -95,6 +111,7 @@ export default function StorefrontCMSPage() {
     fetchAnnouncements();
     fetchBlogPosts();
     fetchUpsells();
+    fetchStoreConfig();
   }, []);
 
   const fetchAnnouncements = async () => {
@@ -301,6 +318,48 @@ export default function StorefrontCMSPage() {
 
   const toggleUpsellActive = (id: string, current: boolean) => {
     handleUpdateUpsell(id, { is_active: !current });
+  };
+
+  const fetchStoreConfig = async () => {
+    try {
+      const res = await fetch('/api/proxy/store-configs');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setStoreConfig({
+        multi_discount_tier_2: Number(data.multi_discount_tier_2 ?? DEFAULT_STORE_CONFIG.multi_discount_tier_2),
+        multi_discount_tier_3: Number(data.multi_discount_tier_3 ?? DEFAULT_STORE_CONFIG.multi_discount_tier_3),
+      });
+    } catch (error) {
+      console.error('Error fetching store config:', error);
+      setStoreConfig(DEFAULT_STORE_CONFIG);
+      setStoreConfigError('Using default discount settings. Save once after running store_configs.sql.');
+    }
+  };
+
+  const handleSaveStoreConfig = async () => {
+    setSavingStoreConfig(true);
+    setStoreConfigError(null);
+    setStoreConfigSaved(false);
+
+    try {
+      const res = await fetch('/api/proxy/store-configs', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(storeConfig),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+
+      setStoreConfigSaved(true);
+      window.setTimeout(() => setStoreConfigSaved(false), 1800);
+    } catch (error: any) {
+      setStoreConfigError(error.message || 'Failed to save discount settings.');
+    } finally {
+      setSavingStoreConfig(false);
+    }
   };
 
   // ═══════════════════════════════════════
@@ -605,6 +664,65 @@ export default function StorefrontCMSPage() {
         {/* ═══════════════════════════════════════ */}
         {/* Section 3: Cart Upsells & Accessories  */}
         {/* ═══════════════════════════════════════ */}
+        <section className="mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <DollarSign className="text-indigo-600" size={24} />
+              Multi-Device Repair Discounts
+            </h2>
+            <button
+              onClick={handleSaveStoreConfig}
+              disabled={savingStoreConfig}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50"
+            >
+              {savingStoreConfig ? <Loader2 size={18} className="animate-spin" /> : <DollarSign size={18} />}
+              Save Discounts
+            </button>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-1.5">2 repair items discount (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="95"
+                step="0.1"
+                value={rateToPercentInput(storeConfig.multi_discount_tier_2)}
+                onChange={(e) => setStoreConfig({ ...storeConfig, multi_discount_tier_2: (Number(e.target.value) || 0) / 100 })}
+                className="w-full text-base font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 placeholder:text-slate-300 outline-none focus:border-indigo-400 transition-colors"
+              />
+              <p className="mt-2 text-xs font-bold text-slate-400">Default: 10% off when two qualifying repair items are confirmed.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-1.5">3+ repair items discount (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="95"
+                step="0.1"
+                value={rateToPercentInput(storeConfig.multi_discount_tier_3)}
+                onChange={(e) => setStoreConfig({ ...storeConfig, multi_discount_tier_3: (Number(e.target.value) || 0) / 100 })}
+                className="w-full text-base font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 placeholder:text-slate-300 outline-none focus:border-indigo-400 transition-colors"
+              />
+              <p className="mt-2 text-xs font-bold text-slate-400">Default: 15% off when three or more qualifying repair items are confirmed.</p>
+            </div>
+          </div>
+
+          {storeConfigSaved && (
+            <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-600 text-sm font-bold mt-4">
+              <ToggleRight size={18} />
+              Discount configuration saved.
+            </div>
+          )}
+          {storeConfigError && (
+            <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold mt-4">
+              <AlertCircle size={18} />
+              {storeConfigError}
+            </div>
+          )}
+        </section>
+
         <section className="mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">

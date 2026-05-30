@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search,
   UserPlus,
@@ -1985,48 +1986,51 @@ export function CustomersView() {
           </div>
         )}
 
-        {isConfirmingDelete && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        {isConfirmingDelete && typeof document !== 'undefined' && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDelete(false)} className="absolute inset-0 bg-black/40" />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
+              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
             >
               <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-600 mx-auto mb-8">
                 <Trash2 size={40} strokeWidth={3} />
               </div>
               <h3 className="text-2xl font-black text-black mb-4">Confirm Deletion</h3>
-              <p className="text-xs font-bold text-gray-500 leading-relaxed mb-10">
-                This action is permanent and will delete all technical history for <span className="text-black font-black">{selectedCustomer?.name}</span>.
+              <p className="text-sm font-black text-gray-500 mb-8 uppercase tracking-widest">
+                This action cannot be undone. All client data will be permanently purged.
               </p>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="flex gap-4">
                 <button
                   onClick={() => setIsConfirmingDelete(false)}
-                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20"
+                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20 flex-1"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleDeleteCustomer}
-                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
+                  onClick={async () => {
+                    await handleDeleteCustomer();
+                  }}
+                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_20px_rgba(220,38,38,0.3)] active:scale-95 transition-all flex-1"
                 >
-                  Confirm
+                  Confirm Purge
                 </button>
               </div>
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {isConfirmingDeleteRepair && (
-          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+        {isConfirmingDeleteRepair && typeof document !== 'undefined' && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDeleteRepair(false)} className="absolute inset-0 bg-black/40" />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
+              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
             >
               <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-600 mx-auto mb-8">
                 <Trash2 size={40} strokeWidth={3} />
@@ -2043,14 +2047,17 @@ export function CustomersView() {
                   Cancel
                 </button>
                 <button
-                  onClick={handleDeleteRepair}
+                  onClick={async () => {
+                    await handleDeleteRepair();
+                  }}
                   className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
                 >
-                  Purge
+                  Confirm
                 </button>
               </div>
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {showQR && (

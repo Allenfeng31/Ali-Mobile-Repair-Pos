@@ -18,6 +18,11 @@ export interface CartDevice {
   pendingExpandedService?: string;
 }
 
+export interface MultiDiscountConfig {
+  multi_discount_tier_2: number;
+  multi_discount_tier_3: number;
+}
+
 interface CartContextType {
   devices: CartDevice[];
   addDevice: (brand: string, model: string, category: string, service?: RepairService, autoConfirm?: boolean, pendingExpandedService?: string | null) => void;
@@ -28,14 +33,36 @@ interface CartContextType {
   editDevice: (deviceId: string) => void;
   clearCart: () => void;
   totalPrice: number;
+  subtotalPrice: number;
+  discountRate: number;
+  discountAmount: number;
+  qualifyingRepairItemCount: number;
+  discountConfig: MultiDiscountConfig;
   hasConfirmedDevices: boolean;
   hasCustomQuote: boolean;
 }
 
+export const DEFAULT_MULTI_DISCOUNT_CONFIG: MultiDiscountConfig = {
+  multi_discount_tier_2: 0.10,
+  multi_discount_tier_3: 0.15,
+};
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const parseDiscountRate = (value: unknown, fallback: number) => {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  const normalized = numeric > 1 ? numeric / 100 : numeric;
+  return Math.min(Math.max(normalized, 0), 0.95);
+};
+
+const priceToCents = (value: number | undefined) => Math.round((Number(value) || 0) * 100);
+const centsToPrice = (cents: number) => Number((cents / 100).toFixed(2));
+const isAccessoryService = (service: RepairService) => String(service.id).startsWith('upsell-');
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [devices, setDevices] = useState<CartDevice[]>([]);
+  const [discountConfig, setDiscountConfig] = useState<MultiDiscountConfig>(DEFAULT_MULTI_DISCOUNT_CONFIG);
 
   // Load from localStorage on init
   useEffect(() => {
@@ -53,6 +80,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('repair_cart', JSON.stringify(devices));
   }, [devices]);
+
+  useEffect(() => {
+    const fetchDiscountConfig = async () => {
+      try {
+        const res = await fetch('/api/proxy/store-configs');
+        if (!res.ok) return;
+        const config = await res.json();
+        setDiscountConfig({
+          multi_discount_tier_2: parseDiscountRate(config.multi_discount_tier_2, DEFAULT_MULTI_DISCOUNT_CONFIG.multi_discount_tier_2),
+          multi_discount_tier_3: parseDiscountRate(config.multi_discount_tier_3, DEFAULT_MULTI_DISCOUNT_CONFIG.multi_discount_tier_3),
+        });
+      } catch (error) {
+        console.warn('Using default multi-item discount config.', error);
+      }
+    };
+
+    fetchDiscountConfig();
+  }, []);
 
   const addDevice = (brand: string, model: string, category: string, service?: RepairService, autoConfirm: boolean = false, pendingExpandedService?: string | null) => {
     const newDevice: CartDevice = {
@@ -101,9 +146,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const confirmedDevices = devices.filter(d => d.isConfirmed);
 
-  const totalPrice = confirmedDevices.reduce((sum, device) => 
-    sum + device.services.reduce((s, service) => s + (service.price || 0), 0)
+  const subtotalCents = confirmedDevices.reduce((sum, device) => 
+    sum + device.services.reduce((serviceSum, service) => serviceSum + priceToCents(service.price), 0)
   , 0);
+
+  const qualifyingRepairItemCount = confirmedDevices.reduce((sum, device) => 
+    sum + device.services.filter(service => !isAccessoryService(service)).length
+  , 0);
+
+  const discountRate = qualifyingRepairItemCount >= 3
+    ? discountConfig.multi_discount_tier_3
+    : qualifyingRepairItemCount === 2
+      ? discountConfig.multi_discount_tier_2
+      : 0;
+
+  const discountCents = Math.round(subtotalCents * discountRate);
+  const subtotalPrice = centsToPrice(subtotalCents);
+  const discountAmount = centsToPrice(discountCents);
+  const totalPrice = centsToPrice(subtotalCents - discountCents);
 
   const hasConfirmedDevices = confirmedDevices.length > 0;
 
@@ -122,6 +182,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       editDevice,
       clearCart, 
       totalPrice, 
+      subtotalPrice,
+      discountRate,
+      discountAmount,
+      qualifyingRepairItemCount,
+      discountConfig,
       hasConfirmedDevices,
       hasCustomQuote 
     }}>

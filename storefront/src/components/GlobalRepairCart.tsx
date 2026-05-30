@@ -29,7 +29,8 @@ interface UpsellItem {
 const CartContent = () => {
   const { 
     devices, addDevice, removeDevice, updateServices, updateDeviceInfo, 
-    confirmDevice, editDevice, totalPrice, hasCustomQuote 
+    confirmDevice, editDevice, totalPrice, subtotalPrice, discountRate,
+    discountAmount, qualifyingRepairItemCount, discountConfig, hasCustomQuote 
   } = useCart();
   const searchParams = useSearchParams();
   
@@ -175,6 +176,15 @@ const CartContent = () => {
     return inventory.filter(i => i.brand === brand && i.deviceModel === model);
   };
 
+  const tier2Percent = Math.round(discountConfig.multi_discount_tier_2 * 100);
+  const tier3Percent = Math.round(discountConfig.multi_discount_tier_3 * 100);
+  const discountPercent = Math.round(discountRate * 100);
+  const discountBannerText = qualifyingRepairItemCount >= 3
+    ? `🔥 Maximum Tier Unlocked! You are saving ${tier3Percent}% OFF on your entire repair session!`
+    : qualifyingRepairItemCount === 2
+      ? `🎉 Awesome! You've unlocked ${tier2Percent}% MULTI-DEVICE DISCOUNT! Add 1 more to level up to ${tier3Percent}% OFF!`
+      : `💡 Add 1 more device to unlock ${tier2Percent}% OFF on your total repair cost!`;
+
   if (loading) return <div className="cart-container"><p style={{ textAlign: 'center' }}>Loading workshop data...</p></div>;
   if (error) return <div className="cart-container"><p style={{ textAlign: 'center', color: '#ff3b30' }}>Workshop connection failed. Please call 0481 058 514.</p></div>;
 
@@ -183,6 +193,10 @@ const CartContent = () => {
       <div className="cart-header">
         <h1>Repair Cart</h1>
         <p>Select multiple devices or repairs. Prices are live and transparent.</p>
+      </div>
+
+      <div className={`multi-discount-banner ${discountRate > 0 ? 'is-unlocked' : ''}`}>
+        {discountBannerText}
       </div>
 
       {devices.map((device, idx) => (
@@ -212,10 +226,24 @@ const CartContent = () => {
             <h4>Estimated Cost (Pay In-Store)</h4>
             <div className="total-amount">
               {totalPrice > 0 ? (
-                <>
-                  ${totalPrice.toFixed(2)}
-                  {hasCustomQuote && <span className="custom-quote-badge"> + Custom Quote</span>}
-                </>
+                discountRate > 0 ? (
+                  <div className="discount-total-stack">
+                    <div className="discount-original-row">
+                      <span className="discount-original-price">${subtotalPrice.toFixed(2)}</span>
+                      <span className="discount-rate-chip">-{discountPercent}% Multi-Device Discount</span>
+                    </div>
+                    <div className="discount-savings-row">You save ${discountAmount.toFixed(2)}</div>
+                    <div>
+                      ${totalPrice.toFixed(2)}
+                      {hasCustomQuote && <span className="custom-quote-badge"> + Custom Quote</span>}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    ${totalPrice.toFixed(2)}
+                    {hasCustomQuote && <span className="custom-quote-badge"> + Custom Quote</span>}
+                  </>
+                )
               ) : (
                 hasCustomQuote ? "Custom Quote" : "$0.00"
               )}

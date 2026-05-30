@@ -38,8 +38,8 @@ type SeoArticle = {
   lastUpdated: string;
   content: string;
   relatedKeywords: string[];
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
   jsonLd?: unknown;
   repairTarget: RepairTarget;
 };
@@ -265,8 +265,6 @@ async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
     lastUpdated: formatDate(campaign.updated_at || campaign.created_at),
     content: draft.content,
     relatedKeywords: draft.relatedKeywords || ['phone repair', 'screen repair', 'battery replacement'],
-    rating: 4.9,
-    reviewCount: 150,
     jsonLd: campaign.payload?.jsonLd,
     repairTarget,
   };
@@ -353,9 +351,11 @@ export default async function SeoArticlePage({ params }: { params: Promise<{ key
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                   ))}
-                  <span className="ml-1 text-sm font-bold text-white">{article.rating}</span>
+                  {article.rating && <span className="ml-1 text-sm font-bold text-white">{article.rating}</span>}
                 </div>
-                <div className="text-xs text-gray-400">Based on {article.reviewCount}+ reviews</div>
+                <div className="text-xs text-gray-400">
+                  {article.reviewCount ? `Based on ${article.reviewCount}+ reviews` : 'See our latest Google reviews'}
+                </div>
               </div>
             </div>
           </div>

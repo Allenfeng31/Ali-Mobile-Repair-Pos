@@ -106,6 +106,10 @@ let twilioClient = null;
 const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
 const googleReviewLink = process.env.GOOGLE_REVIEW_LINK || 'https://pos.alimobile.com.au/feedback';
 const ADMIN_PHONE = process.env.ADMIN_PHONE_NUMBER || '+61481058514';
+const DEFAULT_STORE_CONFIG = {
+  multi_discount_tier_2: 0.10,
+  multi_discount_tier_3: 0.15,
+};
 
 if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
   const twilio = require('twilio');
@@ -216,6 +220,66 @@ const getReminderSentAt = (appointment) => {
 
   const match = String(appointment.notes || '').match(REMINDER_SENT_NOTE_REGEX);
   return match?.[1] || null;
+};
+
+const parseDiscountRate = (value, fallback) => {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  const normalized = numeric > 1 ? numeric / 100 : numeric;
+  return Math.min(Math.max(normalized, 0), 0.95);
+};
+
+const normalizeStoreConfig = (config = {}) => ({
+  multi_discount_tier_2: parseDiscountRate(config.multi_discount_tier_2, DEFAULT_STORE_CONFIG.multi_discount_tier_2),
+  multi_discount_tier_3: parseDiscountRate(config.multi_discount_tier_3, DEFAULT_STORE_CONFIG.multi_discount_tier_3),
+});
+
+const readStoreConfigRows = async () => {
+  const { data, error } = await supabase
+    .from('store_configs')
+    .select('key, value')
+    .in('key', Object.keys(DEFAULT_STORE_CONFIG));
+
+  if (!error && Array.isArray(data)) {
+    return data.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+  }
+
+  const settingsResult = await supabase
+    .from('settings')
+    .select('key, value')
+    .in('key', Object.keys(DEFAULT_STORE_CONFIG));
+
+  if (settingsResult.error || !Array.isArray(settingsResult.data)) {
+    return {};
+  }
+
+  return settingsResult.data.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+};
+
+const loadStoreConfig = async () => normalizeStoreConfig(await readStoreConfigRows());
+
+const servicePriceToCents = (service) => Math.round((Number(service?.price) || 0) * 100);
+const isAccessoryService = (service) => String(service?.id || '').startsWith('upsell-');
+
+const calculateMultiItemPricing = (devices = [], config = DEFAULT_STORE_CONFIG) => {
+  const allServices = devices.flatMap(device => Array.isArray(device?.services) ? device.services : []);
+  const subtotalCents = allServices.reduce((sum, service) => sum + servicePriceToCents(service), 0);
+  const qualifyingRepairItemCount = allServices.filter(service => !isAccessoryService(service)).length;
+  const normalizedConfig = normalizeStoreConfig(config);
+  const discountRate = qualifyingRepairItemCount >= 3
+    ? normalizedConfig.multi_discount_tier_3
+    : qualifyingRepairItemCount === 2
+      ? normalizedConfig.multi_discount_tier_2
+      : 0;
+  const discountCents = Math.round(subtotalCents * discountRate);
+
+  return {
+    subtotal: Number((subtotalCents / 100).toFixed(2)),
+    discountRate,
+    discountAmount: Number((discountCents / 100).toFixed(2)),
+    qualifyingRepairItemCount,
+    total: Number(((subtotalCents - discountCents) / 100).toFixed(2)),
+  };
 };
 
 const appendReminderSentNote = (notes, sentAt, sid) => {
@@ -950,11 +1014,20 @@ const markAppointmentReminderSent = async (appointment, sentAt, sid) => {
 };
 
 app.post('/api/book-repair', async (req, res) => {
-  const { customer_name, phone, devices, total, hasCustomQuote, datetime, notes, session_token } = req.body;
+  const { customer_name, phone, devices, total, pricing, hasCustomQuote, datetime, notes, session_token } = req.body;
 
-  if (!customer_name || !phone || !datetime || !devices) {
+  if (!customer_name || !phone || !datetime || !Array.isArray(devices) || devices.length === 0) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  const storeConfig = await loadStoreConfig();
+  const serverPricing = calculateMultiItemPricing(devices, storeConfig);
+  const submittedTotal = Number(total);
+  const canonicalTotal = serverPricing.total;
+  const totalMismatch = Number.isFinite(submittedTotal) && Math.abs(submittedTotal - canonicalTotal) >= 0.01;
+  const discountSummary = serverPricing.discountRate > 0
+    ? ` | Multi-device discount: -${Math.round(serverPricing.discountRate * 100)}% (-$${serverPricing.discountAmount.toFixed(2)}) from $${serverPricing.subtotal.toFixed(2)}`
+    : '';
 
   // 1. Create Main Appointment Record
   const mainDevice = devices[0];
@@ -967,7 +1040,7 @@ app.post('/api/book-repair', async (req, res) => {
       model: mainDevice.model,
       service: devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair'),
       datetime,
-      notes: `[MULTI-DEVICE] Total: $${total} ${hasCustomQuote ? '(+Custom)' : ''} | Full Notes: ${notes}`,
+      notes: `[MULTI-DEVICE] Total: $${canonicalTotal.toFixed(2)}${discountSummary} ${hasCustomQuote ? '(+Custom)' : ''}${totalMismatch ? ` | Submitted total was $${submittedTotal.toFixed(2)}` : ''} | Full Notes: ${notes}`,
       status: 'pending'
     }])
     .select()
@@ -999,7 +1072,11 @@ app.post('/api/book-repair', async (req, res) => {
     device: mainDeviceTitle,
     service: mainServiceDescription,
     summary: bookingSummary,
-    total: total,
+    total: canonicalTotal,
+    pricing: {
+      ...serverPricing,
+      submitted: pricing || null,
+    },
     time: datetime,
     notes
   })}`;
@@ -1551,6 +1628,45 @@ app.get('/api/upsells', async (req, res) => {
 // ----------------------------------------------------------------------
 // SETTINGS
 // ----------------------------------------------------------------------
+app.get('/api/store-configs', async (req, res) => {
+  try {
+    const config = await loadStoreConfig();
+    res.json(config);
+  } catch (error) {
+    console.error('[Store Configs] Failed to load config:', error.message);
+    res.json(DEFAULT_STORE_CONFIG);
+  }
+});
+
+app.put('/api/store-configs', async (req, res) => {
+  const config = normalizeStoreConfig(req.body || {});
+  const rows = Object.entries(config).map(([key, value]) => ({ key, value: String(value) }));
+
+  try {
+    const storeConfigResult = await supabase
+      .from('store_configs')
+      .upsert(rows, { onConflict: 'key' })
+      .select();
+
+    if (!storeConfigResult.error) {
+      return res.json(config);
+    }
+
+    const settingsResult = await supabase
+      .from('settings')
+      .upsert(rows, { onConflict: 'key' })
+      .select();
+
+    if (settingsResult.error) {
+      return res.status(500).json({ error: settingsResult.error.message });
+    }
+
+    res.json(config);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/settings', async (req, res) => {
   const { data, error } = await supabase.from('settings').select('*');
   if (error) return res.status(500).json({ error: error.message });

@@ -22,8 +22,8 @@ export interface GoogleReviewsPayload {
 }
 
 export const fallbackAggregateRating: ReviewAggregateRating = {
-  ratingValue: "4.9",
-  reviewCount: "150",
+  ratingValue: "",
+  reviewCount: "",
 };
 
 export const fallbackFiveStarReviews: PublicGoogleReview[] = [

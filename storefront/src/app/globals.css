@@ -1653,6 +1653,39 @@ input:checked+.toggle-slider:before {
   font-weight: 950;
 }
 
+.booking-discount-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.booking-original-total {
+  color: #94a3b8 !important;
+  font-size: 0.86rem !important;
+  text-decoration: line-through;
+}
+
+.booking-discount-chip {
+  width: fit-content;
+  color: #047857 !important;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.68rem !important;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.booking-discount-note {
+  margin-top: 0.55rem;
+  color: #047857;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: right;
+}
+
 .booking-total-row small {
   color: #ca8a04;
   font-size: 0.82rem;

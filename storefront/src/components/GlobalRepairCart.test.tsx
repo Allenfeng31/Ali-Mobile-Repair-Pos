@@ -58,6 +58,15 @@ describe('GlobalRepairCart Hydration Logic', () => {
           json: () => Promise.resolve([]),
         });
       }
+      if (url.includes('/api/proxy/store-configs')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            multi_discount_tier_2: 0.10,
+            multi_discount_tier_3: 0.15,
+          }),
+        });
+      }
       return Promise.reject(new Error('Unknown API'));
     }));
   });
