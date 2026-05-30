@@ -25,7 +25,8 @@ import {
   Scan,
   Users,
   ArrowRight,
-  Calendar
+  Calendar,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
@@ -56,30 +57,38 @@ const getStatusColor = (status: string) => {
   }
 };
 
+type RepairDeviceFormData = {
+  repairItem: string;
+  modelNumber: string;
+  liquidDamage: boolean;
+  password: string;
+  imei: string;
+};
+
 type CustomerFormData = {
   name: string;
   phone: string;
   email: string;
-  repairItem: string;
-  modelNumber: string;
+  devices: RepairDeviceFormData[];
   price: string;
-  liquidDamage: boolean;
-  password: string;
-  imei: string;
   remark: string;
   deposit: string;
 };
+
+const createEmptyRepairDevice = (): RepairDeviceFormData => ({
+  repairItem: '',
+  modelNumber: '',
+  liquidDamage: false,
+  password: '',
+  imei: ''
+});
 
 const createEmptyCustomerFormData = (): CustomerFormData => ({
   name: '',
   phone: '',
   email: '',
-  repairItem: '',
-  modelNumber: '',
+  devices: [createEmptyRepairDevice()],
   price: '',
-  liquidDamage: false,
-  password: '',
-  imei: '',
   remark: '',
   deposit: ''
 });
@@ -89,21 +98,32 @@ const readCustomerFormData = (
   currentFormData: CustomerFormData
 ): CustomerFormData => {
   const fields = new FormData(form);
-  const readField = (name: keyof CustomerFormData) => String(fields.get(name) ?? '');
+  const readField = (name: 'name' | 'phone' | 'email' | 'price' | 'remark' | 'deposit') => String(fields.get(name) ?? '');
+  const devices = currentFormData.devices
+    .map(device => ({
+      ...device,
+      repairItem: device.repairItem.trim(),
+      modelNumber: device.modelNumber.trim(),
+      password: device.password.trim(),
+      imei: device.imei.trim()
+    }))
+    .filter(device => device.repairItem || device.modelNumber || device.password || device.imei || device.liquidDamage);
 
   return {
     name: readField('name'),
     phone: readField('phone'),
     email: readField('email'),
-    repairItem: readField('repairItem'),
-    modelNumber: readField('modelNumber'),
+    devices: devices.length > 0 ? devices : [createEmptyRepairDevice()],
     price: readField('price'),
-    liquidDamage: currentFormData.liquidDamage,
-    password: readField('password'),
-    imei: readField('imei'),
     remark: readField('remark'),
     deposit: readField('deposit')
   };
+};
+
+const appendRepairEntryContext = (remark: string, index: number, count: number) => {
+  if (count <= 1) return remark;
+  const suffix = `Device ${index + 1} of ${count}`;
+  return remark ? `${remark} | ${suffix}` : suffix;
 };
 
 // Memoized customer card — only re-renders when its specific props change
@@ -483,7 +503,7 @@ export function CustomersView() {
   const [reviewSent, setReviewSent] = useState(false);
   const [partNotifiedId, setPartNotifiedId] = useState<string | null>(null);
   const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
-  const [scannerTarget, setScannerTarget] = useState<'add' | 'repair' | null>(null);
+  const [scannerTarget, setScannerTarget] = useState<{ mode: 'add'; deviceIndex: number } | { mode: 'repair' } | null>(null);
   const [upsells, setUpsells] = useState<any[]>([]);
   const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
   const customerFormRef = useRef<HTMLFormElement | null>(null);
@@ -507,19 +527,7 @@ export function CustomersView() {
     !!scannerTarget
   );
 
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    repairItem: '',
-    modelNumber: '',
-    price: '',
-    liquidDamage: false,
-    password: '',
-    imei: '',
-    remark: '',
-    deposit: ''
-  });
+  const [formData, setFormData] = useState<CustomerFormData>(createEmptyCustomerFormData());
 
   const [repairFormData, setRepairFormData] = useState({
     repairItem: '',
@@ -532,6 +540,31 @@ export function CustomersView() {
     deposit: '',
     status: 'In Processing'
   });
+
+  const updateRepairDevice = (index: number, updates: Partial<RepairDeviceFormData>) => {
+    setFormData(prev => ({
+      ...prev,
+      devices: prev.devices.map((device, deviceIndex) =>
+        deviceIndex === index ? { ...device, ...updates } : device
+      )
+    }));
+  };
+
+  const addRepairDevice = () => {
+    setFormData(prev => ({
+      ...prev,
+      devices: [...prev.devices, createEmptyRepairDevice()]
+    }));
+  };
+
+  const removeRepairDevice = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      devices: prev.devices.length > 1
+        ? prev.devices.filter((_, deviceIndex) => deviceIndex !== index)
+        : prev.devices
+    }));
+  };
 
   const getLatestTimestamp = (customer: Customer) => {
     if (customer.repairs.length === 0) return 0;
@@ -682,29 +715,54 @@ export function CustomersView() {
     if (isSaving) return;
     setIsSaving(true);
     const submittedFormData = readCustomerFormData(e.currentTarget, formData);
+    const devices = submittedFormData.devices.filter(device => device.repairItem && device.modelNumber);
+
+    if (devices.length === 0) {
+      alert('Please add at least one device model and repair target.');
+      setIsSaving(false);
+      return;
+    }
+
+    let baseRemark = submittedFormData.remark.trim();
+
+    if (selectedUpsells.length > 0) {
+      const accessoryNames = upsells
+        .filter(u => selectedUpsells.includes(u.id))
+        .map(u => u.name)
+        .join(', ');
+      baseRemark = baseRemark ? `${baseRemark} | Requested Accessories: ${accessoryNames}` : `Requested Accessories: ${accessoryNames}`;
+    }
+
+    const totalPrice = parseFloat(submittedFormData.price) || 0;
+    const totalDeposit = parseFloat(submittedFormData.deposit) || 0;
+    const timestamp = new Date().toISOString();
+    const buildRepairForApi = (customerId: string, device: RepairDeviceFormData, index: number) => ({
+      id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+      customer_id: customerId,
+      timestamp,
+      repairItem: device.repairItem,
+      modelNumber: device.modelNumber,
+      price: index === 0 ? totalPrice : 0,
+      liquidDamage: device.liquidDamage,
+      password: device.password,
+      imei: device.imei,
+      remark: appendRepairEntryContext(baseRemark, index, devices.length),
+      deposit: index === 0 ? totalDeposit : 0,
+      status: 'In Processing'
+    });
     
     const existingCustomerIndex = customers.findIndex(c => c.phone === submittedFormData.phone);
 
     try {
       if (existingCustomerIndex !== -1) {
         const existingCustomer = customers[existingCustomerIndex];
-        const newRepairForApi = {
-          id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-          customer_id: existingCustomer.id,
-          timestamp: new Date().toISOString(),
-          repairItem: submittedFormData.repairItem,
-          modelNumber: submittedFormData.modelNumber,
-          price: parseFloat(submittedFormData.price) || 0,
-          liquidDamage: submittedFormData.liquidDamage,
-          password: submittedFormData.password,
-          imei: submittedFormData.imei,
-          remark: submittedFormData.remark,
-          deposit: parseFloat(submittedFormData.deposit) || 0,
-          status: 'In Processing'
-        };
+        const createdRepairs = [];
 
-        const createdRepair = await api.createRepair(newRepairForApi);
-        const updatedRepairs = [createdRepair, ...existingCustomer.repairs];
+        for (let index = 0; index < devices.length; index += 1) {
+          createdRepairs.push(await api.createRepair(buildRepairForApi(existingCustomer.id, devices[index], index)));
+        }
+
+        const updatedRepairs = [...createdRepairs, ...existingCustomer.repairs];
         const newTotalSpent = updatedRepairs.reduce((sum, r) => sum + r.price, 0);
         const newStatus = getCustomerOverallStatus({ ...existingCustomer, repairs: updatedRepairs });
 
@@ -730,7 +788,6 @@ export function CustomersView() {
         setSelectedId(existingCustomer.id);
       } else {
         const initials = submittedFormData.name.split(' ').map(n => n[0]).join('').toUpperCase();
-        const price = parseFloat(submittedFormData.price) || 0;
 
         const customerForApi = {
           id: Math.random().toString(36).substr(2, 9).toUpperCase(),
@@ -741,37 +798,17 @@ export function CustomersView() {
           status: 'In Processing',
           statusColor: 'tertiary',
           lastVisit: 'Today',
-          totalSpent: price
+          totalSpent: totalPrice
         };
 
         const createdCustomer = await api.createCustomer(customerForApi);
-        const newRepairForApi = {
-          id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-          customer_id: createdCustomer.id,
-          timestamp: new Date().toISOString(),
-          repairItem: submittedFormData.repairItem,
-          modelNumber: submittedFormData.modelNumber,
-          price: price,
-          liquidDamage: submittedFormData.liquidDamage,
-          password: submittedFormData.password,
-          imei: submittedFormData.imei,
-          remark: (() => {
-            let finalRemark = submittedFormData.remark;
-            if (selectedUpsells.length > 0) {
-              const accessoryNames = upsells
-                .filter(u => selectedUpsells.includes(u.id))
-                .map(u => u.name)
-                .join(', ');
-              finalRemark = finalRemark ? `${finalRemark} | Requested Accessories: ${accessoryNames}` : `Requested Accessories: ${accessoryNames}`;
-            }
-            return finalRemark;
-          })(),
-          deposit: parseFloat(submittedFormData.deposit) || 0,
-          status: 'In Processing'
-        };
+        const createdRepairs = [];
 
-        const createdRepair = await api.createRepair(newRepairForApi);
-        createdCustomer.repairs = [createdRepair];
+        for (let index = 0; index < devices.length; index += 1) {
+          createdRepairs.push(await api.createRepair(buildRepairForApi(createdCustomer.id, devices[index], index)));
+        }
+
+        createdCustomer.repairs = createdRepairs;
         setCustomers([createdCustomer, ...customers]);
         setSelectedId(createdCustomer.id);
       }
@@ -843,9 +880,10 @@ export function CustomersView() {
   const openEditModal = () => {
     if (!selectedCustomer) return;
     setFormData({
-      name: selectedCustomer.name, phone: selectedCustomer.phone, email: selectedCustomer.email,
-      repairItem: '', modelNumber: '', price: '', liquidDamage: false,
-      password: '', imei: '', remark: '', deposit: ''
+      ...createEmptyCustomerFormData(),
+      name: selectedCustomer.name,
+      phone: selectedCustomer.phone,
+      email: selectedCustomer.email
     });
     setIsEditing(true);
   };
@@ -1405,32 +1443,131 @@ export function CustomersView() {
                         <h4 className="text-[10px] font-black text-black uppercase tracking-widest">Repair Specifications</h4>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Repair Target</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Screen Fix"
-                            required
-                            name="repairItem"
-                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            defaultValue={formData.repairItem}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Device Model</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. iPhone 15 Pro"
-                            required
-                            name="modelNumber"
-                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            defaultValue={formData.modelNumber}
-                          />
-                        </div>
+                      <div className="space-y-5">
+                        {formData.devices.map((device, index) => (
+                          <div key={index} className="space-y-6 rounded-[2rem] border border-black/5 bg-white/30 p-5 shadow-[var(--shadow-neu-sm)]">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Device {index + 1}</p>
+                              {formData.devices.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeRepairDevice(index)}
+                                  className="h-9 px-4 rounded-xl bg-red-50 text-red-600 text-[9px] font-black uppercase tracking-widest shadow-[var(--shadow-neu-sm)] active:shadow-[var(--shadow-neu-pressed)]"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Device Model</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. iPhone 15 Pro"
+                                  required
+                                  className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
+                                  value={device.modelNumber}
+                                  onChange={(event) => updateRepairDevice(index, { modelNumber: event.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Repair Target</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Screen Fix"
+                                  required
+                                  className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
+                                  value={device.repairItem}
+                                  onChange={(event) => updateRepairDevice(index, { repairItem: event.target.value })}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Screen Passcode</label>
+                                <input
+                                  type="text"
+                                  placeholder="None"
+                                  className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
+                                  value={device.password}
+                                  onChange={(event) => updateRepairDevice(index, { password: event.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">IMEI / Serial</label>
+                                <div className="flex gap-4">
+                                  <input
+                                    type="text"
+                                    placeholder="Scan or Type..."
+                                    className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
+                                    value={device.imei}
+                                    onChange={(event) => updateRepairDevice(index, { imei: event.target.value })}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setScannerTarget({ mode: 'add', deviceIndex: index })}
+                                    className="w-16 h-16 shrink-0 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-blue-600 active:shadow-[var(--shadow-neu-pressed)] transition-all"
+                                  >
+                                    <Scan size={24} strokeWidth={3} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between p-5 bg-red-50 rounded-[1.75rem] border border-red-100">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-2xl bg-white shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-red-600">
+                                  <Droplets size={22} strokeWidth={3} />
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-black text-red-600 leading-tight">Liquid Damage?</h5>
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Device-level assessment</p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => updateRepairDevice(index, { liquidDamage: !device.liquidDamage })}
+                                className={cn(
+                                  "w-14 h-7 rounded-full relative transition-all duration-300 shadow-[var(--shadow-neu-sm)]",
+                                  device.liquidDamage ? "bg-red-600" : "bg-gray-200"
+                                )}
+                              >
+                                <div className={cn(
+                                  "absolute top-1 w-5 h-5 bg-white rounded-full transition-all duration-300 shadow-md",
+                                  device.liquidDamage ? "left-8" : "left-1"
+                                )} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
 
+                      <button
+                        type="button"
+                        onClick={addRepairDevice}
+                        className="w-full py-5 rounded-[1.5rem] bg-blue-50 text-blue-600 shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 border border-blue-200/40"
+                      >
+                        <Plus size={18} strokeWidth={4} />
+                        Add New Device
+                      </button>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Deposit Paid ($)</label>
+                          <div className="relative">
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-green-600 font-black text-base">$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              name="deposit"
+                              className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] py-5 pl-12 pr-5 outline-none text-black font-black text-sm border border-black/5"
+                              defaultValue={formData.deposit}
+                            />
+                          </div>
+                        </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Price ($)</label>
                           <input
@@ -1440,51 +1577,6 @@ export function CustomersView() {
                             name="price"
                             className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
                             defaultValue={formData.price}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Screen Passcode</label>
-                          <input
-                            type="text"
-                            placeholder="None"
-                            name="password"
-                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            defaultValue={formData.password}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">IMEI / Serial</label>
-                        <div className="flex gap-4">
-                          <input
-                            type="text"
-                            placeholder="Scan or Type..."
-                            name="imei"
-                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5"
-                            defaultValue={formData.imei}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setScannerTarget('add')}
-                            className="w-16 h-16 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex items-center justify-center text-blue-600 active:shadow-[var(--shadow-neu-pressed)] transition-all"
-                          >
-                            <Scan size={24} strokeWidth={3} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Deposit Paid ($)</label>
-                        <div className="relative">
-                          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-green-600 font-black text-base">$</span>
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            name="deposit"
-                            className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] py-5 pl-12 pr-5 outline-none text-black font-black text-sm border border-black/5"
-                            defaultValue={formData.deposit}
                           />
                         </div>
                       </div>
@@ -1497,33 +1589,6 @@ export function CustomersView() {
                           className="w-full bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[1.5rem] p-5 outline-none text-black font-black text-sm placeholder:text-gray-400/50 border border-black/5 min-h-[120px] resize-none"
                           defaultValue={formData.remark}
                         />
-                      </div>
-
-                      <div className="pt-4 border-t border-black/5">
-                        <div className="flex items-center justify-between p-6 bg-red-50 rounded-[2rem] border border-red-100">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-white shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-red-600">
-                              <Droplets size={24} strokeWidth={3} />
-                            </div>
-                            <div>
-                              <h5 className="text-sm font-black text-red-600 leading-tight">Liquid Damage?</h5>
-                              <p className="text-[10px] font-bold text-gray-500 uppercase">Critical assessment</p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setFormData({ ...formData, liquidDamage: !formData.liquidDamage })}
-                            className={cn(
-                              "w-14 h-7 rounded-full relative transition-all duration-300 shadow-[var(--shadow-neu-sm)]",
-                              formData.liquidDamage ? "bg-red-600" : "bg-gray-200"
-                            )}
-                          >
-                            <div className={cn(
-                              "absolute top-1 w-5 h-5 bg-white rounded-full transition-all duration-300 shadow-md",
-                              formData.liquidDamage ? "left-8" : "left-1"
-                            )} />
-                          </button>
-                        </div>
                       </div>
                     </div>
                   )}
@@ -2039,13 +2104,9 @@ export function CustomersView() {
         {scannerTarget && (
           <OCRImeiScanner
             onScan={(text) => {
-              if (scannerTarget === 'add') {
-                const imeiInput = customerFormRef.current?.elements.namedItem('imei') as HTMLInputElement | null;
-                if (imeiInput) {
-                  imeiInput.value = text;
-                }
-                setFormData(prev => ({ ...prev, imei: text }));
-              } else if (scannerTarget === 'repair') {
+              if (scannerTarget.mode === 'add') {
+                updateRepairDevice(scannerTarget.deviceIndex, { imei: text });
+              } else if (scannerTarget.mode === 'repair') {
                 setRepairFormData(prev => ({ ...prev, imei: text }));
               }
             }}

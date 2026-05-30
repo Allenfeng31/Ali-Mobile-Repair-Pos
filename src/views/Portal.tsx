@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Smartphone, CheckCircle, Clock, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Smartphone, CheckCircle, Clock, AlertTriangle, ArrowLeft, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
+
+type PortalRepairDevice = {
+  deviceModel: string;
+  problem: string;
+  password: string;
+  imei: string;
+};
+
+const createEmptyPortalDevice = (): PortalRepairDevice => ({
+  deviceModel: '',
+  problem: '',
+  password: '',
+  imei: ''
+});
 
 export function PortalView() {
   const [view, setView] = useState<'home' | 'dropoff' | 'track'>('home');
@@ -31,13 +45,25 @@ export function PortalView() {
   // Drop-off form
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [deviceModel, setDeviceModel] = useState('');
-  const [problem, setProblem] = useState('');
-  const [password, setPassword] = useState('');
+  const [dropoffDevices, setDropoffDevices] = useState<PortalRepairDevice[]>([createEmptyPortalDevice()]);
   const [referralSource, setReferralSource] = useState('');
   const [referralOther, setReferralOther] = useState('');
   const [upsells, setUpsells] = useState<any[]>([]);
   const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
+
+  const updateDropoffDevice = (index: number, updates: Partial<PortalRepairDevice>) => {
+    setDropoffDevices(prev => prev.map((device, deviceIndex) =>
+      deviceIndex === index ? { ...device, ...updates } : device
+    ));
+  };
+
+  const addDropoffDevice = () => {
+    setDropoffDevices(prev => [...prev, createEmptyPortalDevice()]);
+  };
+
+  const removeDropoffDevice = (index: number) => {
+    setDropoffDevices(prev => prev.length > 1 ? prev.filter((_, deviceIndex) => deviceIndex !== index) : prev);
+  };
 
   // Fetch upsells
   useEffect(() => {
@@ -90,7 +116,17 @@ export function PortalView() {
 
   const handleDropoffSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone || !deviceModel || !problem) {
+    const devices = dropoffDevices
+      .map(device => ({
+        ...device,
+        deviceModel: device.deviceModel.trim(),
+        problem: device.problem.trim(),
+        password: device.password.trim(),
+        imei: device.imei.trim()
+      }))
+      .filter(device => device.deviceModel && device.problem);
+
+    if (!name || !phone || devices.length === 0) {
       setErrorMsg('Please fill in all required fields.');
       return;
     }
@@ -126,24 +162,34 @@ export function PortalView() {
         finalRemark += ` | Requested Accessories: ${accessoryNames}`;
       }
 
-      await api.createRepair({
-        id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-        customer_id: targetCustomer.id,
-        timestamp: new Date().toISOString(),
-        repairItem: problem,
-        modelNumber: deviceModel,
-        price: 0,
-        liquidDamage: false,
-        password: password,
-        imei: '',
-        remark: finalRemark,
-        status: 'In Processing'
-      });
+      const timestamp = new Date().toISOString();
+
+      for (let index = 0; index < devices.length; index += 1) {
+        const deviceRemark = devices.length > 1
+          ? `${finalRemark} | Device ${index + 1} of ${devices.length}`
+          : finalRemark;
+
+        await api.createRepair({
+          id: 'R-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+          customer_id: targetCustomer.id,
+          timestamp,
+          repairItem: devices[index].problem,
+          modelNumber: devices[index].deviceModel,
+          price: 0,
+          liquidDamage: false,
+          password: devices[index].password,
+          imei: devices[index].imei,
+          remark: deviceRemark,
+          status: 'In Processing'
+        });
+      }
 
       // Fire SMS confirmation — non-blocking, don't await
       api.sendSms(phone, 'dropoff', { customerName: name }).catch(() => {});
 
       // Switch to tracking view directly!
+      setDropoffDevices([createEmptyPortalDevice()]);
+      setSelectedUpsells([]);
       setView('track');
     } catch (err) {
       setErrorMsg('Failed to submit repair request. Please try again.');
@@ -332,20 +378,56 @@ export function PortalView() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Device Information</label>
-                  <div className="space-y-4">
-                    <input 
-                      type="text" placeholder="Device Model (e.g. iPhone 13 Pro) *" required
-                      className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400"
-                      value={deviceModel} onChange={e => setDeviceModel(e.target.value)}
-                    />
-                    <textarea 
-                      placeholder="Describe the issue... *" required rows={3}
-                      className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400 resize-none"
-                      value={problem} onChange={e => setProblem(e.target.value)}
-                    />
-                  </div>
+                  {dropoffDevices.map((device, index) => (
+                    <div key={index} className="space-y-4 rounded-[2rem] bg-[var(--color-neu-bg)] p-5 shadow-[var(--shadow-neu-flat)]">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Device {index + 1}</p>
+                        {dropoffDevices.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeDropoffDevice(index)}
+                            className="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-[9px] font-black uppercase tracking-widest"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <input 
+                        type="text" placeholder="Device Model (e.g. iPhone 13 Pro) *" required
+                        className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400"
+                        value={device.deviceModel}
+                        onChange={e => updateDropoffDevice(index, { deviceModel: e.target.value })}
+                      />
+                      <input 
+                        type="text" placeholder="Repair Target (e.g. Screen Fix) *" required
+                        className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400"
+                        value={device.problem}
+                        onChange={e => updateDropoffDevice(index, { problem: e.target.value })}
+                      />
+                      <input 
+                        type="text" placeholder="Screen Passcode (Optional)"
+                        className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400"
+                        value={device.password}
+                        onChange={e => updateDropoffDevice(index, { password: e.target.value })}
+                      />
+                      <input 
+                        type="text" placeholder="IMEI / Serial (Optional)"
+                        className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400"
+                        value={device.imei}
+                        onChange={e => updateDropoffDevice(index, { imei: e.target.value })}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addDropoffDevice}
+                    className="w-full py-5 bg-blue-50 text-blue-600 rounded-2xl font-black shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-3"
+                  >
+                    <Plus size={18} strokeWidth={4} />
+                    Add New Device
+                  </button>
                 </div>
 
                 {/* Accessory Upsells */}
@@ -386,15 +468,6 @@ export function PortalView() {
                 )}
 
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Device Security</label>
-                    <input 
-                      type="text" placeholder="Device Passcode (Optional)"
-                      className="w-full px-5 py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl outline-none text-black font-bold placeholder:text-gray-400"
-                      value={password} onChange={e => setPassword(e.target.value)}
-                    />
-                  </div>
-
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Where did you hear about us? *</label>
                     <select

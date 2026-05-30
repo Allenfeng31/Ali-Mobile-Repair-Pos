@@ -104,7 +104,7 @@ const getLocalIp = () => {
 // ----------------------------------------------------------------------
 let twilioClient = null;
 const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
-const googleReviewLink = process.env.GOOGLE_REVIEW_LINK || 'https://g.page/r/your-review-link';
+const googleReviewLink = process.env.GOOGLE_REVIEW_LINK || 'https://pos.alimobile.com.au/feedback';
 const ADMIN_PHONE = process.env.ADMIN_PHONE_NUMBER || '+61481058514';
 
 if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
@@ -232,7 +232,7 @@ const SMS_MESSAGES = {
     `Hi ${name}, your ${device} repair at Ali Mobile Repair is complete. Ready for pickup!`,
 
   review: (name) =>
-    `Hi ${name}, thanks for choosing Ali Mobile Repair! If you loved our service, a quick review helps us out a lot: https://g.page/r/CRGwjUq_bZMbEBM/review`,
+    `Hi ${name}, thanks for choosing Ali Mobile Repair! If you loved our service, a quick review helps us out a lot: https://pos.alimobile.com.au/feedback`,
 
   partArrived: (name, device) =>
     `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
