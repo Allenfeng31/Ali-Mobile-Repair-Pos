@@ -2384,12 +2384,20 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const canonicalUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${safeSlugSegment(resolvedParams.model)}/${safeSlugSegment(resolvedParams['repair-type'])}`;
 
+  const isFlexCable = resolvedParams['repair-type'] === 'flex-cable';
+
   return { 
     title, 
     description,
     alternates: {
       canonical: canonicalUrl
-    }
+    },
+    ...(isFlexCable && {
+      robots: {
+        index: false,
+        follow: true,
+      }
+    })
   };
 }
 
@@ -2494,24 +2502,47 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           />
 
           <div className="trust-badges">
-            <div className="trust-badge">
-              <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-              Under 1 Hour
-            </div>
-            <div className="trust-badge">
-              <span className="trust-badge-icon">
-                {resolvedParams['repair-type'] === 'water-damage-repair' ? <ShieldAlert size={20} strokeWidth={2.5} aria-hidden="true" /> : <ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" />}
-              </span>
-              {resolvedParams['repair-type'] === 'water-damage-repair' ? 'Specialist Rescue' : 'No Fix, No Charge'}
-            </div>
-            <div className="trust-badge">
-              <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-              6-Month Warranty
-            </div>
-            <div className="trust-badge">
-              <span className="trust-badge-icon"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-              Clear Quote First
-            </div>
+            {resolvedParams['repair-type'] === 'water-damage-repair' ? (
+              <>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  Timeframe Depends on Damage
+                </div>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><ShieldAlert size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  Inspection First
+                </div>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  Warranty Depends on Repair Result
+                </div>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  Diagnostic Required
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing')) 
+                    ? 'Timeframe Varies' 
+                    : 'Under 1 Hour'}
+                </div>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  No Fix, No Charge
+                </div>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  6-Month Warranty
+                </div>
+                <div className="trust-badge">
+                  <span className="trust-badge-icon"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
+                  Clear Quote First
+                </div>
+              </>
+            )}
           </div>
         </section>
       </main>

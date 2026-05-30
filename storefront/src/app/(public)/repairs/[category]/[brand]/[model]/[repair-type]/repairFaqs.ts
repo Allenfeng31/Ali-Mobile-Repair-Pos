@@ -24,12 +24,16 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
       ? `Starting from $${price}, the exact pricing depends on the specific ${displayModel} variant.`
       : `Pricing depends on the specific ${displayModel} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`);
 
+  const isBackGlass = repairSlug.includes('back-glass') || repairSlug.includes('back-housing');
+
   const baseFaqs = [
     {
       question: `How long does the ${model} ${repairName} take?`,
       answer: isWaterDamage
-        ? `Water damage recovery typically takes around 1 hour. If the damage is extensive and requires more time for professional drying or component cleaning, our technicians will inform you beforehand.`
-        : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. Walk-ins are welcome on weekdays for same-day service.`,
+        ? `Water damage recovery typically takes around 1 hour for the initial assessment and cleaning. If the damage is extensive, our technicians will inform you beforehand.`
+        : isBackGlass
+        ? `Time depends on the specific ${model} variant and parts availability. Many back glass repairs need more time than simple screen or battery repairs, usually taking longer to ensure a safe, clean removal and precise bonding. We confirm the timeframe after checking the device at our Ringwood location.`
+        : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at Ringwood Square Shopping Centre. Walk-ins are welcome on weekdays for same-day service.`,
     },
     {
       question: `Do you use OEM parts for ${model} ${repairName.toLowerCase()}?`,
@@ -46,7 +50,7 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
       answer: `Our technicians perform a free diagnostic assessment on every device. ${isWaterDamage ? 'Water damage often affects multiple areas simultaneously. We will test every function and give you a full report before you commit to any major part replacements.' : `If we discover additional issues such as ${lsi.issue?.[0] || 'internal damage'}, we'll inform you before proceeding with any extra work. You're never charged for repairs you didn't approve.`}`,
     },
     {
-      question: `Is there a warranty for ${model} water damage recovery?`,
+      question: `Is there a warranty for ${model} ${isWaterDamage ? 'water damage recovery' : repairName.toLowerCase()}?`,
       answer: isWaterDamage
         ? `Due to the unpredictable nature of liquid-induced corrosion, we do not offer a general warranty on water damage rescue services. However, if we replace a specific part (like a new screen), that specific part will still be covered by our 6-month warranty, provided the rest of the device remains stable.`
         : `Yes, all our standard repairs come with a comprehensive 6-month warranty on both parts and labor at our Ringwood location.`,

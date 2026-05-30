@@ -63,6 +63,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.7,
         });
         for (const repair of model.repairTypes) {
+          if (repair.slug === 'flex-cable') continue;
+
           repairUrls.push({
             url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${safeSlugSegment(model.slug)}/${safeSlugSegment(repair.slug)}`,
             lastModified: new Date(),
