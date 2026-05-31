@@ -124,6 +124,17 @@ const nextConfig: NextConfig = {
         source: '/repairs/:category/:brand/:model/flash-flex',
         destination: '/repairs/:category/:brand/:model/flex-cable',
         permanent: true,
+      },
+      // 6. OLD PHONES ROUTE CONSOLIDATION (Apple & Samsung)
+      {
+        source: '/repairs/phones/apple/:model/:repairType',
+        destination: '/repairs/phone/iphone/:model/:repairType',
+        permanent: true,
+      },
+      {
+        source: '/repairs/phones/samsung/:model/:repairType',
+        destination: '/repairs/phone/samsung/:model/:repairType',
+        permanent: true,
       }
     ];
   },
