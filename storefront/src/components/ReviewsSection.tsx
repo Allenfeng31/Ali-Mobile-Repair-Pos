@@ -89,10 +89,10 @@ function buildLocalBusinessSchema(payload: GoogleReviewsPayload) {
   return {
     "@context": "https://schema.org",
     "@type": "MobilePhoneStore",
-    "@id": "https://alimobile.com.au/#localbusiness",
+    "@id": "https://www.alimobile.com.au/#localbusiness",
     name: "Ali Mobile & Repair",
-    image: "https://alimobile.com.au/logo.png",
-    url: "https://alimobile.com.au",
+    image: "https://www.alimobile.com.au/logo.png",
+    url: "https://www.alimobile.com.au",
     telephone: "+61481058514",
     priceRange: "$$",
     address: {

@@ -25,9 +25,9 @@ export function LocalBusinessSchema() {
   const businessData = {
     "@type": "MobilePhoneStore",
     "name": "Ali Mobile & Repair",
-    "image": "https://alimobile.com.au/logo.png",
-    "@id": "https://alimobile.com.au/#localbusiness",
-    "url": "https://alimobile.com.au",
+    "image": "https://www.alimobile.com.au/logo.png",
+    "@id": "https://www.alimobile.com.au/#localbusiness",
+    "url": "https://www.alimobile.com.au",
     "telephone": "0481 058 514",
     "priceRange": "$$",
     "description": "Expert mobile phone, tablet, and laptop repair service located in Ringwood Square Shopping Centre, Melbourne. Specializing in screen replacements, micro-soldering, Face ID repair, and using OEM parts.",
@@ -116,7 +116,7 @@ export function RepairServiceSchema({ serviceName, description, price, modelCode
     "name": serviceName,
     "description": description,
     "provider": {
-      "@id": "https://alimobile.com.au/#localbusiness"
+      "@id": "https://www.alimobile.com.au/#localbusiness"
     },
     "offers": {
       "@type": "Offer",

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ali Mobile & Repair | Electronics Repair in Ringwood",
     description: "Expert phone, tablet, and laptop repair in Ringwood Square, Melbourne. Specializing in micro-soldering, Face ID repair, and screen replacements.",
-    url: "https://alimobile.com.au",
+    url: "https://www.alimobile.com.au",
     siteName: "Ali Mobile & Repair",
     locale: "en_AU",
     type: "website",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description: "Expert mobile phone and electronics repair in Ringwood Square. Fast, reliable, with a 6-month warranty.",
   },
   alternates: {
-    canonical: "https://alimobile.com.au",
+    canonical: "https://www.alimobile.com.au",
   }
 };
 
