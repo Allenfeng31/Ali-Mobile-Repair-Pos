@@ -12,6 +12,7 @@ import { EmployeeManagement } from './views/EmployeeManagement';
 import { StorefrontCMS } from './views/StorefrontCMS';
 import { SupplierPrices } from './views/SupplierPrices';
 import { UsbPrintTest } from './components/UsbPrintTest';
+import { SeoGeoScoutView } from './views/SeoGeoScout';
 import { useAuthStore } from './hooks/useAuthStore';
 import { AnimatePresence } from 'motion/react';
 import { 
@@ -37,16 +38,19 @@ import {
 import { InventoryItem, Order } from './types';
 import { Language, getTranslation } from './lib/i18n';
 
-const LOCAL_STOREFRONT_SEO_URL = 'http://localhost:3000/admin/seo';
-const PRODUCTION_STOREFRONT_SEO_URL = 'https://pos.alimobile.com.au/admin/seo';
+const getInitialViewFromPath = (pathname: string): string => {
+  const normalizedPath = pathname.replace(/\/+$/, '') || '/';
 
-const getSeoDashboardUrl = () => {
-  const isLocal =
-    import.meta.env.DEV ||
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
+  if (normalizedPath === '/admin/seo') return 'seo';
+  if (normalizedPath === '/admin/usb-print-test') return 'usb-print-test';
+  if (normalizedPath === '/admin/supplier-prices') return 'supplier-prices';
+  if (normalizedPath === '/admin/cms') return 'cms';
+  if (normalizedPath === '/admin/employees') return 'employees';
+  if (normalizedPath === '/admin/reports') return 'reports';
+  if (normalizedPath === '/admin/settings') return 'settings';
+  if (normalizedPath === '/admin') return 'admin';
 
-  return isLocal ? LOCAL_STOREFRONT_SEO_URL : PRODUCTION_STOREFRONT_SEO_URL;
+  return 'sales';
 };
 
 const iconMap: Record<string, any> = {
@@ -98,13 +102,14 @@ const getCategoryIcon = (name: string, category: string) => {
 };
 
 export default function App() {
+  const { permissions, isLoading: permissionsLoading } = useAuthStore();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   
   const [lang, setLang] = useState<Language>(() => (localStorage.getItem('pos_lang') as Language) || 'en');
   const t = getTranslation(lang);
 
-  const [currentView, setCurrentView] = useState('sales');
+  const [currentView, setCurrentView] = useState(() => getInitialViewFromPath(window.location.pathname));
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -207,6 +212,15 @@ export default function App() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentView(getInitialViewFromPath(window.location.pathname));
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Automatic Session Expiry Effect
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -249,6 +263,12 @@ export default function App() {
 
   const handleViewChange = (view: string) => {
     if (view === currentView) return;
+
+    if (view === 'seo' && window.location.pathname !== '/admin/seo') {
+      window.history.pushState({}, '', '/admin/seo');
+    } else if (view !== 'seo' && window.location.pathname === '/admin/seo') {
+      window.history.pushState({}, '', '/');
+    }
 
     startTransition(() => {
       setCurrentView(view);
@@ -303,8 +323,12 @@ export default function App() {
       case 'usb-print-test':
         return <UsbPrintTest />;
       case 'seo':
-        window.location.href = getSeoDashboardUrl();
-        return null;
+        return (
+          <SeoGeoScoutView
+            isSuperAdmin={Boolean(permissions?.is_super_admin)}
+            permissionsLoading={permissionsLoading}
+          />
+        );
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }
