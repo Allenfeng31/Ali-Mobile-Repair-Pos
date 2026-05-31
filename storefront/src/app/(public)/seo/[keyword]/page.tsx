@@ -8,6 +8,8 @@ import { fetchRepairCatalog, type BrandEntry, type ModelEntry } from '@/lib/api'
 
 export const dynamic = 'force-dynamic';
 
+const PUBLIC_CAMPAIGN_STATUSES = new Set(['approved', 'published']);
+
 type CampaignPayload = {
   draft?: {
     title?: string;
@@ -50,6 +52,14 @@ type RepairTarget = {
   context: string;
   precision: 'repair' | 'model' | 'brand' | 'category';
 };
+
+function normalizeCampaignStatus(status?: string | null) {
+  return (status || '').trim().toLowerCase();
+}
+
+function isPublicCampaignStatus(status?: string | null) {
+  return PUBLIC_CAMPAIGN_STATUSES.has(normalizeCampaignStatus(status));
+}
 
 function getPublicSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -234,7 +244,7 @@ async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
   const supabase = getPublicSupabaseClient();
   const { data, error } = await supabase
     .from('pending_seo_campaigns')
-    .select('*')
+    .select('id, keyword, status, created_at, updated_at, payload')
     .order('created_at', { ascending: false, nullsFirst: false })
     .limit(250);
 
@@ -245,6 +255,9 @@ async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
 
   const campaigns = (data || []) as CampaignRow[];
   const campaign = campaigns.find((row) => {
+    if (!isPublicCampaignStatus(row.status)) {
+      return false;
+    }
     const draftSlug = row.payload?.draft?.slug;
     return draftSlug === keywordSlug || slugify(row.keyword) === keywordSlug;
   });
