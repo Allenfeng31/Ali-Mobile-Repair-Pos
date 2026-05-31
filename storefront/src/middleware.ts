@@ -8,12 +8,23 @@ export async function middleware(request: NextRequest) {
 
   const url = request.nextUrl;
   const path = url.pathname;
-  const host = request.headers.get('host') || '';
+  const host = (request.headers.get('host') || '').toLowerCase();
+  const isPosHost = host.includes('pos.alimobile.com.au');
+  const isLocalHost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+  const isSeoAdminRoute = path === '/admin/seo' || path.startsWith('/admin/seo/');
+
+  // Keep SEO admin surface POS-only. Block storefront host exposure.
+  if (isSeoAdminRoute && !isPosHost && !isLocalHost) {
+    url.pathname = '/__stealth_404_blackhole__';
+    const blockResponse = NextResponse.rewrite(url);
+    blockResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+    return blockResponse;
+  }
   
   // ==========================================
   // STEALTH DOMAIN LOGIC (pos. / api.)
   // ==========================================
-  const isSubdomain = host.includes('pos.alimobile.com.au') || host.includes('api.alimobile.com.au');
+  const isSubdomain = isPosHost || host.includes('api.alimobile.com.au');
   
   if (isSubdomain) {
     let isAuthorized = false;
