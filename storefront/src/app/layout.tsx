@@ -7,12 +7,12 @@ const inter = Inter({ subsets: ["latin"] });
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.alimobile.com.au"),
   title: "Ali Mobile & Repair | Electronics Repair in Ringwood, Melbourne",
   description: "Expert phone, tablet, and laptop repair in Ringwood Square, Melbourne. Specializing in micro-soldering, Face ID repair, and screen replacements with OEM parts.",
   openGraph: {
     title: "Ali Mobile & Repair | Electronics Repair in Ringwood",
     description: "Expert phone, tablet, and laptop repair in Ringwood Square, Melbourne. Specializing in micro-soldering, Face ID repair, and screen replacements.",
-    url: "https://www.alimobile.com.au",
     siteName: "Ali Mobile & Repair",
     locale: "en_AU",
     type: "website",
@@ -21,9 +21,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ali Mobile & Repair | Ringwood, Melbourne",
     description: "Expert mobile phone and electronics repair in Ringwood Square. Fast, reliable, with a 6-month warranty.",
-  },
-  alternates: {
-    canonical: "https://www.alimobile.com.au",
   }
 };
 

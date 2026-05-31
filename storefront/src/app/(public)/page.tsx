@@ -1,5 +1,6 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import heroStyles from "./HomeHero.module.css";
@@ -7,6 +8,18 @@ import heroStyles from "./HomeHero.module.css";
 const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"));
 const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"));
 const ServiceAreas = dynamic(() => import("@/components/seo/ServiceAreas"));
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    url: "/",
+    type: "website",
+    locale: "en_AU",
+    siteName: "Ali Mobile & Repair",
+  },
+};
 
 export default function Home() {
   return (

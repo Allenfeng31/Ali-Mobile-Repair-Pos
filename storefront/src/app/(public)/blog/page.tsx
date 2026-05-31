@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { BlogImage } from "@/components/BlogImage";
 import { getSortedPostsData } from "@/lib/blog";
@@ -6,6 +7,22 @@ import { getSortedPostsData } from "@/lib/blog";
 import styles from "./BlogArchive.module.css";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Repair Guides & Bench Notes | Ali Mobile Repair Blog",
+  description: "Practical repair guides and diagnostics notes from Ali Mobile & Repair in Ringwood.",
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Repair Guides & Bench Notes | Ali Mobile Repair Blog",
+    description: "Practical repair guides and diagnostics notes from Ali Mobile & Repair in Ringwood.",
+    url: "/blog",
+    type: "website",
+    locale: "en_AU",
+    siteName: "Ali Mobile & Repair",
+  },
+};
 
 interface BlogPostSummary {
   slug: string;

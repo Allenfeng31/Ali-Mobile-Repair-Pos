@@ -6,7 +6,7 @@ import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
 import ChatNowButton from '@/components/ChatNowButton';
 import { fetchRepairCatalog } from '@/lib/api';
-import { formatDynamicParam } from '@/lib/inventoryUtils';
+import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -231,9 +231,23 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const { category: catRaw } = await params;
   const category = formatDynamicParam(catRaw).toLowerCase();
   const data = CATEGORY_SEO_DATA[category];
+  const canonicalPath = `/repairs/${safeSlugSegment(category)}`;
 
   if (!data) return { title: 'Repair Services | Ali Mobile' };
-  return data.metadata;
+  return {
+    ...data.metadata,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: data.metadata.title,
+      description: data.metadata.description,
+      url: canonicalPath,
+      type: "website",
+      locale: "en_AU",
+      siteName: "Ali Mobile & Repair",
+    },
+  };
 }
 
 export default async function CategoryHubPage({ params }: CategoryPageProps) {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
@@ -8,7 +9,7 @@ import styles from "./BlogPost.module.css";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
   try {
@@ -17,6 +18,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
       title: `${postData.title} | Ali Mobile Repair Blog`,
       description: postData.description,
+      alternates: {
+        canonical: `/blog/${slug}`,
+      },
+      openGraph: {
+        title: `${postData.title} | Ali Mobile Repair Blog`,
+        description: postData.description,
+        url: `/blog/${slug}`,
+        type: "article",
+        locale: "en_AU",
+        siteName: "Ali Mobile & Repair",
+      },
     };
   } catch {
     return { title: "Blog Post | Ali Mobile Repair", description: "" };

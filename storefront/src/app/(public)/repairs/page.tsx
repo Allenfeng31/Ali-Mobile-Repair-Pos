@@ -12,6 +12,18 @@ export const metadata: Metadata = {
   title: "Professional Device Repair Services in Ringwood | Ali Mobile",
   description:
     "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day turnaround.",
+  alternates: {
+    canonical: "/repairs",
+  },
+  openGraph: {
+    title: "Professional Device Repair Services in Ringwood | Ali Mobile",
+    description:
+      "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day turnaround.",
+    url: "/repairs",
+    type: "website",
+    locale: "en_AU",
+    siteName: "Ali Mobile & Repair",
+  },
 };
 
 const repairCategories = [

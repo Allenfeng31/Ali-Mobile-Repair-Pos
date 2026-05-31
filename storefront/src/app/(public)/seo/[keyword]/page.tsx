@@ -296,6 +296,17 @@ export async function generateMetadata({ params }: { params: Promise<{ keyword: 
   return {
     title: `${article.title} | Ali Mobile Repair`,
     description: article.metaDescription,
+    alternates: {
+      canonical: `/seo/${keyword}`,
+    },
+    openGraph: {
+      title: `${article.title} | Ali Mobile Repair`,
+      description: article.metaDescription,
+      url: `/seo/${keyword}`,
+      type: "article",
+      locale: "en_AU",
+      siteName: "Ali Mobile & Repair",
+    },
   };
 }
 
