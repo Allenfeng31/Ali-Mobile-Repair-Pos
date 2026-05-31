@@ -151,9 +151,18 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/ipad/ipad-pro-12-9/:repairType', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-3rd-generation/:repairType', permanent: true },
       { source: '/repairs/tablet/ipad/ipad-pro-12-9', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-3rd-generation', permanent: true },
       // 10. SAFE LEGACY REDIRECTS (Watch)
-      { source: '/repairs/watches/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
-      { source: '/repairs/watch/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
-      { source: '/repairs/smart-watch/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
+      { source: '/repairs/watches/apple/:model/:repairType', destination: '/repairs/watch/apple/:model/:repairType', permanent: true },
+      { source: '/repairs/smart-watch/apple/:model/:repairType', destination: '/repairs/watch/apple/:model/:repairType', permanent: true },
+      // 10.1 FIX WRONG DESTINATIONS (apple-watch -> apple)
+      { source: '/repairs/watch/apple-watch/:model', destination: '/repairs/watch/apple/:model', permanent: true },
+      { source: '/repairs/watch/apple-watch/:model/:repairType', destination: '/repairs/watch/apple/:model/:repairType', permanent: true },
+      // 10.2 ALIAS REDIRECTS (Apple Watch Ultra 1/2 Naked Models)
+      { source: '/repairs/watch/apple/apple-watch-ultra-1-49mm', destination: '/repairs/watch/apple/apple-watch-ultra-49mm', permanent: true },
+      { source: '/repairs/watch/apple/apple-watch-ultra-1-49mm/:repairType', destination: '/repairs/watch/apple/apple-watch-ultra-49mm/:repairType', permanent: true },
+      { source: '/repairs/watch/apple/apple-watch-ultra-2', destination: '/repairs/watch/apple/apple-watch-ultra-2-49mm', permanent: true },
+      { source: '/repairs/watch/apple/apple-watch-ultra-2/:repairType', destination: '/repairs/watch/apple/apple-watch-ultra-2-49mm/:repairType', permanent: true },
+      { source: '/repairs/watch/apple-watch/apple-watch-ultra-2', destination: '/repairs/watch/apple/apple-watch-ultra-2-49mm', permanent: true },
+      { source: '/repairs/watch/apple-watch/apple-watch-ultra-2/:repairType', destination: '/repairs/watch/apple/apple-watch-ultra-2-49mm/:repairType', permanent: true },
       // 11. SAFE LEGACY REDIRECTS (Laptop / MacBook)
       { source: '/repairs/laptops/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
       { source: '/repairs/laptop/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
