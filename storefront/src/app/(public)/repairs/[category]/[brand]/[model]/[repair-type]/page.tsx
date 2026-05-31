@@ -2895,7 +2895,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const canonicalUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${safeSlugSegment(resolvedParams.model)}/${safeSlugSegment(resolvedParams['repair-type'])}`;
 
-  const isFlexCable = resolvedParams['repair-type'] === 'flex-cable';
+  const isFlexCable = resolvedParams['repair-type'].includes('flex-cable');
 
   return { 
     title, 
