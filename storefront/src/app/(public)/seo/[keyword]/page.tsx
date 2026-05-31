@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 import { ArrowRight, Calendar, Clock, ShieldCheck, Star, Wrench } from 'lucide-react';
 import SeoKeywordTracker from '@/components/analytics/SeoKeywordTracker';
 import { fetchRepairCatalog, type BrandEntry, type ModelEntry } from '@/lib/api';
@@ -59,22 +58,6 @@ function normalizeCampaignStatus(status?: string | null) {
 
 function isPublicCampaignStatus(status?: string | null) {
   return PUBLIC_CAMPAIGN_STATUSES.has(normalizeCampaignStatus(status));
-}
-
-function getPublicSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase public credentials for SEO article page.');
-  }
-
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
 }
 
 function slugify(text: string) {
@@ -241,46 +224,10 @@ function formatDate(value?: string | null) {
 }
 
 async function getSeoArticle(keywordSlug: string): Promise<SeoArticle | null> {
-  const supabase = getPublicSupabaseClient();
-  const { data, error } = await supabase
-    .from('pending_seo_campaigns')
-    .select('id, keyword, status, created_at, updated_at, payload')
-    .order('created_at', { ascending: false, nullsFirst: false })
-    .limit(250);
-
-  if (error) {
-    console.error('[seo-page] Failed to load generated SEO campaigns:', error);
-    return null;
-  }
-
-  const campaigns = (data || []) as CampaignRow[];
-  const campaign = campaigns.find((row) => {
-    if (!isPublicCampaignStatus(row.status)) {
-      return false;
-    }
-    const draftSlug = row.payload?.draft?.slug;
-    return draftSlug === keywordSlug || slugify(row.keyword) === keywordSlug;
-  });
-  const draft = campaign?.payload?.draft;
-
-  if (!campaign || !draft?.title || !draft?.description || !draft?.content) {
-    return null;
-  }
-
-  const repairTarget = await resolveRepairTarget(campaign.keyword, draft.title, draft.description);
-
-  return {
-    keyword: campaign.keyword,
-    title: draft.title,
-    metaDescription: draft.description,
-    author: 'Ali Mobile Repair Technicians',
-    readingTime: draft.readingTime || '5 min read',
-    lastUpdated: formatDate(campaign.updated_at || campaign.created_at),
-    content: draft.content,
-    relatedKeywords: draft.relatedKeywords || ['phone repair', 'screen repair', 'battery replacement'],
-    jsonLd: campaign.payload?.jsonLd,
-    repairTarget,
-  };
+  // P0 security hotfix: public route must not read pending SEO campaign storage.
+  // Keep public /seo/* unavailable until a separate published-only source is implemented.
+  void keywordSlug;
+  return null;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ keyword: string }> }): Promise<Metadata> {

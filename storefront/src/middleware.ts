@@ -28,6 +28,10 @@ export async function middleware(request: NextRequest) {
   
   if (isSubdomain) {
     let isAuthorized = false;
+    const configuredSecret = process.env.ADMIN_SYNC_SECRET?.trim();
+    const isLocalDevSecretFallback =
+      process.env.NODE_ENV !== 'production' && isLocalHost;
+    const secretKey = configuredSecret || (isLocalDevSecretFallback ? 'alimobile-stealth-key' : '');
 
     // 1. WHITELIST: Open routes for customers
     if (path === '/feedback' || path === '/portal') {
@@ -36,10 +40,9 @@ export async function middleware(request: NextRequest) {
 
     // 2. BACKDOOR: Query Param Gate & Cookie Session
     const gatekey = url.searchParams.get('gatekey');
-    const secretKey = process.env.ADMIN_SYNC_SECRET || 'alimobile-stealth-key';
     const stealthCookie = request.cookies.get('pos_device_ticket')?.value;
 
-    if (gatekey === secretKey) {
+    if (secretKey && gatekey === secretKey) {
       // Issue secure cookie and strip the query param to hide it
       url.searchParams.delete('gatekey');
       const stealthResponse = NextResponse.redirect(url);
@@ -52,13 +55,13 @@ export async function middleware(request: NextRequest) {
       return stealthResponse;
     }
 
-    if (stealthCookie === secretKey) {
+    if (secretKey && stealthCookie === secretKey) {
       isAuthorized = true;
     }
 
     // 3. API INTERNAL BYPASS: Allow Backend Cron/Webhooks with Bearer Token
     const authHeader = request.headers.get('authorization');
-    if (host.includes('api.alimobile.com.au') && authHeader === `Bearer ${secretKey}`) {
+    if (secretKey && host.includes('api.alimobile.com.au') && authHeader === `Bearer ${secretKey}`) {
       isAuthorized = true;
     }
 

@@ -42,7 +42,7 @@ export function SettingsView({
   const rawTopLevelRole = currentUser?.role || '';
   const isSystemRole = SUPABASE_SYSTEM_ROLES.includes(String(rawTopLevelRole).toLowerCase());
   const userRole = (!rawTopLevelRole || isSystemRole)
-    ? (currentUser?.app_metadata?.role || currentUser?.user_metadata?.role || '')
+    ? (currentUser?.app_metadata?.role || '')
     : rawTopLevelRole;
   const userRoleStr = String(userRole);
   const isSuperAdmin = typeof userRoleStr === 'string' && userRoleStr.toLowerCase().replace(/_/g, ' ') === 'super admin';

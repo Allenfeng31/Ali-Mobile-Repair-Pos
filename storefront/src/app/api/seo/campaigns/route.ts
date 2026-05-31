@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic';
 type SeoSessionUser = {
   role?: string;
   app_metadata?: Record<string, unknown>;
-  user_metadata?: Record<string, unknown>;
 };
 
 const SUPABASE_SYSTEM_ROLES = ['authenticated', 'anon', 'service_role'];
@@ -22,13 +21,10 @@ async function createSeoRouteSupabase() {
 }
 
 function isSuperAdminUser(user: SeoSessionUser | undefined): boolean {
-  const topLevelRole = user?.role || '';
+  const topLevelRole = String(user?.role || '');
   const isSystemRole = SUPABASE_SYSTEM_ROLES.includes(topLevelRole.toLowerCase());
-  const customRole = !topLevelRole || isSystemRole
-    ? String(user?.app_metadata?.role || user?.user_metadata?.role || '')
-    : topLevelRole;
-
-  return customRole.toLowerCase().replace(/_/g, ' ') === 'super admin';
+  const trustedRole = isSystemRole ? String(user?.app_metadata?.role || '') : topLevelRole;
+  return trustedRole.toLowerCase().replace(/_/g, ' ') === 'super admin';
 }
 
 function isLocalDevelopmentRequest(request: Request): boolean {
