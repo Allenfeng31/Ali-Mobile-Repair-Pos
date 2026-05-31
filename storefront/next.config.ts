@@ -147,6 +147,9 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablets/apple/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
       { source: '/repairs/tablets/ipad/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
       { source: '/repairs/tablet/apple/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
+      // 9.1 ALIAS REDIRECTS (iPad Pro 12.9 Naked Model)
+      { source: '/repairs/tablet/ipad/ipad-pro-12-9/:repairType', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-3rd-generation/:repairType', permanent: true },
+      { source: '/repairs/tablet/ipad/ipad-pro-12-9', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-3rd-generation', permanent: true },
       // 10. SAFE LEGACY REDIRECTS (Watch)
       { source: '/repairs/watches/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
       { source: '/repairs/watch/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
