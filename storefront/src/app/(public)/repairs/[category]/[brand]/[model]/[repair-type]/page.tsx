@@ -2268,6 +2268,492 @@ function getOppoRepairPocket(modelSlug: string, repairType: string): RepairTypeS
   }
 }
 
+function formatSlugWords(slug: string): string {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((token) => {
+      if (/^\d+$/.test(token)) return token;
+      if (/^\d+(st|nd|rd|th)$/i.test(token)) return `${token.slice(0, -2)}${token.slice(-2).toLowerCase()}`;
+      if (/^\d+mm$/i.test(token)) return `${token.slice(0, -2)}mm`;
+      if (/^x\d+$/i.test(token)) return token.toUpperCase();
+      if (token === "sm") return "SM";
+      if (token === "ipad") return "iPad";
+      if (token === "macbook") return "MacBook";
+      if (token === "pro") return "Pro";
+      if (token === "air") return "Air";
+      if (token === "mini") return "mini";
+      if (token === "ultra") return "Ultra";
+      if (token === "se") return "SE";
+      if (token === "mm") return "mm";
+      if (token === "tab") return "Tab";
+      if (token === "galaxy") return "Galaxy";
+      return token.charAt(0).toUpperCase() + token.slice(1);
+    })
+    .join(" ");
+}
+
+function deriveTabletModelName(modelSlug: string, brandSlug: string): string {
+  const normalizedModel = slugify(modelSlug);
+  const normalizedBrand = slugify(brandSlug);
+
+  if (normalizedBrand === "ipad" || normalizedBrand === "apple" || normalizedModel.startsWith("ipad-")) {
+    const label = normalizedModel.startsWith("ipad-")
+      ? `iPad ${formatSlugWords(normalizedModel.slice("ipad-".length))}`.trim()
+      : formatSlugWords(normalizedModel);
+    return label.replace(/\s+/g, " ").trim();
+  }
+
+  if (normalizedBrand === "samsung" || normalizedBrand === "galaxy") {
+    if (normalizedModel.includes("tab")) {
+      const tabLabel = formatSlugWords(normalizedModel);
+      if (tabLabel.toLowerCase().startsWith("galaxy")) return `Samsung ${tabLabel}`;
+      return `Samsung Galaxy ${tabLabel}`;
+    }
+    return `Samsung ${formatSlugWords(normalizedModel)}`.trim();
+  }
+
+  return formatSlugWords(normalizedModel);
+}
+
+function deriveLaptopModelName(modelSlug: string): string {
+  const normalizedModel = slugify(modelSlug);
+  const formatted = formatSlugWords(normalizedModel);
+  if (formatted.toLowerCase().startsWith("macbook")) return formatted;
+  return formatted || "Laptop";
+}
+
+function deriveWatchModelName(modelSlug: string): string {
+  const normalizedModel = slugify(modelSlug);
+  const formatted = formatSlugWords(normalizedModel).trim();
+  if (formatted.toLowerCase().startsWith("apple watch")) return formatted;
+  if (formatted.toLowerCase().startsWith("watch")) return `Apple ${formatted}`;
+  return `Apple Watch ${formatted}`.trim();
+}
+
+function isSamsungTabletBrand(brandSlug: string): boolean {
+  const normalized = slugify(brandSlug);
+  return normalized === "samsung" || normalized === "galaxy";
+}
+
+function isSamsungTabletModelSlug(modelSlug: string): boolean {
+  const normalized = slugify(modelSlug);
+  return normalized.includes("tab") || normalized.startsWith("galaxy-tab");
+}
+
+function buildTabletRepairPocket(
+  modelName: string,
+  repairType: string,
+  options: { isIpad: boolean; isSamsungTablet: boolean }
+): RepairTypeSeoPocket {
+  const normalizedRepairType = slugify(repairType);
+  const productLabel = options.isIpad ? "iPad" : options.isSamsungTablet ? "Samsung tablet" : "tablet";
+  const displayLabel = options.isIpad ? "display and touch layer" : "display assembly and touch layer";
+  const chargingLabel = options.isIpad ? "charging port and charging draw" : "USB-C charging port and charging draw";
+
+  if (normalizedRepairType === "screen-replacement" || normalizedRepairType === "screen-repair") {
+    return {
+      quickAnswer:
+        `Need ${modelName} screen replacement in Ringwood? Ali Mobile & Repair checks glass damage, ${displayLabel}, frame alignment, button feel, and charging response before confirming the quote.`,
+      workbenchHeadings: {
+        options: `Which screen path fits this ${productLabel}?`,
+        diagnostics: "What do we test before display work?",
+        symptoms: "Which screen symptoms matter most?",
+        outcomes: "What can affect display fit and touch?",
+      },
+      repairOptions: [
+        { name: "Display assembly diagnosis", shortDescription: "We inspect glass cracks, touch response, display output, and frame shape before opening.", bestFor: "Cracked glass, no image, touch dead zones, or flicker.", notes: "If the frame is bent, we explain fit risk before starting." },
+        { name: "Model-matched screen replacement", shortDescription: "We fit a model-matched display assembly and confirm clean bonding.", bestFor: "Tablets with clear display assembly damage and stable board behavior.", notes: "Quote and turnaround are confirmed before repair begins." },
+        { name: "Post-fit function checks", shortDescription: "After fitting, we test touch, brightness, front camera area, buttons, and charging response.", bestFor: "Customers who want practical handover checks before pickup.", notes: "Any additional fault found during testing is reported before extra work." },
+      ],
+      commonProblems: [
+        { title: "Cracked glass with unstable touch", description: "Touch can worsen over time even when the display still lights up." },
+        { title: "No image or flicker", description: "Display faults can come from panel impact, connector stress, or prior pressure damage." },
+        { title: "Frame bend near corners", description: "A bent frame can stop the new screen from sitting flat." },
+        { title: "Charging or button overlap faults", description: "Impact can also affect charging port seating or button feel, so we test both." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Inspect glass, frame, and housing", description: "We check crack spread, frame shape, and whether the tablet is safe to open." },
+        { step: "02", title: "Test touch and display behavior", description: "We test full-panel touch, brightness, and visible display faults before quoting." },
+        { step: "03", title: "Confirm quote and repair scope", description: "We confirm part availability, quote, and expected turnaround before repair starts." },
+        { step: "04", title: "Final handover checks", description: `We retest touch, display output, cameras, buttons, and ${chargingLabel} before return.` },
+      ],
+      faq: [
+        { question: `Can you replace the screen on ${modelName} the same day?`, answer: "Same-day service depends on part availability and device condition. We confirm timing after bench inspection." },
+        { question: `Do you test touch response after ${modelName} screen repair?`, answer: "Yes. We test touch coverage, display output, buttons, and charging behavior before pickup." },
+      ],
+    };
+  }
+
+  if (normalizedRepairType === "battery-replacement" || normalizedRepairType === "battery-service") {
+    return {
+      quickAnswer:
+        `Need ${modelName} battery replacement in Ringwood? Ali Mobile & Repair checks battery condition, swelling risk, ${chargingLabel}, and runtime symptoms before confirming the repair quote.`,
+      workbenchHeadings: {
+        options: `Which battery path fits this ${productLabel}?`,
+        diagnostics: "What do we test before battery service?",
+        symptoms: "Which battery symptoms matter most?",
+        outcomes: "What can affect battery results?",
+      },
+      repairOptions: [
+        { name: "Battery health diagnosis", shortDescription: "We test charge hold, heat behavior, swelling signs, and charging response first.", bestFor: "Fast drain, short runtime, random shutdowns, or swelling concern.", notes: "Charging-port faults can mimic battery issues, so both are checked." },
+        { name: "Battery replacement path", shortDescription: "We remove the old cell safely and fit a model-matched replacement battery.", bestFor: "Tablets with confirmed battery wear and stable main board behavior.", notes: "Adhesive cleanup and safe cable handling are part of the repair path." },
+        { name: "Handover charging checks", shortDescription: "We verify charging draw, boot behavior, and practical usage checks before pickup.", bestFor: "Customers who want confirmed power stability before return.", notes: "Quote and scope are always confirmed before opening the tablet." },
+      ],
+      commonProblems: [
+        { title: "Fast drain or short runtime", description: "Battery wear can reduce daily usage time and create unstable percentage drops." },
+        { title: "Swelling pressure risk", description: "Battery swelling can stress the display and housing if not addressed early." },
+        { title: "Charging fault mimic", description: "Port wear or debris can look like battery failure, so we test the full charging path." },
+        { title: "Heat during charging", description: "Unusual heat can point to battery wear or power-path issues that need diagnosis." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Check battery symptoms", description: "We review runtime behavior, charge hold, shutdown pattern, and heat signs." },
+        { step: "02", title: "Validate charging path", description: "We inspect port condition and charging draw before confirming battery replacement." },
+        { step: "03", title: "Confirm quote and scope", description: "We confirm pricing, part availability, and repair scope before work begins." },
+        { step: "04", title: "Final power checks", description: "After fitting, we test charging behavior, startup stability, and normal operation." },
+      ],
+      faq: [
+        { question: `Does ${modelName} battery replacement include charging checks?`, answer: "Yes. We check charging behavior before and after replacement to confirm stable power response." },
+        { question: `Can swelling be checked before replacing the battery?`, answer: "Yes. We inspect for swelling pressure and explain risk before any repair starts." },
+      ],
+    };
+  }
+
+  if (normalizedRepairType === "charging-port" || normalizedRepairType === "charging-port-repair" || normalizedRepairType === "charging-port-replacement") {
+    return {
+      quickAnswer:
+        `Need ${modelName} charging port repair in Ringwood? Ali Mobile & Repair checks port wear, debris, cable seating, charging draw, and surrounding housing condition before quoting.`,
+      workbenchHeadings: {
+        options: "Which charging-port path fits this tablet?",
+        diagnostics: "What do we test before port repair?",
+        symptoms: "Which charging symptoms matter most?",
+        outcomes: "What can affect charging results?",
+      },
+      repairOptions: [
+        { name: "Port inspection and clean", shortDescription: "We inspect debris, corrosion, and cable seating before recommending replacement.", bestFor: "Loose cable fit, intermittent charging, or no-charge reports.", notes: "If cleaning solves the issue, we avoid unnecessary part replacement." },
+        { name: "Port replacement path", shortDescription: "If port pins or sub-board paths fail, we quote the correct replacement path.", bestFor: "No charge response, worn pins, or unstable connection behavior.", notes: "Frame and housing condition are checked to avoid connector stress." },
+        { name: "Post-repair power checks", shortDescription: "After repair, we test charging draw, cable fit, and practical use behavior.", bestFor: "Customers who want charging stability confirmed before pickup.", notes: "Quote confirmation is completed before opening the device." },
+      ],
+      commonProblems: [
+        { title: "Cable only charges at one angle", description: "Debris or pin wear can interrupt normal cable seating." },
+        { title: "No charging response", description: "Port, cable, battery, or board-path faults can all cause no-charge behavior." },
+        { title: "Port movement in housing", description: "Housing stress or impact near the port can affect connector stability." },
+        { title: "Slow or unstable charging draw", description: "Power-path testing is needed before confirming parts replacement." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Inspect port and housing", description: "We check port seating, debris, visible damage, and surrounding frame condition." },
+        { step: "02", title: "Test charging response", description: "We measure charging behavior with known-good cable and adapter combinations." },
+        { step: "03", title: "Confirm quote before repair", description: "We confirm repair path, part availability, and quote before opening the device." },
+        { step: "04", title: "Final charging checks", description: "After repair, we verify charging stability and normal operation before handover." },
+      ],
+      faq: [
+        { question: `Can ${modelName} charging issues be fixed without replacement?`, answer: "Sometimes yes. We inspect and clean first, then quote replacement only when needed." },
+        { question: `Do you test charging draw before and after port repair?`, answer: "Yes. We test charging response on the bench before return." },
+      ],
+    };
+  }
+
+  return {
+    quickAnswer:
+      `Need ${modelName} repair assessment in Ringwood? Ali Mobile & Repair checks visible faults, frame condition, charging behavior, and key functions before confirming the quote.`,
+    workbenchHeadings: {
+      options: "Which repair path fits this device?",
+      diagnostics: "What do we test before repair?",
+      symptoms: "Which symptoms matter most?",
+      outcomes: "What can affect the final result?",
+    },
+    repairOptions: [
+      { name: "General fault diagnosis", shortDescription: "We isolate the visible issue and test related functions before repair.", bestFor: "Unclear faults or multiple symptoms on one device.", notes: "Quote and scope are confirmed before work starts." },
+      { name: "Part-level repair path", shortDescription: "When a module-level fault is confirmed, we quote the matching repair path.", bestFor: "Display, battery, charging, or button-related hardware issues.", notes: "We keep the repair scope practical and model-specific." },
+      { name: "Final function validation", shortDescription: "Before handover, we retest core functions related to the original fault.", bestFor: "Customers who want clear post-repair checks before pickup.", notes: "Any extra issue found is explained before additional work." },
+    ],
+    commonProblems: [
+      { title: "Visible physical damage", description: "Glass cracks, housing bends, or impact marks can affect more than one function." },
+      { title: "Charging instability", description: "Power issues can come from battery wear, port faults, or board-level behavior." },
+      { title: "Intermittent function faults", description: "Touch, button, camera, or audio symptoms can appear together after impact." },
+      { title: "Unknown repair scope", description: "We diagnose first so the quote matches the real fault before repair starts." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Inspect condition and symptoms", description: "We inspect housing, fault history, and current behavior." },
+      { step: "02", title: "Run bench diagnostics", description: "We test the affected function and related components before quoting." },
+      { step: "03", title: "Confirm quote and scope", description: "We confirm pricing, part availability, and expected turnaround before work." },
+      { step: "04", title: "Final handover checks", description: "After repair, we retest the original fault path and normal operation." },
+    ],
+    faq: [
+      { question: `Do you confirm the quote before repairing ${modelName}?`, answer: "Yes. We diagnose first, then confirm scope and quote before starting." },
+    ],
+  };
+}
+
+function buildLaptopRepairPocket(modelName: string, repairType: string): RepairTypeSeoPocket {
+  const normalizedRepairType = slugify(repairType);
+  const isMacBook = modelName.toLowerCase().includes("macbook");
+
+  if (normalizedRepairType === "screen-replacement" || normalizedRepairType === "screen-repair") {
+    return {
+      quickAnswer:
+        `Need ${modelName} screen repair in Ringwood? Ali Mobile & Repair checks panel damage, hinge alignment, top-case fit, cable condition, and quote scope before repair.`,
+      workbenchHeadings: {
+        options: "Which display repair path fits this laptop?",
+        diagnostics: "What do we test before screen repair?",
+        symptoms: "Which display symptoms matter most?",
+        outcomes: "What can affect screen repair results?",
+      },
+      repairOptions: [
+        { name: "Display fault diagnosis", shortDescription: "We test panel output, lines, flicker, backlight behavior, and external display response.", bestFor: "Cracked panel, black screen, flicker, or partial image faults.", notes: "Hinge pressure and cable movement are checked before quote confirmation." },
+        { name: "Screen assembly replacement", shortDescription: "We fit the matched display assembly and align hinges and top-case seating.", bestFor: "Confirmed panel damage with stable board-level display output.", notes: "We confirm parts and quote before opening the unit." },
+        { name: "Post-repair validation", shortDescription: "After fitting, we test brightness control, camera area, hinge travel, and normal boot behavior.", bestFor: "Customers who want practical handover checks before pickup.", notes: "Any additional issue is reported before extra work." },
+      ],
+      commonProblems: [
+        { title: "Cracked panel with usable image", description: "A cracked panel can worsen and stress hinge-side cables with continued use." },
+        { title: "Flicker or no image", description: "Panel, cable, or board-level display paths can all cause similar symptoms." },
+        { title: "Hinge or top-case stress", description: "Stiff hinges or top-case distortion can affect panel life after replacement." },
+        { title: "Backlight-only faults", description: "Dim output or no image with power can indicate display-path diagnostics are needed." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Inspect panel and hinge condition", description: "We inspect cracks, hinge movement, top-case shape, and cable stress points." },
+        { step: "02", title: "Test display path", description: "We test panel output, backlight behavior, and related display-path symptoms." },
+        { step: "03", title: "Confirm quote and scope", description: "We confirm repair scope, part path, and quote before disassembly." },
+        { step: "04", title: "Final function checks", description: "We retest display stability, camera area, keyboard/trackpad response, and charging behavior." },
+      ],
+      faq: [
+        { question: `Do you check hinge and cable condition during ${modelName} screen repair?`, answer: "Yes. Hinge movement and display cable stress are checked as part of the diagnostic process." },
+      ],
+    };
+  }
+
+  if (normalizedRepairType === "battery-replacement" || normalizedRepairType === "battery-service") {
+    return {
+      quickAnswer:
+        `Need ${modelName} battery replacement in Ringwood? Ali Mobile & Repair checks cycle behavior, swelling risk, charger response, and board-level power symptoms before confirming the quote.`,
+      workbenchHeadings: {
+        options: "Which battery path fits this laptop?",
+        diagnostics: "What do we test before battery service?",
+        symptoms: "Which battery symptoms matter most?",
+        outcomes: "What can affect battery replacement results?",
+      },
+      repairOptions: [
+        { name: "Battery condition diagnosis", shortDescription: "We test charge hold, adapter response, shutdown behavior, and battery health indicators.", bestFor: "Fast drain, shutdowns, or poor runtime on battery power.", notes: "Power-path checks are done before confirming replacement." },
+        { name: "Battery replacement path", shortDescription: "We replace the battery with careful cable handling and top-case inspection where required.", bestFor: "Confirmed battery wear with stable charging-path behavior.", notes: "Quote and scope are confirmed before opening the device." },
+        { name: "Post-repair power checks", shortDescription: "We test charging, boot stability, and practical runtime behavior before handover.", bestFor: "Customers who want confirmed power behavior before pickup.", notes: "If extra faults appear, we explain them before additional work." },
+      ],
+      commonProblems: [
+        { title: "Fast drain off charger", description: "Battery wear can shorten runtime and cause unstable percentage drops." },
+        { title: "Unexpected shutdowns", description: "Voltage instability can cause shutdowns even with remaining percentage." },
+        { title: "Swelling pressure signs", description: "Swelling can affect top case, trackpad feel, and safe operation." },
+        { title: "Adapter or board-path overlap", description: "Charging-path faults can mimic battery wear and need separate diagnosis." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Review power symptoms", description: "We assess battery runtime, shutdown history, and heat behavior." },
+        { step: "02", title: "Test charging path", description: "We validate adapter response and charging behavior before replacement." },
+        { step: "03", title: "Confirm quote before repair", description: "We confirm part path, scope, and quote before disassembly." },
+        { step: "04", title: "Final handover checks", description: "We retest charging, startup, keyboard, trackpad, ports, and speaker behavior." },
+      ],
+      faq: [
+        { question: `Will you check for swelling and top-case pressure on ${modelName}?`, answer: "Yes. We check for swelling-related pressure before battery replacement." },
+      ],
+    };
+  }
+
+  if (normalizedRepairType.includes("keyboard") || normalizedRepairType.includes("top-case")) {
+    return {
+      quickAnswer:
+        `Need ${modelName} keyboard or top-case repair in Ringwood? Ali Mobile & Repair checks key response, top-case condition, trackpad behavior, and cable paths before confirming quote and scope.`,
+      workbenchHeadings: {
+        options: "Which keyboard repair path fits this laptop?",
+        diagnostics: "What do we test before keyboard work?",
+        symptoms: "Which keyboard symptoms matter most?",
+        outcomes: "What can affect keyboard repair results?",
+      },
+      repairOptions: [
+        { name: "Key response diagnosis", shortDescription: "We test key registration, repeating keys, stuck keys, and backlight behavior.", bestFor: "Missing key input, sticky keys, or inconsistent typing response.", notes: "Top-case condition is checked before confirming repair path." },
+        { name: "Keyboard or top-case replacement path", shortDescription: "We quote the correct keyboard-level or top-case-level replacement based on the model.", bestFor: "Failed keyboard matrix, liquid-damaged keys, or structural top-case issues.", notes: "Trackpad and cable routing checks are included before handover." },
+        { name: "Post-repair typing validation", shortDescription: "After repair, we test full-keyboard input, trackpad click/gesture response, and charging behavior.", bestFor: "Customers wanting full practical checks before pickup.", notes: "Quote confirmation happens before opening the laptop." },
+      ],
+      commonProblems: [
+        { title: "Missing or repeated key input", description: "Key matrix faults can cause dropped letters or repeated presses." },
+        { title: "Liquid-related key failure", description: "Liquid can affect key response and connector paths under the keyboard." },
+        { title: "Trackpad overlap issues", description: "Top-case pressure or internal shifts can affect both keyboard and trackpad feel." },
+        { title: "Port or speaker side effects", description: "After impact or liquid exposure, nearby components should be checked before quote finalization." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Check key and top-case condition", description: "We inspect key behavior, top-case state, and visible damage patterns." },
+        { step: "02", title: "Test related functions", description: "We test trackpad behavior, charger detection, and nearby component response." },
+        { step: "03", title: "Confirm quote and scope", description: "We confirm whether keyboard-only or top-case-level repair is needed before work starts." },
+        { step: "04", title: "Final function checks", description: "We retest typing, trackpad, ports, speaker output, and normal operation before return." },
+      ],
+      faq: [
+        { question: `Do you test trackpad and ports during ${modelName} keyboard repair?`, answer: "Yes. We check related functions so handover includes practical validation." },
+      ],
+    };
+  }
+
+  if (normalizedRepairType === "water-damage-repair" || normalizedRepairType === "water-damage" || normalizedRepairType.includes("logic-board")) {
+    return {
+      quickAnswer:
+        `Need ${modelName} board or liquid-damage diagnosis in Ringwood? Ali Mobile & Repair checks power safety, liquid indicators, connector corrosion, and short-risk symptoms before confirming repair options.`,
+      workbenchHeadings: {
+        options: "Which board diagnosis path fits this laptop?",
+        diagnostics: "What do we inspect before board work?",
+        symptoms: "Which board-level symptoms matter most?",
+        outcomes: "What can affect liquid/board repair results?",
+      },
+      repairOptions: [
+        { name: "Power-safe triage", shortDescription: "We begin with safe power handling and no-charge triage for unstable liquid-exposed devices.", bestFor: "No power, random shutdown, or liquid-exposure symptoms.", notes: "Not every liquid-damaged unit is repairable; diagnosis comes first." },
+        { name: "Board and connector inspection", shortDescription: "We inspect board and connector areas for corrosion, oxidation, and short-risk signs.", bestFor: "Devices with uncertain fault spread after spill or impact events.", notes: "Repair scope is quoted only after inspection findings are clear." },
+        { name: "Recovery path reporting", shortDescription: "We explain practical next steps: board repair path, module replacement path, or stop-at-diagnosis.", bestFor: "Customers needing a clear cost/risk decision before proceeding.", notes: "Quote and approval are required before board-level work starts." },
+      ],
+      commonProblems: [
+        { title: "No power after liquid exposure", description: "Power-path faults can involve board rails, connectors, or attached modules." },
+        { title: "Charging but not booting", description: "A device can show charge behavior while still failing normal startup." },
+        { title: "Corrosion on connectors", description: "Residue can continue affecting reliability if not diagnosed and cleaned correctly." },
+        { title: "Unstable ports or speaker response", description: "Liquid or board faults can impact multiple functions beyond power-on behavior." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Disconnect power-safe path", description: "We begin with safe power isolation before deeper board checks." },
+        { step: "02", title: "Inspect board and connectors", description: "We inspect corrosion/oxidation signs and short-risk areas under magnification." },
+        { step: "03", title: "Confirm quote and repair scope", description: "We confirm board-level or part-level options with quote details before work." },
+        { step: "04", title: "Final reporting and next step", description: "We provide a practical report on what is repairable and what remains high risk." },
+      ],
+      faq: [
+        { question: `Can ${modelName} liquid damage always be repaired?`, answer: "Not always. We inspect first and quote only the repairs we can complete." },
+      ],
+    };
+  }
+
+  return {
+    quickAnswer:
+      `Need ${modelName} repair in Ringwood? Ali Mobile & Repair checks the visible fault, related hardware behavior, and quote scope before any repair starts.`,
+    workbenchHeadings: {
+      options: "Which repair path fits this laptop?",
+      diagnostics: "What do we test before repair?",
+      symptoms: "Which symptoms matter most?",
+      outcomes: "What can affect the final result?",
+    },
+    repairOptions: [
+      { name: "Fault diagnosis first", shortDescription: "We isolate the main fault and test related hardware before quoting.", bestFor: "Unclear or mixed symptoms that need a practical diagnosis.", notes: "Quote confirmation happens before disassembly." },
+      { name: "Part-level repair path", shortDescription: "Where applicable, we quote module-level repair options matched to the model.", bestFor: "Display, battery, keyboard, or charging-path issues.", notes: "Any extra issue is explained before additional work." },
+      { name: "Final handover checks", shortDescription: "After repair, we test startup, input devices, ports, and core functions.", bestFor: "Customers wanting verified operation before pickup.", notes: "We keep the checks practical and repair-specific." },
+    ],
+    commonProblems: [
+      { title: "Visible hardware damage", description: "Impact, pressure, or spill events can affect more than one subsystem." },
+      { title: "Charging or power instability", description: "Power faults may involve battery, charging path, or board behavior." },
+      { title: "Input and port overlap issues", description: "Keyboard, trackpad, and port faults can overlap after damage." },
+      { title: "Unclear repair scope", description: "A bench diagnosis keeps the quote aligned with the real fault." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Inspect condition and symptoms", description: "We inspect hardware condition and fault history." },
+      { step: "02", title: "Run bench diagnostics", description: "We test the affected system and related functions before quote approval." },
+      { step: "03", title: "Confirm quote before repair", description: "We confirm repair scope and expected timing before work starts." },
+      { step: "04", title: "Final handover checks", description: "We retest the repaired path and practical day-to-day functions." },
+    ],
+    faq: [
+      { question: `Do you confirm quote and scope before repairing ${modelName}?`, answer: "Yes. Diagnosis and quote confirmation are completed before repair begins." },
+    ],
+  };
+}
+
+function buildWatchRepairPocket(modelName: string, repairType: string): RepairTypeSeoPocket {
+  const normalizedRepairType = slugify(repairType);
+
+  if (normalizedRepairType === "screen-replacement" || normalizedRepairType === "screen-repair") {
+    return {
+      quickAnswer:
+        `Need ${modelName} screen repair in Ringwood? Ali Mobile & Repair checks glass damage, display output, touch response, housing condition, and seal limitations before confirming the quote.`,
+      workbenchHeadings: {
+        options: "Which screen path fits this watch?",
+        diagnostics: "What do we test before display repair?",
+        symptoms: "Which display symptoms matter most?",
+        outcomes: "What can affect display and seal results?",
+      },
+      repairOptions: [
+        { name: "Glass and display diagnosis", shortDescription: "We inspect cracks, display output, touch response, and housing fit before opening.", bestFor: "Cracked glass, no image, flicker, or weak touch response.", notes: "We confirm quote and scope before repair begins." },
+        { name: "Display repair path", shortDescription: "We perform model-matched display repair with careful cable and housing handling.", bestFor: "Watches with confirmed display assembly damage.", notes: "Frame/housing condition is checked before final part commitment." },
+        { name: "Post-repair function checks", shortDescription: "After repair, we test touch response, display stability, charging, and button/crown behavior.", bestFor: "Customers wanting practical checks before pickup.", notes: "Seal condition is rebuilt carefully, with limitations explained at handover." },
+      ],
+      commonProblems: [
+        { title: "Cracked glass with partial touch", description: "Touch may still work in spots but usually degrades with continued use." },
+        { title: "No display or flicker", description: "Impact can affect panel output or internal display connectors." },
+        { title: "Housing distortion", description: "Frame pressure can affect panel seating and repair fit." },
+        { title: "Seal limitations after opening", description: "After watch opening, water resistance cannot be guaranteed." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Inspect glass and housing", description: "We inspect crack spread, housing shape, and safe opening condition." },
+        { step: "02", title: "Test touch and display behavior", description: "We test touch coverage, display output, and charging behavior before quoting." },
+        { step: "03", title: "Confirm quote and scope", description: "We confirm part path and quote before opening the watch." },
+        { step: "04", title: "Final handover checks", description: "We retest touch, display, charging, crown/button response, and explain seal limitations." },
+      ],
+      faq: [
+        { question: `Will ${modelName} be fully waterproof after screen repair?`, answer: "We rebuild the seal carefully, but water resistance cannot be guaranteed after opening the watch." },
+      ],
+    };
+  }
+
+  if (normalizedRepairType === "battery-replacement" || normalizedRepairType === "battery-service") {
+    return {
+      quickAnswer:
+        `Need ${modelName} battery replacement in Ringwood? Ali Mobile & Repair checks battery runtime behavior, swelling risk, charging response, and housing condition before confirming the quote.`,
+      workbenchHeadings: {
+        options: "Which battery path fits this watch?",
+        diagnostics: "What do we test before battery service?",
+        symptoms: "Which battery symptoms matter most?",
+        outcomes: "What can affect battery and seal results?",
+      },
+      repairOptions: [
+        { name: "Battery behavior diagnosis", shortDescription: "We check runtime, charging response, and shutdown pattern before opening.", bestFor: "Fast drain, short runtime, or no-power watch symptoms.", notes: "Quote and scope are confirmed before service starts." },
+        { name: "Battery replacement path", shortDescription: "We replace the battery with careful connector and housing handling.", bestFor: "Watches with confirmed battery wear or swelling risk.", notes: "Housing and seal condition are assessed during repair." },
+        { name: "Post-repair charging checks", shortDescription: "We test charging response, startup stability, and core operation before pickup.", bestFor: "Customers wanting confirmed power behavior at handover.", notes: "Water-resistance limitations are explained after repair." },
+      ],
+      commonProblems: [
+        { title: "Fast battery drain", description: "Battery wear can reduce daily usage time and charging stability." },
+        { title: "Unexpected shutdowns", description: "Voltage drop can cause shutdown even with remaining percentage." },
+        { title: "Battery swelling risk", description: "Swelling can place pressure on display and housing layers." },
+        { title: "Charging response faults", description: "Charging issues can overlap with battery or connector path faults." },
+      ],
+      diagnosticSteps: [
+        { step: "01", title: "Review battery symptoms", description: "We check runtime behavior, shutdown pattern, and heat signs." },
+        { step: "02", title: "Validate charging behavior", description: "We test charging response before confirming battery replacement path." },
+        { step: "03", title: "Confirm quote before repair", description: "We confirm pricing and scope before opening the watch." },
+        { step: "04", title: "Final handover checks", description: "We retest charging and normal watch behavior, then explain seal limitations." },
+      ],
+      faq: [
+        { question: `Do you test charging after ${modelName} battery replacement?`, answer: "Yes. We test charging response and startup behavior before handover." },
+      ],
+    };
+  }
+
+  return {
+    quickAnswer:
+      `Need ${modelName} repair assessment in Ringwood? Ali Mobile & Repair checks display, touch, battery behavior, housing condition, and repair scope before confirming the quote.`,
+    workbenchHeadings: {
+      options: "Which repair path fits this watch?",
+      diagnostics: "What do we test before repair?",
+      symptoms: "Which symptoms matter most?",
+      outcomes: "What can affect final watch repair results?",
+    },
+    repairOptions: [
+      { name: "General watch diagnosis", shortDescription: "We inspect the main fault and test related functions before quote confirmation.", bestFor: "Unclear faults across display, touch, battery, or charging behavior.", notes: "Repair scope is always confirmed before opening." },
+      { name: "Part-level repair path", shortDescription: "When the fault is confirmed, we quote the matching part-level repair path.", bestFor: "Known display, battery, charging, or housing faults.", notes: "Any extra fault found is explained before additional work." },
+      { name: "Final handover checks", shortDescription: "After repair, we retest key watch functions before pickup.", bestFor: "Customers who want practical function checks at handover.", notes: "Water-resistance limitations are explained after opening." },
+    ],
+    commonProblems: [
+      { title: "Display or touch instability", description: "Cracks or impact can cause image faults and weak touch response." },
+      { title: "Battery runtime decline", description: "Battery wear can shorten runtime and cause shutdown symptoms." },
+      { title: "Housing or frame stress", description: "Housing condition affects fit and repair stability." },
+      { title: "Seal limitations", description: "After opening, water resistance cannot be guaranteed." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Inspect watch condition", description: "We inspect display, housing, and visible fault signs." },
+      { step: "02", title: "Test core functions", description: "We test touch, display, charging, and normal operation before quoting." },
+      { step: "03", title: "Confirm quote and scope", description: "We confirm repair scope, quote, and part path before service." },
+      { step: "04", title: "Final handover checks", description: "We retest key functions and explain post-repair seal limitations." },
+    ],
+    faq: [
+      { question: `Do you confirm quote and scope before repairing ${modelName}?`, answer: "Yes. We confirm quote and repair scope before any watch repair starts." },
+    ],
+  };
+}
+
 function getRepairTypeSeoPocket(params: {
   category: string;
   brand: string;
@@ -2315,6 +2801,31 @@ function getRepairTypeSeoPocket(params: {
   if (category === "phone" && (brand === "oppo" || brand.startsWith("oppo-"))) {
     const oppoPocket = getOppoRepairPocket(model, repairType);
     if (oppoPocket) return oppoPocket;
+  }
+
+  if (category === "tablet") {
+    const isIpadBrand = brand === "ipad" || brand === "apple";
+    const isSamsungTablet = isSamsungTabletBrand(brand) && isSamsungTabletModelSlug(model);
+
+    if (isIpadBrand || isSamsungTablet) {
+      const modelName = deriveTabletModelName(model, brand);
+      return buildTabletRepairPocket(modelName, repairType, {
+        isIpad: isIpadBrand || model.startsWith("ipad"),
+        isSamsungTablet,
+      });
+    }
+  }
+
+  if (category === "laptop") {
+    const modelName = deriveLaptopModelName(model);
+    if (modelName) {
+      return buildLaptopRepairPocket(modelName, repairType);
+    }
+  }
+
+  if (category === "watch" && (brand === "apple" || brand === "apple-watch")) {
+    const modelName = deriveWatchModelName(model);
+    return buildWatchRepairPocket(modelName, repairType);
   }
 
   return null;
