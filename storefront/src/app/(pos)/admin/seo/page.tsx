@@ -354,6 +354,7 @@ export default function SeoGeoScoutConsole() {
   const [keywords, setKeywords] = useState<KeywordRecord[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignRecord[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignRecord | null>(null);
+  const [campaignsAuthState, setCampaignsAuthState] = useState<'idle' | 'authorized' | 'unauthorized' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<ActiveTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [isScouting, setIsScouting] = useState(false);
@@ -385,14 +386,25 @@ export default function SeoGeoScoutConsole() {
         cache: 'no-store',
         credentials: 'include',
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
 
       if (res.ok && json.status === 'SUCCESS') {
         setCampaigns(Array.isArray(json.data) ? json.data : []);
+        setCampaignsAuthState('authorized');
+      } else if (res.status === 401) {
+        setCampaigns([]);
+        setSelectedCampaign(null);
+        setCampaignsAuthState('unauthorized');
       } else {
+        setCampaigns([]);
+        setSelectedCampaign(null);
+        setCampaignsAuthState('error');
         console.error('Failed to load campaigns:', json.error || json.message);
       }
     } catch (err) {
+      setCampaigns([]);
+      setSelectedCampaign(null);
+      setCampaignsAuthState('error');
       console.error('Failed to load campaigns:', err);
     }
   }, []);
@@ -491,14 +503,20 @@ export default function SeoGeoScoutConsole() {
         cache: 'no-store',
         credentials: 'include',
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
 
       if (res.ok && json.status === 'SUCCESS') {
         setSelectedCampaign(json.data);
+        setCampaignsAuthState('authorized');
+      } else if (res.status === 401) {
+        setSelectedCampaign(null);
+        setCampaignsAuthState('unauthorized');
       } else {
+        setCampaignsAuthState('error');
         console.error('Failed to load campaign detail:', json.error || json.message);
       }
     } catch (err) {
+      setCampaignsAuthState('error');
       console.error('Failed to load campaign detail:', err);
     } finally {
       setIsLoadingCampaign(false);
@@ -572,7 +590,7 @@ export default function SeoGeoScoutConsole() {
             { label: 'Total Discovered', value: totalDiscovered, icon: Database, tone: 'text-blue-200' },
             { label: 'Builder Queue', value: builderQueueSize, icon: Sparkles, tone: 'text-emerald-200' },
             { label: 'Blocked', value: violationsBlocked, icon: ShieldAlert, tone: 'text-rose-200' },
-            { label: 'Generated Campaigns', value: campaigns.length, icon: FileText, tone: 'text-cyan-200' },
+            { label: 'Generated Campaigns', value: campaignsAuthState === 'unauthorized' ? 'Auth' : campaigns.length, icon: FileText, tone: 'text-cyan-200' },
           ].map((metric) => {
             const Icon = metric.icon;
             return (
@@ -727,11 +745,20 @@ export default function SeoGeoScoutConsole() {
               <div className="min-h-[660px] rounded-3xl border border-white/10 bg-slate-950/60 p-3">
                 <div className="mb-3 flex items-center justify-between px-2">
                   <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Articles</span>
-                  <span className="text-[10px] font-black text-slate-500">{filteredCampaigns.length}</span>
+                  <span className="text-[10px] font-black text-slate-500">
+                    {campaignsAuthState === 'unauthorized' ? 'Auth required' : filteredCampaigns.length}
+                  </span>
                 </div>
 
                 <div className="max-h-[625px] space-y-2 overflow-auto pr-1">
-                  {filteredCampaigns.length > 0 ? filteredCampaigns.map((campaign) => (
+                  {campaignsAuthState === 'unauthorized' ? (
+                    <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5 text-center">
+                      <p className="text-sm font-black text-amber-100">Unauthorized</p>
+                      <p className="mt-2 text-xs font-bold leading-5 text-amber-200/80">
+                        Please sign in as a Super Admin to view SEO campaigns.
+                      </p>
+                    </div>
+                  ) : filteredCampaigns.length > 0 ? filteredCampaigns.map((campaign) => (
                     <button
                       key={campaign.id}
                       type="button"
@@ -755,7 +782,9 @@ export default function SeoGeoScoutConsole() {
                     </button>
                   )) : (
                     <div className="rounded-2xl border border-dashed border-white/10 p-5 text-center text-sm font-bold text-slate-500">
-                      No generated campaigns yet.
+                      {campaignsAuthState === 'error'
+                        ? 'Unable to load campaigns right now.'
+                        : 'No generated campaigns yet.'}
                     </div>
                   )}
                 </div>
