@@ -135,7 +135,25 @@ const nextConfig: NextConfig = {
         source: '/repairs/phones/samsung/:model/:repairType',
         destination: '/repairs/phone/samsung/:model/:repairType',
         permanent: true,
-      }
+      },
+      // 7. SAFE LEGACY REDIRECTS (Google Pixel)
+      { source: '/repairs/phones/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
+      { source: '/repairs/phones/google-pixel/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
+      { source: '/repairs/phone/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
+      // 8. SAFE LEGACY REDIRECTS (Oppo)
+      { source: '/repairs/phones/oppo/:model/:repairType', destination: '/repairs/phone/oppo/:model/:repairType', permanent: true },
+      // 9. SAFE LEGACY REDIRECTS (Tablet / iPad)
+      { source: '/repairs/tablets/apple/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
+      { source: '/repairs/tablets/ipad/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
+      { source: '/repairs/tablet/apple/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
+      // 10. SAFE LEGACY REDIRECTS (Watch)
+      { source: '/repairs/watches/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
+      { source: '/repairs/watch/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
+      { source: '/repairs/smart-watch/apple/:model/:repairType', destination: '/repairs/watch/apple-watch/:model/:repairType', permanent: true },
+      // 11. SAFE LEGACY REDIRECTS (Laptop / MacBook)
+      { source: '/repairs/laptops/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
+      { source: '/repairs/laptop/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
+      { source: '/repairs/laptops/macbook/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true }
     ];
   },
 };
