@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { scoreSeoCampaignBatch, type CampaignLike } from '@/lib/seo/campaignQualityGate';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +57,10 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Internal Server Error';
 }
 
+function attachPhaseAScores<T extends CampaignLike>(campaigns: T[]): Array<T & { qualityGatePhaseA: ReturnType<typeof scoreSeoCampaignBatch>[number]['qualityGatePhaseA'] }> {
+  return scoreSeoCampaignBatch(campaigns) as Array<T & { qualityGatePhaseA: ReturnType<typeof scoreSeoCampaignBatch>[number]['qualityGatePhaseA'] }>;
+}
+
 export async function GET(request: Request) {
   try {
     const supabase = await createSeoRouteSupabase();
@@ -77,8 +82,10 @@ export async function GET(request: Request) {
 
       if (error) throw error;
 
+      const scored = data ? attachPhaseAScores([data as CampaignLike])[0] : null;
+
       return NextResponse.json(
-        { status: 'SUCCESS', data },
+        { status: 'SUCCESS', data: scored },
         { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
       );
     }
@@ -91,8 +98,10 @@ export async function GET(request: Request) {
 
     if (error) throw error;
 
+    const scoredData = attachPhaseAScores((data || []) as CampaignLike[]);
+
     return NextResponse.json(
-      { status: 'SUCCESS', data },
+      { status: 'SUCCESS', data: scoredData },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
     );
   } catch (error) {
