@@ -65,6 +65,24 @@ const PRIORITY_MODEL_REPAIR_LINKS: Record<string, PriorityRepairLink> = {
     description:
       "Short runtime, service battery warnings, or swelling signs? View the battery repair path so we can check power behaviour, charging response, and trackpad pressure first.",
   },
+  "phone/samsung/galaxy-s24-ultra": {
+    repairSlug: "screen-replacement",
+    title: "Samsung Galaxy S24 Ultra screen replacement",
+    description:
+      "Flicker, lines, black display, or touch dead zones? Start with the screen repair page so we can check OLED output, frame condition, and post-repair function checks before quoting.",
+  },
+  "phone/iphone/iphone-13": {
+    repairSlug: "screen-replacement",
+    title: "iPhone 13 screen replacement",
+    description:
+      "Cracked glass, touch drift, or display faults? View the iPhone 13 screen repair path so we can check panel condition, frame seating, and quote options before service.",
+  },
+  "laptop/macbook/macbook-pro-14-m3": {
+    repairSlug: "battery-replacement",
+    title: "MacBook Pro 14 M3 battery replacement",
+    description:
+      "Battery drain, cycle wear, or charging inconsistency? Start with the battery repair page so we can check charging path, top-case pressure, and power stability before repair.",
+  },
 };
 
 function getPriorityRepairLink(categorySlug: string, brandSlug: string, modelSlug: string, repairSlugs: string[]) {

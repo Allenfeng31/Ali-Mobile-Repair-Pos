@@ -2965,6 +2965,96 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { question: "Should I back up my MacBook before battery replacement?", answer: "Yes. If the MacBook still powers on, back up important data before bringing it in for battery service." },
     ],
   },
+  "phone/samsung/galaxy-s24-ultra/screen-replacement": {
+    quickAnswer:
+      "Need Samsung Galaxy S24 Ultra screen replacement in Ringwood? We check OLED output, flicker and line symptoms, touch response, frame condition, and fit risk before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this display?",
+      diagnostics: "How do we confirm the screen fault?",
+      symptoms: "Which display symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "OLED and touch diagnosis", shortDescription: "We test display output, touch coverage, brightness behaviour, and dead-zone patterns before quoting.", bestFor: "Black screen, line/flicker issues, touch loss, or cracked display glass.", notes: "Quote and screen path are confirmed before parts are fitted." },
+      { name: "Frame and corner inspection", shortDescription: "We inspect frame edges, corners, and impact points that can affect display seating and fit.", bestFor: "Drops with visible corner dents or frame pressure around the display.", notes: "Frame-related risk is explained clearly before repair starts." },
+      { name: "Post-repair function checks", shortDescription: "After fitting, we retest display output, touch response, cameras, speaker, and charging response.", bestFor: "Customers who want practical handover checks on core daily-use functions.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Flicker or line artefacts", description: "Impact can cause OLED output faults such as lines, flicker, or partial image loss." },
+      { title: "Touch dead zones", description: "Touch may stop responding in strips or corners after screen or frame impact." },
+      { title: "Frame pressure damage", description: "Corner dents or edge pressure can affect new display seating quality." },
+      { title: "Visible crack spread", description: "Cracks can expand with daily use and make touch behaviour less stable." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Display and touch test", description: "We confirm OLED output condition, brightness behaviour, and touch coverage." },
+      { step: "02", title: "Inspect frame impact points", description: "We check corners and edge fit risks before confirming screen replacement." },
+      { step: "03", title: "Confirm quote and repair scope", description: "We confirm the display path and quote before fitting the replacement screen." },
+      { step: "04", title: "Final handover checks", description: "We retest display, touch, camera, speaker, and charging behaviour before pickup." },
+    ],
+    faq: [
+      { question: "Do you check frame damage before Galaxy S24 Ultra screen replacement?", answer: "Yes. We inspect frame and corner condition first because impact points can affect display fit and repair stability." },
+    ],
+  },
+  "phone/iphone/iphone-13/screen-replacement": {
+    quickAnswer:
+      "Need iPhone 13 screen replacement in Ringwood? We check crack spread, touch drift, display output, frame seating risk, and top camera area condition before confirming quote and repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this iPhone 13 screen?",
+      diagnostics: "How do we confirm the display fault?",
+      symptoms: "Which screen symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Display and touch assessment", shortDescription: "We test image output, touch drift, dead zones, and flicker/line symptoms before repair.", bestFor: "Cracked glass, no image, touch lag, or unstable touch response.", notes: "Repair option and quote are confirmed before fitting the new display." },
+      { name: "Frame seating and fit check", shortDescription: "We inspect frame edges and pressure points that can affect clean screen seating.", bestFor: "Phones with corner drops, bent edges, or lifted screen sections.", notes: "Frame fit risks are explained before service starts." },
+      { name: "Top camera area review", shortDescription: "We inspect the top display area for impact around the front camera/sensor region.", bestFor: "Damage near the notch area or front glass upper edge.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Crack spread over time", description: "Small cracks can expand and gradually affect touch accuracy." },
+      { title: "Touch drift or lag", description: "Touch can register inconsistently after display impact or pressure damage." },
+      { title: "Flicker or black image", description: "Display impact can cause intermittent image loss or full black screen symptoms." },
+      { title: "Frame seating issues", description: "Edge dents can affect how well the replacement display seats." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test display response", description: "We confirm image condition, brightness, and touch behaviour across the panel." },
+      { step: "02", title: "Inspect frame and top area", description: "We check frame fit and top camera/sensor region before confirming repair path." },
+      { step: "03", title: "Confirm quote and display option", description: "We confirm display path and quote before fitting the replacement screen." },
+      { step: "04", title: "Final function checks", description: "We retest display quality, touch response, cameras, speaker, and charging at handover." },
+    ],
+    faq: [
+      { question: "Should I back up my iPhone 13 before screen replacement?", answer: "Yes. If the phone still powers on, backing up your data before repair is always recommended." },
+    ],
+  },
+  "laptop/macbook/macbook-pro-14-m3/battery-replacement": {
+    quickAnswer:
+      "Need MacBook Pro 14 M3 battery replacement in Ringwood? We check cycle-related battery behaviour, charging response, swelling signs, and trackpad/top-case pressure before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this MacBook battery?",
+      diagnostics: "How do we confirm the battery fault?",
+      symptoms: "Which battery symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Battery runtime and cycle review", shortDescription: "We assess runtime drop, battery warning behaviour, shutdown pattern, and cycle-related wear signs.", bestFor: "Fast drain, short unplugged use, or service battery warnings.", notes: "Quote and repair scope are confirmed before battery replacement." },
+      { name: "Charger-path verification", shortDescription: "We test charging path and adapter response before assuming the battery is the only issue.", bestFor: "Charging inconsistency or power behaviour that changes by adapter/cable.", notes: "Bring the charger that shows the issue if possible." },
+      { name: "Top-case and trackpad pressure check", shortDescription: "We inspect for swelling pressure signs affecting trackpad feel or housing alignment.", bestFor: "Trackpad stiffness, case lift, or visible pressure on palm-rest/top-case areas.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Runtime dropping quickly", description: "Battery wear can shorten unplugged work time and increase shutdown risk." },
+      { title: "Service battery alerts", description: "Battery condition warnings can indicate ageing cells and unstable power behaviour." },
+      { title: "Charging path uncertainty", description: "Some power issues can overlap between battery condition and charging path hardware." },
+      { title: "Swelling pressure symptoms", description: "Battery swelling can affect trackpad response and case alignment." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Review power symptoms", description: "We check runtime behaviour, warning signs, and shutdown pattern." },
+      { step: "02", title: "Test charger response", description: "We validate charging path behaviour before confirming battery replacement." },
+      { step: "03", title: "Inspect top-case and trackpad", description: "We check for pressure or fit symptoms linked to battery condition." },
+      { step: "04", title: "Final power validation", description: "After repair, we confirm startup, charging response, and normal operating stability." },
+    ],
+    faq: [
+      { question: "Can you test charging before MacBook Pro 14 M3 battery replacement?", answer: "Yes. We test charging-path behaviour first so the repair scope is clear before replacement begins." },
+    ],
+  },
 };
 
 function getPriorityRepairSeoPocket(category: string, brand: string, model: string, repairType: string) {
