@@ -166,7 +166,21 @@ const nextConfig: NextConfig = {
       // 11. SAFE LEGACY REDIRECTS (Laptop / MacBook)
       { source: '/repairs/laptops/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
       { source: '/repairs/laptop/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
-      { source: '/repairs/laptops/macbook/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true }
+      { source: '/repairs/laptops/macbook/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
+      // 12. GSC MODEL-PREFIXED REPAIR SLUG CLEANUP
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/lenovo-tab-m10-gen-3-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-front-camera', destination: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/galaxy-tab-s9-fe-back-housing', destination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/back-housing-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/lenovo-tab-m9-back-housing', destination: '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/back-housing-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-s24-ultra/logic-board', destination: '/repairs/phone/samsung/galaxy-s24-ultra/logic-board-repair', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-a50/logic-board', destination: '/repairs/phone/samsung/galaxy-a50/logic-board-repair', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s7-plus-sm-t970--sm-t975--sm-t976/galaxy-tab-s7-plus-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s7-plus-sm-t970--sm-t975--sm-t976/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s2-97-sm-t810--sm-t815/galaxy-tab-s2-97-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s2-97-sm-t810--sm-t815/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/lenovo-tab-m10-plus-gen-3-back-housing', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/back-housing-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/galaxy-tab-a-80-2015-charging-port', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/charging-port-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/lenovo-tab-m7-3rd-gen-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-tb-x606f/lenovo-tab-m10-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-tb-x606f/screen-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-s8/logic-board', destination: '/repairs/phone/samsung/galaxy-s8/logic-board-repair', permanent: true }
     ];
   },
 };
