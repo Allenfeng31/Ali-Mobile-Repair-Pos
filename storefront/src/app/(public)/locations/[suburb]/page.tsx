@@ -351,6 +351,36 @@ export default async function LocationPage({ params }: LocationPageProps) {
           </Link>
         </section>
 
+        <section className="location-content-grid" aria-label={`Common repair pages for ${area.name} customers`}>
+          <article className="location-story-card">
+            <span className="location-kicker location-kicker-muted">Common repair pages</span>
+            <h2>Popular repairs customers ask about near {area.name}</h2>
+            <p>
+              Customers often ask about these repair pages before they visit. You can check symptoms,
+              quote context, and booking details on each model-specific page.
+            </p>
+            <div className="location-transit-guide">
+              <ul>
+                <li>
+                  <Link href="/repairs/phone/iphone/iphone-15-pro-max/screen-replacement">
+                    iPhone 15 Pro Max screen replacement
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement">
+                    Galaxy S24 Ultra screen replacement
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/repairs/tablet/ipad/ipad-9th-generation/screen-replacement">
+                    iPad 9th Generation screen replacement
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </article>
+        </section>
+
         <section className="location-final-cta">
           <div>
             <span className="location-kicker location-kicker-muted">Before you drive</span>
