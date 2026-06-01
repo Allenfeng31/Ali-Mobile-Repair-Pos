@@ -3025,34 +3025,34 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { question: "Should I back up my iPhone 13 before screen replacement?", answer: "Yes. If the phone still powers on, backing up your data before repair is always recommended." },
     ],
   },
-  "laptop/macbook/macbook-pro-14-m3/battery-replacement": {
+  "tablet/ipad/ipad-9th-generation/screen-replacement": {
     quickAnswer:
-      "Need MacBook Pro 14 M3 battery replacement in Ringwood? We check cycle-related battery behaviour, charging response, swelling signs, and trackpad/top-case pressure before confirming the repair path.",
+      "Need iPad 9th Generation screen replacement in Ringwood? We check glass damage, touch response, frame pressure, and button/camera-area condition before confirming quote and repair scope.",
     workbenchHeadings: {
-      options: "What do we check before replacing this MacBook battery?",
-      diagnostics: "How do we confirm the battery fault?",
-      symptoms: "Which battery symptoms matter most?",
+      options: "What do we check before replacing this iPad screen?",
+      diagnostics: "How do we confirm the display fault?",
+      symptoms: "Which screen symptoms matter most?",
       outcomes: "What should you prepare before booking?",
     },
     repairOptions: [
-      { name: "Battery runtime and cycle review", shortDescription: "We assess runtime drop, battery warning behaviour, shutdown pattern, and cycle-related wear signs.", bestFor: "Fast drain, short unplugged use, or service battery warnings.", notes: "Quote and repair scope are confirmed before battery replacement." },
-      { name: "Charger-path verification", shortDescription: "We test charging path and adapter response before assuming the battery is the only issue.", bestFor: "Charging inconsistency or power behaviour that changes by adapter/cable.", notes: "Bring the charger that shows the issue if possible." },
-      { name: "Top-case and trackpad pressure check", shortDescription: "We inspect for swelling pressure signs affecting trackpad feel or housing alignment.", bestFor: "Trackpad stiffness, case lift, or visible pressure on palm-rest/top-case areas.", notes: "Back up important data before repair when possible." },
+      { name: "Glass and touch assessment", shortDescription: "We inspect crack spread and test touch response across the full panel before quoting.", bestFor: "Cracked glass, touch dead zones, ghost touch, or weak touch response.", notes: "Quote and display path are confirmed before repair starts." },
+      { name: "Frame and corner pressure check", shortDescription: "We inspect frame bend and corner pressure that can affect new screen seating.", bestFor: "Tablets with corner drops, bent edges, or visible frame stress.", notes: "Any fit risk is explained before parts are fitted." },
+      { name: "Button and camera-area condition review", shortDescription: "We check home button feel and front camera area condition where impact is visible.", bestFor: "Damage near button/camera region or upper glass edge.", notes: "Back up important data before repair when possible." },
     ],
     commonProblems: [
-      { title: "Runtime dropping quickly", description: "Battery wear can shorten unplugged work time and increase shutdown risk." },
-      { title: "Service battery alerts", description: "Battery condition warnings can indicate ageing cells and unstable power behaviour." },
-      { title: "Charging path uncertainty", description: "Some power issues can overlap between battery condition and charging path hardware." },
-      { title: "Swelling pressure symptoms", description: "Battery swelling can affect trackpad response and case alignment." },
+      { title: "Cracked glass with partial touch", description: "Touch can still work in parts but usually gets less stable over time." },
+      { title: "Touch response instability", description: "Impact can cause dead zones, delayed touch, or ghost input behaviour." },
+      { title: "Frame bend or corner stress", description: "Frame pressure can affect how cleanly the replacement screen sits." },
+      { title: "Button and camera-area overlap", description: "Damage near button or camera zones can affect nearby function checks." },
     ],
     diagnosticSteps: [
-      { step: "01", title: "Review power symptoms", description: "We check runtime behaviour, warning signs, and shutdown pattern." },
-      { step: "02", title: "Test charger response", description: "We validate charging path behaviour before confirming battery replacement." },
-      { step: "03", title: "Inspect top-case and trackpad", description: "We check for pressure or fit symptoms linked to battery condition." },
-      { step: "04", title: "Final power validation", description: "After repair, we confirm startup, charging response, and normal operating stability." },
+      { step: "01", title: "Inspect glass and frame condition", description: "We assess crack spread, corner pressure, and frame shape before opening." },
+      { step: "02", title: "Test display and touch behavior", description: "We test panel image output and touch response across the full screen." },
+      { step: "03", title: "Confirm quote and repair scope", description: "We confirm the screen path and quote before fitting the replacement display." },
+      { step: "04", title: "Final function checks", description: "After repair, we retest display, touch, front camera area, and button response." },
     ],
     faq: [
-      { question: "Can you test charging before MacBook Pro 14 M3 battery replacement?", answer: "Yes. We test charging-path behaviour first so the repair scope is clear before replacement begins." },
+      { question: "Should I back up my iPad 9th Generation before screen replacement?", answer: "Yes. If the iPad still powers on, backing up important data before repair is recommended." },
     ],
   },
 };

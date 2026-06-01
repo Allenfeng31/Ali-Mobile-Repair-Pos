@@ -77,11 +77,11 @@ const PRIORITY_MODEL_REPAIR_LINKS: Record<string, PriorityRepairLink> = {
     description:
       "Cracked glass, touch drift, or display faults? View the iPhone 13 screen repair path so we can check panel condition, frame seating, and quote options before service.",
   },
-  "laptop/macbook/macbook-pro-14-m3": {
-    repairSlug: "battery-replacement",
-    title: "MacBook Pro 14 M3 battery replacement",
+  "tablet/ipad/ipad-9th-generation": {
+    repairSlug: "screen-replacement",
+    title: "iPad 9th Generation screen replacement",
     description:
-      "Battery drain, cycle wear, or charging inconsistency? Start with the battery repair page so we can check charging path, top-case pressure, and power stability before repair.",
+      "Cracked glass or weak touch response? Start with the iPad 9th Generation screen repair page so we can check frame pressure, button/camera-area condition, and fit risk before quoting.",
   },
 };
 
