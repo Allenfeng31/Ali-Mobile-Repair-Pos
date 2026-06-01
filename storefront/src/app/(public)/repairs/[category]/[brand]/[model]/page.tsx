@@ -16,6 +16,46 @@ interface ModelPageProps {
   params: Promise<{ category: string; brand: string; model: string }>;
 }
 
+interface PriorityRepairLink {
+  repairSlug: string;
+  title: string;
+  description: string;
+}
+
+const PRIORITY_MODEL_REPAIR_LINKS: Record<string, PriorityRepairLink> = {
+  "phone/iphone/iphone-14-pro-max": {
+    repairSlug: "battery-replacement",
+    title: "iPhone 14 Pro Max battery replacement",
+    description:
+      "Fast drain, shutdowns, or battery health warnings? Start with the battery repair page so we can check charging behaviour, swelling signs, and quote options before service.",
+  },
+  "phone/samsung/galaxy-s22": {
+    repairSlug: "charging-port-replacement",
+    title: "Samsung Galaxy S22 charging port replacement",
+    description:
+      "Loose USB-C fit or charging only at certain angles? View the charging port repair path so we can check cable, port, dust, and corrosion symptoms before quoting.",
+  },
+  "tablet/ipad/ipad-11th-generation": {
+    repairSlug: "charging-port-replacement",
+    title: "iPad 11th Generation charging port replacement",
+    description:
+      "School-use wear, loose USB-C fit, or charger issues? Start with the iPad charging port page so we can check cable, frame alignment, quote, and stock path.",
+  },
+};
+
+function getPriorityRepairLink(categorySlug: string, brandSlug: string, modelSlug: string, repairSlugs: string[]) {
+  const priorityLink = PRIORITY_MODEL_REPAIR_LINKS[`${categorySlug}/${brandSlug}/${modelSlug}`];
+
+  if (!priorityLink || !repairSlugs.includes(priorityLink.repairSlug)) {
+    return null;
+  }
+
+  return {
+    ...priorityLink,
+    href: `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${priorityLink.repairSlug}`,
+  };
+}
+
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
 
@@ -68,6 +108,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const repairTypes = data?.repairTypes || [];
+  const priorityRepairLink = getPriorityRepairLink(
+    categorySlug,
+    brandSlug,
+    modelSlug,
+    repairTypes.map((repairType) => repairType.slug)
+  );
 
   return (
     <main className="repair-page-shell repair-page-shell-narrow">
@@ -100,6 +146,20 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </div>
         </div>
       </section>
+
+      {priorityRepairLink && (
+        <section className="repair-assist-panel" aria-labelledby="priority-repair-heading">
+          <div>
+            <span className="repair-kicker repair-kicker-muted">Common repair request</span>
+            <h2 id="priority-repair-heading">{priorityRepairLink.title}</h2>
+            <p>{priorityRepairLink.description}</p>
+          </div>
+          <Link href={priorityRepairLink.href} className="repair-primary-action">
+            View priority repair
+            <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+          </Link>
+        </section>
+      )}
 
       <section id="repair-options" className="repair-content-band" aria-label={`${modelName} repair options`}>
         <RepairOptionsGrid

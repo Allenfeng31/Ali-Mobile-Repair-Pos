@@ -2754,6 +2754,103 @@ function buildWatchRepairPocket(modelName: string, repairType: string): RepairTy
   };
 }
 
+const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
+  "phone/iphone/iphone-14-pro-max/battery-replacement": {
+    quickAnswer:
+      "Need iPhone 14 Pro Max battery replacement in Ringwood? We check battery health symptoms, charging behaviour, swelling signs, and shutdown patterns before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this battery?",
+      diagnostics: "How do we confirm it is a battery fault?",
+      symptoms: "Which battery symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Battery health review", shortDescription: "We check the reported battery health, service message, fast drain, and shutdown behaviour.", bestFor: "Battery health drop, short runtime, or unexpected shutdowns.", notes: "A clear quote is confirmed before replacement starts." },
+      { name: "Charging path check", shortDescription: "We test cable, charging response, and port condition before assuming the battery is the only fault.", bestFor: "Phones that charge but drain quickly or only charge with certain cables.", notes: "Bring the cable or charger that shows the issue if you can." },
+      { name: "Swelling and fit inspection", shortDescription: "We look for lifted screen edges, pressure marks, or heat symptoms that can point to battery swelling.", bestFor: "Devices with screen lift, heat, or sudden power loss.", notes: "Back up important data before any repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Battery health has dropped", description: "Reduced battery health can make the phone drain faster during normal daily use." },
+      { title: "Unexpected shutdowns", description: "A worn battery can shut down under load even when charge remains." },
+      { title: "Charging but draining quickly", description: "Fast drain while charging can point to battery wear, cable issues, or port condition." },
+      { title: "Swelling warning signs", description: "Screen lift, pressure, or heat should be checked before the phone is used further." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Check the charging setup", description: "We test charging response with known-good cable and charger before confirming the battery path." },
+      { step: "02", title: "Inspect battery symptoms", description: "We review shutdowns, heat, swelling signs, and reported battery health." },
+      { step: "03", title: "Confirm quote and repair scope", description: "We confirm the battery replacement path and quote before opening the device." },
+      { step: "04", title: "Final power checks", description: "After repair, we check startup, charging response, and normal power behaviour before handover." },
+    ],
+    faq: [
+      { question: "Should I check the charger before booking iPhone 14 Pro Max battery replacement?", answer: "Yes. If the issue appears with one cable or charger, bring it in so we can test charging behaviour before confirming the battery replacement." },
+    ],
+  },
+  "phone/samsung/galaxy-s22/charging-port-replacement": {
+    quickAnswer:
+      "Need Samsung Galaxy S22 charging port replacement in Ringwood? We check USB-C fit, cable behaviour, dust, liquid signs, and charging board symptoms before confirming the repair.",
+    workbenchHeadings: {
+      options: "What do we check before replacing the port?",
+      diagnostics: "How do we confirm the charging fault?",
+      symptoms: "Which USB-C symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Cable and charger test", shortDescription: "We test the phone with known-good charging gear before confirming a port repair.", bestFor: "Phones that only fail with certain cables or chargers.", notes: "Bring the cable or charger that shows the fault if possible." },
+      { name: "USB-C port inspection", shortDescription: "We inspect for loose fit, lint, dust, corrosion, and visible liquid signs around the port.", bestFor: "Loose USB-C connection or charging only at certain angles.", notes: "Avoid forcing the cable if the fit feels loose or gritty." },
+      { name: "Charging board diagnosis", shortDescription: "We check whether symptoms point to the port, charging board path, or related connection.", bestFor: "No-charge, intermittent charging, or charging accessory warnings.", notes: "Repair scope and quote are confirmed before parts are fitted." },
+    ],
+    commonProblems: [
+      { title: "Loose USB-C connection", description: "A worn or dirty port can make the cable feel loose or disconnect easily." },
+      { title: "Angle-only charging", description: "Charging only at a certain angle often points to port wear or debris." },
+      { title: "Dust or corrosion", description: "Lint, moisture, or corrosion can block stable charging contact." },
+      { title: "Board-level overlap", description: "Some charging symptoms can involve the port path or charging board rather than the socket alone." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test known-good accessories", description: "We test with reliable cable and charger before replacing parts." },
+      { step: "02", title: "Inspect the USB-C port", description: "We check fit, debris, corrosion, and signs of liquid exposure." },
+      { step: "03", title: "Confirm charging path", description: "We verify whether the fault matches a port or charging board repair path." },
+      { step: "04", title: "Retest charging before pickup", description: "After repair, we confirm stable cable fit and charging response." },
+    ],
+    faq: [
+      { question: "Can you check my Galaxy S22 cable before replacing the charging port?", answer: "Yes. Bring the cable or charger that causes the issue and we will test it before confirming the charging port repair." },
+    ],
+  },
+  "tablet/ipad/ipad-11th-generation/charging-port-replacement": {
+    quickAnswer:
+      "Need iPad 11th Generation charging port replacement in Ringwood? We check USB-C wear, charger behaviour, frame alignment, and school-use impact signs before confirming quote and stock path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing the iPad port?",
+      diagnostics: "How do we confirm the USB-C fault?",
+      symptoms: "Which iPad charging symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "USB-C port fit check", shortDescription: "We inspect cable fit, port wear, debris, and visible damage around the charging socket.", bestFor: "Loose charging cable, no-charge symptoms, or intermittent charging.", notes: "Do not force the cable if the port feels tight, loose, or misaligned." },
+      { name: "Charger and cable test", shortDescription: "We test with known-good charging gear before confirming the port replacement path.", bestFor: "iPads that charge with one cable but not another.", notes: "Bring the charger or school cable that shows the fault if possible." },
+      { name: "Frame alignment review", shortDescription: "We check whether case pressure, drops, or frame bend affects the USB-C port fit.", bestFor: "School or child-use iPads with impact marks or bent corners.", notes: "Stock and quote are confirmed before repair if the price is not already listed." },
+    ],
+    commonProblems: [
+      { title: "USB-C port wear", description: "Daily school or home use can loosen the port or wear charging contact points." },
+      { title: "Cable test differences", description: "Charging with one cable but not another can point to cable, charger, or port condition." },
+      { title: "Frame or case pressure", description: "Bent corners or tight cases can affect port alignment and cable fit." },
+      { title: "Backup before service", description: "If the iPad still powers on, back up important school or family data before repair." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test charging accessories", description: "We compare charging response with known-good cable and charger." },
+      { step: "02", title: "Inspect port and frame", description: "We check USB-C fit, debris, damage, frame bend, and alignment." },
+      { step: "03", title: "Confirm quote and stock path", description: "We confirm repair scope, quote, and part availability before starting." },
+      { step: "04", title: "Final charging checks", description: "After repair, we test cable fit and charging response before handover." },
+    ],
+    faq: [
+      { question: "Should I bring my iPad 11th Generation charger for a port check?", answer: "Yes. If the charging issue happens with a particular cable or charger, bring it in so we can test the full charging setup." },
+    ],
+  },
+};
+
+function getPriorityRepairSeoPocket(category: string, brand: string, model: string, repairType: string) {
+  return PRIORITY_REPAIR_SEO_POCKETS[`${category}/${brand}/${model}/${repairType}`] || null;
+}
+
 function getRepairTypeSeoPocket(params: {
   category: string;
   brand: string;
@@ -2764,6 +2861,9 @@ function getRepairTypeSeoPocket(params: {
   const brand = slugify(params.brand);
   const model = slugify(params.model);
   const repairType = slugify(params.repairType);
+
+  const priorityPocket = getPriorityRepairSeoPocket(category, brand, model, repairType);
+  if (priorityPocket) return priorityPocket;
 
   if (category === "phone" && (brand === "iphone" || brand === "apple")) {
     const modelName = deriveIphoneModelNameFromSlug(model);
