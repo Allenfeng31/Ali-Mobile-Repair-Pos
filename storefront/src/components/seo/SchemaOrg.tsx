@@ -111,38 +111,49 @@ export function FAQSchema({ faqs }: { faqs: { question: string; answer: string }
   return <SchemaOrg type="FAQPage" data={faqData} />;
 }
 
-export function RepairServiceSchema({ serviceName, description, price, modelCode }: { serviceName: string; description: string; price?: string; modelCode?: string }) {
+export function RepairServiceSchema({
+  serviceName,
+  description,
+  price,
+  modelCode,
+  url,
+}: {
+  serviceName: string;
+  description: string;
+  price?: string;
+  modelCode?: string;
+  url?: string;
+}) {
   const serviceData: any = {
     "name": serviceName,
     "description": description,
     "provider": {
       "@id": "https://www.alimobile.com.au/#localbusiness"
     },
-    "offers": {
-      "@type": "Offer",
-      "availability": "https://schema.org/InStock"
-    }
   };
 
   const parsedPrice = typeof price === 'string' ? parseFloat(price) : Number(price);
+  const hasNumericPrice = !isNaN(parsedPrice) && parsedPrice > 0;
 
-  if (!price || isNaN(parsedPrice) || parsedPrice <= 0) {
-    serviceData.offers.description = "No Fix No Charge policy. Get a free quote.";
-    // STRICT GUARD: Ensure absolutely no price output for zero/empty values
-    delete (serviceData.offers as any).price;
-    delete (serviceData.offers as any).priceCurrency;
-  } else {
-    serviceData.offers.price = parsedPrice.toFixed(2);
-    serviceData.offers.priceCurrency = "AUD";
+  if (hasNumericPrice) {
+    const offerData: any = {
+      "@type": "Offer",
+      "price": parsedPrice.toFixed(2),
+      "priceCurrency": "AUD",
+      "availability": "https://schema.org/InStock",
+    };
+    if (url) offerData.url = url;
+    serviceData.offers = offerData;
   }
 
-  if (modelCode) {
+  if (modelCode && hasNumericPrice) {
     serviceData.model = modelCode;
     serviceData.mpn = modelCode;
     serviceData.itemOffered = {
       "@type": "Product",
       "name": modelCode,
-      "model": modelCode
+      "model": modelCode,
+      "offers": { ...serviceData.offers }
     };
   }
 

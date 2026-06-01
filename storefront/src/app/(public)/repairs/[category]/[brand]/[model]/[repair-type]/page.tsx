@@ -2980,6 +2980,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const finalRepairName = knownRepair?.name || repairTypeDerived;
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
+  const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${safeSlugSegment(resolvedParams.model)}/${safeSlugSegment(resolvedParams['repair-type'])}`;
 
   return (
     <>
@@ -2988,6 +2990,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         description={`Professional ${finalRepairName} for ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`}
         price={price > 0 ? String(price) : undefined}
         modelCode={modelCode}
+        url={repairPageUrl}
       />
 
       <RepairTypeClient 
