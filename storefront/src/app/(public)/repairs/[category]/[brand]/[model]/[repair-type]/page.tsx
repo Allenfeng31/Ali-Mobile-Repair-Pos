@@ -2845,6 +2845,126 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { question: "Should I bring my iPad 11th Generation charger for a port check?", answer: "Yes. If the charging issue happens with a particular cable or charger, bring it in so we can test the full charging setup." },
     ],
   },
+  "phone/iphone/iphone-15-pro-max/screen-replacement": {
+    quickAnswer:
+      "Need iPhone 15 Pro Max screen replacement in Ringwood? We check the display image, touch response, frame edge condition, camera area, and display option fit before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this display?",
+      diagnostics: "How do we confirm the screen fault?",
+      symptoms: "Which display symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Display and touch check", shortDescription: "We test image output, touch response, dead spots, lines, and brightness behaviour before quoting.", bestFor: "Cracked glass, black display, flicker, or touch faults.", notes: "Repair option and quote are confirmed before the screen is fitted." },
+      { name: "Frame and fit inspection", shortDescription: "We check edge dents, corner pressure, and housing alignment that can affect display seating.", bestFor: "Phones with impact marks, bent corners, or lifted display edges.", notes: "Frame condition can affect the final fit and is explained before repair." },
+      { name: "Camera area review", shortDescription: "We inspect the top display area and front camera opening for visible impact or pressure signs.", bestFor: "Drops near the Dynamic Island or top edge of the screen.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Cracked glass with working touch", description: "Touch may still work after a crack, but glass damage can worsen with daily use." },
+      { title: "Lines, flicker, or black display", description: "OLED impact symptoms can show as green lines, flicker, dark patches, or no image." },
+      { title: "Weak touch response", description: "Touch faults can appear in strips, corners, or after pressure near the damaged area." },
+      { title: "Frame edge damage", description: "A bent or dented edge can affect how cleanly the new display seats." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test display and touch", description: "We check image output, brightness, touch response, and visible OLED symptoms." },
+      { step: "02", title: "Inspect frame condition", description: "We look at corners, edge dents, and camera-area pressure before confirming fit." },
+      { step: "03", title: "Confirm screen option", description: "We confirm the display path, quote, and repair scope before fitting parts." },
+      { step: "04", title: "Final function checks", description: "After repair, we retest touch, display output, cameras, speaker, and charging response." },
+    ],
+    faq: [
+      { question: "Do you check the iPhone 15 Pro Max frame before screen replacement?", answer: "Yes. We inspect the frame and corner condition because dents or pressure can affect display fit." },
+    ],
+  },
+  "phone/google/pixel-8-pro/screen-replacement": {
+    quickAnswer:
+      "Need Google Pixel 8 Pro screen replacement in Ringwood? We check display output, touch response, fingerprint area behaviour, frame condition, and camera-bar impact signs before quoting.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this Pixel screen?",
+      diagnostics: "How do we confirm the display fault?",
+      symptoms: "Which Pixel screen symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Display and touch diagnosis", shortDescription: "We test image output, touch response, brightness, green lines, and black-screen symptoms.", bestFor: "Cracked glass, no image, flicker, or weak touch response.", notes: "Quote and repair scope are confirmed before screen service." },
+      { name: "Fingerprint and sensor check", shortDescription: "We check the lower display area and related behaviour before and after repair.", bestFor: "Screen faults near the fingerprint area or touch dead zones.", notes: "Some symptoms need testing before the repair path is confirmed." },
+      { name: "Frame and camera-bar inspection", shortDescription: "We inspect edge damage, pressure marks, and camera-bar impact signs that can affect fit.", bestFor: "Drops on the corners, back, or top camera-bar area.", notes: "Back up important photos and data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Cracked or lifted glass", description: "Glass damage can spread and may weaken touch response over time." },
+      { title: "Black display or green lines", description: "Impact can affect OLED output even when the phone still powers on." },
+      { title: "Touch dead zones", description: "Touch may fail around cracks, edges, or the fingerprint area." },
+      { title: "Frame pressure", description: "Bent corners or pressure near the camera bar can affect display seating." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test display behaviour", description: "We check image output, brightness, touch, and visible OLED damage." },
+      { step: "02", title: "Inspect frame and camera bar", description: "We look for impact marks that can affect repair fit." },
+      { step: "03", title: "Confirm display path", description: "We confirm quote and repair scope before fitting the replacement display." },
+      { step: "04", title: "Retest core functions", description: "After repair, we retest touch, display, cameras, charging, and normal use behaviour." },
+    ],
+    faq: [
+      { question: "Do you test touch and fingerprint behaviour on Pixel 8 Pro screen repairs?", answer: "Yes. We check touch response and related display-area behaviour before and after the screen repair." },
+    ],
+  },
+  "phone/oppo/find-x3-pro/charging-port-replacement": {
+    quickAnswer:
+      "Need Oppo Find X3 Pro charging port replacement in Ringwood? We check USB-C fit, cable behaviour, dust, corrosion, charging response, and lower-board symptoms before confirming the repair.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this port?",
+      diagnostics: "How do we confirm the charging fault?",
+      symptoms: "Which charging symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Cable and charger check", shortDescription: "We compare charging response with known-good USB-C cable and power adapter.", bestFor: "Phones that charge with one cable but not another.", notes: "Bring the cable or charger that shows the issue if possible." },
+      { name: "USB-C socket inspection", shortDescription: "We inspect the port for looseness, debris, bent contact signs, corrosion, or liquid marks.", bestFor: "Loose cable fit, no-charge symptoms, or angle-only charging.", notes: "Avoid forcing the cable if the connection feels unstable." },
+      { name: "Charging path diagnosis", shortDescription: "We check whether symptoms point to the socket, lower board, or related charging path.", bestFor: "Intermittent charging or no response after accessory testing.", notes: "Quote and scope are confirmed before parts are fitted." },
+    ],
+    commonProblems: [
+      { title: "Loose USB-C fit", description: "Wear or debris can stop the cable from seating cleanly." },
+      { title: "Angle-only charging", description: "Charging only at certain angles often points to socket wear or obstruction." },
+      { title: "Dust or corrosion", description: "Pocket lint, moisture, or corrosion can interrupt stable charging contact." },
+      { title: "Accessory mismatch", description: "Some faults are cable or adapter related, so we test accessories before replacing parts." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test known-good charging gear", description: "We check whether the phone responds with reliable USB-C cable and adapter." },
+      { step: "02", title: "Inspect the charging port", description: "We look for debris, loose fit, corrosion, and visible liquid signs." },
+      { step: "03", title: "Confirm repair scope", description: "We confirm whether the fault fits a port or charging path repair before quoting." },
+      { step: "04", title: "Final charging test", description: "After repair, we test cable fit and charging response before handover." },
+    ],
+    faq: [
+      { question: "Should I bring my charger for Oppo Find X3 Pro charging port diagnosis?", answer: "Yes. Bring the charger or cable that causes the issue so we can test the full charging setup before confirming repair." },
+    ],
+  },
+  "laptop/macbook/macbook-pro-13-m1-2020/battery-replacement": {
+    quickAnswer:
+      "Need MacBook Pro 13 M1 2020 battery replacement in Ringwood? We check battery condition, cycle symptoms, charging response, top-case fit, and trackpad behaviour before confirming the repair.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this MacBook battery?",
+      diagnostics: "How do we confirm the battery fault?",
+      symptoms: "Which MacBook battery symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Battery condition review", shortDescription: "We check battery health, runtime symptoms, shutdowns, charging response, and swelling signs.", bestFor: "Fast drain, service battery warnings, or short runtime.", notes: "Quote and part path are confirmed before repair." },
+      { name: "Charger and port test", shortDescription: "We test USB-C charging response before assuming the battery is the only issue.", bestFor: "MacBooks that charge intermittently or only with certain adapters.", notes: "Bring the charger that shows the issue if possible." },
+      { name: "Top case and trackpad check", shortDescription: "We inspect the top case, trackpad pressure, and lower housing fit for swelling-related symptoms.", bestFor: "Trackpad stiffness, case lift, or visible battery swelling risk.", notes: "Back up important data before service when possible." },
+    ],
+    commonProblems: [
+      { title: "Short battery runtime", description: "Battery wear can reduce unplugged runtime and make the MacBook shut down sooner." },
+      { title: "Service battery warning", description: "macOS battery warnings can point to ageing or unstable battery condition." },
+      { title: "Charging inconsistency", description: "Charging faults can involve the adapter, USB-C path, or battery condition." },
+      { title: "Swelling pressure signs", description: "Battery swelling can affect the trackpad, top case, or lower housing fit." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Check power symptoms", description: "We review battery condition, runtime, shutdowns, and charging behaviour." },
+      { step: "02", title: "Test charger and USB-C response", description: "We test charging with known-good gear before confirming battery replacement." },
+      { step: "03", title: "Inspect case and trackpad", description: "We check for swelling pressure, trackpad stiffness, and housing fit." },
+      { step: "04", title: "Final power checks", description: "After repair, we check charging response, startup, trackpad feel, and normal power behaviour." },
+    ],
+    faq: [
+      { question: "Should I back up my MacBook before battery replacement?", answer: "Yes. If the MacBook still powers on, back up important data before bringing it in for battery service." },
+    ],
+  },
 };
 
 function getPriorityRepairSeoPocket(category: string, brand: string, model: string, repairType: string) {

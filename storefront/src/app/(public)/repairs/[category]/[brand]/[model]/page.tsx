@@ -41,6 +41,30 @@ const PRIORITY_MODEL_REPAIR_LINKS: Record<string, PriorityRepairLink> = {
     description:
       "School-use wear, loose USB-C fit, or charger issues? Start with the iPad charging port page so we can check cable, frame alignment, quote, and stock path.",
   },
+  "phone/iphone/iphone-15-pro-max": {
+    repairSlug: "screen-replacement",
+    title: "iPhone 15 Pro Max screen replacement",
+    description:
+      "Cracked glass, green lines, black display, or weak touch? Start with the screen repair page so we can check display output, frame fit, and camera-area condition before quoting.",
+  },
+  "phone/google/pixel-8-pro": {
+    repairSlug: "screen-replacement",
+    title: "Google Pixel 8 Pro screen replacement",
+    description:
+      "Cracked glass, black display, touch dead zones, or fingerprint-area issues? View the Pixel screen repair path so we can check display behaviour and frame fit first.",
+  },
+  "phone/oppo/find-x3-pro": {
+    repairSlug: "charging-port-replacement",
+    title: "Oppo Find X3 Pro charging port replacement",
+    description:
+      "Loose USB-C fit or angle-only charging? Start with the charging port page so we can test cable, socket, corrosion, and charging-path symptoms before quoting.",
+  },
+  "laptop/macbook/macbook-pro-13-m1-2020": {
+    repairSlug: "battery-replacement",
+    title: "MacBook Pro 13 M1 2020 battery replacement",
+    description:
+      "Short runtime, service battery warnings, or swelling signs? View the battery repair path so we can check power behaviour, charging response, and trackpad pressure first.",
+  },
 };
 
 function getPriorityRepairLink(categorySlug: string, brandSlug: string, modelSlug: string, repairSlugs: string[]) {
