@@ -116,6 +116,24 @@ function standardizeRepairName(rawName: string): string {
   return REPAIR_NAME_MAP[rawName] ?? rawName;
 }
 
+function normalizeRepairSlug(rawName: string): string {
+  const rawSlug = slugify(rawName);
+
+  const repairSlugRules: Array<[RegExp, string]> = [
+    [/(^|-)screen-(repair|replacement)$/, 'screen-replacement'],
+    [/(^|-)battery-(service|repair|replacement)$/, 'battery-replacement'],
+    [/(^|-)charging-port(-(repair|replacement))?$/, 'charging-port-replacement'],
+    [/(^|-)back-housing(-(repair|replacement))?$/, 'back-housing-replacement'],
+    [/(^|-)back-glass(-(repair|replacement))?$/, 'back-housing-replacement'],
+    [/(^|-)front-camera(-(repair|replacement))?$/, 'front-camera-replacement'],
+    [/(^|-)back-camera(-(repair|replacement))?$/, 'back-camera-replacement'],
+    [/(^|-)water-damage(-(repair|recovery))?$/, 'water-damage-repair'],
+    [/(^|-)logic-board(-(repair|replacement))?$/, 'logic-board-repair'],
+  ];
+
+  return repairSlugRules.find(([pattern]) => pattern.test(rawSlug))?.[1] ?? rawSlug;
+}
+
 // ─── Repair Matrix Expansion ─────────────────────────────────────────────────
 
 const UNIVERSAL_REPAIR_TYPES: RepairOption[] = [
@@ -210,7 +228,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
 
     // ── Name Standardization: map old POS names to canonical names ──
     const standardName = standardizeRepairName(item.service);
-    const standardSlug = slugify(standardName);
+    const standardSlug = normalizeRepairSlug(standardName);
 
     const cleanBrand = displayBrand(item.brand);
     const category = getDeviceCategory(cleanBrand, item.deviceModel);
@@ -382,14 +400,15 @@ export async function fetchRepairDetails(
   if (!modelEntry) return null;
 
   const repairEntry = modelEntry.repairTypes.find(r => r.slug === repairSlug);
+  if (!repairEntry) return null;
 
   return {
     brand: brandEntry.brand,
     model: modelEntry.model,
     modelCode: modelEntry.modelCode,
-    repairType: repairEntry?.name || repairSlug.replace(/-/g, ' '),
-    price: repairEntry?.price || 0,
-    variants: repairEntry?.variants || [],
+    repairType: repairEntry.name,
+    price: repairEntry.price,
+    variants: repairEntry.variants || [],
     source: catalog.source,
   };
 }

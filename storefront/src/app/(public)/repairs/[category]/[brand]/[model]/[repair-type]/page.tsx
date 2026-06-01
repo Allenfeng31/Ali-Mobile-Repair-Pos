@@ -2880,6 +2880,10 @@ export async function generateMetadata({ params }: RepairPageProps) {
     resolvedParams['repair-type']
   );
 
+  if (!details) {
+    notFound();
+  }
+
   const model = details?.model || formatDynamicParam(resolvedParams.model);
   const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const priceStr = details?.price ? ` from $${details.price}` : '';
@@ -2958,7 +2962,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type']
   );
 
-  if (!details && !resolvedParams.model) {
+  if (!details) {
     notFound();
   }
 
