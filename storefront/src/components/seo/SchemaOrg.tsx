@@ -115,13 +115,11 @@ export function RepairServiceSchema({
   serviceName,
   description,
   price,
-  modelCode,
   url,
 }: {
   serviceName: string;
   description: string;
   price?: string;
-  modelCode?: string;
   url?: string;
 }) {
   const serviceData: any = {
@@ -144,17 +142,6 @@ export function RepairServiceSchema({
     };
     if (url) offerData.url = url;
     serviceData.offers = offerData;
-  }
-
-  if (modelCode && hasNumericPrice) {
-    serviceData.model = modelCode;
-    serviceData.mpn = modelCode;
-    serviceData.itemOffered = {
-      "@type": "Product",
-      "name": modelCode,
-      "model": modelCode,
-      "offers": { ...serviceData.offers }
-    };
   }
 
   return <SchemaOrg type="Service" data={serviceData} />;

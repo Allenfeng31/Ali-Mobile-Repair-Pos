@@ -2989,7 +2989,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         serviceName={`${displayModel} ${finalRepairName} in Ringwood`}
         description={`Professional ${finalRepairName} for ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`}
         price={price > 0 ? String(price) : undefined}
-        modelCode={modelCode}
         url={repairPageUrl}
       />
 
