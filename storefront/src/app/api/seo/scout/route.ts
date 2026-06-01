@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { buildStrategicScoutQueries, runScoutEngine } from '@/lib/seo/scout';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,7 +111,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data, error } = await supabase
+    const seoDataClient = createServiceRoleClient();
+    const { data, error } = await seoDataClient
       .from('seo_keywords')
       .select('*')
       .order('search_weight', { ascending: false });
@@ -145,7 +147,8 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { error } = await supabase
+    const seoDataClient = createServiceRoleClient();
+    const { error } = await seoDataClient
       .from('seo_keywords')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id);
@@ -222,7 +225,8 @@ export async function POST(request: Request) {
       }
     }
 
-    const { data: lastRunLog, error: lastRunError } = await supabase
+    const seoDataClient = createServiceRoleClient();
+    const { data: lastRunLog, error: lastRunError } = await seoDataClient
       .from('seo_scout_logs')
       .select('created_at')
       .eq('status', 'SUCCESS')
@@ -260,10 +264,10 @@ export async function POST(request: Request) {
         postalCode: '3134',
         searchQueries: buildStrategicScoutQueries(),
       },
-      supabase
+      seoDataClient
     );
 
-    const { error: insertError } = await supabase.from('seo_scout_logs').insert({
+    const { error: insertError } = await seoDataClient.from('seo_scout_logs').insert({
       triggered_by: sessionUserId,
       keywords_found: scoutResult.insertedCount,
       violations_blocked: scoutResult.blockedCount,

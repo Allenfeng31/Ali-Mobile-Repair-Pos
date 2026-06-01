@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { scoreSeoCampaignBatch, type CampaignLike } from '@/lib/seo/campaignQualityGate';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,11 +67,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const seoDataClient = createServiceRoleClient();
     const { searchParams } = new URL(request.url);
     const campaignId = searchParams.get('id');
 
     if (campaignId) {
-      const { data, error } = await supabase
+      const { data, error } = await seoDataClient
         .from('pending_seo_campaigns')
         .select('*')
         .eq('id', campaignId)
@@ -86,7 +88,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await seoDataClient
       .from('pending_seo_campaigns')
       .select('*')
       .order('created_at', { ascending: false, nullsFirst: false })

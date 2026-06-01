@@ -8,11 +8,11 @@ dotenv.config({ path: path.resolve(process.cwd(), 'server/.env') });
 dotenv.config({ path: path.resolve(process.cwd(), 'storefront/.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), 'storefront/.env') });
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Missing Supabase credentials in env.");
+  console.error("Missing server-side Supabase credentials. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
   process.exit(1);
 }
 

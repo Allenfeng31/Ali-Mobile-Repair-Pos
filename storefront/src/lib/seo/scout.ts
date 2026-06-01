@@ -1,6 +1,5 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 
 // ---------------------------------------------------------------------------
 // CONSTANTS & CONFIGURATIONS
@@ -328,17 +327,15 @@ export function isWithin15KmOfRingwood(keyword: string): boolean {
     return localSuburbs.some((suburb) => lower.includes(suburb));
 }
 
-// Instantiating Supabase Client (Will be intercepted by your Vitest mock)
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-key'
-);
+function getScoutServiceClient(): SupabaseClient {
+    return createServiceRoleClient() as SupabaseClient;
+}
 
 // ---------------------------------------------------------------------------
 // CONSTRAINT 2: Quota Protection Logic (12-Hour Server Lockdown)
 // ---------------------------------------------------------------------------
 export async function checkQuotaLock() {
-    const { data, error } = await supabase
+    const { data, error } = await getScoutServiceClient()
         .from('pending_seo_campaigns')
         .select('created_at')
         .order('created_at', { ascending: false })
@@ -386,8 +383,8 @@ export function buildSearchRequest(q: string) {
 // ---------------------------------------------------------------------------
 // CONSTRAINT 3: UPSERT & Search Weight Atomic Machine
 // ---------------------------------------------------------------------------
-export async function buildUpsertPayload(keyword: string, source: string) {
-    const { data } = await supabase
+export async function buildUpsertPayload(keyword: string, source: string, client: SupabaseClient = getScoutServiceClient()) {
+    const { data } = await client
         .from('seo_keywords')
         .select('search_weight')
         .eq('keyword', keyword)
@@ -403,10 +400,10 @@ export async function buildUpsertPayload(keyword: string, source: string) {
     };
 }
 
-export async function persistKeyword(keyword: string, source: string) {
-    const payload = await buildUpsertPayload(keyword, source);
+export async function persistKeyword(keyword: string, source: string, client: SupabaseClient = getScoutServiceClient()) {
+    const payload = await buildUpsertPayload(keyword, source, client);
 
-    return await supabase
+    return await client
         .from('seo_keywords')
         .upsert(
             {
@@ -544,7 +541,7 @@ export async function runScoutEngine(
     params: ScoutParams,
     injectedSupabase?: SupabaseClient
 ): Promise<ScoutResult> {
-    const routeSupabase = injectedSupabase || createRouteHandlerClient({ cookies });
+    const routeSupabase = injectedSupabase || getScoutServiceClient();
     const generatedKeywordTexts = await loadGeneratedKeywordTexts(routeSupabase as SupabaseClient);
     let insertedCount = 0;
     const blockedCount = 0;

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 
 export const dynamic = 'force-dynamic';
 
@@ -292,7 +293,7 @@ function buildInventoryMarkdown(records: SeoKeywordInventoryRecord[]) {
   return lines.join('\n');
 }
 
-async function loadAllSeoKeywords(supabase: Awaited<ReturnType<typeof createAdminSeoSupabase>>) {
+async function loadAllSeoKeywords(supabase: ReturnType<typeof createServiceRoleClient>) {
   const pageSize = 1000;
   const records: SeoKeywordInventoryRecord[] = [];
   let from = 0;
@@ -336,7 +337,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const records = await loadAllSeoKeywords(supabase);
+    const seoDataClient = createServiceRoleClient();
+    const records = await loadAllSeoKeywords(seoDataClient);
     const markdown = buildInventoryMarkdown(records);
 
     return new NextResponse(markdown, {
