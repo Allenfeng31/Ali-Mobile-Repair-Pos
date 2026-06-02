@@ -18,12 +18,15 @@ import {
   FileText,
   Copy,
   Shield,
-  Search
+  Search,
+  BellRing,
+  Volume2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '@/lib/api';
 import { getApiBaseUrl } from '@/lib/apiBase';
+import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/hooks/useAuthStore';
 
 interface LayoutProps {
@@ -43,6 +46,24 @@ const navItems = [
   { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'admin', label: 'Admin', icon: Shield, adminOnly: true },
 ];
+
+const getUnreadSummary = (sessions: any[]) => {
+  const unreadMessages = sessions
+    .flatMap((session) => session.chat_messages || [])
+    .filter((message) => message.sender === 'customer' && !message.is_read)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  return {
+    total: unreadMessages.length,
+    latestUnreadId: unreadMessages[0]?.id || null,
+  };
+};
+
+const getStaffAuthHeaders = async () => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // ─── Slim Settings Panel ──────────────────────────────────────────────────────
 function SettingsPanel({
@@ -361,6 +382,9 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   const { permissions } = useAuthStore();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [unreadChats, setUnreadChats] = React.useState(0);
+  const [markingChatSeen, setMarkingChatSeen] = React.useState(false);
+  const lastAlertedMessageIdRef = React.useRef<string | null>(null);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
 
   // ── Quick Quote (Cmd+K) State ───────────────────────────────────────────
   const [isQuickSearchOpen, setIsQuickSearchOpen] = React.useState(false);
@@ -431,34 +455,116 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
     return () => clearInterval(interval);
   }, []);
 
-  // Poll for unread customer messages — shows red dot on Chat icon
-  React.useEffect(() => {
-    const API_BASE = getApiBaseUrl();
+  const playChatAlertSound = React.useCallback(() => {
+    try {
+      const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextCtor) return;
 
-    const checkUnread = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/chat/sessions`);
-        if (!res.ok) return;
-        const sessions: any[] = await res.json();
-        const total = sessions.reduce((acc, s) => {
-          const unread = (s.chat_messages || []).filter(
-            (m: any) => m.sender === 'customer' && !m.is_read
-          ).length;
-          return acc + unread;
-        }, 0);
-        setUnreadChats(total);
-      } catch (_) {}
-    };
+      const audioContext = audioContextRef.current || new AudioContextCtor();
+      audioContextRef.current = audioContext;
 
-    checkUnread();
-    const interval = setInterval(checkUnread, 5000);
-    return () => clearInterval(interval);
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(660, audioContext.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.34);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.36);
+    } catch (_) {
+      // Browsers can block sound until the staff member has interacted with the page.
+    }
   }, []);
 
-  // Clear badge when user navigates to chat
+  const checkUnreadChats = React.useCallback(async () => {
+    const API_BASE = getApiBaseUrl();
+
+    try {
+      const res = await fetch(`${API_BASE}/chat/sessions`, {
+        headers: await getStaffAuthHeaders(),
+      });
+      if (!res.ok) return null;
+      const sessions: any[] = await res.json();
+      const summary = getUnreadSummary(sessions);
+      setUnreadChats(summary.total);
+
+      if (summary.latestUnreadId && summary.latestUnreadId !== lastAlertedMessageIdRef.current) {
+        lastAlertedMessageIdRef.current = summary.latestUnreadId;
+        playChatAlertSound();
+      }
+
+      if (!summary.latestUnreadId) {
+        lastAlertedMessageIdRef.current = null;
+      }
+
+      return summary;
+    } catch (_) {
+      return null;
+    }
+  }, [playChatAlertSound]);
+
+  // Poll backend unread state so every open POS device reflects global chat status.
   React.useEffect(() => {
-    if (currentView === 'chat') setUnreadChats(0);
-  }, [currentView]);
+    checkUnreadChats();
+    const interval = setInterval(checkUnreadChats, 5000);
+    return () => clearInterval(interval);
+  }, [checkUnreadChats]);
+
+  const markChatSeen = React.useCallback(async () => {
+    const API_BASE = getApiBaseUrl();
+    setMarkingChatSeen(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/chat/seen`, {
+        method: 'POST',
+        headers: await getStaffAuthHeaders(),
+      });
+      if (!res.ok) {
+        await checkUnreadChats();
+        return false;
+      }
+
+      const data = await res.json().catch(() => ({ unreadCount: 0 }));
+      const unreadCount = Number(data?.unreadCount || 0);
+      setUnreadChats(unreadCount);
+      if (unreadCount === 0) lastAlertedMessageIdRef.current = null;
+
+      try {
+        if ('clearAppBadge' in navigator) {
+          (navigator as any).clearAppBadge().catch(() => {});
+        }
+      } catch (_) {}
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_BADGE' });
+      }
+
+      return true;
+    } catch (_) {
+      await checkUnreadChats();
+      return false;
+    } finally {
+      setMarkingChatSeen(false);
+    }
+  }, [checkUnreadChats]);
+
+  const openChatAndMarkSeen = React.useCallback(() => {
+    if (currentView !== 'chat') {
+      onViewChange('chat');
+      return;
+    }
+    markChatSeen();
+  }, [currentView, markChatSeen, onViewChange]);
+
+  React.useEffect(() => {
+    if (currentView === 'chat') {
+      markChatSeen();
+    }
+  }, [currentView, markChatSeen]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -481,22 +587,25 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            const showBadge = item.id === 'chat' && unreadChats > 0 && !isActive;
+            const showBadge = item.id === 'chat' && unreadChats > 0;
             return (
               <button
                 key={item.id}
-                onClick={() => onViewChange(item.id)}
+                onClick={() => item.id === 'chat' ? openChatAndMarkSeen() : onViewChange(item.id)}
                 className={cn(
                   "p-3 rounded-2xl transition-all duration-200 relative group",
                   isActive
                     ? "text-neu-accent bg-neu-bg shadow-neu-pressed"
-                    : "text-neu-text-secondary hover:text-neu-accent hover:bg-neu-bg hover:shadow-neu-sm"
+                    : "text-neu-text-secondary hover:text-neu-accent hover:bg-neu-bg hover:shadow-neu-sm",
+                  showBadge && "text-red-600 bg-red-50 shadow-[0_0_0_6px_rgba(239,68,68,0.12)] animate-pulse"
                 )}
               >
                 <div className="relative">
                   <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                   {showBadge && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-surface-container-low shadow-sm" />
+                    <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-600 border-2 border-white text-[9px] font-black text-white shadow-lg flex items-center justify-center">
+                      {unreadChats > 9 ? '9+' : unreadChats}
+                    </span>
                   )}
                 </div>
                 <span className="absolute left-full ml-4 px-4 py-2 bg-[var(--color-neu-bg)] text-black font-black text-sm rounded-xl shadow-[var(--shadow-neu-flat)] opacity-0 pointer-events-none group-hover:opacity-100 transition-all z-50 whitespace-nowrap">
@@ -572,6 +681,35 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           </div>
         </header>
 
+        {unreadChats > 0 && (
+          <div className="sticky top-[72px] z-40 px-4 md:px-8 pt-4">
+            <div className="mx-auto flex max-w-5xl flex-col gap-4 rounded-[2rem] border border-red-200 bg-red-50 p-4 text-red-700 shadow-[0_18px_45px_rgba(239,68,68,0.22)] sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-red-600 text-white shadow-lg">
+                  <BellRing size={22} strokeWidth={3} />
+                  <span className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-white shadow">
+                    <span className="block h-full w-full animate-ping rounded-full bg-red-500" />
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-black text-red-700">New customer message or booking in chat</p>
+                  <p className="mt-1 text-xs font-bold text-red-600/80">
+                    {unreadChats} unread {unreadChats === 1 ? 'message' : 'messages'} waiting. This alert stays until staff opens chat.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={openChatAndMarkSeen}
+                disabled={markingChatSeen}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-red-700 active:scale-95 disabled:opacity-60"
+              >
+                <Volume2 size={16} strokeWidth={3} />
+                {markingChatSeen ? 'Opening...' : 'Open chat'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* View Content */}
         <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
           <motion.div
@@ -591,22 +729,25 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            const showBadge = item.id === 'chat' && unreadChats > 0 && !isActive;
+            const showBadge = item.id === 'chat' && unreadChats > 0;
             return (
               <button
                 key={item.id}
-                onClick={() => onViewChange(item.id)}
+                onClick={() => item.id === 'chat' ? openChatAndMarkSeen() : onViewChange(item.id)}
                 className={cn(
                   "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-2xl relative",
                   isActive
                     ? "bg-neu-bg shadow-neu-pressed text-neu-accent scale-110"
-                    : "text-neu-text-secondary shadow-neu-flat"
+                    : "text-neu-text-secondary shadow-neu-flat",
+                  showBadge && "bg-red-50 text-red-600 shadow-[0_0_0_5px_rgba(239,68,68,0.12)] animate-pulse"
                 )}
               >
                 <div className="relative">
                   <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                   {showBadge && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border border-surface/90 shadow-sm" />
+                    <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-600 border-2 border-white text-[9px] font-black text-white shadow-lg flex items-center justify-center">
+                      {unreadChats > 9 ? '9+' : unreadChats}
+                    </span>
                   )}
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-wider mt-1">{item.label}</span>

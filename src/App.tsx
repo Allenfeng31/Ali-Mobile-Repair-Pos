@@ -42,6 +42,8 @@ const getInitialViewFromPath = (pathname: string): string => {
   const normalizedPath = pathname.replace(/\/+$/, '') || '/';
 
   if (normalizedPath === '/admin/seo') return 'seo';
+  if (normalizedPath === '/admin/chat') return 'chat';
+  if (normalizedPath === '/admin/messages') return 'chat';
   if (normalizedPath === '/admin/usb-print-test') return 'usb-print-test';
   if (normalizedPath === '/admin/supplier-prices') return 'supplier-prices';
   if (normalizedPath === '/admin/cms') return 'cms';
@@ -262,16 +264,17 @@ export default function App() {
   };
 
   const handleViewChange = (view: string) => {
-    if (view === currentView) return;
+    const normalizedView = view === 'messages' ? 'chat' : view;
+    if (normalizedView === currentView) return;
 
-    if (view === 'seo' && window.location.pathname !== '/admin/seo') {
+    if (normalizedView === 'seo' && window.location.pathname !== '/admin/seo') {
       window.history.pushState({}, '', '/admin/seo');
-    } else if (view !== 'seo' && window.location.pathname === '/admin/seo') {
+    } else if (normalizedView !== 'seo' && window.location.pathname === '/admin/seo') {
       window.history.pushState({}, '', '/');
     }
 
     startTransition(() => {
-      setCurrentView(view);
+      setCurrentView(normalizedView);
     });
   };
 

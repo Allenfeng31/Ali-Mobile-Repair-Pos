@@ -86,6 +86,41 @@ if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
   console.warn('⚠️  [Security] Using anon key — add SUPABASE_SERVICE_ROLE_KEY to server/.env for maximum security.');
 }
 
+const requireStaffAuth = async (req, res, next) => {
+  const authHeader = req.headers.authorization || '';
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  const token = match?.[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized: staff session required.' });
+  }
+
+  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  const user = userData?.user;
+
+  if (userError || !user) {
+    return res.status(401).json({ error: 'Unauthorized: invalid staff session.' });
+  }
+
+  const { data: permissions, error: permissionsError } = await supabase
+    .from('employee_permissions')
+    .select('user_id, is_super_admin')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (permissionsError) {
+    return res.status(500).json({ error: permissionsError.message });
+  }
+
+  if (!permissions) {
+    return res.status(403).json({ error: 'Forbidden: staff permissions required.' });
+  }
+
+  req.staffUser = user;
+  req.staffPermissions = permissions;
+  next();
+};
+
 const getLocalIp = () => {
   const os = require('os');
   const interfaces = os.networkInterfaces();
@@ -2009,7 +2044,7 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
 });
 
 // Staff: get all sessions (conversation list)
-app.get('/api/chat/sessions', async (req, res) => {
+app.get('/api/chat/sessions', requireStaffAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('chat_sessions')
     .select(`
@@ -2025,8 +2060,29 @@ app.get('/api/chat/sessions', async (req, res) => {
   res.json(activeSessions);
 });
 
+// Staff: mark all unread customer chat messages as seen globally
+app.post('/api/chat/seen', requireStaffAuth, async (_req, res) => {
+  const { error } = await supabase
+    .from('chat_messages')
+    .update({ is_read: true })
+    .eq('sender', 'customer')
+    .eq('is_read', false);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const { count, error: countError } = await supabase
+    .from('chat_messages')
+    .select('*', { count: 'exact', head: true })
+    .eq('sender', 'customer')
+    .eq('is_read', false);
+
+  if (countError) return res.status(500).json({ error: countError.message });
+
+  res.json({ success: true, unreadCount: count || 0 });
+});
+
 // Staff: get all messages in a specific session
-app.get('/api/chat/session/id/:id/messages', async (req, res) => {
+app.get('/api/chat/session/id/:id/messages', requireStaffAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('chat_messages')
     .select('*')
@@ -2046,7 +2102,7 @@ app.get('/api/chat/session/id/:id/messages', async (req, res) => {
 });
 
 // Staff: reply to a customer session
-app.post('/api/chat/session/id/:id/reply', async (req, res) => {
+app.post('/api/chat/session/id/:id/reply', requireStaffAuth, async (req, res) => {
   const { content } = req.body;
   if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
 
@@ -2068,7 +2124,7 @@ app.post('/api/chat/session/id/:id/reply', async (req, res) => {
 
 
 // Staff: delete a chat session (and all its messages via CASCADE)
-app.delete('/api/chat/session/id/:id', async (req, res) => {
+app.delete('/api/chat/session/id/:id', requireStaffAuth, async (req, res) => {
   const { error } = await supabase
     .from('chat_sessions')
     .delete()

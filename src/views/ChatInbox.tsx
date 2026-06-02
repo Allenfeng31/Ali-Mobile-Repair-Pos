@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from '../hooks/useAuthStore';
 import { cn } from '@/lib/utils';
 import { getApiBaseUrl } from '@/lib/apiBase';
+import { supabase } from '@/lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,6 +57,12 @@ const API_BASE = getApiBaseUrl();
 
 const INTRO_PREFIX = '[CUSTOMER_INFO]';
 const BOOKING_PREFIX = '[BOOKING_DATA]';
+
+const getStaffAuthHeaders = async () => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 /**
  * Strips metadata from customer intro messages to reveal the actual feedback/message.
@@ -98,7 +105,9 @@ export function ChatInbox() {
 
   const loadSessions = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/chat/sessions`);
+      const res = await fetch(`${API_BASE}/chat/sessions`, {
+        headers: await getStaffAuthHeaders(),
+      });
       if (res.ok) setSessions(await res.json());
     } catch (_) {
     } finally {
@@ -132,7 +141,9 @@ export function ChatInbox() {
 
   const loadMessages = useCallback(async (sessionId: string) => {
     try {
-      const res = await fetch(`${API_BASE}/chat/session/id/${sessionId}/messages`);
+      const res = await fetch(`${API_BASE}/chat/session/id/${sessionId}/messages`, {
+        headers: await getStaffAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
@@ -200,7 +211,7 @@ export function ChatInbox() {
     try {
       await fetch(`${API_BASE}/chat/session/id/${activeSession.id}/reply`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await getStaffAuthHeaders()) },
         body: JSON.stringify({ content: text }),
       });
       await loadMessages(activeSession.id);
@@ -218,7 +229,10 @@ export function ChatInbox() {
     if (!confirmed) return;
     setDeleting(true);
     try {
-      await fetch(`${API_BASE}/chat/session/id/${activeSession.id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/chat/session/id/${activeSession.id}`, {
+        method: 'DELETE',
+        headers: await getStaffAuthHeaders(),
+      });
       setSessions(prev => prev.filter(s => s.id !== activeSession.id));
       setActiveSession(null);
       setMessages([]);
