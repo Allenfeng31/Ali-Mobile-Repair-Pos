@@ -65,6 +65,8 @@ const getStaffAuthHeaders = async () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+type ChatAuthWarning = 'expired' | 'forbidden' | null;
+
 // ─── Slim Settings Panel ──────────────────────────────────────────────────────
 function SettingsPanel({
   open,
@@ -382,8 +384,10 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   const { permissions } = useAuthStore();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [unreadChats, setUnreadChats] = React.useState(0);
+  const [chatAuthWarning, setChatAuthWarning] = React.useState<ChatAuthWarning>(null);
   const [markingChatSeen, setMarkingChatSeen] = React.useState(false);
   const lastAlertedMessageIdRef = React.useRef<string | null>(null);
+  const lastNativeNotificationIdRef = React.useRef<string | null>(null);
   const audioContextRef = React.useRef<AudioContext | null>(null);
 
   // ── Quick Quote (Cmd+K) State ───────────────────────────────────────────
@@ -480,14 +484,55 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
     }
   }, []);
 
+  const showNativeChatNotification = React.useCallback((messageId: string) => {
+    if (lastNativeNotificationIdRef.current === messageId) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    if (!document.hidden && document.hasFocus()) return;
+
+    lastNativeNotificationIdRef.current = messageId;
+
+    try {
+      const notification = new Notification('New customer message or booking', {
+        body: 'Open POS chat to view the message.',
+        tag: `pos-chat-${messageId}`,
+        requireInteraction: true,
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        onViewChange('chat');
+        notification.close();
+      };
+    } catch (_) {
+      // Native notifications are best-effort; the in-app banner remains the reliable alert.
+    }
+  }, [onViewChange]);
+
   const checkUnreadChats = React.useCallback(async () => {
     const API_BASE = getApiBaseUrl();
 
     try {
+      const headers = await getStaffAuthHeaders();
+      if (!headers.Authorization) {
+        setChatAuthWarning('expired');
+        return null;
+      }
+
       const res = await fetch(`${API_BASE}/chat/sessions`, {
-        headers: await getStaffAuthHeaders(),
+        headers,
       });
+      if (res.status === 401) {
+        setChatAuthWarning('expired');
+        return null;
+      }
+      if (res.status === 403) {
+        setChatAuthWarning('forbidden');
+        return null;
+      }
       if (!res.ok) return null;
+
+      setChatAuthWarning(null);
       const sessions: any[] = await res.json();
       const summary = getUnreadSummary(sessions);
       setUnreadChats(summary.total);
@@ -495,17 +540,19 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       if (summary.latestUnreadId && summary.latestUnreadId !== lastAlertedMessageIdRef.current) {
         lastAlertedMessageIdRef.current = summary.latestUnreadId;
         playChatAlertSound();
+        showNativeChatNotification(summary.latestUnreadId);
       }
 
       if (!summary.latestUnreadId) {
         lastAlertedMessageIdRef.current = null;
+        lastNativeNotificationIdRef.current = null;
       }
 
       return summary;
     } catch (_) {
       return null;
     }
-  }, [playChatAlertSound]);
+  }, [playChatAlertSound, showNativeChatNotification]);
 
   // Poll backend unread state so every open POS device reflects global chat status.
   React.useEffect(() => {
@@ -519,19 +566,40 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
     setMarkingChatSeen(true);
 
     try {
+      const headers = await getStaffAuthHeaders();
+      if (!headers.Authorization) {
+        setChatAuthWarning('expired');
+        await checkUnreadChats();
+        return false;
+      }
+
       const res = await fetch(`${API_BASE}/chat/seen`, {
         method: 'POST',
-        headers: await getStaffAuthHeaders(),
+        headers,
       });
+      if (res.status === 401) {
+        setChatAuthWarning('expired');
+        await checkUnreadChats();
+        return false;
+      }
+      if (res.status === 403) {
+        setChatAuthWarning('forbidden');
+        await checkUnreadChats();
+        return false;
+      }
       if (!res.ok) {
         await checkUnreadChats();
         return false;
       }
 
+      setChatAuthWarning(null);
       const data = await res.json().catch(() => ({ unreadCount: 0 }));
       const unreadCount = Number(data?.unreadCount || 0);
       setUnreadChats(unreadCount);
-      if (unreadCount === 0) lastAlertedMessageIdRef.current = null;
+      if (unreadCount === 0) {
+        lastAlertedMessageIdRef.current = null;
+        lastNativeNotificationIdRef.current = null;
+      }
 
       try {
         if ('clearAppBadge' in navigator) {
@@ -680,6 +748,29 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             </div>
           </div>
         </header>
+
+        {chatAuthWarning && (
+          <div className="sticky top-[72px] z-40 px-4 md:px-8 pt-4">
+            <div className="mx-auto flex max-w-5xl flex-col gap-3 rounded-[2rem] border border-amber-200 bg-amber-50 p-4 text-amber-800 shadow-[0_18px_45px_rgba(245,158,11,0.18)] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-black">
+                  {chatAuthWarning === 'expired'
+                    ? 'Staff chat session expired. Please sign out and sign back in.'
+                    : 'This account does not have staff chat permission.'}
+                </p>
+                <p className="mt-1 text-xs font-bold text-amber-700/80">
+                  On mobile or PWA, force refresh the POS app after signing in again so the latest staff chat code loads.
+                </p>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="rounded-2xl bg-amber-500 px-5 py-3 text-xs font-black uppercase tracking-widest text-black shadow-lg transition-all hover:bg-amber-400 active:scale-95"
+              >
+                Refresh POS
+              </button>
+            </div>
+          </div>
+        )}
 
         {unreadChats > 0 && (
           <div className="sticky top-[72px] z-40 px-4 md:px-8 pt-4">

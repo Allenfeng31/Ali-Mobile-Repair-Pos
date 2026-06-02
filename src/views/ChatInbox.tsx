@@ -64,6 +64,8 @@ const getStaffAuthHeaders = async () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+type ChatAuthError = 'expired' | 'forbidden' | null;
+
 /**
  * Strips metadata from customer intro messages to reveal the actual feedback/message.
  */
@@ -85,6 +87,7 @@ const cleanMessageContent = (content: string) => {
 export function ChatInbox() {
   const { permissions } = useAuthStore();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [chatAuthError, setChatAuthError] = useState<ChatAuthError>(null);
   const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [reply, setReply] = useState('');
@@ -105,10 +108,30 @@ export function ChatInbox() {
 
   const loadSessions = useCallback(async () => {
     try {
+      const headers = await getStaffAuthHeaders();
+      if (!headers.Authorization) {
+        setChatAuthError('expired');
+        setSessions([]);
+        return;
+      }
+
       const res = await fetch(`${API_BASE}/chat/sessions`, {
-        headers: await getStaffAuthHeaders(),
+        headers,
       });
-      if (res.ok) setSessions(await res.json());
+      if (res.status === 401) {
+        setChatAuthError('expired');
+        setSessions([]);
+        return;
+      }
+      if (res.status === 403) {
+        setChatAuthError('forbidden');
+        setSessions([]);
+        return;
+      }
+      if (res.ok) {
+        setChatAuthError(null);
+        setSessions(await res.json());
+      }
     } catch (_) {
     } finally {
       setLoading(false);
@@ -141,10 +164,25 @@ export function ChatInbox() {
 
   const loadMessages = useCallback(async (sessionId: string) => {
     try {
+      const headers = await getStaffAuthHeaders();
+      if (!headers.Authorization) {
+        setChatAuthError('expired');
+        return;
+      }
+
       const res = await fetch(`${API_BASE}/chat/session/id/${sessionId}/messages`, {
-        headers: await getStaffAuthHeaders(),
+        headers,
       });
+      if (res.status === 401) {
+        setChatAuthError('expired');
+        return;
+      }
+      if (res.status === 403) {
+        setChatAuthError('forbidden');
+        return;
+      }
       if (res.ok) {
+        setChatAuthError(null);
         const data = await res.json();
         setMessages(data);
 
@@ -205,18 +243,34 @@ export function ChatInbox() {
 
   const sendReply = async () => {
     if (!reply.trim() || !activeSession || sending) return;
+    const headers = await getStaffAuthHeaders();
+    if (!headers.Authorization) {
+      setChatAuthError('expired');
+      return;
+    }
+
     setSending(true);
     const text = reply.trim();
     setReply('');
     try {
-      await fetch(`${API_BASE}/chat/session/id/${activeSession.id}/reply`, {
+      const res = await fetch(`${API_BASE}/chat/session/id/${activeSession.id}/reply`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(await getStaffAuthHeaders()) },
+        headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify({ content: text }),
       });
+      if (res.status === 401) {
+        setChatAuthError('expired');
+        return;
+      }
+      if (res.status === 403) {
+        setChatAuthError('forbidden');
+        return;
+      }
       await loadMessages(activeSession.id);
-    } catch (_) { }
-    setSending(false);
+    } catch (_) {
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -227,17 +281,33 @@ export function ChatInbox() {
     if (!activeSession) return;
     const confirmed = window.confirm('Delete this conversation? This cannot be undone.');
     if (!confirmed) return;
+    const headers = await getStaffAuthHeaders();
+    if (!headers.Authorization) {
+      setChatAuthError('expired');
+      return;
+    }
+
     setDeleting(true);
     try {
-      await fetch(`${API_BASE}/chat/session/id/${activeSession.id}`, {
+      const res = await fetch(`${API_BASE}/chat/session/id/${activeSession.id}`, {
         method: 'DELETE',
-        headers: await getStaffAuthHeaders(),
+        headers,
       });
+      if (res.status === 401) {
+        setChatAuthError('expired');
+        return;
+      }
+      if (res.status === 403) {
+        setChatAuthError('forbidden');
+        return;
+      }
       setSessions(prev => prev.filter(s => s.id !== activeSession.id));
       setActiveSession(null);
       setMessages([]);
-    } catch (_) { }
-    setDeleting(false);
+    } catch (_) {
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const updateAppointmentStatus = async (apptId: string, status: 'confirmed' | 'declined' | 'arrived') => {
@@ -743,7 +813,27 @@ export function ChatInbox() {
         </div>
       )}
 
-      {!loading && sessions.length === 0 && (
+      {!loading && chatAuthError && (
+        <div className="text-center py-24 px-6 bg-red-50 shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-red-100 flex flex-col items-center">
+          <MessageSquare className="text-red-300 mb-8" size={72} strokeWidth={1.5} />
+          <h3 className="text-xl font-black text-red-700">
+            {chatAuthError === 'expired'
+              ? 'Staff session expired. Please sign out and sign back in.'
+              : 'This account does not have staff chat permission.'}
+          </h3>
+          <p className="text-xs font-bold text-red-600/80 mt-3 max-w-md">
+            If this is a mobile or PWA device, force refresh the POS app after signing in again so it loads the latest staff chat code.
+          </p>
+          <button
+            onClick={loadSessions}
+            className="mt-8 rounded-2xl bg-red-600 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg active:scale-95 transition-all"
+          >
+            Retry chat connection
+          </button>
+        </div>
+      )}
+
+      {!loading && !chatAuthError && sessions.length === 0 && (
         <div className="text-center py-32 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-black/5 flex flex-col items-center">
           <MessageSquare className="text-gray-200 mb-8" size={80} strokeWidth={1} />
           <h3 className="text-xl font-black text-black">No Active Links</h3>
