@@ -64,24 +64,24 @@ interface CategoryPageProps {
 const CATEGORY_SEO_DATA: Record<string, any> = {
   phone: {
     metadata: {
-      title: 'Phone Repair Ringwood | Weekday Same Day Fix | Ali Mobile & Repair',
-      description: 'Fast phone repairs in Ringwood, servicing Croydon, Mitcham, and Heathmont. Weekday same-day screen and battery replacements for iPhone, Samsung, and Pixel with 180-day warranty.',
+      title: 'Phone Repair Ringwood | Fast Screen and Battery Fixes | Ali Mobile & Repair',
+      description: 'Phone repairs in Ringwood for iPhone, Samsung, Google Pixel, Oppo, and more. Same-day options may be available for common screen and battery repairs when parts are in stock.',
     },
     hero: {
       pillType: 'primary',
       pillText: 'Phone Specialist',
       title: 'Phone & iPhone Repair in Ringwood, Melbourne',
       intro1: 'At Ali Mobile Repair, we specialize in high-quality iPhone and Android screen replacements. Centrally located in Ringwood, we are the go-to repair shop for the Eastern Suburbs including Croydon, Mitcham, Heathmont, and Wantirna.',
-      intro2: 'Take advantage of our Weekday Same-Day repair service! If we have the parts in stock, screen and battery replacements take just 15-30 minutes, and all other repairs are completed quickly! Even if we need to quickly source a part locally, we still guarantee it will be completed the exact same day!',
+      intro2: 'Most common screen and battery repairs can be completed the same day when parts are in stock. We confirm timing after checking the model, part availability, repair queue, and device condition.',
     },
     schema: {
       serviceName: 'Phone Repair Services Ringwood',
-      description: "Expert phone repair services for iPhone, Samsung, Pixel, and Oppo serving Melbourne's Eastern Suburbs. Weekday same-day screen and battery replacements.",
+      description: "Expert phone repair services for iPhone, Samsung, Pixel, and Oppo serving Melbourne's Eastern Suburbs. Same-day options may be available for common screen and battery repairs when parts are in stock.",
     },
     features: [
-      { t: "Weekday Same-Day Repair Guarantee", d: "We ensure same-day completion." },
+      { t: "Same-day options when parts are in stock", d: "We confirm timing after checking the model and repair queue." },
       { t: "Premium Quality Screens & Parts Available", d: "" },
-      { t: "On-the-spot Repair (15-30 min for screens and batteries)", d: "" },
+      { t: "Fast repair options for common screens and batteries", d: "" },
       { t: "No Fix, No Charge Policy", d: "" },
       { t: "180-Day Comprehensive Warranty", d: "" }
     ],
@@ -95,11 +95,11 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "Do you offer same-day phone repairs?", answer: "Absolutely! During any weekday, if we have the parts in stock, repairs take just 15-30 minutes. If we need to source a specific component from our local suppliers, we still guarantee the repair will be completed on the exact same day!" },
-      { question: "How long does a typical phone screen repair take at your Ringwood store?", answer: "Most phone screen repairs are completed in 15 to 30 minutes while you wait. We are centrally located in Ringwood, making us a quick drive from Croydon, Mitcham, Heathmont, and Wantirna." },
-      { question: "Will I lose my data during the repair process?", answer: "In 99% of cases, your data remains perfectly safe during screen or battery replacements. However, we always recommend performing a backup before any repair service as a standard safety precaution." },
-      { question: "What is your warranty on phone repairs?", answer: "We proudly offer a 180-day comprehensive warranty on all parts and labor. If you experience any technical faults related to the repair within this 6-month period, we will fix it completely free of charge." },
-      { question: "Which phone brands do you repair?", answer: "We specialize in all major brands including Apple iPhone, Samsung Galaxy, Google Pixel, Oppo, and Huawei. Because we stock parts locally, we can fix these brands immediately on any weekday." }
+      { question: "Do you offer same-day phone repairs?", answer: "Most common phone screen and battery repairs can be completed the same day when parts are in stock. We confirm timing after checking your model, part availability, repair queue, and device condition." },
+      { question: "How long does a typical phone screen repair take at your Ringwood store?", answer: "Many common phone screen repairs are completed quickly while you wait, but timing depends on the model and the device condition. We are centrally located in Ringwood, making us a quick drive from Croydon, Mitcham, Heathmont, and Wantirna." },
+      { question: "Will I lose my data during the repair process?", answer: "Data is normally not affected during standard screen or battery repairs, but we recommend backing up first whenever possible." },
+      { question: "What is your warranty on phone repairs?", answer: "We proudly offer a 180-day comprehensive warranty on all parts and labor. If you experience any technical faults related to the repair within this 6-month period, warranty support depends on the fault confirmed at inspection and whether it relates to the completed repair." },
+      { question: "Which phone brands do you repair?", answer: "We support major brands including Apple iPhone, Samsung Galaxy, Google Pixel, Oppo, and Huawei. Call ahead if you want part availability checked before visiting." }
     ]
   },
   tablet: {
