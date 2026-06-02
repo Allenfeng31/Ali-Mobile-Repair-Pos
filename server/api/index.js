@@ -2123,15 +2123,24 @@ app.post('/api/chat/session/id/:id/reply', requireStaffAuth, async (req, res) =>
 });
 
 
-// Staff: delete a chat session (and all its messages via CASCADE)
+// Staff: delete a chat session; only report success when the row is actually removed.
 app.delete('/api/chat/session/id/:id', requireStaffAuth, async (req, res) => {
-  const { error } = await supabase
+  const { data: deletedRows, error } = await supabase
     .from('chat_sessions')
     .delete()
-    .eq('id', req.params.id);
+    .eq('id', req.params.id)
+    .select('id');
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
+  if (error) {
+    console.error('[Chat] Failed to delete session:', error.message);
+    return res.status(500).json({ error: 'Could not delete this conversation. Please refresh and try again.' });
+  }
+
+  if (!deletedRows || deletedRows.length === 0) {
+    return res.status(404).json({ error: 'Conversation not found or already deleted.' });
+  }
+
+  res.json({ success: true, deletedId: deletedRows[0].id });
 });
 
 // Proxy for AI Images (fixes CORS and loading issues in preview)

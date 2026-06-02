@@ -82,6 +82,14 @@ const cleanMessageContent = (content: string) => {
     .trim();
 };
 
+const getCustomerInfoFromContent = (content: string) => {
+  if (!content.startsWith(INTRO_PREFIX)) return null;
+  const lines = content.split('\n');
+  const name = lines.find(l => l.startsWith('Name:'))?.replace('Name:', '').trim();
+  const phone = lines.find(l => l.startsWith('Phone:'))?.replace('Phone:', '').trim();
+  return { name, phone };
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatInbox() {
@@ -93,6 +101,9 @@ export function ChatInbox() {
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messageLoadError, setMessageLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [apptStatusCache, setApptStatusCache] = useState<Record<string, string>>({});
   const [bookingsOpen, setBookingsOpen] = useState(false);
@@ -163,6 +174,8 @@ export function ChatInbox() {
   }, [apptStatusCache]);
 
   const loadMessages = useCallback(async (sessionId: string) => {
+    setMessagesLoading(true);
+    setMessageLoadError(null);
     try {
       const headers = await getStaffAuthHeaders();
       if (!headers.Authorization) {
@@ -179,6 +192,10 @@ export function ChatInbox() {
       }
       if (res.status === 403) {
         setChatAuthError('forbidden');
+        return;
+      }
+      if (!res.ok) {
+        setMessageLoadError('Could not load this conversation. Please refresh and try again.');
         return;
       }
       if (res.ok) {
@@ -210,7 +227,11 @@ export function ChatInbox() {
 
         loadSessions();
       }
-    } catch (_) { }
+    } catch (_) {
+      setMessageLoadError('Could not load this conversation. Please refresh and try again.');
+    } finally {
+      setMessagesLoading(false);
+    }
   }, [loadSessions, fetchBookingStatuses]);
 
   useEffect(() => {
@@ -237,6 +258,8 @@ export function ChatInbox() {
   }, [messages, activeSession]);
 
   const openSession = (session: ChatSession) => {
+    setDeleteError(null);
+    setMessageLoadError(null);
     setActiveSession(session);
     loadMessages(session.id);
   };
@@ -281,6 +304,7 @@ export function ChatInbox() {
     if (!activeSession) return;
     const confirmed = window.confirm('Delete this conversation? This cannot be undone.');
     if (!confirmed) return;
+    setDeleteError(null);
     const headers = await getStaffAuthHeaders();
     if (!headers.Authorization) {
       setChatAuthError('expired');
@@ -301,10 +325,22 @@ export function ChatInbox() {
         setChatAuthError('forbidden');
         return;
       }
-      setSessions(prev => prev.filter(s => s.id !== activeSession.id));
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const message = data?.error || 'Could not delete this conversation. Please refresh and try again.';
+        setDeleteError(message);
+        alert(message);
+        return;
+      }
+
       setActiveSession(null);
       setMessages([]);
+      setMessageLoadError(null);
+      await loadSessions();
     } catch (_) {
+      const message = 'Could not delete this conversation. Please refresh and try again.';
+      setDeleteError(message);
+      alert(message);
     } finally {
       setDeleting(false);
     }
@@ -423,10 +459,7 @@ export function ChatInbox() {
   const getCustomerInfo = (session: ChatSession) => {
     const introMsg = (session.chat_messages || []).find(m => m.content.startsWith(INTRO_PREFIX));
     if (!introMsg) return null;
-    const lines = introMsg.content.split('\n');
-    const name = lines.find(l => l.startsWith('Name:'))?.replace('Name:', '').trim();
-    const phone = lines.find(l => l.startsWith('Phone:'))?.replace('Phone:', '').trim();
-    return { name, phone };
+    return getCustomerInfoFromContent(introMsg.content);
   };
 
   const getSessionLabel = (session: ChatSession, idx: number) => {
@@ -448,12 +481,7 @@ export function ChatInbox() {
   if (activeSession) {
     const sessionIdx = sessions.findIndex(s => s.id === activeSession.id);
     const customerInfo = getCustomerInfo(activeSession);
-    const visibleMessages = messages.filter(m => {
-      if (m.content.startsWith(INTRO_PREFIX)) {
-        return cleanMessageContent(m.content) !== '';
-      }
-      return true;
-    });
+    const visibleMessages = messages;
 
     return (
       <div className="flex flex-col h-full max-w-4xl mx-auto px-4" style={{ height: 'calc(100vh - 120px)' }}>
@@ -486,9 +514,27 @@ export function ChatInbox() {
           )}
         </div>
 
+        {deleteError && (
+          <div className="mb-6 rounded-[2rem] border border-red-100 bg-red-50 px-6 py-4 text-sm font-bold text-red-700 shadow-[var(--shadow-neu-sm)]">
+            {deleteError}
+          </div>
+        )}
+
         {/* MESSAGES AREA */}
         <div className="flex-1 overflow-y-auto space-y-6 px-2 pb-8 custom-scrollbar">
-          {visibleMessages.length === 0 && (
+          {messageLoadError && (
+            <div className="flex flex-col items-center justify-center h-full rounded-[2rem] border border-red-100 bg-red-50 px-6 py-12 text-center">
+              <MessageSquare size={48} strokeWidth={1} className="text-red-300 mb-4" />
+              <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">{messageLoadError}</p>
+            </div>
+          )}
+          {!messageLoadError && messagesLoading && visibleMessages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full opacity-40">
+              <RefreshCw size={40} strokeWidth={1.5} className="text-gray-300 mb-4 animate-spin" />
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Loading Conversation</p>
+            </div>
+          )}
+          {!messageLoadError && !messagesLoading && visibleMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full opacity-40">
               <MessageSquare size={48} strokeWidth={1} className="text-gray-300 mb-4" />
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Awaiting First Transmission</p>
@@ -515,7 +561,37 @@ export function ChatInbox() {
                 </div>
 
                 <div className="text-sm font-bold text-black leading-relaxed whitespace-pre-wrap">
-                  {msg.content.includes(BOOKING_PREFIX) ? (() => {
+                  {msg.content.startsWith(INTRO_PREFIX) ? (() => {
+                    const info = getCustomerInfoFromContent(msg.content);
+                    const cleaned = cleanMessageContent(msg.content);
+                    return (
+                      <div className="bg-white/40 shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 mt-2 space-y-3 border border-black/5">
+                        <div className="flex items-center gap-3 text-green-600">
+                          <User size={18} strokeWidth={3} />
+                          <h4 className="text-[10px] font-black uppercase tracking-widest">Customer Information</h4>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 text-xs">
+                          {info?.name && (
+                            <p className="flex justify-between border-b border-black/5 pb-1">
+                              <span className="text-gray-500">Name:</span>
+                              <span className="text-black font-black">{info.name}</span>
+                            </p>
+                          )}
+                          {info?.phone && (
+                            <p className="flex justify-between border-b border-black/5 pb-1">
+                              <span className="text-gray-500">Phone:</span>
+                              <span className="text-black font-black">{info.phone}</span>
+                            </p>
+                          )}
+                        </div>
+                        {cleaned && (
+                          <p className="rounded-2xl bg-white/50 p-4 text-xs font-bold text-black shadow-[var(--shadow-neu-sm)]">
+                            {cleaned}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })() : msg.content.includes(BOOKING_PREFIX) ? (() => {
                     try {
                       const startIndex = msg.content.indexOf('{');
                       const endIndex = msg.content.lastIndexOf('}');
