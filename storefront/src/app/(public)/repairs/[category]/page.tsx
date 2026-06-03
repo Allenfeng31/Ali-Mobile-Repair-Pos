@@ -104,23 +104,23 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   },
   tablet: {
     metadata: {
-      title: 'iPad & Tablet Repair Ringwood | OEM Battery & Screen Fixes | Ali Mobile & Repair',
-      description: 'Fast iPad and Samsung Tab repairs in Ringwood, serving Croydon and Mitcham. Weekday same-day repairs, OEM standard batteries, and 180-day warranty.',
+      title: 'iPad & Tablet Repair Ringwood | Battery & Screen Fixes | Ali Mobile & Repair',
+      description: 'Tablet repairs in Ringwood for iPad and Samsung Tab. Same-day options may be available for common repairs when parts are in stock.',
     },
     hero: {
       pillType: 'primary',
       pillText: 'Tablet Specialist',
       title: 'Professional Tablet & iPad Repairs in Ringwood',
       intro1: 'From shattered iPad touch glasses to unresponsive Samsung Tabs batteries, we provide expert hardware repairs for the Eastern Suburbs including Croydon, Mitcham, and Wantirna.',
-      intro2: 'Take advantage of our Weekday Same-Day repair service! If we have the parts in stock, screen and battery replacements take just 1-2 hours, and all other repairs are completed quickly! We carry OEM-grade parts and can return your iPad the exact same day.',
+      intro2: 'Common screen and battery repairs may be completed the same day when parts are in stock. We confirm timing after checking the model, part availability, repair queue, and device condition.',
     },
     schema: {
       serviceName: 'Tablet & iPad Repair Services Ringwood',
-      description: "Professional iPad and tablet repair services in Ringwood, Melbourne. Expert screen and OEM battery replacements for all makes and models.",
+      description: "Professional iPad and tablet repair services in Ringwood, Melbourne. Expert screen and battery replacements for supported models.",
     },
     features: [
-      { t: "Weekday Same-Day Repair", d: "Get your tablet back the same day." },
-      { t: "OEM Standard Batteries", d: "Exactly the same quality and lifespan as original batteries." },
+      { t: "Same-day options when parts are in stock", d: "Timing is confirmed after model, part, and queue checks." },
+      { t: "Quality replacement batteries", d: "Selected for compatible tablet models and confirmed before repair." },
       { t: "Detailed diagnostic checks prior to repair", d: "" },
       { t: "180-Day Comprehensive Warranty Coverage", d: "" }
     ],
@@ -136,31 +136,31 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "Do you repair cracked iPad screens in Ringwood?", answer: "Yes, we specialize in iPad screen repairs right here in Ringwood. Whether you only need the top glass or the entire LCD assembly replaced, we offer fast, high-quality same-day service during weekdays." },
-      { question: "What kind of replacement batteries do you use for tablets?", answer: "We use strictly OEM (Original Equipment Manufacturer) standard batteries for all tablet and iPad replacements. The quality and lifespan of our batteries are completely identical to the original battery your tablet came with." },
-      { question: "How long does an iPad repair take?", answer: "Most iPad repairs are completed within 1-2 hours. Because iPads are sealed with strong adhesive, we take extra time to ensure the device is properly bonded and cured. Drop it off during a weekday and get it back the same day!" },
-      { question: "What is your warranty policy for tablet repairs?", answer: "All tablet screen and battery replacements are backed by our 180-day comprehensive warranty. If the part malfunctions within 6 months, simply bring it back to our Ringwood shop for a free replacement." },
-      { question: "Is my tablet data safe during the repair?", answer: "Your data is perfectly safe during hardware repairs like screen and battery swaps. We do not access or wipe your data. However, we always recommend cloud backups (like iCloud or Google Drive) before coming in." }
+      { question: "Do you repair cracked iPad screens in Ringwood?", answer: "Yes, we specialize in iPad screen repairs right here in Ringwood. Whether you only need the top glass or the entire LCD assembly replaced, same-day options may be available when parts are in stock." },
+      { question: "What kind of replacement batteries do you use for tablets?", answer: "We use compatible replacement batteries selected for the model and confirm the available option before repair." },
+      { question: "How long does an iPad repair take?", answer: "Many common iPad repairs can be completed the same day when parts are in stock, but timing depends on adhesive curing, model, repair queue, and device condition." },
+      { question: "What is your warranty policy for tablet repairs?", answer: "Tablet screen and battery replacements are backed by our 180-day warranty. Warranty support depends on the fault confirmed at inspection and whether it relates to the completed repair." },
+      { question: "Is my tablet data safe during the repair?", answer: "Data is normally not affected during standard screen or battery repairs, but we recommend backing up first whenever possible." }
     ]
   },
   laptop: {
     metadata: {
       title: 'Laptop & MacBook Repair Ringwood | SSD Upgrades & Screen Replacement',
-      description: 'Expert MacBook Air, MacBook Pro, and PC laptop repairs in Ringwood serving Mitcham and Croydon. Weekday same-day repairs, SSD upgrades, and logic board fixes.',
+      description: 'Laptop repairs in Ringwood for MacBook and PC models. Same-day options may be available for common screen or battery work when parts are in stock.',
     },
     hero: {
       pillType: 'warning',
       pillText: 'Certified Technicians',
       title: 'Expert MacBook & Laptop Repairs in Ringwood',
-      intro1: "Whether it's hardware failures or software glitches, we fix them all. We serve Maroondah, Croydon, Mitcham, and Heathmont with high-quality screen replacements and data recovery.",
-      intro2: 'Take advantage of our Weekday Same-Day repair service! Screen and battery replacements are completed in just a few hours. Other hardware repairs are also completed quickly!',
+      intro1: "Whether it's hardware failures or software glitches, we inspect the issue and explain practical repair options. We serve Maroondah, Croydon, Mitcham, and Heathmont with high-quality screen replacements and data recovery assessment where possible.",
+      intro2: 'Same-day options may be available for common screen and battery repairs when parts are in stock. We confirm timing after checking the model, part availability, repair queue, and device condition.',
     },
     schema: {
       serviceName: 'Computer & MacBook Repair Services Ringwood',
       description: "Professional MacBook and laptop repair services in Ringwood, Melbourne. Expert hardware upgrades, screen repairs, and motherboard troubleshooting.",
     },
     features: [
-      { t: "Weekday Same-Day Repair", d: "Available for screens and batteries in stock." },
+      { t: "Same-day options when parts are in stock", d: "Available for common screens and batteries after model and queue checks." },
       { t: "Expert Data Preservation protocols", d: "" },
       { t: "Component-level motherboard repairs", d: "" },
       { t: "Local Eastern Suburbs Shop at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134", d: "" }
@@ -177,8 +177,8 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "Do you repair liquid damaged MacBooks in Ringwood?", answer: "Yes, we are specialists in logic board cleaning and component-level repair for liquid-damaged MacBooks. The sooner you bring it in, the higher the chance of a successful recovery." },
-      { question: "Can you fix a laptop screen on the same day?", answer: "Absolutely! Many common MacBook and laptop screens are kept in stock. If you drop it off during a weekday, our same-day repair policy applies and we can have it ready in just a few hours." },
+      { question: "Do you repair liquid damaged MacBooks in Ringwood?", answer: "Yes, we inspect liquid-damaged MacBooks for logic board cleaning and component-level repair options. The sooner you bring it in, the better the chance of limiting corrosion, but inspection is required before quoting timing or outcome." },
+      { question: "Can you fix a laptop screen on the same day?", answer: "Many common MacBook and laptop screens can be completed the same day when the part is in stock. We confirm timing after checking the model, repair queue, and device condition." },
       { question: "Why is my laptop running so slowly?", answer: "Sluggish performance is often caused by a nearly full hard drive, insufficient RAM, or outdated software. We offer complete diagnostic checks and can recommend quick hardware upgrades to boost your speed." },
       { question: "My laptop is overheating—is this bad?", answer: "Yes, constant overheating can lead to permanent component degradation and random shutdowns. Bring it to our Ringwood shop for thermal repasting and internal fan cleaning to protect your investment." },
       { question: "Can I upgrade my laptop's RAM or storage?", answer: "In most Windows laptops and older MacBooks, yes! Upgrading from an old hard drive to a modern solid-state drive (SSD) is the most cost-effective way to speed up your machine." }
@@ -187,21 +187,21 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   watch: {
     metadata: {
       title: 'Apple Watch Repair Ringwood | Battery & Screen Replace | Ali Mobile',
-      description: 'Fast Apple Watch repairs in Ringwood, serving Mitcham and Croydon. Weekday same-day screen replacements and battery fixing for Series and Ultra models.',
+      description: 'Apple Watch repairs in Ringwood, serving Mitcham and Croydon. Same-day options may be available for common screen or battery repairs when parts are in stock.',
     },
     hero: {
       pillType: 'accent',
       pillText: 'Watch Specialist',
       title: 'Premium Smart Watch Repairs in Ringwood',
       intro1: 'Shattered Apple Watch screen? Battery not lasting through the day? We specialize in precision repairs for all Apple Watch models, proudly servicing Ringwood, Croydon, Mitcham, and Wantirna.',
-      intro2: 'Drop off your watch on a weekday and get it back the same day! Screen and battery replacements take just 2-4 hours, and other fixes are completed quickly. Our fast turnaround keeps you connected!',
+      intro2: 'Common watch screen and battery repairs may be available same day when parts are in stock. We confirm timing after checking the model, repair queue, and device condition.',
     },
     schema: {
       serviceName: 'Smart Watch Repair Services Ringwood',
-      description: "Professional Apple Watch and smart watch repair services in Ringwood, Melbourne. Weekday same-day screen and battery replacements.",
+      description: "Professional Apple Watch and smart watch repair services in Ringwood, Melbourne. Same-day options may be available for common screen and battery repairs when parts are in stock.",
     },
     features: [
-      { t: "Weekday Same-Day Guarantee", d: "Quick, secure turnarounds." },
+      { t: "Same-day options when parts are in stock", d: "Timing is confirmed after model, part, and queue checks." },
       { t: "Precision Tools & Specialised Press Equipment", d: "" },
       { t: "High-quality adhesive seals", d: "" },
       { t: "180-Day Warranty on parts and labour", d: "" }
@@ -218,10 +218,10 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "Do you offer weekday same-day Apple Watch repairs in Ringwood?", answer: "Yes, we prioritize smart watch repairs during all weekdays. If we have the screen or battery in stock, we guarantee a same-day turnaround for our local Ringwood customers." },
-      { question: "What should I do if my Apple Watch won't turn on?", answer: "First, try a forced restart. If it still won't hold a charge, the battery likely needs replacing. Battery degradation is normal over time, and our service restores your watch to full-day usage." },
-      { question: "How long does an Apple Watch screen repair take?", answer: "Due to the precision required for sealing smart watches, most Apple watch screen repairs take around 2 to 4 hours using our specialized press equipment." },
-      { question: "Will my Apple Watch remain waterproof after repair?", answer: "While we use high-quality gaskets and premium adhesives to reseal the watch exactly to OEM standards, we generally recommend avoiding complete submersion in water after any repair." },
+      { question: "Do you offer weekday same-day Apple Watch repairs in Ringwood?", answer: "Same-day turnaround may be available when the screen or battery is in stock. We confirm timing after checking the model, repair queue, and device condition." },
+      { question: "What should I do if my Apple Watch won't turn on?", answer: "First, try a forced restart. If it still won't hold a charge, the battery may need replacing. Battery degradation is normal over time, and inspection helps confirm the right repair option." },
+      { question: "How long does an Apple Watch screen repair take?", answer: "Apple Watch screen repair timing depends on the model, part availability, sealing requirements, repair queue, and device condition." },
+      { question: "Will my Apple Watch remain water resistant after repair?", answer: "Water resistance cannot be guaranteed after opening. We reseal carefully, but recommend avoiding submersion after repair." },
       { question: "Is it worth repairing my smartwatch?", answer: "Absolutely! Battery or screen replacements are highly cost-effective compared to buying a brand new Apple Watch Series or Ultra. Bring it in for a quote!" }
     ]
   }
