@@ -9,6 +9,15 @@ import { Menu, X } from 'lucide-react';
 
 type ThemeMode = 'light' | 'dark';
 
+const repairMenuItems = [
+  { label: 'iPhone Repairs', href: '/repairs/phone/iphone' },
+  { label: 'Samsung Repairs', href: '/repairs/phone/samsung' },
+  { label: 'Other Phone Repairs', href: '/repairs/phone' },
+  { label: 'iPad Repairs', href: '/repairs/tablet/ipad' },
+  { label: 'MacBook Repairs', href: '/repairs/laptop/macbook' },
+  { label: 'Apple Watch Repairs', href: '/repairs/watch/apple' },
+];
+
 function getInitialTheme(): ThemeMode {
   return 'light'; // Forced light mode MVP
 }
@@ -63,7 +72,18 @@ export default function Header() {
           {/* Center: Desktop nav links (Absolute Center) */}
           <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <nav className="nav-links nav-links--desktop">
-              <Link href="/repairs" prefetch={true}>Service &amp; Repairs</Link>
+              <div className="nav-dropdown">
+                <Link href="/repairs" prefetch={true} className="nav-dropdown-trigger">
+                  Service &amp; Repairs
+                </Link>
+                <div className="nav-dropdown-menu" aria-label="Service and repair categories">
+                  {repairMenuItems.map((item) => (
+                    <Link key={item.href} href={item.href} prefetch={true}>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
               <Link href="/about-us" prefetch={true}>About Us</Link>
               <Link href="/blog" prefetch={true}>Blog</Link>
             </nav>
@@ -129,7 +149,16 @@ export default function Header() {
           </div>
           
           <nav className="flex flex-col pt-8 px-8 overflow-y-auto gap-8">
-            <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Services &amp; Repairs</Link>
+            <div className="flex flex-col gap-4">
+              <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Service &amp; Repairs</Link>
+              <div className="mobile-repair-links" aria-label="Service and repair categories">
+                {repairMenuItems.map((item) => (
+                  <Link key={item.href} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
             <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Shop</Link>
             <Link href="/track-status" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
