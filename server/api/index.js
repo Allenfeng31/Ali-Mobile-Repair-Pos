@@ -1384,13 +1384,10 @@ app.post('/api/appointments/:id/reminder', async (req, res) => {
 });
 
 app.get('/api/appointments/upcoming', async (req, res) => {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-
   const withReminderFields = await supabase
     .from('appointments')
     .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at, reminder_sent_at, reminder_sms_sid')
-    .gte('datetime', startOfToday.toISOString())
+    .in('status', ['pending', 'confirmed'])
     .order('datetime', { ascending: true });
 
   let data = withReminderFields.data;
@@ -1400,7 +1397,7 @@ app.get('/api/appointments/upcoming', async (req, res) => {
     const fallback = await supabase
       .from('appointments')
       .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at')
-      .gte('datetime', startOfToday.toISOString())
+      .in('status', ['pending', 'confirmed'])
       .order('datetime', { ascending: true });
 
     data = (fallback.data || []).map((appointment) => ({
@@ -1413,9 +1410,7 @@ app.get('/api/appointments/upcoming', async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  const visibleStatuses = new Set(['pending', 'confirmed']);
   const upcoming = (data || [])
-    .filter((appointment) => visibleStatuses.has(String(appointment.status || '').toLowerCase()))
     .map((appointment) => ({
       ...appointment,
       reminder_sent_at: getReminderSentAt(appointment),

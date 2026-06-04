@@ -498,6 +498,9 @@ export function CustomersView() {
   const [isEditingRepair, setIsEditingRepair] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isConfirmingDeleteRepair, setIsConfirmingDeleteRepair] = useState(false);
+  const [isDeletingCustomer, setIsDeletingCustomer] = useState(false);
+  const [isDeletingRepair, setIsDeletingRepair] = useState(false);
+  const [deleteDialogError, setDeleteDialogError] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
   const [showPhonePopup, setShowPhonePopup] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
@@ -527,6 +530,43 @@ export function CustomersView() {
     isTicketModalOpen ||
     !!scannerTarget
   );
+
+  useEffect(() => {
+    if (!isConfirmingDelete && !isConfirmingDeleteRepair) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (isDeletingCustomer || isDeletingRepair) return;
+      setIsConfirmingDelete(false);
+      setIsConfirmingDeleteRepair(false);
+      setDeleteDialogError(null);
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isConfirmingDelete, isConfirmingDeleteRepair, isDeletingCustomer, isDeletingRepair]);
+
+  const openDeleteCustomerConfirm = () => {
+    setDeleteDialogError(null);
+    setIsConfirmingDelete(true);
+  };
+
+  const closeDeleteCustomerConfirm = () => {
+    if (isDeletingCustomer) return;
+    setDeleteDialogError(null);
+    setIsConfirmingDelete(false);
+  };
+
+  const openDeleteRepairConfirm = () => {
+    setDeleteDialogError(null);
+    setIsConfirmingDeleteRepair(true);
+  };
+
+  const closeDeleteRepairConfirm = () => {
+    if (isDeletingRepair) return;
+    setDeleteDialogError(null);
+    setIsConfirmingDeleteRepair(false);
+  };
 
   const [formData, setFormData] = useState<CustomerFormData>(createEmptyCustomerFormData());
 
@@ -855,6 +895,9 @@ export function CustomersView() {
       alert('You do not have permission to delete customers.');
       return;
     }
+    if (!selectedId || isDeletingCustomer) return;
+    setIsDeletingCustomer(true);
+    setDeleteDialogError(null);
     try {
       await api.deleteCustomer(selectedId);
       const updatedCustomers = customers.filter(c => c.id !== selectedId);
@@ -869,7 +912,9 @@ export function CustomersView() {
       resetForm();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete customer');
+      setDeleteDialogError('Failed to delete client record. Please refresh and try again.');
+    } finally {
+      setIsDeletingCustomer(false);
     }
   };
 
@@ -982,6 +1027,9 @@ export function CustomersView() {
       alert('You do not have permission to delete repair records.');
       return;
     }
+    if (isDeletingRepair) return;
+    setIsDeletingRepair(true);
+    setDeleteDialogError(null);
     try {
       await api.deleteRepair(selectedRepair.id);
       const updatedCustomers = customers.map(c => {
@@ -1002,7 +1050,9 @@ export function CustomersView() {
       setSelectedRepair(null);
     } catch (err) {
       console.error(err);
-      alert('Failed to delete repair');
+      setDeleteDialogError('Failed to delete transaction. Please refresh and try again.');
+    } finally {
+      setIsDeletingRepair(false);
     }
   };
 
@@ -1617,11 +1667,11 @@ export function CustomersView() {
                     {isEditing && (
                       <button
                         type="button"
-                        onClick={() => setIsConfirmingDelete(true)}
+                        onClick={openDeleteCustomerConfirm}
                         className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all border border-red-200/20 flex items-center justify-center gap-3"
                       >
                         <Trash2 size={18} strokeWidth={3} />
-                        Purge Client Record
+                        Delete Client Record
                       </button>
                     )}
                   </div>
@@ -1778,11 +1828,11 @@ export function CustomersView() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => setIsConfirmingDeleteRepair(true)}
+                        onClick={openDeleteRepairConfirm}
                         className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
                       >
                         <Trash2 size={18} strokeWidth={3} />
-                        Delete Repair Record
+                        Delete Transaction
                       </button>
                     </div>
                   </form>
@@ -1887,11 +1937,11 @@ export function CustomersView() {
                       </button>
 
                       <button
-                        onClick={() => setIsConfirmingDeleteRepair(true)}
+                        onClick={openDeleteRepairConfirm}
                         className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
                       >
                         <Trash2 size={18} strokeWidth={3} />
-                        Purge Transaction
+                        Delete Transaction
                       </button>
                     </div>
                   </div>
@@ -1987,25 +2037,37 @@ export function CustomersView() {
         )}
 
         {isConfirmingDelete && typeof document !== 'undefined' && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDelete(false)} className="absolute inset-0 bg-black/40" />
+          <div
+            className="fixed inset-0 z-[12000] flex items-center justify-center overscroll-contain bg-black/45 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-client-confirm-title"
+            onClick={closeDeleteCustomerConfirm}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
+              className="relative max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-[2.5rem] border border-white/20 bg-[var(--color-neu-bg)] p-8 text-center shadow-[var(--shadow-neu-floating)] sm:rounded-[3rem] sm:p-10"
+              onClick={(event) => event.stopPropagation()}
             >
               <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-600 mx-auto mb-8">
                 <Trash2 size={40} strokeWidth={3} />
               </div>
-              <h3 className="text-2xl font-black text-black mb-4">Confirm Deletion</h3>
+              <h3 id="delete-client-confirm-title" className="text-2xl font-black text-black mb-4">Delete Client Record?</h3>
               <p className="text-sm font-black text-gray-500 mb-8 uppercase tracking-widest">
-                This action cannot be undone. All client data will be permanently purged.
+                This action cannot be undone. The client record will only be removed after the backend confirms deletion.
               </p>
+              {deleteDialogError && (
+                <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-black text-red-700">
+                  {deleteDialogError}
+                </div>
+              )}
               <div className="flex gap-4">
                 <button
-                  onClick={() => setIsConfirmingDelete(false)}
-                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20 flex-1"
+                  onClick={closeDeleteCustomerConfirm}
+                  disabled={isDeletingCustomer}
+                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20 flex-1 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -2013,9 +2075,10 @@ export function CustomersView() {
                   onClick={async () => {
                     await handleDeleteCustomer();
                   }}
-                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_20px_rgba(220,38,38,0.3)] active:scale-95 transition-all flex-1"
+                  disabled={isDeletingCustomer}
+                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_20px_rgba(220,38,38,0.3)] active:scale-95 transition-all flex-1 disabled:opacity-50"
                 >
-                  Confirm Purge
+                  {isDeletingCustomer ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </motion.div>
@@ -2024,25 +2087,37 @@ export function CustomersView() {
         )}
 
         {isConfirmingDeleteRepair && typeof document !== 'undefined' && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmingDeleteRepair(false)} className="absolute inset-0 bg-black/40" />
+          <div
+            className="fixed inset-0 z-[12000] flex items-center justify-center overscroll-contain bg-black/45 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-transaction-confirm-title"
+            onClick={closeDeleteRepairConfirm}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 text-center border border-white/20"
+              className="relative max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-[2.5rem] border border-white/20 bg-[var(--color-neu-bg)] p-8 text-center shadow-[var(--shadow-neu-floating)] sm:rounded-[3rem] sm:p-10"
+              onClick={(event) => event.stopPropagation()}
             >
               <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-600 mx-auto mb-8">
                 <Trash2 size={40} strokeWidth={3} />
               </div>
-              <h3 className="text-2xl font-black text-black mb-4">Purge Record</h3>
+              <h3 id="delete-transaction-confirm-title" className="text-2xl font-black text-black mb-4">Delete Transaction?</h3>
               <p className="text-xs font-bold text-gray-500 leading-relaxed mb-10">
-                Are you sure you want to remove this transaction log? This cannot be undone.
+                Are you sure you want to remove this transaction log? It will only be removed after the backend confirms deletion.
               </p>
+              {deleteDialogError && (
+                <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-black text-red-700">
+                  {deleteDialogError}
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-6">
                 <button
-                  onClick={() => setIsConfirmingDeleteRepair(false)}
-                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20"
+                  onClick={closeDeleteRepairConfirm}
+                  disabled={isDeletingRepair}
+                  className="py-5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] border border-white/20 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -2050,9 +2125,10 @@ export function CustomersView() {
                   onClick={async () => {
                     await handleDeleteRepair();
                   }}
-                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95"
+                  disabled={isDeletingRepair}
+                  className="py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.3)] active:scale-95 disabled:opacity-50"
                 >
-                  Confirm
+                  {isDeletingRepair ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </motion.div>

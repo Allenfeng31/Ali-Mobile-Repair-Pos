@@ -462,7 +462,10 @@ export function ChatInbox() {
 
   const pendingBookings = bookings.filter(booking => booking.status === 'pending');
   const confirmedBookings = bookings.filter(booking => booking.status === 'confirmed');
-  const nextBooking = confirmedBookings[0] || bookings[0] || null;
+  const nowTime = Date.now();
+  const nextFutureConfirmedBooking =
+    confirmedBookings.find(booking => new Date(booking.datetime).getTime() >= nowTime) || null;
+  const nextBooking = nextFutureConfirmedBooking || confirmedBookings[0] || bookings[0] || null;
 
   const getUnreadCount = (session: ChatSession) =>
     (session.chat_messages || []).filter(m => m.sender === 'customer' && !m.is_read).length;
