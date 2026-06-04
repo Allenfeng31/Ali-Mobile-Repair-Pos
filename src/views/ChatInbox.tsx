@@ -102,6 +102,7 @@ export function ChatInbox() {
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [messageLoadError, setMessageLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -257,9 +258,37 @@ export function ChatInbox() {
     if (activeSession) scrollToBottom();
   }, [messages, activeSession]);
 
+  useEffect(() => {
+    if (!bookingsOpen && !deleteConfirmOpen) return;
+
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalDocumentOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalDocumentOverflow;
+    };
+  }, [bookingsOpen, deleteConfirmOpen]);
+
+  useEffect(() => {
+    if (!deleteConfirmOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !deleting) {
+        setDeleteConfirmOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [deleteConfirmOpen, deleting]);
+
   const openSession = (session: ChatSession) => {
     setDeleteError(null);
     setMessageLoadError(null);
+    setDeleteConfirmOpen(false);
     setActiveSession(session);
     loadMessages(session.id);
   };
@@ -302,12 +331,16 @@ export function ChatInbox() {
 
   const deleteSession = async () => {
     if (!activeSession) return;
-    const confirmed = window.confirm('Delete this conversation? This cannot be undone.');
-    if (!confirmed) return;
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteSession = async () => {
+    if (!activeSession) return;
     setDeleteError(null);
     const headers = await getStaffAuthHeaders();
     if (!headers.Authorization) {
       setChatAuthError('expired');
+      setDeleteConfirmOpen(false);
       return;
     }
 
@@ -319,10 +352,12 @@ export function ChatInbox() {
       });
       if (res.status === 401) {
         setChatAuthError('expired');
+        setDeleteConfirmOpen(false);
         return;
       }
       if (res.status === 403) {
         setChatAuthError('forbidden');
+        setDeleteConfirmOpen(false);
         return;
       }
       if (!res.ok) {
@@ -336,6 +371,7 @@ export function ChatInbox() {
       setActiveSession(null);
       setMessages([]);
       setMessageLoadError(null);
+      setDeleteConfirmOpen(false);
       await loadSessions();
     } catch (_) {
       const message = 'Could not delete this conversation. Please refresh and try again.';
@@ -485,6 +521,55 @@ export function ChatInbox() {
 
     return (
       <div className="flex flex-col h-full max-w-4xl mx-auto px-4" style={{ height: 'calc(100vh - 120px)' }}>
+        {deleteConfirmOpen && (
+          <div
+            className="fixed inset-0 z-[120] flex items-center justify-center overscroll-contain bg-slate-950/45 px-4 py-6 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-chat-confirm-title"
+            onClick={() => {
+              if (!deleting) setDeleteConfirmOpen(false);
+            }}
+          >
+            <div
+              className="w-full max-w-md rounded-[2.25rem] border border-white/30 bg-[var(--color-neu-bg)] p-6 shadow-[0_28px_80px_rgba(15,23,42,0.35)]"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-5 flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-500 shadow-[var(--shadow-neu-sm)]">
+                  <Trash2 size={22} strokeWidth={3} />
+                </div>
+                <div>
+                  <h3 id="delete-chat-confirm-title" className="text-xl font-black tracking-tight text-black">
+                    Delete this conversation?
+                  </h3>
+                  <p className="mt-2 text-sm font-bold leading-relaxed text-gray-500">
+                    This removes the chat session after the backend confirms deletion. Customer messages are not hidden unless the delete succeeds.
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  disabled={deleting}
+                  className="rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-gray-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteSession}
+                  disabled={deleting}
+                  className="rounded-2xl bg-red-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_12px_26px_rgba(239,68,68,0.28)] transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Chat'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* NEUMORPHIC HEADER */}
         <div className="flex items-center gap-6 mb-8 p-6 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] border border-white/20">
           <button
@@ -687,9 +772,9 @@ export function ChatInbox() {
   return (
     <div className="max-w-4xl mx-auto px-4 pb-20">
       {bookingsOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-8">
-          <div className="w-full max-w-5xl max-h-[86vh] overflow-hidden rounded-[3rem] border border-white/30 bg-[var(--color-neu-bg)] shadow-[0_34px_90px_rgba(15,23,42,0.28)]">
-            <div className="flex flex-col gap-6 border-b border-white/40 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden overscroll-contain bg-slate-900/35 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-8">
+          <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.25rem] border border-white/30 bg-[var(--color-neu-bg)] shadow-[0_34px_90px_rgba(15,23,42,0.28)] sm:max-h-[86vh] sm:rounded-[3rem]">
+            <div className="shrink-0 flex flex-col gap-6 border-b border-white/40 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.24em] text-blue-600">Today & Upcoming</span>
                 <h2 className="mt-2 text-3xl font-black tracking-tight text-black">Booking Control</h2>
@@ -713,7 +798,7 @@ export function ChatInbox() {
               </div>
             </div>
 
-            <div className="grid gap-4 px-6 pt-6 sm:grid-cols-3">
+            <div className="shrink-0 grid gap-4 px-5 pt-5 sm:grid-cols-3 sm:px-6 sm:pt-6">
               <div className="rounded-[2rem] bg-amber-50 p-5 shadow-[var(--shadow-neu-sm)]">
                 <p className="text-[9px] font-black uppercase tracking-[0.22em] text-amber-600">Pending</p>
                 <p className="mt-2 text-3xl font-black text-black">{pendingBookings.length}</p>
@@ -730,7 +815,7 @@ export function ChatInbox() {
               </div>
             </div>
 
-            <div className="max-h-[52vh] overflow-y-auto px-6 py-6 custom-scrollbar">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 custom-scrollbar [-webkit-overflow-scrolling:touch] sm:px-6 sm:py-6">
               {bookingsLoading && bookings.length === 0 ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map(i => (
