@@ -171,6 +171,11 @@ const nextConfig: NextConfig = {
       { source: '/repairs/laptop/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
       { source: '/repairs/laptops/macbook/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
       // 12. GSC MODEL-PREFIXED REPAIR SLUG CLEANUP
+      { source: '/repairs/phone/iphone/iphone-16e/back-glasshousing', destination: '/repairs/phone/iphone/iphone-16e/back-housing-replacement', permanent: true },
+      { source: '/repairs/phone/iphone/iphone-17-air/back-glasshousing', destination: '/repairs/phone/iphone/iphone-17-air/back-housing-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/samsung-a21s/galaxy-a21s-charging-port-replacement', destination: '/repairs/phone/samsung/samsung-a21s/charging-port-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-extreme-tb-570fu/lenovo-tab-extreme-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-extreme-tb-570fu/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/lenovo-tab-m10-gen-3-charging-port', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/charging-port-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/lenovo-tab-m10-gen-3-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-front-camera', destination: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/front-camera-replacement', permanent: true },
       { source: '/repairs/phone/samsung/galaxy-s24-ultra/logic-board', destination: '/repairs/phone/samsung/galaxy-s24-ultra/logic-board-repair', permanent: true },
