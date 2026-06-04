@@ -2045,6 +2045,45 @@ export function CustomersView() {
           </div>
         )}
 
+        {showQR && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowQR(false)} className="absolute inset-0 bg-black/40" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 flex flex-col items-center border border-white/20"
+            >
+              <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Portal Sync</h3>
+              <p className="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 leading-relaxed">Scan to drop-off or track tickets</p>
+
+              <div className="p-6 bg-white rounded-[2.5rem] shadow-[var(--shadow-neu-floating)] mb-10 border border-black/5 transform hover:rotate-3 transition-transform">
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-52 h-52 rounded-2xl" />
+              </div>
+
+              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest text-center bg-blue-50 px-6 py-3 rounded-full shadow-[var(--shadow-neu-sm)] border border-blue-200/30">Awaiting External Scan</p>
+
+              <button
+                onClick={() => setShowQR(false)}
+                className="absolute top-6 right-6 w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-full flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
+              >
+                <X size={20} strokeWidth={3} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+
+        {isTicketModalOpen && selectedCustomer && selectedRepair && (
+          <RepairTicketModal
+            isOpen={isTicketModalOpen}
+            onClose={() => setIsTicketModalOpen(false)}
+            customer={selectedCustomer}
+            repair={selectedRepair}
+            t={t}
+          />
+        )}
+      </AnimatePresence>
+
         {isConfirmingDelete && typeof document !== 'undefined' && createPortal(
           <div
             className="fixed inset-0 z-[12000] flex items-center justify-center overscroll-contain bg-black/45 p-4 backdrop-blur-sm"
@@ -2144,45 +2183,6 @@ export function CustomersView() {
           </div>,
           document.body
         )}
-
-        {showQR && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowQR(false)} className="absolute inset-0 bg-black/40" />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-sm bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] p-10 flex flex-col items-center border border-white/20"
-            >
-              <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Portal Sync</h3>
-              <p className="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 leading-relaxed">Scan to drop-off or track tickets</p>
-
-              <div className="p-6 bg-white rounded-[2.5rem] shadow-[var(--shadow-neu-floating)] mb-10 border border-black/5 transform hover:rotate-3 transition-transform">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(getPortalUrl())}`} alt="Portal QR" className="w-52 h-52 rounded-2xl" />
-              </div>
-
-              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest text-center bg-blue-50 px-6 py-3 rounded-full shadow-[var(--shadow-neu-sm)] border border-blue-200/30">Awaiting External Scan</p>
-
-              <button
-                onClick={() => setShowQR(false)}
-                className="absolute top-6 right-6 w-10 h-10 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-full flex items-center justify-center text-gray-500 active:shadow-[var(--shadow-neu-pressed)]"
-              >
-                <X size={20} strokeWidth={3} />
-              </button>
-            </motion.div>
-          </div>
-        )}
-
-        {isTicketModalOpen && selectedCustomer && selectedRepair && (
-          <RepairTicketModal
-            isOpen={isTicketModalOpen}
-            onClose={() => setIsTicketModalOpen(false)}
-            customer={selectedCustomer}
-            repair={selectedRepair}
-            t={t}
-          />
-        )}
-      </AnimatePresence>
 
       {/* FAB (Floating Physical Button) */}
       <button
