@@ -3055,6 +3055,156 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { question: "Should I back up my iPad 9th Generation before screen replacement?", answer: "Yes. If the iPad still powers on, backing up important data before repair is recommended." },
     ],
   },
+  "phone/iphone/iphone-16-pro/screen-replacement": {
+    quickAnswer:
+      "Need iPhone 16 Pro screen replacement in Ringwood? We check display image faults, touch response, frame fit, and the front sensor area before confirming the screen repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this iPhone 16 Pro display?",
+      diagnostics: "How do we confirm the screen fault?",
+      symptoms: "Which display symptoms matter most?",
+      outcomes: "What do we retest before handover?",
+    },
+    repairOptions: [
+      { name: "Display and touch diagnosis", shortDescription: "We test image output, touch coverage, brightness behaviour, black-screen symptoms, and visible crack spread before quoting.", bestFor: "Cracked glass, dead touch areas, flicker, or display image loss.", notes: "We confirm the screen repair path before parts are fitted." },
+      { name: "Front sensor and frame fit check", shortDescription: "We inspect the Face ID and front sensor area, edge dents, and frame pressure that can affect display seating.", bestFor: "Top-edge damage, bent corners, or lifted display sections.", notes: "Frame fit risk is explained before work begins." },
+      { name: "Final function retest", shortDescription: "After fitting, we retest touch, brightness, proximity behaviour, speaker and mic response, and front camera area function.", bestFor: "Customers who want practical post-repair checks on the main daily-use functions.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Cracked glass with unstable touch", description: "A cracked panel may still work in parts, but touch accuracy and edge response can worsen over time." },
+      { title: "Black screen, lines, or weak brightness", description: "Impact can damage OLED output even when the phone still vibrates or powers on." },
+      { title: "Face ID or top sensor area concern", description: "Drops near the top edge can overlap with the front sensor area, so we check that zone before repair." },
+      { title: "Frame bend affecting fit", description: "Corner dents or edge pressure can stop a fresh display from seating cleanly." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test display behaviour", description: "We check image output, touch response, brightness, and visible OLED symptoms before quoting." },
+      { step: "02", title: "Inspect frame and top sensor area", description: "We look at edge dents, corner pressure, and the front sensor area before confirming fit." },
+      { step: "03", title: "Confirm quote and screen path", description: "We confirm the repair scope before fitting the replacement display." },
+      { step: "04", title: "Final handover checks", description: "After repair, we retest touch, brightness, proximity response, speaker, mic, and camera-area function." },
+    ],
+    faq: [
+      { question: "Do you check the iPhone 16 Pro frame and sensor area before screen replacement?", answer: "Yes. We inspect the frame, corner condition, and top sensor area first because those points can affect display fit and final function checks." },
+    ],
+  },
+  "phone/samsung/galaxy-s23-ultra/screen-replacement": {
+    quickAnswer:
+      "Need Galaxy S23 Ultra screen replacement in Ringwood? We check AMOLED output, touch response, frame impact points, fingerprint area behaviour, and final display fit before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this S23 Ultra screen?",
+      diagnostics: "How do we confirm the display fault?",
+      symptoms: "Which screen symptoms matter most?",
+      outcomes: "What do we retest before pickup?",
+    },
+    repairOptions: [
+      { name: "AMOLED and touch diagnosis", shortDescription: "We test image output, black-screen symptoms, line or flicker faults, and touch coverage across the full panel.", bestFor: "Cracked glass, no image, partial touch, or unstable display output.", notes: "The screen path and quote are confirmed before parts are fitted." },
+      { name: "Frame, corner, and edge response check", shortDescription: "We inspect corner dents, frame pressure, and edge response across the large curved display area.", bestFor: "Phones dropped on corners or with visible housing pressure around the screen.", notes: "Frame-related fit risks are explained before service." },
+      { name: "Fingerprint and final function testing", shortDescription: "After fitting, we retest display output, touch, fingerprint-area behaviour, and core daily-use functions.", bestFor: "Customers who want practical confirmation that the main functions were rechecked before handover.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Large AMOLED line or flicker faults", description: "Impact can cause line artefacts, flicker, black patches, or full image loss on the curved display." },
+      { title: "Touch or edge-response issues", description: "Dead zones can appear along the edges or corners after screen or frame damage." },
+      { title: "Fingerprint-area concern", description: "Display faults near the lower screen area can overlap with fingerprint-use behaviour and need testing." },
+      { title: "Frame and corner impact", description: "A bent frame or dented corner can affect how a replacement display sits." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Check display and touch behaviour", description: "We test AMOLED output, brightness, line/flicker symptoms, and touch coverage." },
+      { step: "02", title: "Inspect the frame and corners", description: "We look for pressure points and impact marks that can affect display seating." },
+      { step: "03", title: "Confirm quote and repair scope", description: "We confirm the screen repair path before fitting the replacement display." },
+      { step: "04", title: "Retest core functions", description: "After repair, we retest touch, fingerprint-area response, display output, and main daily-use functions before handover." },
+    ],
+    faq: [
+      { question: "Do you test fingerprint and edge response on Galaxy S23 Ultra screen repairs?", answer: "Yes. We check lower-screen behaviour, touch coverage, and edge response as part of the screen replacement process and final testing." },
+    ],
+  },
+  "phone/google/pixel-7-pro/screen-replacement": {
+    quickAnswer:
+      "Need Pixel 7 Pro screen replacement in Ringwood? We check curved OLED symptoms, touch dead zones, fingerprint-area behaviour, frame pressure, and camera-area condition before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this Pixel 7 Pro display?",
+      diagnostics: "How do we confirm the screen fault?",
+      symptoms: "Which Pixel display symptoms matter most?",
+      outcomes: "What do we retest before handover?",
+    },
+    repairOptions: [
+      { name: "Curved OLED diagnosis", shortDescription: "We test black-screen faults, green lines, flicker, brightness behaviour, and curved-edge touch response before quoting.", bestFor: "Cracked glass, no image, display lines, or touch loss.", notes: "We confirm the repair path before fitting the replacement screen." },
+      { name: "Fingerprint and frame pressure review", shortDescription: "We inspect lower-screen behaviour, frame pressure, and edge damage that can affect display fit.", bestFor: "Phones with corner drops, lower-screen faults, or visible housing stress.", notes: "Fit risks are explained before repair begins." },
+      { name: "Final daily-use function check", shortDescription: "After fitting, we retest touch, brightness, fingerprint-area behaviour, calls, charging response, and camera-area function.", bestFor: "Customers who want the main day-to-day functions checked before pickup.", notes: "Back up important data before repair when possible." },
+    ],
+    commonProblems: [
+      { title: "Green line, black screen, or flicker", description: "Curved OLED panels can show line artefacts, dark image loss, or flicker after impact." },
+      { title: "Touch dead zones", description: "Touch may fail around cracked zones or near the screen edges after pressure damage." },
+      { title: "Frame pressure near the camera area", description: "Drops around the upper housing can affect fit and should be checked before screen replacement." },
+      { title: "Fingerprint-area overlap", description: "Display damage near the lower screen area can overlap with fingerprint-use behaviour and needs retesting." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Test display behaviour", description: "We check OLED output, brightness, touch, and visible line or flicker symptoms." },
+      { step: "02", title: "Inspect frame and camera-area condition", description: "We look for corner pressure, housing stress, and impact near the camera area before confirming fit." },
+      { step: "03", title: "Confirm quote and screen path", description: "We confirm the repair scope before fitting the replacement display." },
+      { step: "04", title: "Final handover checks", description: "After repair, we retest touch, display output, charging response, calls, and lower-screen behaviour before handover." },
+    ],
+    faq: [
+      { question: "Do you check fingerprint-area behaviour on Pixel 7 Pro screen repairs?", answer: "Yes. We check lower-screen behaviour as part of the display diagnosis and final function testing after the repair." },
+    ],
+  },
+  "tablet/ipad/ipad-pro-11-inch-4th-generation/screen-replacement": {
+    quickAnswer:
+      "Need iPad Pro 11-inch 4th Generation screen replacement in Ringwood? We check glass, display, touch response, frame pressure, and front camera/Face ID area condition before confirming the repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this iPad Pro screen?",
+      diagnostics: "How do we confirm the display fault?",
+      symptoms: "Which screen symptoms matter most?",
+      outcomes: "What should you prepare before booking?",
+    },
+    repairOptions: [
+      { name: "Glass, display, and touch assessment", shortDescription: "We check crack spread, image output, touch response, and visible panel damage before quoting.", bestFor: "Cracked glass, no image, touch dead zones, or weak panel response.", notes: "We confirm the screen path before repair starts." },
+      { name: "Frame pressure and camera-area review", shortDescription: "We inspect bent corners, frame pressure, and the front camera or Face ID area where impact is visible.", bestFor: "Tablets with corner drops, bent edges, or upper-screen damage.", notes: "Any fit risk is explained before parts are fitted." },
+      { name: "Accessory and final function testing", shortDescription: "After fitting, we retest touch response, Apple Pencil interaction where relevant, and the core front-camera and display functions.", bestFor: "Customers who want practical daily-use functions rechecked before handover.", notes: "If the iPad still powers on, backing up important data before repair is recommended." },
+    ],
+    commonProblems: [
+      { title: "Cracked glass with mixed touch response", description: "The display may still show an image, but touch can become unstable around damaged sections." },
+      { title: "Display or touch-layer overlap", description: "Some impacts affect the glass, display image, and touch layer together, so we test all three before quoting." },
+      { title: "Bent frame or corner pressure", description: "A bent edge can affect how cleanly the replacement screen sits." },
+      { title: "Front camera or Face ID area concern", description: "Impact near the top of the iPad should be checked before confirming the repair scope." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Inspect glass and housing condition", description: "We assess crack spread, corner pressure, and whether the frame is safe to open." },
+      { step: "02", title: "Test display and touch behaviour", description: "We check image output, touch response, and visible panel issues before confirming the repair path." },
+      { step: "03", title: "Confirm quote and screen scope", description: "We confirm the repair scope before fitting the replacement screen." },
+      { step: "04", title: "Retest display and accessory use", description: "After repair, we retest touch, display function, and Apple Pencil or front-camera behaviour where relevant." },
+    ],
+    faq: [
+      { question: "Should I back up my iPad Pro 11-inch 4th Generation before screen replacement?", answer: "Yes. If the iPad still powers on, backing up important data before repair is recommended." },
+    ],
+  },
+  "laptop/macbook/macbook-pro-1416-m1-promax-2021/screen-replacement": {
+    quickAnswer:
+      "Need MacBook Pro 14 or 16 M1 Pro/Max 2021 screen replacement in Ringwood? We diagnose display assembly faults, lid-angle symptoms, hinge condition, and top-case overlap before confirming the screen repair path.",
+    workbenchHeadings: {
+      options: "What do we check before replacing this MacBook display?",
+      diagnostics: "How do we confirm the screen fault?",
+      symptoms: "Which display symptoms matter most?",
+      outcomes: "What should you expect before handover?",
+    },
+    repairOptions: [
+      { name: "Display assembly diagnosis", shortDescription: "We check cracked LCD, line artefacts, backlight issues, black screen symptoms, and lid-angle related display faults before quoting.", bestFor: "Cracked screens, image loss, lines, or a display that cuts in and out when the lid moves.", notes: "We confirm whether the fault matches a display assembly repair before ordering or fitting parts." },
+      { name: "Hinge and top-case condition review", shortDescription: "We inspect hinge movement, lid alignment, and visible housing stress that can affect the replacement path.", bestFor: "Drops, lid pressure, or signs that the display damage overlaps with hinge or housing condition.", notes: "Battery, keyboard, and trackpad are not included unless separately quoted." },
+      { name: "Final system function testing", shortDescription: "After fitting, we retest display output, webcam, sleep/wake behaviour, and external display output where relevant.", bestFor: "Customers who want practical post-repair checks on the main screen-related functions.", notes: "Repair timing depends on part availability and bench inspection." },
+    ],
+    commonProblems: [
+      { title: "Cracked LCD or display lines", description: "A hit to the lid can cause lines, black sections, or no image even if the machine still boots normally." },
+      { title: "Backlight or lid-angle faults", description: "Some screen faults appear when the lid moves or the backlight cuts in and out." },
+      { title: "Hinge or lid alignment concern", description: "Drops or closing pressure can affect hinge movement and should be checked before the display path is confirmed." },
+      { title: "Top-case overlap questions", description: "Customers often ask whether battery, keyboard, or trackpad are included, so we confirm scope clearly before repair." },
+    ],
+    diagnosticSteps: [
+      { step: "01", title: "Check display assembly symptoms", description: "We review LCD damage, lines, backlight behaviour, and lid-angle symptoms before confirming the repair path." },
+      { step: "02", title: "Inspect hinge and housing condition", description: "We check hinge movement, lid alignment, and whether housing condition affects the display replacement scope." },
+      { step: "03", title: "Confirm quote and part path", description: "We confirm the screen assembly scope, quote, and part-availability timing before work begins." },
+      { step: "04", title: "Final screen-related checks", description: "After repair, we retest display output, camera, sleep/wake, and external display function where relevant before handover." },
+    ],
+    faq: [
+      { question: "Does MacBook Pro 14 or 16 M1 Pro/Max 2021 screen replacement include battery or keyboard parts?", answer: "No. Screen replacement is quoted separately from battery, keyboard, or trackpad work unless inspection shows another repair is needed and you approve it first." },
+    ],
+  },
 };
 
 function getPriorityRepairSeoPocket(category: string, brand: string, model: string, repairType: string) {

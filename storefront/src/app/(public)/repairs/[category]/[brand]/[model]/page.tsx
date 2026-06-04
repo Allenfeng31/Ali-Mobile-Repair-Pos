@@ -83,6 +83,36 @@ const PRIORITY_MODEL_REPAIR_LINKS: Record<string, PriorityRepairLink> = {
     description:
       "Cracked glass or weak touch response? Start with the iPad 9th Generation screen repair page so we can check frame pressure, button/camera-area condition, and fit risk before quoting.",
   },
+  "phone/iphone/iphone-16-pro": {
+    repairSlug: "screen-replacement",
+    title: "iPhone 16 Pro screen replacement",
+    description:
+      "Cracked glass, black display, weak touch, or top sensor-area damage? Start with the screen repair page so we can check display output, frame fit, and front sensor condition before quoting.",
+  },
+  "phone/samsung/galaxy-s23-ultra": {
+    repairSlug: "screen-replacement",
+    title: "Samsung Galaxy S23 Ultra screen replacement",
+    description:
+      "Lines, flicker, black display, or touch issues on the large AMOLED panel? View the screen repair path so we can check frame impact, lower-screen behaviour, and display fit before quoting.",
+  },
+  "phone/google/pixel-7-pro": {
+    repairSlug: "screen-replacement",
+    title: "Google Pixel 7 Pro screen replacement",
+    description:
+      "Green lines, black screen, weak touch, or curved-edge damage? Start with the Pixel screen repair page so we can check display output, frame pressure, and lower-screen behaviour first.",
+  },
+  "tablet/ipad/ipad-pro-11-inch-4th-generation": {
+    repairSlug: "screen-replacement",
+    title: "iPad Pro 11-inch 4th Generation screen replacement",
+    description:
+      "Cracked glass, touch faults, or display damage? View the screen repair path so we can check frame pressure, camera-area condition, and accessory-use testing before quoting.",
+  },
+  "laptop/macbook/macbook-pro-1416-m1-promax-2021": {
+    repairSlug: "screen-replacement",
+    title: "MacBook Pro 14/16 M1 Pro/Max 2021 screen replacement",
+    description:
+      "Lines, black display, lid-angle faults, or cracked LCD? Start with the screen repair page so we can diagnose the display assembly, hinge condition, and final function checks before quoting.",
+  },
 };
 
 function getPriorityRepairLink(categorySlug: string, brandSlug: string, modelSlug: string, repairSlugs: string[]) {
