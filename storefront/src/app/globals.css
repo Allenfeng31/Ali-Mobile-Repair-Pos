@@ -178,6 +178,16 @@ a {
   position: relative;
 }
 
+.nav-dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: -0.75rem;
+  right: -0.75rem;
+  z-index: 59;
+  height: 0.95rem;
+}
+
 .nav-dropdown-trigger {
   display: inline-flex;
   align-items: center;
@@ -199,7 +209,11 @@ a {
   box-shadow: 0 22px 55px rgba(15, 23, 42, 0.14);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  visibility: hidden;
+  transition:
+    opacity 0.18s ease 0.18s,
+    transform 0.18s ease 0.18s,
+    visibility 0s linear 0.36s;
 }
 
 .nav-dropdown:hover .nav-dropdown-menu,
@@ -207,6 +221,8 @@ a {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 .nav-dropdown-menu a {
