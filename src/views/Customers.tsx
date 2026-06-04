@@ -557,8 +557,9 @@ export function CustomersView() {
     setIsConfirmingDelete(false);
   };
 
-  const openDeleteRepairConfirm = () => {
+  const openDeleteRepairConfirm = (repair?: any) => {
     setDeleteDialogError(null);
+    if (repair) setSelectedRepair(repair);
     setIsConfirmingDeleteRepair(true);
   };
 
@@ -1828,8 +1829,12 @@ export function CustomersView() {
                       </div>
                       <button
                         type="button"
-                        onClick={openDeleteRepairConfirm}
-                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          openDeleteRepairConfirm(selectedRepair);
+                        }}
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20 [touch-action:manipulation]"
                       >
                         <Trash2 size={18} strokeWidth={3} />
                         Delete Transaction
@@ -1937,11 +1942,15 @@ export function CustomersView() {
                       </button>
 
                       <button
-                        onClick={openDeleteRepairConfirm}
-                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          openDeleteRepairConfirm(selectedRepair);
+                        }}
+                        className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-600 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all flex items-center justify-center gap-3 border border-red-200/20 [touch-action:manipulation]"
                       >
                         <Trash2 size={18} strokeWidth={3} />
-                        Delete Transaction
+                        Purge Transaction
                       </button>
                     </div>
                   </div>
