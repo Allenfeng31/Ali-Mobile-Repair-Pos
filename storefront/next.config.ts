@@ -185,7 +185,25 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/galaxy-tab-a-80-2015-charging-port', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/charging-port-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/lenovo-tab-m7-3rd-gen-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m10-tb-x606f/lenovo-tab-m10-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-tb-x606f/screen-replacement', permanent: true },
-      { source: '/repairs/phone/samsung/galaxy-s8/logic-board', destination: '/repairs/phone/samsung/galaxy-s8/logic-board-repair', permanent: true }
+      { source: '/repairs/phone/samsung/galaxy-s8/logic-board', destination: '/repairs/phone/samsung/galaxy-s8/logic-board-repair', permanent: true },
+      { source: '/repairs/phone/iphone/iphone-17e/back-glasshousing', destination: '/repairs/phone/iphone/iphone-17e/back-housing-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-hd-2nd-gen-tb-x306f/lenovo-tab-m10-hd-2nd-gen-front-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-hd-2nd-gen-tb-x306f/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-hd-2nd-gen-tb-x306f/lenovo-tab-m10-hd-2nd-gen-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-hd-2nd-gen-tb-x306f/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/lenovo-tab-m7-3rd-gen-charging-port', destination: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/charging-port-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/lenovo-tab-m7-3rd-gen-front-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m7-3rd-gen-tb-7305f/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/lenovo-tab-m8-gen-4-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/lenovo-tab-p11-gen-2-charging-port', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/charging-port-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/lenovo-tab-p11-gen-2-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-plus-tb-j616f/lenovo-tab-p11-plus-front-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-plus-tb-j616f/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-plus-tb-j616f/lenovo-tab-p11-plus-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-plus-tb-j616f/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-pro-gen-2-tb-132fu/lenovo-tab-p11-pro-gen-2-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-pro-gen-2-tb-132fu/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-pro-gen-2-tb-132fu/lenovo-tab-p11-pro-gen-2-front-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-pro-gen-2-tb-132fu/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-tb-j606f/lenovo-tab-p11-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-tb-j606f/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p12-pro-tb-q706f/lenovo-tab-p12-pro-charging-port', destination: '/repairs/tablet/lenovo/lenovo-tab-p12-pro-tb-q706f/charging-port-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p12-tb-370fu/lenovo-tab-p12-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-p12-tb-370fu/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-back-camera', destination: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-yoga-tab-11-yt-j706f/lenovo-yoga-tab-11-front-camera', destination: '/repairs/tablet/lenovo/lenovo-yoga-tab-11-yt-j706f/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true }
     ];
   },
 };
