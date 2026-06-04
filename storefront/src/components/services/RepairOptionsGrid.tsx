@@ -33,6 +33,9 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
     "front-camera-replacement": 50,
     "back-camera-replacement": 50,
     "back-housing-replacement": 79,
+    "back-glass": 79,
+    "back-glass-repair": 79,
+    "back-glass-replacement": 79,
   },
   samsung: {
     "screen-replacement": 129,
@@ -41,6 +44,9 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
     "front-camera-replacement": 50,
     "back-camera-replacement": 50,
     "back-housing-replacement": 50,
+    "back-glass": 50,
+    "back-glass-repair": 50,
+    "back-glass-replacement": 50,
   },
   google: {
     "screen-replacement": 129,
@@ -49,6 +55,9 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
     "front-camera-replacement": 50,
     "back-camera-replacement": 50,
     "back-housing-replacement": 79,
+    "back-glass": 79,
+    "back-glass-repair": 79,
+    "back-glass-replacement": 79,
   },
   pixel: {
     "screen-replacement": 129,
@@ -57,6 +66,9 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
     "front-camera-replacement": 50,
     "back-camera-replacement": 50,
     "back-housing-replacement": 79,
+    "back-glass": 79,
+    "back-glass-repair": 79,
+    "back-glass-replacement": 79,
   },
   oppo: {
     "screen-replacement": 129,
@@ -65,7 +77,9 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
     "front-camera-replacement": 50,
     "back-camera-replacement": 50,
     "back-housing-replacement": 50,
+    "back-glass": 50,
     "back-glass-repair": 50,
+    "back-glass-replacement": 50,
   },
   other: {
     "screen-replacement": 129,
@@ -74,7 +88,9 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
     "front-camera-replacement": 50,
     "back-camera-replacement": 50,
     "back-housing-replacement": 50,
+    "back-glass": 50,
     "back-glass-repair": 50,
+    "back-glass-replacement": 50,
   },
 };
 
@@ -113,11 +129,6 @@ export default function RepairOptionsGrid({
   const getDisplayPrice = (rt: RepairOption) => {
     if (rt.price > 0) {
       return `From $${rt.price}`;
-    }
-
-    const hasQuoteOnlyVariants = rt.variants?.some((variant) => variant.price <= 0);
-    if (hasQuoteOnlyVariants) {
-      return "Quote on Request";
     }
 
     if (categorySlug === "phone") {
