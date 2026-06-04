@@ -16,7 +16,7 @@ export const REPAIR_TYPES = [
   { slug: "charging-port-replacement", name: "Charging Port Replacement" },
   { slug: "back-housing-replacement", name: "Back Housing Replacement" },
   { slug: "camera-repair", name: "Camera Repair" },
-  { slug: "water-damage-repair", name: "Water Damage Recovery" },
+  { slug: "water-damage-repair", name: "Water Damage Cleaning / Assessment" },
   { slug: "flex-cable", name: "Flex Cable" }
 ];
 

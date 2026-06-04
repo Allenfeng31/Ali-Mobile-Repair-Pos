@@ -140,7 +140,7 @@ const UNIVERSAL_REPAIR_TYPES: RepairOption[] = [
   { slug: 'screen-replacement',          name: 'Screen Replacement',          price: 0 },
   { slug: 'battery-replacement',         name: 'Battery Replacement',         price: 0 },
   { slug: 'charging-port-replacement',   name: 'Charging Port Replacement',   price: 0 },
-  { slug: 'water-damage-repair',         name: 'Water Damage Recovery',       price: 0 },
+  { slug: 'water-damage-repair',         name: 'Water Damage Cleaning / Assessment', price: 0 },
 ];
 
 const BACK_GLASS_REPAIR: RepairOption = {

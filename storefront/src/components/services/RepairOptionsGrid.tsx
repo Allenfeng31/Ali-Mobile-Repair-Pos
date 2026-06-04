@@ -25,6 +25,64 @@ interface RepairOptionsGridProps {
   modelName: string;
 }
 
+const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {
+  iphone: {
+    "screen-replacement": 50,
+    "charging-port-replacement": 50,
+    "battery-replacement": 50,
+    "front-camera-replacement": 50,
+    "back-camera-replacement": 50,
+    "back-housing-replacement": 79,
+  },
+  samsung: {
+    "screen-replacement": 129,
+    "charging-port-replacement": 65,
+    "battery-replacement": 65,
+    "front-camera-replacement": 50,
+    "back-camera-replacement": 50,
+    "back-housing-replacement": 50,
+  },
+  google: {
+    "screen-replacement": 129,
+    "charging-port-replacement": 65,
+    "battery-replacement": 65,
+    "front-camera-replacement": 50,
+    "back-camera-replacement": 50,
+    "back-housing-replacement": 79,
+  },
+  pixel: {
+    "screen-replacement": 129,
+    "charging-port-replacement": 65,
+    "battery-replacement": 65,
+    "front-camera-replacement": 50,
+    "back-camera-replacement": 50,
+    "back-housing-replacement": 79,
+  },
+  oppo: {
+    "screen-replacement": 129,
+    "charging-port-replacement": 65,
+    "battery-replacement": 65,
+    "front-camera-replacement": 50,
+    "back-camera-replacement": 50,
+    "back-housing-replacement": 50,
+    "back-glass-repair": 50,
+  },
+  other: {
+    "screen-replacement": 129,
+    "charging-port-replacement": 50,
+    "battery-replacement": 50,
+    "front-camera-replacement": 50,
+    "back-camera-replacement": 50,
+    "back-housing-replacement": 50,
+    "back-glass-repair": 50,
+  },
+};
+
+function getPhoneStartingPrice(brandSlug: string, repairSlug: string) {
+  const brandPrices = PHONE_BRAND_STARTING_PRICES[brandSlug] || PHONE_BRAND_STARTING_PRICES.other;
+  return brandPrices[repairSlug] ?? null;
+}
+
 export default function RepairOptionsGrid({
   repairTypes,
   categorySlug,
@@ -52,6 +110,26 @@ export default function RepairOptionsGrid({
     analytics.trackRepairView(modelName, rt.name);
   };
 
+  const getDisplayPrice = (rt: RepairOption) => {
+    if (rt.price > 0) {
+      return `From $${rt.price}`;
+    }
+
+    const hasQuoteOnlyVariants = rt.variants?.some((variant) => variant.price <= 0);
+    if (hasQuoteOnlyVariants) {
+      return "Quote on Request";
+    }
+
+    if (categorySlug === "phone") {
+      const startingPrice = getPhoneStartingPrice(brandSlug, rt.slug);
+      if (startingPrice) {
+        return `Starting from $${startingPrice}`;
+      }
+    }
+
+    return "Quote on Request";
+  };
+
   return (
     <>
       <div className="repair-option-grid">
@@ -67,11 +145,7 @@ export default function RepairOptionsGrid({
                 <div className="repair-option-info">
                   <span className="repair-option-name">{rt.name}</span>
                   <span className="repair-option-price">
-                    {rt.price > 0
-                      ? `From $${rt.price}`
-                      : rt.slug === "water-damage-repair"
-                      ? "From $50"
-                      : "Quote on Request"}
+                    {getDisplayPrice(rt)}
                   </span>
                 </div>
                 <span className="repair-option-arrow">
@@ -82,6 +156,9 @@ export default function RepairOptionsGrid({
           );
         })}
       </div>
+      <p className="mt-3 text-center text-sm font-medium text-slate-500">
+        Prices are starting prices. Final quote depends on parts, model, and device condition.
+      </p>
     </>
   );
 }
