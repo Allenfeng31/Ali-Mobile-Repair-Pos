@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { RawItem, ParsedItem, parseItem, slugify, displayBrand } from './inventoryUtils';
 import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 
@@ -58,6 +59,11 @@ function getCategoryIcon(category: string): string {
 // ─── POS Fetch (Server-Side Only) ───────────────────────────────────────────
 
 const POS_INVENTORY_ENDPOINT = '/api/inventory';
+const POS_INVENTORY_TIMEOUT_MS = 4000;
+const FALLBACK_CATALOG_CACHE_MS = 15000;
+
+let fallbackCatalogCache: { catalog: RepairCatalog; expiresAt: number } | null = null;
+let repairCatalogRequest: Promise<RepairCatalog> | null = null;
 
 async function fetchPOSInventory(): Promise<RawItem[] | null> {
   const baseUrl = process.env.POS_API_URL || process.env.NEXT_PUBLIC_POS_API_URL;
@@ -67,20 +73,35 @@ async function fetchPOSInventory(): Promise<RawItem[] | null> {
     return null;
   }
 
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
   try {
-    const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
+    const request = fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
       cache: 'no-store', // Disable caching to ensure real-time data and fix "ghost cache" issues
+      signal: controller.signal,
     });
 
+    const timeout = new Promise<Response>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        controller.abort();
+        reject(new Error(`POS inventory request timed out after ${POS_INVENTORY_TIMEOUT_MS}ms`));
+      }, POS_INVENTORY_TIMEOUT_MS);
+    });
+
+    const res = await Promise.race([request, timeout]);
+
     if (!res.ok) {
-      console.error(`[api.ts] POS API returned ${res.status}`);
+      console.warn(`[api.ts] POS API returned ${res.status}; using fallback repair catalog`);
       return null;
     }
 
     return await res.json();
   } catch (error) {
-    console.error('[api.ts] Failed to fetch POS inventory:', error);
+    console.warn('[api.ts] POS inventory unavailable; using fallback repair catalog:', error);
     return null;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
 
@@ -349,7 +370,7 @@ function buildFallbackCatalog(): BrandEntry[] {
  * This function is designed for server-side use only (RSC / generateStaticParams).
  * The ISR cache ensures it's called at most once per hour.
  */
-export async function fetchRepairCatalog(): Promise<RepairCatalog> {
+async function loadRepairCatalog(): Promise<RepairCatalog> {
   const rawItems = await fetchPOSInventory();
 
   if (rawItems && rawItems.length > 0) {
@@ -362,6 +383,37 @@ export async function fetchRepairCatalog(): Promise<RepairCatalog> {
   // Fallback to hardcoded data
   return { brands: buildFallbackCatalog(), source: 'fallback' };
 }
+
+export const fetchRepairCatalog = cache(async function fetchRepairCatalog(): Promise<RepairCatalog> {
+  const now = Date.now();
+
+  if (fallbackCatalogCache && fallbackCatalogCache.expiresAt > now) {
+    return fallbackCatalogCache.catalog;
+  }
+
+  if (repairCatalogRequest) {
+    return repairCatalogRequest;
+  }
+
+  repairCatalogRequest = loadRepairCatalog()
+    .then((catalog) => {
+      if (catalog.source === 'fallback') {
+        fallbackCatalogCache = {
+          catalog,
+          expiresAt: Date.now() + FALLBACK_CATALOG_CACHE_MS,
+        };
+      } else {
+        fallbackCatalogCache = null;
+      }
+
+      return catalog;
+    })
+    .finally(() => {
+      repairCatalogRequest = null;
+    });
+
+  return repairCatalogRequest;
+});
 
 /**
  * Fetch a specific brand's model list for the sub-hub page.

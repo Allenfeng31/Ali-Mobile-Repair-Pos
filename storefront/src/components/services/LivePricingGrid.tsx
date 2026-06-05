@@ -6,6 +6,8 @@ import { RawItem, ParsedItem, parseItem } from '@/lib/inventoryUtils';
 
 import QuoteRequestModal from './QuoteRequestModal';
 
+const LIVE_PRICING_TIMEOUT_MS = 5000;
+
 export default function LivePricingGrid({ deviceType, defaultItems, title }: { deviceType: string, defaultItems: any[], title: string }) {
   const [items, setItems] = useState<ParsedItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +16,20 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), LIVE_PRICING_TIMEOUT_MS);
+
     const fetchPrices = async () => {
       try {
-        const res = await fetch("/api/proxy/inventory");
-        if (!res.ok) throw new Error("Failed to fetch");
+        const res = await fetch("/api/proxy/inventory", {
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          console.warn(`[LivePricingGrid] Inventory request returned ${res.status}; using fallback pricing display.`);
+          return;
+        }
+
         const raw: RawItem[] = await res.json();
         if (cancelled) return;
 
@@ -67,14 +79,22 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
           setItems(dynamicDisplayList);
         }
       } catch (error) {
-        console.error("Error fetching live prices:", error);
+        if (!cancelled) {
+          const message = error instanceof Error ? error.message : String(error);
+          console.warn(`[LivePricingGrid] Inventory unavailable; using fallback pricing display. ${message}`);
+        }
       } finally {
+        window.clearTimeout(timeoutId);
         if (!cancelled) setLoading(false);
       }
     };
 
     fetchPrices();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [deviceType]);
 
   const displayList = items.length > 0 ? items : defaultItems;
