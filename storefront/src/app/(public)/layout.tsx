@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "../Header";
 import { CartProvider } from "@/context/CartContext";
 import PageTransition from "@/components/PageTransition";
+import SocialIcon from "@/components/SocialIcon";
 import { Clock3, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 
 const ChatWidget = dynamic(() => import("../ChatWidget"));
@@ -93,6 +94,28 @@ export default function PublicLayout({
                     <Wrench size={15} strokeWidth={2.5} aria-hidden="true" />
                     No Fix, No Charge
                   </span>
+                </div>
+                <div className="footer-social-links" aria-label="Follow Ali Mobile & Repair">
+                  <a
+                    href="https://www.facebook.com/AliMobile"
+                    className="footer-social-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow Ali Mobile & Repair on Facebook"
+                  >
+                    <SocialIcon name="facebook" className="footer-social-icon" />
+                    <span>Facebook</span>
+                  </a>
+                  <a
+                    href="https://www.instagram.com/alimobileandrepair_mel/"
+                    className="footer-social-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow Ali Mobile & Repair on Instagram"
+                  >
+                    <SocialIcon name="instagram" className="footer-social-icon" />
+                    <span>Instagram</span>
+                  </a>
                 </div>
               </div>
 
