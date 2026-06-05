@@ -1,6 +1,6 @@
 import React from 'react';
 import { REPAIR_TYPES } from '@/data/seo-data';
-import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
+import { fetchRepairCatalog, fetchRepairDetails, type RepairVariant } from '@/lib/api';
 import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import { safeSlugSegment } from '@/lib/inventoryUtils';
@@ -30,6 +30,11 @@ interface RepairPageProps {
     model: string;
     'repair-type': string;
   }>;
+}
+
+interface SameModelRepairLink {
+  href: string;
+  label: string;
 }
 
 interface RepairTypeSeoPocket {
@@ -3409,22 +3414,69 @@ function WaterDamagePolicySection() {
   );
 }
 
+async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['params']>): Promise<{
+  details: {
+    brand: string;
+    model: string;
+    modelCode?: string;
+    repairType: string;
+    price: number;
+    variants: RepairVariant[];
+    source: 'pos' | 'fallback';
+  };
+  otherRepairLinks: SameModelRepairLink[];
+} | null> {
+  const catalog = await fetchRepairCatalog();
+  const brandEntry = catalog.brands.find(
+    (brand) => brand.category === resolvedParams.category && brand.slug === resolvedParams.brand
+  );
+
+  if (!brandEntry) return null;
+
+  const modelEntry = brandEntry.models.find((model) => model.slug === resolvedParams.model);
+  if (!modelEntry) return null;
+
+  const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === resolvedParams['repair-type']);
+  if (!repairEntry) return null;
+
+  const otherRepairLinks = modelEntry.repairTypes
+    .filter((repair) => repair.slug !== resolvedParams['repair-type'])
+    .filter((repair) => !repair.slug.includes('flex-cable'))
+    .filter((repair) => !repair.slug.includes('logic-board'))
+    .filter((repair) => !repair.slug.includes('water-damage'))
+    .slice(0, 4)
+    .map((repair) => ({
+      href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${repair.slug}`,
+      label: `${modelEntry.model} ${repair.name.toLowerCase()}`,
+    }));
+
+  return {
+    details: {
+      brand: brandEntry.brand,
+      model: modelEntry.model,
+      modelCode: modelEntry.modelCode,
+      repairType: repairEntry.name,
+      price: repairEntry.price,
+      variants: repairEntry.variants || [],
+      source: catalog.source,
+    },
+    otherRepairLinks,
+  };
+}
+
 import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
-  const details = await fetchRepairDetails(
-    resolvedParams.category,
-    resolvedParams.brand,
-    resolvedParams.model,
-    resolvedParams['repair-type']
-  );
+  const pageData = await fetchRepairPageData(resolvedParams);
 
-  if (!details) {
+  if (!pageData) {
     notFound();
   }
+
+  const { details, otherRepairLinks } = pageData;
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
@@ -3522,6 +3574,27 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             )}
           </div>
         </section>
+
+        {otherRepairLinks.length > 0 && (
+          <section className="repair-assist-panel" aria-labelledby="same-model-repairs-heading">
+            <div>
+              <span className="repair-kicker repair-kicker-muted">Related repair options</span>
+              <h2 id="same-model-repairs-heading">Other {displayModel} repairs</h2>
+              <p>Explore other repair paths confirmed for this model.</p>
+            </div>
+            <div className="grid w-full gap-3 sm:grid-cols-2">
+              {otherRepairLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
