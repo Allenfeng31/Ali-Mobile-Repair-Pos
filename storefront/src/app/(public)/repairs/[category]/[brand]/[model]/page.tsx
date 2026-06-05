@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -13,6 +14,118 @@ export const dynamicParams = true;
 
 interface ModelPageProps {
   params: Promise<{ category: string; brand: string; model: string }>;
+}
+
+interface PriorityRepairLink {
+  repairSlug: string;
+  title: string;
+  description: string;
+}
+
+const PRIORITY_MODEL_REPAIR_LINKS: Record<string, PriorityRepairLink> = {
+  "phone/iphone/iphone-14-pro-max": {
+    repairSlug: "battery-replacement",
+    title: "iPhone 14 Pro Max battery replacement",
+    description:
+      "Fast drain, shutdowns, or battery health warnings? Start with the battery repair page so we can check charging behaviour, swelling signs, and quote options before service.",
+  },
+  "phone/samsung/galaxy-s22": {
+    repairSlug: "charging-port-replacement",
+    title: "Samsung Galaxy S22 charging port replacement",
+    description:
+      "Loose USB-C fit or charging only at certain angles? View the charging port repair path so we can check cable, port, dust, and corrosion symptoms before quoting.",
+  },
+  "tablet/ipad/ipad-11th-generation": {
+    repairSlug: "charging-port-replacement",
+    title: "iPad 11th Generation charging port replacement",
+    description:
+      "School-use wear, loose USB-C fit, or charger issues? Start with the iPad charging port page so we can check cable, frame alignment, quote, and stock path.",
+  },
+  "phone/iphone/iphone-15-pro-max": {
+    repairSlug: "screen-replacement",
+    title: "iPhone 15 Pro Max screen replacement",
+    description:
+      "Cracked glass, green lines, black display, or weak touch? Start with the screen repair page so we can check display output, frame fit, and camera-area condition before quoting.",
+  },
+  "phone/google/pixel-8-pro": {
+    repairSlug: "screen-replacement",
+    title: "Google Pixel 8 Pro screen replacement",
+    description:
+      "Cracked glass, black display, touch dead zones, or fingerprint-area issues? View the Pixel screen repair path so we can check display behaviour and frame fit first.",
+  },
+  "phone/oppo/find-x3-pro": {
+    repairSlug: "charging-port-replacement",
+    title: "Oppo Find X3 Pro charging port replacement",
+    description:
+      "Loose USB-C fit or angle-only charging? Start with the charging port page so we can test cable, socket, corrosion, and charging-path symptoms before quoting.",
+  },
+  "laptop/macbook/macbook-pro-13-m1-2020": {
+    repairSlug: "battery-replacement",
+    title: "MacBook Pro 13 M1 2020 battery replacement",
+    description:
+      "Short runtime, service battery warnings, or swelling signs? View the battery repair path so we can check power behaviour, charging response, and trackpad pressure first.",
+  },
+  "phone/samsung/galaxy-s24-ultra": {
+    repairSlug: "screen-replacement",
+    title: "Samsung Galaxy S24 Ultra screen replacement",
+    description:
+      "Flicker, lines, black display, or touch dead zones? Start with the screen repair page so we can check OLED output, frame condition, and post-repair function checks before quoting.",
+  },
+  "phone/iphone/iphone-13": {
+    repairSlug: "screen-replacement",
+    title: "iPhone 13 screen replacement",
+    description:
+      "Cracked glass, touch drift, or display faults? View the iPhone 13 screen repair path so we can check panel condition, frame seating, and quote options before service.",
+  },
+  "tablet/ipad/ipad-9th-generation": {
+    repairSlug: "screen-replacement",
+    title: "iPad 9th Generation screen replacement",
+    description:
+      "Cracked glass or weak touch response? Start with the iPad 9th Generation screen repair page so we can check frame pressure, button/camera-area condition, and fit risk before quoting.",
+  },
+  "phone/iphone/iphone-16-pro": {
+    repairSlug: "screen-replacement",
+    title: "iPhone 16 Pro screen replacement",
+    description:
+      "Cracked glass, black display, weak touch, or top sensor-area damage? Start with the screen repair page so we can check display output, frame fit, and front sensor condition before quoting.",
+  },
+  "phone/samsung/galaxy-s23-ultra": {
+    repairSlug: "screen-replacement",
+    title: "Samsung Galaxy S23 Ultra screen replacement",
+    description:
+      "Lines, flicker, black display, or touch issues on the large AMOLED panel? View the screen repair path so we can check frame impact, lower-screen behaviour, and display fit before quoting.",
+  },
+  "phone/google/pixel-7-pro": {
+    repairSlug: "screen-replacement",
+    title: "Google Pixel 7 Pro screen replacement",
+    description:
+      "Green lines, black screen, weak touch, or curved-edge damage? Start with the Pixel screen repair page so we can check display output, frame pressure, and lower-screen behaviour first.",
+  },
+  "tablet/ipad/ipad-pro-11-inch-4th-generation": {
+    repairSlug: "screen-replacement",
+    title: "iPad Pro 11-inch 4th Generation screen replacement",
+    description:
+      "Cracked glass, touch faults, or display damage? View the screen repair path so we can check frame pressure, camera-area condition, and accessory-use testing before quoting.",
+  },
+  "laptop/macbook/macbook-pro-1416-m1-promax-2021": {
+    repairSlug: "screen-replacement",
+    title: "MacBook Pro 14/16 M1 Pro/Max 2021 screen replacement",
+    description:
+      "Lines, black display, lid-angle faults, or cracked LCD? Start with the screen repair page so we can diagnose the display assembly, hinge condition, and final function checks before quoting.",
+  },
+};
+
+function getPriorityRepairLink(categorySlug: string, brandSlug: string, modelSlug: string, repairSlugs: string[]) {
+  const priorityLink = PRIORITY_MODEL_REPAIR_LINKS[`${categorySlug}/${brandSlug}/${modelSlug}`];
+
+  if (!priorityLink || !repairSlugs.includes(priorityLink.repairSlug)) {
+    return null;
+  }
+
+  return {
+    ...priorityLink,
+    href: `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${priorityLink.repairSlug}`,
+  };
 }
 
 export async function generateStaticParams() {
@@ -67,6 +180,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const repairTypes = data?.repairTypes || [];
+  const priorityRepairLink = getPriorityRepairLink(
+    categorySlug,
+    brandSlug,
+    modelSlug,
+    repairTypes.map((repairType) => repairType.slug)
+  );
 
   return (
     <main className="repair-page-shell repair-page-shell-narrow">
@@ -99,6 +218,20 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </div>
         </div>
       </section>
+
+      {priorityRepairLink && (
+        <section className="repair-assist-panel" aria-labelledby="priority-repair-heading">
+          <div>
+            <span className="repair-kicker repair-kicker-muted">Common repair request</span>
+            <h2 id="priority-repair-heading">{priorityRepairLink.title}</h2>
+            <p>{priorityRepairLink.description}</p>
+          </div>
+          <Link href={priorityRepairLink.href} className="repair-primary-action">
+            View priority repair
+            <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+          </Link>
+        </section>
+      )}
 
       <section id="repair-options" className="repair-content-band" aria-label={`${modelName} repair options`}>
         <RepairOptionsGrid

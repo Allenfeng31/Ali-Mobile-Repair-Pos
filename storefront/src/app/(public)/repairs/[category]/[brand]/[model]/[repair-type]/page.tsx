@@ -1,7 +1,6 @@
 import React from 'react';
 import { REPAIR_TYPES } from '@/data/seo-data';
-import { fetchRepairCatalog, fetchRepairDetails, fetchModelRepairTypes } from '@/lib/api';
-import type { ModelEntry, RepairOption } from '@/lib/api';
+import { fetchRepairCatalog, fetchRepairDetails } from '@/lib/api';
 import { slugify, formatDynamicParam } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import { safeSlugSegment } from '@/lib/inventoryUtils';
@@ -31,143 +30,6 @@ interface RepairPageProps {
     model: string;
     'repair-type': string;
   }>;
-}
-
-interface RelatedRepairLink {
-  label: string;
-  href: string;
-  note: string;
-}
-
-interface RelatedRepairGroup {
-  title: string;
-  links: RelatedRepairLink[];
-}
-
-const RELATED_REPAIR_PRIORITY = [
-  'screen-replacement',
-  'battery-replacement',
-  'charging-port-replacement',
-  'front-camera-replacement',
-  'back-camera-replacement',
-  'back-housing-replacement',
-  'water-damage-repair',
-  'logic-board-repair',
-];
-
-function getRepairPriority(slug: string) {
-  const index = RELATED_REPAIR_PRIORITY.indexOf(slug);
-  return index === -1 ? RELATED_REPAIR_PRIORITY.length : index;
-}
-
-function getRelatedRepairTopic(repairSlug: string, repairName: string) {
-  if (repairSlug.includes('screen')) return 'screen';
-  if (repairSlug.includes('battery')) return 'battery';
-  if (repairSlug.includes('charging-port')) return 'charging port';
-  if (repairSlug.includes('camera')) return 'camera';
-  if (repairSlug.includes('back-housing')) return 'back housing';
-  if (repairSlug.includes('water')) return 'water damage';
-  if (repairSlug.includes('logic-board')) return 'logic board';
-  return repairName.toLowerCase().replace(/\s+(replacement|repair|service)$/i, '');
-}
-
-function getRelatedBrandLabel(brandSlug: string, brandName: string) {
-  const brandLabels: Record<string, string> = {
-    iphone: 'iPhone',
-    samsung: 'Samsung',
-    google: 'Google Pixel',
-    pixel: 'Google Pixel',
-    oppo: 'Oppo',
-    ipad: 'iPad',
-    macbook: 'MacBook',
-  };
-
-  return brandLabels[brandSlug] || brandName;
-}
-
-function formatRepairLinkLabel(modelName: string, repairName: string) {
-  return `${modelName} ${repairName.toLowerCase()}`;
-}
-
-function getRelatedRepairNote(repairSlug: string) {
-  if (repairSlug.includes('screen')) return 'Display, glass, touch, or visual fault checks for this model.';
-  if (repairSlug.includes('battery')) return 'Battery health, fast drain, swelling, or shutdown symptoms.';
-  if (repairSlug.includes('charging-port')) return 'Loose cable fit, no-charge, or intermittent charging checks.';
-  if (repairSlug.includes('camera')) return 'Camera faults, focus issues, lens damage, or camera app errors.';
-  if (repairSlug.includes('back-housing')) return 'Rear housing damage, impact marks, or back glass area issues.';
-  if (repairSlug.includes('water')) return 'Inspection-led cleaning and assessment for liquid exposure symptoms.';
-  if (repairSlug.includes('logic-board')) return 'Diagnostic-first board-level checks before any repair is quoted.';
-  return 'Related repair path for this model.';
-}
-
-function sortRepairOptions(repairTypes: RepairOption[]) {
-  return [...repairTypes].sort((a, b) => getRepairPriority(a.slug) - getRepairPriority(b.slug));
-}
-
-function getNearbyModels(models: ModelEntry[], currentModelSlug: string, repairSlug: string) {
-  const currentIndex = models.findIndex((model) => model.slug === currentModelSlug);
-  const candidates = models
-    .map((model, index) => ({ model, index }))
-    .filter(({ model }) => model.slug !== currentModelSlug && model.repairTypes.some((repair) => repair.slug === repairSlug));
-
-  if (currentIndex === -1) {
-    return candidates.slice(0, 6).map(({ model }) => model);
-  }
-
-  return candidates
-    .sort((a, b) => {
-      const distanceA = Math.abs(a.index - currentIndex);
-      const distanceB = Math.abs(b.index - currentIndex);
-      return distanceA === distanceB ? a.index - b.index : distanceA - distanceB;
-    })
-    .slice(0, 6)
-    .map(({ model }) => model);
-}
-
-async function getRelatedRepairGroups(
-  params: Awaited<RepairPageProps['params']>,
-  modelName: string,
-  brandName: string,
-  repairName: string
-): Promise<RelatedRepairGroup[]> {
-  const currentData = await fetchModelRepairTypes(params.category, params.brand, params.model);
-
-  if (!currentData) {
-    return [];
-  }
-
-  const currentRepairSlug = params['repair-type'];
-  const otherSameModelRepairs = sortRepairOptions(currentData.repairTypes)
-    .filter((repairType) => repairType.slug !== currentRepairSlug)
-    .slice(0, 6)
-    .map((repairType) => ({
-      label: formatRepairLinkLabel(modelName, repairType.name),
-      href: `/repairs/${params.category}/${params.brand}/${params.model}/${repairType.slug}`,
-      note: getRelatedRepairNote(repairType.slug),
-    }));
-
-  const catalog = await fetchRepairCatalog();
-  const brandEntry = catalog.brands.find((brand) => brand.category === params.category && brand.slug === params.brand);
-  const repairTopic = getRelatedRepairTopic(currentRepairSlug, repairName);
-  const relatedBrandName = getRelatedBrandLabel(params.brand, brandName);
-  const nearbyModels = brandEntry ? getNearbyModels(brandEntry.models, params.model, currentRepairSlug) : [];
-
-  const similarBrandRepairs = nearbyModels.map((model) => ({
-    label: formatRepairLinkLabel(model.model, repairName),
-    href: `/repairs/${params.category}/${params.brand}/${model.slug}/${currentRepairSlug}`,
-    note: `Same ${relatedBrandName} ${repairTopic} repair path for a nearby model.`,
-  }));
-
-  return [
-    {
-      title: `Other ${modelName} repairs`,
-      links: otherSameModelRepairs,
-    },
-    {
-      title: `Similar ${relatedBrandName} ${repairTopic} repairs`,
-      links: similarBrandRepairs,
-    },
-  ].filter((group) => group.links.length > 0);
 }
 
 interface RepairTypeSeoPocket {
@@ -3580,13 +3442,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
   const finalRepairName = knownRepair?.name || repairTypeDerived;
-  const relatedBrandName = getRelatedBrandLabel(resolvedParams.brand, displayBrand);
-  const relatedRepairGroups = await getRelatedRepairGroups(
-    resolvedParams,
-    displayModel,
-    displayBrand,
-    finalRepairName
-  );
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -3679,41 +3534,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {/* ─── FAQ SECTION ──────────────────────────────── */}
       <FaqAccordion faqs={faqs} />
-
-      {relatedRepairGroups.length > 0 && (
-        <section
-          className="repair-page-shell repair-page-shell-narrow"
-          style={{ paddingTop: '0' }}
-          aria-labelledby="related-repair-paths-heading"
-        >
-          <div className="repair-content-band">
-            <div className="repair-section-header">
-              <span>More repair paths</span>
-              <h2 id="related-repair-paths-heading">Related {relatedBrandName} repair options</h2>
-              <p>Quick links to nearby repair pages for the same model and similar {relatedBrandName} repairs.</p>
-            </div>
-
-            <div className="grid gap-5 lg:grid-cols-2">
-              {relatedRepairGroups.map((group) => (
-                <div key={group.title}>
-                  <h3 className="mb-3 text-lg font-black tracking-tight text-slate-950">
-                    {group.title}
-                  </h3>
-                  <div className="repair-type-card-grid">
-                    {group.links.map((link, index) => (
-                      <Link key={link.href} href={link.href} className="repair-type-mini-card">
-                        <span>{String(index + 1).padStart(2, '0')}</span>
-                        <strong>{link.label}</strong>
-                        <small>{link.note}</small>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </>
   );
 }
