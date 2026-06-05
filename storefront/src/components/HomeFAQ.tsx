@@ -7,20 +7,36 @@ import styles from './HomeFAQ.module.css';
 
 const faqs = [
   {
-    question: "How much does it cost to fix a phone screen?",
-    answer: "Prices vary by model, but we offer free quotes and a 'No Fix, No Charge' policy. You can get an instant live quote for most models right here on our website!"
+    question: "Do I need an appointment, or can I walk in?",
+    answer: "Walk-ins are welcome at Ali Mobile & Repair, and online bookings get priority. If you want to check parts availability or timing before visiting, call us first."
   },
   {
-    question: "How long does a battery replacement take?",
-    answer: "Most battery and screen replacements are completed in under 1 hour at our Ringwood store, so you can often get it done while you shop at Ringwood Square."
+    question: "Can I get a quote before repair?",
+    answer: "Yes. We confirm the quote before repair starts. Pricing depends on the device model, parts needed, and the condition of the device."
   },
   {
-    question: "Do I need to book an appointment?",
-    answer: "Walk-ins are always welcome at our Kiosk in Ringwood Square Shopping Centre, but booking online guarantees priority service."
+    question: "How long does a repair usually take?",
+    answer: "Repair time depends on the model, issue, and parts availability. Many common repairs can often be completed the same day, but we confirm timing after checking the device."
   },
   {
-    question: "Will I lose my data during the repair?",
-    answer: "In most cases, no. Your data is safe during standard hardware repairs like screens or batteries. We always recommend backing up your device, but we do not wipe devices for these repairs."
+    question: "What devices do you repair?",
+    answer: "We repair a wide range of devices including iPhone, Samsung, Google Pixel, Oppo, iPad, MacBook, and selected Apple Watch models."
+  },
+  {
+    question: "Do you repair screens, batteries, and charging ports?",
+    answer: "Yes. Common repair options include screen replacement, battery replacement, charging port repair, and selected camera or housing repairs depending on the model."
+  },
+  {
+    question: "Do you offer a warranty on repairs?",
+    answer: "Yes. Eligible repairs include warranty support. Please ask our team about warranty coverage for your device and repair type."
+  },
+  {
+    question: "What if I’m not sure what’s wrong with my device?",
+    answer: "That’s okay. Bring the device in for a practical check and we’ll help identify the issue before confirming the repair."
+  },
+  {
+    question: "Where is Ali Mobile & Repair located?",
+    answer: "We’re located at Kiosk C1 inside Ringwood Square Shopping Centre, Seymour St, Ringwood VIC 3134."
   }
 ];
 
