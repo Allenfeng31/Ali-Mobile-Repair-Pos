@@ -371,6 +371,14 @@ function buildFallbackCatalog(): BrandEntry[] {
  * The ISR cache ensures it's called at most once per hour.
  */
 async function loadRepairCatalog(): Promise<RepairCatalog> {
+  if (
+    process.env.NODE_ENV === 'development' &&
+    process.env.ALI_MOBILE_LOCAL_CATALOG_ONLY === 'true'
+  ) {
+    console.info("Using local fallback repair catalog for development");
+    return { brands: buildFallbackCatalog(), source: 'fallback' };
+  }
+
   const rawItems = await fetchPOSInventory();
 
   if (rawItems && rawItems.length > 0) {
