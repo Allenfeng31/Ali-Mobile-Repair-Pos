@@ -4,10 +4,44 @@ import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import heroStyles from "./HomeHero.module.css";
+import homeStyles from "./HomePage.module.css";
 
 const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"));
 const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"));
 const ServiceAreas = dynamic(() => import("@/components/seo/ServiceAreas"));
+
+const popularRepairs = [
+  {
+    label: "iPhone Repairs",
+    href: "/repairs/phone/iphone",
+    note: "Screens, batteries, charging and model-specific repair options.",
+  },
+  {
+    label: "Samsung Repairs",
+    href: "/repairs/phone/samsung",
+    note: "Galaxy screen, battery and charging repair paths.",
+  },
+  {
+    label: "Other Phone Repairs",
+    href: "/repairs/phone",
+    note: "Google Pixel, Oppo and other phone repair categories.",
+  },
+  {
+    label: "iPad Repairs",
+    href: "/repairs/tablet/ipad",
+    note: "iPad screen, battery and charging repair options.",
+  },
+  {
+    label: "MacBook Repairs",
+    href: "/repairs/laptop/macbook",
+    note: "MacBook screen, battery, keyboard and diagnostic support.",
+  },
+  {
+    label: "Apple Watch Repairs",
+    href: "/repairs/watch/apple",
+    note: "Apple Watch screen and battery repair options.",
+  },
+];
 
 export const metadata: Metadata = {
   alternates: {
@@ -26,19 +60,17 @@ export default function Home() {
     <main>
       <LocalBusinessSchema />
       <header className={`${heroStyles.heroSection} w-full px-4 sm:px-6 lg:px-8`}>
-        <div className={`${heroStyles.heroInner} flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-16 pb-12`}>
-          <div className="h-32 md:h-40" aria-hidden="true" />
+        <div className={`${heroStyles.heroInner} flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-10 md:pt-16 pb-10 md:pb-12`}>
+          <div className={heroStyles.heroTopSpacer} aria-hidden="true" />
 
-          <h1 className="text-[3.5rem] md:text-[6rem] font-black tracking-tighter leading-[1.05] text-slate-950">
-            Expert Mobile Phone &amp; Tablet Repair
-            <span className="block mt-2 text-[2rem] md:text-[3.5rem] font-extrabold text-slate-500 tracking-tight">
-              in Ringwood Square
-            </span>
+          <h1 className={heroStyles.heroTitle}>
+            Expert Phone, Tablet &amp; MacBook Repair
           </h1>
+          <p className={heroStyles.heroLocation}>in Ringwood Square</p>
 
           <div className="hero-contact-pill gap-6">
-            <span className="contact-item">No Fix, No Charge</span>
-            <span className="contact-item">6-Month Warranty on All Repairs</span>
+            <span className="contact-item">Walk-ins welcome</span>
+            <span className="contact-item">Call ahead for parts and timing</span>
           </div>
 
           <div className="hero-cta">
@@ -59,7 +91,7 @@ export default function Home() {
           <div className="card-gradient" />
           <div className="card-content">
             <h3>Phone Repair</h3>
-            <p>Broken screen? Battery draining fast? We fix all brands including iPhone, Samsung, Oppo & Pixel.</p>
+            <p>iPhone, Samsung, Google Pixel and Oppo screen, battery, charging port and camera repair options.</p>
             <span className="card-link">View Pricing →</span>
           </div>
         </Link>
@@ -68,7 +100,7 @@ export default function Home() {
           <div className="card-gradient" />
           <div className="card-content">
             <h3>Tablet & iPad Repair</h3>
-            <p>Fast, reliable repairs for all iPad and Samsung tablet models. Most fixed in under 1 hour.</p>
+            <p>iPad and tablet screen, battery and charging repairs with quote confirmation before work begins.</p>
             <span className="card-link">View Pricing →</span>
           </div>
         </Link>
@@ -77,7 +109,7 @@ export default function Home() {
           <div className="card-gradient" />
           <div className="card-content">
             <h3>Laptop & MacBook Repair</h3>
-            <p>Screen, battery, and logic board repairs for all MacBook and laptop models.</p>
+            <p>MacBook screen, battery, keyboard and diagnostic support for common laptop repair issues.</p>
             <span className="card-link">View Pricing →</span>
           </div>
         </Link>
@@ -86,12 +118,41 @@ export default function Home() {
           <div className="card-gradient" />
           <div className="card-content">
             <h3>Smart Watch Repair</h3>
-            <p>Apple Watch screen and battery repairs. Professional service for all series.</p>
+            <p>Apple Watch screen and battery repair options. Call ahead for model support and parts timing.</p>
             <span className="card-link">View Pricing →</span>
           </div>
         </Link>
       </section>
 
+      <section className={homeStyles.popularRepairs} aria-labelledby="popular-repairs-heading">
+        <div className={homeStyles.popularShell}>
+          <div className={homeStyles.popularHeader}>
+            <span className={homeStyles.popularKicker}>Quick repair paths</span>
+            <h2 id="popular-repairs-heading">Popular repair categories</h2>
+            <p>
+              Choose a repair category or book online for quote confirmation.
+            </p>
+          </div>
+
+          <nav className={homeStyles.popularGrid} aria-label="Popular repair categories">
+            {popularRepairs.map((repair) => (
+              <Link key={`${repair.label}-${repair.href}`} href={repair.href} className={homeStyles.popularCard}>
+                <span>{repair.label}</span>
+                <small>{repair.note}</small>
+              </Link>
+            ))}
+          </nav>
+
+          <div className={homeStyles.infoStrip}>
+            <h3>Repairs available at our Ringwood Square kiosk</h3>
+            <p>
+              We help with iPhone, Samsung, Google Pixel, Oppo, iPad, MacBook and Apple Watch repairs.
+              Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square. Walk-ins are welcome,
+              and quotes are confirmed before repair.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <ReviewsSection />
 

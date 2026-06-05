@@ -106,7 +106,7 @@ export default function Header() {
               href="/book-repair" 
               prefetch={true}
               className="md:hidden flex bg-blue-600 text-white rounded-full font-bold shadow-sm hover:bg-blue-700 transition-colors"
-              style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
+              style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap', color: '#ffffff' }}
             >
               BOOK NOW {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.1rem 0.35rem', borderRadius: '8px', fontSize: '0.65rem' }}>{devices.length}</span>}
             </Link>
@@ -165,7 +165,7 @@ export default function Header() {
             <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
             
             <div className="pt-6 mt-4 border-t border-slate-200/50">
-              <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md">
+              <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md" style={{ color: '#ffffff' }}>
                 Book Repair Now {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>{devices.length}</span>}
               </Link>
             </div>

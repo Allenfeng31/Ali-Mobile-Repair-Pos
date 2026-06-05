@@ -1,0 +1,191 @@
+.popularRepairs {
+  width: 100%;
+  max-width: 1220px;
+  margin: 0 auto 4rem;
+  padding: 0 1.5rem;
+}
+
+.popularShell {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 28px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.86)),
+    radial-gradient(circle at 14% 0%, rgba(37, 99, 235, 0.1), transparent 24rem),
+    radial-gradient(circle at 90% 94%, rgba(202, 138, 4, 0.1), transparent 22rem);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 24px 76px rgba(15, 23, 42, 0.07);
+}
+
+.popularHeader {
+  max-width: 720px;
+  margin: 0 auto clamp(1.25rem, 3vw, 1.8rem);
+  text-align: center;
+}
+
+.popularKicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  padding: 0.42rem 0.78rem;
+  background: rgba(239, 246, 255, 0.78);
+  color: #2563eb;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.popularHeader h2 {
+  margin: 0.85rem 0 0.55rem;
+  color: #0f172a;
+  font-size: clamp(1.85rem, 4.2vw, 3.25rem);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.popularHeader p {
+  margin: 0;
+  color: #64748b;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.popularGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.popularCard {
+  display: grid;
+  gap: 0.38rem;
+  min-height: 112px;
+  align-content: center;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  padding: 1rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.76)),
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 12rem);
+  color: #0f172a;
+  text-decoration: none;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.055);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.popularCard:hover,
+.popularCard:focus-visible {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: #ffffff;
+  box-shadow: 0 20px 52px rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
+}
+
+.popularCard:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 3px;
+}
+
+.popularCard span {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.popularCard small {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.infoStrip {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1.4fr);
+  gap: clamp(0.85rem, 2vw, 1.25rem);
+  align-items: start;
+  margin-top: clamp(1rem, 2.4vw, 1.35rem);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-radius: 20px;
+  padding: clamp(1rem, 2.4vw, 1.25rem);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.infoStrip h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.infoStrip p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.94rem;
+  font-weight: 620;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .popularGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .popularRepairs {
+    margin-bottom: 3rem;
+    padding: 0 1rem;
+  }
+
+  .popularShell {
+    border-radius: 24px;
+    padding: 1.1rem;
+  }
+
+  .popularHeader {
+    text-align: left;
+  }
+
+  .popularGrid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .popularCard {
+    min-height: auto;
+    padding: 0.95rem;
+  }
+
+  .infoStrip {
+    grid-template-columns: 1fr;
+    border-radius: 18px;
+    padding: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popularCard {
+    transition: none;
+  }
+
+  .popularCard:hover,
+  .popularCard:focus-visible {
+    transform: none;
+  }
+}

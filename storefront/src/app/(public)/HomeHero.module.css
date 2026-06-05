@@ -40,6 +40,31 @@
   z-index: 1;
 }
 
+.heroTopSpacer {
+  height: clamp(7rem, 13vw, 10rem);
+}
+
+.heroTitle {
+  max-width: 1040px;
+  margin: 0 auto;
+  color: #020617;
+  font-size: clamp(2.45rem, 7.8vw, 5.9rem);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.heroLocation {
+  margin: 0.55rem auto clamp(1.25rem, 2.5vw, 1.55rem);
+  color: #64748b;
+  font-size: clamp(2rem, 4.2vw, 3.5rem);
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
 .heroInner::before,
 .heroInner::after {
   content: "";
@@ -84,6 +109,25 @@
 @media (max-width: 600px) {
   .heroSection {
     min-height: auto;
+  }
+
+  .heroTopSpacer {
+    height: clamp(6.75rem, 24vw, 8.25rem);
+  }
+
+  .heroTitle {
+    max-width: 22rem;
+    font-size: clamp(2.2rem, 11vw, 3rem);
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+  }
+
+  .heroLocation {
+    max-width: 22rem;
+    margin-top: 0.45rem;
+    margin-bottom: 1.15rem;
+    font-size: clamp(1.55rem, 7.8vw, 2.1rem);
+    line-height: 1.08;
   }
 
   .heroInner::before,
