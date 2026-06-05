@@ -348,10 +348,12 @@ function buildFallbackCatalog(): BrandEntry[] {
     }
     
     for (const [category, models] of categoryMap) {
+      const fallbackBrandSlug = brand === 'Apple Watch' ? 'apple' : slugify(brand);
+
       entries.push({
         category,
         brand,
-        slug: slugify(brand),
+        slug: fallbackBrandSlug,
         icon: getCategoryIcon(category),
         models,
       });
