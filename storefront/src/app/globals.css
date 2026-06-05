@@ -1280,6 +1280,54 @@ input:checked+.toggle-slider:before {
   color: #93c5fd;
 }
 
+.footer-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  padding: 0.5rem 0.72rem;
+  background: rgba(255, 255, 255, 0.065);
+  color: #e0f2fe;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-decoration: none;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+}
+
+.footer-social-link:hover,
+.footer-social-link:focus {
+  transform: translateY(-2px);
+  border-color: rgba(147, 197, 253, 0.42);
+  background: rgba(37, 99, 235, 0.16);
+}
+
+.footer-social-label {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.footer-social-icon {
+  display: block;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
 .footer-contact-cards {
   display: grid;
   gap: 0.75rem;

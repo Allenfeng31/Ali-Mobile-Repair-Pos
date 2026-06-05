@@ -5,9 +5,25 @@ import Link from "next/link";
 import Header from "../Header";
 import { CartProvider } from "@/context/CartContext";
 import PageTransition from "@/components/PageTransition";
+import SocialIcon from "@/components/SocialIcon";
 import { Clock3, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 
 const ChatWidget = dynamic(() => import("../ChatWidget"));
+
+const socialLinks = [
+  {
+    platform: "facebook" as const,
+    label: "Facebook",
+    href: "https://www.facebook.com/AliMobile",
+    ariaLabel: "Follow Ali Mobile & Repair on Facebook",
+  },
+  {
+    platform: "instagram" as const,
+    label: "Instagram",
+    href: "https://www.instagram.com/alimobileandrepair_mel/",
+    ariaLabel: "Follow Ali Mobile & Repair on Instagram",
+  },
+];
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -93,6 +109,21 @@ export default function PublicLayout({
                     <Wrench size={15} strokeWidth={2.5} aria-hidden="true" />
                     No Fix, No Charge
                   </span>
+                </div>
+                <div className="footer-social-links" aria-label="Ali Mobile social links">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.href}
+                      href={social.href}
+                      className={`footer-social-link footer-social-link-${social.platform}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.ariaLabel}
+                    >
+                      <SocialIcon platform={social.platform} className="footer-social-icon" />
+                      <span className="footer-social-label">{social.label}</span>
+                    </a>
+                  ))}
                 </div>
               </div>
 
