@@ -143,23 +143,24 @@ export default function RepairOptionsGrid({
 
   return (
     <>
-      <div className="repair-option-grid">
+      <div className="repair-option-grid items-stretch">
         {repairTypes.map((rt) => {
           return (
-            <div key={rt.slug} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div key={rt.slug} className="flex h-full flex-col">
               <Link
                 href={`/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`}
-                className="repair-option-card"
+                className="repair-option-card h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 onClick={(e) => handleOptionClick(e, rt)}
+                style={{ minHeight: "108px" }}
               >
-                <span className="repair-option-icon">{getRepairIcon(rt.slug)}</span>
-                <div className="repair-option-info">
-                  <span className="repair-option-name">{rt.name}</span>
+                <span className="repair-option-icon shrink-0">{getRepairIcon(rt.slug)}</span>
+                <div className="repair-option-info min-w-0">
+                  <span className="repair-option-name break-words leading-snug">{rt.name}</span>
                   <span className="repair-option-price">
                     {getDisplayPrice(rt)}
                   </span>
                 </div>
-                <span className="repair-option-arrow">
+                <span className="repair-option-arrow shrink-0">
                   →
                 </span>
               </Link>

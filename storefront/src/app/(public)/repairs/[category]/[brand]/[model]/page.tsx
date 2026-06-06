@@ -93,8 +93,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     <main className="repair-page-shell repair-page-shell-narrow">
       <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
 
-      <section className="mb-5 rounded-[28px] border border-blue-100 bg-white/85 px-5 py-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:px-6" aria-labelledby="model-repair-heading">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="mb-7 rounded-[28px] border border-blue-100 bg-white/85 px-5 py-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:mb-8 sm:px-6" aria-labelledby="model-repair-heading">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="w-full max-w-2xl">
             <BackButton fallbackHref={`/repairs/${categorySlug}/${brandSlug}`} />
             <span className="repair-kicker mt-3">
