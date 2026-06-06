@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
-import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
+import { formatDynamicParam, preserveRouteSegment, safeSlugSegment } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
-  const canonicalPath = `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${safeSlugSegment(modelSlug)}`;
+  const canonicalPath = `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${preserveRouteSegment(modelSlug)}`;
 
   return {
     title: `${modelName} Repair Services in Ringwood | Ali Mobile & Repair`,

@@ -35,6 +35,14 @@ export function safeSlugSegment(input: unknown): string {
   );
 }
 
+export function preserveRouteSegment(input: unknown): string {
+  return encodeURIComponent(
+    String(input ?? '')
+      .trim()
+      .replace(/^\/+|\/+$/g, '')
+  );
+}
+
 export function slugify(text: string): string {
   if (!text) return "";
   return text.toLowerCase()

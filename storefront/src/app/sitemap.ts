@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { fetchRepairCatalog } from '@/lib/api';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { getSortedPostsData } from '@/lib/blog';
-import { safeSlugSegment } from '@/lib/inventoryUtils';
+import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
         modelUrls.push({
-          url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${safeSlugSegment(model.slug)}`,
+          url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}`,
           lastModified: new Date(),
           changeFrequency: 'weekly' as const,
           priority: 0.7,
@@ -66,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           if (repair.slug.includes('flex-cable')) continue;
 
           repairUrls.push({
-            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${safeSlugSegment(model.slug)}/${safeSlugSegment(repair.slug)}`,
+            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,
