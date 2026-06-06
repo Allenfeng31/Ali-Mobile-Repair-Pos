@@ -230,7 +230,20 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/galaxy-tab-s8-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/back-camera-replacement', permanent: true },
-      { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true }
+      { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/lenovo-tab-m10-plus-gen-3-battery-service', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/galaxy-tab-a-80-2015-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/galaxy-tab-s10-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736/galaxy-tab-s11-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930--sm-x936/galaxy-tab-s11-ultra-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930--sm-x936/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710--sm-t715/galaxy-tab-s2-80-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710--sm-t715/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835/galaxy-tab-s4-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/galaxy-tab-s5e-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610--sm-p613--sm-p615--sm-p619/galaxy-tab-s6-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610--sm-p613--sm-p615--sm-p619/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/galaxy-tab-s6-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/battery-replacement', permanent: true }
     ];
   },
 };
