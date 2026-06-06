@@ -224,6 +224,12 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/galaxy-tab-s9-fe-back-housing', destination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/back-housing-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/lenovo-tab-m9-back-housing', destination: '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/back-housing-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/lenovo-tab-m10-plus-gen-3-back-housing', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/back-housing-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580/galaxy-tab-a-101-2016-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/galaxy-tab-a9-plus-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/galaxy-tab-s8-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true }
     ];
   },
