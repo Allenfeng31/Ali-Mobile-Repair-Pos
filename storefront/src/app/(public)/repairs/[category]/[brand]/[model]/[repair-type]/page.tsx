@@ -35,6 +35,7 @@ interface RepairPageProps {
 interface SameModelRepairLink {
   href: string;
   label: string;
+  slug: string;
 }
 
 interface RepairTypeSeoPocket {
@@ -3448,6 +3449,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     .map((repair) => ({
       href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${repair.slug}`,
       label: `${modelEntry.model} ${repair.name.toLowerCase()}`,
+      slug: repair.slug,
     }));
 
   return {
@@ -3578,7 +3580,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         {otherRepairLinks.length > 0 && (
           <section className="repair-assist-panel" aria-labelledby="same-model-repairs-heading">
             <div>
-              <span className="repair-kicker repair-kicker-muted">Related repair options</span>
+              <span className="repair-kicker repair-kicker-muted">More repair paths</span>
               <h2 id="same-model-repairs-heading">Other {displayModel} repairs</h2>
               <p>Explore other repair paths confirmed for this model.</p>
             </div>
@@ -3587,9 +3589,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                  className="group flex min-h-[56px] items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm shadow-blue-950/5 transition duration-200 ease-out touch-manipulation hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 >
-                  {link.label}
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600 transition group-hover:border-blue-200 group-hover:bg-white">
+                      {getRepairIcon(link.slug, 18)}
+                    </span>
+                    <span className="min-w-0 leading-snug">{link.label}</span>
+                  </span>
+                  <span
+                    className="shrink-0 rounded-full border border-blue-100 bg-white px-2 py-1 text-xs text-blue-600 transition group-hover:translate-x-0.5 group-hover:border-blue-200 group-hover:bg-blue-600 group-hover:text-white"
+                    aria-hidden="true"
+                  >
+                    &rarr;
+                  </span>
                 </Link>
               ))}
             </div>
