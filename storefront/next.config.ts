@@ -203,6 +203,9 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/lenovo/lenovo-tab-p12-tb-370fu/lenovo-tab-p12-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-p12-tb-370fu/screen-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-back-camera', destination: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-yoga-tab-11-yt-j706f/lenovo-yoga-tab-11-front-camera', destination: '/repairs/tablet/lenovo/lenovo-yoga-tab-11-yt-j706f/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/galaxy-tab-s9-fe-back-housing', destination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/back-housing-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/lenovo-tab-m9-back-housing', destination: '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/back-housing-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/lenovo-tab-m10-plus-gen-3-back-housing', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/back-housing-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true }
     ];
   },
