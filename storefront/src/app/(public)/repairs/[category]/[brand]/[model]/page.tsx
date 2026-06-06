@@ -88,59 +88,28 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
   ];
   const diagnosticSteps = ["Quick test", "Honest quote", "Repair options"];
-  const trustChips = ["Clear quote first", "Parts availability checked", "Ringwood repair desk"];
-  const howItWorks = ["Choose repair", "Confirm quote", "Book or visit"];
 
   return (
     <main className="repair-page-shell repair-page-shell-narrow">
       <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
 
-      <section className="mb-7 rounded-[28px] border border-blue-100 bg-white/85 px-5 py-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] sm:mb-8 sm:px-6" aria-labelledby="model-repair-heading">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,320px)] lg:items-end">
-          <div className="w-full max-w-2xl">
+      <section className="mb-8 rounded-[32px] border border-blue-100 bg-white/85 px-5 py-6 shadow-[0_22px_70px_rgba(15,23,42,0.07)] sm:px-6 lg:px-7 lg:py-7" aria-labelledby="model-repair-heading">
+        <div className="overflow-hidden rounded-[28px] border border-blue-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(248,250,252,0.86)),radial-gradient(circle_at_top_right,rgba(59,130,246,0.12),transparent_40%)] p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-6 lg:p-7">
+          <div className="flex flex-wrap items-center gap-3">
             <BackButton fallbackHref={`/repairs/${categorySlug}/${brandSlug}`} />
-            <span className="repair-kicker mt-3">
+            <span className="repair-kicker">
               <Wrench size={15} strokeWidth={2.4} aria-hidden="true" />
               Repair menu
             </span>
-            <h1 id="model-repair-heading" className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+          </div>
+          <div className="mt-6 max-w-3xl">
+            <h1 id="model-repair-heading" className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl lg:leading-[0.98]">
               {modelName} repair options
             </h1>
-            <p className="mt-3 max-w-2xl text-base font-semibold leading-7 text-slate-600">
-              Professional {introBrandPrefix}{modelName} repair services in Ringwood. Select a repair category below to view live pricing, parts availability and repair timing confirmed after inspection.
+            <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-slate-600 sm:text-[1.03rem]">
+              Professional {introBrandPrefix}{modelName} repairs in Ringwood. Choose a repair type below to check pricing, parts availability and booking options.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {trustChips.map((chip) => (
-                <span
-                  key={chip}
-                  className="inline-flex items-center rounded-full border border-blue-100 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm shadow-blue-950/5"
-                >
-                  {chip}
-                </span>
-              ))}
-            </div>
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              {howItWorks.map((step, index) => (
-                <div
-                  key={step}
-                  className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm shadow-blue-950/5"
-                >
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-xs text-blue-700">
-                    {index + 1}
-                  </span>
-                  <span>{step}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex h-full flex-col justify-end gap-4 rounded-[24px] border border-blue-100 bg-white/75 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
-            <div>
-              <span className="repair-kicker repair-kicker-muted">Local support</span>
-              <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
-                Walk-ins are welcome at our Ringwood desk. Call ahead if you want to check parts availability or timing before you visit.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <a href="tel:0481058514" className="repair-secondary-action">
                 <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
                 Call Now
@@ -159,7 +128,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         className="repair-content-band rounded-[28px] border border-blue-100 bg-white/80 px-5 py-6 shadow-[0_18px_60px_rgba(15,23,42,0.055)] sm:px-6"
         aria-labelledby="repair-options-heading"
       >
-        <div className="mb-5">
+        <div className="mb-3">
           <span className="repair-kicker repair-kicker-muted">Repair options</span>
           <h2 id="repair-options-heading" className="sr-only">
             Repair options for {modelName}
