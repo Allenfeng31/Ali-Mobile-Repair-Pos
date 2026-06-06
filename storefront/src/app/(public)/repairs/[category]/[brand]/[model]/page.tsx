@@ -121,7 +121,20 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         </div>
       </section>
 
-      <section id="repair-options" className="repair-content-band" aria-label={`${modelName} repair options`}>
+      <section
+        id="repair-options"
+        className="repair-content-band rounded-[28px] border border-blue-100 bg-white/80 px-5 py-6 shadow-[0_18px_60px_rgba(15,23,42,0.055)] sm:px-6"
+        aria-labelledby="repair-options-heading"
+      >
+        <div className="mb-5 max-w-2xl">
+          <span className="repair-kicker repair-kicker-muted">Repair options</span>
+          <h2 id="repair-options-heading" className="mt-3 text-2xl font-black leading-tight tracking-tight text-slate-950 sm:text-3xl">
+            Choose your {modelName} repair type
+          </h2>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-600 sm:text-base">
+            Select a repair type to view pricing and booking details.
+          </p>
+        </div>
         <RepairOptionsGrid
           repairTypes={repairTypes}
           categorySlug={categorySlug}
