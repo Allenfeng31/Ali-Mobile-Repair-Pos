@@ -6,7 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
-import { ArrowRight, PhoneCall, Wrench } from "lucide-react";
+import { ArrowRight, Battery, Camera, PhoneCall, PlugZap, Smartphone, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -66,7 +66,28 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   }
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
+  const brandName = data?.brand || formatDynamicParam(brandSlug);
+  const introBrandPrefix = brandName && modelName.toLowerCase().startsWith(brandName.toLowerCase()) ? "" : `${brandName} `;
   const repairTypes = data?.repairTypes || [];
+  const commonIssues = [
+    {
+      icon: Smartphone,
+      text: "Cracked front glass or display faults",
+    },
+    {
+      icon: Battery,
+      text: "Rapid battery drain or unexpected shutdowns",
+    },
+    {
+      icon: PlugZap,
+      text: "Loose charging port or cable connection issues",
+    },
+    {
+      icon: Camera,
+      text: "Camera focus faults or cracked rear lenses",
+    },
+  ];
+  const diagnosticSteps = ["Quick test", "Honest quote", "Repair options"];
 
   return (
     <main className="repair-page-shell repair-page-shell-narrow">
@@ -84,7 +105,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               {modelName} repair options
             </h1>
             <p className="mt-3 max-w-xl text-base font-semibold leading-7 text-slate-600">
-              Choose the exact repair type below. Pricing and booking details unlock on the next step.
+              Professional {introBrandPrefix}{modelName} repair services in Ringwood. Select a repair category below to view live pricing, parts availability and repair timing confirmed after inspection.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row lg:pb-1">
@@ -110,11 +131,48 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         />
       </section>
 
+      <section className="repair-assist-panel" aria-labelledby="common-issues-heading">
+        <div className="w-full">
+          <span className="repair-kicker repair-kicker-muted">Symptoms &amp; solutions</span>
+          <h2 id="common-issues-heading">Common {modelName} issues we check</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {commonIssues.map((issue) => {
+              const Icon = issue.icon;
+
+              return (
+                <div
+                  key={issue.text}
+                  className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-semibold leading-6 text-slate-700 shadow-sm shadow-blue-950/5"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600">
+                    <Icon size={18} strokeWidth={2.1} aria-hidden="true" />
+                  </span>
+                  <p>{issue.text}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       <section className="repair-assist-panel" aria-labelledby="diagnostic-help-heading">
-        <div>
+        <div className="w-full max-w-2xl">
           <span className="repair-kicker repair-kicker-muted">Free diagnostic</span>
-          <h2 id="diagnostic-help-heading">Not sure what&apos;s wrong?</h2>
-          <p>Bring your {modelName} to our Ringwood kiosk for a practical diagnostic before committing to a repair.</p>
+          <h2 id="diagnostic-help-heading">Not sure what&apos;s wrong with your {modelName}?</h2>
+          <p>Bring your {modelName} to our Ringwood kiosk for a practical, zero-obligation diagnostic before repair.</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {diagnosticSteps.map((step, index) => (
+              <div
+                key={step}
+                className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm shadow-blue-950/5"
+              >
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-xs text-blue-700">
+                  {index + 1}
+                </span>
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <RepairCTA
           modelSlug={modelSlug}
