@@ -141,6 +141,18 @@ export default function RepairOptionsGrid({
     return "Quote on Request";
   };
 
+  const getRepairDisplayName = (rt: RepairOption) => {
+    if (
+      categorySlug === "phone" &&
+      brandSlug === "iphone" &&
+      rt.slug === "back-housing-replacement"
+    ) {
+      return "Back Glass / Back Housing Replacement";
+    }
+
+    return rt.name;
+  };
+
   return (
     <>
       <div className="repair-option-grid items-stretch">
@@ -155,7 +167,7 @@ export default function RepairOptionsGrid({
               >
                 <span className="repair-option-icon shrink-0">{getRepairIcon(rt.slug)}</span>
                 <div className="repair-option-info min-w-0">
-                  <span className="repair-option-name break-words leading-snug">{rt.name}</span>
+                  <span className="repair-option-name break-words leading-snug">{getRepairDisplayName(rt)}</span>
                   <span className="repair-option-price">
                     {getDisplayPrice(rt)}
                   </span>
