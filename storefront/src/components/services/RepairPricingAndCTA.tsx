@@ -230,7 +230,7 @@ export default function RepairPricingAndCTA({
 
       {showBackHousingNotice && (
         <div className="w-full max-w-4xl mx-auto mt-6 rounded-2xl border border-blue-100 bg-[linear-gradient(180deg,rgba(239,246,255,0.92),rgba(255,255,255,0.95))] px-4 py-4 shadow-sm shadow-blue-950/5 sm:px-5">
-          <div className="flex items-start gap-3">
+          <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left gap-3 sm:gap-4">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-white text-blue-600 shadow-sm">
               <ClipboardCheck size={18} strokeWidth={2.4} aria-hidden="true" />
             </span>

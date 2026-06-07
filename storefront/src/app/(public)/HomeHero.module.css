@@ -112,7 +112,7 @@
   }
 
   .heroTopSpacer {
-    height: clamp(6.75rem, 24vw, 8.25rem);
+    height: clamp(10.5rem, 28vw, 12rem);
   }
 
   .heroTitle {
