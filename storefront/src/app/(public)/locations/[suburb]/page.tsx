@@ -652,6 +652,13 @@ export default async function LocationPage({ params }: LocationPageProps) {
                 process. We confirm the final price after checking the device and repair scope.
               </p>
             </details>
+            <details>
+              <summary>What are your opening hours?</summary>
+              <p>
+                We are open from 10am to 5pm, Monday to Saturday. If you are travelling from {area.name},
+                you can call ahead to check timing, parts availability, or whether booking is recommended.
+              </p>
+            </details>
           </div>
         </section>
 
