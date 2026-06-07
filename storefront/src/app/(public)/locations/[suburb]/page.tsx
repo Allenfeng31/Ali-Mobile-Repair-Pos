@@ -608,6 +608,50 @@ export default async function LocationPage({ params }: LocationPageProps) {
                 and quote before starting paid repair work.
               </p>
             </details>
+            <details>
+              <summary>How long does a common repair usually take?</summary>
+              <p>
+                Many common repairs can be completed in around 15 minutes, especially straightforward
+                screen or battery jobs. Final timing depends on the device model, repair type, parts
+                availability, and what we find during inspection.
+              </p>
+            </details>
+            <details>
+              <summary>Should I call before travelling from {area.name}?</summary>
+              <p>
+                It is a good idea if you know your model or symptom. We can check likely parts,
+                quote range, and timing before you make the {area.driveTime.toLowerCase()} trip.
+              </p>
+            </details>
+            <details>
+              <summary>Do you repair iPhone, Samsung, iPad, MacBook, and Apple Watch devices?</summary>
+              <p>
+                Yes. We handle phone, tablet, laptop, and watch repair enquiries at Ringwood Square,
+                including common screen, battery, charging, camera, and diagnostic repair paths.
+              </p>
+            </details>
+            <details>
+              <summary>Will you check parts availability before I arrive?</summary>
+              <p>
+                Yes. If you call with the model and issue, we can check whether the likely part is
+                available or whether a booking is the better option.
+              </p>
+            </details>
+            <details>
+              <summary>Can you inspect water damage or no-power faults?</summary>
+              <p>
+                Yes. We can inspect water damage, no-power faults, charging issues, and board-level
+                symptoms. These jobs need assessment first because the safest repair path depends on
+                what is damaged internally.
+              </p>
+            </details>
+            <details>
+              <summary>Do customers from {area.name} pay different prices?</summary>
+              <p>
+                No. Customers from {area.name} receive the same Ringwood repair desk pricing and quote
+                process. We confirm the final price after checking the device and repair scope.
+              </p>
+            </details>
           </div>
         </section>
 
