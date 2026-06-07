@@ -6,6 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
+import ScrollReveal from "@/components/ScrollReveal";
 import { ArrowRight, Battery, Camera, PhoneCall, PlugZap, Smartphone, Wrench } from "lucide-react";
 
 export const revalidate = 3600;
@@ -143,56 +144,60 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         />
       </section>
 
-      <section className="repair-assist-panel" aria-labelledby="common-issues-heading">
-        <div className="w-full">
-          <span className="repair-kicker repair-kicker-muted">Symptoms &amp; solutions</span>
-          <h2 id="common-issues-heading">Common {modelName} issues we check</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {commonIssues.map((issue) => {
-              const Icon = issue.icon;
+      <ScrollReveal>
+        <section className="repair-assist-panel" aria-labelledby="common-issues-heading">
+          <div className="w-full">
+            <span className="repair-kicker repair-kicker-muted">Symptoms &amp; solutions</span>
+            <h2 id="common-issues-heading">Common {modelName} issues we check</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {commonIssues.map((issue) => {
+                const Icon = issue.icon;
 
-              return (
+                return (
+                  <div
+                    key={issue.text}
+                    className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-semibold leading-6 text-slate-700 shadow-sm shadow-blue-950/5"
+                  >
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600">
+                      <Icon size={18} strokeWidth={2.1} aria-hidden="true" />
+                    </span>
+                    <p>{issue.text}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <section className="repair-assist-panel" aria-labelledby="diagnostic-help-heading">
+          <div className="w-full max-w-2xl">
+            <span className="repair-kicker repair-kicker-muted">Free diagnostic</span>
+            <h2 id="diagnostic-help-heading">Not sure what&apos;s wrong with your {modelName}?</h2>
+            <p>Bring your {modelName} to our Ringwood kiosk for a practical, zero-obligation diagnostic before repair.</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              {diagnosticSteps.map((step, index) => (
                 <div
-                  key={issue.text}
-                  className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-semibold leading-6 text-slate-700 shadow-sm shadow-blue-950/5"
+                  key={step}
+                  className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm shadow-blue-950/5"
                 >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600">
-                    <Icon size={18} strokeWidth={2.1} aria-hidden="true" />
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-xs text-blue-700">
+                    {index + 1}
                   </span>
-                  <p>{issue.text}</p>
+                  <span>{step}</span>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section className="repair-assist-panel" aria-labelledby="diagnostic-help-heading">
-        <div className="w-full max-w-2xl">
-          <span className="repair-kicker repair-kicker-muted">Free diagnostic</span>
-          <h2 id="diagnostic-help-heading">Not sure what&apos;s wrong with your {modelName}?</h2>
-          <p>Bring your {modelName} to our Ringwood kiosk for a practical, zero-obligation diagnostic before repair.</p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            {diagnosticSteps.map((step, index) => (
-              <div
-                key={step}
-                className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm shadow-blue-950/5"
-              >
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-blue-200 bg-blue-50 text-xs text-blue-700">
-                  {index + 1}
-                </span>
-                <span>{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <RepairCTA
-          modelSlug={modelSlug}
-          repairSlug="general"
-          modelName={modelName}
-          repairName="General Inquiry"
-        />
-      </section>
+          <RepairCTA
+            modelSlug={modelSlug}
+            repairSlug="general"
+            modelName={modelName}
+            repairName="General Inquiry"
+          />
+        </section>
+      </ScrollReveal>
     </main>
   );
 }

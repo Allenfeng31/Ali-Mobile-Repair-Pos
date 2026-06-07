@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
 import ChatNowButton from '@/components/ChatNowButton';
+import ScrollReveal from '@/components/ScrollReveal';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
@@ -396,68 +397,78 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           )}
         </section>
 
-        <section className="repair-assist-panel" aria-labelledby="model-help-heading">
-          <div>
-            <span className="repair-kicker repair-kicker-muted">
-              <MessageCircle size={15} strokeWidth={2.4} aria-hidden="true" />
-              Model check
-            </span>
-            <h2 id="model-help-heading">Not sure which model you have?</h2>
-            <p>Use our Live Quote tool or call us. We can identify your device and give you a practical price before you travel.</p>
-          </div>
-          <div className="repair-assist-actions">
-            <Link href="/book-repair" prefetch={true} className="repair-primary-action">
-              Get a Live Quote
-            </Link>
-            <ChatNowButton className="repair-secondary-action" />
-          </div>
-        </section>
+        <ScrollReveal>
+          <section className="repair-assist-panel" aria-labelledby="model-help-heading">
+            <div>
+              <span className="repair-kicker repair-kicker-muted">
+                <MessageCircle size={15} strokeWidth={2.4} aria-hidden="true" />
+                Model check
+              </span>
+              <h2 id="model-help-heading">Not sure which model you have?</h2>
+              <p>Use our Live Quote tool or call us. We can identify your device and give you a practical price before you travel.</p>
+            </div>
+            <div className="repair-assist-actions">
+              <Link href="/book-repair" prefetch={true} className="repair-primary-action">
+                Get a Live Quote
+              </Link>
+              <ChatNowButton className="repair-secondary-action" />
+            </div>
+          </section>
+        </ScrollReveal>
 
-        <section className="repair-content-band" aria-labelledby="why-choose-heading">
-          <div className="repair-section-header">
-            <span>Repair clarity</span>
-            <h2 id="why-choose-heading">Why Choose Us?</h2>
-            <p>{data.hero.intro2}</p>
-          </div>
+        <ScrollReveal>
+          <section className="repair-content-band" aria-labelledby="why-choose-heading">
+            <div className="repair-section-header">
+              <span>Repair clarity</span>
+              <h2 id="why-choose-heading">Why Choose Us?</h2>
+              <p>{data.hero.intro2}</p>
+            </div>
 
-          <div className="repair-signal-grid">
-            {data.features.map((f: any, idx: number) => (
-              <article key={idx} className="repair-signal-card">
-                <span>{String(idx + 1).padStart(2, '0')}</span>
-                <h3>{f.t}</h3>
-                <p>{f.d ? f.d : 'Included standard with our service.'}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+            <div className="repair-signal-grid">
+              {data.features.map((f: any, idx: number) => (
+                <article key={idx} className="repair-signal-card">
+                  <span>{String(idx + 1).padStart(2, '0')}</span>
+                  <h3>{f.t}</h3>
+                  <p>{f.d ? f.d : 'Included standard with our service.'}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
 
         {/* Live Pricing Section fetches from Backend */}
-        <LivePricingGrid
-          title={data.pricing.title}
-          deviceType={data.pricing.deviceType}
-          defaultItems={data.pricing.items}
-        />
+        <ScrollReveal>
+          <LivePricingGrid
+            title={data.pricing.title}
+            deviceType={data.pricing.deviceType}
+            defaultItems={data.pricing.items}
+          />
+        </ScrollReveal>
 
-        <section className="repair-content-band" aria-labelledby="category-faq-heading">
-          <div className="repair-section-header">
-            <span>FAQ</span>
-            <h2 id="category-faq-heading">Frequently Asked Questions</h2>
-          </div>
-          <div className="repair-faq-grid">
-            {data.faqs.map((faq: any, index: number) => (
-              <article key={index} className="repair-faq-card">
-                <h3>{faq.question}</h3>
-                <p>{faq.answer}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <ScrollReveal>
+          <section className="repair-content-band" aria-labelledby="category-faq-heading">
+            <div className="repair-section-header">
+              <span>FAQ</span>
+              <h2 id="category-faq-heading">Frequently Asked Questions</h2>
+            </div>
+            <div className="repair-faq-grid">
+              {data.faqs.map((faq: any, index: number) => (
+                <article key={index} className="repair-faq-card">
+                  <h3>{faq.question}</h3>
+                  <p>{faq.answer}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
 
-        <div className="repair-final-cta">
-          <Link href="/book-repair" prefetch={true} className="repair-primary-action">
-            Book Your {category.charAt(0).toUpperCase() + category.slice(1)} Repair
-          </Link>
-        </div>
+        <ScrollReveal>
+          <div className="repair-final-cta">
+            <Link href="/book-repair" prefetch={true} className="repair-primary-action">
+              Book Your {category.charAt(0).toUpperCase() + category.slice(1)} Repair
+            </Link>
+          </div>
+        </ScrollReveal>
       </main>
     </>
   );
