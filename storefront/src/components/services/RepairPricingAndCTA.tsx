@@ -15,6 +15,7 @@ interface RepairPricingAndCTAProps {
   brandName: string;
   modelName: string;
   repairName: string;
+  bookingRepairName?: string;
   variants?: RepairVariant[];
 }
 
@@ -22,6 +23,7 @@ export default function RepairPricingAndCTA({
   brandName,
   modelName, 
   repairName,
+  bookingRepairName,
   variants = []
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
@@ -76,7 +78,7 @@ export default function RepairPricingAndCTA({
     const params = new URLSearchParams();
     params.set('brand', brandName);
     params.set('model', modelName);
-    params.set('service', repairName);
+    params.set('service', bookingRepairName || repairName);
     if (tierToUse) {
       params.set('tier', tierToUse);
     }

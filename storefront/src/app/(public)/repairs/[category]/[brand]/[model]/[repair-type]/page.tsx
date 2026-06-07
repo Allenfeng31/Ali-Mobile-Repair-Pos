@@ -3546,11 +3546,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
+  const bookingRepairName = knownRepair?.name || repairTypeDerived;
   const finalRepairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
     resolvedParams['repair-type'],
-    knownRepair?.name || repairTypeDerived
+    bookingRepairName
   );
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
@@ -3585,6 +3586,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             brandName={displayBrand}
             modelName={displayModel}
             repairName={finalRepairName}
+            bookingRepairName={bookingRepairName}
             variants={details?.variants || []}
           />
 
