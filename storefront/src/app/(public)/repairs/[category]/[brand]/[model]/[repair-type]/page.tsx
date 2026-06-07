@@ -3336,13 +3336,50 @@ const META_DESCRIPTION_TEMPLATES = [
     `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Quick turnaround, 6-month warranty on all parts, and free diagnostics. Get started today.`,
 ];
 
+const IPHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
+const IPHONE_BACK_HOUSING_INTERNAL_SLUG = "back-housing-replacement";
+const IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass / Back Housing Replacement";
+
+function isIphoneBackGlassPublicAlias(category: string, brand: string, repairSlug: string) {
+  return category === "phone" && brand === "iphone" && repairSlug === IPHONE_BACK_GLASS_PUBLIC_SLUG;
+}
+
+function resolveRepairSlugForLookup(category: string, brand: string, repairSlug: string) {
+  if (isIphoneBackGlassPublicAlias(category, brand, repairSlug)) {
+    return IPHONE_BACK_HOUSING_INTERNAL_SLUG;
+  }
+
+  return repairSlug;
+}
+
+function getPublicRepairSlug(category: string, brand: string, repairSlug: string) {
+  if (category === "phone" && brand === "iphone" && repairSlug === IPHONE_BACK_HOUSING_INTERNAL_SLUG) {
+    return IPHONE_BACK_GLASS_PUBLIC_SLUG;
+  }
+
+  return repairSlug;
+}
+
+function getRepairDisplayName(category: string, brand: string, publicRepairSlug: string, repairName: string) {
+  if (isIphoneBackGlassPublicAlias(category, brand, publicRepairSlug)) {
+    return IPHONE_BACK_GLASS_DISPLAY_NAME;
+  }
+
+  return repairName;
+}
+
 export async function generateMetadata({ params }: RepairPageProps) {
   const resolvedParams = await params;
+  const internalRepairSlug = resolveRepairSlugForLookup(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams['repair-type']
+  );
   const details = await fetchRepairDetails(
     resolvedParams.category,
     resolvedParams.brand,
     resolvedParams.model,
-    resolvedParams['repair-type']
+    internalRepairSlug
   );
 
   if (!details) {
@@ -3350,7 +3387,12 @@ export async function generateMetadata({ params }: RepairPageProps) {
   }
 
   const model = details?.model || formatDynamicParam(resolvedParams.model);
-  const repairName = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
+  const repairName = getRepairDisplayName(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams['repair-type'],
+    details?.repairType || formatDynamicParam(resolvedParams['repair-type'])
+  );
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
@@ -3436,17 +3478,22 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   const modelEntry = brandEntry.models.find((model) => model.slug === resolvedParams.model);
   if (!modelEntry) return null;
 
-  const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === resolvedParams['repair-type']);
+  const internalRepairSlug = resolveRepairSlugForLookup(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams['repair-type']
+  );
+  const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === internalRepairSlug);
   if (!repairEntry) return null;
 
   const otherRepairLinks = modelEntry.repairTypes
-    .filter((repair) => repair.slug !== resolvedParams['repair-type'])
+    .filter((repair) => repair.slug !== internalRepairSlug)
     .filter((repair) => !repair.slug.includes('flex-cable'))
     .filter((repair) => !repair.slug.includes('logic-board'))
     .filter((repair) => !repair.slug.includes('water-damage'))
     .slice(0, 4)
     .map((repair) => ({
-      href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${repair.slug}`,
+      href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, repair.slug)}`,
       label: `${modelEntry.model} ${repair.name.toLowerCase()}`,
       slug: repair.slug,
     }));
@@ -3485,16 +3532,26 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
+  const internalRepairSlug = resolveRepairSlugForLookup(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams['repair-type']
+  );
   const seoPocket = getRepairTypeSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
-    repairType: resolvedParams['repair-type'],
+    repairType: internalRepairSlug,
   });
 
   // Validate repair type exists in our known list, or accept POS-provided name
-  const knownRepair = REPAIR_TYPES.find(r => r.slug === resolvedParams['repair-type']);
-  const finalRepairName = knownRepair?.name || repairTypeDerived;
+  const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
+  const finalRepairName = getRepairDisplayName(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams['repair-type'],
+    knownRepair?.name || repairTypeDerived
+  );
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';

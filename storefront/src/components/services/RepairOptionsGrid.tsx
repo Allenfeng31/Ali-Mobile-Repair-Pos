@@ -153,6 +153,17 @@ export default function RepairOptionsGrid({
     return rt.name;
   };
 
+  const getRepairHref = (rt: RepairOption) => {
+    const publicRepairSlug =
+      categorySlug === "phone" &&
+      brandSlug === "iphone" &&
+      rt.slug === "back-housing-replacement"
+        ? "back-glass-replacement"
+        : rt.slug;
+
+    return `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${publicRepairSlug}`;
+  };
+
   return (
     <>
       <div className="repair-option-grid items-stretch">
@@ -160,7 +171,7 @@ export default function RepairOptionsGrid({
           return (
             <div key={rt.slug} className="flex h-full flex-col">
               <Link
-                href={`/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`}
+                href={getRepairHref(rt)}
                 className="repair-option-card h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 onClick={(e) => handleOptionClick(e, rt)}
                 style={{ minHeight: "108px" }}

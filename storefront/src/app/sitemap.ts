@@ -65,8 +65,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         for (const repair of model.repairTypes) {
           if (repair.slug.includes('flex-cable')) continue;
 
+          const publicRepairSlug =
+            brand.category === 'phone' &&
+            brand.slug === 'iphone' &&
+            repair.slug === 'back-housing-replacement'
+              ? 'back-glass-replacement'
+              : repair.slug;
+
           repairUrls.push({
-            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
+            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(publicRepairSlug)}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,
