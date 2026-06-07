@@ -12,7 +12,7 @@ import FaqAccordion from '@/components/FaqAccordion';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
 import { generateFaqs } from './repairFaqs';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 900;
 
 function getRepairIcon(slug: string, size = 48) {
   if (slug.includes('water')) return <Droplet size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;

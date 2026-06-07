@@ -9,7 +9,7 @@ import RepairCTA from "@/components/services/RepairCTA";
 import ScrollReveal from "@/components/ScrollReveal";
 import { ArrowRight, Battery, Camera, PhoneCall, PlugZap, Smartphone, Wrench } from "lucide-react";
 
-export const revalidate = 3600;
+export const revalidate = 900;
 export const dynamicParams = true;
 
 interface ModelPageProps {
