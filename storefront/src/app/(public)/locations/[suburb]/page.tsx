@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Clock, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { ArrowRight, Battery, Camera, CheckCircle2, Clock, MapPin, Navigation, PhoneCall, PlugZap, ShieldCheck, Smartphone, TabletSmartphone, Wrench } from "lucide-react";
 import { SERVICE_AREAS, getServiceAreaBySlug } from "@/data/serviceAreas";
 import LocationAnalyticsTracker from "@/components/analytics/LocationAnalyticsTracker";
 
@@ -12,6 +13,84 @@ type LocationPageProps = {
 };
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.alimobile.com.au";
+
+const popularRepairLinks: Array<{
+  title: string;
+  description: string;
+  href: string;
+  timing: string;
+  Icon: LucideIcon;
+}> = [
+  {
+    title: "iPhone Screen Replacement",
+    description: "Cracked glass, display lines, touch faults, and frame-fit checks before quoting.",
+    href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement",
+    timing: "Quote and parts check first",
+    Icon: Smartphone,
+  },
+  {
+    title: "Phone Battery Replacement",
+    description: "Battery health, swelling risk, shutdown symptoms, and charging behaviour checked in-store.",
+    href: "/repairs/phone/iphone/iphone-13/battery-replacement",
+    timing: "Common same-visit repair",
+    Icon: Battery,
+  },
+  {
+    title: "Charging Port Repair",
+    description: "USB-C or Lightning port wear, lint, cable seating, microphone routing, and charge draw checks.",
+    href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement",
+    timing: "Inspection confirms scope",
+    Icon: PlugZap,
+  },
+  {
+    title: "Back Glass Repair",
+    description: "Rear glass, frame condition, camera ring fit, and wireless charging alignment reviewed first.",
+    href: "/repairs/phone/iphone/iphone-15/back-glass-replacement",
+    timing: "Model-dependent quote",
+    Icon: ShieldCheck,
+  },
+  {
+    title: "Camera Repair",
+    description: "Front and rear camera focus, lens glass, dust spots, and impact symptoms checked before repair.",
+    href: "/repairs/phone/iphone/iphone-13/back-camera-replacement",
+    timing: "Function test included",
+    Icon: Camera,
+  },
+  {
+    title: "iPad and Tablet Repair",
+    description: "Screen, charging, battery, and model-specific tablet repair options from the Ringwood bench.",
+    href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement",
+    timing: "Parts availability checked",
+    Icon: TabletSmartphone,
+  },
+];
+
+const popularModelLinks = [
+  { name: "iPhone 15 Pro Max", href: "/repairs/phone/iphone/iphone-15-pro-max", detail: "Screen, battery, camera, back glass" },
+  { name: "iPhone 13", href: "/repairs/phone/iphone/iphone-13", detail: "Screen, battery, charging, housing" },
+  { name: "Galaxy S24 Ultra", href: "/repairs/phone/samsung/galaxy-s24-ultra", detail: "AMOLED, battery, USB-C, camera" },
+  { name: "Galaxy S23 Ultra", href: "/repairs/phone/samsung/galaxy-s23-ultra", detail: "Screen, back housing, charging" },
+  { name: "iPad 9th Generation", href: "/repairs/tablet/ipad/ipad-9th-generation", detail: "Glass, display, charging port" },
+  { name: "MacBook Pro 13 M1 2020", href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", detail: "Screen, battery, keyboard checks" },
+];
+
+function getNearbyServiceAreas(currentSlug: string) {
+  const currentIndex = SERVICE_AREAS.findIndex((area) => area.slug === currentSlug);
+  if (currentIndex < 0) return SERVICE_AREAS.filter((area) => area.slug !== currentSlug).slice(0, 6);
+
+  const before = SERVICE_AREAS.slice(Math.max(0, currentIndex - 3), currentIndex);
+  const after = SERVICE_AREAS.slice(currentIndex + 1, currentIndex + 4);
+  const nearby = [...before, ...after].filter((area) => area.slug !== currentSlug);
+
+  if (nearby.length >= 6) return nearby.slice(0, 6);
+
+  const fill = SERVICE_AREAS.filter(
+    (area) => area.slug !== currentSlug && !nearby.some((nearbyArea) => nearbyArea.slug === area.slug)
+  );
+
+  return [...nearby, ...fill].slice(0, 6);
+}
+
 const suburbTransitGuide: Record<string, string[]> = {
   ringwood: [
     " Walk or catch any local service into Ringwood Station, then continue about 5-10 minutes to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.",
@@ -186,6 +265,36 @@ export default async function LocationPage({ params }: LocationPageProps) {
   const transitMapSrc = googleMapsApiKey
     ? `https://www.google.com/maps/embed/v1/directions?key=${googleMapsApiKey}&origin=${encodedOrigin}&destination=${encodedDestination}&mode=transit`
     : `https://www.google.com/maps?output=embed&saddr=${encodedOrigin}&daddr=${encodedDestination}&dirflg=r`;
+  const directionsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodedOrigin}&destination=${encodedDestination}`;
+  const nearbyAreas = getNearbyServiceAreas(area.slug);
+  const locationTrustPoints = [
+    {
+      title: `Short trip from ${area.name}`,
+      description: area.driveTime === "Local store"
+        ? "Visit us directly inside Ringwood Square Shopping Centre at Kiosk C1."
+        : `${area.route} Most customers use the visit to confirm the fault, quote, and parts path in one stop.`,
+    },
+    {
+      title: "Quote before repair",
+      description: "We inspect the device first, explain the likely repair path, and confirm pricing before starting work.",
+    },
+    {
+      title: "Warranty-backed repairs",
+      description: "Standard repairs include warranty support on parts and labour, with practical checks before handover.",
+    },
+    {
+      title: "Walk-ins and bookings",
+      description: "Walk-ins are welcome, and online bookings help us prepare parts and timing before you arrive.",
+    },
+    {
+      title: "No Fix No Charge guidance",
+      description: "Eligible diagnostic jobs are handled with clear expectations when the device cannot be repaired as quoted.",
+    },
+    {
+      title: "One Ringwood repair bench",
+      description: "Customers from nearby suburbs get the same Ringwood pricing, quoting process, and repair desk support.",
+    },
+  ];
 
   const schema = {
     "@context": "https://schema.org",
@@ -328,6 +437,28 @@ export default async function LocationPage({ params }: LocationPageProps) {
           </article>
         </section>
 
+        <section className="location-trust-panel" aria-labelledby="location-trust-heading">
+          <div className="location-section-heading">
+            <span className="location-kicker location-kicker-muted">Local repair support</span>
+            <h2 id="location-trust-heading">Why {area.name} residents choose our Ringwood repair desk</h2>
+            <p>
+              We keep the visit practical: check the model, confirm the fault, explain parts availability,
+              and quote before repair. That matters when you are travelling from {area.name}.
+            </p>
+          </div>
+          <div className="location-reason-grid">
+            {locationTrustPoints.map((item) => (
+              <div key={item.title} className="location-reason-item">
+                <CheckCircle2 size={18} strokeWidth={2.7} aria-hidden="true" />
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="location-service-grid" aria-label="Repair services available from Ringwood Square">
           <Link href="/repairs/phone" className="location-service-card">
             <Wrench size={22} strokeWidth={2.5} aria-hidden="true" />
@@ -349,6 +480,49 @@ export default async function LocationPage({ params }: LocationPageProps) {
             <strong>Watch Repair</strong>
             <span>Screen and battery options</span>
           </Link>
+        </section>
+
+        <section className="location-repair-section" aria-labelledby="location-popular-repairs-heading">
+          <div className="location-section-heading">
+            <span className="location-kicker location-kicker-muted">Popular repair paths</span>
+            <h2 id="location-popular-repairs-heading">Common repairs customers ask about near {area.name}</h2>
+            <p>
+              These are the repair categories customers often check before visiting from {area.name}.
+              Each page explains symptoms, quote context, and booking options.
+            </p>
+          </div>
+          <div className="location-popular-grid">
+            {popularRepairLinks.map(({ title, description, href, timing, Icon }) => (
+              <Link key={title} href={href} className="location-popular-card">
+                <Icon size={21} strokeWidth={2.5} aria-hidden="true" />
+                <strong>{title}</strong>
+                <span>{description}</span>
+                <small>
+                  {timing}
+                  <ArrowRight size={14} strokeWidth={2.7} aria-hidden="true" />
+                </small>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="location-model-section" aria-labelledby="location-models-heading">
+          <div className="location-section-heading">
+            <span className="location-kicker location-kicker-muted">Model shortcuts</span>
+            <h2 id="location-models-heading">Popular device models we repair for {area.name} customers</h2>
+            <p>
+              Start with a model page if you want the most relevant repair types, pricing context,
+              and booking options before travelling to Ringwood Square.
+            </p>
+          </div>
+          <div className="location-model-grid">
+            {popularModelLinks.map((model) => (
+              <Link key={model.href} href={model.href} className="location-model-card">
+                <strong>{model.name}</strong>
+                <span>{model.detail}</span>
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section className="location-content-grid" aria-label={`Common repair pages for ${area.name} customers`}>
@@ -381,19 +555,81 @@ export default async function LocationPage({ params }: LocationPageProps) {
           </article>
         </section>
 
+        <section className="location-nearby-section" aria-labelledby="location-nearby-heading">
+          <div className="location-section-heading">
+            <span className="location-kicker location-kicker-muted">Nearby areas</span>
+            <h2 id="location-nearby-heading">Nearby suburbs we also serve</h2>
+            <p>
+              Customers visit our Ringwood Square repair bench from surrounding suburbs for the same
+              quote-first repair process and clear route information.
+            </p>
+          </div>
+          <div className="location-nearby-grid">
+            {nearbyAreas.map((nearbyArea) => (
+              <Link key={nearbyArea.slug} href={`/locations/${nearbyArea.slug}`} className="location-nearby-link">
+                <span>{nearbyArea.name}</span>
+                <small>{nearbyArea.driveTime}</small>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="location-faq-section" aria-labelledby="location-faq-heading">
+          <div className="location-section-heading">
+            <span className="location-kicker location-kicker-muted">Local questions</span>
+            <h2 id="location-faq-heading">Frequently asked questions for {area.name} customers</h2>
+          </div>
+          <div className="location-faq-list">
+            <details>
+              <summary>Do you service customers from {area.name}?</summary>
+              <p>
+                Yes. We regularly help customers travelling from {area.name} to Ringwood Square
+                for phone, tablet, laptop, and watch repair assessment.
+              </p>
+            </details>
+            <details>
+              <summary>How far is Ali Mobile & Repair from {area.name}?</summary>
+              <p>
+                The typical trip is {area.driveTime.toLowerCase()}. {area.route} You can call first
+                if you want us to check parts or likely timing before you leave.
+              </p>
+            </details>
+            <details>
+              <summary>Do I need an appointment before coming in?</summary>
+              <p>
+                Walk-ins are welcome. Booking online can help us prepare the right model notes and
+                gives your visit clearer priority at the repair desk.
+              </p>
+            </details>
+            <details>
+              <summary>Can I get a quote before repair starts?</summary>
+              <p>
+                Yes. We inspect the device, explain the likely cause, and confirm the repair scope
+                and quote before starting paid repair work.
+              </p>
+            </details>
+          </div>
+        </section>
+
         <section className="location-final-cta">
           <div>
             <span className="location-kicker location-kicker-muted">Before you drive</span>
-            <h2>Call first if you want pricing or stock checked</h2>
+            <h2>Device repair near {area.name}, handled from Ringwood Square</h2>
             <p>
-              Tell us your device model and symptom. If a pickup or timing option makes more sense
-              for your situation, we can talk through the best next step before you leave {area.name}.
+              Tell us your device model and symptom before you leave {area.name}. We can check the
+              likely repair path, parts availability, and whether booking or walking in makes more sense.
             </p>
           </div>
-          <a href="tel:0481058514" className="repair-primary-action">
-            <PhoneCall size={18} strokeWidth={2.7} aria-hidden="true" />
-            0481 058 514
-          </a>
+          <div className="location-final-actions">
+            <a href="tel:0481058514" className="repair-primary-action">
+              <PhoneCall size={18} strokeWidth={2.7} aria-hidden="true" />
+              0481 058 514
+            </a>
+            <a href={directionsHref} className="repair-secondary-action" target="_blank" rel="noopener noreferrer">
+              <Navigation size={18} strokeWidth={2.7} aria-hidden="true" />
+              Get Directions
+            </a>
+          </div>
         </section>
       </main>
     </>
