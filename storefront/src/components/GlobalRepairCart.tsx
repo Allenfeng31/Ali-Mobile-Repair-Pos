@@ -12,6 +12,13 @@ import { smartSortModels } from '@/lib/modelSortConfig';
 import { Pencil, Trash2 } from 'lucide-react';
 import './RepairCart.css';
 
+function getCartDisplayServiceName(category: string, brand: string, rawServiceName: string) {
+  if (category === 'phone' && brand.toLowerCase() !== 'iphone' && rawServiceName.startsWith('Back Housing Replacement')) {
+    return rawServiceName.replace('Back Housing Replacement', 'Back Glass Replacement');
+  }
+  return rawServiceName;
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────
 interface UpsellItem {
   id: string;
@@ -384,7 +391,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               {formatDeviceTitle(device.brand, device.model)}
             </div>
             <div className="summary-services truncate">
-              {device.services.filter(s => !String(s.id).startsWith('upsell-')).map(s => s.name).join(", ")}
+              {device.services.filter(s => !String(s.id).startsWith('upsell-')).map(s => getCartDisplayServiceName(device.category || 'phone', device.brand, s.name)).join(", ")}
             </div>
           </div>
           <div className="summary-actions flex shrink-0 items-center gap-2">
@@ -546,7 +553,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                     >
                       <div className="checkbox-custom" />
                       <div className="service-name-price">
-                        <span className="service-name">{s.service}</span>
+                        <span className="service-name">{getCartDisplayServiceName(selectedCategory, selectedBrand, s.service)}</span>
                         <span className="service-price">
                           {s.price > 0 ? (s.variants.length > 1 ? `From $${s.price}` : `$${s.price.toFixed(2)}`) : "Quote on Request"}
                         </span>

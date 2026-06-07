@@ -66,9 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           if (repair.slug.includes('flex-cable')) continue;
 
           const publicRepairSlug =
-            brand.category === 'phone' &&
-            brand.slug === 'iphone' &&
-            repair.slug === 'back-housing-replacement'
+            brand.category === 'phone' && repair.slug === 'back-housing-replacement'
               ? 'back-glass-replacement'
               : repair.slug;
 

@@ -142,12 +142,8 @@ export default function RepairOptionsGrid({
   };
 
   const getRepairDisplayName = (rt: RepairOption) => {
-    if (
-      categorySlug === "phone" &&
-      brandSlug === "iphone" &&
-      rt.slug === "back-housing-replacement"
-    ) {
-      return "Back Glass / Back Housing Replacement";
+    if (categorySlug === "phone" && rt.slug === "back-housing-replacement") {
+      return brandSlug === "iphone" ? "Back Glass / Back Housing Replacement" : "Back Glass Replacement";
     }
 
     return rt.name;
@@ -155,9 +151,7 @@ export default function RepairOptionsGrid({
 
   const getRepairHref = (rt: RepairOption) => {
     const publicRepairSlug =
-      categorySlug === "phone" &&
-      brandSlug === "iphone" &&
-      rt.slug === "back-housing-replacement"
+      categorySlug === "phone" && rt.slug === "back-housing-replacement"
         ? "back-glass-replacement"
         : rt.slug;
 

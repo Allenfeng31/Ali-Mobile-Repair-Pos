@@ -3336,9 +3336,10 @@ const META_DESCRIPTION_TEMPLATES = [
     `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Quick turnaround, 6-month warranty on all parts, and free diagnostics. Get started today.`,
 ];
 
-const IPHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
-const IPHONE_BACK_HOUSING_INTERNAL_SLUG = "back-housing-replacement";
+const PHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
+const PHONE_BACK_HOUSING_INTERNAL_SLUG = "back-housing-replacement";
 const IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass / Back Housing Replacement";
+const NON_IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass Replacement";
 const IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES = [
   "iphone-8",
   "iphone-x",
@@ -3350,29 +3351,29 @@ const IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES = [
   "iphone-14-pro",
 ];
 
-function isIphoneBackGlassPublicAlias(category: string, brand: string, repairSlug: string) {
-  return category === "phone" && brand === "iphone" && repairSlug === IPHONE_BACK_GLASS_PUBLIC_SLUG;
+function isPhoneBackGlassPublicAlias(category: string, repairSlug: string) {
+  return category === "phone" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
 }
 
 function resolveRepairSlugForLookup(category: string, brand: string, repairSlug: string) {
-  if (isIphoneBackGlassPublicAlias(category, brand, repairSlug)) {
-    return IPHONE_BACK_HOUSING_INTERNAL_SLUG;
+  if (isPhoneBackGlassPublicAlias(category, repairSlug)) {
+    return PHONE_BACK_HOUSING_INTERNAL_SLUG;
   }
 
   return repairSlug;
 }
 
 function getPublicRepairSlug(category: string, brand: string, repairSlug: string) {
-  if (category === "phone" && brand === "iphone" && repairSlug === IPHONE_BACK_HOUSING_INTERNAL_SLUG) {
-    return IPHONE_BACK_GLASS_PUBLIC_SLUG;
+  if (category === "phone" && repairSlug === PHONE_BACK_HOUSING_INTERNAL_SLUG) {
+    return PHONE_BACK_GLASS_PUBLIC_SLUG;
   }
 
   return repairSlug;
 }
 
 function getRepairDisplayName(category: string, brand: string, publicRepairSlug: string, repairName: string) {
-  if (isIphoneBackGlassPublicAlias(category, brand, publicRepairSlug)) {
-    return IPHONE_BACK_GLASS_DISPLAY_NAME;
+  if (isPhoneBackGlassPublicAlias(category, publicRepairSlug)) {
+    return brand === "iphone" ? IPHONE_BACK_GLASS_DISPLAY_NAME : NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
   }
 
   return repairName;
@@ -3380,7 +3381,7 @@ function getRepairDisplayName(category: string, brand: string, publicRepairSlug:
 
 function shouldShowIphoneBackHousingNotice(category: string, brand: string, modelSlug: string, repairSlug: string) {
   if (category !== "phone" || brand !== "iphone") return false;
-  if (repairSlug !== IPHONE_BACK_GLASS_PUBLIC_SLUG && repairSlug !== IPHONE_BACK_HOUSING_INTERNAL_SLUG) return false;
+  if (repairSlug !== PHONE_BACK_GLASS_PUBLIC_SLUG && repairSlug !== PHONE_BACK_HOUSING_INTERNAL_SLUG) return false;
 
   const normalizedModel = slugify(modelSlug);
   return IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES.some((prefix) => normalizedModel === prefix || normalizedModel.startsWith(`${prefix}-`));
@@ -3564,7 +3565,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
-  const bookingRepairName = knownRepair?.name || repairTypeDerived;
+  const bookingRepairName = isPhoneBackGlassPublicAlias(resolvedParams.category, resolvedParams['repair-type']) ? (knownRepair?.name || repairTypeDerived) : undefined;
   const showBackHousingNotice = shouldShowIphoneBackHousingNotice(
     resolvedParams.category,
     resolvedParams.brand,
@@ -3575,7 +3576,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams.category,
     resolvedParams.brand,
     resolvedParams['repair-type'],
-    bookingRepairName
+    knownRepair?.name || repairTypeDerived
   );
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);

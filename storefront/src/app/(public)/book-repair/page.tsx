@@ -22,6 +22,13 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function getCartDisplayServiceName(category: string, brand: string, rawServiceName: string) {
+  if (category === 'phone' && brand.toLowerCase() !== 'iphone' && rawServiceName.startsWith('Back Housing Replacement')) {
+    return rawServiceName.replace('Back Housing Replacement', 'Back Glass Replacement');
+  }
+  return rawServiceName;
+}
+
 function generateICS(booking: any) {
   const { name, brand, model, service, datetime } = booking;
   const start = new Date(datetime);
@@ -261,7 +268,9 @@ export default function BookRepairPage() {
         // Legacy fields for SuccessView compatibility
         brand: confirmedDevices[0].brand,
         model: confirmedDevices[0].model,
-        service: confirmedDevices.length > 1 ? `${confirmedDevices[0].services[0]?.name || 'Repair'} + more` : (confirmedDevices[0].services[0]?.name || 'Repair')
+        service: confirmedDevices.length > 1
+          ? `${getCartDisplayServiceName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0]?.name || 'Repair')} + more`
+          : (getCartDisplayServiceName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0]?.name || 'Repair'))
       });
       clearCart();
     } catch (err) {
@@ -412,7 +421,7 @@ export default function BookRepairPage() {
                   <div>
                     {confirmedDevices.map((d, i) => (
                       <div key={i} className="booking-summary-line">
-                        <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => s.name).join(', ')}
+                        <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => getCartDisplayServiceName(d.category || 'phone', d.brand, s.name)).join(', ')}
                       </div>
                     ))}
                     <div className="booking-total-row">
