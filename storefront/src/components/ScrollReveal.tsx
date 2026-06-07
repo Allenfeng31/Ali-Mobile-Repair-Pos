@@ -16,7 +16,7 @@ export default function ScrollReveal({ children, className = "", delay = 0 }: Sc
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ 
-        duration: 0.4, 
+        duration: 0.6,
         ease: "easeOut",
         delay: delay
       }}
