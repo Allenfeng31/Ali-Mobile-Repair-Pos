@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { analytics } from '@/lib/analytics';
-import { PhoneCall, ThumbsUp } from 'lucide-react';
+import { ClipboardCheck, PhoneCall, ThumbsUp } from 'lucide-react';
 
 interface RepairVariant {
   quality_grade: string;
@@ -16,14 +16,61 @@ interface RepairPricingAndCTAProps {
   modelName: string;
   repairName: string;
   bookingRepairName?: string;
+  showBackHousingNotice?: boolean;
   variants?: RepairVariant[];
 }
+
+const TIER_DESCRIPTION_OVERRIDES: Record<string, Record<string, string>> = {
+  "screen replacement": {
+    "Budget": "High-quality aftermarket part. Best for quick, cost-effective fixes.",
+    "Standard": "Industry-standard replacement part with reliable performance.",
+    "Premium": "Top-tier aftermarket display selected for strong colour, touch response and daily reliability.",
+    "Genuine": "Original equipment display where available, selected for the closest match to factory display performance."
+  },
+  "battery replacement": {
+    "Budget": "Cost-effective replacement battery for basic daily use.",
+    "Standard": "Reliable replacement battery selected for stable charging and everyday performance.",
+    "Premium": "High-quality replacement battery selected for stronger daily reliability and longer service life.",
+    "Genuine": "Original equipment battery where available, selected for the closest match to factory performance."
+  },
+  "charging port replacement": {
+    "Budget": "Cost-effective charging port repair option for basic charging function.",
+    "Standard": "Reliable charging port part selected for stable charging and cable connection.",
+    "Premium": "High-quality charging port assembly selected for stronger fit, connection stability and daily durability.",
+    "Genuine": "Original equipment charging component where available."
+  },
+  "back housing replacement": {
+    "Budget": "Cost-effective rear glass or housing repair option for basic cosmetic restoration.",
+    "Standard": "Reliable rear glass or housing replacement selected for fit and everyday use.",
+    "Premium": "High-quality rear glass or housing assembly selected for better fit, finish and durability.",
+    "Genuine": "Original equipment rear housing assembly where available."
+  },
+  "back glass / back housing replacement": {
+    "Budget": "Cost-effective rear glass or housing repair option for basic cosmetic restoration.",
+    "Standard": "Reliable rear glass or housing replacement selected for fit and everyday use.",
+    "Premium": "High-quality rear glass or housing assembly selected for better fit, finish and durability.",
+    "Genuine": "Original equipment rear housing assembly where available."
+  },
+  "front camera replacement": {
+    "Budget": "Cost-effective front camera repair option for basic photo and video use.",
+    "Standard": "Reliable front camera replacement selected for clear selfies and video calls.",
+    "Premium": "High-quality front camera part selected for sharper image quality and stable daily use.",
+    "Genuine": "Original equipment front camera component where available."
+  },
+  "back camera replacement": {
+    "Budget": "Cost-effective rear camera repair option for basic photo and video use.",
+    "Standard": "Reliable rear camera replacement selected for clear everyday photos and videos.",
+    "Premium": "High-quality rear camera part selected for sharper image quality and stable focus performance.",
+    "Genuine": "Original equipment rear camera component where available."
+  }
+};
 
 export default function RepairPricingAndCTA({ 
   brandName,
   modelName, 
   repairName,
   bookingRepairName,
+  showBackHousingNotice = false,
   variants = []
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
@@ -89,6 +136,16 @@ export default function RepairPricingAndCTA({
     router.push(url);
   };
 
+  const getTierDescription = (tierName: string) => {
+    const normalizedRepairName = (bookingRepairName || repairName).toLowerCase().trim();
+
+    if (TIER_DESCRIPTION_OVERRIDES[normalizedRepairName]?.[tierName]) {
+      return TIER_DESCRIPTION_OVERRIDES[normalizedRepairName][tierName];
+    }
+
+    return tierDescriptions[tierName];
+  };
+
   return (
     <div className="w-full flex flex-col items-center mt-8">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
@@ -142,9 +199,9 @@ export default function RepairPricingAndCTA({
                 </div>
 
                 {/* Description */}
-                {tierDescriptions[variant.quality_grade] && (
+                {getTierDescription(variant.quality_grade) && (
                   <p className={`text-sm leading-relaxed mt-2 flex-grow text-center ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
-                    {tierDescriptions[variant.quality_grade]}
+                    {getTierDescription(variant.quality_grade)}
                   </p>
                 )}
 
@@ -168,6 +225,27 @@ export default function RepairPricingAndCTA({
             </a>{' '}
             for an instant quote.
           </p>
+        </div>
+      )}
+
+      {showBackHousingNotice && (
+        <div className="w-full max-w-4xl mx-auto mt-6 rounded-2xl border border-blue-100 bg-[linear-gradient(180deg,rgba(239,246,255,0.92),rgba(255,255,255,0.95))] px-4 py-4 shadow-sm shadow-blue-950/5 sm:px-5">
+          <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-blue-100 bg-white text-blue-600 shadow-sm">
+              <ClipboardCheck size={18} strokeWidth={2.4} aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold tracking-tight text-slate-900">
+                Back glass or full housing?
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                For this iPhone model, we may recommend a full rear housing replacement instead of back glass only. This can help protect the frame, camera area, wireless charging alignment and long-term durability. We inspect the phone first and confirm the safest repair option before starting.
+              </p>
+              <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-blue-700/80">
+                Final repair method and quote depend on inspection.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

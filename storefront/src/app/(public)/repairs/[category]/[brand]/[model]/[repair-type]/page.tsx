@@ -3339,6 +3339,16 @@ const META_DESCRIPTION_TEMPLATES = [
 const IPHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
 const IPHONE_BACK_HOUSING_INTERNAL_SLUG = "back-housing-replacement";
 const IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass / Back Housing Replacement";
+const IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES = [
+  "iphone-8",
+  "iphone-x",
+  "iphone-xs",
+  "iphone-xr",
+  "iphone-11",
+  "iphone-12",
+  "iphone-13",
+  "iphone-14-pro",
+];
 
 function isIphoneBackGlassPublicAlias(category: string, brand: string, repairSlug: string) {
   return category === "phone" && brand === "iphone" && repairSlug === IPHONE_BACK_GLASS_PUBLIC_SLUG;
@@ -3366,6 +3376,14 @@ function getRepairDisplayName(category: string, brand: string, publicRepairSlug:
   }
 
   return repairName;
+}
+
+function shouldShowIphoneBackHousingNotice(category: string, brand: string, modelSlug: string, repairSlug: string) {
+  if (category !== "phone" || brand !== "iphone") return false;
+  if (repairSlug !== IPHONE_BACK_GLASS_PUBLIC_SLUG && repairSlug !== IPHONE_BACK_HOUSING_INTERNAL_SLUG) return false;
+
+  const normalizedModel = slugify(modelSlug);
+  return IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES.some((prefix) => normalizedModel === prefix || normalizedModel.startsWith(`${prefix}-`));
 }
 
 export async function generateMetadata({ params }: RepairPageProps) {
@@ -3547,6 +3565,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
   const bookingRepairName = knownRepair?.name || repairTypeDerived;
+  const showBackHousingNotice = shouldShowIphoneBackHousingNotice(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams.model,
+    resolvedParams['repair-type']
+  );
   const finalRepairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
@@ -3587,6 +3611,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             modelName={displayModel}
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
+            showBackHousingNotice={showBackHousingNotice}
             variants={details?.variants || []}
           />
 
