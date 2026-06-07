@@ -9,6 +9,7 @@ import homeStyles from "./HomePage.module.css";
 const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"));
 const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"));
 const ServiceAreas = dynamic(() => import("@/components/seo/ServiceAreas"));
+import ScrollReveal from "@/components/ScrollReveal";
 
 const popularRepairs = [
   {
@@ -84,136 +85,148 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="servicesGrid homepage-services-motion !mt-24 md:!mt-32" aria-labelledby="services-heading">
-        <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
-        <Link href="/repairs/phone" className="serviceCard">
-          <div className="card-bg" style={{ backgroundImage: "url('/images/services/phone-repair.jpg')" }} />
-          <div className="card-gradient" />
-          <div className="card-content">
-            <h3>Phone Repair</h3>
-            <p>iPhone, Samsung, Google Pixel and Oppo screen, battery, charging port and camera repair options.</p>
-            <span className="card-link">View Pricing →</span>
+      <ScrollReveal>
+        <section className="servicesGrid homepage-services-motion !mt-24 md:!mt-32" aria-labelledby="services-heading">
+          <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
+          <Link href="/repairs/phone" className="serviceCard">
+            <div className="card-bg" style={{ backgroundImage: "url('/images/services/phone-repair.jpg')" }} />
+            <div className="card-gradient" />
+            <div className="card-content">
+              <h3>Phone Repair</h3>
+              <p>iPhone, Samsung, Google Pixel and Oppo screen, battery, charging port and camera repair options.</p>
+              <span className="card-link">View Pricing →</span>
+            </div>
+          </Link>
+          <Link href="/repairs/tablet" className="serviceCard">
+            <div className="card-bg" style={{ backgroundImage: "url('/images/services/tablet-repair.jpg')" }} />
+            <div className="card-gradient" />
+            <div className="card-content">
+              <h3>Tablet & iPad Repair</h3>
+              <p>iPad and tablet screen, battery and charging repairs with quote confirmation before work begins.</p>
+              <span className="card-link">View Pricing →</span>
+            </div>
+          </Link>
+          <Link href="/repairs/laptop" className="serviceCard">
+            <div className="card-bg" style={{ backgroundImage: "url('/images/services/laptop-repair.jpg')" }} />
+            <div className="card-gradient" />
+            <div className="card-content">
+              <h3>Laptop & MacBook Repair</h3>
+              <p>MacBook screen, battery, keyboard and diagnostic support for common laptop repair issues.</p>
+              <span className="card-link">View Pricing →</span>
+            </div>
+          </Link>
+          <Link href="/repairs/watch" className="serviceCard">
+            <div className="card-bg" style={{ backgroundImage: "url('/images/services/watch-repair.jpg')" }} />
+            <div className="card-gradient" />
+            <div className="card-content">
+              <h3>Smart Watch Repair</h3>
+              <p>Apple Watch screen and battery repair options. Call ahead for model support and parts timing.</p>
+              <span className="card-link">View Pricing →</span>
+            </div>
+          </Link>
+        </section>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <section className={homeStyles.popularRepairs} aria-labelledby="popular-repairs-heading">
+          <div className={homeStyles.popularShell}>
+            <div className={homeStyles.popularHeader}>
+              <span className={homeStyles.popularKicker}>Quick repair paths</span>
+              <h2 id="popular-repairs-heading">Popular repair categories</h2>
+              <p>
+                Choose a repair category or book online for quote confirmation.
+              </p>
+            </div>
+
+            <nav className={homeStyles.popularGrid} aria-label="Popular repair categories">
+              {popularRepairs.map((repair) => (
+                <Link key={`${repair.label}-${repair.href}`} href={repair.href} className={homeStyles.popularCard}>
+                  <span>{repair.label}</span>
+                  <small>{repair.note}</small>
+                </Link>
+              ))}
+            </nav>
+
+            <div className={homeStyles.infoStrip}>
+              <h3>Repairs available at our Ringwood Square kiosk</h3>
+              <p>
+                We help with iPhone, Samsung, Google Pixel, Oppo, iPad, MacBook and Apple Watch repairs.
+                Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square. Walk-ins are welcome,
+                and quotes are confirmed before repair.
+              </p>
+            </div>
           </div>
-        </Link>
-        <Link href="/repairs/tablet" className="serviceCard">
-          <div className="card-bg" style={{ backgroundImage: "url('/images/services/tablet-repair.jpg')" }} />
-          <div className="card-gradient" />
-          <div className="card-content">
-            <h3>Tablet & iPad Repair</h3>
-            <p>iPad and tablet screen, battery and charging repairs with quote confirmation before work begins.</p>
-            <span className="card-link">View Pricing →</span>
-          </div>
-        </Link>
-        <Link href="/repairs/laptop" className="serviceCard">
-          <div className="card-bg" style={{ backgroundImage: "url('/images/services/laptop-repair.jpg')" }} />
-          <div className="card-gradient" />
-          <div className="card-content">
-            <h3>Laptop & MacBook Repair</h3>
-            <p>MacBook screen, battery, keyboard and diagnostic support for common laptop repair issues.</p>
-            <span className="card-link">View Pricing →</span>
-          </div>
-        </Link>
-        <Link href="/repairs/watch" className="serviceCard">
-          <div className="card-bg" style={{ backgroundImage: "url('/images/services/watch-repair.jpg')" }} />
-          <div className="card-gradient" />
-          <div className="card-content">
-            <h3>Smart Watch Repair</h3>
-            <p>Apple Watch screen and battery repair options. Call ahead for model support and parts timing.</p>
-            <span className="card-link">View Pricing →</span>
-          </div>
-        </Link>
-      </section>
+        </section>
+      </ScrollReveal>
 
-      <section className={homeStyles.popularRepairs} aria-labelledby="popular-repairs-heading">
-        <div className={homeStyles.popularShell}>
-          <div className={homeStyles.popularHeader}>
-            <span className={homeStyles.popularKicker}>Quick repair paths</span>
-            <h2 id="popular-repairs-heading">Popular repair categories</h2>
-            <p>
-              Choose a repair category or book online for quote confirmation.
-            </p>
-          </div>
+      <ScrollReveal>
+        <ReviewsSection />
+      </ScrollReveal>
 
-          <nav className={homeStyles.popularGrid} aria-label="Popular repair categories">
-            {popularRepairs.map((repair) => (
-              <Link key={`${repair.label}-${repair.href}`} href={repair.href} className={homeStyles.popularCard}>
-                <span>{repair.label}</span>
-                <small>{repair.note}</small>
-              </Link>
-            ))}
-          </nav>
+      <ScrollReveal>
+        <HomeFAQ />
+      </ScrollReveal>
 
-          <div className={homeStyles.infoStrip}>
-            <h3>Repairs available at our Ringwood Square kiosk</h3>
-            <p>
-              We help with iPhone, Samsung, Google Pixel, Oppo, iPad, MacBook and Apple Watch repairs.
-              Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square. Walk-ins are welcome,
-              and quotes are confirmed before repair.
-            </p>
-          </div>
-        </div>
-      </section>
+      <ScrollReveal>
+        <ServiceAreas />
+      </ScrollReveal>
 
-      <ReviewsSection />
+      <ScrollReveal>
+        <section className="map-section" aria-labelledby="map-heading">
+          <div className="map-shell">
+            <div className="map-copy">
+              <span className="map-kicker">
+                <MapPin size={16} strokeWidth={2.5} aria-hidden="true" />
+                Visit the repair bench
+              </span>
+              <h2 id="map-heading">Find us inside Ringwood Square</h2>
+              <p>
+                Drop in at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check, quote confirmation, or same-day
+                repair path when parts are available.
+              </p>
 
-      <HomeFAQ />
-
-      <ServiceAreas />
-
-      <section className="map-section" aria-labelledby="map-heading">
-        <div className="map-shell">
-          <div className="map-copy">
-            <span className="map-kicker">
-              <MapPin size={16} strokeWidth={2.5} aria-hidden="true" />
-              Visit the repair bench
-            </span>
-            <h2 id="map-heading">Find us inside Ringwood Square</h2>
-            <p>
-              Drop in at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check, quote confirmation, or same-day
-              repair path when parts are available.
-            </p>
-
-            <div className="map-info-grid">
-              <div>
-                <Navigation size={18} strokeWidth={2.5} aria-hidden="true" />
-                <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
+              <div className="map-info-grid">
+                <div>
+                  <Navigation size={18} strokeWidth={2.5} aria-hidden="true" />
+                  <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
+                </div>
+                <div>
+                  <Clock3 size={18} strokeWidth={2.5} aria-hidden="true" />
+                  <span>Call ahead for stock and timing</span>
+                </div>
               </div>
-              <div>
-                <Clock3 size={18} strokeWidth={2.5} aria-hidden="true" />
-                <span>Call ahead for stock and timing</span>
+
+              <div className="map-actions">
+                <a
+                  href="https://www.google.com/maps/dir/?api=1&destination=Ali+Mobile+%26+Repair+Ringwood"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="repair-primary-action"
+                >
+                  Get Directions
+                  <Navigation size={18} strokeWidth={2.7} aria-hidden="true" />
+                </a>
+                <a href="tel:0481058514" className="repair-secondary-action">
+                  <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
+                  Call Now
+                </a>
               </div>
             </div>
 
-            <div className="map-actions">
-              <a
-                href="https://www.google.com/maps/dir/?api=1&destination=Ali+Mobile+%26+Repair+Ringwood"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="repair-primary-action"
-              >
-                Get Directions
-                <Navigation size={18} strokeWidth={2.7} aria-hidden="true" />
-              </a>
-              <a href="tel:0481058514" className="repair-secondary-action">
-                <PhoneCall size={17} strokeWidth={2.6} aria-hidden="true" />
-                Call Now
-              </a>
+            <div className="map-wrapper">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6303.831349042814!2d145.222375!3d-37.8154441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad63bd4323d01bd%3A0x1b936dbf4a8db011!2sAli%20Mobile%20%26%20Repair!5e0!3m2!1sen!2sau!4v1775003205754!5m2!1sen!2sau"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={false}
+                loading="lazy"
+                title="Ali Mobile Repair Location - Ringwood Melbourne"
+              ></iframe>
             </div>
           </div>
-
-          <div className="map-wrapper">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6303.831349042814!2d145.222375!3d-37.8154441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad63bd4323d01bd%3A0x1b936dbf4a8db011!2sAli%20Mobile%20%26%20Repair!5e0!3m2!1sen!2sau!4v1775003205754!5m2!1sen!2sau"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen={false}
-              loading="lazy"
-              title="Ali Mobile Repair Location - Ringwood Melbourne"
-            ></iframe>
-          </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
     </main>
   );
