@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { analytics } from '@/lib/analytics';
 import { ClipboardCheck, PhoneCall, ThumbsUp } from 'lucide-react';
+import { getStartingPrice } from '@/lib/repairStartingPrices';
 
 interface RepairVariant {
   quality_grade: string;
@@ -74,10 +75,15 @@ export default function RepairPricingAndCTA({
   variants = []
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
+  const params = useParams();
   const [tierDescriptions, setTierDescriptions] = useState<Record<string, string>>({});
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [showValidationHint, setShowValidationHint] = useState(false);
   const [showError, setShowError] = useState(false);
+
+  const categorySlug = typeof params?.category === 'string' ? params.category : '';
+  const brandSlug = typeof params?.brand === 'string' ? params.brand : '';
+  const repairSlug = typeof params?.['repair-type'] === 'string' ? params['repair-type'] : '';
 
   useEffect(() => {
     const fetchTierDescriptions = async () => {
@@ -98,6 +104,10 @@ export default function RepairPricingAndCTA({
 
   const displayVariants = variants.length > 0 ? variants : [];
   const isMultiple = displayVariants.length > 1;
+
+  const startingPrice = (displayVariants.length === 0 || displayVariants[0].price === 0)
+    ? getStartingPrice(categorySlug, brandSlug, repairSlug)
+    : null;
 
   const handleCardClick = (tierName: string) => {
     setShowValidationHint(false);
@@ -215,6 +225,14 @@ export default function RepairPricingAndCTA({
         </div>
       ) : (
         <div className="mb-12 mt-4 text-center max-w-md mx-auto p-10 rounded-2xl border border-slate-200 bg-slate-50/50 dark:bg-white dark:border-white shadow-sm">
+          {startingPrice && (
+            <div className="mb-4">
+              <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Starting from</span>
+              <div className="text-3xl font-extrabold text-slate-700 dark:text-slate-800">${startingPrice}</div>
+              <div className="mt-1 text-xs text-slate-400">Final quote depends on parts, model and device condition.</div>
+              <div className="my-5 h-px w-16 bg-slate-200 mx-auto"></div>
+            </div>
+          )}
           <p className="text-2xl font-extrabold text-blue-600 dark:text-black mb-4">
             Quote on Request
           </p>
