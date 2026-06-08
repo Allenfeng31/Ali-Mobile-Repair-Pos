@@ -35,7 +35,11 @@ interface ChatSession {
   session_token: string;
   created_at: string;
   last_message_at: string;
-  chat_messages: ChatMessage[];
+  unread_count?: number;
+  latest_message_snippet?: string;
+  latest_message_sender?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
 }
 
 interface BookingRecord {
@@ -467,53 +471,27 @@ export function ChatInbox() {
     confirmedBookings.find(booking => new Date(booking.datetime).getTime() >= nowTime) || null;
   const nextBooking = nextFutureConfirmedBooking || confirmedBookings[0] || bookings[0] || null;
 
-  const getUnreadCount = (session: ChatSession) =>
-    (session.chat_messages || []).filter(m => m.sender === 'customer' && !m.is_read).length;
+  const getUnreadCount = (session: ChatSession) => session.unread_count || 0;
 
   const getLastMessage = (session: ChatSession) => {
-    const msgs = session.chat_messages || [];
-    const visible = msgs.filter(m => {
-      if (m.content.startsWith(BOOKING_PREFIX)) return false;
-      if (m.content.startsWith(INTRO_PREFIX)) return cleanMessageContent(m.content) !== '';
-      return true;
-    });
-
-    if (visible.length > 0) {
-      const msg = visible[visible.length - 1];
-      const cleaned = cleanMessageContent(msg.content);
-      return { ...msg, content: cleaned.substring(0, 60) + (cleaned.length > 60 ? '...' : '') };
-    }
-    const booking = msgs.find(m => m.content.startsWith(BOOKING_PREFIX));
-    if (booking) return { ...booking, content: '📅 New Booking Request' };
-    return msgs[msgs.length - 1];
-  };
-
-  const getBookingInfo = (session: ChatSession) => {
-    const bookingMsg = (session.chat_messages || []).find(m => m.content.startsWith(BOOKING_PREFIX));
-    if (!bookingMsg) return null;
-    try { return JSON.parse(bookingMsg.content.replace(BOOKING_PREFIX, '').trim()); }
-    catch (_) { return null; }
+    return {
+      content: session.latest_message_snippet || 'New Conversation',
+      sender: session.latest_message_sender || 'customer'
+    };
   };
 
   const getCustomerInfo = (session: ChatSession) => {
-    const introMsg = (session.chat_messages || []).find(m => m.content.startsWith(INTRO_PREFIX));
-    if (!introMsg) return null;
-    return getCustomerInfoFromContent(introMsg.content);
+    return { name: session.customer_name, phone: session.customer_phone };
   };
 
   const getSessionLabel = (session: ChatSession, idx: number) => {
-    const info = getCustomerInfo(session);
-    if (info?.name) return info.name;
-    const bInfo = getBookingInfo(session);
-    if (bInfo?.name) return bInfo.name;
+    if (session.customer_name) return session.customer_name;
     return `Customer #${String(idx + 1).padStart(3, '0')}`;
   };
 
   const getSessionSubLabel = (session: ChatSession) => {
-    const info = getCustomerInfo(session);
-    if (info?.phone) return info.phone;
-    const bInfo = getBookingInfo(session);
-    return bInfo?.phone || null;
+    if (session.customer_phone) return session.customer_phone;
+    return null;
   };
 
   // ── Conversation view ──────────────────────────────────────────────────────

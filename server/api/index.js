@@ -2038,21 +2038,125 @@ app.post('/api/chat/session/:token/message', async (req, res) => {
   res.json(data);
 });
 
+// Staff: get global unread summary for Layout polling
+app.get('/api/chat/unread-summary', requireStaffAuth, async (req, res) => {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('id, session_id')
+    .eq('sender', 'customer')
+    .eq('is_read', false)
+    .order('created_at', { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({
+    total: data ? data.length : 0,
+    latestUnreadId: (data && data.length > 0) ? data[0].session_id : null
+  });
+});
+
 // Staff: get all sessions (conversation list)
 app.get('/api/chat/sessions', requireStaffAuth, async (req, res) => {
-  const { data, error } = await supabase
+  // 1. Fetch top 40 sessions with their latest 5 messages
+  const { data: sessions, error } = await supabase
     .from('chat_sessions')
     .select(`
       id, session_token, created_at, last_message_at,
       chat_messages (id, sender, content, created_at, is_read)
     `)
-    .order('last_message_at', { ascending: false });
+    .order('last_message_at', { ascending: false })
+    .limit(40)
+    .order('created_at', { foreignTable: 'chat_messages', ascending: false })
+    .limit(20, { foreignTable: 'chat_messages' });
 
   if (error) return res.status(500).json({ error: error.message });
+  if (!sessions || sessions.length === 0) return res.json([]);
 
-  // Filter out sessions that have no messages (ghost sessions)
-  const activeSessions = (data || []).filter(s => s.chat_messages && s.chat_messages.length > 0);
-  res.json(activeSessions);
+  const activeSessions = sessions.filter(s => s.chat_messages && s.chat_messages.length > 0);
+  if (activeSessions.length === 0) return res.json([]);
+
+  const sessionIds = activeSessions.map(s => s.id);
+
+  // 2. Fetch customer info / booking intro for these sessions
+  const { data: introMsgs } = await supabase
+    .from('chat_messages')
+    .select('session_id, content')
+    .in('session_id', sessionIds)
+    .or('content.ilike.[CUSTOMER_INFO]%,content.ilike.[BOOKING_DATA]%');
+
+  const introBySession = {};
+  if (introMsgs) {
+    introMsgs.forEach(m => {
+      if (!introBySession[m.session_id]) introBySession[m.session_id] = [];
+      introBySession[m.session_id].push(m);
+    });
+  }
+
+  // 3. Fetch independent accurate unread count for these sessions
+  const { data: unreadMsgs } = await supabase
+    .from('chat_messages')
+    .select('session_id')
+    .in('session_id', sessionIds)
+    .eq('sender', 'customer')
+    .eq('is_read', false);
+
+  const unreadBySession = {};
+  if (unreadMsgs) {
+    unreadMsgs.forEach(m => {
+      unreadBySession[m.session_id] = (unreadBySession[m.session_id] || 0) + 1;
+    });
+  }
+
+  // 4. Map to lightweight summary payload
+  const summaries = activeSessions.map(s => {
+    const unreads = unreadBySession[s.id] || 0;
+    const latestMsg = s.chat_messages[0];
+
+    let snippet = '';
+    if (latestMsg) {
+       let clean = latestMsg.content;
+       if (clean.startsWith('[CUSTOMER_INFO]')) {
+         clean = clean.split('\n').filter(line => !line.startsWith('[CUSTOMER_INFO]') && !line.startsWith('Name:') && !line.startsWith('Phone:')).join('\n').trim();
+       }
+       if (clean.startsWith('[BOOKING_DATA]')) {
+         clean = '📅 New Booking Request';
+       }
+       snippet = clean.substring(0, 60) + (clean.length > 60 ? '...' : '');
+    }
+
+    let customerName = null;
+    let customerPhone = null;
+
+    const intros = introBySession[s.id] || [];
+    for (const msg of intros) {
+      if (msg.content.startsWith('[CUSTOMER_INFO]')) {
+         const lines = msg.content.split('\n');
+         const n = lines.find(l => l.startsWith('Name:'))?.replace('Name:', '').trim();
+         const p = lines.find(l => l.startsWith('Phone:'))?.replace('Phone:', '').trim();
+         if (n) customerName = n;
+         if (p) customerPhone = p;
+      } else if (msg.content.startsWith('[BOOKING_DATA]')) {
+         try {
+           const d = JSON.parse(msg.content.replace('[BOOKING_DATA]', '').trim());
+           if (d.name) customerName = d.name;
+           if (d.phone) customerPhone = d.phone;
+         } catch(e){}
+      }
+    }
+
+    return {
+      id: s.id,
+      session_token: s.session_token,
+      created_at: s.created_at,
+      last_message_at: s.last_message_at,
+      unread_count: unreads,
+      latest_message_snippet: snippet || 'New Conversation',
+      latest_message_sender: latestMsg?.sender || null,
+      customer_name: customerName,
+      customer_phone: customerPhone
+    };
+  });
+
+  res.json(summaries);
 });
 
 // Staff: mark all unread customer chat messages as seen globally
@@ -2082,9 +2186,12 @@ app.get('/api/chat/session/id/:id/messages', requireStaffAuth, async (req, res) 
     .from('chat_messages')
     .select('*')
     .eq('session_id', req.params.id)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false })
+    .limit(100);
 
   if (error) return res.status(500).json({ error: error.message });
+
+  const messages = data ? data.reverse() : [];
 
   // Mark all customer messages as read
   await supabase
@@ -2093,7 +2200,7 @@ app.get('/api/chat/session/id/:id/messages', requireStaffAuth, async (req, res) 
     .eq('session_id', req.params.id)
     .eq('sender', 'customer');
 
-  res.json(data || []);
+  res.json(messages);
 });
 
 // Staff: reply to a customer session

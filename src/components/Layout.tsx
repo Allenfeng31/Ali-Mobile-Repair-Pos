@@ -519,7 +519,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         return null;
       }
 
-      const res = await fetch(`${API_BASE}/chat/sessions`, {
+      const res = await fetch(`${API_BASE}/chat/unread-summary`, {
         headers,
       });
       if (res.status === 401) {
@@ -533,8 +533,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       if (!res.ok) return null;
 
       setChatAuthWarning(null);
-      const sessions: any[] = await res.json();
-      const summary = getUnreadSummary(sessions);
+      const summary = await res.json();
       setUnreadChats(summary.total);
 
       if (summary.latestUnreadId && summary.latestUnreadId !== lastAlertedMessageIdRef.current) {
@@ -557,7 +556,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   // Poll backend unread state so every open POS device reflects global chat status.
   React.useEffect(() => {
     checkUnreadChats();
-    const interval = setInterval(checkUnreadChats, 5000);
+    const interval = setInterval(checkUnreadChats, 30000);
     return () => clearInterval(interval);
   }, [checkUnreadChats]);
 
