@@ -163,36 +163,16 @@ const IPHONE_13_SCREEN_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
     },
   ],
   faq: [
-    {
-      question: "How long does iPhone 13 screen replacement take in Ringwood?",
-      answer:
-        "If the correct display assembly is in stock and there is no hidden frame or liquid damage, iPhone 13 screen replacement is usually completed in under 1 hour.",
-    },
-    {
-      question: "Can you fix an iPhone 13 with green lines, flicker, or a black screen?",
-      answer:
-        "Yes. Green lines, flicker, black display, and touch dead zones are common OLED or digitizer symptoms. We test the phone first to confirm whether a screen assembly is the right repair.",
-    },
-    {
-      question: "Do you check Face ID before replacing the iPhone 13 screen?",
-      answer:
-        "Yes. We check the Face ID area, front camera area, proximity behaviour, and earpiece mesh condition before repair because impact around the top of the display can affect those parts.",
-    },
-    {
-      question: "Will True Tone still work after an iPhone 13 screen replacement?",
-      answer:
-        "Where supported, we check display data and True Tone behaviour during the repair process. The result can depend on the display option, device condition, and whether the original screen data is readable.",
-    },
-    {
-      question: "Will my iPhone 13 still be water resistant after screen replacement?",
-      answer:
-        "We clean old adhesive and reseal carefully, but factory water resistance cannot be guaranteed after any phone has been opened. Keep the phone away from water after repair.",
-    },
-    {
-      question: "Do I need to book before visiting for iPhone 13 screen replacement?",
-      answer:
-        "Booking helps us prepare the right display option and gives you priority at the repair desk. Walk-ins are welcome, but part availability can vary.",
-    },
+    { question: "How long does iPhone 13 screen replacement usually take?", answer: "Timing depends on part availability and device condition. We confirm the estimated turnaround after a quick inspection at our Ringwood store. Many common screen repairs can be completed quickly when the right part is in stock." },
+    { question: "Will I lose my photos or data during the screen repair?", answer: "Your data is normally not affected by a screen replacement. However, we recommend backing up your iPhone 13 to iCloud or a computer before bringing it in, as a precaution." },
+    { question: "How much will my iPhone 13 screen repair cost?", answer: "The final quote depends on the display option, model, parts availability and device condition. We confirm the price with you before any repair work begins." },
+    { question: "What screen quality options are available?", answer: "Available display options can vary by model and stock. We explain the suitable screen options for your iPhone 13 before repair, including differences in display quality, touch feel and budget." },
+    { question: "Will my iPhone 13 still be water resistant after the screen is fixed?", answer: "We reseal the device carefully after opening it. However, factory water resistance cannot be guaranteed after any phone has been opened, so we recommend keeping your repaired iPhone away from water." },
+    { question: "Will Face ID still work after screen replacement?", answer: "Face ID usually depends on the original sensor assembly, not only the screen. If the top sensor area was damaged by the impact, we will check it before and after the repair and explain any issue we find." },
+    { question: "Do you test the screen before returning the phone?", answer: "Yes. We run standard post-repair checks, including touch response, brightness, display colour, speaker area, front sensor area and general screen fit before handover." },
+    { question: "Will True Tone still work after the repair?", answer: "Where supported, we try to preserve True Tone by transferring compatible display data. This depends on the chosen screen option and whether the original display data is still readable." },
+    { question: "Is there warranty support for iPhone 13 screen replacement?", answer: "Warranty support is available on eligible screen repairs. It does not cover new physical damage, pressure damage or liquid damage after the repair. We explain the applicable warranty terms before you proceed." },
+    { question: "Do I need to book, or can I walk in?", answer: "Walk-ins are welcome at our Ringwood Square repair desk. Booking ahead is recommended because it helps us check part availability for your exact iPhone model before you visit." },
   ],
 };
 
@@ -2877,7 +2857,16 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { step: "04", title: "Final function checks", description: "After repair, we retest touch, display output, cameras, speaker, and charging response." },
     ],
     faq: [
-      { question: "Do you check the iPhone 15 Pro Max frame before screen replacement?", answer: "Yes. We inspect the frame and corner condition because dents or pressure can affect display fit." },
+      { question: "How long does iPhone 15 Pro Max screen replacement usually take?", answer: "Timing depends on part availability and device condition. We confirm the estimated turnaround after a quick inspection at our Ringwood store. Many common screen repairs can be completed quickly when the right part is in stock." },
+      { question: "Will I lose my photos or data during the screen repair?", answer: "Your data is normally not affected by a screen replacement. However, we recommend backing up your iPhone 15 Pro Max to iCloud or a computer before bringing it in, as a precaution." },
+      { question: "How much will my iPhone 15 Pro Max screen repair cost?", answer: "The final quote depends on the display option, model, parts availability and device condition. We confirm the price with you before any repair work begins." },
+      { question: "What screen quality options are available?", answer: "Available display options can vary by model and stock. We explain the suitable screen options for your iPhone 15 Pro Max before repair, including differences in display quality, touch feel and budget." },
+      { question: "Will my iPhone 15 Pro Max still be water resistant after the screen is fixed?", answer: "We reseal the device carefully after opening it. However, factory water resistance cannot be guaranteed after any phone has been opened, so we recommend keeping your repaired iPhone away from water." },
+      { question: "Will Face ID still work after screen replacement?", answer: "Face ID usually depends on the original sensor assembly, not only the screen. If the top sensor area was damaged by the impact, we will check it before and after the repair and explain any issue we find." },
+      { question: "Do you test the screen before returning the phone?", answer: "Yes. We run standard post-repair checks, including touch response, brightness, display colour, speaker area, front sensor area and general screen fit before handover." },
+      { question: "Will True Tone still work after the repair?", answer: "Where supported, we try to preserve True Tone by transferring compatible display data. This depends on the chosen screen option and whether the original display data is still readable." },
+      { question: "Is there warranty support for iPhone 15 Pro Max screen replacement?", answer: "Warranty support is available on eligible screen repairs. It does not cover new physical damage, pressure damage or liquid damage after the repair. We explain the applicable warranty terms before you proceed." },
+      { question: "Do I need to book, or can I walk in?", answer: "Walk-ins are welcome at our Ringwood Square repair desk. Booking ahead is recommended because it helps us check part availability for your exact iPhone model before you visit." },
     ],
   },
   "phone/google/pixel-8-pro/screen-replacement": {
@@ -3027,7 +3016,16 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { step: "04", title: "Final function checks", description: "We retest display quality, touch response, cameras, speaker, and charging at handover." },
     ],
     faq: [
-      { question: "Should I back up my iPhone 13 before screen replacement?", answer: "Yes. If the phone still powers on, backing up your data before repair is always recommended." },
+      { question: "How long does iPhone 13 screen replacement usually take?", answer: "Timing depends on part availability and device condition. We confirm the estimated turnaround after a quick inspection at our Ringwood store. Many common screen repairs can be completed quickly when the right part is in stock." },
+      { question: "Will I lose my photos or data during the screen repair?", answer: "Your data is normally not affected by a screen replacement. However, we recommend backing up your iPhone 13 to iCloud or a computer before bringing it in, as a precaution." },
+      { question: "How much will my iPhone 13 screen repair cost?", answer: "The final quote depends on the display option, model, parts availability and device condition. We confirm the price with you before any repair work begins." },
+      { question: "What screen quality options are available?", answer: "Available display options can vary by model and stock. We explain the suitable screen options for your iPhone 13 before repair, including differences in display quality, touch feel and budget." },
+      { question: "Will my iPhone 13 still be water resistant after the screen is fixed?", answer: "We reseal the device carefully after opening it. However, factory water resistance cannot be guaranteed after any phone has been opened, so we recommend keeping your repaired iPhone away from water." },
+      { question: "Will Face ID still work after screen replacement?", answer: "Face ID usually depends on the original sensor assembly, not only the screen. If the top sensor area was damaged by the impact, we will check it before and after the repair and explain any issue we find." },
+      { question: "Do you test the screen before returning the phone?", answer: "Yes. We run standard post-repair checks, including touch response, brightness, display colour, speaker area, front sensor area and general screen fit before handover." },
+      { question: "Will True Tone still work after the repair?", answer: "Where supported, we try to preserve True Tone by transferring compatible display data. This depends on the chosen screen option and whether the original display data is still readable." },
+      { question: "Is there warranty support for iPhone 13 screen replacement?", answer: "Warranty support is available on eligible screen repairs. It does not cover new physical damage, pressure damage or liquid damage after the repair. We explain the applicable warranty terms before you proceed." },
+      { question: "Do I need to book, or can I walk in?", answer: "Walk-ins are welcome at our Ringwood Square repair desk. Booking ahead is recommended because it helps us check part availability for your exact iPhone model before you visit." },
     ],
   },
   "tablet/ipad/ipad-9th-generation/screen-replacement": {
@@ -3087,7 +3085,16 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { step: "04", title: "Final handover checks", description: "After repair, we retest touch, brightness, proximity response, speaker, mic, and camera-area function." },
     ],
     faq: [
-      { question: "Do you check the iPhone 16 Pro frame and sensor area before screen replacement?", answer: "Yes. We inspect the frame, corner condition, and top sensor area first because those points can affect display fit and final function checks." },
+      { question: "How long does iPhone 16 Pro screen replacement usually take?", answer: "Timing depends on part availability and device condition. We confirm the estimated turnaround after a quick inspection at our Ringwood store. Many common screen repairs can be completed quickly when the right part is in stock." },
+      { question: "Will I lose my photos or data during the screen repair?", answer: "Your data is normally not affected by a screen replacement. However, we recommend backing up your iPhone 16 Pro to iCloud or a computer before bringing it in, as a precaution." },
+      { question: "How much will my iPhone 16 Pro screen repair cost?", answer: "The final quote depends on the display option, model, parts availability and device condition. We confirm the price with you before any repair work begins." },
+      { question: "What screen quality options are available?", answer: "Available display options can vary by model and stock. We explain the suitable screen options for your iPhone 16 Pro before repair, including differences in display quality, touch feel and budget." },
+      { question: "Will my iPhone 16 Pro still be water resistant after the screen is fixed?", answer: "We reseal the device carefully after opening it. However, factory water resistance cannot be guaranteed after any phone has been opened, so we recommend keeping your repaired iPhone away from water." },
+      { question: "Will Face ID still work after screen replacement?", answer: "Face ID usually depends on the original sensor assembly, not only the screen. If the top sensor area was damaged by the impact, we will check it before and after the repair and explain any issue we find." },
+      { question: "Do you test the screen before returning the phone?", answer: "Yes. We run standard post-repair checks, including touch response, brightness, display colour, speaker area, front sensor area and general screen fit before handover." },
+      { question: "Will True Tone still work after the repair?", answer: "Where supported, we try to preserve True Tone by transferring compatible display data. This depends on the chosen screen option and whether the original display data is still readable." },
+      { question: "Is there warranty support for iPhone 16 Pro screen replacement?", answer: "Warranty support is available on eligible screen repairs. It does not cover new physical damage, pressure damage or liquid damage after the repair. We explain the applicable warranty terms before you proceed." },
+      { question: "Do I need to book, or can I walk in?", answer: "Walk-ins are welcome at our Ringwood Square repair desk. Booking ahead is recommended because it helps us check part availability for your exact iPhone model before you visit." },
     ],
   },
   "phone/samsung/galaxy-s23-ultra/screen-replacement": {
@@ -3327,13 +3334,13 @@ function stableHash(str: string, modulo: number): number {
 
 const META_DESCRIPTION_TEMPLATES = [
   (m: string, r: string) =>
-    `Fast, professional ${m} ${r.toLowerCase()} in Ringwood, Melbourne. Under 1 hour, 6-month warranty, No Fix No Charge. Book now.`,
+    `Fast, professional ${m} ${r.toLowerCase()} in Ringwood, Melbourne. Fast quote and repair options, warranty support on eligible repairs, No Fix No Charge. Book now.`,
   (m: string, r: string) =>
-    `Need a ${m} ${r.toLowerCase()}? Our Ringwood experts complete most jobs in under 60 minutes with premium-quality parts and a 6-month guarantee.`,
+    `Need a ${m} ${r.toLowerCase()}? Our Ringwood experts offer fast turnaround for many common repairs with premium-quality parts and warranty support on eligible repairs.`,
   (m: string, r: string) =>
-    `Walk-in ${m} ${r.toLowerCase()} at Ali Mobile Ringwood. Same-day turnaround, transparent pricing, and a No Fix No Charge promise. Call or book online.`,
+    `Walk-in ${m} ${r.toLowerCase()} at Ali Mobile Ringwood. Same-day options for common repairs when parts are available, transparent pricing, and free diagnostics.`,
   (m: string, r: string) =>
-    `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Quick turnaround, 6-month warranty on all parts, and free diagnostics. Get started today.`,
+    `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Fast quote and repair options, warranty support on eligible parts, and free diagnostics. Get started today.`,
 ];
 
 const PHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
@@ -3535,6 +3542,8 @@ import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import ScrollReveal from '@/components/ScrollReveal';
+import TechnicianWorkbench from '@/components/seo/TechnicianWorkbench';
+import { getFlagshipWorkbench } from '@/data/seo-content/flagship-models';
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
@@ -3583,6 +3592,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
+
+  const flagshipWorkbench = getFlagshipWorkbench(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams.model,
+    resolvedParams['repair-type']
+  );
 
   return (
     <>
@@ -3643,7 +3659,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
                   {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing')) 
                     ? 'Timeframe Varies' 
-                    : 'Under 1 Hour'}
+                    : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
+                    ? 'Diagnostic Required'
+                    : 'Fast Turnaround'}
                 </div>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
@@ -3661,6 +3679,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             )}
           </div>
         </section>
+
+        {flagshipWorkbench && (
+          <TechnicianWorkbench content={flagshipWorkbench} />
+        )}
 
         {otherRepairLinks.length > 0 && (
           <ScrollReveal>
