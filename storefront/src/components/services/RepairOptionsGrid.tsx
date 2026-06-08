@@ -94,9 +94,63 @@ const PHONE_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>
   },
 };
 
-function getPhoneStartingPrice(brandSlug: string, repairSlug: string) {
-  const brandPrices = PHONE_BRAND_STARTING_PRICES[brandSlug] || PHONE_BRAND_STARTING_PRICES.other;
-  return brandPrices[repairSlug] ?? null;
+const TABLET_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {
+  ipad: {
+    "screen-replacement": 89,
+    "battery-replacement": 99,
+    "front-camera-replacement": 65,
+    "back-camera-replacement": 65,
+    "charging-port-replacement": 120,
+  },
+  samsung: {
+    "screen-replacement": 99,
+    "battery-replacement": 85,
+    "front-camera-replacement": 65,
+    "back-camera-replacement": 65,
+    "charging-port-replacement": 85,
+  },
+  lenovo: {
+    "screen-replacement": 129,
+    "battery-replacement": 85,
+    "front-camera-replacement": 65,
+    "back-camera-replacement": 65,
+    "charging-port-replacement": 85,
+  },
+};
+
+const LAPTOP_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {
+  macbook: {
+    "screen-replacement": 250,
+    "battery-replacement": 150,
+    "charging-port-replacement": 99,
+  },
+};
+
+const WATCH_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {
+  apple: {
+    "screen-replacement": 150,
+    "battery-replacement": 85,
+  },
+};
+
+function getStartingPrice(categorySlug: string, brandSlug: string, repairSlug: string) {
+  if (categorySlug === "phone") {
+    const brandPrices = PHONE_BRAND_STARTING_PRICES[brandSlug] || PHONE_BRAND_STARTING_PRICES.other;
+    return brandPrices[repairSlug] ?? null;
+  }
+  if (categorySlug === "tablet") {
+    const brandPrices = TABLET_BRAND_STARTING_PRICES[brandSlug];
+    return brandPrices ? (brandPrices[repairSlug] ?? null) : null;
+  }
+  if (categorySlug === "laptop") {
+    const brandPrices = LAPTOP_BRAND_STARTING_PRICES[brandSlug];
+    return brandPrices ? (brandPrices[repairSlug] ?? null) : null;
+  }
+  if (categorySlug === "watch") {
+    const brandPrices = WATCH_BRAND_STARTING_PRICES[brandSlug];
+    return brandPrices ? (brandPrices[repairSlug] ?? null) : null;
+  }
+  return null;
 }
 
 export default function RepairOptionsGrid({
@@ -131,11 +185,9 @@ export default function RepairOptionsGrid({
       return `From $${rt.price}`;
     }
 
-    if (categorySlug === "phone") {
-      const startingPrice = getPhoneStartingPrice(brandSlug, rt.slug);
-      if (startingPrice) {
-        return `Starting from $${startingPrice}`;
-      }
+    const startingPrice = getStartingPrice(categorySlug, brandSlug, rt.slug);
+    if (startingPrice) {
+      return `Starting from $${startingPrice}`;
     }
 
     return "Quote on Request";
