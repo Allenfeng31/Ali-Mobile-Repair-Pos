@@ -17,6 +17,11 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
 
   const displayModel = modelCode ? `${model} (${modelCode})` : model;
   const isWaterDamage = repairSlug === 'water-damage-repair';
+  const isLogicBoard = repairSlug === 'logic-board-repair';
+  const isDataRecovery = repairSlug === 'data-recovery';
+  const isNoPower = repairSlug === 'no-power';
+  const isComplexDiagnostic = isLogicBoard || isDataRecovery || isNoPower;
+  const isBackGlass = repairSlug.includes('back-glass') || repairSlug.includes('back-housing');
 
   const priceInfo = isWaterDamage
     ? `Water damage recovery starts from $50 for the intensive cleaning and drying process. If additional parts like a screen or battery are needed, we will provide a comprehensive quote after the internal assessment.`
@@ -24,23 +29,56 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
       ? `Starting from $${price}, the exact pricing depends on the specific ${displayModel} variant.`
       : `Pricing depends on the specific ${displayModel} variant and the condition of the ${component}. Use our Live Quote tool or call 0481 058 514 for an instant, accurate price.`);
 
-  const isBackGlass = repairSlug.includes('back-glass') || repairSlug.includes('back-housing');
-
-  const baseFaqs = [
-    {
+  let q1 = { question: "", answer: "" };
+  if (isLogicBoard) {
+    q1 = {
+      question: `How long does ${model} logic board repair take?`,
+      answer: `Board-level repairs need inspection first. Timing depends on fault location, parts availability and testing results. We confirm the repair path and quote after diagnosis.`
+    };
+  } else if (isDataRecovery) {
+    q1 = {
+      question: `Can you recover data from my ${model}?`,
+      answer: `Data recovery depends on device condition and storage damage. We inspect the phone first and explain the safest available recovery option before starting.`
+    };
+  } else if (isNoPower) {
+    q1 = {
+      question: `Why won't my ${model} turn on?`,
+      answer: `No-power faults can be caused by battery, charging port, board-level issues or liquid damage. We inspect the device first before confirming the repair path.`
+    };
+  } else {
+    q1 = {
       question: `How long does the ${model} ${repairName} take?`,
       answer: isWaterDamage
         ? `Water damage recovery typically takes around 1 hour for the initial assessment and cleaning. If the damage is extensive, our technicians will inform you beforehand.`
         : isBackGlass
         ? `Time depends on the specific ${model} variant and parts availability. Many back glass repairs need more time than simple screen or battery repairs, usually taking longer to ensure a safe, clean removal and precise bonding. We confirm the timeframe after checking the device at our Ringwood location.`
-        : `Most ${model} ${repairName.toLowerCase()} jobs are completed in under 1 hour at Ringwood Square Shopping Centre. Walk-ins are welcome on weekdays for same-day service.`,
-    },
-    {
+        : `Most ${model} ${repairName.toLowerCase()} jobs are completed quickly at Ringwood Square Shopping Centre, often in under 1 hour for common parts. Walk-ins are welcome on weekdays for fast service.`
+    };
+  }
+
+  let q2 = { question: "", answer: "" };
+  if (isLogicBoard || isNoPower) {
+    q2 = {
+      question: `What do you check before a board-level or no-power repair?`,
+      answer: `We check power behaviour, charging response, short circuits, liquid damage signs and visible connector damage before recommending board-level work.`
+    };
+  } else if (isDataRecovery) {
+    q2 = {
+      question: `Do you replace parts for data recovery?`,
+      answer: `Data recovery focuses on safely accessing your data. Some cases may need board-level work or temporary repair steps, but the final method depends on inspection.`
+    };
+  } else {
+    q2 = {
       question: `Do you use OEM parts for ${model} ${repairName.toLowerCase()}?`,
       answer: isWaterDamage
         ? `For water damage, our first priority is to rescue your original high-quality boards and components using specialized cleaning. If a component like the screen is beyond saving, we replace it with premium parts that meet or exceed OEM standards.`
-        : `We use premium-quality ${component} parts that meet or exceed OEM specifications. All parts come with our 6-month warranty, so you can be confident in the quality of the ${altComponent} replacement.`,
-    },
+        : `We use premium-quality ${component} parts that meet or exceed OEM specifications. All parts come with our 6-month warranty, so you can be confident in the quality of the ${altComponent} replacement.`
+    };
+  }
+
+  const baseFaqs = [
+    q1,
+    q2,
     {
       question: `How much does a ${model} ${repairName.toLowerCase()} cost?`,
       answer: `${priceInfo} ${isWaterDamage ? 'Please note that due to the labor-intensive nature of the drying and cleaning process, a specialized labor fee applies even if the device is ultimately unrepairable.' : 'Our "No Fix, No Charge" policy means you only pay if we successfully complete the repair.'}`,
@@ -53,6 +91,8 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
       question: `Is there a warranty for ${model} ${isWaterDamage ? 'water damage recovery' : repairName.toLowerCase()}?`,
       answer: isWaterDamage
         ? `Due to the unpredictable nature of liquid-induced corrosion, we do not offer a general warranty on water damage rescue services. However, if we replace a specific part (like a new screen), that specific part will still be covered by our 6-month warranty, provided the rest of the device remains stable.`
+        : isComplexDiagnostic
+        ? `Warranty coverage depends on the final repair path. If parts are replaced to restore function, they are covered by our standard 6-month warranty.`
         : `Yes, all our standard repairs come with a comprehensive 6-month warranty on both parts and labor at our Ringwood location.`,
     },
   ];
