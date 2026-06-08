@@ -3542,8 +3542,7 @@ import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import ScrollReveal from '@/components/ScrollReveal';
-import TechnicianWorkbench from '@/components/seo/TechnicianWorkbench';
-import { getFlagshipWorkbench } from '@/data/seo-content/flagship-models';
+
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
@@ -3593,12 +3592,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
 
-  const flagshipWorkbench = getFlagshipWorkbench(
-    resolvedParams.category,
-    resolvedParams.brand,
-    resolvedParams.model,
-    resolvedParams['repair-type']
-  );
+
 
   return (
     <>
@@ -3680,9 +3674,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        {flagshipWorkbench && (
-          <TechnicianWorkbench content={flagshipWorkbench} />
-        )}
+
 
         {otherRepairLinks.length > 0 && (
           <ScrollReveal>
