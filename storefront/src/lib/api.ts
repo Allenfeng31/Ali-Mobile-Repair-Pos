@@ -69,7 +69,7 @@ async function fetchPOSInventory(): Promise<RawItem[] | null> {
 
   try {
     const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
-      next: { revalidate: 900 }, // Cache the catalog for 15 minutes to enable ISR and fast TTFB, while keeping reasonably fresh data
+      next: { revalidate: 86400 }, // Phase 2C: 24-hour cache TTL
     });
 
     if (!res.ok) {
