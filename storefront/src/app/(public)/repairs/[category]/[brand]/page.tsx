@@ -28,21 +28,22 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const { brand } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
   const brandName = brand?.brand || formatDynamicParam(resolvedParams.brand);
   const canonicalPath = `/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`;
-  return {
-    title: `${brandName} Repair Services in Ringwood | Ali Mobile & Repair`,
-    description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Under 1 hour, 6-month warranty.`,
+  const metadata: Metadata = {
+    title: `${brandName} Repair Services in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
+    description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`,
     alternates: {
       canonical: canonicalPath,
     },
     openGraph: {
-      title: `${brandName} Repair Services in Ringwood | Ali Mobile & Repair`,
-      description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Under 1 hour, 6-month warranty.`,
+      title: `${brandName} Repair Services in Ringwood | Fast \u0026 Reliable`,
+      description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`,
       url: canonicalPath,
       type: "website",
       locale: "en_AU",
       siteName: "Ali Mobile & Repair",
     },
   };
+  return metadata;
 }
 
 export default async function BrandSubHubPage({ params }: BrandPageProps) {

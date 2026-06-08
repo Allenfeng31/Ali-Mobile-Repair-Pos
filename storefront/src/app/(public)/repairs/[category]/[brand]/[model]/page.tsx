@@ -42,14 +42,14 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const canonicalPath = `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${preserveRouteSegment(modelSlug)}`;
 
   return {
-    title: `${modelName} Repair Services in Ringwood | Ali Mobile & Repair`,
-    description: `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix & more — under 1 hour in Ringwood with a 6-month warranty.`,
+    title: `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
+    description: `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
     alternates: {
       canonical: canonicalPath,
     },
     openGraph: {
-      title: `${modelName} Repair Services in Ringwood | Ali Mobile & Repair`,
-      description: `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix & more — under 1 hour in Ringwood with a 6-month warranty.`,
+      title: `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
+      description: `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
       url: canonicalPath,
       type: "website",
       locale: "en_AU",

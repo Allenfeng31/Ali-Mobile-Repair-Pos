@@ -11,14 +11,14 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Professional Device Repair Services in Ringwood | Ali Mobile",
   description:
-    "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day turnaround.",
+    "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day options for common repairs and most common repairs under 1 hour when parts are in stock.",
   alternates: {
     canonical: "/repairs",
   },
   openGraph: {
     title: "Professional Device Repair Services in Ringwood | Ali Mobile",
     description:
-      "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day turnaround.",
+      "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day options for common repairs and most common repairs under 1 hour when parts are in stock.",
     url: "/repairs",
     type: "website",
     locale: "en_AU",
@@ -51,7 +51,7 @@ const repairCategories = [
     description:
       "Screen, battery, keyboard, SSD, logic board, and data recovery support for MacBook and Windows laptops.",
     image: "/images/services/laptop-repair.jpg",
-    metric: "Same day",
+    metric: "Fast turnaround",
     detail: "When parts are in stock",
   },
   {
