@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { TopAnnouncementBar } from "@/components/TopAnnouncementBar";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen bg-slate-50">
         <TopAnnouncementBar />
         {children}
+        <Analytics />
       </body>
     </html>
   );
