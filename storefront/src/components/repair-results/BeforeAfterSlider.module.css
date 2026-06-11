@@ -3,10 +3,13 @@
   isolation: isolate;
   overflow: hidden;
   width: 100%;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 20px;
   background: #e5e7eb;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 32px 90px rgba(15, 23, 42, 0.14),
+    0 14px 34px rgba(37, 99, 235, 0.1);
+  transform: translateZ(0);
 }
 
 .imageLayer,
@@ -33,27 +36,28 @@
 
 .label {
   position: absolute;
-  top: 0.75rem;
+  top: 0.85rem;
   z-index: 4;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 999px;
-  padding: 0.34rem 0.64rem;
-  background: rgba(15, 23, 42, 0.72);
+  padding: 0.42rem 0.68rem;
+  background: rgba(15, 23, 42, 0.68);
   color: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
 }
 
 .labelBefore {
-  left: 0.75rem;
+  left: 0.85rem;
 }
 
 .labelAfter {
-  right: 0.75rem;
+  right: 0.85rem;
 }
 
 .handle {
@@ -63,9 +67,32 @@
   z-index: 5;
   width: 2px;
   transform: translateX(-1px);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.12),
+    0 0 26px rgba(15, 23, 42, 0.16);
   pointer-events: none;
+}
+
+.handle::before,
+.handle::after {
+  position: absolute;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%) rotate(45deg);
+  border: 2px solid rgba(255, 255, 255, 0.96);
+  background: rgba(37, 99, 235, 0.9);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+  content: "";
+}
+
+.handle::before {
+  top: 0.85rem;
+}
+
+.handle::after {
+  bottom: 0.85rem;
 }
 
 .handleKnob {
@@ -73,17 +100,30 @@
   top: 50%;
   left: 50%;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   place-items: center;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(15, 23, 42, 0.14);
+  border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #0f172a;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.2);
-  font-size: 1rem;
-  font-weight: 900;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 16px 38px rgba(15, 23, 42, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+.handleKnob::before,
+.handleKnob::after {
+  width: 3px;
+  height: 16px;
+  border-radius: 999px;
+  background: #2563eb;
+  content: "";
+}
+
+.handleKnob {
+  grid-template-columns: repeat(2, auto);
+  gap: 4px;
 }
 
 .range {
@@ -100,6 +140,42 @@
 .range:focus-visible + .handle .handleKnob {
   outline: 3px solid rgba(37, 99, 235, 0.42);
   outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .slider {
+    border-radius: 16px;
+    box-shadow:
+      0 22px 54px rgba(15, 23, 42, 0.13),
+      0 10px 24px rgba(37, 99, 235, 0.08);
+  }
+
+  .label {
+    top: 0.55rem;
+    padding: 0.36rem 0.54rem;
+    font-size: 0.62rem;
+  }
+
+  .labelBefore {
+    left: 0.55rem;
+  }
+
+  .labelAfter {
+    right: 0.55rem;
+  }
+
+  .handleKnob {
+    width: 40px;
+    height: 40px;
+  }
+
+  .handle::before {
+    top: 0.55rem;
+  }
+
+  .handle::after {
+    bottom: 0.55rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

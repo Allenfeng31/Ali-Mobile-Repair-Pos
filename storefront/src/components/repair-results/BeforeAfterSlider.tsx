@@ -60,7 +60,7 @@ export default function BeforeAfterSlider({
         onChange={(event) => setPosition(Number(event.target.value))}
       />
       <div className={styles.handle} style={{ left: `${position}%` }} aria-hidden="true">
-        <span className={styles.handleKnob}>↔</span>
+        <span className={styles.handleKnob} />
       </div>
     </div>
   );

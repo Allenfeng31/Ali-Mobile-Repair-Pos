@@ -38,12 +38,14 @@ export default function RealRepairResultsSection({ resultsByCategory }: RealRepa
   return (
     <section className={styles.section} aria-labelledby="real-repair-results-heading">
       <div className={styles.shell}>
-        <div className={styles.copy}>
-          <span className={styles.kicker}>Workshop proof</span>
-          <h2 id="real-repair-results-heading">Real Repair Results</h2>
-          <p>
-            Before and after repair photos from approved Ali Mobile &amp; Repair jobs, checked for privacy before they appear here.
-          </p>
+        <div className={styles.copyCard}>
+          <div className={styles.copyHeader}>
+            <span className={styles.kicker}>Workshop Proof</span>
+            <h2 id="real-repair-results-heading">Real Repair Results</h2>
+            <p>
+              Before and after repair photos from approved Ali Mobile &amp; Repair jobs, checked for privacy before they appear here.
+            </p>
+          </div>
 
           <div className={styles.meta}>
             <strong>{activeResult.title}</strong>
@@ -80,17 +82,15 @@ export default function RealRepairResultsSection({ resultsByCategory }: RealRepa
           )}
         </div>
 
-        <div className={styles.visual}>
-          <BeforeAfterSlider
-            key={activeResult.id}
-            beforeSrc={beforeSrc}
-            afterSrc={afterSrc}
-            beforeAlt={getRepairResultAltText(activeResult, 'before')}
-            afterAlt={getRepairResultAltText(activeResult, 'after')}
-            aspectRatio={aspectRatio}
-            priority={true}
-          />
-        </div>
+        <BeforeAfterSlider
+          key={activeResult.id}
+          beforeSrc={beforeSrc}
+          afterSrc={afterSrc}
+          beforeAlt={getRepairResultAltText(activeResult, 'before')}
+          afterAlt={getRepairResultAltText(activeResult, 'after')}
+          aspectRatio={aspectRatio}
+          priority={true}
+        />
       </div>
     </section>
   );

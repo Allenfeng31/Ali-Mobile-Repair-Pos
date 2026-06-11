@@ -121,7 +121,7 @@ function trimTrailingSlash(value: string) {
 }
 
 function getRepairResultsApiBase() {
-  const configured = (import.meta.env.VITE_STOREFRONT_URL || '').trim();
+  const configured = (import.meta.env.VITE_STOREFRONT_API_BASE_URL || import.meta.env.VITE_STOREFRONT_URL || '').trim();
   if (configured) return trimTrailingSlash(configured);
 
   if (typeof window !== 'undefined') {
@@ -133,7 +133,7 @@ function getRepairResultsApiBase() {
     }
   }
 
-  return 'https://pos.alimobile.com.au';
+  return 'https://www.alimobile.com.au';
 }
 
 async function getRepairResultsAuthHeaders() {
@@ -263,7 +263,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
     }
   }
 
-  async function updateResult(id: string, updates: Partial<Pick<PublicRepairResult, 'status' | 'privacy_checked'>>) {
+  async function updateResult(id: string, updates: Partial<Pick<PublicRepairResult, 'status' | 'privacy_checked' | 'featured_on_homepage'>>) {
     setError(null);
     setSuccess(null);
     setUpdatingId(id);
@@ -653,6 +653,30 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                           className="rounded-full bg-slate-950 px-3 py-1.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {updatingId === result.id ? 'Publishing...' : 'Publish'}
+                        </button>
+                      )}
+                      {result.featured_on_homepage && (
+                        <button
+                          type="button"
+                          disabled={updatingId === result.id}
+                          onClick={() => void updateResult(result.id, { featured_on_homepage: false })}
+                          className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-700 hover:bg-amber-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Remove from homepage
+                        </button>
+                      )}
+                      {result.status !== 'archived' && (
+                        <button
+                          type="button"
+                          disabled={updatingId === result.id}
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to archive this result? It will be removed from the homepage and public storefront.')) {
+                              void updateResult(result.id, { status: 'archived', featured_on_homepage: false });
+                            }
+                          }}
+                          className="rounded-full bg-rose-100 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Archive
                         </button>
                       )}
                     </div>

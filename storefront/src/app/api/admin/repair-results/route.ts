@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { createRequire } from 'module';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
@@ -11,6 +10,7 @@ import {
   type RepairResultDeviceCategory,
   type RepairResultStatus,
 } from '@/lib/repair-results';
+import sharp from 'sharp';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,29 +21,6 @@ const ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:3002',
   'https://pos.alimobile.com.au',
 ]);
-const require = createRequire(import.meta.url);
-const sharp = require('sharp');
-
-async function createSessionClient() {
-  const cookieStore = await cookies();
-
-  return createRouteHandlerClient({
-    cookies: (() => cookieStore) as unknown as typeof cookies,
-  });
-}
-
-async function assertAuthenticated(supabase: ReturnType<typeof createRouteHandlerClient>) {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-
-  if (error) {
-    console.error('[repair-results] Failed to read admin session:', error);
-  }
-
-  return Boolean(session?.user);
-}
 
 function buildCorsHeaders(request: Request, extraHeaders?: HeadersInit) {
   const headers = new Headers(extraHeaders);
