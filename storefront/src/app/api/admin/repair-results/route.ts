@@ -10,9 +10,8 @@ import {
   type RepairResultDeviceCategory,
   type RepairResultStatus,
 } from '@/lib/repair-results';
-import sharp from 'sharp';
-
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const VALID_DEVICE_CATEGORIES = new Set<RepairResultDeviceCategory>(['phone', 'tablet', 'laptop', 'watch']);
 const VALID_STATUSES = new Set<RepairResultStatus>(['draft', 'approved', 'published', 'archived']);
@@ -105,6 +104,7 @@ function getImageFile(formData: FormData, key: string) {
 }
 
 async function sanitizeRepairImage(file: File) {
+  const sharp = (await import('sharp')).default;
   const input = Buffer.from(await file.arrayBuffer());
   const image = sharp(input, { failOn: 'none' }).rotate();
   
