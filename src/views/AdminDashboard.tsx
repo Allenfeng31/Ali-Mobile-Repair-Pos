@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart, Usb, Radar } from 'lucide-react';
+import { Users, BarChart3, Settings, ShieldCheck, Database, MessageSquare, ShoppingCart, Usb, Radar, Images } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../hooks/useAuthStore';
 
@@ -40,6 +40,15 @@ const adminCards: AdminCard[] = [
     color: 'text-orange-600',
     gradient: 'from-orange-500/10 to-orange-600/5',
     href: '/admin/cms',
+  },
+  {
+    id: 'repair-results',
+    title: 'Repair Results CMS',
+    icon: Images,
+    description: 'Upload and publish privacy-checked before and after repair showcases.',
+    color: 'text-indigo-600',
+    gradient: 'from-indigo-500/10 to-indigo-600/5',
+    href: '/dashboard/repair-results',
   },
   {
     id: 'supplier-prices',
@@ -141,7 +150,7 @@ export function AdminDashboard({ onViewChange }: { onViewChange: (view: string) 
             key={card.id}
             variants={item}
             onClick={() => {
-              if (card.href?.startsWith('/admin/')) {
+              if (card.href?.startsWith('/admin/') || card.href?.startsWith('/dashboard/')) {
                 const view = card.href.split('/').pop() || card.id;
                 onViewChange(view);
               } else if (card.href) {

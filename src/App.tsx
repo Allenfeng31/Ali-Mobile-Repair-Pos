@@ -13,6 +13,7 @@ import { StorefrontCMS } from './views/StorefrontCMS';
 import { SupplierPrices } from './views/SupplierPrices';
 import { UsbPrintTest } from './components/UsbPrintTest';
 import { SeoGeoScoutView } from './views/SeoGeoScout';
+import { RepairResultsView } from './views/RepairResults';
 import { useAuthStore } from './hooks/useAuthStore';
 import { AnimatePresence } from 'motion/react';
 import { 
@@ -41,6 +42,8 @@ import { Language, getTranslation } from './lib/i18n';
 const getInitialViewFromPath = (pathname: string): string => {
   const normalizedPath = pathname.replace(/\/+$/, '') || '/';
 
+  if (normalizedPath === '/dashboard/repair-results') return 'repair-results';
+  if (normalizedPath === '/admin/repair-results') return 'repair-results';
   if (normalizedPath === '/admin/seo') return 'seo';
   if (normalizedPath === '/admin/chat') return 'chat';
   if (normalizedPath === '/admin/messages') return 'chat';
@@ -53,6 +56,27 @@ const getInitialViewFromPath = (pathname: string): string => {
   if (normalizedPath === '/admin') return 'admin';
 
   return 'sales';
+};
+
+const getPathForView = (view: string): string | null => {
+  switch (view) {
+    case 'admin':
+      return '/admin';
+    case 'employees':
+      return '/admin/employees';
+    case 'cms':
+      return '/admin/cms';
+    case 'supplier-prices':
+      return '/admin/supplier-prices';
+    case 'usb-print-test':
+      return '/admin/usb-print-test';
+    case 'seo':
+      return '/admin/seo';
+    case 'repair-results':
+      return '/dashboard/repair-results';
+    default:
+      return null;
+  }
 };
 
 const iconMap: Record<string, any> = {
@@ -267,9 +291,12 @@ export default function App() {
     const normalizedView = view === 'messages' ? 'chat' : view;
     if (normalizedView === currentView) return;
 
-    if (normalizedView === 'seo' && window.location.pathname !== '/admin/seo') {
-      window.history.pushState({}, '', '/admin/seo');
-    } else if (normalizedView !== 'seo' && window.location.pathname === '/admin/seo') {
+    const nextPath = getPathForView(normalizedView);
+    const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+
+    if (nextPath && currentPath !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    } else if (!nextPath && currentPath !== '/') {
       window.history.pushState({}, '', '/');
     }
 
@@ -332,6 +359,8 @@ export default function App() {
             permissionsLoading={permissionsLoading}
           />
         );
+      case 'repair-results':
+        return <RepairResultsView onBack={() => handleViewChange('admin')} />;
       default:
         return <TerminalView inventory={inventory} setInventory={setInventory} orders={orders} setOrders={setOrders} cart={cart} setCart={setCart} categories={categories} brands={brands} t={t} />;
     }

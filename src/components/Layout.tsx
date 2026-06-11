@@ -47,6 +47,16 @@ const navItems = [
   { id: 'admin', label: 'Admin', icon: Shield, adminOnly: true },
 ];
 
+const adminViews = new Set([
+  'admin',
+  'employees',
+  'cms',
+  'supplier-prices',
+  'usb-print-test',
+  'seo',
+  'repair-results',
+]);
+
 const getUnreadSummary = (sessions: any[]) => {
   const unreadMessages = sessions
     .flatMap((session) => session.chat_messages || [])
@@ -653,7 +663,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         <div className="flex flex-col gap-8 w-full items-center">
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
-            const isActive = currentView === item.id;
+            const isActive = currentView === item.id || (item.id === 'admin' && adminViews.has(currentView));
             const showBadge = item.id === 'chat' && unreadChats > 0;
             return (
               <button
@@ -818,7 +828,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-neu-bg backdrop-blur-lg border-t border-transparent z-50">
           {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
             const Icon = item.icon;
-            const isActive = currentView === item.id;
+            const isActive = currentView === item.id || (item.id === 'admin' && adminViews.has(currentView));
             const showBadge = item.id === 'chat' && unreadChats > 0;
             return (
               <button

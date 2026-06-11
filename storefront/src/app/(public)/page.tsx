@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
+import RealRepairResultsSection from "@/components/repair-results/RealRepairResultsSection";
+import { fetchFeaturedRepairResultsByCategory } from "@/lib/repair-results";
 import heroStyles from "./HomeHero.module.css";
 import homeStyles from "./HomePage.module.css";
 
@@ -56,7 +58,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const repairResultsByCategory = await fetchFeaturedRepairResultsByCategory();
+
   return (
     <main>
       <LocalBusinessSchema />
@@ -157,6 +161,10 @@ export default function Home() {
             </div>
           </div>
         </section>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <RealRepairResultsSection resultsByCategory={repairResultsByCategory} />
       </ScrollReveal>
 
       <ScrollReveal>
