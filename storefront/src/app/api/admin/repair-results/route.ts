@@ -103,26 +103,7 @@ function getImageFile(formData: FormData, key: string) {
   return value instanceof File && value.size > 0 ? value : null;
 }
 
-async function sanitizeRepairImage(file: File) {
-  const sharp = (await import('sharp')).default;
-  const input = Buffer.from(await file.arrayBuffer());
-  const image = sharp(input, { failOn: 'none' }).rotate();
-  
-  const resized = image.resize({ width: 1600, withoutEnlargement: true });
-  const metadata = await resized.metadata();
-  
-  const output = await resized
-    .webp({ quality: 80 })
-    .toBuffer();
-
-  return {
-    buffer: output,
-    width: metadata.width || null,
-    height: metadata.height || null,
-  };
-}
-
-async function uploadSanitizedRepairImage(
+async function uploadRepairImage(
   supabase: SupabaseClient,
   id: string,
   side: 'before' | 'after',
@@ -131,8 +112,8 @@ async function uploadSanitizedRepairImage(
 ) {
   const prefix = privacyChecked ? 'approved' : 'raw';
   const path = `${prefix}/${id}/${side}.webp`;
-  const sanitized = await sanitizeRepairImage(file);
-  const { error } = await supabase.storage.from(REPAIR_RESULT_BUCKET).upload(path, sanitized.buffer, {
+  const arrayBuffer = await file.arrayBuffer();
+  const { error } = await supabase.storage.from(REPAIR_RESULT_BUCKET).upload(path, arrayBuffer, {
     cacheControl: privacyChecked ? '31536000' : '3600',
     contentType: 'image/webp',
     upsert: false,
@@ -142,11 +123,7 @@ async function uploadSanitizedRepairImage(
     throw error;
   }
 
-  return {
-    path,
-    width: sanitized.width,
-    height: sanitized.height,
-  };
+  return path;
 }
 
 export async function OPTIONS(request: Request) {
@@ -236,8 +213,8 @@ export async function POST(request: Request) {
     }
 
     const supabase = createServiceRoleClient();
-    const beforeImageUpload = await uploadSanitizedRepairImage(supabase, id, 'before', beforeImage, privacyChecked);
-    const afterImageUpload = await uploadSanitizedRepairImage(supabase, id, 'after', afterImage, privacyChecked);
+    const beforeImagePath = await uploadRepairImage(supabase, id, 'before', beforeImage, privacyChecked);
+    const afterImagePath = await uploadRepairImage(supabase, id, 'after', afterImage, privacyChecked);
 
     const { data, error } = await supabase
       .from('repair_results')
@@ -250,14 +227,14 @@ export async function POST(request: Request) {
         model_slug: getString(formData, 'model_slug'),
         repair_type: getString(formData, 'repair_type'),
         repair_type_slug: getString(formData, 'repair_type_slug'),
-        before_image_path: beforeImageUpload.path,
-        after_image_path: afterImageUpload.path,
+        before_image_path: beforeImagePath,
+        after_image_path: afterImagePath,
         image_pair_alt_text: getOptionalString(formData, 'image_pair_alt_text'),
         image_aspect_ratio: getString(formData, 'image_aspect_ratio') || '4:3',
-        before_image_width: beforeImageUpload.width,
-        before_image_height: beforeImageUpload.height,
-        after_image_width: afterImageUpload.width,
-        after_image_height: afterImageUpload.height,
+        before_image_width: getInteger(formData, 'before_image_width') || null,
+        before_image_height: getInteger(formData, 'before_image_height') || null,
+        after_image_width: getInteger(formData, 'after_image_width') || null,
+        after_image_height: getInteger(formData, 'after_image_height') || null,
         title: getString(formData, 'title'),
         short_description: getOptionalString(formData, 'short_description'),
         status,

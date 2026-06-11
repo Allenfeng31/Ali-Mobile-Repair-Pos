@@ -150,6 +150,47 @@ async function getRepairResultsAuthHeaders() {
   };
 }
 
+async function processImage(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      
+      let { width, height } = img;
+      const MAX_WIDTH = 1600;
+
+      if (width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return reject(new Error('Failed to initialize image processor.'));
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error('Failed to export processed image.'));
+        resolve({ blob, width, height });
+      }, 'image/webp', 0.8);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image. It may be corrupt or an unsupported format.'));
+    };
+
+    img.src = url;
+  });
+}
+
 export function RepairResultsView({ onBack }: { onBack: () => void }) {
   const { permissions, isLoading: permissionsLoading } = useAuthStore();
   const [form, setForm] = React.useState<FormState>(INITIAL_FORM_STATE);
@@ -232,13 +273,24 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
     setSaving(true);
 
     try {
+      const beforeProcessed = await processImage(beforeImage).catch((e) => {
+        throw new Error(`Before Image Error: ${e.message}`);
+      });
+      const afterProcessed = await processImage(afterImage).catch((e) => {
+        throw new Error(`After Image Error: ${e.message}`);
+      });
+
       const headers = await getRepairResultsAuthHeaders();
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
         formData.set(key, String(value));
       });
-      formData.set('before_image', beforeImage);
-      formData.set('after_image', afterImage);
+      formData.set('before_image', beforeProcessed.blob, 'before.webp');
+      formData.set('after_image', afterProcessed.blob, 'after.webp');
+      formData.set('before_image_width', String(beforeProcessed.width));
+      formData.set('before_image_height', String(beforeProcessed.height));
+      formData.set('after_image_width', String(afterProcessed.width));
+      formData.set('after_image_height', String(afterProcessed.height));
 
       const response = await fetch(`${getRepairResultsApiBase()}/api/admin/repair-results`, {
         method: 'POST',
