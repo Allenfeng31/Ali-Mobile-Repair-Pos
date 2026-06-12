@@ -6,6 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
+import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
 import ScrollReveal from "@/components/ScrollReveal";
 import { ArrowRight, Battery, Camera, PhoneCall, PlugZap, Smartphone, Wrench } from "lucide-react";
 
@@ -143,6 +144,13 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           modelName={modelName}
         />
       </section>
+
+      <RepairResultsMatchingSection
+        category={categorySlug}
+        brand={brandSlug}
+        model={modelSlug}
+        context="model"
+      />
 
       <ScrollReveal>
         <section className="repair-assist-panel" aria-labelledby="common-issues-heading">

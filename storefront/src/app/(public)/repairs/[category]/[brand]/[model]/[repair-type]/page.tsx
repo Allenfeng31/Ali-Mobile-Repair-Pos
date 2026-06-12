@@ -3541,6 +3541,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
 import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
+import RepairResultsMatchingSection from '@/components/repair-results/RepairResultsMatchingSection';
 import ScrollReveal from '@/components/ScrollReveal';
 
 
@@ -3674,7 +3675,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-
+        <RepairResultsMatchingSection
+          category={resolvedParams.category}
+          brand={resolvedParams.brand}
+          model={resolvedParams.model}
+          repairType={resolvedParams['repair-type']}
+          context="detail"
+        />
 
         {otherRepairLinks.length > 0 && (
           <ScrollReveal>

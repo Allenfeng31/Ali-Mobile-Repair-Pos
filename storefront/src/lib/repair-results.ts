@@ -43,6 +43,21 @@ export interface RepairResultHomepageItem {
   related_repair_url: string | null;
 }
 
+export interface RepairResultMatchingItem {
+  id: string;
+  device_category: RepairResultDeviceCategory;
+  brand: string;
+  brand_slug: string;
+  model: string;
+  model_slug: string;
+  repair_type: string;
+  repair_type_slug: string;
+  image_pair_alt_text: string | null;
+  title: string;
+  short_description: string | null;
+  related_repair_url: string | null;
+}
+
 export const REPAIR_RESULT_BUCKET = 'repair-results';
 
 export const REPAIR_RESULT_CATEGORIES: Array<{
@@ -132,7 +147,7 @@ export const PUBLIC_REPAIR_RESULT_SELECT = [
 
 const PUBLIC_REPAIR_RESULTS_FETCH_TIMEOUT_MS = 3500;
 
-function createPublicRepairResultsClient() {
+export function createPublicRepairResultsClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
