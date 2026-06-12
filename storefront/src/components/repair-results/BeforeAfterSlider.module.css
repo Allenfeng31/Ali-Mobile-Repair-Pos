@@ -1,15 +1,65 @@
 .slider {
+  --slider-aspect-ratio: 4 / 3;
+  --slider-max-width: 660px;
+  --slider-max-height: 500px;
+  --slider-mobile-max-height: 420px;
+  --slider-height-factor: 0.75;
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  width: 100%;
+  justify-self: center;
+  width: min(100%, var(--slider-max-width));
+  max-width: var(--slider-max-width);
+  height: min(
+    var(--slider-max-height),
+    calc(min(100%, var(--slider-max-width)) * var(--slider-height-factor))
+  );
+  max-height: var(--slider-max-height);
+  margin: 0 auto;
   border: 0;
   border-radius: 20px;
-  background: #e5e7eb;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.92) 42%, rgba(226, 232, 240, 0.82) 100%);
   box-shadow:
     0 32px 90px rgba(15, 23, 42, 0.14),
     0 14px 34px rgba(37, 99, 235, 0.1);
   transform: translateZ(0);
+}
+
+.slider[data-device='phone'] {
+  --slider-aspect-ratio: 3 / 4;
+  --slider-max-width: 420px;
+  --slider-max-height: 520px;
+  --slider-height-factor: 1.333333;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.94) 46%, rgba(226, 232, 240, 0.88) 100%);
+}
+
+.slider[data-device='tablet'] {
+  --slider-aspect-ratio: 4 / 3;
+  --slider-max-width: 660px;
+  --slider-max-height: 500px;
+  --slider-height-factor: 0.75;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.92) 42%, rgba(226, 232, 240, 0.82) 100%);
+}
+
+.slider[data-device='laptop'] {
+  --slider-aspect-ratio: 16 / 10;
+  --slider-max-width: 660px;
+  --slider-max-height: 500px;
+  --slider-height-factor: 0.625;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.92) 42%, rgba(226, 232, 240, 0.82) 100%);
+}
+
+.slider[data-device='watch'] {
+  --slider-aspect-ratio: 1 / 1;
+  --slider-max-width: 420px;
+  --slider-max-height: 420px;
+  --slider-height-factor: 1;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.88), rgba(248, 250, 252, 0.95) 44%, rgba(226, 232, 240, 0.88) 100%);
 }
 
 .imageLayer,
@@ -31,7 +81,8 @@
 }
 
 .image {
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 .label {
@@ -53,11 +104,11 @@
 }
 
 .labelBefore {
-  left: 0.85rem;
+  left: 0.72rem;
 }
 
 .labelAfter {
-  right: 0.85rem;
+  right: 0.72rem;
 }
 
 .handle {
@@ -100,8 +151,8 @@
   top: 50%;
   left: 50%;
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   transform: translate(-50%, -50%);
   border: 1px solid rgba(15, 23, 42, 0.12);
@@ -142,6 +193,17 @@
   outline-offset: 3px;
 }
 
+@media (max-width: 960px) {
+  .slider {
+    max-width: min(100%, var(--slider-max-width));
+    max-height: var(--slider-mobile-max-height);
+    height: min(
+      var(--slider-mobile-max-height),
+      calc(min(100%, var(--slider-max-width)) * var(--slider-height-factor))
+    );
+  }
+}
+
 @media (max-width: 600px) {
   .slider {
     border-radius: 16px;
@@ -157,16 +219,16 @@
   }
 
   .labelBefore {
-    left: 0.55rem;
+    left: 0.45rem;
   }
 
   .labelAfter {
-    right: 0.55rem;
+    right: 0.45rem;
   }
 
   .handleKnob {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .handle::before {

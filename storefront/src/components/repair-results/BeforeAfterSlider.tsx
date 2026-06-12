@@ -1,37 +1,52 @@
 "use client";
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
+import {
+  getRepairResultFrameConfig,
+  type RepairResultDeviceCategory,
+} from '@/lib/repair-results';
 import styles from './BeforeAfterSlider.module.css';
 
 interface BeforeAfterSliderProps {
+  deviceCategory: RepairResultDeviceCategory;
   beforeSrc: string;
   afterSrc: string;
   beforeAlt: string;
   afterAlt: string;
-  aspectRatio: string;
   priority?: boolean;
 }
 
 export default function BeforeAfterSlider({
+  deviceCategory,
   beforeSrc,
   afterSrc,
   beforeAlt,
   afterAlt,
-  aspectRatio,
   priority = false,
 }: BeforeAfterSliderProps) {
+  const frameConfig = getRepairResultFrameConfig(deviceCategory);
   const [position, setPosition] = useState(50);
+  const sliderStyle = {
+    aspectRatio: frameConfig.aspectRatio,
+    '--slider-max-width': frameConfig.maxWidth,
+    '--slider-max-height': frameConfig.maxHeight,
+    '--slider-mobile-max-height': frameConfig.mobileMaxHeight,
+  } as CSSProperties;
 
   return (
-    <div className={styles.slider} style={{ aspectRatio }}>
+    <div
+      className={styles.slider}
+      data-device={deviceCategory}
+      style={sliderStyle}
+    >
       <div className={`${styles.imageLayer} ${styles.beforeLayer}`}>
         <Image
           src={beforeSrc}
           alt={beforeAlt}
           fill
           className={styles.image}
-          sizes="(min-width: 1024px) 720px, 94vw"
+          sizes={frameConfig.sizes}
           priority={priority}
         />
       </div>
@@ -42,7 +57,7 @@ export default function BeforeAfterSlider({
           alt={afterAlt}
           fill
           className={styles.image}
-          sizes="(min-width: 1024px) 720px, 94vw"
+          sizes={frameConfig.sizes}
           loading={priority ? 'eager' : 'lazy'}
         />
       </div>

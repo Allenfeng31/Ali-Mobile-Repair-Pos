@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   REPAIR_RESULT_CATEGORIES,
   getRepairResultAltText,
-  getRepairResultAspectRatio,
   getRepairResultImageSrc,
   type PublicRepairResult,
   type RepairResultDeviceCategory,
@@ -33,7 +32,6 @@ export default function RealRepairResultsSection({ resultsByCategory }: RealRepa
 
   const beforeSrc = getRepairResultImageSrc(activeResult, 'before');
   const afterSrc = getRepairResultImageSrc(activeResult, 'after');
-  const aspectRatio = getRepairResultAspectRatio(activeResult.image_aspect_ratio);
 
   return (
     <section className={styles.section} aria-labelledby="real-repair-results-heading">
@@ -84,11 +82,11 @@ export default function RealRepairResultsSection({ resultsByCategory }: RealRepa
 
         <BeforeAfterSlider
           key={activeResult.id}
+          deviceCategory={activeResult.device_category}
           beforeSrc={beforeSrc}
           afterSrc={afterSrc}
           beforeAlt={getRepairResultAltText(activeResult, 'before')}
           afterAlt={getRepairResultAltText(activeResult, 'after')}
-          aspectRatio={aspectRatio}
           priority={true}
         />
       </div>

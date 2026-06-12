@@ -44,6 +44,52 @@ export const REPAIR_RESULT_CATEGORIES: Array<{
   { value: 'watch', label: 'Watch' },
 ];
 
+export interface RepairResultFrameConfig {
+  aspectRatio: string;
+  maxWidth: string;
+  maxHeight: string;
+  mobileMaxHeight: string;
+  sizes: string;
+}
+
+export function getRepairResultFrameConfig(deviceCategory: RepairResultDeviceCategory): RepairResultFrameConfig {
+  switch (deviceCategory) {
+    case 'phone':
+      return {
+        aspectRatio: '3 / 4',
+        maxWidth: '420px',
+        maxHeight: '520px',
+        mobileMaxHeight: '420px',
+        sizes: '(min-width: 1024px) 420px, (min-width: 640px) 92vw, 100vw',
+      };
+    case 'tablet':
+      return {
+        aspectRatio: '4 / 3',
+        maxWidth: '660px',
+        maxHeight: '500px',
+        mobileMaxHeight: '420px',
+        sizes: '(min-width: 1024px) 660px, (min-width: 640px) 92vw, 100vw',
+      };
+    case 'laptop':
+      return {
+        aspectRatio: '16 / 10',
+        maxWidth: '660px',
+        maxHeight: '500px',
+        mobileMaxHeight: '420px',
+        sizes: '(min-width: 1024px) 660px, (min-width: 640px) 92vw, 100vw',
+      };
+    case 'watch':
+    default:
+      return {
+        aspectRatio: '1 / 1',
+        maxWidth: '420px',
+        maxHeight: '420px',
+        mobileMaxHeight: '420px',
+        sizes: '(min-width: 1024px) 420px, (min-width: 640px) 84vw, 100vw',
+      };
+  }
+}
+
 export const PUBLIC_REPAIR_RESULT_SELECT = [
   'id',
   'device_category',

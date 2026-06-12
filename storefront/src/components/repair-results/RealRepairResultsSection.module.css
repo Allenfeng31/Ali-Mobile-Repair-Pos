@@ -251,7 +251,7 @@
   z-index: 1;
   align-self: center;
   justify-self: stretch;
-  transform: translate3d(0, -0.3rem, 0);
+  transform: translate3d(0, 0.25rem, 0);
 }
 
 @keyframes ambientGridDrift {
