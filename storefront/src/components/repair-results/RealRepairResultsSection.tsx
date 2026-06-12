@@ -1,31 +1,82 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   REPAIR_RESULT_CATEGORIES,
   getRepairResultAltText,
   getRepairResultImageSrc,
-  type PublicRepairResult,
+  type RepairResultHomepageItem,
   type RepairResultDeviceCategory,
 } from '@/lib/repair-results';
 import BeforeAfterSlider from './BeforeAfterSlider';
 import styles from './RealRepairResultsSection.module.css';
 
-interface RealRepairResultsSectionProps {
-  resultsByCategory: Partial<Record<RepairResultDeviceCategory, PublicRepairResult>>;
+interface RepairResultsApiResponse {
+  status: 'SUCCESS';
+  data: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>;
 }
 
-function firstAvailableCategory(resultsByCategory: RealRepairResultsSectionProps['resultsByCategory']) {
+function firstAvailableCategory(resultsByCategory: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>) {
   return REPAIR_RESULT_CATEGORIES.find((category) => resultsByCategory[category.value])?.value || 'phone';
 }
 
-export default function RealRepairResultsSection({ resultsByCategory }: RealRepairResultsSectionProps) {
-  const hasResults = REPAIR_RESULT_CATEGORIES.some((category) => resultsByCategory[category.value]);
-  const [activeCategory, setActiveCategory] = useState<RepairResultDeviceCategory>(
-    resultsByCategory.phone ? 'phone' : firstAvailableCategory(resultsByCategory)
-  );
+export default function RealRepairResultsSection() {
+  const [resultsByCategory, setResultsByCategory] = useState<
+    Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>
+  >({});
+  const [activeCategory, setActiveCategory] = useState<RepairResultDeviceCategory>('phone');
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!hasResults) return null;
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadRepairResults() {
+      try {
+        const response = await fetch('/api/public/repair-results', {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Repair results request failed: ${response.status}`);
+        }
+
+        const payload = (await response.json()) as RepairResultsApiResponse;
+        const nextResults = payload?.status === 'SUCCESS' ? payload.data || {} : {};
+        setResultsByCategory(nextResults);
+
+        if (nextResults.phone) {
+          setActiveCategory('phone');
+        } else {
+          setActiveCategory(firstAvailableCategory(nextResults));
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error('[repair-results] Failed to load public homepage data:', error);
+        setResultsByCategory({});
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadRepairResults();
+
+    return () => controller.abort();
+  }, []);
+
+  const hasResults = REPAIR_RESULT_CATEGORIES.some((category) => resultsByCategory[category.value]);
+
+  useEffect(() => {
+    if (!hasResults) return;
+
+    if (!resultsByCategory[activeCategory]) {
+      setActiveCategory(firstAvailableCategory(resultsByCategory));
+    }
+  }, [activeCategory, hasResults, resultsByCategory]);
+
+  if (isLoading || !hasResults) return null;
 
   const activeResult = resultsByCategory[activeCategory] || resultsByCategory[firstAvailableCategory(resultsByCategory)];
   if (!activeResult) return null;

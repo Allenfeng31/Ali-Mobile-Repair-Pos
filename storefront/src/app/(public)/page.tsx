@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import RealRepairResultsSection from "@/components/repair-results/RealRepairResultsSection";
-import { fetchFeaturedRepairResultsByCategory } from "@/lib/repair-results";
 import heroStyles from "./HomeHero.module.css";
 import homeStyles from "./HomePage.module.css";
 
@@ -58,9 +57,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
-  const repairResultsByCategory = await fetchFeaturedRepairResultsByCategory();
-
+export default function Home() {
   return (
     <main>
       <LocalBusinessSchema />
@@ -164,7 +161,7 @@ export default async function Home() {
       </ScrollReveal>
 
       <ScrollReveal>
-        <RealRepairResultsSection resultsByCategory={repairResultsByCategory} />
+        <RealRepairResultsSection />
       </ScrollReveal>
 
       <ScrollReveal>

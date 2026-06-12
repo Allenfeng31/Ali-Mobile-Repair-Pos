@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
@@ -20,6 +21,27 @@ const ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:3002',
   'https://pos.alimobile.com.au',
 ]);
+
+async function createSessionClient() {
+  const cookieStore = await cookies();
+
+  return createRouteHandlerClient({
+    cookies: (() => cookieStore) as unknown as typeof cookies,
+  });
+}
+
+async function assertAuthenticated(supabase: ReturnType<typeof createRouteHandlerClient>) {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error('[repair-results] Failed to read admin session:', error);
+  }
+
+  return Boolean(session?.user);
+}
 
 function buildCorsHeaders(request: Request, extraHeaders?: HeadersInit) {
   const headers = new Headers(extraHeaders);
@@ -248,6 +270,9 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
+
+    revalidateTag('repair-results', 'max');
+    revalidatePath('/', 'page');
 
     return jsonWithCors(request, { status: 'SUCCESS', data }, { status: 201 });
   } catch (error) {

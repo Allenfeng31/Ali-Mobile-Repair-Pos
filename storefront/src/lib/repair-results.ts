@@ -32,6 +32,17 @@ export interface PublicRepairResult {
   published_at: string | null;
 }
 
+export interface RepairResultHomepageItem {
+  id: string;
+  device_category: RepairResultDeviceCategory;
+  model: string;
+  repair_type: string;
+  image_pair_alt_text: string | null;
+  title: string;
+  short_description: string | null;
+  related_repair_url: string | null;
+}
+
 export const REPAIR_RESULT_BUCKET = 'repair-results';
 
 export const REPAIR_RESULT_CATEGORIES: Array<{
@@ -152,11 +163,14 @@ function createPublicRepairResultsClient() {
   });
 }
 
-export function getRepairResultImageSrc(result: PublicRepairResult, side: 'before' | 'after') {
+export function getRepairResultImageSrc(result: Pick<RepairResultHomepageItem, 'id'>, side: 'before' | 'after') {
   return `/media/repair-results/${encodeURIComponent(result.id)}/${side}`;
 }
 
-export function getRepairResultAltText(result: PublicRepairResult, side: 'before' | 'after') {
+export function getRepairResultAltText(
+  result: Pick<RepairResultHomepageItem, 'image_pair_alt_text' | 'model' | 'repair_type'>,
+  side: 'before' | 'after'
+) {
   const explicitAlt = result.image_pair_alt_text?.trim();
   if (explicitAlt) return `${explicitAlt} - ${side}`;
 

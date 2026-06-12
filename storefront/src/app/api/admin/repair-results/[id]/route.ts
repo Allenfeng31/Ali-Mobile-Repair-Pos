@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
@@ -196,6 +197,9 @@ export async function PATCH(request: Request, context: RouteContext) {
       .single();
 
     if (error) throw error;
+
+    revalidateTag('repair-results', 'max');
+    revalidatePath('/', 'page');
 
     return jsonWithCors(request, { status: 'SUCCESS', data });
   } catch (error) {
