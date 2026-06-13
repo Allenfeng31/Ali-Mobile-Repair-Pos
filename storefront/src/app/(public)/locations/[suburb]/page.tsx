@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { ArrowRight, Battery, Camera, CheckCircle2, Clock, MapPin, Navigation, PhoneCall, PlugZap, ShieldCheck, Smartphone, TabletSmartphone, Wrench } from "lucide-react";
 import { SERVICE_AREAS, getServiceAreaBySlug } from "@/data/serviceAreas";
 import LocationAnalyticsTracker from "@/components/analytics/LocationAnalyticsTracker";
+import ChineseServiceCta from "@/components/locations/ChineseServiceCta";
 
 type LocationPageProps = {
   params: Promise<{
@@ -398,6 +399,8 @@ export default async function LocationPage({ params }: LocationPageProps) {
             </div>
           </aside>
         </section>
+
+        {area.showChineseServiceCta ? <ChineseServiceCta suburbName={area.name} /> : null}
 
         <section className="location-content-grid">
           <article className="location-story-card">

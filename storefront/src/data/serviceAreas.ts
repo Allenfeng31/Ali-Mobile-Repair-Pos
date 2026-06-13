@@ -20,6 +20,7 @@ export type ServiceArea = {
   };
   customFaqs?: Array<{ question: string; answer: string }>;
   customLinks?: Array<{ href: string; label: string }>;
+  showChineseServiceCta?: boolean;
 };
 
 export const SERVICE_AREAS: ServiceArea[] = [
@@ -412,6 +413,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Box Hill Central", "Box Hill Station", "Maroondah Highway"],
     route: "Take the Lilydale or Belgrave line to Ringwood Station, then walk to Ringwood Square Shopping Centre.",
     localReason: "Box Hill customers can use a direct train corridor to reach our Ringwood Square repair bench for clear quotes and warranty-backed service.",
+    showChineseServiceCta: true,
   },
   {
     name: "Glen Waverley",
@@ -421,6 +423,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Glen Waverley Station", "The Glen", "Springvale Road"],
     route: "Travel toward Ringwood by bus or drive through Canterbury Road and Wantirna Road for Ringwood Square parking.",
     localReason: "Glen Waverley customers can call first for model checks and visit only when the likely repair path is clear.",
+    showChineseServiceCta: true,
   },
   {
     name: "Wantirna",
@@ -492,6 +495,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Westfield Doncaster", "Doncaster Road", "Eastern Freeway"],
     route: "Drive through Springvale Road and Maroondah Highway or use EastLink toward Ringwood Square.",
     localReason: "Doncaster customers often compare repair options before travelling, so a quick phone check can confirm parts, price range, and timing.",
+    showChineseServiceCta: true,
   },
   {
     name: "Bayswater",
@@ -625,6 +629,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Burwood Highway", "Deakin University", "Vermont South"],
     route: "Drive east along Burwood Highway, then connect through Vermont South and Wantirna toward Ringwood.",
     localReason: "Burwood customers can phone ahead for repair pricing, model checks, and pickup timing before making the trip.",
+    showChineseServiceCta: true,
   },
   {
     name: "Balwyn",
@@ -634,6 +639,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Whitehorse Road", "Balwyn Village", "Box Hill Station"],
     route: "Drive east via Whitehorse Road and Maroondah Highway toward Ringwood Square.",
     localReason: "Balwyn customers can use the direct eastern corridor for careful diagnostics and a clear quote before repair.",
+    showChineseServiceCta: true,
     metaTitle: "Balwyn Phone, Tablet & MacBook Repair Advice | Ringwood Square",
     metaDescription: "Premium phone, tablet, and MacBook diagnostics for Balwyn residents. Visit Kiosk C1 at Ringwood Square for face-to-face assessments and repair choices.",
     customH1: "Phone, Tablet and MacBook Repair Advice for Balwyn Customers",
@@ -758,6 +764,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Springvale Station", "Springvale Road", "EastLink"],
     route: "Drive north via Springvale Road and EastLink toward Ringwood Square.",
     localReason: "Springvale customers can call first for a practical quote and decide whether repair, pickup, or another timing option makes sense.",
+    showChineseServiceCta: true,
     metaTitle: "Springvale Phone & Tablet Repair Assessments | Ringwood Square",
     metaDescription: "Need phone or tablet repair options near Springvale? Contact us before travelling to confirm the device model, likely repair options and parts availability.",
     customH1: "Phone and Tablet Repair Advice for Springvale Customers",
@@ -944,6 +951,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Clayton Station", "Monash University", "Ferntree Gully Road"],
     route: "Drive via Ferntree Gully Road and EastLink toward Ringwood Square.",
     localReason: "Clayton customers can call ahead to confirm whether repair, quote, or pickup support is the smartest next step.",
+    showChineseServiceCta: true,
     metaTitle: "Clayton Phone, Laptop & Tablet Repair | Ringwood Square C1",
     metaDescription: "Phone, tablet, and MacBook repair diagnostics for Clayton students, professionals, and residents. Visit Kiosk C1 at Ringwood Square for hands-on quotes.",
     customH1: "Phone, Laptop and Tablet Repair Assessments for Clayton Customers",
@@ -1502,6 +1510,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Blackburn Station", "Whitehorse Road", "Blackburn Square"],
     route: "Drive east via Whitehorse Road and Maroondah Highway through Nunawading and Mitcham.",
     localReason: "Blackburn customers have a direct train and road link to Ringwood Square for transparent quotes and warranty-backed repairs.",
+    showChineseServiceCta: true,
   },
   {
     name: "Warranwood",
@@ -1536,7 +1545,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       },
       {
         question: "Can I have a phone or iPad checked while I shop at Ringwood Square?",
-        answer: "Yes. Many Warranwood locals combine a quick counter diagnostic check with their supermarket shopping or local errands. Since we are located near Coles, you can leave your device at our bench and return after your shopping run."
+        answer: "Yes. Many Warranwood locals combine a quick counter diagnostic check with shopping or local errands. Since we are located opposite the Bunnings entrance inside Ringwood Square Shopping Centre, you can leave your device at our bench and return after your shopping run."
       },
       {
         question: "Do you guarantee repair completion on the same visit?",
