@@ -978,6 +978,50 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   </div>
                 </div>
 
+                {/* Quick Access Pin Controls */}
+                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2rem] p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <label className="text-sm font-black text-black uppercase">PIN TO QUICK ACCESS</label>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase">Show in Terminal</span>
+                    </div>
+                    <div 
+                      className={cn("w-14 h-8 rounded-full shadow-[var(--shadow-neu-pressed)] flex items-center p-1 cursor-pointer transition-colors duration-300", formData.is_pinned ? "bg-blue-500/20" : "bg-[var(--color-neu-bg)]")}
+                      onClick={() => setFormData({...formData, is_pinned: !formData.is_pinned})}
+                    >
+                      <div className={cn("w-6 h-6 rounded-full shadow-[var(--shadow-neu-flat)] transition-transform duration-300", formData.is_pinned ? "translate-x-6 bg-blue-500" : "translate-x-0 bg-gray-400")} />
+                    </div>
+                  </div>
+                  {formData.is_pinned && (
+                    <div className="pt-4 border-t border-black/5 flex items-center justify-between gap-4">
+                      <div className="flex flex-col">
+                        <label className="text-xs font-black text-gray-600 uppercase tracking-widest">PIN ORDER</label>
+                        <span className="text-[10px] text-gray-400">Lower numbers appear first.</span>
+                      </div>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 w-24">
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          className="w-full px-3 py-2 bg-transparent border-none text-black font-bold focus:ring-0 outline-none text-center"
+                          value={formData.pin_order === 0 && !formData.is_pinned ? '' : formData.pin_order}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                              setFormData({...formData, pin_order: 0});
+                              return;
+                            }
+                            const parsed = parseInt(val, 10);
+                            if (!isNaN(parsed) && parsed >= 0) {
+                              setFormData({...formData, pin_order: parsed});
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-4">
                   <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Variants</label>
                   {formData.variants.map((variant, idx) => (
