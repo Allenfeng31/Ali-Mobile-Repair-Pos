@@ -139,6 +139,15 @@
   line-height: 1.68;
 }
 
+.freshnessIndicator {
+  display: block;
+  margin-top: 0.85rem;
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
 .meta {
   display: grid;
   gap: 0.5rem;

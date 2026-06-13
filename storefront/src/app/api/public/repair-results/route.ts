@@ -12,6 +12,7 @@ export const runtime = 'nodejs';
 type RepairResultsApiResponse = {
   status: 'SUCCESS';
   data: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>;
+  latestPublishedAt?: string | null;
 };
 
 function pickHomepageFields(result: NonNullable<Awaited<ReturnType<typeof fetchFeaturedRepairResultsByCategory>>[RepairResultDeviceCategory]>) {
@@ -31,17 +32,26 @@ export async function GET() {
   try {
     const resultsByCategory = await fetchFeaturedRepairResultsByCategory();
     const data: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>> = {};
+    let latestPublishedAt: string | null = null;
 
     for (const category of REPAIR_RESULT_CATEGORIES) {
       const result = resultsByCategory[category.value];
       if (result) {
         data[category.value] = pickHomepageFields(result);
+        
+        const timestamp = result.published_at || result.created_at;
+        if (timestamp) {
+          if (!latestPublishedAt || new Date(timestamp) > new Date(latestPublishedAt)) {
+            latestPublishedAt = timestamp;
+          }
+        }
       }
     }
 
     const payload: RepairResultsApiResponse = {
       status: 'SUCCESS',
       data,
+      latestPublishedAt,
     };
 
     return NextResponse.json(payload, {
@@ -52,7 +62,7 @@ export async function GET() {
   } catch (error) {
     console.error('[repair-results-public] Failed to load homepage data:', error);
     return NextResponse.json(
-      { status: 'SUCCESS', data: {} },
+      { status: 'SUCCESS', data: {}, latestPublishedAt: null },
       {
         headers: {
           'Cache-Control': 'no-store, max-age=0, must-revalidate',

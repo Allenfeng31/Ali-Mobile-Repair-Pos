@@ -14,10 +14,24 @@ import styles from './RealRepairResultsSection.module.css';
 interface RepairResultsApiResponse {
   status: 'SUCCESS';
   data: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>;
+  latestPublishedAt?: string | null;
 }
 
 function firstAvailableCategory(resultsByCategory: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>) {
   return REPAIR_RESULT_CATEGORIES.find((category) => resultsByCategory[category.value])?.value || 'phone';
+}
+
+function formatDate(isoString: string) {
+  try {
+    return new Intl.DateTimeFormat("en-AU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "Australia/Melbourne",
+    }).format(new Date(isoString));
+  } catch (e) {
+    return null;
+  }
 }
 
 export default function RealRepairResultsSection() {
@@ -25,6 +39,7 @@ export default function RealRepairResultsSection() {
     Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>
   >({});
   const [activeCategory, setActiveCategory] = useState<RepairResultDeviceCategory>('phone');
+  const [latestPublishedAt, setLatestPublishedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +59,7 @@ export default function RealRepairResultsSection() {
         const payload = (await response.json()) as RepairResultsApiResponse;
         const nextResults = payload?.status === 'SUCCESS' ? payload.data || {} : {};
         setResultsByCategory(nextResults);
+        setLatestPublishedAt(payload?.latestPublishedAt || null);
 
         if (nextResults.phone) {
           setActiveCategory('phone');
@@ -54,6 +70,7 @@ export default function RealRepairResultsSection() {
         if (controller.signal.aborted) return;
         console.error('[repair-results] Failed to load public homepage data:', error);
         setResultsByCategory({});
+        setLatestPublishedAt(null);
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
@@ -94,6 +111,11 @@ export default function RealRepairResultsSection() {
             <p>
               Before and after repair photos from approved Ali Mobile &amp; Repair jobs, checked for privacy before they appear here.
             </p>
+            {latestPublishedAt && formatDate(latestPublishedAt) && (
+              <time className={styles.freshnessIndicator} dateTime={latestPublishedAt}>
+                ● Latest repair result added: {formatDate(latestPublishedAt)}
+              </time>
+            )}
           </div>
 
           <div className={styles.meta}>
