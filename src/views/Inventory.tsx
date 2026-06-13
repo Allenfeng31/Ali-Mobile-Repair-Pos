@@ -833,6 +833,126 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Brand Control */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Brand</label>
+                    {isAddingBrand ? (
+                      <div className="flex gap-2">
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 flex-1">
+                          <input
+                            type="text"
+                            placeholder="New Brand"
+                            className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
+                            value={newBrand}
+                            onChange={e => setNewBrand(e.target.value)}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddBrand}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-blue-600 font-bold transition-all"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingBrand(false)}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-gray-500 font-bold transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 flex-1">
+                          <select
+                            className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
+                            value={formData.brand}
+                            onChange={e => setFormData({ ...formData, brand: e.target.value })}
+                          >
+                            <option value="" disabled>Select Brand</option>
+                            {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
+                          </select>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBrand(formData.brand)}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-red-500 hover:text-red-600 transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingBrand(true)}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-blue-600 hover:text-blue-700 transition-all"
+                        >
+                          <Plus size={18} strokeWidth={3} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Category Control */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Category</label>
+                    {isAddingCategory ? (
+                      <div className="flex gap-2">
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 flex-1">
+                          <input
+                            type="text"
+                            placeholder="New Category"
+                            className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
+                            value={newCategory}
+                            onChange={e => setNewCategory(e.target.value)}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddCategory}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-blue-600 font-bold transition-all"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingCategory(false)}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-gray-500 font-bold transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 flex-1">
+                          <select
+                            className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
+                            value={formData.category}
+                            onChange={e => setFormData({ ...formData, category: e.target.value })}
+                          >
+                            <option value="" disabled>Select Category</option>
+                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCategory(formData.category)}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-red-500 hover:text-red-600 transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingCategory(true)}
+                          className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] rounded-2xl px-4 text-blue-600 hover:text-blue-700 transition-all"
+                        >
+                          <Plus size={18} strokeWidth={3} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Model</label>
