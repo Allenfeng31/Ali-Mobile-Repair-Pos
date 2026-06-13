@@ -114,6 +114,18 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const handleBulkGenerate = async () => {
     if (!bulkModel.trim()) return;
 
+    const targetModel = bulkModel.trim();
+    const existingConflicts = inventory.filter(i => 
+      (i.model === targetModel || i.model === `${bulkBrand}||${targetModel}`) && 
+      REPAIR_TEMPLATES.some(tmpl => i.name.includes(tmpl.label))
+    );
+
+    if (existingConflicts.length > 0) {
+      setSuccessMessage(`Error: ${existingConflicts.length} templates already exist for ${targetModel}. Generation aborted to prevent duplicates.`);
+      setTimeout(() => setSuccessMessage(null), 5000);
+      return;
+    }
+
     setBulkGenerating(true);
     try {
       const items = REPAIR_TEMPLATES.map(tmpl => ({
@@ -794,6 +806,35 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         value={bulkModel}
                         onChange={e => setBulkModel(e.target.value)}
                       />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">AU Model Code</label>
+                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                      <input
+                        className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none placeholder:text-black/20"
+                        placeholder="e.g. SM-A566B"
+                        value={bulkDeviceModel}
+                        onChange={e => setBulkDeviceModel(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Will Generate:</label>
+                    <div className="flex flex-wrap gap-2">
+                      {REPAIR_TEMPLATES.map((tmpl, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 px-3 py-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-xl text-xs font-bold text-gray-600"
+                        >
+                          <div className="text-orange-500">
+                            {React.createElement(getIconComponent(tmpl.iconName), { size: 14, strokeWidth: 3 })}
+                          </div>
+                          {bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
