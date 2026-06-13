@@ -231,14 +231,14 @@ export async function generateMetadata({ params }: LocationPageProps): Promise<M
   }
 
   return {
-    title: `Device Repair near ${area.name} | Ali Mobile & Repair Ringwood`,
-    description: `Phone, tablet, laptop, and watch repairs for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for expert diagnostics, No Fix No Charge, and warranty-backed repairs.`,
+    title: area.metaTitle || `Device Repair near ${area.name} | Ali Mobile & Repair Ringwood`,
+    description: area.metaDescription || `Phone, tablet, laptop, and watch repairs for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for expert diagnostics, No Fix No Charge, and warranty-backed repairs.`,
     alternates: {
       canonical: `${baseUrl}/locations/${area.slug}`,
     },
     openGraph: {
-      title: `Expert Device Repair for ${area.name} Residents`,
-      description: `A practical ${area.driveTime.toLowerCase()} trip to Ringwood Square for professional device repairs.`,
+      title: area.metaTitle || `Expert Device Repair for ${area.name} Residents`,
+      description: area.metaDescription || `A practical ${area.driveTime.toLowerCase()} trip to Ringwood Square for professional device repairs.`,
       url: `${baseUrl}/locations/${area.slug}`,
       type: "website",
       locale: "en_AU",
@@ -349,10 +349,9 @@ export default async function LocationPage({ params }: LocationPageProps) {
               <MapPin size={16} strokeWidth={2.5} aria-hidden="true" />
               Service area
             </span>
-            <h1 id="location-heading">Expert Device Repair for {area.name} Residents</h1>
+            <h1 id="location-heading">{area.customH1 || `Expert Device Repair for ${area.name} Residents`}</h1>
             <p>
-              A practical {area.driveTime.toLowerCase()} trip to Ringwood Square for careful diagnostics,
-              transparent quotes, and warranty-backed repairs from a specialist local bench.
+              {area.customIntro || `A practical ${area.driveTime.toLowerCase()} trip to Ringwood Square for careful diagnostics, transparent quotes, and warranty-backed repairs from a specialist local bench.`}
             </p>
 
             <div className="location-hero-actions">
@@ -402,38 +401,67 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
         <section className="location-content-grid">
           <article className="location-story-card">
-            <span className="location-kicker location-kicker-muted">Why make the trip</span>
-            <h2>Why {area.name} customers visit Ali Mobile & Repair</h2>
-            <p>
-              {area.localReason} We do not try to turn every issue into a repair. Our team checks the
-              fault first, explains the likely repair path, and applies No Fix No Charge to eligible
-              diagnostics when the device cannot be repaired as quoted.
-            </p>
-            <p>
-              For common iPhone, Samsung, iPad, MacBook, and Apple Watch issues, the short trip to
-              Ringwood Square can save the uncertainty of mailing a device away or accepting a vague
-              quote before anyone has inspected the hardware.
-            </p>
+            {area.customScenarioSection ? (
+              <>
+                <span className="location-kicker location-kicker-muted">Customer scenario</span>
+                <h2>{area.customScenarioSection.title}</h2>
+                {area.customScenarioSection.paragraphs.map((p, idx) => (
+                  <p key={idx}>{p}</p>
+                ))}
+              </>
+            ) : (
+              <>
+                <span className="location-kicker location-kicker-muted">Why make the trip</span>
+                <h2>Why {area.name} customers visit Ali Mobile & Repair</h2>
+                <p>
+                  {area.localReason} We do not try to turn every issue into a repair. Our team checks the
+                  fault first, explains the likely repair path, and applies No Fix No Charge to eligible
+                  diagnostics when the device cannot be repaired as quoted.
+                </p>
+                <p>
+                  For common iPhone, Samsung, iPad, MacBook, and Apple Watch issues, the short trip to
+                  Ringwood Square can save the uncertainty of mailing a device away or accepting a vague
+                  quote before anyone has inspected the hardware.
+                </p>
+              </>
+            )}
           </article>
 
           <article className="location-story-card location-route-details">
-            <span className="location-kicker location-kicker-muted">Local route</span>
-            <h2>Getting here from {area.name}</h2>
-            <p>{area.route}</p>
-            <p>{area.transitAdvice}</p>
-            <div className="location-landmarks">
-              {area.landmarks.map((landmark) => (
-                <span key={landmark}>{landmark}</span>
-              ))}
-            </div>
-            <div className="location-transit-guide">
-              <h3>Public transport options from {area.name}</h3>
-              <ul>
-                {transitSteps.map((step) => (
-                  <li key={step}>{step.trim()}</li>
+            {area.customLocalSection ? (
+              <>
+                <span className="location-kicker location-kicker-muted">Local route</span>
+                <h2>{area.customLocalSection.title}</h2>
+                {area.customLocalSection.paragraphs.map((p, idx) => (
+                  <p key={idx}>{p}</p>
                 ))}
-              </ul>
-            </div>
+                <div className="location-landmarks">
+                  {area.landmarks.map((landmark) => (
+                    <span key={landmark}>{landmark}</span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="location-kicker location-kicker-muted">Local route</span>
+                <h2>Getting here from {area.name}</h2>
+                <p>{area.route}</p>
+                <p>{area.transitAdvice}</p>
+                <div className="location-landmarks">
+                  {area.landmarks.map((landmark) => (
+                    <span key={landmark}>{landmark}</span>
+                  ))}
+                </div>
+                <div className="location-transit-guide">
+                  <h3>Public transport options from {area.name}</h3>
+                  <ul>
+                    {transitSteps.map((step) => (
+                      <li key={step}>{step.trim()}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </article>
         </section>
 
@@ -535,21 +563,33 @@ export default async function LocationPage({ params }: LocationPageProps) {
             </p>
             <div className="location-transit-guide">
               <ul>
-                <li>
-                  <Link href="/repairs/phone/iphone/iphone-15-pro-max/screen-replacement">
-                    iPhone 15 Pro Max screen replacement
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement">
-                    Galaxy S24 Ultra screen replacement
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/repairs/tablet/ipad/ipad-9th-generation/screen-replacement">
-                    iPad 9th Generation screen replacement
-                  </Link>
-                </li>
+                {area.customLinks ? (
+                  area.customLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href}>
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))
+                ) : (
+                  <>
+                    <li>
+                      <Link href="/repairs/phone/iphone/iphone-15-pro-max/screen-replacement">
+                        iPhone 15 Pro Max screen replacement
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement">
+                        Galaxy S24 Ultra screen replacement
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/repairs/tablet/ipad/ipad-9th-generation/screen-replacement">
+                        iPad 9th Generation screen replacement
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           </article>
@@ -580,85 +620,96 @@ export default async function LocationPage({ params }: LocationPageProps) {
             <h2 id="location-faq-heading">Frequently asked questions for {area.name} customers</h2>
           </div>
           <div className="location-faq-list">
-            <details>
-              <summary>Do you service customers from {area.name}?</summary>
-              <p>
-                Yes. We regularly help customers travelling from {area.name} to Ringwood Square
-                for phone, tablet, laptop, and watch repair assessment.
-              </p>
-            </details>
-            <details>
-              <summary>How far is Ali Mobile & Repair from {area.name}?</summary>
-              <p>
-                The typical trip is {area.driveTime.toLowerCase()}. {area.route} You can call first
-                if you want us to check parts or likely timing before you leave.
-              </p>
-            </details>
-            <details>
-              <summary>Do I need an appointment before coming in?</summary>
-              <p>
-                Walk-ins are welcome. Booking online can help us prepare the right model notes and
-                gives your visit clearer priority at the repair desk.
-              </p>
-            </details>
-            <details>
-              <summary>Can I get a quote before repair starts?</summary>
-              <p>
-                Yes. We inspect the device, explain the likely cause, and confirm the repair scope
-                and quote before starting paid repair work.
-              </p>
-            </details>
-            <details>
-              <summary>How long does a common repair usually take?</summary>
-              <p>
-                Many common repairs can be completed in around 15 minutes, especially straightforward
-                screen or battery jobs. Final timing depends on the device model, repair type, parts
-                availability, and what we find during inspection.
-              </p>
-            </details>
-            <details>
-              <summary>Should I call before travelling from {area.name}?</summary>
-              <p>
-                It is a good idea if you know your model or symptom. We can check likely parts,
-                quote range, and timing before you make the {area.driveTime.toLowerCase()} trip.
-              </p>
-            </details>
-            <details>
-              <summary>Do you repair iPhone, Samsung, iPad, MacBook, and Apple Watch devices?</summary>
-              <p>
-                Yes. We handle phone, tablet, laptop, and watch repair enquiries at Ringwood Square,
-                including common screen, battery, charging, camera, and diagnostic repair paths.
-              </p>
-            </details>
-            <details>
-              <summary>Will you check parts availability before I arrive?</summary>
-              <p>
-                Yes. If you call with the model and issue, we can check whether the likely part is
-                available or whether a booking is the better option.
-              </p>
-            </details>
-            <details>
-              <summary>Can you inspect water damage or no-power faults?</summary>
-              <p>
-                Yes. We can inspect water damage, no-power faults, charging issues, and board-level
-                symptoms. These jobs need assessment first because the safest repair path depends on
-                what is damaged internally.
-              </p>
-            </details>
-            <details>
-              <summary>Do customers from {area.name} pay different prices?</summary>
-              <p>
-                No. Customers from {area.name} receive the same Ringwood repair desk pricing and quote
-                process. We confirm the final price after checking the device and repair scope.
-              </p>
-            </details>
-            <details>
-              <summary>What are your opening hours?</summary>
-              <p>
-                We are open from 10am to 5pm, Monday to Saturday. If you are travelling from {area.name},
-                you can call ahead to check timing, parts availability, or whether booking is recommended.
-              </p>
-            </details>
+            {area.customFaqs ? (
+              area.customFaqs.map((faq) => (
+                <details key={faq.question}>
+                  <summary>{faq.question}</summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))
+            ) : (
+              <>
+                <details>
+                  <summary>Do you service customers from {area.name}?</summary>
+                  <p>
+                    Yes. We regularly help customers travelling from {area.name} to Ringwood Square
+                    for phone, tablet, laptop, and watch repair assessment.
+                  </p>
+                </details>
+                <details>
+                  <summary>How far is Ali Mobile & Repair from {area.name}?</summary>
+                  <p>
+                    The typical trip is {area.driveTime.toLowerCase()}. {area.route} You can call first
+                    if you want us to check parts or likely timing before you leave.
+                  </p>
+                </details>
+                <details>
+                  <summary>Do I need an appointment before coming in?</summary>
+                  <p>
+                    Walk-ins are welcome. Booking online can help us prepare the right model notes and
+                    gives your visit clearer priority at the repair desk.
+                  </p>
+                </details>
+                <details>
+                  <summary>Can I get a quote before repair starts?</summary>
+                  <p>
+                    Yes. We inspect the device, explain the likely cause, and confirm the repair scope
+                    and quote before starting paid repair work.
+                  </p>
+                </details>
+                <details>
+                  <summary>How long does a common repair usually take?</summary>
+                  <p>
+                    Many common repairs can be completed in around 15 minutes, especially straightforward
+                    screen or battery jobs. Final timing depends on the device model, repair type, parts
+                    availability, and what we find during inspection.
+                  </p>
+                </details>
+                <details>
+                  <summary>Should I call before travelling from {area.name}?</summary>
+                  <p>
+                    It is a good idea if you know your model or symptom. We can check likely parts,
+                    quote range, and timing before you make the {area.driveTime.toLowerCase()} trip.
+                  </p>
+                </details>
+                <details>
+                  <summary>Do you repair iPhone, Samsung, iPad, MacBook, and Apple Watch devices?</summary>
+                  <p>
+                    Yes. We handle phone, tablet, laptop, and watch repair enquiries at Ringwood Square,
+                    including common screen, battery, charging, camera, and diagnostic repair paths.
+                  </p>
+                </details>
+                <details>
+                  <summary>Will you check parts availability before I arrive?</summary>
+                  <p>
+                    Yes. If you call with the model and issue, we can check whether the likely part is
+                    available or whether a booking is the better option.
+                  </p>
+                </details>
+                <details>
+                  <summary>Can you inspect water damage or no-power faults?</summary>
+                  <p>
+                    Yes. We can inspect water damage, no-power faults, charging issues, and board-level
+                    symptoms. These jobs need assessment first because the safest repair path depends on
+                    what is damaged internally.
+                  </p>
+                </details>
+                <details>
+                  <summary>Do customers from {area.name} pay different prices?</summary>
+                  <p>
+                    No. Customers from {area.name} receive the same Ringwood repair desk pricing and quote
+                    process. We confirm the final price after checking the device and repair scope.
+                  </p>
+                </details>
+                <details>
+                  <summary>What are your opening hours?</summary>
+                  <p>
+                    We are open from 10am to 5pm, Monday to Saturday. If you are travelling from {area.name},
+                    you can call ahead to check timing, parts availability, or whether booking is recommended.
+                  </p>
+                </details>
+              </>
+            )}
           </div>
         </section>
 

@@ -6,6 +6,20 @@ export type ServiceArea = {
   landmarks: string[];
   route: string;
   localReason: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  customH1?: string;
+  customIntro?: string;
+  customLocalSection?: {
+    title: string;
+    paragraphs: string[];
+  };
+  customScenarioSection?: {
+    title: string;
+    paragraphs: string[];
+  };
+  customFaqs?: Array<{ question: string; answer: string }>;
+  customLinks?: Array<{ href: string; label: string }>;
 };
 
 export const SERVICE_AREAS: ServiceArea[] = [
@@ -53,6 +67,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Croydon Central", "Croydon Station", "Mt Dandenong Road"],
     route: "Head west toward Ringwood, then turn into Ringwood Square for easy centre parking.",
     localReason: "Worth the short trip for careful diagnostics, transparent quoting, and No Fix No Charge on eligible jobs.",
+    metaTitle: "Croydon Phone & Device Repairs | Visit Kiosk C1 Ringwood",
+    metaDescription: "Need phone, battery, or back-glass repairs in Croydon? We inspect your device face-to-face at Ringwood Square before any parts are ordered. Read route guides.",
+    customH1: "Pre-Repair Inspection and Diagnostics for Croydon Clients",
+    customIntro: "For Croydon residents, our Ringwood Square desk provides a reliable, transparent service just a 10-minute trip away. We prioritize physical inspection over guessing, ensuring we check screen, battery, back-glass, and charging port faults at our counter before confirming any quote or reserving parts.",
+    customLocalSection: {
+      title: "Transit Options from Croydon to Ringwood Square",
+      paragraphs: [
+        "Croydon locals have excellent transport links to our Ringwood shop. You can drive west via Mt Dandenong Road or Maroondah Highway, arriving at Ringwood Square Shopping Centre in roughly 10 minutes. There is plenty of customer parking right in front of the centre.",
+        "Alternatively, catch the Lilydale line train from Croydon Station. It takes about 6 minutes to reach Ringwood Station, from which you can take a brief walk across the street to find our kiosk situated near the Coles supermarket."
+      ]
+    },
+    customScenarioSection: {
+      title: "Typical Croydon Device Assessment Scenarios",
+      paragraphs: [
+        "We often see Croydon customers who want to confirm if a cracked rear panel has damaged the wireless charging coils. At our bench, we perform a power-draw test and check the frame alignment before booking a back glass replacement.",
+        "Another frequent scenario is charging port failure. Before recommending a port replacement, we inspect the USB-C or Lightning port under magnification to clear out any compressed pocket lint or debris, which sometimes solves the issue without needing new parts."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical shop front in Croydon?",
+        answer: "No, our physical store is situated at Kiosk C1 inside Ringwood Square Shopping Centre. We are located near Coles, about 10 minutes from Croydon."
+      },
+      {
+        question: "Can I get my back glass inspected before ordering a repair from Croydon?",
+        answer: "Yes. We inspect the frame structure and camera housing at our Ringwood kiosk to make sure a new back glass will seat correctly."
+      },
+      {
+        question: "How do I confirm if you have my replacement screen in stock before leaving Croydon?",
+        answer: "We recommend calling or messaging our Ringwood team. We will check our current inventory and can hold a screen or battery for you."
+      },
+      {
+        question: "What happens if my charging port just needs a clean?",
+        answer: "Many Croydon clients bring in devices that won't charge, only to find it's blocked by lint. We can clean the port at our bench; if that fixes it, we charge a cleaning fee instead of a full port replacement."
+      },
+      {
+        question: "Is there parking available when driving from Croydon?",
+        answer: "Yes, Ringwood Square has a large, free open-air parking lot. You can park close to the entrance and walk straight to Kiosk C1."
+      },
+      {
+        question: "Do you offer warranty cover on repairs for Croydon clients?",
+        answer: "Yes, our repairs include our standard 6-month warranty on parts and labour, which is claimable directly at our Ringwood Square counter."
+      },
+      {
+        question: "How long should I expect to wait for a battery replacement?",
+        answer: "Most iPhone battery swaps take around 20 to 40 minutes, depending on the model and current queue. We suggest calling from Croydon first to check wait times."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15/back-glass-replacement", label: "charging and battery checks for Croydon devices" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Croydon iPhone battery diagnostic options" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung charging port repair near Croydon" }
+    ]
   },
   {
     name: "Mitcham",
@@ -62,6 +129,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mitcham Station", "EastLink", "Mitcham Shopping Centre"],
     route: "Follow Maroondah Highway east toward Ringwood Square.",
     localReason: "Mitcham residents can reach us quickly for priority booking, phone checks, and warranty-backed repair work.",
+    metaTitle: "Mitcham Device Repairs | Quick Trip to Ringwood Square",
+    metaDescription: "Need phone, Samsung, or iPad repairs near Mitcham? Get reliable screen, battery, and charging checks just 6 minutes away at Kiosk C1, Ringwood Square.",
+    customH1: "Direct Screen & Battery Diagnostics for Mitcham Residents",
+    customIntro: "Located only a few minutes down the road, our repair kiosk at Ringwood Square is the primary destination for Mitcham locals seeking face-to-face device assessments. Rather than mailing your phone away, you can visit us for hands-on diagnostics and immediate clarity on parts availability for iPhones, Samsung models, and iPads.",
+    customLocalSection: {
+      title: "Travelling from Mitcham to our Ringwood Repair Bench",
+      paragraphs: [
+        "Getting to Ringwood Square from Mitcham is incredibly direct. Commuters can catch the Lilydale or Belgrave line from Mitcham Station and arrive at Ringwood Station in approximately 5 minutes. From the station, walk across the road past Coles into the main shopping corridor.",
+        "If you are driving from Mitcham, follow Maroondah Highway east for about 4 kilometers. Ringwood Square is on your left just before the major intersection, offering ample centre parking close to the kiosk entrance. This makes it easy to drop in during your weekly shopping run."
+      ]
+    },
+    customScenarioSection: {
+      title: "Common Mitcham Repair Scenarios We Handle",
+      paragraphs: [
+        "Many Mitcham clients stop by with cracked screens or battery degradation issues that they want checked in person. Instead of accepting an online estimate, we open the device at our counter, inspect the screen connectors, check the battery cycle count, and check for any internal dust or liquid contact.",
+        "For Samsung Galaxy phones or iPads, we help verify if the touch digitizer or charging port is the source of the fault. By explaining the repair process beforehand, we make sure you have a clear choice before any parts are replaced or work begins."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is Ali Mobile located in Mitcham or Ringwood?",
+        answer: "We are located at Kiosk C1 inside Ringwood Square Shopping Centre (near Coles), which is a short 5-minute train trip or drive east from Mitcham."
+      },
+      {
+        question: "How do Mitcham commuters drop off devices for repair?",
+        answer: "Many Mitcham residents drop off their iPhone or iPad on their morning commute via Ringwood Station, do their shopping or head to work, and pick it up on their way back home."
+      },
+      {
+        question: "Do you check screen stock for Mitcham customers before they travel?",
+        answer: "Yes, we encourage calling or messaging first. We can verify if we have the specific screen or battery in stock at Ringwood Square to save you a trip."
+      },
+      {
+        question: "Can Mitcham residents get iPad or Samsung tablet assessments?",
+        answer: "Yes. We inspect charging port wear, battery health, and display damage for iPads and Samsung Galaxy Tabs directly at our Ringwood bench."
+      },
+      {
+        question: "What is the typical repair turnaround time for a Mitcham visitor?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do Mitcham customers need an appointment?",
+        answer: "Walk-ins are always welcome. However, booking online helps us reserve specific replacement parts for your model ahead of your visit."
+      },
+      {
+        question: "What if my phone cannot be fixed after I travel from Mitcham?",
+        answer: "We apply a 'No Fix, No Charge' policy to eligible diagnostic jobs. If we open the device at our Ringwood bench and find it is beyond repair due to board damage, you won't pay the repair fee."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Mitcham customers comparing iPhone screen repair options" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery diagnostic checks near Mitcham" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Samsung and iPad repair support near Mitcham" }
+    ]
   },
   {
     name: "Nunawading",
@@ -71,6 +191,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Brand Smart", "Nunawading Station", "Whitehorse Road"],
     route: "Continue east along Maroondah Highway until Ringwood Square.",
     localReason: "A convenient repair stop for customers comparing quick local service against larger shopping-centre queues.",
+    metaTitle: "Nunawading Device Diagnostics | Ringwood Square Repair Desk",
+    metaDescription: "Professional phone, tablet, and MacBook diagnostics for Nunawading commuters. Drop off your device at Ringwood Square for screen and charging port repairs.",
+    customH1: "Device Assessments for Nunawading Commuters & Commercial Clients",
+    customIntro: "Conveniently located 10 minutes east of Nunawading, our Ringwood Square kiosk is set up to serve busy commuters and local commercial clients. We offer straightforward diagnostic checks, battery replacements, and USB-C port repairs, allowing you to drop off a device on your way to work or during a lunch break.",
+    customLocalSection: {
+      title: "Getting to Ringwood Square from Nunawading",
+      paragraphs: [
+        "If you are commuting from Nunawading, driving straight east along Maroondah Highway (Whitehorse Road) takes you past Mitcham directly to Ringwood Square in under 10 minutes. The centre offers easy parking access for quick drop-offs.",
+        "If you prefer public transport, take the Belgrave or Lilydale train from Nunawading Station. The train ride is only 7 minutes to Ringwood Station. Our kiosk is located just across the road inside Ringwood Square Shopping Centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Commuter & Commercial Repair Scenarios from Nunawading",
+      paragraphs: [
+        "Nunawading has a mix of residential and business offices. We frequently assist commercial users who rely on their laptops or tablets for daily operations. We check power draws, display connections, and battery cycles to provide rapid answers.",
+        "For office workers, dropping off an iPhone with a failing battery or loose USB-C port in the morning allows us to inspect the unit and have it ready for collection by the time they return from the city in the afternoon."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile kiosk inside Nunawading?",
+        answer: "No. We operate exclusively from Kiosk C1 in Ringwood Square Shopping Centre. Nunawading is a direct 10-minute drive or train ride to our shop."
+      },
+      {
+        question: "Can Nunawading businesses drop off multiple devices for inspection?",
+        answer: "Yes. Commercial clients frequently bring in several iPads or MacBooks for battery and screen diagnostics at our Ringwood Square bench."
+      },
+      {
+        question: "Can I leave my phone with you while commuting from Nunawading to the city?",
+        answer: "Yes, this is very common. Drop it off in the morning near Ringwood Station, and pick it up on your return commute in the evening."
+      },
+      {
+        question: "Do you repair USB-C charging ports for Nunawading customers?",
+        answer: "Yes, we diagnose and repair loose or damaged USB-C ports on Samsung, iPhone 15, and other devices at our Ringwood location."
+      },
+      {
+        question: "How can I check if you have a specific replacement screen before travelling?",
+        answer: "Call us at 0481 058 514 before leaving Nunawading. We can verify if the part is in stock and schedule a time slot to check your device."
+      },
+      {
+        question: "What diagnostics do you run for power issues?",
+        answer: "We test power draw, inspect charging ICs, check for battery degradation, and inspect structural components to find the root cause."
+      },
+      {
+        question: "Is there a No Fix No Charge policy for Nunawading diagnostics?",
+        answer: "Yes, on eligible repairs. If we find that a phone has unrepairable board damage during our desk inspection, we do not charge the repair fee."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Samsung and iPad repair support near Nunawading" },
+      { href: "/repairs/phone/iphone/iphone-13/back-camera-replacement", label: "Nunawading iPhone camera and screen diagnostics" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display repair solutions close to Nunawading" }
+    ]
   },
   {
     name: "Box Hill",
