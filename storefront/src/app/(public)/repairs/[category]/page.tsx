@@ -4,7 +4,6 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
-import ChatNowButton from '@/components/ChatNowButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
@@ -50,6 +49,18 @@ const CATEGORY_HERO_MEDIA = {
 const POPULAR_BRANDS_KEYS = [
   'iPhone', 'iPad', 'Samsung', 'Google', 'Apple',
   'MacBook', 'Microsoft', 'Dell', 'HP', 'Lenovo', 'Asus'
+];
+
+const LAPTOP_PRIORITY_BRANDS = [
+  'Dell',
+  'HP',
+  'Lenovo',
+  'Microsoft',
+  'Surface',
+  'ASUS',
+  'Acer',
+  'Razer',
+  'Alienware',
 ];
 
 export async function generateStaticParams() {
@@ -146,43 +157,46 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   },
   laptop: {
     metadata: {
-      title: 'Laptop & MacBook Repair Ringwood | SSD Upgrades & Screen Replacement',
-      description: 'Laptop repairs in Ringwood for MacBook and PC models. Same-day options may be available for common screen or battery work when parts are in stock.',
+      title: 'Laptop Repair Ringwood | Screen, Battery & Keyboard Service',
+      description: 'Ali Mobile & Repair at Ringwood Square provides laptop screen, battery, keyboard, charging and diagnostic support for Windows laptops and MacBooks. Choose your brand or request an assessment before you travel.',
     },
     hero: {
       pillType: 'warning',
-      pillText: 'Certified Technicians',
-      title: 'Expert MacBook & Laptop Repairs in Ringwood',
-      intro1: "Whether it's hardware failures or software glitches, we inspect the issue and explain practical repair options. We serve Maroondah, Croydon, Mitcham, and Heathmont with high-quality screen replacements and data recovery assessment where possible.",
-      intro2: 'Same-day options may be available for common screen and battery repairs when parts are in stock. We confirm timing after checking the model, part availability, repair queue, and device condition.',
+      pillText: 'Laptop Repair Hub',
+      title: 'Laptop Repair in Ringwood',
+      intro1: 'Need help with a Windows laptop or MacBook? We inspect the fault first, explain the repair path, and help you choose the right brand, model or assessment before any work begins.',
+      intro2: 'Common laptop screen and battery jobs may move faster when parts are in stock, but timing always depends on the exact model, the fault, parts availability and final testing.',
     },
     schema: {
-      serviceName: 'Computer & MacBook Repair Services Ringwood',
-      description: "Professional MacBook and laptop repair services in Ringwood, Melbourne. Expert hardware upgrades, screen repairs, and motherboard troubleshooting.",
+      serviceName: 'Laptop Repair Services Ringwood',
+      description: 'Broad laptop repair services in Ringwood for Windows laptops and MacBooks. Screen, battery, keyboard, charging, power and diagnostic support.',
     },
     features: [
-      { t: "Same-day options when parts are in stock", d: "Available for common screens and batteries after model and queue checks." },
-      { t: "Expert Data Preservation protocols", d: "" },
-      { t: "Component-level motherboard repairs", d: "" },
-      { t: "Local Eastern Suburbs Shop at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134", d: "" }
+      { t: "Windows and MacBook repair pathways", d: "Choose the laptop family that matches your device, or ask us to identify it at the counter." },
+      { t: "Screen, battery, keyboard and charging support", d: "We explain the likely fault path before any repair begins." },
+      { t: "Diagnostics before parts are ordered", d: "A practical assessment helps confirm the right repair and timing." },
+      { t: "Ringwood Square kiosk", d: "Ali Mobile & Repair, Kiosk C1, Seymour St, Ringwood VIC 3134." }
     ],
     pricing: {
-      title: "Popular Computer Repair Pricing",
+      title: "Laptop Repair Price Check",
       deviceType: "computer",
       items: [
-        { model: "MacBook Air (M1/M2)", service: "LCD Screen Replacement", price: 549 },
-        { model: "MacBook Pro 13\"", service: "Battery replacement", price: 199 },
-        { model: "Windows Gaming Laptop", service: "Fan / Thermal Maintenance", price: 89 },
-        { model: "Universal Laptop", service: "Keyboard / Trackpad Repair", price: 149 },
-        { model: "Desktop / Mac", service: "OS Reinstall & Data Recovery", price: 120 },
+        { model: "Windows laptop", service: "Screen replacement", price: 0 },
+        { model: "Laptop", service: "Battery replacement", price: 0 },
+        { model: "Laptop", service: "Keyboard / top-case repair", price: 0 },
+        { model: "Laptop", service: "Charging / power diagnosis", price: 0 },
+        { model: "MacBook", service: "Assessment and quote", price: 0 },
       ]
     },
     faqs: [
-      { question: "Do you repair liquid damaged MacBooks in Ringwood?", answer: "Yes, we inspect liquid-damaged MacBooks for logic board cleaning and component-level repair options. The sooner you bring it in, the better the chance of limiting corrosion, but inspection is required before quoting timing or outcome." },
-      { question: "Can you fix a laptop screen on the same day?", answer: "Many common MacBook and laptop screens can be completed the same day when the part is in stock. We confirm timing after checking the model, repair queue, and device condition." },
-      { question: "Why is my laptop running so slowly?", answer: "Sluggish performance is often caused by a nearly full hard drive, insufficient RAM, or outdated software. We offer complete diagnostic checks and can recommend quick hardware upgrades to boost your speed." },
-      { question: "My laptop is overheating—is this bad?", answer: "Yes, constant overheating can lead to permanent component degradation and random shutdowns. Bring it to our Ringwood shop for thermal repasting and internal fan cleaning to protect your investment." },
-      { question: "Can I upgrade my laptop's RAM or storage?", answer: "In most Windows laptops and older MacBooks, yes! Upgrading from an old hard drive to a modern solid-state drive (SSD) is the most cost-effective way to speed up your machine." }
+      { question: "What laptop brands do you repair?", answer: "We support Windows laptop and MacBook pathways when the current catalogue or parts setup allows. If you are not sure, bring the device in and we can identify the brand and model before you travel." },
+      { question: "Do I need the exact model?", answer: "No, but it helps. If you do not know the model, we can inspect the device and identify it at the counter." },
+      { question: "Can you repair a laptop that will not turn on?", answer: "Often yes, but we need a diagnostic first to check charging, battery, power and board-level symptoms." },
+      { question: "How long does a laptop repair take?", answer: "Many common laptop screen or battery repairs can sometimes be completed in around 15–45 minutes once work begins when parts are in stock. Larger jobs take longer because we need to inspect, test and sometimes order parts." },
+      { question: "Do you offer screen and battery replacement?", answer: "Yes, screen and battery work are part of the laptop service pathways we support. The exact option depends on brand, model and what the inspection reveals." },
+      { question: "Can liquid-damaged laptops be guaranteed?", answer: "No. Liquid damage is unpredictable, and the outcome depends on corrosion, the affected boards and how quickly the device is brought in." },
+      { question: "Should I back up data before repair?", answer: "Yes. We do our best to protect your data, but any repair can carry risk, especially if the device is already unstable or has liquid damage." },
+      { question: "Where is the Ringwood kiosk?", answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. The kiosk is opposite the Bunnings entrance inside Ringwood Square Shopping Centre." }
     ]
   },
   watch: {
@@ -266,6 +280,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
   // Dynamically split into Popular and Other
   let topBrands;
+  let secondaryLaptopBrands: typeof validBrands = [];
   if (category === 'phone') {
     const PHONE_PRIORITY = ['iPhone', 'Samsung', 'Google', 'Oppo'];
     topBrands = validBrands
@@ -276,24 +291,38 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         return indexA - indexB;
       });
   } else if (category === 'laptop') {
-    topBrands = validBrands.filter(b => b.brand.toLowerCase().includes('macbook'));
+    const nonMacBookBrands = validBrands.filter(b => !b.brand.toLowerCase().includes('macbook'));
+    const macBookBrands = validBrands.filter(b => b.brand.toLowerCase().includes('macbook'));
+    const sortLaptopBrands = (a: typeof validBrands[number], b: typeof validBrands[number]) => {
+      const indexA = LAPTOP_PRIORITY_BRANDS.findIndex(pk => a.brand.toLowerCase().includes(pk.toLowerCase()));
+      const indexB = LAPTOP_PRIORITY_BRANDS.findIndex(pk => b.brand.toLowerCase().includes(pk.toLowerCase()));
+      const normalizedA = indexA === -1 ? LAPTOP_PRIORITY_BRANDS.length : indexA;
+      const normalizedB = indexB === -1 ? LAPTOP_PRIORITY_BRANDS.length : indexB;
+      if (normalizedA !== normalizedB) return normalizedA - normalizedB;
+      return a.brand.localeCompare(b.brand);
+    };
+    topBrands = (nonMacBookBrands.length > 0 ? nonMacBookBrands : macBookBrands).sort(sortLaptopBrands);
+    secondaryLaptopBrands = nonMacBookBrands.length > 0 ? macBookBrands.sort(sortLaptopBrands) : [];
   } else {
     topBrands = validBrands.filter(b =>
       POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
     );
   }
 
-  const otherBrands = validBrands
-    .filter(b => !topBrands.some(tb => tb.slug === b.slug))
-    .sort((a, b) => a.brand.localeCompare(b.brand));
+  const otherBrands = category === 'laptop'
+    ? secondaryLaptopBrands
+    : validBrands
+      .filter(b => !topBrands.some(tb => tb.slug === b.slug))
+      .sort((a, b) => a.brand.localeCompare(b.brand));
   const heroMedia = CATEGORY_HERO_MEDIA[category as keyof typeof CATEGORY_HERO_MEDIA];
+  const isLaptop = category === 'laptop';
+  const laptopDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
 
   return (
     <>
       <ServiceSchema
         serviceName={data.schema.serviceName}
         description={data.schema.description}
-        faqs={data.faqs}
       />
 
       <main className="repair-page-shell">
@@ -310,17 +339,38 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <p>{data.hero.intro1}</p>
             <div className="repair-hero-actions">
               <Link href="/book-repair" prefetch={true} className="repair-primary-action">
-                Get a Live Quote
+                Book a Repair
                 <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
               </Link>
               <a href="tel:0481058514" className="repair-secondary-action">
                 <PhoneCall size={18} strokeWidth={2.6} aria-hidden="true" />
                 0481 058 514
               </a>
+              {isLaptop && (
+                <a href="#laptop-brands" className="repair-secondary-action">
+                  Choose a Brand
+                  <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+                </a>
+              )}
             </div>
           </div>
 
-          {heroMedia ? (
+          {isLaptop ? (
+            <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Laptop repair support">
+              <div>
+                <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+                <span>Windows and MacBook repair pathways</span>
+              </div>
+              <div>
+                <MessageCircle size={20} strokeWidth={2.4} aria-hidden="true" />
+                <span>Screen, battery, keyboard and charging diagnostics</span>
+              </div>
+              <div>
+                <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
+                <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
+              </div>
+            </div>
+          ) : heroMedia ? (
             <aside
               className={`repair-exploded-hero repair-exploded-hero-${category}`}
               aria-label={heroMedia.ariaLabel}
@@ -358,11 +408,165 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           )}
         </section>
 
+        {isLaptop && (
+          <ScrollReveal>
+            <section className="repair-workbench-shell" aria-labelledby="laptop-workbench-heading">
+              <div className="repair-workbench-heading">
+                <span>Laptop repair workbench</span>
+                <h2 id="laptop-workbench-heading">How we handle laptop repairs</h2>
+                <p>Tell us the laptop brand, model and symptoms. We inspect the fault, explain the repair path, and only begin work after you approve the option.</p>
+              </div>
+
+              <div className="repair-workbench-grid">
+                <details className="repair-workbench-box" open>
+                  <summary>
+                    <span className="repair-workbench-number">01</span>
+                    <h3>Which laptop path fits your device?</h3>
+                    <span className="repair-workbench-chevron" aria-hidden="true" />
+                  </summary>
+                  <div className="repair-workbench-box-content">
+                    <article className="repair-workbench-mini-card">
+                      <h3>Windows laptop repair</h3>
+                      <p>Dell, HP, Lenovo, ASUS, Acer, Surface and other supported models can start with brand and model selection.</p>
+                      <span>Best for</span>
+                      <p>Screen, battery, keyboard, charging and power problems on non-Apple laptops.</p>
+                      <small>Choose the brand below or bring the device in for identification.</small>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>MacBook repair pathway</h3>
+                      <p>Apple laptops stay on the dedicated MacBook hub so the broad laptop page remains focused on the wider category.</p>
+                      <span>Best for</span>
+                      <p>MacBook screens, batteries, keyboards, trackpads and charging faults.</p>
+                      <small>Use the separate MacBook page when your laptop is an Apple notebook.</small>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Laptop assessment first</h3>
+                      <p>If the fault is unclear, a face-to-face assessment helps confirm the problem before any work starts.</p>
+                      <span>Best for</span>
+                      <p>No power, intermittent startup, overheating, liquid exposure or mixed symptoms.</p>
+                      <small>We explain the likely repair path before parts are ordered.</small>
+                    </article>
+                  </div>
+                </details>
+
+                <details className="repair-workbench-box">
+                  <summary>
+                    <span className="repair-workbench-number">02</span>
+                    <h3>What do we check before quoting?</h3>
+                    <span className="repair-workbench-chevron" aria-hidden="true" />
+                  </summary>
+                  <div className="repair-workbench-box-content">
+                    <article className="repair-workbench-step-card">
+                      <span>01</span>
+                      <div>
+                        <h3>Confirm brand, model and symptoms</h3>
+                        <p>Tell us the exact laptop or bring it in so we can identify it from the label or model markings.</p>
+                      </div>
+                    </article>
+                    <article className="repair-workbench-step-card">
+                      <span>02</span>
+                      <div>
+                        <h3>Inspect the obvious fault areas</h3>
+                        <p>We check screen, battery, keyboard, charging, power and visible damage before making a recommendation.</p>
+                      </div>
+                    </article>
+                    <article className="repair-workbench-step-card">
+                      <span>03</span>
+                      <div>
+                        <h3>Explain repair options and parts</h3>
+                        <p>We outline the practical path, likely parts and whether anything needs to be ordered.</p>
+                      </div>
+                    </article>
+                    <article className="repair-workbench-step-card">
+                      <span>04</span>
+                      <div>
+                        <h3>Start only after approval</h3>
+                        <p>Work begins once you agree to the option and timing that suits you.</p>
+                      </div>
+                    </article>
+                    <article className="repair-workbench-step-card">
+                      <span>05</span>
+                      <div>
+                        <h3>Test before handover</h3>
+                        <p>We check power, charging, display, keyboard or other repaired functions before you collect.</p>
+                      </div>
+                    </article>
+                  </div>
+                </details>
+
+                <details className="repair-workbench-box">
+                  <summary>
+                    <span className="repair-workbench-number">03</span>
+                    <h3>Which symptoms matter most?</h3>
+                    <span className="repair-workbench-chevron" aria-hidden="true" />
+                  </summary>
+                  <div className="repair-workbench-box-content">
+                    <article className="repair-workbench-mini-card">
+                      <h3>Cracked or damaged screen</h3>
+                      <p>Bring the laptop in for model identification and a screen-path assessment before any replacement is quoted.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Battery not holding charge</h3>
+                      <p>We check whether the battery is failing or whether another fault is affecting charging and power delivery.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Keyboard or key failure</h3>
+                      <p>Some keyboards are repairable, while others need a top-case or related part depending on model.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Charging or power problems</h3>
+                      <p>Loose ports, debris, cable faults and board-level issues can look similar at first.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Overheating or fan noise</h3>
+                      <p>We inspect cooling, dust and thermal behaviour before discussing service options.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Liquid exposure or no power</h3>
+                      <p>Liquid damage needs diagnosis first so we can explain the realistic repair path and risks.</p>
+                    </article>
+                  </div>
+                </details>
+
+                <details className="repair-workbench-box">
+                  <summary>
+                    <span className="repair-workbench-number">04</span>
+                    <h3>What affects timing and warranty?</h3>
+                    <span className="repair-workbench-chevron" aria-hidden="true" />
+                  </summary>
+                  <div className="repair-workbench-box-content">
+                    <article className="repair-workbench-mini-card">
+                      <h3>Parts availability</h3>
+                      <p>Some jobs move faster when the right part is already on hand. Others need ordering first.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Model and fault complexity</h3>
+                      <p>The exact laptop model and the type of fault determine the repair path and timing.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Warranty depends on the repair</h3>
+                      <p>Warranty coverage depends on the job and the part selected, and we confirm it before you approve the work.</p>
+                    </article>
+                    <article className="repair-workbench-mini-card">
+                      <h3>Data and liquid-damage caution</h3>
+                      <p>We work carefully, but any repair can carry risk, especially where liquid damage or instability is already present.</p>
+                    </article>
+                  </div>
+                </details>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
         <section className="repair-content-band" aria-labelledby="popular-brands-heading">
           <div className="repair-section-header">
-            <span>Choose your device path</span>
-            <h2 id="popular-brands-heading">Most Popular Brands</h2>
-            <p>Pick the brand first, then choose your exact model for live repair options and pricing.</p>
+            <span>{isLaptop ? 'Choose your laptop path' : 'Choose your device path'}</span>
+            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : 'Most Popular Brands'}</h2>
+            <p>
+              {isLaptop
+                ? 'Start with the brand that matches your laptop. Windows laptop brands appear first, while MacBook stays on the dedicated Apple laptop hub so this page remains broad.'
+                : 'Pick the brand first, then choose your exact model for live repair options and pricing.'}
+            </p>
           </div>
 
           {topBrands.length > 0 ? (
@@ -380,7 +584,26 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
           )}
 
-          {category !== 'laptop' && otherBrands.length > 0 && (
+          {isLaptop ? (
+            <>
+              <div className="repair-section-header repair-section-header-compact">
+                <span>Apple laptop pathway</span>
+                <h3>MacBook repair options</h3>
+                <p>Use the dedicated MacBook hub if your laptop is an Apple notebook. That keeps the broad laptop page focused on the wider category.</p>
+              </div>
+              <div className="brand-grid-standard">
+                {otherBrands.length > 0 ? otherBrands.map(b => (
+                  <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
+                    {b.brand}
+                  </Link>
+                )) : (
+                  <Link href="/repairs/laptop/macbook" prefetch={true} className="brand-card-standard">
+                    Explore MacBook repair options
+                  </Link>
+                )}
+              </div>
+            </>
+          ) : otherBrands.length > 0 && (
             <>
               <div className="repair-section-header repair-section-header-compact">
                 <span>Extended catalogue</span>
@@ -402,16 +625,21 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <div>
               <span className="repair-kicker repair-kicker-muted">
                 <MessageCircle size={15} strokeWidth={2.4} aria-hidden="true" />
-                Model check
+                Ringwood Square kiosk
               </span>
-              <h2 id="model-help-heading">Not sure which model you have?</h2>
-              <p>Use our Live Quote tool or call us. We can identify your device and give you a practical price before you travel.</p>
+              <h2 id="model-help-heading">Visit us in Ringwood Square</h2>
+              <p>Ali Mobile &amp; Repair, Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Opposite the Bunnings entrance inside Ringwood Square Shopping Centre. Call ahead if you want to confirm parts, timing or the right laptop path before travelling.</p>
             </div>
             <div className="repair-assist-actions">
               <Link href="/book-repair" prefetch={true} className="repair-primary-action">
-                Get a Live Quote
+                Book a Repair
               </Link>
-              <ChatNowButton className="repair-secondary-action" />
+              <a href={laptopDirectionsHref} className="repair-secondary-action" target="_blank" rel="noopener noreferrer">
+                Get Directions
+              </a>
+              <a href="tel:0481058514" className="repair-secondary-action">
+                Call 0481 058 514
+              </a>
             </div>
           </section>
         </ScrollReveal>
@@ -420,7 +648,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           <section className="repair-content-band" aria-labelledby="why-choose-heading">
             <div className="repair-section-header">
               <span>Repair clarity</span>
-              <h2 id="why-choose-heading">Why Choose Us?</h2>
+              <h2 id="why-choose-heading">Why Choose Our Laptop Hub?</h2>
               <p>{data.hero.intro2}</p>
             </div>
 
