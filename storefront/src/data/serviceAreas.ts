@@ -1192,6 +1192,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Stud Road", "Knox Park", "Burwood Highway"],
     route: "Drive north via Stud Road and Boronia Road or use EastLink toward Ringwood Square.",
     localReason: "Knoxfield customers can phone ahead for symptom checks and avoid unnecessary travel if parts need to be ordered.",
+    metaTitle: "Knoxfield Phone, Tablet & Work-Device Diagnostics | Ringwood",
+    metaDescription: "Phone, tablet, and work-device diagnostics for Knoxfield trade and residential customers. Kiosk C1 at Ringwood Square provides upfront checks. Call first.",
+    customH1: "Phone, Tablet and Work-Device Diagnostics for Knoxfield Customers",
+    customIntro: "For Knoxfield trade workers, businesses, and residential customers, our Ringwood Square bench offers upfront device diagnostics. We inspect charging port problems, USB-C faults, battery drain, and damaged screens on work phones, Samsung devices, tablets, and laptops, verifying the repair scope before any components are ordered.",
+    customLocalSection: {
+      title: "Driving & Transit Routes from Knoxfield",
+      paragraphs: [
+        "Driving north from Knoxfield via Stud Road and Boronia Road, or connecting via Ferntree Gully Road and EastLink typically takes about 18 minutes depending on traffic. Ringwood Square Shopping Centre has free parking in front.",
+        "If using public transport, the SmartBus 901 runs from the Stud Road or Burwood Highway corridor toward Ringwood Station."
+      ]
+    },
+    customScenarioSection: {
+      title: "Knoxfield Work & Trade Device Diagnostics",
+      paragraphs: [
+        "A tradesperson, local worker or family customer brings in a device with a loose charging connection, damaged screen, battery drain or USB-C problem and wants a clear diagnosis first.",
+        "We welcome enquiries about multiple business or work devices. Timing, pricing and parts availability are assessed based on the number of devices and the work required."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile storefront located in Knoxfield?",
+        answer: "No. Our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Knoxfield is typically an 18-minute drive north."
+      },
+      {
+        question: "Do you offer fleet contracts or priority business accounts for Knoxfield?",
+        answer: "No. We welcome enquiries about multiple business or work devices. However, we do not imply or guarantee an existing fleet contract, corporate account pricing, priority business queues, guaranteed bulk turnaround, or guaranteed component stock. Timing, pricing and parts availability are assessed based on the number of devices and the work required."
+      },
+      {
+        question: "How fast do you swap common screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Knoxfield customers?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you charge a diagnostic fee if the device is unrepairable?",
+        answer: "We apply a No Fix, No Charge policy to eligible diagnostic jobs. If a bench check reveals severe logic board damage that cannot be repaired, you will not pay the repair fee."
+      },
+      {
+        question: "How do you clean blocked USB-C or Lightning ports?",
+        answer: "If the port is clogged with industrial dust or lint, we clean it using our paid professional cleaning service. If the port has broken pins, we provide a replacement quote."
+      },
+      {
+        question: "Do you repair laptop screen and power issues?",
+        answer: "Yes, we diagnose laptop screens, keyboards, and battery faults at our Ringwood Square counter."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "work-device and USB-C diagnostics for Knoxfield customers" },
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Knoxfield iPhone and Samsung repair options" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component checks near Knoxfield" }
+    ]
   },
   {
     name: "Rowville",
@@ -1263,6 +1316,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Springvale Road", "Mullum Mullum Creek Trail", "EastLink"],
     route: "Drive via Springvale Road, Maroondah Highway, or EastLink toward Ringwood Square.",
     localReason: "Donvale customers are close enough for fast diagnostics while still getting specialist phone, tablet, laptop, and watch support.",
+    metaTitle: "Donvale Phone, Tablet & Laptop Repair | Ringwood Square",
+    metaDescription: "Transparent phone, tablet, and laptop repair assessments for Donvale residents. Visit Kiosk C1 at Ringwood Square for hardware checks.",
+    customH1: "Phone, Tablet and Laptop Repair Assessments for Donvale Customers",
+    customIntro: "For Donvale families and professionals, our kiosk in Ringwood Square provides transparent, face-to-face advice. Whether your device has display lines, a worn battery, or charging issues, we explain our hardware assessment and part choices clearly before you approve any repair work.",
+    customLocalSection: {
+      title: "Transit and Driving Connections from Donvale",
+      paragraphs: [
+        "Driving from Donvale is direct. Head east via Doncaster Road, Mitcham Road, or connect via EastLink, which typically takes about 14 minutes depending on traffic. Ringwood Square provides a spacious parking lot.",
+        "If you are taking public transport, you can use local bus connections toward Ringwood and nearby train services, such as catching the SmartBus 902 toward Nunawading Station and transferring to the Lilydale or Belgrave train line."
+      ]
+    },
+    customScenarioSection: {
+      title: "Donvale Professional & Family Device Scenarios",
+      paragraphs: [
+        "We frequently assess work laptops, personal phones, or family iPads brought in by Donvale residents. We run diagnostic tests on the charging port draw, battery depletion rate, or touch panel responsiveness.",
+        "We explain the repair options and provide a detailed quote before ordering any components or beginning the repair, ensuring you understand the practical value of the work."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile store located in Donvale?",
+        answer: "No. Our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Donvale is typically a 14-minute drive away."
+      },
+      {
+        question: "Do you offer business-account priority or fleet agreements for Donvale companies?",
+        answer: "No. We do not offer specialized business-account priority or fleet service contracts. We provide standard high-quality, competitive repairs to all business owners, professionals, and families."
+      },
+      {
+        question: "How long do common screen or battery replacements take?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do you guarantee same-day turnaround for Donvale walk-ins?",
+        answer: "No. While many common screen and battery repairs are fast, complex diagnostics or out-of-stock components may require additional time. We do not guarantee same-day completion."
+      },
+      {
+        question: "What is the warranty policy for Donvale customers?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "What is your policy if a device cannot be repaired?",
+        answer: "We apply a No Fix, No Charge policy to eligible diagnostic jobs. If we perform a bench inspection and find a motherboard issue that is not repairable, you will not pay the repair fee."
+      },
+      {
+        question: "Do you charge for clearing a blocked charging port?",
+        answer: "If the charging port is clogged with pocket lint or dirt blocking the contacts, we offer a paid professional cleaning service. If the port has broken internal contacts, we will quote on a replacement."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "phone and tablet assessments for Donvale customers" },
+      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "MacBook and laptop diagnostics near Donvale" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Donvale Samsung charging port assessments" }
+    ]
   },
   {
     name: "Park Orchards",
@@ -1272,6 +1378,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Park Orchards Village", "Ringwood-Warrandyte Road", "Stintons Reserve"],
     route: "Drive south via Park Road or Ringwood-Warrandyte Road into Ringwood Square.",
     localReason: "Park Orchards customers can reach Ringwood quickly for local repair assessment without travelling into the CBD.",
+    metaTitle: "Phone, Tablet and Laptop Repair Advice for Park Orchards",
+    metaDescription: "Device repair advice for Park Orchards residents. Visit Kiosk C1 at Ringwood Square for screen, battery, and charging checks. Call first.",
+    customH1: "Device Repair Advice for Park Orchards Residents",
+    customIntro: "For Park Orchards families and residents, we offer clear advice on phone, tablet, and laptop hardware issues. We help you check parts availability and timing options before you travel so you can plan your visit to Ringwood Square efficiently.",
+    customLocalSection: {
+      title: "Driving Routes from Park Orchards",
+      paragraphs: [
+        "Travelling from Park Orchards is straightforward. Driving south via Park Road, Warrandyte Road, or connecting through Ringwood North routes typically takes about 12 minutes depending on traffic.",
+        "Ringwood Square Shopping Centre has free open-air parking near Coles, making it easy to drop off your device at our kiosk."
+      ]
+    },
+    customScenarioSection: {
+      title: "Park Orchards Device Visit Planning",
+      paragraphs: [
+        "We recommend that Park Orchards residents call us before visiting to confirm their device's model and likely fault description. This helps us check whether parts may need ordering and explain expected repair timing.",
+        "At our kiosk, we run counter checks on power draw or display lines, providing a detailed quote first to help you decide if a repair is worthwhile."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you offer a pickup or mobile repair service in Park Orchards?",
+        answer: "No. We do not provide a mobile home-call repair service or a collection or pickup service in Park Orchards. All assessments and repairs are performed in-person at our kiosk."
+      },
+      {
+        question: "Is there an Ali Mobile store inside Park Orchards?",
+        answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Park Orchards is typically about a 12-minute drive south."
+      },
+      {
+        question: "Do you guarantee that repair parts are always in stock?",
+        answer: "No. We do not guarantee parts availability. We recommend calling 0481 058 514 before travelling so we can verify if the specific display or battery is in stock and reserve it for your visit."
+      },
+      {
+        question: "How fast do you swap common screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Park Orchards residents?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "What is if my phone has a loose charging port connection?",
+        answer: "We inspect the port under magnification. If it is clogged with dirt, we clean it using our paid professional cleaning service. If the port pins are broken, we quote on a port replacement."
+      },
+      {
+        question: "Do you apply a No Fix No Charge policy?",
+        answer: "Yes. For eligible hardware diagnostics, if a desk inspection reveals the device has suffered unrepairable board damage, you will not pay the repair fee."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "device repair planning for Park Orchards residents" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad screen replacements near Park Orchards" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Park Orchards phone battery checks" }
+    ]
   },
   {
     name: "Warrandyte",
@@ -1281,6 +1440,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Warrandyte Village", "Yarra Street", "Ringwood-Warrandyte Road"],
     route: "Drive via Ringwood-Warrandyte Road directly into Ringwood Square.",
     localReason: "Warrandyte customers can call first, confirm the likely repair path, and visit Ringwood only when it is worth the trip.",
+    metaTitle: "Warrandyte Phone, Battery & Charging Assessments | Ringwood",
+    metaDescription: "Phone, battery, and charging assessments for Warrandyte. Kiosk C1 at Ringwood Square provides moisture checks and hardware inspections. Call first.",
+    customH1: "Phone, Battery and Charging Assessments for Warrandyte Customers",
+    customIntro: "For Warrandyte residents travelling via the Warrandyte Road corridor, our kiosk inside Ringwood Square Shopping Centre provides careful hardware assessments. We examine display cracks, battery wear, camera faults, and moisture exposure on devices used for outdoor and daily activities, helping you plan your visit.",
+    customLocalSection: {
+      title: "Corridor Travel from Warrandyte",
+      paragraphs: [
+        "Driving south from the Yarra River along the Ringwood-Warrandyte Road corridor typically takes about 18 minutes depending on traffic. Ringwood Square has a spacious free parking lot.",
+        "If you are taking public transport, you can use Bus 364 to Ringwood Station or other local bus connections along the Warrandyte Road corridor."
+      ]
+    },
+    customScenarioSection: {
+      title: "Warrandyte Moisture & Hardware Diagnostics",
+      paragraphs: [
+        "We frequently see devices exposed to moisture, drops, or dust from outdoor use in Warrandyte. We perform a hands-on assessment to verify whether the screen, battery, charging port, or internal components are damaged.",
+        "For liquid-exposed devices, we open the housing to check for corrosion and identify which parts require replacement before providing a cost estimate."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile store in Warrandyte?",
+        answer: "No. Our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Warrandyte is typically an 18-minute drive south."
+      },
+      {
+        question: "Can you guarantee recovery of liquid-exposed devices?",
+        answer: "No. Our hardware inspection does not guarantee repair success for liquid-exposed devices. Furthermore, data recovery is not guaranteed, and original water resistance cannot be guaranteed after repair, as internal corrosion and damage may continue to develop over time."
+      },
+      {
+        question: "Can you repair a water-damaged device on the same day?",
+        answer: "No. Liquid-exposure jobs require thorough cleaning, corrosion removal, and drying, which depends on the severity. We cannot promise same-day completion, and liquid-damage repairs are not covered by the 15–45 minute common repair turnaround."
+      },
+      {
+        question: "How fast do you swap common screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Warrandyte customers?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "What is your policy if a device is unrepairable?",
+        answer: "We apply our No Fix, No Charge policy to eligible diagnostic jobs. If our bench test reveals the motherboard has suffered unrepairable damage, you will not pay the repair fee."
+      },
+      {
+        question: "How do you clean blocked charging ports?",
+        answer: "If the charging port is clogged with lint or dirt, we clear it using our paid professional cleaning service. If the port contacts are damaged, we quote a component replacement."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "charging and moisture checks near Warrandyte" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Warrandyte iPhone battery diagnostics" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component checks near Warrandyte" }
+    ]
   },
   {
     name: "Blackburn",
@@ -1299,6 +1511,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Wonga Road", "Warranwood Reserve", "Yarra Valley Grammar"],
     route: "Drive south along Wonga Road and connect into Ringwood Square via Maroondah Highway.",
     localReason: "A nearby option for families and commuters who want quick assessment, honest pricing, and warranty support.",
+    metaTitle: "Warranwood Phone & iPad Repair Checks | Ringwood Square",
+    metaDescription: "Phone and iPad repair assessments near Warranwood. Kiosk C1 at Ringwood Square provides hands-on display and battery checks for local families.",
+    customH1: "Phone and iPad Repair Checks near Warranwood",
+    customIntro: "For Warranwood families and residents, our kiosk inside Ringwood Square Shopping Centre is a short trip via Wonga Road. We provide counter assessments for cracked displays, touch failures, battery wear, and charging issues on personal phones and iPads used for school or study.",
+    customLocalSection: {
+      title: "Getting to Ringwood Square from Warranwood",
+      paragraphs: [
+        "Warranwood is located close to our Ringwood bench. Driving south via Wonga Road or Plymouth Road typically takes about 10 minutes depending on traffic. Free parking is available right outside Ringwood Square.",
+        "Our kiosk is situated inside the shopping centre, making it convenient to drop off your device while running errands in Ringwood."
+      ]
+    },
+    customScenarioSection: {
+      title: "Warranwood Family Device Diagnostics",
+      paragraphs: [
+        "A family brings in a phone or an iPad used for school or study with damaged glass, touch faults, battery wear or unreliable charging and wants to know whether repair is practical.",
+        "We inspect the display assembly and power system at our counter, explaining the repair steps and cost upfront so you can make a practical decision."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile storefront located in Warranwood?",
+        answer: "No. Our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Warranwood is typically a short 10-minute drive away."
+      },
+      {
+        question: "Do you have partnerships with schools in Warranwood?",
+        answer: "No. We do not imply or hold any school partnerships. We assist parents and students independently with repairs for personal or school-use devices."
+      },
+      {
+        question: "Do you guarantee repair completion on the same visit?",
+        answer: "No. While many common screen and battery repairs are completed quickly, we do not guarantee same-visit completion, as turnaround depends on parts availability and testing requirements."
+      },
+      {
+        question: "How fast do you swap common screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Warranwood families?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "What is your policy if a device is unrepairable?",
+        answer: "We apply our No Fix, No Charge policy to eligible diagnostic jobs. If our desk inspection reveals the device has suffered unrepairable damage, you will not pay the repair fee."
+      },
+      {
+        question: "How do you clean blocked charging ports?",
+        answer: "If your charging port is blocked with debris or pocket lint, we clean it using our paid professional cleaning service. If the port itself is physically damaged, we will offer a replacement quote."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and phone repair options for Warranwood families" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Warranwood iPhone battery replacement options" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung phone repair checks near Warranwood" }
+    ]
   },
 ];
 
