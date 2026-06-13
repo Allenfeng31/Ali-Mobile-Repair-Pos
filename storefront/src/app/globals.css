@@ -3420,6 +3420,15 @@ input:checked+.toggle-slider:before {
     padding: 132px 1rem 4rem;
   }
 
+  .location-hero-copy {
+    padding: 1.25rem;
+  }
+
+  .location-hero-copy h1 {
+    font-size: clamp(1.6rem, 6vw, 2.1rem);
+    line-height: 1.05;
+  }
+
   .location-hero-copy,
   .location-route-card,
   .location-story-card,

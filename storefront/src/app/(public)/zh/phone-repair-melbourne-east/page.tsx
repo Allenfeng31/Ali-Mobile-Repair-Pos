@@ -145,7 +145,7 @@ const faqs = [
   {
     question: "维修需要预约吗？",
     answer:
-      "Walk-in 到店咨询通常可以，但在线预约有助于我们提前查看机型、零件和时间安排。较远地区客户建议来店前先致电确认。",
+      "通常可以直接到店咨询，但在线预约有助于我们提前查看机型、零件和时间安排。较远地区客户建议来店前先致电确认。",
   },
   {
     question: "可以先确认零件和维修时间吗？",
@@ -195,7 +195,7 @@ const internalLinks = [
 
 export default function ChineseRepairHubPage() {
   return (
-    <main className={styles.page} lang="zh-Hans">
+    <div className={styles.page} lang="zh-Hans">
       <nav className={styles.breadcrumb} aria-label="面包屑导航">
         <Link href="/">首页</Link>
         <span aria-hidden="true">/</span>
@@ -333,7 +333,7 @@ export default function ChineseRepairHubPage() {
           <ul>
             <li>进水、主板或不开机问题</li>
             <li>数据恢复或复杂诊断</li>
-            <li>MacBook top-case、键盘总成等大型维修</li>
+            <li>MacBook 上盖及键盘总成等大型维修</li>
             <li>需要订购零件或进一步测试的维修</li>
           </ul>
         </div>
@@ -396,7 +396,7 @@ export default function ChineseRepairHubPage() {
           <span className={styles.kicker}>来店前确认</span>
           <h2 id="final-chinese-cta-heading">先确认机型、零件和预计时间，再决定是否到店</h2>
           <p>
-            如果你从墨尔本东区其他 suburb 前来，建议先致电说明设备型号和故障情况。我们会尽量帮你确认维修选择、零件和预计时间。
+            如果你准备从其他区或郊区前来，建议先致电说明设备型号和故障情况。我们会尽量帮你确认维修选择、零件和预计时间。
           </p>
         </div>
         <div className={styles.finalActions}>
@@ -426,6 +426,6 @@ export default function ChineseRepairHubPage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }
