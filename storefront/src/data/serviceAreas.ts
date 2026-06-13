@@ -40,6 +40,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Ringwood East Station", "Maroondah Highway", "Ringwood Lake"],
     route: "Head west toward Ringwood Square and use the centre parking near Maroondah Highway.",
     localReason: "Close enough for quick diagnostics, model checks, and same-day collection on common repairs.",
+    metaTitle: "Ringwood East Phone & Device Repairs | Ringwood Square Kiosk C1",
+    metaDescription: "Need phone, screen, or iPad repairs in Ringwood East? Drop by Kiosk C1 at Ringwood Square for face-to-face checks before any work begins. Read route guides.",
+    customH1: "Quick Phone and Device Assessments for Ringwood East Locals",
+    customIntro: "For Ringwood East residents, our specialist kiosk inside Ringwood Square Shopping Centre provides prompt, face-to-face device assessments just a short distance away. Instead of guessing the fault or waiting on remote quotes, you can visit our counter for a physical inspection of screen, battery, charging, and iPad issues before any repair begins.",
+    customLocalSection: {
+      title: "Travelling from Ringwood East to Kiosk C1",
+      paragraphs: [
+        "Getting here from Ringwood East is extremely simple and direct. You can drive west via Dublin Road or Maroondah Highway, which typically takes about 5 minutes depending on traffic. Ample parking is available right at Ringwood Square near the entrance.",
+        "If you prefer public transport, take the Lilydale line train from Ringwood East Station to Ringwood Station. The train ride is only around 3 minutes. From the station exit, it is just a brief walk across the street past Coles to our kiosk."
+      ]
+    },
+    customScenarioSection: {
+      title: "Ringwood East Customer Repair Scenarios",
+      paragraphs: [
+        "Many Ringwood East locals drop in to combine a device assessment with their weekly shopping or errands at Ringwood Square. Whether it is a cracked phone screen or an iPad that will not turn on, we perform bench diagnostics in your presence.",
+        "We inspect the display connectors, test the charging current, and check the battery cycle count. Once we find the cause, we confirm the price, parts path, and expected timing so you can make an informed choice before any work begins."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile storefront in Ringwood East?",
+        answer: "No. We operate exclusively from Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood. Ringwood East is typically a 5-minute drive or a short 3-minute train ride away."
+      },
+      {
+        question: "Do I need to book an appointment from Ringwood East?",
+        answer: "Walk-ins are always welcome. However, letting us know your model and symptoms beforehand helps us reserve parts and schedule bench time for your visit."
+      },
+      {
+        question: "How fast can you replace a screen or battery for a Ringwood East visitor?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do you offer face-to-face checks for Ringwood East customers?",
+        answer: "Yes. We inspect the hardware at our counter in your presence, confirming the fault and the final quote before starting any paid repair work."
+      },
+      {
+        question: "What if my iPad has a cracked screen or touch issue?",
+        answer: "We can perform an iPad glass and display assessment at our bench, explaining the replacement path and checking parts availability for your specific iPad generation."
+      },
+      {
+        question: "Can you claim a warranty on repairs if I live in Ringwood East?",
+        answer: "Yes. All standard replacements include our 6-month warranty on parts and labour, which is claimable directly at our Ringwood Square desk."
+      },
+      {
+        question: "What is your policy if a device cannot be fixed?",
+        answer: "We apply a 'No Fix, No Charge' policy to eligible diagnostics. If we inspect your phone and find severe board-level damage that makes it unrepairable, you will not pay the repair fee."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Ringwood East iPhone screen assessment options" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery checks near Ringwood East" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display diagnostics for Ringwood East residents" }
+    ]
   },
   {
     name: "Ringwood North",
@@ -49,6 +102,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Warrandyte Road", "Ringwood North Shopping Centre", "EastLink"],
     route: "Come down Warrandyte Road, then enter Ringwood Square from the Maroondah Highway side.",
     localReason: "A practical nearby option when you want specialist device repair without heading into the CBD.",
+    metaTitle: "Ringwood North Phone & Tablet Checks | Kiosk C1 Ringwood Square",
+    metaDescription: "Need phone screen, touch fault, or battery checks near Ringwood North? Drive south along Warrandyte Road to Kiosk C1, Ringwood Square for hands-on diagnostics.",
+    customH1: "Phone, Tablet and Battery Checks near Ringwood North",
+    customIntro: "Located just a short drive south along Warrandyte Road, our Ringwood Square kiosk offers hands-on diagnostics and troubleshooting for Ringwood North residents. We specialize in face-to-face counter checks for screen lines, touch faults, unexpected battery drain, and charging port issues, ensuring a clear diagnostic review before any parts are reserved.",
+    customLocalSection: {
+      title: "Transit & Drive Guide from Ringwood North",
+      paragraphs: [
+        "Driving from Ringwood North is very straightforward. Head directly south along Warrandyte Road, which typically takes about 7 minutes depending on traffic. You can park in the main Ringwood Square Shopping Centre lot for easy counter access.",
+        "If you are taking public transport, catch a local bus along the Warrandyte Road corridor towards Ringwood Station, then walk a few minutes into the shopping centre near Coles."
+      ]
+    },
+    customScenarioSection: {
+      title: "Ringwood North Device Inspection Scenarios",
+      paragraphs: [
+        "We frequently help Ringwood North residents whose devices are displaying vertical screen lines or failing to respond to touch inputs. Instead of booking a blind repair, you can walk in or schedule a check so we can open the housing and test the display panel's connections.",
+        "If your device experiences unexpected shutdowns, we inspect the battery's health and system logs to identify if the battery is failing or if a background software loop is causing the drain, explaining the options clearly at the counter."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Are you physically located in Ringwood North?",
+        answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Seymour Street, Ringwood. Ringwood North is typically about a 7-minute drive south down Warrandyte Road."
+      },
+      {
+        question: "What should I do if my phone screen shows lines or touch faults?",
+        answer: "We recommend bringing it in for a face-to-face check. We can inspect if the display flex cable is loose or if the screen digitizer has suffered impact damage."
+      },
+      {
+        question: "How long does a screen or battery swap take for Ringwood North walk-ins?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do I need an appointment for a battery check?",
+        answer: "Walk-ins are welcome for battery diagnostics. However, booking online helps us reserve the correct replacement battery for your specific model in advance."
+      },
+      {
+        question: "What parking options do you have for Ringwood North visitors?",
+        answer: "Ringwood Square has a large, free open-air car park. You can park close to the centre entrances and walk straight to Kiosk C1 (near Coles)."
+      },
+      {
+        question: "Can you diagnose tablet issues for Ringwood North families?",
+        answer: "Yes. We test iPads and other tablet models for screen cracks, charging ports, and power draw issues directly at our Ringwood bench."
+      },
+      {
+        question: "Do you apply a No Fix No Charge policy?",
+        answer: "Yes, our 'No Fix, No Charge' policy applies to eligible diagnostic services if the device is found to be unrepairable due to motherboard damage."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Ringwood North iPhone touch & screen diagnostics" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "battery health & drainage checks near Ringwood North" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "tablet screen checks for Ringwood North families" }
+    ]
   },
   {
     name: "Heathmont",
@@ -58,6 +164,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Heathmont Station", "Canterbury Road", "Dandenong Creek Trail"],
     route: "Drive north toward Maroondah Highway and park at Ringwood Square Shopping Centre.",
     localReason: "Heathmont customers can get a quick quote before committing to screen, battery, or charging repairs.",
+    metaTitle: "Heathmont Device Repairs & Battery Checks | Ringwood Square C1",
+    metaDescription: "Need phone, battery, or charging checks in Heathmont? Visit Kiosk C1 at Ringwood Square for diagnostics, battery replacements, and iPad assessments.",
+    customH1: "Screen, Battery and Charging Checks for Heathmont Customers",
+    customIntro: "For Heathmont residents, our Kiosk C1 repair desk inside Ringwood Square Shopping Centre is located just a short drive north. We offer professional diagnostics to distinguish simple charging port debris from actual hardware failure, along with battery-health checks, battery replacement options, and iPad touch or display assessments.",
+    customLocalSection: {
+      title: "Getting to Ringwood Square from Heathmont",
+      paragraphs: [
+        "Travel from Heathmont is very convenient. Driving north via Canterbury Road and Great Ryrie Street typically takes about 5 minutes depending on traffic. Ringwood Square has a spacious free parking lot near Coles.",
+        "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (a short 4-minute trip), then walk across the road directly into Ringwood Square."
+      ]
+    },
+    customScenarioSection: {
+      title: "Heathmont Charging & Battery Triage Scenarios",
+      paragraphs: [
+        "Many Heathmont customers bring in devices that refuse to charge. Rather than automatically quoting a port replacement, we inspect the port under magnification. If it is simply packed with lint or dust, we perform a professional cleaning, which solves the issue for a cleaning fee instead of a parts fee.",
+        "For older phones, we run battery-health diagnostics. We measure the charge capacity and explain replacement options so you can choose between premium battery tiers with clear quote information."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a phone repair kiosk in Heathmont?",
+        answer: "No. Our physical shop is located at Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Heathmont is just a short 5-minute drive north or a 4-minute train ride away."
+      },
+      {
+        question: "How do you check if my phone just needs a charging port clean?",
+        answer: "We inspect the port for debris under magnification at our bench. If we find compressed lint, we clean it out; if that restores power, you pay a cleaning fee instead of a port replacement."
+      },
+      {
+        question: "How long does a battery replacement take for Heathmont locals?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Can you run battery health checks for my device?",
+        answer: "Yes. We test your battery capacity and check for cycle wear or voltage drops to recommend the best battery replacement option."
+      },
+      {
+        question: "Do you perform iPad touch and screen assessments?",
+        answer: "Yes. We inspect iPads for screen cracks, touch responsiveness faults, and frame alignment at our Ringwood Square counter."
+      },
+      {
+        question: "What is your No Fix No Charge policy for Heathmont visitors?",
+        answer: "On eligible repairs, if we open and diagnose your device and determine it cannot be repaired due to major board issues, you won't be charged the repair fee."
+      },
+      {
+        question: "Do I need to book a spot before driving from Heathmont?",
+        answer: "You are welcome to walk in. However, booking online helps us ensure we have the replacement screen or battery in stock for your visit."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Heathmont battery replacement options" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging diagnostics and clean services near Heathmont" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display & touch assessments for Heathmont" }
+    ]
   },
   {
     name: "Croydon",
@@ -271,6 +430,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Knox Private Hospital", "EastLink", "Stud Road"],
     route: "Take EastLink north, exit toward Ringwood, then park at Ringwood Square.",
     localReason: "Good for customers who want to call first, confirm pricing, then visit only when the repair path is clear.",
+    metaTitle: "Wantirna Phone & Tablet Repair Assessments | Ringwood C1",
+    metaDescription: "Need phone or tablet repair checks near Wantirna? We provide face-to-face assessments for iPad, Samsung, and iPhone display or charging problems at Ringwood Square.",
+    customH1: "Phone and Tablet Repair Assessments for Wantirna Residents",
+    customIntro: "Our kiosk at Ringwood Square Shopping Centre offers Wantirna residents clear, face-to-face diagnostics and device assessments. We inspect display, touch, and charging problems on iPads, Samsung devices, and iPhones, ensuring we confirm parts, pricing, and estimated turnaround times before any repair work starts.",
+    customLocalSection: {
+      title: "Transit Paths from Wantirna to Ringwood Square",
+      paragraphs: [
+        "Wantirna residents have direct road links to our shop. Driving straight north via Wantirna Road or using EastLink typically takes about 12 minutes depending on traffic. Ample parking is available at Ringwood Square.",
+        "By public transport, you can catch the SmartBus 901 towards Ringwood Station from corridors along Wantirna Road, then walk 5 minutes into the shopping centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Wantirna iPad & Samsung Assessment Scenarios",
+      paragraphs: [
+        "When Wantirna families bring in an iPad or Samsung Galaxy with touch unresponsiveness or cracked glass, we perform a counter inspection to verify the underlying damage. We explain the screen repair options face-to-face and confirm if replacement digitizers are in stock.",
+        "For charging issues, we test the power draw at our bench. We confirm whether the issue is a simple cable fault, a clogged port, or a damaged charging IC, giving you a transparent quote before you authorize any work."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile & Repair store inside Wantirna?",
+        answer: "No. We operate exclusively from Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood. Wantirna is typically about a 12-minute drive north via Wantirna Road."
+      },
+      {
+        question: "Can I get an iPad repair quote before leaving Wantirna?",
+        answer: "We can provide price ranges online or over the phone, but we recommend a quick bench inspection at our kiosk to verify the exact parts needed."
+      },
+      {
+        question: "How fast do you complete battery and screen repairs for Wantirna clients?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do you accept commercial or multiple-device enquiries from Wantirna?",
+        answer: "Yes. We accept commercial enquiries and can inspect multiple iPads, tablets, or phones for local businesses or schools at our Ringwood bench."
+      },
+      {
+        question: "Is parking free at Ringwood Square when driving from Wantirna?",
+        answer: "Yes, Ringwood Square provides a large open-air parking lot with free parking, making it convenient to park and walk straight to our kiosk."
+      },
+      {
+        question: "What happens if you diagnose my phone and it cannot be repaired?",
+        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostic services. If the device has terminal board damage, you won't pay the repair price."
+      },
+      {
+        question: "Do you offer warranty cover on replacement screens and batteries?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Wantirna iPad and tablet repair diagnostics" },
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone display checks near Wantirna" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung charging port repair options for Wantirna" }
+    ]
   },
   {
     name: "Doncaster",
