@@ -81,7 +81,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       },
       {
         question: "Can you claim a warranty on repairs if I live in Ringwood East?",
-        answer: "Yes. All standard replacements include our 6-month warranty on parts and labour, which is claimable directly at our Ringwood Square desk."
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
       },
       {
         question: "What is your policy if a device cannot be fixed?",
@@ -172,7 +172,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Getting to Ringwood Square from Heathmont",
       paragraphs: [
         "Travel from Heathmont is very convenient. Driving north via Canterbury Road and Great Ryrie Street typically takes about 5 minutes depending on traffic. Ringwood Square has a spacious free parking lot near Coles.",
-        "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (a short 4-minute trip), then walk across the road directly into Ringwood Square."
+        "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (typically around a 4-minute trip), then walk across the road directly into Ringwood Square."
       ]
     },
     customScenarioSection: {
@@ -267,7 +267,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       },
       {
         question: "Do you offer warranty cover on repairs for Croydon clients?",
-        answer: "Yes, our repairs include our standard 6-month warranty on parts and labour, which is claimable directly at our Ringwood Square counter."
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
       },
       {
         question: "How long should I expect to wait for a battery replacement?",
@@ -358,7 +358,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Getting to Ringwood Square from Nunawading",
       paragraphs: [
         "If you are commuting from Nunawading, driving straight east along Maroondah Highway (Whitehorse Road) takes you past Mitcham directly to Ringwood Square in under 10 minutes. The centre offers easy parking access for quick drop-offs.",
-        "If you prefer public transport, take the Belgrave or Lilydale train from Nunawading Station. The train ride is only 7 minutes to Ringwood Station. Our kiosk is located just across the road inside Ringwood Square Shopping Centre."
+        "If you prefer public transport, take the Belgrave or Lilydale train from Nunawading Station. The train ride is typically around 7 minutes to Ringwood Station. Our kiosk is located just across the road inside Ringwood Square Shopping Centre."
       ]
     },
     customScenarioSection: {
@@ -697,7 +697,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Follow Canterbury Road east, then connect toward Ringwood Square.",
     localReason: "Customers from Vermont can phone ahead for a model check and avoid unnecessary travel if parts are unavailable.",
     metaTitle: "Vermont Phone & iPad Repair Assessments | Ringwood Square Kiosk",
-    metaDescription: "Differentiated phone and iPad repair checks for Vermont families. Visit Kiosk C1 at Ringwood Square for hands-on battery and screen diagnostics.",
+    metaDescription: "Professional phone and iPad repair checks for Vermont families. Visit Kiosk C1 at Ringwood Square for hands-on battery and screen diagnostics.",
     customH1: "Phone and iPad Repair Assessments for Vermont Families",
     customIntro: "Located close to Mitcham and Nunawading, our Ringwood Square kiosk is the primary destination for Vermont families looking for practical, face-to-face device triage. We inspect personal phones and school iPads, helping you determine if a touch, screen, or battery repair is worthwhile before you commit to any costs.",
     customLocalSection: {
@@ -1441,9 +1441,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Drive via Ringwood-Warrandyte Road directly into Ringwood Square.",
     localReason: "Warrandyte customers can call first, confirm the likely repair path, and visit Ringwood only when it is worth the trip.",
     metaTitle: "Warrandyte Phone, Battery & Charging Assessments | Ringwood",
-    metaDescription: "Phone, battery, and charging assessments for Warrandyte. Kiosk C1 at Ringwood Square provides moisture checks and hardware inspections. Call first.",
+    metaDescription: "Professional phone, camera, and charging port checks for Warrandyte residents. Visit Kiosk C1 at Ringwood Square to clear dust, debris, and resolve charging instability.",
     customH1: "Phone, Battery and Charging Assessments for Warrandyte Customers",
-    customIntro: "For Warrandyte residents travelling via the Warrandyte Road corridor, our kiosk inside Ringwood Square Shopping Centre provides careful hardware assessments. We examine display cracks, battery wear, camera faults, and moisture exposure on devices used for outdoor and daily activities, helping you plan your visit.",
+    customIntro: "For Warrandyte residents travelling via the Warrandyte Road corridor, our kiosk inside Ringwood Square Shopping Centre provides direct hardware assessments. We focus on diagnosing camera lens damage, charging port instability from dust or pocket lint, and screen wear on devices exposed to rugged outdoor use along the Yarra River.",
     customLocalSection: {
       title: "Corridor Travel from Warrandyte",
       paragraphs: [
@@ -1452,10 +1452,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Warrandyte Moisture & Hardware Diagnostics",
+      title: "Warrandyte Outdoor Use & Charging Diagnostics",
       paragraphs: [
-        "We frequently see devices exposed to moisture, drops, or dust from outdoor use in Warrandyte. We perform a hands-on assessment to verify whether the screen, battery, charging port, or internal components are damaged.",
-        "For liquid-exposed devices, we open the housing to check for corrosion and identify which parts require replacement before providing a cost estimate."
+        "We frequently assist Warrandyte residents whose phones are exposed to dirt, sand, and moisture from river walks or outdoor recreation. If a camera lens gets scratched, or the charging port becomes unstable, we perform a bench check to see if a simple cleaning or a replacement component is required.",
+        "We test charging current draw and inspect the port contacts under magnification. If dust or debris is blocking the connection, we clear it at the counter, explaining the options clearly before any parts are replaced."
       ]
     },
     customFaqs: [
@@ -1464,12 +1464,12 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "No. Our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Warrandyte is typically an 18-minute drive south."
       },
       {
-        question: "Can you guarantee recovery of liquid-exposed devices?",
-        answer: "No. Our hardware inspection does not guarantee repair success for liquid-exposed devices. Furthermore, data recovery is not guaranteed, and original water resistance cannot be guaranteed after repair, as internal corrosion and damage may continue to develop over time."
+        question: "Should I call before travelling from Warrandyte with a moisture-exposed phone?",
+        answer: "Yes, we highly recommend calling 0481 058 514 first. While we run bench checks for dampness and corrosion, we cannot guarantee recovery of liquid-damaged devices, data retrieval, or water resistance. Calling helps us discuss the severity and confirm diagnostic time slots before you travel."
       },
       {
-        question: "Can you repair a water-damaged device on the same day?",
-        answer: "No. Liquid-exposure jobs require thorough cleaning, corrosion removal, and drying, which depends on the severity. We cannot promise same-day completion, and liquid-damage repairs are not covered by the 15–45 minute common repair turnaround."
+        question: "Can dust or debris affect my phone camera or charging connection?",
+        answer: "Absolutely. Fine dust and grit from local trails can settle inside charging ports or scratch camera lens covers, causing connection failures or blurry photos. We inspect ports under magnification and clean them using our professional cleaning service, or quote a replacement if components are physically broken."
       },
       {
         question: "How fast do you swap common screens and batteries?",
@@ -1489,7 +1489,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "charging and moisture checks near Warrandyte" },
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "charging and camera diagnostics near Warrandyte" },
       { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Warrandyte iPhone battery diagnostics" },
       { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component checks near Warrandyte" }
     ]
@@ -1512,21 +1512,21 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Drive south along Wonga Road and connect into Ringwood Square via Maroondah Highway.",
     localReason: "A nearby option for families and commuters who want quick assessment, honest pricing, and warranty support.",
     metaTitle: "Warranwood Phone & iPad Repair Checks | Ringwood Square",
-    metaDescription: "Phone and iPad repair assessments near Warranwood. Kiosk C1 at Ringwood Square provides hands-on display and battery checks for local families.",
+    metaDescription: "Phone and iPad repair assessments near Warranwood. Kiosk C1 at Ringwood Square provides hands-on display and battery checks for local residents.",
     customH1: "Phone and iPad Repair Checks near Warranwood",
-    customIntro: "For Warranwood families and residents, our kiosk inside Ringwood Square Shopping Centre is a short trip via Wonga Road. We provide counter assessments for cracked displays, touch failures, battery wear, and charging issues on personal phones and iPads used for school or study.",
+    customIntro: "For Warranwood residents, our kiosk inside Ringwood Square Shopping Centre is a very short drive down Wonga Road or Plymouth Road. We provide convenient walk-in assessments for single-device issues, specializing in touch faults, cracked displays, and rapid battery wear before you plan your day's errands.",
     customLocalSection: {
       title: "Getting to Ringwood Square from Warranwood",
       paragraphs: [
-        "Warranwood is located close to our Ringwood bench. Driving south via Wonga Road or Plymouth Road typically takes about 10 minutes depending on traffic. Free parking is available right outside Ringwood Square.",
+        "Warranwood is located close to our Ringwood bench. Driving south via Wonga Road or Plymouth Road typically takes about 10 minutes depending on traffic. Free parking is available in the Ringwood Square Shopping Centre car park.",
         "Our kiosk is situated inside the shopping centre, making it convenient to drop off your device while running errands in Ringwood."
       ]
     },
     customScenarioSection: {
-      title: "Warranwood Family Device Diagnostics",
+      title: "Warranwood Local Errands & Diagnostic Visit",
       paragraphs: [
-        "A family brings in a phone or an iPad used for school or study with damaged glass, touch faults, battery wear or unreliable charging and wants to know whether repair is practical.",
-        "We inspect the display assembly and power system at our counter, explaining the repair steps and cost upfront so you can make a practical decision."
+        "A customer drops in with a single device, such as a phone showing a flickering screen, touch unresponsiveness, or quick battery depletion, wanting a fast physical check while they shop.",
+        "We perform a bench inspection under magnification at our counter, confirming if it is a simple connection issue or requires a replacement part, so you can decide how to proceed without delaying your day."
       ]
     },
     customFaqs: [
@@ -1535,8 +1535,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "No. Our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Warranwood is typically a short 10-minute drive away."
       },
       {
-        question: "Do you have partnerships with schools in Warranwood?",
-        answer: "No. We do not imply or hold any school partnerships. We assist parents and students independently with repairs for personal or school-use devices."
+        question: "Can I have a phone or iPad checked while I shop at Ringwood Square?",
+        answer: "Yes. Many Warranwood locals combine a quick counter diagnostic check with their supermarket shopping or local errands. Since we are located near Coles, you can leave your device at our bench and return after your shopping run."
       },
       {
         question: "Do you guarantee repair completion on the same visit?",
@@ -1547,12 +1547,12 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
       },
       {
-        question: "What is the warranty policy for Warranwood families?",
+        question: "What is the warranty policy for Warranwood residents?",
         answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
       },
       {
-        question: "What is your policy if a device is unrepairable?",
-        answer: "We apply our No Fix, No Charge policy to eligible diagnostic jobs. If our desk inspection reveals the device has suffered unrepairable damage, you will not pay the repair fee."
+        question: "How do you assess an iPad with working display but unreliable touch?",
+        answer: "We inspect the digitizer layer and flex cable contacts at our bench. This check helps us determine if a cracked outer glass can be replaced independently or if the entire display assembly needs swapping, keeping the quote clear before any work begins."
       },
       {
         question: "How do you clean blocked charging ports?",
@@ -1560,7 +1560,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and phone repair options for Warranwood families" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and phone repair options for Warranwood residents" },
       { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Warranwood iPhone battery replacement options" },
       { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung phone repair checks near Warranwood" }
     ]
