@@ -758,6 +758,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Springvale Station", "Springvale Road", "EastLink"],
     route: "Drive north via Springvale Road and EastLink toward Ringwood Square.",
     localReason: "Springvale customers can call first for a practical quote and decide whether repair, pickup, or another timing option makes sense.",
+    metaTitle: "Springvale Phone & Tablet Repair Assessments | Ringwood Square",
+    metaDescription: "Need phone or tablet repair options near Springvale? Contact us before travelling to confirm the device model, likely repair options and parts availability.",
+    customH1: "Phone and Tablet Repair Advice for Springvale Customers",
+    customIntro: "For Springvale customers travelling from a busy commercial and multicultural precinct, our kiosk in Ringwood Square provides transparent, face-to-face advice, helping you plan the trip with clearer information about parts, repair options and expected timing before you travel.",
+    customLocalSection: {
+      title: "Driving & Public Transport from Springvale",
+      paragraphs: [
+        "Driving north via Springvale Road and EastLink typically takes about 28 minutes depending on traffic. Ringwood Square Shopping Centre offers spacious open-air parking near Coles.",
+        "Alternatively, public transport users can take the SmartBus 902 toward Nunawading, then transfer to the Lilydale or Belgrave train line to reach Ringwood Station, which is directly opposite the shopping centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Confirming Repair Scope Before Travelling from Springvale",
+      paragraphs: [
+        "Because of the travel distance, we advise customers from Springvale to call or message us before making the trip. We can verify your device model and confirm likely parts availability to help you plan your visit.",
+        "At the kiosk, we perform a direct bench inspection of your phone or tablet, explaining the work and cost options in plain language before any repair begins."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile storefront located in Springvale?",
+        answer: "No. Our only physical storefront is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Springvale is typically about a 28-minute drive via EastLink."
+      },
+      {
+        question: "Should I contact you before travelling from Springvale?",
+        answer: "Yes, we encourage you to call 0481 058 514 first. We can check parts availability and timing for your specific model to help you organize your trip."
+      },
+      {
+        question: "How long do common screen or battery replacements take?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Springvale customers?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you repair blocked or loose charging ports?",
+        answer: "Yes. If the charging port is clogged with dust or pocket lint, we offer a paid professional cleaning service. If the port has physical damage, we can quote on a component replacement."
+      },
+      {
+        question: "What is your policy if a device cannot be repaired?",
+        answer: "We apply a No Fix, No Charge policy to eligible diagnostic jobs. If we perform a bench inspection and find a motherboard issue that is not repairable, you will not pay the repair fee."
+      },
+      {
+        question: "Do you repair iPad screen issues?",
+        answer: "Yes, we handle iPad display damage, touch responsiveness faults, and battery wear directly on our Ringwood bench."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone and Samsung repair options for Springvale customers" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad screen replacements near Springvale" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging port diagnostics for Springvale devices" }
+    ]
   },
   {
     name: "Kilsyth",
@@ -891,6 +944,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Clayton Station", "Monash University", "Ferntree Gully Road"],
     route: "Drive via Ferntree Gully Road and EastLink toward Ringwood Square.",
     localReason: "Clayton customers can call ahead to confirm whether repair, quote, or pickup support is the smartest next step.",
+    metaTitle: "Clayton Phone, Laptop & Tablet Repair | Ringwood Square C1",
+    metaDescription: "Phone, tablet, and MacBook repair diagnostics for Clayton students, professionals, and residents. Visit Kiosk C1 at Ringwood Square for hands-on quotes.",
+    customH1: "Phone, Laptop and Tablet Repair Assessments for Clayton Customers",
+    customIntro: "For students, researchers, healthcare workers and local professionals around Clayton, our Ringwood Square kiosk offers straightforward, face-to-face diagnostics. We focus on phones, tablets, laptops and MacBooks with display, keyboard, battery, charging and USB-C faults, verifying repair viability before you approve any work.",
+    customLocalSection: {
+      title: "Transit & Travel Options from Clayton",
+      paragraphs: [
+        "Driving from Clayton typically takes about 30 minutes depending on traffic, via Ferntree Gully Road and EastLink. Ringwood Square has a spacious free parking lot.",
+        "By train, you can catch the Cranbourne or Pakenham line to Richmond Station, then transfer to a Lilydale or Belgrave line train bound for Ringwood. The kiosk is a short walk from Ringwood Station."
+      ]
+    },
+    customScenarioSection: {
+      title: "Clayton Tech Assessment & Diagnostics",
+      paragraphs: [
+        "If your laptop keyboard is sticking, your iPad screen is cracked, or your phone refuses to charge, we run a counter assessment to identify the exact fault.",
+        "We discuss the available replacement components and expected timeframe, helping you confirm if a repair is worthwhile before approving the work."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile storefront located in Clayton?",
+        answer: "No. We operate exclusively from Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Clayton is typically a 30-minute drive away."
+      },
+      {
+        question: "Do you have student discounts or university partnerships?",
+        answer: "No. We do not imply or hold any Monash University or healthcare partnerships, nor do we offer corporate service contracts. We provide open, competitive pricing to all students, researchers, and local professionals."
+      },
+      {
+        question: "How long does a typical screen or battery repair take?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is your warranty policy for Clayton clients?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "How do you handle device data during repair assessments?",
+        answer: "We follow standard professional handling protocols and do not access personal folders. We do not perform factory resets without your explicit instruction. However, we do not guarantee data recovery, and keeping a backup is recommended."
+      },
+      {
+        question: "Do you clean blocked USB-C or Lightning charging ports?",
+        answer: "Yes, we clean clogged charging ports using a paid professional cleaning service to remove pocket lint. If the physical contacts are worn, we can quote on a replacement."
+      },
+      {
+        question: "What if my laptop screen or keyboard is damaged?",
+        answer: "We inspect the keyboard connection or LCD assembly at our bench to provide a detailed quote before any parts are ordered."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "laptop and phone diagnostics for Clayton devices" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Clayton iPad screen and battery options" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "USB-C charging diagnostics close to Clayton" }
+    ]
   },
   {
     name: "Lilydale",
@@ -1024,6 +1130,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Ferntree Gully Station", "Burwood Highway", "Dorset Road"],
     route: "Drive north via Burwood Highway, Dorset Road, or Mountain Highway toward Ringwood Square.",
     localReason: "Ferntree Gully customers can combine a direct train trip with transparent quotes and practical repair advice.",
+    metaTitle: "Ferntree Gully Screen, Battery & Charging Checks | Ringwood",
+    metaDescription: "Phone and tablet screen, battery, and charging assessments near Ferntree Gully. Visit Kiosk C1 at Ringwood Square for direct hands-on diagnostics.",
+    customH1: "Screen, Battery and Charging Assessments near Ferntree Gully",
+    customIntro: "For Ferntree Gully commuters and families, our kiosk inside Ringwood Square Shopping Centre provides hands-on assessments. If your device has suffered a drop, moisture exposure, or charging instability, we inspect the hardware to identify corrosion or component damage before you make a repair decision.",
+    customLocalSection: {
+      title: "Corridor Routes from Ferntree Gully to Kiosk C1",
+      paragraphs: [
+        "Driving north via Burwood Highway, Dorset Road, or Mountain Highway typically takes about 22 minutes depending on traffic. Ringwood Square has plenty of free parking.",
+        "If using public transport, the Belgrave train line connects Ferntree Gully Station directly to Ringwood Station, making the trip highly convenient. We are located just across the street inside the centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Ferntree Gully Hardware & Liquid Diagnostics",
+      paragraphs: [
+        "When a phone or tablet is dropped or exposed to damp conditions, internal issues can develop. We perform physical bench inspections to assess screen damage, battery wear, or charging port faults.",
+        "If liquid exposure has occurred, we check for corrosion. We will explain what parts need replacement, so you can decide if the repair is practical."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there a physical storefront in Ferntree Gully?",
+        answer: "No. Our storefront is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Ferntree Gully is typically a 22-minute drive or a direct train ride away."
+      },
+      {
+        question: "Can you guarantee recovery of liquid-damaged devices?",
+        answer: "No. Our hardware inspection does not guarantee recovery of water-damaged devices. Furthermore, data recovery is not guaranteed, and water resistance cannot be guaranteed after repair, as internal corrosion and damage may continue to develop over time."
+      },
+      {
+        question: "How long does a liquid damage assessment take?",
+        answer: "Liquid damage checks require detailed cleaning and drying to check for active corrosion, meaning they cannot be rushed. We do not apply the 15–45 minute turnaround to liquid-damaged devices or complex board diagnostics."
+      },
+      {
+        question: "How fast do you swap common screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Ferntree Gully customers?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "What is your policy if a device is unrepairable?",
+        answer: "We apply our No Fix, No Charge policy to eligible diagnostic jobs. If our bench test reveals the motherboard has suffered unrepairable damage, you will not pay the repair fee."
+      },
+      {
+        question: "How do you clean blocked charging ports?",
+        answer: "If the charging port is clogged with lint, we clean it using our paid professional cleaning service. If the port is physically broken, we provide a replacement quote."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "charging and screen assessments near Ferntree Gully" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Ferntree Gully phone battery checks" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component diagnostics near Ferntree Gully" }
+    ]
   },
   {
     name: "Knoxfield",
@@ -1042,6 +1201,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Stud Park Shopping Centre", "Stud Road", "Wellington Road"],
     route: "Drive via Stud Road, Ferntree Gully Road, or EastLink toward Ringwood Square.",
     localReason: "Rowville customers can get a clear repair path before travelling, including quote guidance and availability checks.",
+    metaTitle: "Rowville Phone, iPad & Family Device Repair | Ringwood",
+    metaDescription: "Phone, iPad, and family device repair options for Rowville. Visit Kiosk C1 at Ringwood Square for screen, battery, and charging checks.",
+    customH1: "Phone, iPad and Family Device Repair Options for Rowville",
+    customIntro: "For Rowville families, parents, and students, our repair bench inside Ringwood Square Shopping Centre offers hands-on diagnostics. We inspect cracked screens, touch display faults, and charging problems on family phones, laptops, and iPads used for school or study, helping you check costs and value before you travel.",
+    customLocalSection: {
+      title: "Local Travel Options from Rowville",
+      paragraphs: [
+        "Driving north via Stud Road, Ferntree Gully Road, or EastLink typically takes about 24 minutes depending on traffic. Free parking is available in the Ringwood Square Shopping Centre lot.",
+        "For public transport, you can catch local bus connections from the Stud Park area to connect to Ringwood Station. Our kiosk is located just across the road inside the centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Rowville Family Device Scenarios",
+      paragraphs: [
+        "We regularly help parents and students drop off iPads used for school or study that have shattered glass or touch responsiveness issues. We run checks at our counter to assess if the LCD is intact.",
+        "We explain the repair steps and quote upfront, helping you decide if repairing is a practical alternative to buying a new device."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical shop in Rowville?",
+        answer: "No, our only physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Rowville is typically a 24-minute drive north."
+      },
+      {
+        question: "Do you have partnerships with Rowville schools?",
+        answer: "No. We do not imply or hold any school partnerships. We assist families and students independently with repairs for personal or school-use devices."
+      },
+      {
+        question: "Do you guarantee that repair parts are always in stock?",
+        answer: "No, we do not guarantee parts availability. We recommend calling 0481 058 514 before travelling from Rowville so we can verify if the specific screen or battery is in stock."
+      },
+      {
+        question: "How fast do you swap common phone screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Rowville families?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you charge a diagnostic fee if the device is unrepairable?",
+        answer: "We apply a No Fix, No Charge policy to eligible diagnostic jobs. If a bench check reveals severe logic board damage that cannot be repaired, you will not pay the repair fee."
+      },
+      {
+        question: "How do you clean blocked charging ports?",
+        answer: "If your charging port is blocked with debris or pocket lint, we clean it using our paid professional cleaning service. If the port itself is physically damaged, we will offer a replacement quote."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and family-device repair options for Rowville" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery checks close to Rowville" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung phone repair assessments near Rowville" }
+    ]
   },
   {
     name: "Donvale",
