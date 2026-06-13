@@ -501,6 +501,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Bayswater Station", "Mountain Highway", "Bayswater Village"],
     route: "Travel west along Mountain Highway and continue toward Ringwood Square.",
     localReason: "A short drive for battery, screen, charging port, and tablet repairs with clear quote options.",
+    metaTitle: "Bayswater Phone, Tablet & Work Device Repairs | Ringwood Square",
+    metaDescription: "Professional device repairs for Bayswater trades and local small businesses. Get charging, battery, and screen checks at Kiosk C1, Ringwood Square.",
+    customH1: "Phone, Tablet and Work-Device Assessments for Bayswater Customers",
+    customIntro: "For Bayswater trade workers, commercial businesses, and local families, our Ringwood Square kiosk provides face-to-face assessments for all your work and personal devices. We inspect charging ports, batteries, cracked screens, and USB-C issues directly at our counter, confirming quotes before any parts are ordered.",
+    customLocalSection: {
+      title: "Travelling from Bayswater to Ringwood Square",
+      paragraphs: [
+        "Bayswater residents can easily access our Ringwood shop. Driving west along Mountain Highway or Bayswater Road typically takes about 12 minutes depending on traffic. You can park in the main centre lot near Coles for easy entry.",
+        "If using public transport, the bus connections or a short train trip via Ringwood Station provide direct access, followed by a brief walk across the street into the shopping centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Work-Device and Commercial Repair Scenarios",
+      paragraphs: [
+        "We regularly support Bayswater tradespeople and local business owners who rely on their phones and tablets for daily operations. If your device has stopped charging or suffers from a rapidly draining battery, we run power draw tests at our bench.",
+        "Instead of recommending an immediate port replacement, we inspect the port for dirt or structural damage. If it is clogged, we can clean it to restore function; otherwise, we quote the exact replacement part required."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical repair shop inside Bayswater?",
+        answer: "No, our physical kiosk is located at Kiosk C1, Ringwood Square Shopping Centre (near Coles), Seymour Street, Ringwood. Bayswater is typically a short 12-minute drive away."
+      },
+      {
+        question: "What types of work devices do you repair for Bayswater trades?",
+        answer: "We inspect and repair trade phones, tablets, and laptops used in daily business operations, covering screens, battery swaps, and loose charging ports."
+      },
+      {
+        question: "How fast can you check or fix my device?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do you offer warranty cover for Bayswater clients?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Can you inspect devices that won't charge?",
+        answer: "Yes. We run a diagnostic on the charging port and power draw to check if the port is damaged, dirty, or if the battery is failing."
+      },
+      {
+        question: "Do you charge for charging port cleaning?",
+        answer: "Yes, charging port cleaning is a paid service when it resolves the issue without needing to replace the charging port component."
+      },
+      {
+        question: "What happens if a work phone is found to be unrepairable?",
+        answer: "We apply a 'No Fix, No Charge' policy to eligible diagnostic checkups. If a phone has terminal board damage, you won't pay the repair price."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Bayswater work-phone and charging repair options" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery assessments near Bayswater" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "tablet screen diagnostics for Bayswater small businesses" }
+    ]
   },
   {
     name: "Boronia",
@@ -510,6 +563,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Boronia Station", "Dorset Square", "Mountain Highway"],
     route: "Head north-west through Dorset Road or Mountain Highway toward Ringwood Square.",
     localReason: "Boronia customers can reach our bench without mailing a device away or waiting for a vague remote quote.",
+    metaTitle: "Boronia Phone Screen, Battery & Charging Checks | Kiosk C1",
+    metaDescription: "Need phone repairs near Boronia? Visit Kiosk C1 at Ringwood Square for face-to-face screen, battery, and charging checks. Direct Belgrave train line route.",
+    customH1: "Phone Screen, Battery and Charging Checks near Boronia",
+    customIntro: "For commuters and residents in Boronia, our repair bench at Ringwood Square Shopping Centre offers hands-on diagnostics just a short trip away. We specialize in face-to-face checks for cracked displays, battery degradation, charging port failures, and liquid exposure, ensuring we outline all repair options before any work begins.",
+    customLocalSection: {
+      title: "Transit Options from Boronia to Ringwood Square",
+      paragraphs: [
+        "Boronia locals can reach our kiosk easily by road or rail. Driving north-west via Boronia Road and Dorset Road typically takes about 16 minutes depending on traffic. Ringwood Square offers spacious free parking near Coles.",
+        "If you are commuting, taking the Belgrave line train from Boronia Station to Ringwood Station is a short train connection of around 11 minutes. Our shop is just across the street from the station exit."
+      ]
+    },
+    customScenarioSection: {
+      title: "Boronia Commuter & Daily Use Repair Scenarios",
+      paragraphs: [
+        "We often assist Boronia commuters who experience screen cracks or charging instability during their daily travels. If your phone drops or starts draining battery unexpectedly, we open the unit to check for internal wear and confirm the battery's cycle count.",
+        "In liquid exposure cases, we run diagnostic checks to see if corrosion has affected the motherboard or charging ports, outlining a realistic assessment of whether the device can be saved before you spend money on replacement parts."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile & Repair shop inside Boronia?",
+        answer: "No, our physical store is Kiosk C1, Ringwood Square Shopping Centre, Ringwood. Boronia is typically a 16-minute drive or a short 11-minute train ride away."
+      },
+      {
+        question: "Can you fix a phone that has been dropped in water?",
+        answer: "We run liquid exposure diagnostics to clean and inspect internal components. While we cannot guarantee water-damaged devices can be fully restored, a prompt inspection gives the best chance."
+      },
+      {
+        question: "How fast can you replace a screen or battery for a Boronia commuter?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do I get a warranty on replacement screens?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you verify parts availability before I leave Boronia?",
+        answer: "Yes, we recommend calling or messaging first. We can check our current inventory and hold screens or battery components for your model."
+      },
+      {
+        question: "What if my charging port is loose or unstable?",
+        answer: "We inspect the port for debris or pins damage. If it's dirty, we can clean it for a fee; if it's broken, we explain the replacement process."
+      },
+      {
+        question: "What is your policy if a diagnosed phone cannot be fixed?",
+        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostics. If a motherboard is dead or unrepairable, you will not pay the repair price."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "battery and screen assessments for Boronia customers" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Boronia iPhone battery replacement services" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging port checks near Boronia" }
+    ]
   },
   {
     name: "Burwood",
@@ -528,6 +634,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Whitehorse Road", "Balwyn Village", "Box Hill Station"],
     route: "Drive east via Whitehorse Road and Maroondah Highway toward Ringwood Square.",
     localReason: "Balwyn customers can use the direct eastern corridor for careful diagnostics and a clear quote before repair.",
+    metaTitle: "Balwyn Phone, Tablet & MacBook Repair Advice | Ringwood Square",
+    metaDescription: "Premium phone, tablet, and MacBook diagnostics for Balwyn residents. Visit Kiosk C1 at Ringwood Square for face-to-face assessments and repair choices.",
+    customH1: "Phone, Tablet and MacBook Repair Advice for Balwyn Customers",
+    customIntro: "For Balwyn residents seeking clear explanations and transparent repair choices, our kiosk at Ringwood Square provides premium device diagnostics. We check screens, batteries, keyboards, and charging faults on iPhones, Samsung Galaxy models, iPads, and MacBooks, confirming parts availability before any work starts.",
+    customLocalSection: {
+      title: "Transit Connections from Balwyn to Ringwood Square",
+      paragraphs: [
+        "Driving from Balwyn is direct via the Eastern Freeway corridor or Whitehorse Road/Maroondah Highway, which typically takes about 25 minutes depending on traffic. Ringwood Square has a large open-air free parking lot.",
+        "If using public transport, catch a local bus to Box Hill Station, then take the Lilydale or Belgrave line train directly to Ringwood Station."
+      ]
+    },
+    customScenarioSection: {
+      title: "Balwyn Premium Device Inspection Scenarios",
+      paragraphs: [
+        "Many Balwyn clients travel to our kiosk for hands-on, face-to-face assessments of premium devices like MacBooks or higher-end iPhones. If a laptop keyboard fails or a phone screen flickers, we inspect the internal ribbon cables at our bench.",
+        "We explain the difference between replacement tiers, check our inventory for immediate parts availability, and verify if same-visit servicing is practical before you authorize the repair."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical location in Balwyn?",
+        answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Balwyn is typically about a 25-minute drive east."
+      },
+      {
+        question: "Can you diagnose keyboard or screen faults on a MacBook?",
+        answer: "Yes, we run basic diagnostic checks on MacBook screens, batteries, keyboards, and power inputs at our Ringwood Square bench."
+      },
+      {
+        question: "How fast do you complete battery and display replacements?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do you offer warranty cover on premium repairs?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you check inventory before I travel from Balwyn?",
+        answer: "Yes, we recommend calling us at 0481 058 514 first. We can verify parts availability and reserve them for your scheduled check."
+      },
+      {
+        question: "What if my phone just needs a charging port clean?",
+        answer: "If the charging port is blocked by pocket lint, we clean it at our counter; if that fixes it, we charge our standard cleaning fee."
+      },
+      {
+        question: "Is there a No Fix No Charge policy for Balwyn customers?",
+        answer: "Yes, our 'No Fix, No Charge' policy applies to eligible diagnostic tasks if we find unrepairable motherboard damage during inspection."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone, Samsung and MacBook support near Balwyn" },
+      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "MacBook diagnostics near Balwyn" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Balwyn iPad screen replacement checks" }
+    ]
   },
   {
     name: "Vermont",
@@ -537,6 +696,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Vermont South Shopping Centre", "Canterbury Road", "Terrara Park"],
     route: "Follow Canterbury Road east, then connect toward Ringwood Square.",
     localReason: "Customers from Vermont can phone ahead for a model check and avoid unnecessary travel if parts are unavailable.",
+    metaTitle: "Vermont Phone & iPad Repair Assessments | Ringwood Square Kiosk",
+    metaDescription: "Differentiated phone and iPad repair checks for Vermont families. Visit Kiosk C1 at Ringwood Square for hands-on battery and screen diagnostics.",
+    customH1: "Phone and iPad Repair Assessments for Vermont Families",
+    customIntro: "Located close to Mitcham and Nunawading, our Ringwood Square kiosk is the primary destination for Vermont families looking for practical, face-to-face device triage. We inspect personal phones and school iPads, helping you determine if a touch, screen, or battery repair is worthwhile before you commit to any costs.",
+    customLocalSection: {
+      title: "Transit & Drive Guide from Vermont",
+      paragraphs: [
+        "Vermont residents have a very quick commute to our kiosk. Driving north-east via Canterbury Road and Wantirna Road typically takes about 12 minutes depending on traffic. You can park in the free Ringwood Square lot close to Coles.",
+        "If you are taking public transport, catch Bus 742 from Vermont directly to Ringwood Station, then walk across the road into the shopping centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Vermont Family & School Device Scenarios",
+      paragraphs: [
+        "We frequently help parents whose children have dropped their school iPads or personal phones. Touch faults, display cracks, or bent frame shapes need careful checking; we assess the frame and digitizer layers at our bench to explain the repair choices.",
+        "If a family phone is no longer holding a charge, we check the battery health and power draw. We confirm if a new battery will extend its life or if the charging port is the primary issue, keeping our quote transparent."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical storefront in Vermont?",
+        answer: "No, our physical store is Kiosk C1, Ringwood Square Shopping Centre, Ringwood. Vermont is typically a short 12-minute drive away."
+      },
+      {
+        question: "Can you repair cracked screens on school iPads?",
+        answer: "Yes, we diagnose and replace damaged glass or digitizers on iPads used for school or home study. We verify the iPad generation at our counter."
+      },
+      {
+        question: "How long should I expect to wait for a family screen replacement?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do Vermont clients get warranty support?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "What if the iPad touch function is completely unresponsive?",
+        answer: "This usually indicates digitizer damage. We perform a bench inspection to verify if a new glass digitizer panel will restore touch controls."
+      },
+      {
+        question: "Do you charge for charging port cleaning if it is blocked?",
+        answer: "Yes. If a phone or iPad refuses to charge due to pocket lint or dirt blocking the contacts, we clean the port for a cleaning fee."
+      },
+      {
+        question: "What happens if a device is not worth repairing?",
+        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostics. If a bench check reveals motherboard failure, you will not pay the repair price."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and phone repair choices for Vermont families" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery checks near Vermont" },
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Vermont iPhone screen replacement options" }
+    ]
   },
   {
     name: "Springvale",
