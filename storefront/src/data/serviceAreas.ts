@@ -767,6 +767,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mt Dandenong Road", "Kilsyth Shopping Centre", "Croydon Station"],
     route: "Drive west along Mt Dandenong Road and Maroondah Highway toward Ringwood Square.",
     localReason: "Kilsyth customers get a nearby specialist option for screen, battery, charging, and water-damage inspections.",
+    metaTitle: "Kilsyth Phone, Tablet & Device Checks | Ringwood Square C1",
+    metaDescription: "Professional phone, tablet, and work device checks for Kilsyth trades and families. Visit Kiosk C1 at Ringwood Square for hands-on diagnostics.",
+    customH1: "Phone, Tablet and Work-Device Checks for Kilsyth Customers",
+    customIntro: "For Kilsyth residents, trade workers, and families, our Ringwood Square kiosk is located just a short trip away via the Croydon corridor. We provide hands-on assessments for screen cracks, charging faults, and battery wear on personal and business devices, inspecting every device in your presence before any parts are ordered.",
+    customLocalSection: {
+      title: "Getting to Ringwood Square from Kilsyth",
+      paragraphs: [
+        "Travelling from Kilsyth is very convenient. Driving west via Mt Dandenong Road or Maroondah Highway typically takes about 18 minutes depending on traffic. You can park in the free Ringwood Square lot close to Coles.",
+        "If you prefer public transport, local bus routes connect Kilsyth to Croydon Station, where you can take a brief train trip to Ringwood Station."
+      ]
+    },
+    customScenarioSection: {
+      title: "Kilsyth Trade & Family Device Scenarios",
+      paragraphs: [
+        "We frequently assist Kilsyth tradespeople and families who want a direct counter inspection for charging port instability or screen cracks. We test the charging current draw and inspect the port under magnification to see if a repair is required.",
+        "By opening the housing and testing the battery or display connections, we confirm the exact issue and explain the repair scope face-to-face, avoiding any surprise costs."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical storefront in Kilsyth?",
+        answer: "No. Our physical shop is located at Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Kilsyth is typically about an 18-minute drive west."
+      },
+      {
+        question: "Do I need to leave my work phone with you for days?",
+        answer: "No. We run a prompt counter assessment. If the replacement part is in stock, common screen and battery repairs can often be completed in around 15–45 minutes once work begins."
+      },
+      {
+        question: "How fast do you diagnose charging port issues?",
+        answer: "We inspect the port at our bench in your presence. If it is clogged with debris, we clean it for a standard fee; if the pins are damaged, we explain the replacement choices."
+      },
+      {
+        question: "What is the warranty coverage for Kilsyth clients?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do Kilsyth families need a booking for iPad diagnostics?",
+        answer: "Walk-ins are always welcome. However, booking ahead online helps us ensure model-specific screens or batteries are reserved for your visit."
+      },
+      {
+        question: "What if my phone has motherboard damage?",
+        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostics. If our bench test reveals the motherboard is unrepairable, you will not pay the repair fee."
+      },
+      {
+        question: "Is there parking available near the kiosk?",
+        answer: "Yes, Ringwood Square has a large, free open-air car park right in front of the centre near Coles."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging and work-device checks for Kilsyth customers" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery diagnostic options near Kilsyth" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display & touch assessments close to Kilsyth" }
+    ]
   },
   {
     name: "Mooroolbark",
@@ -776,6 +829,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mooroolbark Station", "Manchester Road", "Brice Avenue"],
     route: "Head toward Ringwood via Manchester Road and use Ringwood Square parking.",
     localReason: "Helpful when you want a specialist repair bench close by without sending the device away.",
+    metaTitle: "Mooroolbark Phone Screen, Battery & Tablet Assessments | Ringwood",
+    metaDescription: "Need phone repairs near Mooroolbark? Visit Kiosk C1 at Ringwood Square for commuter phone screen, battery, and tablet assessments. Lilydale line route.",
+    customH1: "Phone Screen, Battery and Tablet Assessments near Mooroolbark",
+    customIntro: "For Mooroolbark commuters, parents, and students, our repair kiosk at Ringwood Square Shopping Centre offers straightforward, face-to-face diagnostics. We inspect cracked displays, touch responsiveness issues, battery wear, and charging faults on phones and school iPads, providing a clear assessment before you make any decisions.",
+    customLocalSection: {
+      title: "Transit Guides from Mooroolbark to Kiosk C1",
+      paragraphs: [
+        "Mooroolbark residents have direct rail and road connections to our kiosk. Driving south-west via Manchester Road and Maroondah Highway typically takes about 15 minutes depending on traffic. Free parking is available at Ringwood Square.",
+        "If you are taking public transport, catch a train directly from Mooroolbark Station to Ringwood Station on the Lilydale line, which is a direct train connection. Our kiosk is a brief walk across the street from the station."
+      ]
+    },
+    customScenarioSection: {
+      title: "Mooroolbark Commuter & Family Device Scenarios",
+      paragraphs: [
+        "We often see Mooroolbark commuters drop off a phone showing touch failures, vertical lines, or rapid battery drain. We open the housing, test the display assembly, and run diagnostics to confirm if a component swap is needed.",
+        "For parents with school iPads, we check if a cracked screen is a simple outer glass issue or if the underlying display panel has failed, explaining the most economical option before starting any work."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical kiosk inside Mooroolbark?",
+        answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Mooroolbark is typically a 15-minute drive or a short direct train ride away."
+      },
+      {
+        question: "Can Mooroolbark commuters drop off devices on their way to work?",
+        answer: "Yes. You can drop off your device in the morning near Ringwood Station and pick it up on your return commute in the afternoon."
+      },
+      {
+        question: "How fast do you swap batteries or screens?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty policy for Mooroolbark customers?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you check parts availability before I travel?",
+        answer: "Yes. If you call or message us with your device model, we can check our current stock and hold the screen or battery for you."
+      },
+      {
+        question: "What happens if a phone charging port won't hold a cable?",
+        answer: "We inspect the port for dirt or damage. If it is clogged, we clean it for a fee; if it requires a replacement component, we provide a clear quote first."
+      },
+      {
+        question: "Is there a diagnostic fee if the phone cannot be fixed?",
+        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostic checkups. If a motherboard is dead or unrepairable, you will not pay the repair fee."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "phone screen and iPad repair options near Mooroolbark" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery replacement services close to Mooroolbark" },
+      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung charging diagnostics near Mooroolbark" }
+    ]
   },
   {
     name: "Clayton",
@@ -794,6 +900,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Lilydale Station", "Maroondah Highway", "Lilydale Marketplace"],
     route: "Drive west along Maroondah Highway through Chirnside Park and Croydon into Ringwood.",
     localReason: "Lilydale customers can reach us on the same rail and road corridor for model checks and warranty-backed repair work.",
+    metaTitle: "Lilydale Device Repair Advice | Ringwood Square Kiosk C1",
+    metaDescription: "Professional device repair advice for Lilydale customers. Get transparent phone, tablet, and MacBook diagnostics at Kiosk C1, Ringwood Square before you buy a new one.",
+    customH1: "Device Repair Advice for Lilydale Customers Travelling to Ringwood",
+    customIntro: "For Lilydale residents looking to save their devices and avoid costly new replacements, our Ringwood Square kiosk offers professional, face-to-face diagnostics. We examine screens, batteries, keyboards, and charging inputs on iPhones, Samsung Galaxy models, iPads, and MacBooks, checking parts availability and expected timing before work begins.",
+    customLocalSection: {
+      title: "Transit & Driving Corridor from Lilydale",
+      paragraphs: [
+        "Driving from Lilydale is very direct. Head west along Maroondah Highway through Croydon, which typically takes about 18 minutes depending on traffic. Ringwood Square Shopping Centre has free open-air parking near Coles.",
+        "If taking public transport, you can take a direct train connection from Lilydale Station to Ringwood Station. The train ride is approximately 15 minutes. Walk across the street to find our kiosk inside the centre."
+      ]
+    },
+    customScenarioSection: {
+      title: "Lilydale Long-Distance Transit Scenarios",
+      paragraphs: [
+        "Because Lilydale is located further out, many customers call us before making the trip to confirm parts availability and coordinate their visit. We walk you through the model numbers and verify if the display or battery is in stock.",
+        "At the counter, we inspect the hardware, explain if a cracked screen is cosmetic or structural, and confirm the repair path so you don't make an unnecessary device replacement."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile storefront in Lilydale?",
+        answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Lilydale is typically an 18-minute drive or a short train ride away."
+      },
+      {
+        question: "Can I check if you have my screen in stock before I leave Lilydale?",
+        answer: "Yes, we encourage calling us at 0481 058 514 first. We can verify our current inventory and can hold parts for your visit."
+      },
+      {
+        question: "How long does a common repair take once I arrive?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "What is the warranty coverage for Lilydale visitors?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you repair keyboards or screen issues on MacBooks?",
+        answer: "Yes, we diagnose display flickering, battery wear, and keyboard faults on MacBooks directly at our Ringwood Square bench."
+      },
+      {
+        question: "What happens if my phone charging port is loose?",
+        answer: "We test the current draw. If it simply has compacted pocket lint, we clean it for a fee; if it's physically damaged, we quote a port replacement."
+      },
+      {
+        question: "Do you apply a No Fix No Charge policy?",
+        answer: "Yes. On eligible repairs, if we find that a phone has unrepairable board damage during our desk inspection, you will not pay the repair price."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "device repair advice for Lilydale customers" },
+      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "MacBook diagnostics near Lilydale" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Lilydale iPad screen replacement options" }
+    ]
   },
   {
     name: "Chirnside Park",
@@ -803,6 +962,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Chirnside Park Shopping Centre", "Maroondah Highway", "Lilydale Road"],
     route: "Drive west on Maroondah Highway through Croydon toward Ringwood Square.",
     localReason: "Chirnside Park customers can avoid sending devices away by visiting a nearby specialist bench in Ringwood.",
+    metaTitle: "Chirnside Park Phone & iPad Repair Options | Ringwood Square C1",
+    metaDescription: "Need phone screen, iPad, or battery repairs near Chirnside Park? Visit Kiosk C1 at Ringwood Square for hands-on diagnostics. Read route details.",
+    customH1: "Phone, iPad and Battery Repair Options for Chirnside Park Families",
+    customIntro: "For families and residents in Chirnside Park, our repair desk inside Ringwood Square Shopping Centre is located just a short trip away down Maroondah Highway. We specialize in face-to-face inspections to diagnose phone screen damage, iPad touch responsiveness faults, and battery wear, helping you confirm if a repair is economical before work begins.",
+    customLocalSection: {
+      title: "Travelling from Chirnside Park to Kiosk C1",
+      paragraphs: [
+        "Driving from Chirnside Park is direct. Follow Maroondah Highway south-west through Croydon into Ringwood, which typically takes about 16 minutes depending on traffic. Ringwood Square has a spacious free parking lot.",
+        "If you are taking public transport, catch Bus 670 directly from Chirnside Park Shopping Centre to Ringwood Station, then walk across the street into Ringwood Square."
+      ]
+    },
+    customScenarioSection: {
+      title: "Chirnside Park Family & School Device Scenarios",
+      paragraphs: [
+        "We often see Chirnside Park parents drop off iPads used for school or personal phones that have been dropped. We inspect the glass digitizer, LCD panel, and frame alignment at our counter to verify the exact scope of the damage.",
+        "We explain the repair options clearly, check parts availability, and confirm quotes before starting work so you can decide if the repair fits your budget."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Is there an Ali Mobile kiosk inside Chirnside Park Shopping Centre?",
+        answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Chirnside Park is typically about a 16-minute drive south-west."
+      },
+      {
+        question: "Can I get my iPad screen touch issues diagnosed?",
+        answer: "Yes, we test touch responsiveness and check if a new outer glass digitizer will resolve the issue or if the LCD display is damaged."
+      },
+      {
+        question: "How fast do you swap phone screens and batteries?",
+        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+      },
+      {
+        question: "Do Chirnside Park families get warranty cover?",
+        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+      },
+      {
+        question: "Do you check screen stock before I travel from Chirnside Park?",
+        answer: "Yes. We recommend calling us before leaving Chirnside Park so we can verify if the screen or battery for your specific model is in stock."
+      },
+      {
+        question: "What if my device has a charging port issue?",
+        answer: "We test the port under magnification. If it is clogged with dirt, we clean it for a fee; if the contacts are broken, we quote a port replacement."
+      },
+      {
+        question: "What happens if a device is not worth repairing?",
+        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostics. If a bench check reveals motherboard failure, you will not pay the repair price."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone, Samsung and tablet support for Chirnside Park families" },
+      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad touch and screen repair options near Chirnside Park" },
+      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Chirnside Park iPhone battery diagnostic options" }
+    ]
   },
   {
     name: "Ferntree Gully",
