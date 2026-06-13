@@ -1011,8 +1011,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                               setFormData({...formData, pin_order: 0});
                               return;
                             }
-                            const parsed = parseInt(val, 10);
-                            if (!isNaN(parsed) && parsed >= 0) {
+                            const parsed = Number(val);
+                            if (Number.isInteger(parsed) && parsed >= 0) {
                               setFormData({...formData, pin_order: parsed});
                             }
                           }}
