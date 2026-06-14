@@ -94,28 +94,39 @@ export async function GET(request: Request) {
   if (!supabase) return emptyResponse();
 
   try {
-    let query = supabase
-      .from('repair_results')
-      .select(PUBLIC_REPAIR_RESULT_SELECT)
-      .eq('status', 'published')
-      .eq('privacy_checked', true)
-      .eq('device_category', category)
-      .eq('brand_slug', brand)
-      .eq('model_slug', model)
-      .neq('before_image_path', '')
-      .neq('after_image_path', '')
-      .order('featured_on_homepage', { ascending: false })
-      .order('sort_order', { ascending: true })
-      .order('published_at', { ascending: false, nullsFirst: false })
-      .order('updated_at', { ascending: false });
+    const buildQuery = (targetBrand: string) => {
+      let q = supabase
+        .from('repair_results')
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .eq('status', 'published')
+        .eq('privacy_checked', true)
+        .eq('device_category', category)
+        .eq('brand_slug', targetBrand)
+        .eq('model_slug', model)
+        .neq('before_image_path', '')
+        .neq('after_image_path', '')
+        .order('featured_on_homepage', { ascending: false })
+        .order('sort_order', { ascending: true })
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('updated_at', { ascending: false });
 
-    if (context === 'detail') {
-      query = query.eq('repair_type_slug', repairType).limit(limit);
-    } else {
-      query = query.limit(Math.max(limit * 4, 8));
+      if (context === 'detail') {
+        q = q.eq('repair_type_slug', repairType).limit(limit);
+      } else {
+        q = q.limit(Math.max(limit * 4, 8));
+      }
+
+      return q;
+    };
+
+    let { data, error } = await buildQuery(brand);
+
+    if (!error && (!data || data.length === 0) && brand === 'ipad') {
+      const fallback = await buildQuery('apple');
+      data = fallback.data;
+      error = fallback.error;
     }
 
-    const { data, error } = await query;
     if (error) {
       console.error('[repair-results-matching] Failed to load matching results:', error);
       return emptyResponse();
