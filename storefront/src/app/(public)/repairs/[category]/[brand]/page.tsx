@@ -339,6 +339,138 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
         </>
+      ) : isAppleWatchHub ? (
+        <>
+          <AppleWatchModelFinder
+            seriesGroups={seriesGroups}
+            categorySlug={categorySlug}
+            brandSlug={brandSlug}
+          />
+
+          <RepairResultsMatchingSection
+            category={categorySlug}
+            brand={brandSlug}
+            model={brandSlug}
+            context="model"
+          />
+
+          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
+            <div className="repair-types-showcase-header">
+              <div>
+                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <h2 id="brand-repair-types-heading">Common Apple Watch Repair Paths</h2>
+              </div>
+              <p>Choose your Apple Watch model first, then compare the repair path that best matches the fault we need to assess.</p>
+            </div>
+            <div className="repair-type-card-grid">
+              {[
+                { name: "Screen and display replacement", note: "Cracked glass, display faults and touch issues need the exact model and case size before the repair path is confirmed." },
+                { name: "Battery replacement", note: "Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path." },
+                { name: "Charging or no-power assessment", note: "If the watch is not charging or not turning on, we inspect the fault first before confirming the practical repair option." }
+              ].map((path, index) => (
+                <article key={path.name} className="repair-type-mini-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{path.name}</strong>
+                  <small>{path.note}</small>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="apple-watch-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="apple-watch-diagnostic-heading">How Apple Watch diagnosis, parts and quoting work</h2>
+              <p>
+                We confirm the exact model and condition first, then explain the compatible repair options, parts availability and practical quote path before any work is approved.
+              </p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Why generation and case size matter</h3>
+                  <p>Parts and repair compatibility vary across Series, SE, Ultra, exact generation, and case size.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Parts and timing</h3>
+                  <p>Parts availability varies. Timing depends on the exact model, inspection, stock, and repair complexity.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Water resistance limits</h3>
+                  <p>Original Apple factory water resistance cannot be guaranteed after opening or repair. Adhesive resealing does not restore guaranteed factory water-resistance certification.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="apple-watch-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="apple-watch-ringwood-heading">Apple Watch repair support at Ringwood Square</h2>
+              <p>
+                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
+              </p>
+            </div>
+            <div className="repair-chip-cloud" aria-label="Apple Watch repair support actions">
+              <span>
+                <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+                Ringwood Square Kiosk C1
+              </span>
+              <span>
+                <Clock3 size={15} strokeWidth={2.2} aria-hidden="true" />
+                Clear quote before approval
+              </span>
+              <span>
+                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+                Privacy-checked repair workflow
+              </span>
+            </div>
+          </section>
+
+          <section className="faq-section" aria-labelledby="apple-watch-faq-heading">
+            <h2 id="apple-watch-faq-heading" className="faq-heading">Apple Watch repair FAQs</h2>
+            <div className="faq-accordion">
+              {[
+                { question: "Do you offer same-day Apple Watch repairs?", answer: "We do not promise same-day completion. Timing depends on the exact model, condition, parts availability, and the repair queue." },
+                { question: "Are you an Apple-authorised service provider?", answer: "No, we are an independent repair service provider offering high-quality repairs." },
+                { question: "Will my Apple Watch remain water resistant?", answer: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
+                { question: "Is an Apple Watch repair worth it?", answer: "That depends on the exact model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
+              ].map((faq) => (
+                <details key={faq.question} className="faq-item">
+                  <summary className="faq-question">
+                    <span>{faq.question}</span>
+                    <svg className="faq-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </summary>
+                  <div className="faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="apple-watch-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="apple-watch-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>
+                Start with the Apple Watch model selector above to check compatible repair paths, then book or call once you have the exact model.
+              </p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your Apple Watch Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
       ) : (
         <>
           <section id="models-list" className="repair-content-band" aria-label={`${brandName} models`}>
