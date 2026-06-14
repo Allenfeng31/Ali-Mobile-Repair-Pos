@@ -305,6 +305,9 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
   const watchBrandSectionCopy = 'Select your brand and exact model to view compatible repair options and current pricing. Apple Watch repair options are currently available, with additional supported smartwatch brands added after service review.';
+  const ringwoodSupportCopy = isWatch
+    ? 'We confirm the exact model, device condition, parts availability and practical repair path before quoting timing or starting work. Ali Mobile & Repair operates from Ringwood Square Shopping Centre Kiosk C1, and you can call ahead or book before visiting.'
+    : `Ali Mobile & Repair, Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Opposite the Bunnings entrance inside Ringwood Square Shopping Centre. Call ahead if you want to confirm parts, timing or the right ${isLaptop ? 'laptop' : isTablet ? 'tablet' : 'phone'} repair path before travelling.`;
   const macBookHubHref = laptopMacBookBrand ? `/repairs/${category}/${laptopMacBookBrand.slug}` : '/repairs/laptop/macbook';
 
   return (
@@ -722,9 +725,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               </span>
               <h2 id="model-help-heading">{isWatch ? 'Diagnosis, parts and Ringwood support' : 'Visit us in Ringwood Square'}</h2>
               <p>
-                {isWatch
-                  ? 'We confirm the exact model, device condition, parts availability and practical repair path before quoting timing or starting work. Ali Mobile & Repair operates from Ringwood Square Shopping Centre Kiosk C1, and you can call ahead or book before visiting.'
-                  : 'Ali Mobile & Repair, Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Opposite the Bunnings entrance inside Ringwood Square Shopping Centre. Call ahead if you want to confirm parts, timing or the right laptop path before travelling.'}
+                {ringwoodSupportCopy}
               </p>
             </div>
             <div className="repair-assist-actions">
