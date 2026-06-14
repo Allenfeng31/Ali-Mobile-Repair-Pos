@@ -8,6 +8,7 @@ import BrandModelSearch from "@/components/BrandModelSearch";
 import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
+import AppleWatchModelFinder from "./AppleWatchModelFinder";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
@@ -30,15 +31,25 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const { brand } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
   const brandName = brand?.brand || formatDynamicParam(resolvedParams.brand);
   const canonicalPath = `/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`;
+  const isAppleWatch = resolvedParams.category === "watch" && resolvedParams.brand === "apple";
+
+  const title = isAppleWatch
+    ? 'Apple Watch Repair Services Ringwood | Fast & Reliable | Ali Mobile'
+    : `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
+
+  const description = isAppleWatch
+    ? 'Expert Apple Watch repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.'
+    : `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`;
+
   const metadata: Metadata = {
-    title: `${brandName} Repair Services in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
-    description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`,
+    title,
+    description,
     alternates: {
       canonical: canonicalPath,
     },
     openGraph: {
-      title: `${brandName} Repair Services in Ringwood | Fast \u0026 Reliable`,
-      description: `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`,
+      title: isAppleWatch ? 'Apple Watch Repair Services Ringwood | Fast & Reliable' : `${brandName} Repair Services in Ringwood | Fast & Reliable`,
+      description,
       url: canonicalPath,
       type: "website",
       locale: "en_AU",
@@ -57,6 +68,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const categorySlug = resolvedParams.category;
   const brandSlug = resolvedParams.brand;
   const isMacBookHub = categorySlug === "laptop" && brandSlug === "macbook";
+  const isAppleWatchHub = categorySlug === "watch" && brandSlug === "apple";
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
   const macbookRepairPaths = [
@@ -130,9 +142,13 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             Model selector
           </span>
           <h1 id="brand-repair-heading" style={{ overflowWrap: "anywhere" }}>
-            {brandName} Repair Services
+            {isAppleWatchHub ? 'Apple Watch Repair Services in Ringwood' : `${brandName} Repair Services`}
           </h1>
-          <p>Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.</p>
+          <p>
+            {isAppleWatchHub
+              ? 'Select your exact Apple Watch model, generation, and case size below to view compatible repair options and pricing.'
+              : 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.'}
+          </p>
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
               View model option
@@ -143,7 +159,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </Link>
           </div>
         </div>
-        {!isMacBookHub && (
+        {!isMacBookHub && !isAppleWatchHub && (
           <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
             <div className="repair-device-card" aria-hidden="true">
               <span className="repair-device-frame">
@@ -165,6 +181,31 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div>
               <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
               <span>Exact model unlocks service pricing</span>
+            </div>
+          </div>
+        )}
+        {isAppleWatchHub && (
+          <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
+            <div className="repair-device-card" aria-hidden="true">
+              <span className="repair-device-frame">
+                <span />
+              </span>
+              <div>
+                <strong>Apple Watch</strong>
+                <small>Choose exact model</small>
+              </div>
+            </div>
+            <div>
+              <Search size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Apple Watch Series, SE and Ultra</span>
+            </div>
+            <div>
+              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Exact generation required</span>
+            </div>
+            <div>
+              <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Case size (e.g. 41mm, 45mm, 49mm)</span>
             </div>
           </div>
         )}
