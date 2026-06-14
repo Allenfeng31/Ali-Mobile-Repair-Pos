@@ -441,7 +441,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </div>
 
           {topBrands.length > 0 ? (
-            <div className="brand-grid-hero">
+            <div className="brand-grid-hero" style={isWatch && topBrands.length === 1 ? { gridTemplateColumns: 'minmax(0, 480px)', justifyContent: 'center' } : undefined}>
               {topBrands.map(b => (
                 <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
                   {isWatch && b.slug === 'apple' ? (
