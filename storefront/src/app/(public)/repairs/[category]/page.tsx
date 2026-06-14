@@ -140,13 +140,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
     pricing: {
       title: "Popular Tablet Repair Pricing",
       deviceType: "tablet",
-      items: [
-        { model: "iPad 10th Gen", service: "Screen replacement", price: 170, search: "ipad 10 screen" },
-        { model: "iPad 7 / 8 / 9", service: "Screen replacement", price: 130, search: "ipad 7 screen" },
-        { model: "iPad 6", service: "Screen replacement", price: 120, search: "ipad 6 screen" },
-        { model: "iPad 7 / 8 / 9", service: "Battery replacement", price: 110, search: "ipad 7 battery" },
-        { model: "iPad 6", service: "Battery replacement", price: 90, search: "ipad 6 battery" },
-      ]
+      items: []
     },
     faqs: [
       { question: "Do you repair cracked iPad screens in Ringwood?", answer: "Yes, we specialize in iPad screen repairs right here in Ringwood. Whether you only need the top glass or the entire LCD assembly replaced, same-day options may be available when parts are in stock." },
@@ -307,6 +301,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const heroMedia = CATEGORY_HERO_MEDIA[category as keyof typeof CATEGORY_HERO_MEDIA];
   const isLaptop = category === 'laptop';
   const isWatch = category === 'watch';
+  const isTablet = category === 'tablet';
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
   const watchBrandSectionCopy = 'Select your brand and exact model to view compatible repair options and current pricing. Apple Watch repair options are currently available, with additional supported smartwatch brands added after service review.';
@@ -429,13 +424,15 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           aria-labelledby="popular-brands-heading"
         >
           <div className="repair-section-header">
-            <span>{isLaptop ? 'Choose your laptop path' : isWatch ? 'Choose your smartwatch brand' : 'Choose your device path'}</span>
-            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : isWatch ? 'Smart Watch Brand and Model Paths' : 'Most Popular Brands'}</h2>
+            <span>{isLaptop ? 'Choose your laptop path' : isWatch ? 'Choose your smartwatch brand' : isTablet ? 'Choose your tablet brand' : 'Choose your device path'}</span>
+            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : isWatch ? 'Smart Watch Brand and Model Paths' : isTablet ? 'Tablet Brands and Model Paths' : 'Most Popular Brands'}</h2>
             <p>
               {isLaptop
                 ? laptopBrandSectionCopy
                 : isWatch
                   ? watchBrandSectionCopy
+                : isTablet
+                  ? 'Pick the tablet brand first, then choose your exact model to view compatible services and pricing.'
                 : 'Pick the brand first, then choose your exact model for live repair options and pricing.'}
             </p>
           </div>
@@ -744,12 +741,48 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </section>
         </ScrollReveal>
 
+        {isTablet && (
+          <ScrollReveal>
+            <section className="repair-assist-panel" aria-labelledby="tablet-diagnostic-heading">
+              <div className="w-full">
+                <span className="repair-kicker repair-kicker-muted">Tablet support</span>
+                <h2 id="tablet-diagnostic-heading">Diagnosis, quoting, and repair process</h2>
+                <p>
+                  We confirm the exact tablet model, device condition, and part availability before finalising the quote and timing.
+                </p>
+                <div className="repair-signal-grid mt-5">
+                  <article className="repair-signal-card">
+                    <span>01</span>
+                    <h3>Why exact brand and model matter</h3>
+                    <p>Display assemblies, batteries, and connectors differ by brand, model, generation, screen size, and Cellular/Wi-Fi variant.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>02</span>
+                    <h3>Common repair paths</h3>
+                    <p>We support screen or display replacement, battery replacement, and charging/no-power diagnostic assessments.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>03</span>
+                    <h3>Parts and timing</h3>
+                    <p>Timing depends on model, stock, queue, device condition, and adhesive curing requirements. Some repairs are faster when parts are in stock.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>04</span>
+                    <h3>Ringwood service</h3>
+                    <p>We operate from Ringwood Square Shopping Centre Kiosk C1. Call or book online before you travel.</p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
         <ScrollReveal>
           <section className="repair-content-band" aria-labelledby="why-choose-heading">
             <div className="repair-section-header">
               <span>Repair clarity</span>
-              <h2 id="why-choose-heading">{isWatch ? 'How smart watch quotes, timing and water-resistance limits work' : 'Why Choose Our Laptop Hub?'}</h2>
-              <p>{isWatch ? 'Quotes and repair timing depend on the exact model, the condition of the watch and the parts path we confirm after inspection.' : data.hero.intro2}</p>
+              <h2 id="why-choose-heading">{isWatch ? 'How smart watch quotes, timing and water-resistance limits work' : isTablet ? 'Why Choose Our Tablet Repair Service?' : isLaptop ? 'Why Choose Our Laptop Hub?' : 'Why Choose Our Service?'}</h2>
+              <p>{isWatch ? 'Quotes and repair timing depend on the exact model, the condition of the watch and the parts path we confirm after inspection.' : isTablet ? 'We carefully identify your tablet model before confirming repair compatibility.' : data.hero.intro2}</p>
             </div>
 
             <div className="repair-signal-grid">
@@ -764,13 +797,13 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </section>
         </ScrollReveal>
 
-        {isWatch ? (
+        {isWatch || isTablet ? (
           <ScrollReveal>
-            <section className="repair-content-band" aria-labelledby="watch-pricing-guidance-heading">
+            <section className="repair-content-band" aria-labelledby="pricing-guidance-heading">
               <div className="repair-section-header">
                 <span>Model-first pricing</span>
-                <h2 id="watch-pricing-guidance-heading">Select your brand and model to view current pricing</h2>
-                <p>Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.</p>
+                <h2 id="pricing-guidance-heading">Select your brand and model to view current pricing</h2>
+                <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.'}</p>
               </div>
             </section>
           </ScrollReveal>
