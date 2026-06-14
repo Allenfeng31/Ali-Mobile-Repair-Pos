@@ -9,6 +9,7 @@ import RepairResultsMatchingSection from "@/components/repair-results/RepairResu
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
 import AppleWatchModelFinder from "./AppleWatchModelFinder";
+import IPadModelFinder from "./iPadModelFinder";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
@@ -32,13 +33,18 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const brandName = brand?.brand || formatDynamicParam(resolvedParams.brand);
   const canonicalPath = `/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`;
   const isAppleWatch = resolvedParams.category === "watch" && resolvedParams.brand === "apple";
+  const isIPad = resolvedParams.category === "tablet" && resolvedParams.brand === "ipad";
 
   const title = isAppleWatch
     ? 'Apple Watch Repair Services Ringwood | Fast & Reliable | Ali Mobile'
+    : isIPad
+    ? 'iPad Repair Services in Ringwood | Fast & Reliable | Ali Mobile'
     : `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
 
   const description = isAppleWatch
     ? 'Expert Apple Watch repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.'
+    : isIPad
+    ? 'Expert iPad repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact iPad family, generation, screen size or A-number for compatible repair options and current pricing.'
     : `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`;
 
   const metadata: Metadata = {
@@ -69,6 +75,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandSlug = resolvedParams.brand;
   const isMacBookHub = categorySlug === "laptop" && brandSlug === "macbook";
   const isAppleWatchHub = categorySlug === "watch" && brandSlug === "apple";
+  const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
   const macbookRepairPaths = [
@@ -137,16 +144,26 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       >
         <div className="repair-tech-hero-copy">
           <BackButton fallbackHref={`/repairs/${categorySlug}`} />
-          <span className="repair-kicker">
-            <Smartphone size={15} strokeWidth={2.4} aria-hidden="true" />
-            Model selector
+          <span className="repair-hero-badge">
+            <Smartphone size={16} strokeWidth={2.4} aria-hidden="true" />
+            {isMacBookHub ? "MacBook Model Hub" : isAppleWatchHub ? "Apple Watch Model Hub" : isIPadHub ? "iPad Model Hub" : `${brandName} Model Hub`}
           </span>
-          <h1 id="brand-repair-heading" style={{ overflowWrap: "anywhere" }}>
-            {isAppleWatchHub ? 'Apple Watch Repair Services in Ringwood' : `${brandName} Repair Services`}
+          <h1 id="category-repair-heading">
+            {isMacBookHub
+              ? "MacBook Repair Services in Ringwood"
+              : isAppleWatchHub
+              ? "Apple Watch Repair Services in Ringwood"
+              : isIPadHub
+              ? "iPad Repair Services in Ringwood"
+              : `${brandName} Repair Services`}
           </h1>
           <p>
-            {isAppleWatchHub
-              ? 'Select your exact Apple Watch model, generation, and case size below to view compatible repair options and pricing.'
+            {isMacBookHub
+              ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1. We confirm your repair path before any work begins.'
+              : isAppleWatchHub
+              ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.'
+              : isIPadHub
+              ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre. We confirm your exact iPad family, generation, screen size or A-number before confirming the repair path.'
               : 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.'}
           </p>
           <div className="repair-hero-actions">
@@ -159,7 +176,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </Link>
           </div>
         </div>
-        {!isMacBookHub && !isAppleWatchHub && (
+        {!isMacBookHub && !isAppleWatchHub && !isIPadHub && (
           <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
             <div className="repair-device-card" aria-hidden="true">
               <span className="repair-device-frame">
@@ -206,6 +223,31 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div>
               <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
               <span>Case size (e.g. 41mm, 45mm, 49mm)</span>
+            </div>
+          </div>
+        )}
+        {isIPadHub && (
+          <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
+            <div className="repair-device-card" aria-hidden="true">
+              <span className="repair-device-frame">
+                <span />
+              </span>
+              <div>
+                <strong>iPad</strong>
+                <small>Choose exact model</small>
+              </div>
+            </div>
+            <div>
+              <Search size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>iPad, iPad Air, iPad Pro, iPad mini</span>
+            </div>
+            <div>
+              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Exact generation required</span>
+            </div>
+            <div>
+              <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Screen size or A-number</span>
             </div>
           </div>
         )}
@@ -463,6 +505,132 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div className="repair-hero-actions">
               <a href="#models-list" className="repair-primary-action">
                 Choose Your Apple Watch Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : isIPadHub ? (
+        <>
+          <IPadModelFinder
+            seriesGroups={seriesGroups}
+            categorySlug={categorySlug}
+            brandSlug={brandSlug}
+          />
+
+          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
+            <div className="repair-types-showcase-header">
+              <div>
+                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <h2 id="brand-repair-types-heading">Common iPad Repair Paths</h2>
+              </div>
+              <p>Choose your iPad model first, then compare the repair path that best matches the fault we need to assess.</p>
+            </div>
+            <div className="repair-type-card-grid">
+              {[
+                { name: "Screen and display replacement", note: "Cracked glass, display faults and touch issues need the exact model before the repair path is confirmed." },
+                { name: "Battery replacement", note: "Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path." },
+                { name: "Charging or no-power diagnostic assessment", note: "If the iPad is not charging or not turning on, we inspect the fault first before confirming the practical repair option." }
+              ].map((path, index) => (
+                <article key={path.name} className="repair-type-mini-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{path.name}</strong>
+                  <small>{path.note}</small>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="ipad-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="ipad-diagnostic-heading">How iPad diagnosis, parts and quoting work</h2>
+              <p>
+                We confirm the exact model, device condition, frame condition, fault and parts availability first. Then we explain the compatible repair options and practical quote path before any work is approved.
+              </p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Why the exact model matters</h3>
+                  <p>Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Parts, timing and adhesive</h3>
+                  <p>Parts availability varies. Timing depends on model, stock, queue and device condition. Some repairs require adhesive fitting and curing time, so we do not promise same-day completion before checking the device and part.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Data and backup guidance</h3>
+                  <p>Standard hardware repairs normally do not require access to personal content. However, we recommend backing up the iPad where possible before repair, as data preservation cannot be guaranteed.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="ipad-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="ipad-ringwood-heading">iPad repair support at Ringwood Square</h2>
+              <p>
+                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1.
+              </p>
+            </div>
+            <div className="repair-chip-cloud" aria-label="iPad repair support actions">
+              <span>
+                <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+                Ringwood Square Kiosk C1
+              </span>
+              <span>
+                <Clock3 size={15} strokeWidth={2.2} aria-hidden="true" />
+                Clear quote before approval
+              </span>
+              <span>
+                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+                Privacy-checked repair workflow
+              </span>
+            </div>
+          </section>
+
+          <section className="faq-section" aria-labelledby="ipad-faq-heading">
+            <h2 id="ipad-faq-heading" className="faq-heading">iPad repair FAQs</h2>
+            <div className="faq-accordion">
+              {[
+                { question: "How do I identify the exact iPad model?", answer: "Check Settings → General → About, or look for the A-number printed on the rear casing of your iPad." },
+                { question: "Can you confirm screen or battery repair timing immediately?", answer: "We do not promise same-day completion before checking the device and part. Timing depends on the exact model, condition, parts availability, and the repair queue." },
+                { question: "Is my data safe during an iPad repair?", answer: "Standard hardware repairs normally do not require access to personal content. However, we recommend backing up the iPad where possible before repair, as we cannot guarantee data preservation." },
+                { question: "Do bent frames affect iPad screen replacement?", answer: "Yes, bent frames can prevent a new screen from sitting flush and sealing correctly. We inspect the frame condition before confirming the repair option." },
+                { question: "Is an iPad repair worth it?", answer: "That depends on the exact model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
+              ].map((faq) => (
+                <details key={faq.question} className="faq-item">
+                  <summary className="faq-question">
+                    <span>{faq.question}</span>
+                    <svg className="faq-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </summary>
+                  <div className="faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="ipad-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="ipad-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>
+                Start with the iPad model selector above to check compatible repair paths, then book or call once you have the exact model.
+              </p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your iPad Model
                 <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
               </a>
               <Link href="/book-repair" className="repair-secondary-action">
