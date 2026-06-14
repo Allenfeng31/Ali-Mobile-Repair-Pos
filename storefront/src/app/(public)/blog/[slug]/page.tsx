@@ -61,12 +61,11 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   const authorName = postData.author_name || "Ali Mobile & Repair";
   const authorType = authorName === "Ali Mobile & Repair" ? "Organization" : "Person";
 
-  const jsonLd = {
+  const jsonLd: any = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: postData.title,
     description: postData.description,
-    image: postData.image ? [postData.image] : undefined,
     author: {
       "@type": authorType,
       name: authorName,
@@ -76,12 +75,16 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
       name: "Ali Mobile & Repair",
     },
     datePublished: postData.date,
-    dateModified: postData.date,
+    dateModified: postData.updated_at || postData.date,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://www.alimobile.com.au/blog/${slug}`,
     },
   };
+
+  if (postData.image) {
+    jsonLd.image = [postData.image];
+  }
 
   return (
     <main className={styles.page}>
