@@ -217,28 +217,17 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       description: "Smart watch repair services in Ringwood, Melbourne. Select your smartwatch brand and exact model to view compatible repair options and pricing, with Apple Watch models currently available on the public repair path.",
     },
     features: [
-      { t: "Exact model and case-size compatibility", d: "Repair compatibility depends on the brand, generation, model and case size before any work is confirmed." },
-      { t: "Current public Apple Watch pathway", d: "Apple Watch repair options are currently available, with additional supported smartwatch brands added only after service review." },
-      { t: "Model-first quotes and parts checks", d: "We confirm the practical repair path, quote and parts availability after inspection." },
-      { t: "Water-resistance caution after opening", d: "Careful resealing may be possible, but factory water-resistance certification cannot be guaranteed after repair." }
+      { t: "Parts availability varies by brand and model", d: "Replacement parts are model-specific and we confirm availability before quoting." },
+      { t: "Timing depends on model and inspection", d: "Repair complexity, stock levels and the exact fault determine the turnaround time." },
+      { t: "Water-resistance limitations", d: "Original factory water resistance cannot be guaranteed after opening or repair." },
+      { t: "Adhesive resealing", d: "We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." }
     ],
-    pricing: {
-      title: "Smart Watch Repair Pricing",
-      deviceType: "watch",
-      items: [
-        { model: "Apple Watch Ultra / Ultra 2", service: "Display Assembly Fix", price: 499 },
-        { model: "Apple Watch Series 9 / 8 / 7", service: "Glass & OLED replacement", price: 249 },
-        { model: "Apple Watch SE", service: "Screen replacement", price: 169 },
-        { model: "All Series Models", service: "Battery replacement", price: 79 },
-        { model: "Watch Face", service: "Rear Housing Glass Repair", price: 120 },
-      ]
-    },
     faqs: [
       { question: "Do you offer same-day smart watch repairs in Ringwood?", answer: "Some smart watch repairs may move faster when the exact model and part are confirmed, but we do not promise same-day completion before checking the watch, parts availability, repair queue and device condition." },
       { question: "What if my smart watch will not turn on or charge?", answer: "A no-power or charging fault needs diagnosis first so we can confirm whether the issue is related to the battery, charging path, display behaviour or another fault before quoting." },
       { question: "Why do I need the exact model and case size?", answer: "Repair compatibility, parts selection and pricing depend on the exact smartwatch brand, generation, model and case size. Apple Watch models are currently available on the public repair path." },
       { question: "Will my smart watch remain water resistant after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
-      { question: "Is a smart watch repair worth it?", answer: "That depends on the model, damage, device condition, quote and the value of replacing the watch. Once we confirm the exact model and fault, we can explain the practical repair path." }
+      { question: "Is a smart watch repair worth it?", answer: "That depends on the brand, model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
     ]
   }
 };
@@ -318,7 +307,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const heroMedia = CATEGORY_HERO_MEDIA[category as keyof typeof CATEGORY_HERO_MEDIA];
   const isLaptop = category === 'laptop';
   const isWatch = category === 'watch';
-  const laptopDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
+  const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
   const watchBrandSectionCopy = 'Select your brand and exact model to view compatible repair options and current pricing. Apple Watch repair options are currently available, with additional supported smartwatch brands added after service review.';
   const macBookHubHref = laptopMacBookBrand ? `/repairs/${category}/${laptopMacBookBrand.slug}` : '/repairs/laptop/macbook';
@@ -455,7 +444,16 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <div className="brand-grid-hero">
               {topBrands.map(b => (
                 <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
-                  <span>{isWatch && b.slug === 'apple' ? 'Apple Watch' : b.brand}</span>
+                  {isWatch && b.slug === 'apple' ? (
+                    <div>
+                      <span style={{ display: 'block' }}>Apple Watch</span>
+                      <small style={{ display: 'block', fontSize: '0.8em', marginTop: '4px', opacity: 0.8, fontWeight: 'normal' }}>
+                        Apple Watch repair options currently available
+                      </small>
+                    </div>
+                  ) : (
+                    <span>{b.brand}</span>
+                  )}
                   <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
                 </Link>
               ))}
@@ -465,13 +463,6 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               No active brands available in this category for now.
             </div>
           ) : null}
-
-          {isWatch && topBrands.length > 0 && (
-            <div className="repair-section-header repair-section-header-compact">
-              <span>Current public pathway</span>
-              <h3>Apple Watch repair options currently available</h3>
-            </div>
-          )}
 
           {isLaptop ? (
             <Link
@@ -743,7 +734,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               <Link href="/book-repair" prefetch={true} className="repair-primary-action">
                 Book a Repair
               </Link>
-              <a href={laptopDirectionsHref} className="repair-secondary-action" target="_blank" rel="noopener noreferrer">
+              <a href={ringwoodDirectionsHref} className="repair-secondary-action" target="_blank" rel="noopener noreferrer">
                 Get Directions
               </a>
               <a href="tel:0481058514" className="repair-secondary-action">
