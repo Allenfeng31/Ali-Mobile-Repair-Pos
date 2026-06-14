@@ -5,8 +5,10 @@ import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
+import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
 import BackButton from "@/components/BackButton";
-import { ArrowRight, ClipboardCheck, Search, ShieldCheck, Smartphone } from "lucide-react";
+import MacBookModelFinder from "./MacBookModelFinder";
+import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
@@ -54,8 +56,57 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const models = brandEntry?.models || [];
   const categorySlug = resolvedParams.category;
   const brandSlug = resolvedParams.brand;
+  const isMacBookHub = categorySlug === "laptop" && brandSlug === "macbook";
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
+  const macbookRepairPaths = [
+    {
+      name: "Screen and display faults",
+      note: "Cracked panels, image issues, backlight faults and display assemblies matched to the exact model.",
+    },
+    {
+      name: "Battery replacement",
+      note: "Battery wear, charging drop-off and shutdown symptoms checked against the correct MacBook generation.",
+    },
+    {
+      name: "Keyboard and top case path",
+      note: "Keyboard issues often use a top case assembly, and the replacement top case does not include the battery.",
+    },
+    {
+      name: "Charging and power faults",
+      note: "USB-C, MagSafe and power-delivery issues are assessed after confirming the model and the likely fault path.",
+    },
+    {
+      name: "Liquid damage assessment",
+      note: "We inspect spill-related damage first and explain the practical repair path before extra work is approved.",
+    },
+    {
+      name: "Trackpad and speaker issues",
+      note: "Input and audio faults are checked as model-specific repair paths after diagnosis.",
+    },
+  ];
+  const macbookFaqs = [
+    {
+      question: "Why do I need the exact MacBook model before repair?",
+      answer:
+        "MacBook repair compatibility, parts selection and quote accuracy all depend on the exact model and A-number.",
+    },
+    {
+      question: "Can you quote a MacBook keyboard repair straight away?",
+      answer:
+        "We can outline the likely repair path, but the exact model still needs to be confirmed because keyboard work commonly uses a top case assembly and parts availability varies by model.",
+    },
+    {
+      question: "How long do MacBook parts usually take to arrive?",
+      answer:
+        "Many MacBook parts commonly take around one to two days to obtain, then installation is often about one hour once the correct part arrives.",
+    },
+    {
+      question: "What if my MacBook model is not listed yet?",
+      answer:
+        "If your MacBook is not shown in the selector, contact Ali Mobile & Repair for an assessment before you travel and we can confirm the next step.",
+    },
+  ];
 
   return (
     <main className="repair-page-shell repair-page-shell-narrow">
@@ -67,14 +118,20 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         <strong>{brandName}</strong>
       </nav>
 
-      <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="brand-repair-heading">
+      <section
+        className="repair-tech-hero repair-tech-hero-compact"
+        aria-labelledby="brand-repair-heading"
+        style={isMacBookHub ? { gridTemplateColumns: "minmax(0, 1fr)" } : undefined}
+      >
         <div className="repair-tech-hero-copy">
           <BackButton fallbackHref={`/repairs/${categorySlug}`} />
           <span className="repair-kicker">
             <Smartphone size={15} strokeWidth={2.4} aria-hidden="true" />
             Model selector
           </span>
-          <h1 id="brand-repair-heading">{brandName} Repair Services</h1>
+          <h1 id="brand-repair-heading" style={{ overflowWrap: "anywhere" }}>
+            {brandName} Repair Services
+          </h1>
           <p>Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.</p>
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
@@ -86,57 +143,191 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </Link>
           </div>
         </div>
-        <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
-          <div className="repair-device-card" aria-hidden="true">
-            <span className="repair-device-frame">
-              <span />
-            </span>
+        {!isMacBookHub && (
+          <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
+            <div className="repair-device-card" aria-hidden="true">
+              <span className="repair-device-frame">
+                <span />
+              </span>
+              <div>
+                <strong>{brandName}</strong>
+                <small>Choose model first</small>
+              </div>
+            </div>
             <div>
-              <strong>{brandName}</strong>
-              <small>Choose model first</small>
+              <Search size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Search by model name or code</span>
+            </div>
+            <div>
+              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Transparent repair paths before booking</span>
+            </div>
+            <div>
+              <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
+              <span>Exact model unlocks service pricing</span>
             </div>
           </div>
-          <div>
-            <Search size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Search by model name or code</span>
-          </div>
-          <div>
-            <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Transparent repair paths before booking</span>
-          </div>
-          <div>
-            <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-            <span>Exact model unlocks service pricing</span>
-          </div>
-        </div>
+        )}
       </section>
 
-      <section id="models-list" className="repair-content-band" aria-label={`${brandName} models`}>
-        <BrandModelSearch
-          seriesGroups={seriesGroups}
-          categorySlug={categorySlug}
-          brandSlug={brandSlug}
-        />
-      </section>
+      {isMacBookHub ? (
+        <>
+          <MacBookModelFinder
+            seriesGroups={seriesGroups}
+            categorySlug={categorySlug}
+            brandSlug={brandSlug}
+          />
 
-      <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
-        <div className="repair-types-showcase-header">
-          <div>
-            <span className="repair-kicker repair-kicker-muted">Common services</span>
-            <h2 id="brand-repair-types-heading">All {brandName} Repair Types</h2>
-          </div>
-          <p>Choose your exact model first, then we show the right repair path, quote range, and booking options.</p>
-        </div>
-        <div className="repair-type-card-grid">
-          {REPAIR_TYPES.map((rt, index) => (
-            <article key={rt.slug} className="repair-type-mini-card">
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <strong>{rt.name}</strong>
-              <small>Model-specific quote</small>
-            </article>
-          ))}
-        </div>
-      </section>
+          <RepairResultsMatchingSection
+            category={categorySlug}
+            brand={brandSlug}
+            model={brandSlug}
+            context="model"
+          />
+
+          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
+            <div className="repair-types-showcase-header">
+              <div>
+                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <h2 id="brand-repair-types-heading">Common MacBook repair paths</h2>
+              </div>
+              <p>Choose your MacBook model first, then compare the repair path that best matches the fault we need to assess.</p>
+            </div>
+            <div className="repair-type-card-grid">
+              {macbookRepairPaths.map((path, index) => (
+                <article key={path.name} className="repair-type-mini-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{path.name}</strong>
+                  <small>{path.note}</small>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="macbook-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="macbook-diagnostic-heading">How MacBook diagnosis, parts and quoting work</h2>
+              <p>
+                We confirm the exact model first, then explain the compatible repair options, parts availability and practical quote path before any work is approved.
+              </p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Model-specific diagnosis</h3>
+                  <p>The exact model matters before we confirm repair compatibility, quote accuracy or the likely part path.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Parts and timing</h3>
+                  <p>Parts commonly require around one to two days to obtain, and installation is generally about one hour after the correct part arrives.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Keyboard and top case notes</h3>
+                  <p>MacBook keyboard work commonly uses a top case assembly, and the replacement top case does not include the battery.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>04</span>
+                  <h3>Warranty and limits</h3>
+                  <p>Keyboard repair warranty is six months, and we do not promise exact completion timing before the model and parts are confirmed.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="macbook-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="macbook-ringwood-heading">MacBook repair support at Ringwood Square</h2>
+              <p>
+                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. If your model is not listed or the fault needs assessment first, contact us before you travel.
+              </p>
+            </div>
+            <div className="repair-chip-cloud" aria-label="MacBook repair support actions">
+              <span>
+                <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+                Ringwood Square Kiosk C1
+              </span>
+              <span>
+                <Clock3 size={15} strokeWidth={2.2} aria-hidden="true" />
+                Clear quote before approval
+              </span>
+              <span>
+                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+                Privacy-checked repair workflow
+              </span>
+            </div>
+          </section>
+
+          <section className="faq-section" aria-labelledby="macbook-faq-heading">
+            <h2 id="macbook-faq-heading" className="faq-heading">MacBook repair FAQs</h2>
+            <div className="faq-accordion">
+              {macbookFaqs.map((faq) => (
+                <details key={faq.question} className="faq-item">
+                  <summary className="faq-question">
+                    <span>{faq.question}</span>
+                    <svg className="faq-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </summary>
+                  <div className="faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="macbook-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="macbook-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>
+                Start with the MacBook model selector above to check compatible repair paths, then book or call once you have the exact model.
+              </p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your MacBook Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : (
+        <>
+          <section id="models-list" className="repair-content-band" aria-label={`${brandName} models`}>
+            <BrandModelSearch
+              seriesGroups={seriesGroups}
+              categorySlug={categorySlug}
+              brandSlug={brandSlug}
+            />
+          </section>
+
+          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
+            <div className="repair-types-showcase-header">
+              <div>
+                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <h2 id="brand-repair-types-heading">All {brandName} Repair Types</h2>
+              </div>
+              <p>Choose your exact model first, then we show the right repair path, quote range, and booking options.</p>
+            </div>
+            <div className="repair-type-card-grid">
+              {REPAIR_TYPES.map((rt, index) => (
+                <article key={rt.slug} className="repair-type-mini-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{rt.name}</strong>
+                  <small>Model-specific quote</small>
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
     </main>
   );
 }
