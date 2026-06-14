@@ -2121,7 +2121,7 @@ input:checked+.toggle-slider:before {
 
 .search-input {
   width: 100%;
-  padding: 1rem 1.5rem 1rem 3rem;
+  padding: 1rem 1.5rem 1rem 3.55rem;
   border-radius: 50px;
   background: var(--layer);
   border: 1px solid var(--layer-border);
@@ -2139,7 +2139,7 @@ input:checked+.toggle-slider:before {
 .search-icon {
   position: absolute;
   top: 50%;
-  left: 2.5rem;
+  left: 1.3rem;
   transform: translateY(-50%);
   color: var(--foreground);
   opacity: 0.5;
