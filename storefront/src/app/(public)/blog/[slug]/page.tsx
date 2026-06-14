@@ -15,14 +15,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   try {
     const postData = await getPostData(slug);
 
+    const metaTitle = postData.seo_title || postData.title;
+
     return {
-      title: `${postData.title} | Ali Mobile Repair Blog`,
+      title: `${metaTitle} | Ali Mobile Repair Blog`,
       description: postData.description,
       alternates: {
         canonical: `/blog/${slug}`,
       },
       openGraph: {
-        title: `${postData.title} | Ali Mobile Repair Blog`,
+        title: `${metaTitle} | Ali Mobile Repair Blog`,
         description: postData.description,
         url: `/blog/${slug}`,
         type: "article",
@@ -56,8 +58,37 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
       })
     : "";
 
+  const authorName = postData.author_name || "Ali Mobile & Repair";
+  const authorType = authorName === "Ali Mobile & Repair" ? "Organization" : "Person";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: postData.title,
+    description: postData.description,
+    image: postData.image ? [postData.image] : undefined,
+    author: {
+      "@type": authorType,
+      name: authorName,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Ali Mobile & Repair",
+    },
+    datePublished: postData.date,
+    dateModified: postData.date,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://www.alimobile.com.au/blog/${slug}`,
+    },
+  };
+
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className={styles.shell}>
         <Link href="/blog" className={styles.backLink}>
           Back to Blog
@@ -66,16 +97,20 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         <section className={styles.hero} aria-labelledby="article-title">
           <div className={styles.heroCopy}>
             <span className={styles.kicker}>Repair Guide</span>
-            {formattedDate && <span className={styles.dateLabel}>{formattedDate}</span>}
+            <div className={styles.metaRow} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', fontSize: '0.875rem', color: 'var(--color-neu-text-secondary)', marginBottom: '1rem' }}>
+              {formattedDate && <span className={styles.dateLabel}>{formattedDate}</span>}
+              {formattedDate && <span>•</span>}
+              <span>By {authorName}</span>
+            </div>
             <h1 id="article-title">{postData.title}</h1>
             {postData.description && <p>{postData.description}</p>}
           </div>
 
           {postData.image && (
-            <div className={styles.coverWrapper}>
+            <div className={styles.coverWrapper} style={{ objectFit: 'cover', width: '100%', maxHeight: '600px', overflow: 'hidden' }}>
               <BlogImage
                 src={postData.image}
-                alt={postData.title}
+                alt={postData.cover_image_alt || postData.title}
                 className={styles.coverImage}
                 priority
               />

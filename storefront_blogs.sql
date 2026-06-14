@@ -39,3 +39,10 @@ WITH CHECK (true);
 
 -- Enable realtime (optional)
 ALTER PUBLICATION supabase_realtime ADD TABLE public.storefront_blogs;
+
+-- ============================================================
+-- MIGRATION: Add SEO and authorship fields
+-- ============================================================
+ALTER TABLE public.storefront_blogs ADD COLUMN IF NOT EXISTS seo_title TEXT;
+ALTER TABLE public.storefront_blogs ADD COLUMN IF NOT EXISTS cover_image_alt TEXT;
+ALTER TABLE public.storefront_blogs ADD COLUMN IF NOT EXISTS author_name TEXT;

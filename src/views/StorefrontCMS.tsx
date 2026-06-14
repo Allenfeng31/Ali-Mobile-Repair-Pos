@@ -53,6 +53,9 @@ interface BlogPost {
   content: string;
   description: string;
   cover_image: string;
+  seo_title?: string | null;
+  cover_image_alt?: string | null;
+  author_name?: string | null;
   is_published: boolean;
   published_at: string | null;
   created_at?: string;
@@ -99,6 +102,9 @@ function BlogEditorInline({
   const [slug, setSlug] = useState(post?.slug || '');
   const [description, setDescription] = useState(post?.description || '');
   const [coverImage, setCoverImage] = useState(post?.cover_image || '');
+  const [seoTitle, setSeoTitle] = useState(post?.seo_title || '');
+  const [coverImageAlt, setCoverImageAlt] = useState(post?.cover_image_alt || '');
+  const [authorName, setAuthorName] = useState(post?.author_name || '');
   const [isPublished] = useState(post?.is_published || false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -171,6 +177,12 @@ function BlogEditorInline({
       setDescription={setDescription}
       coverImage={coverImage}
       setCoverImage={setCoverImage}
+      seoTitle={seoTitle}
+      setSeoTitle={setSeoTitle}
+      coverImageAlt={coverImageAlt}
+      setCoverImageAlt={setCoverImageAlt}
+      authorName={authorName}
+      setAuthorName={setAuthorName}
       isPublished={isPublished}
       saving={saving}
       setSaving={setSaving}
@@ -193,6 +205,9 @@ function TipTapEditorWrapper({
   slug, setSlug,
   description, setDescription,
   coverImage, setCoverImage,
+  seoTitle, setSeoTitle,
+  coverImageAlt, setCoverImageAlt,
+  authorName, setAuthorName,
   isPublished,
   saving, setSaving,
   uploading, setUploading,
@@ -289,6 +304,9 @@ function TipTapEditorWrapper({
       content: editor?.getHTML() || '',
       description: description.trim(),
       cover_image: coverImage.trim(),
+      seo_title: seoTitle.trim() || null,
+      cover_image_alt: coverImageAlt.trim() || null,
+      author_name: authorName.trim() || null,
       is_published: publish,
       published_at: publish ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
@@ -352,6 +370,16 @@ function TipTapEditorWrapper({
                 className="w-full text-4xl font-black text-neu-text-primary bg-transparent border-none focus:ring-0 p-0 placeholder:text-neu-text-secondary/30 outline-none" />
             </div>
             <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">
+                SEO Title <span className="lowercase font-normal tracking-normal text-xs ml-2 opacity-50">(optional, controls browser tab & Google search title. Falls back to article Title)</span>
+                <span className="float-right mr-4 text-xs font-mono opacity-50">{seoTitle.length}/60</span>
+              </label>
+              <div className="bg-neu-bg shadow-neu-pressed rounded-2xl px-4 py-2 border border-black/5">
+                <input type="text" value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder={title || "SEO optimized title..."}
+                  className="w-full text-sm font-black text-neu-text-primary bg-transparent border-none focus:ring-0 p-0 outline-none placeholder:opacity-50" />
+              </div>
+            </div>
+            <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Slug</label>
               <div className="flex items-center gap-2 bg-neu-bg shadow-neu-pressed rounded-2xl px-4 py-2 border border-black/5">
                 <span className="text-neu-text-secondary text-sm font-mono font-bold">/blog/</span>
@@ -365,6 +393,22 @@ function TipTapEditorWrapper({
               <div className="bg-neu-bg shadow-neu-pressed rounded-2xl p-2 border border-black/5">
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief summary for SEO..."
                   rows={2} className="w-full text-sm font-black text-neu-text-primary bg-transparent border-none focus:ring-0 px-4 py-2 outline-none resize-none" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Author Name</label>
+                <div className="bg-neu-bg shadow-neu-pressed rounded-2xl px-4 py-2 border border-black/5">
+                  <input type="text" value={authorName} onChange={(e) => setAuthorName(e.target.value)} placeholder="Ali Mobile & Repair"
+                    className="w-full text-sm font-black text-neu-text-primary bg-transparent border-none focus:ring-0 p-0 outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-neu-text-secondary mb-2 pl-2">Cover Image Alt Text</label>
+                <div className="bg-neu-bg shadow-neu-pressed rounded-2xl px-4 py-2 border border-black/5">
+                  <input type="text" value={coverImageAlt} onChange={(e) => setCoverImageAlt(e.target.value)} placeholder={title || "Descriptive text..."}
+                    className="w-full text-sm font-black text-neu-text-primary bg-transparent border-none focus:ring-0 p-0 outline-none placeholder:opacity-50" />
+                </div>
               </div>
             </div>
             <div>

@@ -39,6 +39,9 @@ export interface BlogPost {
   image?: string;
   contentHtml: string;
   source?: 'markdown' | 'supabase';
+  seo_title?: string | null;
+  cover_image_alt?: string | null;
+  author_name?: string | null;
 }
 
 /**
@@ -89,6 +92,9 @@ async function getSupabasePosts(): Promise<BlogPost[]> {
         image: post.cover_image || undefined,
         contentHtml: post.content || '',
         source: 'supabase' as const,
+        seo_title: post.seo_title || null,
+        cover_image_alt: post.cover_image_alt || null,
+        author_name: post.author_name || null,
       })).filter((post) => !isRemovedBlogSlug(post.slug));
   } catch (err) {
     console.error('Failed to fetch Supabase blog posts:', err);
@@ -131,6 +137,9 @@ export async function getSortedPostsData() {
         image: matterResult.data.image,
         content: matterResult.content,
         source: 'markdown',
+        seo_title: matterResult.data.seo_title || null,
+        cover_image_alt: matterResult.data.cover_image_alt || null,
+        author_name: matterResult.data.author || null,
       });
     }
   }
@@ -196,6 +205,9 @@ export async function getPostData(slug: string): Promise<BlogPost> {
           image: data.cover_image || undefined,
           contentHtml: data.content || '',
           source: 'supabase',
+          seo_title: data.seo_title || null,
+          cover_image_alt: data.cover_image_alt || null,
+          author_name: data.author_name || null,
         };
       }
     } catch {
@@ -221,5 +233,8 @@ export async function getPostData(slug: string): Promise<BlogPost> {
     description: matterResult.data.description || '',
     image: matterResult.data.image,
     source: 'markdown',
+    seo_title: matterResult.data.seo_title || null,
+    cover_image_alt: matterResult.data.cover_image_alt || null,
+    author_name: matterResult.data.author || null,
   };
 }
