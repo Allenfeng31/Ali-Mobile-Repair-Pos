@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
@@ -280,7 +281,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
 
   // Dynamically split into Popular and Other
   let topBrands;
-  let secondaryLaptopBrands: typeof validBrands = [];
+  let laptopMacBookBrand: typeof validBrands[number] | null = null;
   if (category === 'phone') {
     const PHONE_PRIORITY = ['iPhone', 'Samsung', 'Google', 'Oppo'];
     topBrands = validBrands
@@ -301,8 +302,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
       if (normalizedA !== normalizedB) return normalizedA - normalizedB;
       return a.brand.localeCompare(b.brand);
     };
-    topBrands = (nonMacBookBrands.length > 0 ? nonMacBookBrands : macBookBrands).sort(sortLaptopBrands);
-    secondaryLaptopBrands = nonMacBookBrands.length > 0 ? macBookBrands.sort(sortLaptopBrands) : [];
+    topBrands = nonMacBookBrands.sort(sortLaptopBrands);
+    laptopMacBookBrand = macBookBrands.sort(sortLaptopBrands)[0] ?? null;
   } else {
     topBrands = validBrands.filter(b =>
       POPULAR_BRANDS_KEYS.some(pk => b.brand.toLowerCase().includes(pk.toLowerCase()))
@@ -310,13 +311,15 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   }
 
   const otherBrands = category === 'laptop'
-    ? secondaryLaptopBrands
+    ? []
     : validBrands
       .filter(b => !topBrands.some(tb => tb.slug === b.slug))
       .sort((a, b) => a.brand.localeCompare(b.brand));
   const heroMedia = CATEGORY_HERO_MEDIA[category as keyof typeof CATEGORY_HERO_MEDIA];
   const isLaptop = category === 'laptop';
   const laptopDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
+  const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
+  const macBookHubHref = laptopMacBookBrand ? `/repairs/${category}/${laptopMacBookBrand.slug}` : '/repairs/laptop/macbook';
 
   return (
     <>
@@ -355,19 +358,40 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
           </div>
 
-          {isLaptop ? (
-            <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Laptop repair support">
-              <div>
-                <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-                <span>Windows and MacBook repair pathways</span>
-              </div>
-              <div>
-                <MessageCircle size={20} strokeWidth={2.4} aria-hidden="true" />
-                <span>Screen, battery, keyboard and charging diagnostics</span>
-              </div>
-              <div>
-                <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
-                <span>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</span>
+          {isLaptop && heroMedia ? (
+            <div className="repair-laptop-hero-stack">
+              <aside
+                className={`repair-exploded-hero repair-exploded-hero-${category}`}
+                aria-label={heroMedia.ariaLabel}
+                style={{
+                  '--hero-media-width': `${heroMedia.width}px`,
+                  '--hero-media-height': `${heroMedia.height}px`,
+                } as React.CSSProperties}
+              >
+                <img
+                  className="repair-exploded-hero-image"
+                  src={heroMedia.image}
+                  alt={heroMedia.alt}
+                  width={heroMedia.width}
+                  height={heroMedia.height}
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                />
+              </aside>
+              <div className="repair-laptop-proof-panel" aria-label="Laptop repair support points">
+                <div>
+                  <span>Windows and MacBook pathways</span>
+                  <p>Choose a published model path, or ask us to identify the laptop at the Ringwood kiosk.</p>
+                </div>
+                <div>
+                  <span>Quote-first diagnostics</span>
+                  <p>Screen, battery, keyboard, charging and power faults are checked before work begins.</p>
+                </div>
+                <div>
+                  <span>Ringwood Square location</span>
+                  <p>Kiosk C1, Seymour Street, Ringwood VIC 3134, opposite the Bunnings entrance.</p>
+                </div>
               </div>
             </div>
           ) : heroMedia ? (
@@ -408,9 +432,83 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           )}
         </section>
 
+        <section
+          id={isLaptop ? 'laptop-brands' : undefined}
+          className="repair-content-band"
+          aria-labelledby="popular-brands-heading"
+        >
+          <div className="repair-section-header">
+            <span>{isLaptop ? 'Choose your laptop path' : 'Choose your device path'}</span>
+            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : 'Most Popular Brands'}</h2>
+            <p>
+              {isLaptop
+                ? laptopBrandSectionCopy
+                : 'Pick the brand first, then choose your exact model for live repair options and pricing.'}
+            </p>
+          </div>
+
+          {topBrands.length > 0 ? (
+            <div className="brand-grid-hero">
+              {topBrands.map(b => (
+                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
+                  <span>{b.brand}</span>
+                  <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+                </Link>
+              ))}
+            </div>
+          ) : validBrands.length === 0 ? (
+            <div className="repair-empty-state">
+              No active brands available in this category for now.
+            </div>
+          ) : null}
+
+          {isLaptop ? (
+            <Link
+              href={macBookHubHref}
+              prefetch={true}
+              className="repair-macbook-card"
+              aria-label="Choose your MacBook model to view repair options and pricing"
+            >
+              <div className="repair-macbook-card-media">
+                <Image
+                  className="repair-macbook-card-image"
+                  src="/images/services/laptop-repair.jpg"
+                  alt="Open MacBook on a repair bench showing the keyboard, logic board, and service tools"
+                  width={1024}
+                  height={1024}
+                  sizes="(max-width: 820px) 100vw, (max-width: 1120px) 40vw, 360px"
+                />
+              </div>
+              <div className="repair-macbook-card-body">
+                <span className="repair-macbook-card-kicker">MacBook Air &amp; MacBook Pro</span>
+                <h3>MacBook Repair &amp; Price Check</h3>
+                <p>Choose your MacBook model to view available screen, battery, keyboard and other repair options, with live pricing where available.</p>
+                <span className="repair-macbook-card-link">
+                  Choose Your MacBook Model
+                  <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+                </span>
+              </div>
+            </Link>
+          ) : otherBrands.length > 0 && (
+            <>
+              <div className="repair-section-header repair-section-header-compact">
+                <span>Extended catalogue</span>
+                <h3>Other Supported Brands</h3>
+              </div>
+              <div className="brand-grid-standard">
+                {otherBrands.map(b => (
+                  <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
+                    {b.brand}
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
         {isLaptop && (
           <ScrollReveal>
-            <section className="repair-workbench-shell" aria-labelledby="laptop-workbench-heading">
+            <section className="repair-workbench-shell repair-workbench-shell-laptop" aria-labelledby="laptop-workbench-heading">
               <div className="repair-workbench-heading">
                 <span>Laptop repair workbench</span>
                 <h2 id="laptop-workbench-heading">How we handle laptop repairs</h2>
@@ -418,7 +516,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               </div>
 
               <div className="repair-workbench-grid">
-                <details className="repair-workbench-box" open>
+                <details className="repair-workbench-box">
                   <summary>
                     <span className="repair-workbench-number">01</span>
                     <h3>Which laptop path fits your device?</h3>
@@ -427,10 +525,10 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <div className="repair-workbench-box-content">
                     <article className="repair-workbench-mini-card">
                       <h3>Windows laptop repair</h3>
-                      <p>Dell, HP, Lenovo, ASUS, Acer, Surface and other supported models can start with brand and model selection.</p>
+                      <p>Supported non-Apple laptop models can start with brand and model selection when a reviewed pathway is published.</p>
                       <span>Best for</span>
                       <p>Screen, battery, keyboard, charging and power problems on non-Apple laptops.</p>
-                      <small>Choose the brand below or bring the device in for identification.</small>
+                      <small>Choose a published brand path above, or bring the device in for identification and assessment.</small>
                     </article>
                     <article className="repair-workbench-mini-card">
                       <h3>MacBook repair pathway</h3>
@@ -557,68 +655,6 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </section>
           </ScrollReveal>
         )}
-
-        <section className="repair-content-band" aria-labelledby="popular-brands-heading">
-          <div className="repair-section-header">
-            <span>{isLaptop ? 'Choose your laptop path' : 'Choose your device path'}</span>
-            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : 'Most Popular Brands'}</h2>
-            <p>
-              {isLaptop
-                ? 'Start with the brand that matches your laptop. Windows laptop brands appear first, while MacBook stays on the dedicated Apple laptop hub so this page remains broad.'
-                : 'Pick the brand first, then choose your exact model for live repair options and pricing.'}
-            </p>
-          </div>
-
-          {topBrands.length > 0 ? (
-            <div className="brand-grid-hero">
-              {topBrands.map(b => (
-                <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
-                  <span>{b.brand}</span>
-                  <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
-                </Link>
-              ))}
-            </div>
-          ) : validBrands.length === 0 && (
-            <div className="repair-empty-state">
-              No active brands available in this category for now.
-            </div>
-          )}
-
-          {isLaptop ? (
-            <>
-              <div className="repair-section-header repair-section-header-compact">
-                <span>Apple laptop pathway</span>
-                <h3>MacBook repair options</h3>
-                <p>Use the dedicated MacBook hub if your laptop is an Apple notebook. That keeps the broad laptop page focused on the wider category.</p>
-              </div>
-              <div className="brand-grid-standard">
-                {otherBrands.length > 0 ? otherBrands.map(b => (
-                  <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
-                    {b.brand}
-                  </Link>
-                )) : (
-                  <Link href="/repairs/laptop/macbook" prefetch={true} className="brand-card-standard">
-                    Explore MacBook repair options
-                  </Link>
-                )}
-              </div>
-            </>
-          ) : otherBrands.length > 0 && (
-            <>
-              <div className="repair-section-header repair-section-header-compact">
-                <span>Extended catalogue</span>
-                <h3>Other Supported Brands</h3>
-              </div>
-              <div className="brand-grid-standard">
-                {otherBrands.map(b => (
-                  <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-standard">
-                    {b.brand}
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-        </section>
 
         <ScrollReveal>
           <section className="repair-assist-panel" aria-labelledby="model-help-heading">
