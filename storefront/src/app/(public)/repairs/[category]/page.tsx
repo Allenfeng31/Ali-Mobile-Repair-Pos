@@ -202,25 +202,25 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   },
   watch: {
     metadata: {
-      title: 'Apple Watch Repair Ringwood | Battery & Screen Replace | Ali Mobile',
-      description: 'Apple Watch repairs in Ringwood, serving Mitcham and Croydon. Same-day options may be available for common screen or battery repairs when parts are in stock.',
+      title: 'Smart Watch Repair Ringwood | Screen, Battery & Diagnostic Service | Ali Mobile',
+      description: 'Smart watch repairs in Ringwood. Select your smartwatch brand and exact model to view compatible repair options and pricing. Apple Watch models are currently available, with additional supported brands added after service review.',
     },
     hero: {
       pillType: 'accent',
       pillText: 'Watch Specialist',
-      title: 'Premium Smart Watch Repairs in Ringwood',
-      intro1: 'Shattered Apple Watch screen? Battery not lasting through the day? We specialize in precision repairs for all Apple Watch models, proudly servicing Ringwood, Croydon, Mitcham, and Wantirna.',
-      intro2: 'Common watch screen and battery repairs may be available same day when parts are in stock. We confirm timing after checking the model, repair queue, and device condition.',
+      title: 'Smart Watch Repair Services in Ringwood',
+      intro1: 'Select your smartwatch brand and exact model to view compatible repair options and pricing. Apple Watch models are currently available on the public repair path, with additional supported brands added after service review.',
+      intro2: 'Repair timing depends on the exact model, device condition, parts availability and inspection. We confirm the practical repair path and quote after checking the watch first.',
     },
     schema: {
       serviceName: 'Smart Watch Repair Services Ringwood',
-      description: "Professional Apple Watch and smart watch repair services in Ringwood, Melbourne. Same-day options may be available for common screen and battery repairs when parts are in stock.",
+      description: "Smart watch repair services in Ringwood, Melbourne. Select your smartwatch brand and exact model to view compatible repair options and pricing, with Apple Watch models currently available on the public repair path.",
     },
     features: [
-      { t: "Same-day options when parts are in stock", d: "Timing is confirmed after model, part, and queue checks." },
-      { t: "Precision Tools & Specialised Press Equipment", d: "" },
-      { t: "High-quality adhesive seals", d: "" },
-      { t: "180-Day Warranty on parts and labour", d: "" }
+      { t: "Exact model and case-size compatibility", d: "Repair compatibility depends on the brand, generation, model and case size before any work is confirmed." },
+      { t: "Current public Apple Watch pathway", d: "Apple Watch repair options are currently available, with additional supported smartwatch brands added only after service review." },
+      { t: "Model-first quotes and parts checks", d: "We confirm the practical repair path, quote and parts availability after inspection." },
+      { t: "Water-resistance caution after opening", d: "Careful resealing may be possible, but factory water-resistance certification cannot be guaranteed after repair." }
     ],
     pricing: {
       title: "Smart Watch Repair Pricing",
@@ -234,11 +234,11 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "Do you offer weekday same-day Apple Watch repairs in Ringwood?", answer: "Same-day turnaround may be available when the screen or battery is in stock. We confirm timing after checking the model, repair queue, and device condition." },
-      { question: "What should I do if my Apple Watch won't turn on?", answer: "First, try a forced restart. If it still won't hold a charge, the battery may need replacing. Battery degradation is normal over time, and inspection helps confirm the right repair option." },
-      { question: "How long does an Apple Watch screen repair take?", answer: "Apple Watch screen repair timing depends on the model, part availability, sealing requirements, repair queue, and device condition." },
-      { question: "Will my Apple Watch remain water resistant after repair?", answer: "Water resistance cannot be guaranteed after opening. We reseal carefully, but recommend avoiding submersion after repair." },
-      { question: "Is it worth repairing my smartwatch?", answer: "Absolutely! Battery or screen replacements are highly cost-effective compared to buying a brand new Apple Watch Series or Ultra. Bring it in for a quote!" }
+      { question: "Do you offer same-day smart watch repairs in Ringwood?", answer: "Some smart watch repairs may move faster when the exact model and part are confirmed, but we do not promise same-day completion before checking the watch, parts availability, repair queue and device condition." },
+      { question: "What if my smart watch will not turn on or charge?", answer: "A no-power or charging fault needs diagnosis first so we can confirm whether the issue is related to the battery, charging path, display behaviour or another fault before quoting." },
+      { question: "Why do I need the exact model and case size?", answer: "Repair compatibility, parts selection and pricing depend on the exact smartwatch brand, generation, model and case size. Apple Watch models are currently available on the public repair path." },
+      { question: "Will my smart watch remain water resistant after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
+      { question: "Is a smart watch repair worth it?", answer: "That depends on the model, damage, device condition, quote and the value of replacing the watch. Once we confirm the exact model and fault, we can explain the practical repair path." }
     ]
   }
 };
@@ -317,8 +317,10 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
       .sort((a, b) => a.brand.localeCompare(b.brand));
   const heroMedia = CATEGORY_HERO_MEDIA[category as keyof typeof CATEGORY_HERO_MEDIA];
   const isLaptop = category === 'laptop';
+  const isWatch = category === 'watch';
   const laptopDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
+  const watchBrandSectionCopy = 'Select your brand and exact model to view compatible repair options and current pricing. Apple Watch repair options are currently available, with additional supported smartwatch brands added after service review.';
   const macBookHubHref = laptopMacBookBrand ? `/repairs/${category}/${laptopMacBookBrand.slug}` : '/repairs/laptop/macbook';
 
   return (
@@ -438,11 +440,13 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           aria-labelledby="popular-brands-heading"
         >
           <div className="repair-section-header">
-            <span>{isLaptop ? 'Choose your laptop path' : 'Choose your device path'}</span>
-            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : 'Most Popular Brands'}</h2>
+            <span>{isLaptop ? 'Choose your laptop path' : isWatch ? 'Choose your smartwatch brand' : 'Choose your device path'}</span>
+            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : isWatch ? 'Smart Watch Brand and Model Paths' : 'Most Popular Brands'}</h2>
             <p>
               {isLaptop
                 ? laptopBrandSectionCopy
+                : isWatch
+                  ? watchBrandSectionCopy
                 : 'Pick the brand first, then choose your exact model for live repair options and pricing.'}
             </p>
           </div>
@@ -451,7 +455,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <div className="brand-grid-hero">
               {topBrands.map(b => (
                 <Link key={b.slug} href={`/repairs/${category}/${b.slug}`} prefetch={true} className="brand-card-hero">
-                  <span>{b.brand}</span>
+                  <span>{isWatch && b.slug === 'apple' ? 'Apple Watch' : b.brand}</span>
                   <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
                 </Link>
               ))}
@@ -461,6 +465,13 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               No active brands available in this category for now.
             </div>
           ) : null}
+
+          {isWatch && topBrands.length > 0 && (
+            <div className="repair-section-header repair-section-header-compact">
+              <span>Current public pathway</span>
+              <h3>Apple Watch repair options currently available</h3>
+            </div>
+          )}
 
           {isLaptop ? (
             <Link
@@ -505,6 +516,64 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </>
           )}
         </section>
+
+        {isWatch && (
+          <>
+            <ScrollReveal>
+              <section className="repair-content-band" aria-labelledby="watch-model-guidance-heading">
+                <div className="repair-section-header">
+                  <span>Model identification</span>
+                  <h2 id="watch-model-guidance-heading">Why the exact smartwatch model and case size matter</h2>
+                  <p>Repair compatibility depends on the exact brand, generation, model and case size before we confirm the right repair option, quote or timing. Apple Watch models currently available on the public path can vary by Series, SE, Ultra and case size.</p>
+                </div>
+                <div className="repair-signal-grid">
+                  <article className="repair-signal-card">
+                    <span>01</span>
+                    <h3>Brand and generation first</h3>
+                    <p>Select the smartwatch brand first, then the exact generation or family before comparing repair options.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>02</span>
+                    <h3>Case size affects compatibility</h3>
+                    <p>Sizes such as 40mm, 41mm, 42mm, 44mm, 45mm, 46mm and 49mm can change the compatible part and quote path.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>03</span>
+                    <h3>Apple Watch public path</h3>
+                    <p>Apple Watch repair options are currently available, with additional supported smartwatch brands added only after service review.</p>
+                  </article>
+                </div>
+              </section>
+            </ScrollReveal>
+
+            <ScrollReveal>
+              <section className="repair-content-band" aria-labelledby="watch-common-repairs-heading">
+                <div className="repair-section-header">
+                  <span>Common repair needs</span>
+                  <h2 id="watch-common-repairs-heading">Common smart watch repair paths</h2>
+                  <p>Start with the model path that best matches the symptom so we can confirm the compatible repair option and current pricing.</p>
+                </div>
+                <div className="repair-signal-grid">
+                  <article className="repair-signal-card">
+                    <span>01</span>
+                    <h3>Screen and display replacement</h3>
+                    <p>Cracked glass, display faults and touch issues need the exact model and case size before the repair path is confirmed.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>02</span>
+                    <h3>Battery replacement</h3>
+                    <p>Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>03</span>
+                    <h3>Charging or no-power assessment</h3>
+                    <p>If the watch is not charging or not turning on, we inspect the fault first before confirming the practical repair option.</p>
+                  </article>
+                </div>
+              </section>
+            </ScrollReveal>
+          </>
+        )}
 
         {isLaptop && (
           <ScrollReveal>
@@ -663,8 +732,12 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <MessageCircle size={15} strokeWidth={2.4} aria-hidden="true" />
                 Ringwood Square kiosk
               </span>
-              <h2 id="model-help-heading">Visit us in Ringwood Square</h2>
-              <p>Ali Mobile &amp; Repair, Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Opposite the Bunnings entrance inside Ringwood Square Shopping Centre. Call ahead if you want to confirm parts, timing or the right laptop path before travelling.</p>
+              <h2 id="model-help-heading">{isWatch ? 'Diagnosis, parts and Ringwood support' : 'Visit us in Ringwood Square'}</h2>
+              <p>
+                {isWatch
+                  ? 'We confirm the exact model, device condition, parts availability and practical repair path before quoting timing or starting work. Ali Mobile & Repair operates from Ringwood Square Shopping Centre Kiosk C1, and you can call ahead or book before visiting.'
+                  : 'Ali Mobile & Repair, Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Opposite the Bunnings entrance inside Ringwood Square Shopping Centre. Call ahead if you want to confirm parts, timing or the right laptop path before travelling.'}
+              </p>
             </div>
             <div className="repair-assist-actions">
               <Link href="/book-repair" prefetch={true} className="repair-primary-action">
@@ -684,8 +757,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           <section className="repair-content-band" aria-labelledby="why-choose-heading">
             <div className="repair-section-header">
               <span>Repair clarity</span>
-              <h2 id="why-choose-heading">Why Choose Our Laptop Hub?</h2>
-              <p>{data.hero.intro2}</p>
+              <h2 id="why-choose-heading">{isWatch ? 'How smart watch quotes, timing and water-resistance limits work' : 'Why Choose Our Laptop Hub?'}</h2>
+              <p>{isWatch ? 'Quotes and repair timing depend on the exact model, the condition of the watch and the parts path we confirm after inspection.' : data.hero.intro2}</p>
             </div>
 
             <div className="repair-signal-grid">
@@ -700,14 +773,25 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </section>
         </ScrollReveal>
 
-        {/* Live Pricing Section fetches from Backend */}
-        <ScrollReveal>
-          <LivePricingGrid
-            title={data.pricing.title}
-            deviceType={data.pricing.deviceType}
-            defaultItems={data.pricing.items}
-          />
-        </ScrollReveal>
+        {isWatch ? (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="watch-pricing-guidance-heading">
+              <div className="repair-section-header">
+                <span>Model-first pricing</span>
+                <h2 id="watch-pricing-guidance-heading">Select your brand and model to view current pricing</h2>
+                <p>Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.</p>
+              </div>
+            </section>
+          </ScrollReveal>
+        ) : (
+          <ScrollReveal>
+            <LivePricingGrid
+              title={data.pricing.title}
+              deviceType={data.pricing.deviceType}
+              defaultItems={data.pricing.items}
+            />
+          </ScrollReveal>
+        )}
 
         <ScrollReveal>
           <section className="repair-content-band" aria-labelledby="category-faq-heading">
