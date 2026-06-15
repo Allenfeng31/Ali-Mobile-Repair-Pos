@@ -19,10 +19,12 @@ export default function BrandModelSearch({
   seriesGroups,
   categorySlug,
   brandSlug,
+  placeholder = "Search model name or model code",
 }: {
   seriesGroups: SeriesGroup[];
   categorySlug: string;
   brandSlug: string;
+  placeholder?: string;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -58,7 +60,7 @@ export default function BrandModelSearch({
         <input
           type="text"
           className="search-input"
-          placeholder="Search model name or code (e.g. SM-S931B)"
+          placeholder={placeholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
