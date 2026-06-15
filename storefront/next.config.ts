@@ -244,7 +244,15 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610--sm-p613--sm-p615--sm-p619/galaxy-tab-s6-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610--sm-p613--sm-p615--sm-p619/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/galaxy-tab-s6-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/battery-replacement', permanent: true },
-      // 13. NON-IPHONE BACK GLASS MIGRATION REDIRECTS
+      // 13. GSC LEGACY ALIAS REDIRECTS (Logic Board & Tablet)
+      { source: '/repairs/phone/iphone/iphone-16-plus/logic-board', destination: '/repairs/phone/iphone/iphone-16-plus/logic-board-repair', permanent: true },
+      { source: '/repairs/phone/iphone/iphone-14-plus/logic-board', destination: '/repairs/phone/iphone/iphone-14-plus/logic-board-repair', permanent: true },
+      { source: '/repairs/tablet/ipad/ipad-10th-generation/logic-board', destination: '/repairs/tablet/ipad/ipad-10th-generation/logic-board-repair', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/lenovo-tab-m8-gen-4-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936/galaxy-tab-s11-ultra-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825/galaxy-tab-s3-water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825/water-damage-repair', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/galaxy-tab-a7-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/battery-replacement', permanent: true },
+      // 14. NON-IPHONE BACK GLASS MIGRATION REDIRECTS
       { source: '/repairs/phone/samsung/galaxy-s8/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-s8/back-glass-replacement', permanent: true },
       { source: '/repairs/phone/samsung/galaxy-s9/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-s9/back-glass-replacement', permanent: true },
       { source: '/repairs/phone/samsung/galaxy-s10/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-s10/back-glass-replacement', permanent: true },
