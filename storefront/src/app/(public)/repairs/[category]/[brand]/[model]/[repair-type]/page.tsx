@@ -3516,7 +3516,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     .filter((repair) => repair.slug !== internalRepairSlug)
     .filter((repair) => !repair.slug.includes('flex-cable'))
     .filter((repair) => !repair.slug.includes('logic-board'))
-    .filter((repair) => !repair.slug.includes('water-damage'))
+    .filter((repair) => resolvedParams.category === 'watch' || !repair.slug.includes('water-damage'))
     .slice(0, 4)
     .map((repair) => ({
       href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, repair.slug)}`,
