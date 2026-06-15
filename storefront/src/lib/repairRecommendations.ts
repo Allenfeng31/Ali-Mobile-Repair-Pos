@@ -26,6 +26,17 @@ interface ParsedModel {
   explicitYear: number | null;
 }
 
+const POPULARITY_FALLBACK_PREFIXES: Record<string, Record<string, string[]>> = {
+  watch: {
+    apple: [
+      'apple-watch-ultra-2',
+      'apple-watch-se-2nd-gen',
+      'apple-watch-series-8',
+      'apple-watch-series-9'
+    ]
+  }
+};
+
 function normalizeCandidateSlug(slug: string): string {
   return slug.toLowerCase().trim().replace(/[-_]+/g, '-');
 }
@@ -127,12 +138,12 @@ function parseModel(modelName: string, category: string, brandSlug: string): Par
     if (sizeMatch) explicitSize = sizeMatch[1];
   } else if (category === 'watch') {
     if (lower.includes('ultra')) baseFamily = 'Watch Ultra';
-    else if (lower.includes('se')) baseFamily = 'Watch SE';
     else if (lower.includes('series')) {
        baseFamily = 'Watch Series';
        const m = lower.match(/series\s+(\d+)/);
        if (m) generationNumber = parseInt(m[1], 10);
-    } else {
+    } else if (lower.includes('se')) baseFamily = 'Watch SE';
+    else {
        baseFamily = 'Watch';
     }
 
@@ -158,13 +169,14 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
 
   const normCurrentSlug = normalizeCandidateSlug(currentModelSlug);
   const sourceParsed = parseModel(currentModelName, category, brandSlug);
-  const uniqueCandidates = new Map<string, CrossModelCandidate & { rankTuple: RankTuple }>();
+
+  const allCandidates = new Map<string, CrossModelCandidate & { rankTuple: RankTuple, rawModel: ModelEntry, candidateParsed: ParsedModel }>();
 
   for (const m of models) {
     const normSlug = normalizeCandidateSlug(m.slug);
     if (normSlug === normCurrentSlug) continue; // Not current model
     if (!m.repairTypes.some(r => r.slug === repairSlug)) continue; // Must have same repair
-    if (uniqueCandidates.has(normSlug)) continue; // Deduplicate by normalized slug before scoring
+    if (allCandidates.has(normSlug)) continue; // Deduplicate by normalized slug
 
     const candidateParsed = parseModel(m.model, category, brandSlug);
 
@@ -185,7 +197,7 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
     const rankTuple: RankTuple = {
       isSameFamily: sourceParsed.baseFamily === candidateParsed.baseFamily ? 1 : 0,
       isExactGen: 0,
-      negativeGenDistance: -999, // Lower absolute distance is better, so closer to 0 is higher
+      negativeGenDistance: -999, // Lower absolute distance is better
       sharedVariants: 0,
       isSameSize: 0,
       negativeYearDistance: -999,
@@ -204,7 +216,7 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
         rankTuple.negativeGenDistance = -diff;
         if (diff > 0) reason += `Gen Diff ${diff}; `;
       } else if (sourceParsed.generationNumber === null && candidateParsed.generationNumber === null) {
-        rankTuple.negativeGenDistance = 0; // Both unknown is better than one known
+        rankTuple.negativeGenDistance = 0;
       }
 
       for (const v of sourceParsed.variants) {
@@ -216,7 +228,6 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
         reason += `Shared Variants (${rankTuple.sharedVariants}); `;
       }
 
-      // Penalties for variant mismatch when in same generation
       const sourceVariantCount = sourceParsed.variants.size;
       const candidateVariantCount = candidateParsed.variants.size;
       if (sourceVariantCount > 0 && candidateVariantCount === 0) rankTuple.fallbackScore -= 1;
@@ -238,17 +249,20 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
       reason += 'Diff Family; ';
     }
 
-    uniqueCandidates.set(normSlug, {
+    allCandidates.set(normSlug, {
       modelName: m.model,
       modelSlug: m.slug,
       repairSlug,
-      score: 0, // Unused now, keeping for interface
+      score: 0,
       reason: reason.trim() || 'Fallback',
-      rankTuple
+      rankTuple,
+      rawModel: m,
+      candidateParsed
     });
   }
 
-  const sorted = Array.from(uniqueCandidates.values()).sort((a, b) => {
+  // Define ranking comparator
+  const sortCandidates = (a: any, b: any) => {
     const rA = a.rankTuple;
     const rB = b.rankTuple;
 
@@ -287,13 +301,79 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
     if (normNameCompare !== 0) return normNameCompare;
 
     return normalizeCandidateSlug(a.modelSlug).localeCompare(normalizeCandidateSlug(b.modelSlug));
-  });
+  };
 
-  return sorted.slice(0, limit).map(c => ({
-    modelName: c.modelName,
-    modelSlug: c.modelSlug,
-    repairSlug: c.repairSlug,
-    score: c.score,
-    reason: c.reason
-  }));
+  const finalSelection: CrossModelCandidate[] = [];
+  const addedSlugs = new Set<string>();
+
+  const addCandidate = (c: any) => {
+    if (finalSelection.length < limit && !addedSlugs.has(c.modelSlug)) {
+      finalSelection.push({
+        modelName: c.modelName,
+        modelSlug: c.modelSlug,
+        repairSlug: c.repairSlug,
+        score: c.score,
+        reason: c.reason
+      });
+      addedSlugs.add(c.modelSlug);
+    }
+  };
+
+  // Stage 1: Similarity ranking (Same Family candidates)
+  const allValues = Array.from(allCandidates.values());
+  const sameFamilyCandidates = allValues.filter(c => c.rankTuple.isSameFamily === 1);
+  sameFamilyCandidates.sort(sortCandidates);
+
+  for (const c of sameFamilyCandidates) {
+    addCandidate(c);
+  }
+
+  // Stage 2: Popular-model fallback
+  if (finalSelection.length < limit) {
+    const fallbackConfig = POPULARITY_FALLBACK_PREFIXES[category]?.[brandSlug];
+    if (fallbackConfig) {
+      const addedFallbackGenerations = new Set<string>();
+      const preferLargerSize = sourceParsed.baseFamily === 'Watch Ultra';
+
+      for (const prefix of fallbackConfig) {
+        if (finalSelection.length >= limit) break;
+
+        // Find all candidates matching this prefix
+        const matchingCandidates = allValues.filter(c => !addedSlugs.has(c.modelSlug) && normalizeCandidateSlug(c.modelSlug).startsWith(prefix));
+
+        if (matchingCandidates.length > 0) {
+          // If we have multiple sizes for this generation, select the representative one
+          let selected = matchingCandidates[0];
+
+          if (matchingCandidates.length > 1) {
+            // Sort by size (assuming mm exists in slug or parsed explicitSize)
+            matchingCandidates.sort((a, b) => {
+              const sizeA = parseInt(a.candidateParsed.explicitSize || '0', 10);
+              const sizeB = parseInt(b.candidateParsed.explicitSize || '0', 10);
+              return preferLargerSize ? sizeB - sizeA : sizeA - sizeB;
+            });
+            selected = matchingCandidates[0];
+          }
+
+          const genKey = `${selected.candidateParsed.baseFamily}-${selected.candidateParsed.generationNumber}`;
+          if (!addedFallbackGenerations.has(genKey)) {
+            selected.reason = 'Popularity Fallback';
+            addCandidate(selected);
+            addedFallbackGenerations.add(genKey);
+          }
+        }
+      }
+    }
+  }
+
+  // Stage 3: Stable generic fallback
+  if (finalSelection.length < limit) {
+    const diffFamilyCandidates = allValues.filter(c => c.rankTuple.isSameFamily === 0);
+    diffFamilyCandidates.sort(sortCandidates);
+    for (const c of diffFamilyCandidates) {
+      addCandidate(c);
+    }
+  }
+
+  return finalSelection;
 }

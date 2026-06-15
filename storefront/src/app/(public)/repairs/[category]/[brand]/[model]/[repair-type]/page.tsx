@@ -3775,7 +3775,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
                     className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                   >
-                    View all {displayBrand} models &rarr;
+                    View all {resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand}{' '}models &rarr;
                   </Link>
                 </div>
               </div>
