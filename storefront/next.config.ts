@@ -57,7 +57,14 @@ const nextConfig: NextConfig = {
       { source: '/product-page/ipad-case-:slug(.*)', destination: '/repairs/tablet/apple', permanent: true },
       { source: '/product-page/:path*', destination: '/repairs/phone', permanent: true },
 
-      // 4. EXISTING REDIRECTS
+      // 4. MANUAL STOREFRONT CORRECTIONS
+      { source: '/repairs/phone/samsung/samsung-a9-plus', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215', permanent: true },
+      { source: '/repairs/phone/samsung/samsung-a9-plus/screen-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/screen-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/samsung-a9-plus/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/battery-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/samsung-a9-plus/charging-port-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/charging-port-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/samsung-a9-plus/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/water-damage-repair', permanent: true },
+
+      // 5. EXISTING REDIRECTS
       {
         source: '/services/:path*',
         destination: '/repairs/:path*',

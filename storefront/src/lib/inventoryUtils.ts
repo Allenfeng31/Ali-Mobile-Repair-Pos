@@ -192,6 +192,13 @@ export function formatDeviceTitle(brand: string, model: string): string {
 }
 
 export function parseItem(raw: RawItem): ParsedItem | null {
+  // Exclude the legacy incorrect Phone record for Samsung A9 Plus
+  // The correct public device exists in the Tablet catalog.
+  // Excluded here to keep it operational in POS for invoicing while removing it from the public storefront.
+  if (String(raw.id) === "1319" && raw.model === "P Samsung||Samsung A9 Plus") {
+    return null;
+  }
+
   // Skip non-repair items
   const cat = (raw.category || "").toLowerCase();
   const inferredService = findServiceName(raw);
