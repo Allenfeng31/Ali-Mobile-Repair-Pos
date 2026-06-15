@@ -3569,7 +3569,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     notFound();
   }
 
-  const { details, otherRepairLinks } = pageData;
+  const { details, otherRepairLinks, crossModelLinks } = pageData;
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
