@@ -85,55 +85,6 @@ function isGoogleReviewsPayload(value: unknown): value is GoogleReviewsPayload {
   );
 }
 
-function buildLocalBusinessSchema(payload: GoogleReviewsPayload) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "MobilePhoneStore",
-    "@id": "https://www.alimobile.com.au/#localbusiness",
-    name: "Ali Mobile & Repair",
-    image: "https://www.alimobile.com.au/logo.png",
-    url: "https://www.alimobile.com.au",
-    telephone: "+61481058514",
-    priceRange: "$$",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
-      addressLocality: "Ringwood",
-      addressRegion: "VIC",
-      postalCode: "3134",
-      addressCountry: "AU",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: -37.81534,
-      longitude: 145.22851,
-    },
-    ...(payload.aggregateRating.ratingValue && payload.aggregateRating.reviewCount ? {
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: payload.aggregateRating.ratingValue,
-        reviewCount: payload.aggregateRating.reviewCount,
-        bestRating: "5",
-        worstRating: "1",
-      }
-    } : {}),
-    review: payload.reviews.slice(0, 5).map((review) => ({
-      "@type": "Review",
-      author: {
-        "@type": "Person",
-        name: review.authorName,
-      },
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: "5",
-        bestRating: "5",
-        worstRating: "1",
-      },
-      reviewBody: review.text,
-      datePublished: review.publishTime,
-    })),
-  };
-}
 
 function ReviewCard({ review }: { review: PublicGoogleReview }) {
   return (
@@ -197,15 +148,8 @@ export default function ReviewsSection() {
     () => payload.reviews,
     [payload.reviews]
   );
-  const localBusinessSchema = useMemo(() => buildLocalBusinessSchema(payload), [payload]);
-
   return (
     <section className={`${styles.section} homepage-reviews-section`} aria-labelledby="reviews-heading">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
-
       <div className={styles.inner}>
         <header className={styles.header}>
           <span className={styles.eyebrow}>Google Reviews</span>
