@@ -26,6 +26,10 @@ interface ParsedModel {
   explicitYear: number | null;
 }
 
+function normalizeCandidateSlug(slug: string): string {
+  return slug.toLowerCase().trim().replace(/[-_]+/g, '-');
+}
+
 function parseModel(modelName: string, category: string, brandSlug: string): ParsedModel {
   const lower = modelName.toLowerCase();
   let baseFamily = 'Generic';
@@ -105,7 +109,7 @@ function parseModel(modelName: string, category: string, brandSlug: string): Par
     }
     else if (lower.includes('tab active')) baseFamily = 'Tab Active';
 
-    const genMatch = lower.match(/(\d+)(?:th|rd|nd|st)\s+gen/);
+    const genMatch = lower.match(/(\d+)(?:th|rd|nd|st)\s+(?:gen|generation)/) || lower.match(/generation\s+(\d+)/);
     if (genMatch) generationNumber = parseInt(genMatch[1], 10);
 
     const sizeMatch = lower.match(/(\d+(?:\.\d+)?)-inch/);
@@ -151,17 +155,31 @@ interface RankTuple {
 
 export function getCrossModelRepairRecommendations(ctx: RecommendationContext): CrossModelCandidate[] {
   const { category, brandSlug, currentModelSlug, currentModelName, repairSlug, models, limit = 4 } = ctx;
-  const candidates: CrossModelCandidate[] = [];
 
+  const normCurrentSlug = normalizeCandidateSlug(currentModelSlug);
   const sourceParsed = parseModel(currentModelName, category, brandSlug);
   const uniqueCandidates = new Map<string, CrossModelCandidate & { rankTuple: RankTuple }>();
 
   for (const m of models) {
-    if (m.slug === currentModelSlug) continue; // Not current model
+    const normSlug = normalizeCandidateSlug(m.slug);
+    if (normSlug === normCurrentSlug) continue; // Not current model
     if (!m.repairTypes.some(r => r.slug === repairSlug)) continue; // Must have same repair
-    if (uniqueCandidates.has(m.slug)) continue; // Deduplicate by slug before scoring
+    if (uniqueCandidates.has(normSlug)) continue; // Deduplicate by normalized slug before scoring
 
     const candidateParsed = parseModel(m.model, category, brandSlug);
+
+    // Semantic duplication check
+    if (category === 'laptop' || category === 'computer') {
+      if (
+        sourceParsed.baseFamily === candidateParsed.baseFamily &&
+        sourceParsed.explicitSize !== null && candidateParsed.explicitSize !== null && sourceParsed.explicitSize === candidateParsed.explicitSize &&
+        sourceParsed.generationNumber !== null && candidateParsed.generationNumber !== null && sourceParsed.generationNumber === candidateParsed.generationNumber &&
+        sourceParsed.explicitYear !== null && candidateParsed.explicitYear !== null && sourceParsed.explicitYear === candidateParsed.explicitYear
+      ) {
+        continue;
+      }
+    }
+
     let reason = '';
 
     const rankTuple: RankTuple = {
@@ -220,7 +238,7 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
       reason += 'Diff Family; ';
     }
 
-    uniqueCandidates.set(m.slug, {
+    uniqueCandidates.set(normSlug, {
       modelName: m.model,
       modelSlug: m.slug,
       repairSlug,
@@ -235,14 +253,40 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
     const rB = b.rankTuple;
 
     if (rA.isSameFamily !== rB.isSameFamily) return rB.isSameFamily - rA.isSameFamily;
-    if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
-    if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
-    if (rA.sharedVariants !== rB.sharedVariants) return rB.sharedVariants - rA.sharedVariants;
-    if (rA.isSameSize !== rB.isSameSize) return rB.isSameSize - rA.isSameSize;
-    if (rA.negativeYearDistance !== rB.negativeYearDistance) return rB.negativeYearDistance - rA.negativeYearDistance;
+
+    if (category === 'phone') {
+      if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
+      if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
+      if (rA.sharedVariants !== rB.sharedVariants) return rB.sharedVariants - rA.sharedVariants;
+      if (rA.isSameSize !== rB.isSameSize) return rB.isSameSize - rA.isSameSize;
+      if (rA.negativeYearDistance !== rB.negativeYearDistance) return rB.negativeYearDistance - rA.negativeYearDistance;
+    } else if (category === 'tablet') {
+      if (rA.isSameSize !== rB.isSameSize) return rB.isSameSize - rA.isSameSize;
+      if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
+      if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
+      if (rA.sharedVariants !== rB.sharedVariants) return rB.sharedVariants - rA.sharedVariants;
+    } else if (category === 'laptop' || category === 'computer') {
+      if (rA.isSameSize !== rB.isSameSize) return rB.isSameSize - rA.isSameSize;
+      if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
+      if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
+      if (rA.negativeYearDistance !== rB.negativeYearDistance) return rB.negativeYearDistance - rA.negativeYearDistance;
+    } else if (category === 'watch') {
+      if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
+      if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
+      if (rA.isSameSize !== rB.isSameSize) return rB.isSameSize - rA.isSameSize;
+      if (rA.negativeYearDistance !== rB.negativeYearDistance) return rB.negativeYearDistance - rA.negativeYearDistance;
+    } else {
+      if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
+      if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
+      if (rA.sharedVariants !== rB.sharedVariants) return rB.sharedVariants - rA.sharedVariants;
+    }
+
     if (rA.fallbackScore !== rB.fallbackScore) return rB.fallbackScore - rA.fallbackScore;
 
-    return a.modelName.localeCompare(b.modelName);
+    const normNameCompare = normalizeCandidateSlug(a.modelName).localeCompare(normalizeCandidateSlug(b.modelName));
+    if (normNameCompare !== 0) return normNameCompare;
+
+    return normalizeCandidateSlug(a.modelSlug).localeCompare(normalizeCandidateSlug(b.modelSlug));
   });
 
   return sorted.slice(0, limit).map(c => ({
