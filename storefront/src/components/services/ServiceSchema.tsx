@@ -14,9 +14,10 @@ interface ServiceSchemaProps {
 export function ServiceSchema({ serviceName, description, faqs }: ServiceSchemaProps) {
   const localBusinessSchema = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": "MobilePhoneStore",
+    "@id": "https://www.alimobile.com.au/#localbusiness",
     "name": "Ali Mobile & Repair",
-    "image": "https://alimobilerepair.com.au/logo.png", // Replace with actual URL
+    "image": "https://www.alimobile.com.au/logo.png",
     "description": description,
     "address": {
       "@type": "PostalAddress",
@@ -28,17 +29,17 @@ export function ServiceSchema({ serviceName, description, faqs }: ServiceSchemaP
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": -37.815,
-      "longitude": 145.228
+      "latitude": -37.815340,
+      "longitude": 145.228510
     },
-    "url": "https://alimobilerepair.com.au",
+    "url": "https://www.alimobile.com.au",
     "telephone": "0481 058 514",
     "openingHoursSpecification": [
       {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        "opens": "09:00",
-        "closes": "18:00"
+        "opens": "10:00",
+        "closes": "17:00"
       }
     ]
   };

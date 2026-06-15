@@ -14,18 +14,20 @@ export default function Breadcrumbs({ category, brand, model, service }: Breadcr
   const fModel = formatDynamicParam(model);
   const fService = service ? formatDynamicParam(service) : null;
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
+
   const breadcrumbItems = [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobilerepair.com.au/" },
-    { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobilerepair.com.au/repairs" },
-    { "@type": "ListItem", "position": 3, "name": fCategory, "item": `https://www.alimobilerepair.com.au/repairs/${category}` },
-    { "@type": "ListItem", "position": 4, "name": fBrand, "item": `https://www.alimobilerepair.com.au/repairs/${category}/${brand}` },
-    { "@type": "ListItem", "position": 5, "name": fModel, "item": `https://www.alimobilerepair.com.au/repairs/${category}/${brand}/${model}` },
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": `${baseUrl}/` },
+    { "@type": "ListItem", "position": 2, "name": "Repairs", "item": `${baseUrl}/repairs` },
+    { "@type": "ListItem", "position": 3, "name": fCategory, "item": `${baseUrl}/repairs/${category}` },
+    { "@type": "ListItem", "position": 4, "name": fBrand, "item": `${baseUrl}/repairs/${category}/${brand}` },
+    { "@type": "ListItem", "position": 5, "name": fModel, "item": `${baseUrl}/repairs/${category}/${brand}/${model}` },
   ];
 
   if (fService && service) {
     breadcrumbItems.push({
       "@type": "ListItem", "position": 6, "name": fService,
-      "item": `https://www.alimobilerepair.com.au/repairs/${category}/${brand}/${model}/${service}`
+      "item": `${baseUrl}/repairs/${category}/${brand}/${model}/${service}`
     });
   }
 
