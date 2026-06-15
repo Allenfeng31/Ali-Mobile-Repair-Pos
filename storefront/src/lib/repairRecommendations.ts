@@ -22,6 +22,8 @@ interface ParsedModel {
   baseFamily: string;
   generationNumber: number | null;
   variants: Set<string>;
+  explicitSize: string | null;
+  explicitYear: number | null;
 }
 
 function parseModel(modelName: string, category: string, brandSlug: string): ParsedModel {
@@ -29,6 +31,11 @@ function parseModel(modelName: string, category: string, brandSlug: string): Par
   let baseFamily = 'Generic';
   let generationNumber: number | null = null;
   const variants = new Set<string>();
+  let explicitSize: string | null = null;
+  let explicitYear: number | null = null;
+
+  const yearMatch = lower.match(/\b(20\d{2})\b/);
+  if (yearMatch) explicitYear = parseInt(yearMatch[1], 10);
 
   // Extract common variants
   if (lower.includes('pro max')) variants.add('pro max');
@@ -100,9 +107,9 @@ function parseModel(modelName: string, category: string, brandSlug: string): Par
 
     const genMatch = lower.match(/(\d+)(?:th|rd|nd|st)\s+gen/);
     if (genMatch) generationNumber = parseInt(genMatch[1], 10);
-    
+
     const sizeMatch = lower.match(/(\d+(?:\.\d+)?)-inch/);
-    if (sizeMatch) variants.add(`${sizeMatch[1]}-inch`);
+    if (sizeMatch) explicitSize = sizeMatch[1];
 
   } else if (category === 'laptop' || category === 'computer') {
     if (lower.includes('macbook pro')) baseFamily = 'MacBook Pro';
@@ -113,7 +120,7 @@ function parseModel(modelName: string, category: string, brandSlug: string): Par
     if (mChip) generationNumber = parseInt(mChip[1], 10);
 
     const sizeMatch = lower.match(/(\d+(?:\.\d+)?)[-"]\s?(?:inch)?/);
-    if (sizeMatch) variants.add(`${sizeMatch[1]}-inch`);
+    if (sizeMatch) explicitSize = sizeMatch[1];
   } else if (category === 'watch') {
     if (lower.includes('ultra')) baseFamily = 'Watch Ultra';
     else if (lower.includes('se')) baseFamily = 'Watch SE';
@@ -126,10 +133,20 @@ function parseModel(modelName: string, category: string, brandSlug: string): Par
     }
 
     const sizeMatch = lower.match(/(\d+)mm/);
-    if (sizeMatch) variants.add(`${sizeMatch[1]}mm`);
+    if (sizeMatch) explicitSize = sizeMatch[1];
   }
 
-  return { baseFamily, generationNumber, variants };
+  return { baseFamily, generationNumber, variants, explicitSize, explicitYear };
+}
+
+interface RankTuple {
+  isSameFamily: number;
+  isExactGen: number;
+  negativeGenDistance: number;
+  sharedVariants: number;
+  isSameSize: number;
+  negativeYearDistance: number;
+  fallbackScore: number;
 }
 
 export function getCrossModelRepairRecommendations(ctx: RecommendationContext): CrossModelCandidate[] {
@@ -137,76 +154,102 @@ export function getCrossModelRepairRecommendations(ctx: RecommendationContext): 
   const candidates: CrossModelCandidate[] = [];
 
   const sourceParsed = parseModel(currentModelName, category, brandSlug);
+  const uniqueCandidates = new Map<string, CrossModelCandidate & { rankTuple: RankTuple }>();
 
   for (const m of models) {
     if (m.slug === currentModelSlug) continue; // Not current model
     if (!m.repairTypes.some(r => r.slug === repairSlug)) continue; // Must have same repair
+    if (uniqueCandidates.has(m.slug)) continue; // Deduplicate by slug before scoring
 
     const candidateParsed = parseModel(m.model, category, brandSlug);
-    let score = 0;
     let reason = '';
 
-    // 1. Same product family
-    if (sourceParsed.baseFamily === candidateParsed.baseFamily) {
-      score += 1000;
+    const rankTuple: RankTuple = {
+      isSameFamily: sourceParsed.baseFamily === candidateParsed.baseFamily ? 1 : 0,
+      isExactGen: 0,
+      negativeGenDistance: -999, // Lower absolute distance is better, so closer to 0 is higher
+      sharedVariants: 0,
+      isSameSize: 0,
+      negativeYearDistance: -999,
+      fallbackScore: 0
+    };
+
+    if (rankTuple.isSameFamily) {
       reason += 'Same Family; ';
 
-      // 2. Same generation or nearest numeric generation
       if (sourceParsed.generationNumber !== null && candidateParsed.generationNumber !== null) {
+        if (sourceParsed.generationNumber === candidateParsed.generationNumber) {
+          rankTuple.isExactGen = 1;
+          reason += 'Exact Gen; ';
+        }
         const diff = Math.abs(sourceParsed.generationNumber - candidateParsed.generationNumber);
-        score += Math.max(100 - (diff * 20), 0);
-        reason += `Gen Diff ${diff}; `;
+        rankTuple.negativeGenDistance = -diff;
+        if (diff > 0) reason += `Gen Diff ${diff}; `;
       } else if (sourceParsed.generationNumber === null && candidateParsed.generationNumber === null) {
-        score += 50;
+        rankTuple.negativeGenDistance = 0; // Both unknown is better than one known
       }
 
-      // 3. Same variant or size
-      let sharedVariants = 0;
       for (const v of sourceParsed.variants) {
         if (candidateParsed.variants.has(v)) {
-          score += 300;
-          reason += `Shared Variant (${v}); `;
-          sharedVariants++;
+          rankTuple.sharedVariants++;
         }
       }
-      
+      if (rankTuple.sharedVariants > 0) {
+        reason += `Shared Variants (${rankTuple.sharedVariants}); `;
+      }
+
+      // Penalties for variant mismatch when in same generation
       const sourceVariantCount = sourceParsed.variants.size;
       const candidateVariantCount = candidateParsed.variants.size;
-      if (sourceVariantCount === 0 && candidateVariantCount > 0) {
-        score -= 50; 
-      } else if (sourceVariantCount > 0 && candidateVariantCount === 0) {
-        score -= 50; 
-      } else if (sourceVariantCount > 0 && sharedVariants === 0) {
-        score -= 100;
+      if (sourceVariantCount > 0 && candidateVariantCount === 0) rankTuple.fallbackScore -= 1;
+      if (sourceVariantCount === 0 && candidateVariantCount > 0) rankTuple.fallbackScore -= 1;
+
+      if (sourceParsed.explicitSize && sourceParsed.explicitSize === candidateParsed.explicitSize) {
+        rankTuple.isSameSize = 1;
+        reason += `Same Size (${sourceParsed.explicitSize}); `;
+      }
+
+      if (sourceParsed.explicitYear !== null && candidateParsed.explicitYear !== null) {
+        const yearDiff = Math.abs(sourceParsed.explicitYear - candidateParsed.explicitYear);
+        rankTuple.negativeYearDistance = -yearDiff;
+        reason += `Year Diff ${yearDiff}; `;
+      } else if (sourceParsed.explicitYear === null && candidateParsed.explicitYear === null) {
+        rankTuple.negativeYearDistance = 0;
       }
     } else {
-      // Different family fallback
-      score += 10;
-      reason += 'Different Family; ';
+      reason += 'Diff Family; ';
     }
 
-    candidates.push({
+    uniqueCandidates.set(m.slug, {
       modelName: m.model,
       modelSlug: m.slug,
       repairSlug,
-      score,
-      reason: reason.trim() || 'Fallback'
+      score: 0, // Unused now, keeping for interface
+      reason: reason.trim() || 'Fallback',
+      rankTuple
     });
   }
 
-  // Deduplicate just in case
-  const uniqueCandidates = new Map<string, CrossModelCandidate>();
-  for (const c of candidates) {
-    if (!uniqueCandidates.has(c.modelSlug)) {
-      uniqueCandidates.set(c.modelSlug, c);
-    }
-  }
-
   const sorted = Array.from(uniqueCandidates.values()).sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    // 4. Stable normalized-name/slug fallback
+    const rA = a.rankTuple;
+    const rB = b.rankTuple;
+
+    if (rA.isSameFamily !== rB.isSameFamily) return rB.isSameFamily - rA.isSameFamily;
+    if (rA.isExactGen !== rB.isExactGen) return rB.isExactGen - rA.isExactGen;
+    if (rA.negativeGenDistance !== rB.negativeGenDistance) return rB.negativeGenDistance - rA.negativeGenDistance;
+    if (rA.sharedVariants !== rB.sharedVariants) return rB.sharedVariants - rA.sharedVariants;
+    if (rA.isSameSize !== rB.isSameSize) return rB.isSameSize - rA.isSameSize;
+    if (rA.negativeYearDistance !== rB.negativeYearDistance) return rB.negativeYearDistance - rA.negativeYearDistance;
+    if (rA.fallbackScore !== rB.fallbackScore) return rB.fallbackScore - rA.fallbackScore;
+
     return a.modelName.localeCompare(b.modelName);
   });
 
-  return sorted.slice(0, limit);
+  return sorted.slice(0, limit).map(c => ({
+    modelName: c.modelName,
+    modelSlug: c.modelSlug,
+    repairSlug: c.repairSlug,
+    score: c.score,
+    reason: c.reason
+  }));
 }
