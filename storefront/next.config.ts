@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
       { source: '/hobart-detail-p01', destination: '/', permanent: true },
       
       // 2. LEGACY BLOG POSTS
+      { source: '/blog/reliable-phone-repair-ringwood', destination: '/locations/ringwood', permanent: true },
       { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/apple/iphone-13', permanent: true },
       { source: '/post/full-privacy-screen-protect-available-now', destination: '/repairs/phone', permanent: true },
       { source: '/post/put-a-new-light-box', destination: '/', permanent: true },
