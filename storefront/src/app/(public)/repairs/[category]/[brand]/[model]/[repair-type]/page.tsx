@@ -11,6 +11,7 @@ import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
 import { generateFaqs } from './repairFaqs';
+import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
 
 export const revalidate = 86400;
 
@@ -3524,6 +3525,20 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       slug: repair.slug,
     }));
 
+  const crossModelLinks = getCrossModelRepairRecommendations({
+    category: resolvedParams.category,
+    brandSlug: resolvedParams.brand,
+    currentModelSlug: resolvedParams.model,
+    currentModelName: modelEntry.model,
+    repairSlug: internalRepairSlug,
+    models: brandEntry.models,
+    limit: 4,
+  }).map((c) => ({
+    href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${c.modelSlug}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, c.repairSlug)}`,
+    label: c.modelName,
+    slug: c.repairSlug,
+  }));
+
   return {
     details: {
       brand: brandEntry.brand,
@@ -3535,6 +3550,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       source: catalog.source,
     },
     otherRepairLinks,
+    crossModelLinks,
   };
 }
 
@@ -3715,6 +3731,52 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       </span>
                     </Link>
                   ))}
+                </div>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
+        {crossModelLinks && crossModelLinks.length > 0 && (
+          <ScrollReveal>
+            <section className="repair-assist-panel mt-8" aria-labelledby="cross-model-repairs-heading">
+              <div className="flex w-full flex-col gap-5">
+                <div className="w-full max-w-none">
+                  <span className="repair-kicker repair-kicker-muted">More options</span>
+                  <h2 id="cross-model-repairs-heading" className="break-words leading-tight">
+                    More {displayBrand} models for {finalRepairName}
+                  </h2>
+                </div>
+                <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+                  {crossModelLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="group flex min-h-[56px] w-full items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm shadow-blue-950/5 transition duration-200 ease-out touch-manipulation hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    >
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600 transition group-hover:border-blue-200 group-hover:bg-white">
+                          {getRepairIcon(link.slug, 18)}
+                        </span>
+                        <span className="min-w-0 break-words leading-snug">{link.label}</span>
+                      </span>
+                      <span
+                        className="shrink-0 rounded-full border border-blue-100 bg-white px-2 py-1 text-xs text-blue-600 transition group-hover:translate-x-0.5 group-hover:border-blue-200 group-hover:bg-blue-600 group-hover:text-white"
+                        aria-hidden="true"
+                      >
+                        &rarr;
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="mt-2 text-center">
+                  <Link
+                    href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                  >
+                    View all {displayBrand} models &rarr;
+                  </Link>
                 </div>
               </div>
             </section>
