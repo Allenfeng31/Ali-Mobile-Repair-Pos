@@ -85,11 +85,32 @@ export default function RepairResultsDashboardPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [currentId, setCurrentId] = useState<string>('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [replacementId, setReplacementId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentId(crypto.randomUUID());
+  }, []);
 
   const publishedCount = useMemo(
     () => results.filter((result) => result.status === 'published' && result.privacy_checked).length,
     [results]
   );
+
+  const isDirty = useMemo(() => {
+    return JSON.stringify(form) !== JSON.stringify(INITIAL_FORM_STATE) || beforeImage !== null || afterImage !== null;
+  }, [form, beforeImage, afterImage]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   useEffect(() => {
     void fetchResults();
@@ -139,6 +160,43 @@ export default function RepairResultsDashboardPage() {
     });
   }
 
+  function startEdit(result: PublicRepairResult) {
+    setEditingId(result.id);
+    setReplacementId(crypto.randomUUID());
+    setForm({
+      device_category: result.device_category,
+      brand: result.brand,
+      brand_slug: result.brand_slug,
+      model: result.model,
+      model_slug: result.model_slug,
+      repair_type: result.repair_type,
+      repair_type_slug: result.repair_type_slug,
+      title: result.title,
+      short_description: result.short_description || '',
+      image_pair_alt_text: result.image_pair_alt_text || '',
+      image_aspect_ratio: result.image_aspect_ratio || '4:3',
+      related_repair_url: result.related_repair_url || '',
+      featured_on_homepage: result.featured_on_homepage,
+      sort_order: String(result.sort_order),
+      status: result.status,
+      privacy_checked: result.privacy_checked,
+    });
+    setBeforeImage(null);
+    setAfterImage(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    if (isDirty && !window.confirm('You have unsaved changes. Discard?')) {
+      return;
+    }
+    setEditingId(null);
+    setReplacementId(null);
+    setForm(INITIAL_FORM_STATE);
+    setBeforeImage(null);
+    setAfterImage(null);
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -149,7 +207,7 @@ export default function RepairResultsDashboardPage() {
       return;
     }
 
-    if (!beforeImage || !afterImage) {
+    if (!editingId && (!beforeImage || !afterImage)) {
       setError('Before and after images are required.');
       return;
     }
@@ -157,15 +215,25 @@ export default function RepairResultsDashboardPage() {
     setSaving(true);
 
     try {
+      const method = editingId ? 'PATCH' : 'POST';
+      const endpoint = editingId ? `/api/admin/repair-results/${encodeURIComponent(editingId as string)}` : '/api/admin/repair-results';
+
       const formData = new FormData();
+      if (!editingId) {
+        formData.set('id', currentId);
+      } else {
+        if (replacementId && (beforeImage || afterImage)) {
+          formData.set('replacement_id', replacementId);
+        }
+      }
       Object.entries(form).forEach(([key, value]) => {
         formData.set(key, String(value));
       });
-      formData.set('before_image', beforeImage);
-      formData.set('after_image', afterImage);
+      if (beforeImage) formData.set('before_image', beforeImage);
+      if (afterImage) formData.set('after_image', afterImage);
 
-      const response = await fetch('/api/admin/repair-results', {
-        method: 'POST',
+      const response = await fetch(endpoint, {
+        method,
         body: formData,
       });
       const payload = await response.json().catch(() => ({}));
@@ -174,10 +242,23 @@ export default function RepairResultsDashboardPage() {
         throw new Error(payload.error || `Failed to save repair result (${response.status})`);
       }
 
+      if (payload.idempotentReplay) {
+        setSuccess('Repair result already saved.');
+      } else if (payload.warning) {
+        setSuccess(payload.warning);
+      } else {
+        setSuccess('Repair result saved.');
+      }
+      
+      if (!editingId) {
+        setCurrentId(crypto.randomUUID());
+      } else {
+        setEditingId(null);
+        setReplacementId(null);
+      }
       setForm(INITIAL_FORM_STATE);
       setBeforeImage(null);
       setAfterImage(null);
-      setSuccess('Repair result saved.');
       await fetchResults();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Failed to save repair result.');
@@ -205,7 +286,11 @@ export default function RepairResultsDashboardPage() {
         throw new Error(payload.error || `Failed to update repair result (${response.status})`);
       }
 
-      setSuccess('Repair result updated.');
+      if (payload.warning) {
+        setSuccess(payload.warning);
+      } else {
+        setSuccess('Repair result updated.');
+      }
       await fetchResults();
     } catch (updateError) {
       setError(updateError instanceof Error ? updateError.message : 'Failed to update repair result.');
@@ -219,7 +304,15 @@ export default function RepairResultsDashboardPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-center">
           <div>
-            <Link href="/dashboard" className="mb-3 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-950">
+            <Link 
+              href="/dashboard" 
+              className="mb-3 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-950"
+              onClick={(e) => {
+                if (isDirty && !window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                  e.preventDefault();
+                }
+              }}
+            >
               <ArrowLeft size={16} strokeWidth={2.6} aria-hidden="true" />
               Dashboard
             </Link>
@@ -260,7 +353,7 @@ export default function RepairResultsDashboardPage() {
                 <ImagePlus size={20} strokeWidth={2.5} aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-lg font-black">New result</h2>
+                <h2 className="text-lg font-black">{editingId ? 'Edit result' : 'New result'}</h2>
                 <p className="text-xs font-semibold text-slate-500">Images are uploaded to the private repair-results bucket.</p>
               </div>
             </div>
@@ -418,7 +511,7 @@ export default function RepairResultsDashboardPage() {
                 <label className="grid gap-2 text-sm font-bold text-slate-700">
                   Before image (damaged screen before repair)
                   <input
-                    required
+                    required={!editingId}
                     type="file"
                     accept="image/*"
                     onChange={(event) => setBeforeImage(event.target.files?.[0] || null)}
@@ -428,7 +521,7 @@ export default function RepairResultsDashboardPage() {
                 <label className="grid gap-2 text-sm font-bold text-slate-700">
                   After image (repaired screen after repair)
                   <input
-                    required
+                    required={!editingId}
                     type="file"
                     accept="image/*"
                     onChange={(event) => setAfterImage(event.target.files?.[0] || null)}
@@ -458,14 +551,26 @@ export default function RepairResultsDashboardPage() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saving ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <UploadCloud size={18} strokeWidth={2.5} aria-hidden="true" />}
-              Save repair result
-            </button>
+            <div className="mt-5 flex gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saving ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <UploadCloud size={18} strokeWidth={2.5} aria-hidden="true" />}
+                {editingId ? 'Update repair result' : 'Save repair result'}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  disabled={saving}
+                  className="inline-flex items-center justify-center rounded-lg bg-slate-200 px-5 py-3 text-sm font-black text-slate-800 transition hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Cancel edit
+                </button>
+              )}
+            </div>
           </form>
 
           <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -523,6 +628,14 @@ export default function RepairResultsDashboardPage() {
                     </div>
                     <p className="mt-3 text-xs font-semibold text-slate-400">{formatDate(result.published_at)}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={updatingId === result.id}
+                        onClick={() => startEdit(result)}
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Edit
+                      </button>
                       {!result.privacy_checked && (
                         <button
                           type="button"

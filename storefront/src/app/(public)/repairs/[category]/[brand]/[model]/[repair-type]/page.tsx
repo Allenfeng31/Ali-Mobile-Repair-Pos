@@ -9,6 +9,7 @@ import ChatNowButton from '@/components/ChatNowButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
+import RepairResultsServerSection from '@/components/repair-results/RepairResultsServerSection';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
 import { generateFaqs } from './repairFaqs';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
@@ -3494,6 +3495,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     source: 'pos' | 'fallback';
   };
   otherRepairLinks: SameModelRepairLink[];
+  crossModelLinks: SameModelRepairLink[];
 } | null> {
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(
@@ -3557,7 +3559,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
 import { notFound } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
-import RepairResultsMatchingSection from '@/components/repair-results/RepairResultsMatchingSection';
+
 import ScrollReveal from '@/components/ScrollReveal';
 
 
@@ -3691,12 +3693,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        <RepairResultsMatchingSection
+        <RepairResultsServerSection
+          context="detail"
           category={resolvedParams.category}
           brand={resolvedParams.brand}
           model={resolvedParams.model}
           repairType={resolvedParams['repair-type']}
-          context="detail"
         />
 
         {otherRepairLinks.length > 0 && (
@@ -3748,7 +3750,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   </h2>
                 </div>
                 <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                  {crossModelLinks.map((link) => (
+                  {crossModelLinks.map((link: SameModelRepairLink) => (
                     <Link
                       key={link.href}
                       href={link.href}

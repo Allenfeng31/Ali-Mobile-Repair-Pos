@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { invalidateRepairResultScopes } from '@/lib/repair-results-cache';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
@@ -192,7 +193,11 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const id = randomUUID();
+    const id = getString(formData, 'id');
+    if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)) {
+      return jsonWithCors(request, { error: 'Valid UUID id is required.' }, { status: 400 });
+    }
+
     const deviceCategory = getString(formData, 'device_category') as RepairResultDeviceCategory;
     const status = (getString(formData, 'status') || 'draft') as RepairResultStatus;
     const privacyChecked = getBoolean(formData, 'privacy_checked');
@@ -235,44 +240,114 @@ export async function POST(request: Request) {
     }
 
     const supabase = createServiceRoleClient();
-    const beforeImagePath = await uploadRepairImage(supabase, id, 'before', beforeImage, privacyChecked);
-    const afterImagePath = await uploadRepairImage(supabase, id, 'after', afterImage, privacyChecked);
 
-    const { data, error } = await supabase
+    // 2. Check whether the ID already exists
+    const { data: existingRecord, error: existingError } = await supabase
       .from('repair_results')
-      .insert({
-        id,
-        device_category: deviceCategory,
-        brand: getString(formData, 'brand'),
-        brand_slug: getString(formData, 'brand_slug'),
-        model: getString(formData, 'model'),
-        model_slug: getString(formData, 'model_slug'),
-        repair_type: getString(formData, 'repair_type'),
-        repair_type_slug: getString(formData, 'repair_type_slug'),
-        before_image_path: beforeImagePath,
-        after_image_path: afterImagePath,
-        image_pair_alt_text: getOptionalString(formData, 'image_pair_alt_text'),
-        image_aspect_ratio: getString(formData, 'image_aspect_ratio') || '4:3',
-        before_image_width: getInteger(formData, 'before_image_width') || null,
-        before_image_height: getInteger(formData, 'before_image_height') || null,
-        after_image_width: getInteger(formData, 'after_image_width') || null,
-        after_image_height: getInteger(formData, 'after_image_height') || null,
-        title: getString(formData, 'title'),
-        short_description: getOptionalString(formData, 'short_description'),
-        status,
-        privacy_checked: privacyChecked,
-        featured_on_homepage: getBoolean(formData, 'featured_on_homepage'),
-        sort_order: getInteger(formData, 'sort_order'),
-        related_repair_url: getOptionalString(formData, 'related_repair_url'),
-        published_at: status === 'published' ? new Date().toISOString() : null,
-      })
       .select(PUBLIC_REPAIR_RESULT_SELECT)
-      .single();
+      .eq('id', id)
+      .maybeSingle();
 
-    if (error) throw error;
+    if (existingError) {
+      return jsonWithCors(request, { error: 'Database error checking idempotency.' }, { status: 500 });
+    }
 
-    revalidateTag('repair-results', 'max');
-    revalidatePath('/', 'page');
+    // 3. If it already exists before uploading, return 200 with idempotentReplay: true
+    if (existingRecord) {
+      return jsonWithCors(request, {
+        status: 'SUCCESS',
+        data: existingRecord,
+        idempotentReplay: true,
+      }, { status: 200 });
+    }
+
+    const uploadedPaths: string[] = [];
+    let data;
+    
+    try {
+      // 4. Upload files and track paths
+      const beforeImagePath = await uploadRepairImage(supabase, id, 'before', beforeImage, privacyChecked);
+      uploadedPaths.push(beforeImagePath);
+      
+      const afterImagePath = await uploadRepairImage(supabase, id, 'after', afterImage, privacyChecked);
+      uploadedPaths.push(afterImagePath);
+
+      // 5. Attempt DB insert
+      const { data: insertData, error: insertError } = await supabase
+        .from('repair_results')
+        .insert({
+          id,
+          device_category: deviceCategory,
+          brand: getString(formData, 'brand'),
+          brand_slug: getString(formData, 'brand_slug'),
+          model: getString(formData, 'model'),
+          model_slug: getString(formData, 'model_slug'),
+          repair_type: getString(formData, 'repair_type'),
+          repair_type_slug: getString(formData, 'repair_type_slug'),
+          before_image_path: beforeImagePath,
+          after_image_path: afterImagePath,
+          image_pair_alt_text: getOptionalString(formData, 'image_pair_alt_text'),
+          image_aspect_ratio: getString(formData, 'image_aspect_ratio') || '4:3',
+          before_image_width: getInteger(formData, 'before_image_width') || null,
+          before_image_height: getInteger(formData, 'before_image_height') || null,
+          after_image_width: getInteger(formData, 'after_image_width') || null,
+          after_image_height: getInteger(formData, 'after_image_height') || null,
+          title: getString(formData, 'title'),
+          short_description: getOptionalString(formData, 'short_description'),
+          status,
+          privacy_checked: privacyChecked,
+          featured_on_homepage: getBoolean(formData, 'featured_on_homepage'),
+          sort_order: getInteger(formData, 'sort_order'),
+          related_repair_url: getOptionalString(formData, 'related_repair_url'),
+          published_at: status === 'published' ? new Date().toISOString() : null,
+        })
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .single();
+
+      if (insertError) {
+        throw insertError;
+      }
+      
+      data = insertData;
+    } catch (error: any) {
+      // Clean up ONLY this request's uploaded paths
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from(REPAIR_RESULT_BUCKET).remove(uploadedPaths).catch(cleanupError => {
+          console.warn('[repair-results] Failed to clean up orphan images after DB insert error:', cleanupError);
+        });
+      }
+      
+      // 7. If the insert fails because the UUID was concurrently inserted (unique constraint violation code 23505)
+      if (error && error.code === '23505') {
+        const { data: concurrentRecord } = await supabase
+          .from('repair_results')
+          .select(PUBLIC_REPAIR_RESULT_SELECT)
+          .eq('id', id)
+          .maybeSingle();
+          
+        if (concurrentRecord) {
+          return jsonWithCors(request, {
+            status: 'SUCCESS',
+            data: concurrentRecord,
+            idempotentReplay: true,
+          }, { status: 200 });
+        }
+      }
+      
+      // 8. For any other insertion failure
+      throw error;
+    }
+
+    try {
+      invalidateRepairResultScopes(data as any);
+    } catch (cacheError) {
+      console.warn('[repair-results] Cache invalidation failed after successful DB save:', cacheError);
+      return jsonWithCors(request, {
+        status: 'SUCCESS',
+        data,
+        warning: 'Record saved successfully, but Storefront cache refresh failed. Please refresh the page manually or update to retry.',
+      }, { status: 201 });
+    }
 
     return jsonWithCors(request, { status: 'SUCCESS', data }, { status: 201 });
   } catch (error) {

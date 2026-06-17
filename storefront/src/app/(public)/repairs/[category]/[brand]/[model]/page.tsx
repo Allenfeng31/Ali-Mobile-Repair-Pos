@@ -6,7 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
-import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
+import RepairResultsServerSection from "@/components/repair-results/RepairResultsServerSection";
 import ScrollReveal from "@/components/ScrollReveal";
 import { ArrowRight, Battery, Camera, PhoneCall, PlugZap, Smartphone, Wrench } from "lucide-react";
 
@@ -145,11 +145,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         />
       </section>
 
-      <RepairResultsMatchingSection
+      <RepairResultsServerSection
+        context="model"
         category={categorySlug}
         brand={brandSlug}
         model={modelSlug}
-        context="model"
       />
 
       <ScrollReveal>
