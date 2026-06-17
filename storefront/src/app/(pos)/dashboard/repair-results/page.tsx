@@ -60,6 +60,18 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '');
 }
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers (e.g. older iPad POS terminals)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 function statusLabel(status: RepairResultStatus) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
@@ -89,7 +101,7 @@ export default function RepairResultsDashboardPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
-    setCurrentId(crypto.randomUUID());
+    setCurrentId(generateUUID());
   }, []);
 
   const publishedCount = useMemo(
@@ -192,6 +204,7 @@ export default function RepairResultsDashboardPage() {
     setForm(INITIAL_FORM_STATE);
     setBeforeImage(null);
     setAfterImage(null);
+    setCurrentId(generateUUID());
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -244,9 +257,10 @@ export default function RepairResultsDashboardPage() {
       }
       
       if (!editingId) {
-        setCurrentId(crypto.randomUUID());
+        setCurrentId(generateUUID());
       } else {
         setEditingId(null);
+        setCurrentId(generateUUID());
       }
       setForm(INITIAL_FORM_STATE);
       setBeforeImage(null);
