@@ -262,7 +262,8 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
 
       if (context !== 'homepage') {
         q = q.order('published_at', { ascending: false, nullsFirst: false })
-             .order('sort_order', { ascending: true });
+             .order('created_at', { ascending: false, nullsFirst: false })
+             .order('id', { ascending: false });
       } else {
         q = q.order('sort_order', { ascending: true })
              .order('published_at', { ascending: false, nullsFirst: false });
@@ -272,11 +273,20 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
         q = q.range(offset, offset + pageSize - 1);
       }
 
-      const { data, error } = await q;
+      let data, error;
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        const res = await q;
+        data = res.data;
+        error = res.error;
+        if (!error || !error.message?.includes('AbortError')) {
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
 
       if (error) {
         console.error('[repair-results] Query failed:', error);
-        return accumulated;
+        throw new Error(`Supabase query failed: ${error.message || JSON.stringify(error)}`);
       }
 
       const rawResults = (data || []) as unknown as PublicRepairResult[];
