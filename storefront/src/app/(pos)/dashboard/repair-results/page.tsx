@@ -87,7 +87,6 @@ export default function RepairResultsDashboardPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [currentId, setCurrentId] = useState<string>('');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [replacementId, setReplacementId] = useState<string | null>(null);
 
   useEffect(() => {
     setCurrentId(crypto.randomUUID());
@@ -162,7 +161,6 @@ export default function RepairResultsDashboardPage() {
 
   function startEdit(result: PublicRepairResult) {
     setEditingId(result.id);
-    setReplacementId(crypto.randomUUID());
     setForm({
       device_category: result.device_category,
       brand: result.brand,
@@ -191,7 +189,6 @@ export default function RepairResultsDashboardPage() {
       return;
     }
     setEditingId(null);
-    setReplacementId(null);
     setForm(INITIAL_FORM_STATE);
     setBeforeImage(null);
     setAfterImage(null);
@@ -221,10 +218,6 @@ export default function RepairResultsDashboardPage() {
       const formData = new FormData();
       if (!editingId) {
         formData.set('id', currentId);
-      } else {
-        if (replacementId && (beforeImage || afterImage)) {
-          formData.set('replacement_id', replacementId);
-        }
       }
       Object.entries(form).forEach(([key, value]) => {
         formData.set(key, String(value));
@@ -254,7 +247,6 @@ export default function RepairResultsDashboardPage() {
         setCurrentId(crypto.randomUUID());
       } else {
         setEditingId(null);
-        setReplacementId(null);
       }
       setForm(INITIAL_FORM_STATE);
       setBeforeImage(null);
@@ -508,26 +500,34 @@ export default function RepairResultsDashboardPage() {
               </label>
 
               <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-                <label className="grid gap-2 text-sm font-bold text-slate-700">
-                  Before image (damaged screen before repair)
-                  <input
-                    required={!editingId}
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => setBeforeImage(event.target.files?.[0] || null)}
-                    className="text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
-                  />
-                </label>
-                <label className="grid gap-2 text-sm font-bold text-slate-700">
-                  After image (repaired screen after repair)
-                  <input
-                    required={!editingId}
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => setAfterImage(event.target.files?.[0] || null)}
-                    className="text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
-                  />
-                </label>
+                {editingId ? (
+                  <p className="text-sm font-bold text-slate-700">
+                    For new repair photos, create a new Repair Result.
+                  </p>
+                ) : (
+                  <>
+                    <label className="grid gap-2 text-sm font-bold text-slate-700">
+                      Before image (damaged screen before repair)
+                      <input
+                        required
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => setBeforeImage(event.target.files?.[0] || null)}
+                        className="text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-bold text-slate-700">
+                      After image (repaired screen after repair)
+                      <input
+                        required
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => setAfterImage(event.target.files?.[0] || null)}
+                        className="text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
+                      />
+                    </label>
+                  </>
+                )}
               </div>
 
               <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm font-bold text-slate-700 md:col-span-2">

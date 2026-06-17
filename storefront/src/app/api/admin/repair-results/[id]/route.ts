@@ -132,70 +132,6 @@ async function copyToApprovedPath(
   return approvedPath;
 }
 
-async function uploadReplacementImage(
-  supabase: SupabaseClient,
-  id: string,
-  side: 'before' | 'after',
-  file: File,
-  privacyChecked: boolean
-) {
-  const prefix = privacyChecked ? 'approved' : 'raw';
-  const path = `${prefix}/${id}/${side}-${randomUUID()}.webp`;
-  const arrayBuffer = await file.arrayBuffer();
-  const { error } = await supabase.storage.from(REPAIR_RESULT_BUCKET).upload(path, arrayBuffer, {
-    cacheControl: privacyChecked ? '31536000' : '3600',
-    contentType: 'image/webp',
-    upsert: false,
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  return path;
-}
-
-async function cleanupOnlyProvablyUnreferencedCreatedPaths(
-  supabase: SupabaseClient,
-  replacementId: string,
-  createdPathsThisAttempt: string[],
-  oldRecord: any
-) {
-  if (!createdPathsThisAttempt || createdPathsThisAttempt.length === 0) return;
-  const uniquePaths = Array.from(new Set(createdPathsThisAttempt));
-
-  try {
-    const { data: dbRow, error: dbError } = await supabase
-      .from('repair_results')
-      .select('before_image_path, after_image_path')
-      .eq('id', replacementId)
-      .in('status', ['draft', 'approved', 'published', 'archived'])
-      .maybeSingle();
-
-    if (dbError) throw dbError;
-
-    const protectedPaths = new Set([
-      oldRecord.before_image_path,
-      oldRecord.after_image_path
-    ]);
-
-    if (dbRow) {
-      if (dbRow.before_image_path) protectedPaths.add(dbRow.before_image_path);
-      if (dbRow.after_image_path) protectedPaths.add(dbRow.after_image_path);
-    }
-
-    const pathsToDelete = uniquePaths.filter(p => !protectedPaths.has(p));
-
-    if (pathsToDelete.length > 0) {
-      const { error: removeError } = await supabase.storage.from(REPAIR_RESULT_BUCKET).remove(pathsToDelete);
-      if (removeError) {
-        console.warn('[repair-results] Nonfatal storage cleanup warning:', removeError);
-      }
-    }
-  } catch (err) {
-    console.warn('[repair-results] Failed to verify paths before cleanup. Failing closed to preserve files:', err);
-  }
-}
 
 export async function OPTIONS(request: Request) {
   return new NextResponse(null, {
@@ -281,228 +217,43 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const hasImageReplacement = Boolean(beforeImage || afterImage);
-    const createdPathsThisAttempt: string[] = [];
-    let imagesPersisted = false;
     
-    try {
-      if (!hasImageReplacement) {
-        // --- 1. METADATA ONLY EDIT ---
-        if (privacyChecked) {
-          updates.before_image_path = await copyToApprovedPath(supabase, record.before_image_path, id, 'before');
-          if (updates.before_image_path !== record.before_image_path) createdPathsThisAttempt.push(updates.before_image_path as string);
-          
-          updates.after_image_path = await copyToApprovedPath(supabase, record.after_image_path, id, 'after');
-          if (updates.after_image_path !== record.after_image_path) createdPathsThisAttempt.push(updates.after_image_path as string);
-        }
-
-        const { data, error } = await supabase
-          .from('repair_results')
-          .update(updates)
-          .eq('id', id)
-          .select(PUBLIC_REPAIR_RESULT_SELECT)
-          .single();
-
-        if (error) throw error;
-        imagesPersisted = true;
-
-        let warningMessage = '';
-        try {
-          invalidateRepairResultScopes(record as any); 
-          invalidateRepairResultScopes(data as any);   
-        } catch (cacheError) {
-          console.warn('[repair-results] Cache invalidation failed after successful PATCH DB save:', cacheError);
-          warningMessage = 'Record updated successfully, but Storefront cache refresh failed. Please refresh the page manually or update to retry.';
-        }
-
-        // NO old images deleted ever.
-        return jsonWithCors(request, { 
-          status: 'SUCCESS', 
-          data,
-          ...(warningMessage ? { warning: warningMessage } : {})
-        }, { status: 200 });
-
-      } else {
-        // --- 2. REPLACEMENT VERSION WORKFLOW ---
-        let replacementId = typeof body.replacement_id === 'string' ? body.replacement_id : undefined;
-        if (!replacementId || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(replacementId)) {
-          return jsonWithCors(request, { error: 'Valid replacement_id UUID is required for image replacement.' }, { status: 400 });
-        }
-
-        // Check if staged replacement row already exists
-        const { data: stagedRecord, error: stagedError } = await supabase
-          .from('repair_results')
-          .select('*')
-          .eq('id', replacementId)
-          .maybeSingle();
-
-        if (stagedError) throw stagedError;
-
-        let newRecord = stagedRecord;
-
-        if (!newRecord) {
-          let newBeforePath = record.before_image_path;
-          if (beforeImage) {
-            newBeforePath = await uploadReplacementImage(supabase, replacementId, 'before', beforeImage, privacyChecked);
-            createdPathsThisAttempt.push(newBeforePath);
-          } else if (privacyChecked) {
-            newBeforePath = await copyToApprovedPath(supabase, record.before_image_path, replacementId, 'before');
-            if (newBeforePath !== record.before_image_path) {
-              createdPathsThisAttempt.push(newBeforePath);
-            }
-          } else {
-             newBeforePath = record.before_image_path;
-          }
-
-          let newAfterPath = record.after_image_path;
-          if (afterImage) {
-            newAfterPath = await uploadReplacementImage(supabase, replacementId, 'after', afterImage, privacyChecked);
-            createdPathsThisAttempt.push(newAfterPath);
-          } else if (privacyChecked) {
-            newAfterPath = await copyToApprovedPath(supabase, record.after_image_path, replacementId, 'after');
-            if (newAfterPath !== record.after_image_path) {
-              createdPathsThisAttempt.push(newAfterPath);
-            }
-          } else {
-            newAfterPath = record.after_image_path;
-          }
-
-          const newRecordData = {
-            ...record,
-            id: replacementId,
-            ...updates,
-            replaces_result_id: id,
-            status: 'draft',
-            featured_on_homepage: false,
-            before_image_path: newBeforePath,
-            after_image_path: newAfterPath,
-            created_at: undefined,
-            updated_at: undefined
-          };
-
-          const { data: insertedRecord, error: insertError } = await supabase
-            .from('repair_results')
-            .insert(newRecordData as any)
-            .select('*')
-            .single();
-
-          if (insertError) {
-            if (insertError.code === '23505') {
-              const { data: existingDraft } = await supabase
-                .from('repair_results')
-                .select('*')
-                .eq('replaces_result_id', id)
-                .in('status', ['draft', 'approved'])
-                .maybeSingle();
-
-              if (existingDraft) {
-                newRecord = existingDraft;
-                replacementId = existingDraft.id;
-
-                const uniquePaths = Array.from(new Set(createdPathsThisAttempt));
-                for (const path of uniquePaths) {
-                  if (path !== existingDraft.before_image_path &&
-                      path !== existingDraft.after_image_path &&
-                      path !== record.before_image_path &&
-                      path !== record.after_image_path) {
-                    try {
-                      await supabase.storage.from('repair-results').remove([path]);
-                    } catch (cleanupErr) {
-                      console.warn(`[repair-results] Nonfatal storage cleanup warning for orphaned file ${path}:`, cleanupErr);
-                    }
-                  }
-                }
-                createdPathsThisAttempt.length = 0;
-              } else {
-                throw insertError;
-              }
-            } else {
-              throw insertError;
-            }
-          } else {
-            newRecord = insertedRecord;
-          }
-        } 
-        imagesPersisted = true;
-        
-        if (newRecord.status === 'archived') {
-          return jsonWithCors(request, { error: 'Replacement record is archived and cannot be modified.' }, { status: 409 });
-        }
-        
-        if (newRecord.status === 'published') {
-          if (newRecord.replaces_result_id !== id || newRecord.id !== replacementId) {
-             return jsonWithCors(request, { error: 'Invalid replacement identity mismatch.' }, { status: 409 });
-          }
-          return jsonWithCors(request, { 
-            status: 'SUCCESS', 
-            data: newRecord,
-            idempotentReplay: true,
-            oldRecordId: id
-          }, { status: 200 });
-        }
-
-        if (updates.status === 'published') {
-          // Now call the atomic activation RPC only when explicitly publishing
-          const { data: rpcData, error: rpcError } = await supabase.rpc('activate_repair_result_replacement', {
-            old_id: id,
-            new_id: replacementId,
-            req_status: 'published',
-            req_featured: updates.featured_on_homepage ?? record.featured_on_homepage
-          });
-
-          if (rpcError) {
-            console.error('[repair-results] RPC Activation failed:', rpcError);
-            // Retain old public row unchanged, retain new row as draft, retain all historical images
-            return jsonWithCors(request, {
-              status: 'ERROR',
-              error: 'Replacement record staged, but atomic activation failed.',
-              details: rpcError.message
-            }, { status: 500 });
-          }
-
-          newRecord = rpcData.new_record;
-        } else if (updates.status && updates.status !== newRecord.status || Object.keys(updates).length > 0) {
-           // Safely transition Draft/Approved or update metadata without archiving old record
-           const { data: updatedRecord, error: updateError } = await supabase
-             .from('repair_results')
-             .update({
-               ...updates,
-               status: updates.status || newRecord.status,
-               featured_on_homepage: updates.featured_on_homepage ?? newRecord.featured_on_homepage
-             })
-             .eq('id', newRecord.id)
-             .select('*')
-             .single();
-
-           if (updateError) throw updateError;
-           newRecord = updatedRecord;
-        }
-
-        const activatedRecord = newRecord;
-
-        let warningMessage = '';
-        try {
-          invalidateRepairResultScopes(record as any); 
-          invalidateRepairResultScopes(activatedRecord as any);   
-        } catch (cacheError) {
-          console.warn('[repair-results] Cache invalidation failed after successful replacement workflow:', cacheError);
-          warningMessage = 'Replacement record activated, but cache refresh failed. Please refresh the page manually or update to retry.';
-        }
-
-        return jsonWithCors(request, { 
-          status: 'SUCCESS', 
-          data: activatedRecord,
-          oldRecordId: id,
-          ...(warningMessage ? { warning: warningMessage } : {})
-        }, { status: 200 });
-      }
-      
-    } catch (error) {
-      if (!imagesPersisted && createdPathsThisAttempt && createdPathsThisAttempt.length > 0) {
-        const replacementIdToClean = typeof body?.replacement_id === 'string' ? body.replacement_id : id;
-        await cleanupOnlyProvablyUnreferencedCreatedPaths(supabase, replacementIdToClean, createdPathsThisAttempt, record);
-      }
-      throw error;
+    if (hasImageReplacement) {
+      return jsonWithCors(request, { 
+        error: 'Image replacement is no longer supported on existing records. For new repair photos, please create a new Repair Result.' 
+      }, { status: 400 });
     }
+
+    // --- METADATA ONLY EDIT ---
+    if (privacyChecked) {
+      updates.before_image_path = await copyToApprovedPath(supabase, record.before_image_path, id, 'before');
+      updates.after_image_path = await copyToApprovedPath(supabase, record.after_image_path, id, 'after');
+    }
+
+    const { data, error } = await supabase
+      .from('repair_results')
+      .update(updates)
+      .eq('id', id)
+      .select(PUBLIC_REPAIR_RESULT_SELECT)
+      .single();
+
+    if (error) throw error;
+
+    let warningMessage = '';
+    try {
+      invalidateRepairResultScopes(record as any); 
+      invalidateRepairResultScopes(data as any);   
+    } catch (cacheError) {
+      console.warn('[repair-results] Cache invalidation failed after successful PATCH DB save:', cacheError);
+      warningMessage = 'Record updated successfully, but Storefront cache refresh failed. Please refresh the page manually or update to retry.';
+    }
+
+    return jsonWithCors(request, { 
+      status: 'SUCCESS', 
+      data,
+      ...(warningMessage ? { warning: warningMessage } : {})
+    }, { status: 200 });
+
   } catch (error) {
     console.error('[repair-results] PATCH failed:', error);
     return jsonWithCors(request, { error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });

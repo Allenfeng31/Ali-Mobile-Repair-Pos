@@ -114,6 +114,34 @@ export function invalidateRepairResultScopes(record: {
   }
 }
 
+function applyExactGroupDeduplication(results: PublicRepairResult[]): PublicRepairResult[] {
+  // Sort first by published_at DESC, created_at DESC, id DESC
+  const sorted = [...results].sort((a, b) => {
+    const dateA = a.published_at ? new Date(a.published_at).getTime() : 0;
+    const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
+    if (dateA !== dateB) return dateB - dateA;
+    
+    const createdA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const createdB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    if (createdA !== createdB) return createdB - createdA;
+    
+    return b.id.localeCompare(a.id);
+  });
+
+  const selected: PublicRepairResult[] = [];
+  const seenGroups = new Set<string>();
+
+  for (const result of sorted) {
+    const groupKey = `${result.device_category}-${result.brand_slug}-${result.model_slug}-${result.repair_type_slug}`;
+    if (!seenGroups.has(groupKey)) {
+      seenGroups.add(groupKey);
+      selected.push(result);
+    }
+  }
+
+  return selected;
+}
+
 function applyDeterministicDiversity(results: PublicRepairResult[], context: RepairResultsContext): PublicRepairResult[] {
   let limit = 4;
   if (context === 'homepage') limit = 4; // Homepage fetches 1 per category upstream
@@ -277,11 +305,20 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
 
   const rawResults = (data || []) as unknown as PublicRepairResult[];
   const validResults = rawResults.filter(isPublicRepairResult);
+  const dedupedResults = applyExactGroupDeduplication(validResults);
 
   if (context === 'homepage') {
+    // Re-sort homepage by sort_order
+    const sortedForHome = [...dedupedResults].sort((a, b) => {
+      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+      const dateA = a.published_at ? new Date(a.published_at).getTime() : 0;
+      const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
+      return dateB - dateA;
+    });
+
     // 1 per category
     const byCategory: Partial<Record<string, PublicRepairResult>> = {};
-    for (const res of validResults) {
+    for (const res of sortedForHome) {
       if (!byCategory[res.device_category]) {
         byCategory[res.device_category] = res;
       }
@@ -289,7 +326,7 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
     return Object.values(byCategory).filter((r): r is PublicRepairResult => r !== undefined);
   }
 
-  return applyDeterministicDiversity(validResults, context);
+  return applyDeterministicDiversity(dedupedResults, context);
 }
 
 export async function getRepairResults(params: GetRepairResultsParams): Promise<PublicRepairResult[]> {
