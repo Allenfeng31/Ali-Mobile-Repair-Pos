@@ -219,6 +219,15 @@ function applyDeterministicDiversity(results: PublicRepairResult[], context: Rep
   return selected;
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as { name?: unknown }).name === 'AbortError'
+  );
+}
+
 async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<PublicRepairResult[]> {
   const supabase = createPublicRepairResultsClient();
   if (!supabase) return [];
@@ -278,7 +287,7 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
         const res = await q;
         data = res.data;
         error = res.error;
-        if (!error || !error.message?.includes('AbortError')) {
+        if (!error || !isAbortError(error)) {
           break;
         }
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
