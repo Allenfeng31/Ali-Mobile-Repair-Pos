@@ -73,6 +73,17 @@ const STATUS_OPTIONS: RepairResultStatus[] = ['draft', 'approved', 'published', 
 const PRIVACY_CONFIRMATION =
   'I confirm no customer name, phone number, IMEI, serial number, private photo, message, notification, lock screen content or sensitive personal data is visible.';
 
+function generateUUID() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 const INITIAL_FORM_STATE: FormState = {
   device_category: 'phone',
   brand: '',
@@ -194,6 +205,7 @@ async function processImage(file: File): Promise<{ blob: Blob; width: number; he
 export function RepairResultsView({ onBack }: { onBack: () => void }) {
   const { permissions, isLoading: permissionsLoading } = useAuthStore();
   const [form, setForm] = React.useState<FormState>(INITIAL_FORM_STATE);
+  const [currentId, setCurrentId] = React.useState<string>(() => generateUUID());
   const [beforeImage, setBeforeImage] = React.useState<File | null>(null);
   const [afterImage, setAfterImage] = React.useState<File | null>(null);
   const [results, setResults] = React.useState<PublicRepairResult[]>([]);
@@ -270,6 +282,11 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
       return;
     }
 
+    if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(currentId)) {
+      setError('A valid UUID is required to create a repair result.');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -282,6 +299,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
 
       const headers = await getRepairResultsAuthHeaders();
       const formData = new FormData();
+      formData.set('id', currentId);
       Object.entries(form).forEach(([key, value]) => {
         formData.set(key, String(value));
       });
@@ -304,6 +322,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
       }
 
       setForm(INITIAL_FORM_STATE);
+      setCurrentId(generateUUID());
       setBeforeImage(null);
       setAfterImage(null);
       setSuccess('Repair result saved.');

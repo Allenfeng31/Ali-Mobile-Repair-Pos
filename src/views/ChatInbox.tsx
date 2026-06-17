@@ -1017,7 +1017,7 @@ export function ChatInbox() {
                       {getSessionLabel(session, idx)}
                     </span>
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">
-                      {lastMsg ? formatTime(lastMsg.created_at) : formatTime(session.created_at)}
+                      {formatTime(session.last_message_at || session.created_at)}
                     </span>
                   </div>
 
