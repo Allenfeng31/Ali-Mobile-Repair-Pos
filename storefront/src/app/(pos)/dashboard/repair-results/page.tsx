@@ -97,12 +97,8 @@ export default function RepairResultsDashboardPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [currentId, setCurrentId] = useState<string>('');
+  const [currentId, setCurrentId] = useState<string>(() => generateUUID());
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setCurrentId(generateUUID());
-  }, []);
 
   const publishedCount = useMemo(
     () => results.filter((result) => result.status === 'published' && result.privacy_checked).length,
@@ -219,6 +215,11 @@ export default function RepairResultsDashboardPage() {
 
     if (!editingId && (!beforeImage || !afterImage)) {
       setError('Before and after images are required.');
+      return;
+    }
+
+    if (!editingId && !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(currentId)) {
+      setError('A valid UUID is required to create a repair result.');
       return;
     }
 
