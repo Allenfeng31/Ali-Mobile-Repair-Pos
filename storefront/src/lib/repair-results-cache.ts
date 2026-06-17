@@ -120,11 +120,11 @@ function applyExactGroupDeduplication(results: PublicRepairResult[]): PublicRepa
     const dateA = a.published_at ? new Date(a.published_at).getTime() : 0;
     const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
     if (dateA !== dateB) return dateB - dateA;
-    
+
     const createdA = a.created_at ? new Date(a.created_at).getTime() : 0;
     const createdB = b.created_at ? new Date(b.created_at).getTime() : 0;
     if (createdA !== createdB) return createdB - createdA;
-    
+
     return b.id.localeCompare(a.id);
   });
 
@@ -132,7 +132,7 @@ function applyExactGroupDeduplication(results: PublicRepairResult[]): PublicRepa
   const seenGroups = new Set<string>();
 
   for (const result of sorted) {
-    const groupKey = `${result.device_category}-${result.brand_slug}-${result.model_slug}-${result.repair_type_slug}`;
+    const groupKey = JSON.stringify([result.device_category, result.brand_slug, result.model_slug, result.repair_type_slug]);
     if (!seenGroups.has(groupKey)) {
       seenGroups.add(groupKey);
       selected.push(result);
@@ -229,83 +229,86 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
   const model = normalizeSlug(params.model);
   const repairType = normalizeSlug(params.repairType);
 
-  let q = supabase
-    .from('repair_results')
-    .select(PUBLIC_REPAIR_RESULT_SELECT)
-    .eq('status', 'published')
-    .eq('privacy_checked', true)
-    .neq('before_image_path', '')
-    .neq('after_image_path', '');
+  async function getCandidates(isFallback: boolean): Promise<PublicRepairResult[]> {
+    if (!supabase) return [];
 
-  if (context === 'homepage') {
-    q = q.eq('featured_on_homepage', true);
-  } else {
-    if (category) q = q.eq('device_category', category);
+    const accumulated: PublicRepairResult[] = [];
+    let offset = 0;
+    const pageSize = 50;
 
-    if (context === 'detail') {
-      q = q.eq('brand_slug', brand)
-           .eq('model_slug', model)
-           .eq('repair_type_slug', repairType)
-           .limit(3);
-    } else if (context === 'model') {
-      q = q.eq('brand_slug', brand)
-           .eq('model_slug', model)
-           .limit(16);
-    } else if (context === 'brand') {
-      q = q.eq('brand_slug', brand)
-           .limit(16);
-    } else if (context === 'category') {
-      q = q.limit(16);
+    while (true) {
+      let q = supabase
+        .from('repair_results')
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .eq('status', 'published')
+        .eq('privacy_checked', true)
+        .neq('before_image_path', '')
+        .neq('after_image_path', '');
+
+      if (context === 'homepage') {
+        q = q.eq('featured_on_homepage', true);
+      } else {
+        if (category) q = q.eq('device_category', category);
+        const targetBrand = isFallback ? 'apple' : brand;
+
+        if (context === 'detail') {
+          q = q.eq('brand_slug', targetBrand).eq('model_slug', model).eq('repair_type_slug', repairType).limit(3);
+        } else if (context === 'model') {
+          q = q.eq('brand_slug', targetBrand).eq('model_slug', model);
+        } else if (context === 'brand') {
+          q = q.eq('brand_slug', targetBrand);
+        }
+      }
+
+      if (context !== 'homepage') {
+        q = q.order('published_at', { ascending: false, nullsFirst: false })
+             .order('sort_order', { ascending: true });
+      } else {
+        q = q.order('sort_order', { ascending: true })
+             .order('published_at', { ascending: false, nullsFirst: false });
+      }
+
+      if (context === 'model' || context === 'brand' || context === 'category') {
+        q = q.range(offset, offset + pageSize - 1);
+      }
+
+      const { data, error } = await q;
+
+      if (error) {
+        console.error('[repair-results] Query failed:', error);
+        return accumulated;
+      }
+
+      const rawResults = (data || []) as unknown as PublicRepairResult[];
+      const validResults = rawResults.filter(isPublicRepairResult);
+
+      accumulated.push(...validResults);
+
+      if (context === 'homepage' || context === 'detail') {
+        break;
+      }
+
+      const dedupedAccumulated = applyExactGroupDeduplication(accumulated);
+      const testDiversity = applyDeterministicDiversity(dedupedAccumulated, context);
+
+      const targetLimit = 4;
+      if (testDiversity.length >= targetLimit || validResults.length < pageSize) {
+        break;
+      }
+
+      offset += pageSize;
     }
+
+    return accumulated;
   }
 
-  // Use published_at DESC for most contexts. Homepage handled mostly in logic.
-  if (context !== 'homepage') {
-    q = q.order('published_at', { ascending: false, nullsFirst: false })
-         .order('sort_order', { ascending: true });
-  } else {
-    q = q.order('sort_order', { ascending: true })
-         .order('published_at', { ascending: false, nullsFirst: false });
+  let candidates = await getCandidates(false);
+
+  if (candidates.length === 0 && brand === 'ipad' && (context === 'detail' || context === 'model' || context === 'brand')) {
+    candidates = await getCandidates(true);
   }
 
-  let { data, error } = await q;
-
-  // Fallback for iPad to Apple if no results (only for detail/model/brand scopes)
-  if (!error && (!data || data.length === 0) && brand === 'ipad' && (context === 'detail' || context === 'model' || context === 'brand')) {
-    let fallbackQ = supabase
-      .from('repair_results')
-      .select(PUBLIC_REPAIR_RESULT_SELECT)
-      .eq('status', 'published')
-      .eq('privacy_checked', true)
-      .neq('before_image_path', '')
-      .neq('after_image_path', '')
-      .eq('device_category', category)
-      .eq('brand_slug', 'apple');
-
-    if (context === 'detail') {
-      fallbackQ = fallbackQ.eq('model_slug', model).eq('repair_type_slug', repairType).limit(3);
-    } else if (context === 'model') {
-      fallbackQ = fallbackQ.eq('model_slug', model).limit(16);
-    } else if (context === 'brand') {
-      fallbackQ = fallbackQ.limit(16);
-    }
-
-    fallbackQ = fallbackQ.order('published_at', { ascending: false, nullsFirst: false })
-                         .order('sort_order', { ascending: true });
-
-    const fallbackRes = await fallbackQ;
-    data = fallbackRes.data;
-    error = fallbackRes.error;
-  }
-
-  if (error) {
-    console.error('[repair-results] Query failed:', error);
-    return [];
-  }
-
-  const rawResults = (data || []) as unknown as PublicRepairResult[];
-  const validResults = rawResults.filter(isPublicRepairResult);
-  const dedupedResults = applyExactGroupDeduplication(validResults);
+  const dedupedResults = applyExactGroupDeduplication(candidates);
 
   if (context === 'homepage') {
     // Re-sort homepage by sort_order
