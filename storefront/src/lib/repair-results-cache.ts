@@ -23,45 +23,52 @@ function normalizeSlug(val: string | null | undefined): string {
 
 const DIVERSITY_ALGORITHM_VERSION = 'selection-v1';
 
-export function getCacheKey(params: GetRepairResultsParams): string {
-  const context = normalizeSlug(params.context);
-  const category = normalizeSlug(params.category);
-  const brand = normalizeSlug(params.brand);
-  const model = normalizeSlug(params.model);
-  const repairType = normalizeSlug(params.repairType);
-  const limit = context === 'homepage' ? 4 : context === 'detail' ? 3 : 4;
-  return `repair-results-query-${context}-${limit}-${DIVERSITY_ALGORITHM_VERSION}-${category}-${brand}-${model}-${repairType}`;
+async function fetchAllPublicRepairResults(): Promise<PublicRepairResult[]> {
+
+  const supabase = createPublicRepairResultsClient();
+  if (!supabase) return [];
+
+  const accumulated: PublicRepairResult[] = [];
+  let offset = 0;
+  const pageSize = 500;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('repair_results')
+      .select(PUBLIC_REPAIR_RESULT_SELECT)
+      .eq('status', 'published')
+      .eq('privacy_checked', true)
+      .neq('before_image_path', '')
+      .neq('after_image_path', '')
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: false })
+      .range(offset, offset + pageSize - 1);
+
+    if (error) {
+      console.error('[repair-results] Global query failed:', error);
+      throw new Error(`Supabase query failed: ${error.message || JSON.stringify(error)}`);
+    }
+
+    const rawResults = (data || []) as unknown as PublicRepairResult[];
+    const validResults = rawResults.filter(isPublicRepairResult);
+
+    accumulated.push(...validResults);
+
+    if (validResults.length < pageSize) {
+      break;
+    }
+    offset += pageSize;
+  }
+
+  return accumulated;
 }
 
-export function getCacheTagsForScope(params: GetRepairResultsParams): string[] {
-  const context = normalizeSlug(params.context);
-  const category = normalizeSlug(params.category);
-  const brand = normalizeSlug(params.brand);
-  const model = normalizeSlug(params.model);
-  const repairType = normalizeSlug(params.repairType);
-
-  const tags: string[] = ['repair-results'];
-
-  if (context === 'homepage') {
-    tags.push('repair-results:homepage');
-  }
-
-  if (category) {
-    tags.push(`repair-results:category:${category}`);
-  }
-  if (category && brand) {
-    tags.push(`repair-results:brand:${category}:${brand}`);
-  }
-  if (category && brand && model) {
-    tags.push(`repair-results:model:${category}:${brand}:${model}`);
-  }
-  if (category && brand && model && repairType) {
-    tags.push(`repair-results:detail:${category}:${brand}:${model}:${repairType}`);
-  }
-
-  tags.push(`repair-results:version:${DIVERSITY_ALGORITHM_VERSION}`);
-  return tags;
-}
+const getCachedPublicRepairResultsDataset = unstable_cache(
+  async () => fetchAllPublicRepairResults(),
+  ['repair-results-global-dataset-v1'],
+  { tags: ['repair-results-global'], revalidate: false }
+);
 
 function safeRevalidateTag(tag: string) {
   revalidateTag(tag, { expire: 0 });
@@ -96,19 +103,15 @@ export function invalidateRepairResultScopes(record: {
   if (model && !isValidSlug(model)) return;
   if (repairType && !isValidSlug(repairType)) return;
 
-  safeRevalidateTag(`repair-results:category:${category}`);
-  safeRevalidateTag(`repair-results:brand:${category}:${brand}`);
-  safeRevalidateTag(`repair-results:model:${category}:${brand}:${model}`);
-  safeRevalidateTag(`repair-results:detail:${category}:${brand}:${model}:${repairType}`);
+  // Invalidate the one shared public Repair Results dataset tag
+  safeRevalidateTag('repair-results-global');
 
-  if (record.featured_on_homepage) {
-    safeRevalidateTag('repair-results:homepage');
-  }
-
+  // Invalidate only the affected public paths
   revalidatePath(`/repairs/${category}`, 'page');
   revalidatePath(`/repairs/${category}/${brand}`, 'page');
   revalidatePath(`/repairs/${category}/${brand}/${model}`, 'page');
   revalidatePath(`/repairs/${category}/${brand}/${model}/${repairType}`, 'page');
+
   if (record.featured_on_homepage) {
     revalidatePath('/', 'page');
   }
@@ -219,115 +222,51 @@ function applyDeterministicDiversity(results: PublicRepairResult[], context: Rep
   return selected;
 }
 
-function isAbortError(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'name' in error &&
-    (error as { name?: unknown }).name === 'AbortError'
-  );
-}
+export async function getRepairResults(params: GetRepairResultsParams): Promise<PublicRepairResult[]> {
+  const dataset = await getCachedPublicRepairResultsDataset();
 
-async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<PublicRepairResult[]> {
-  const supabase = createPublicRepairResultsClient();
-  if (!supabase) return [];
-
-  const { context } = params;
+  const context = normalizeSlug(params.context) as RepairResultsContext;
   const category = normalizeSlug(params.category);
   const brand = normalizeSlug(params.brand);
   const model = normalizeSlug(params.model);
   const repairType = normalizeSlug(params.repairType);
 
-  async function getCandidates(isFallback: boolean): Promise<PublicRepairResult[]> {
-    if (!supabase) return [];
+  let filtered = dataset;
 
-    const accumulated: PublicRepairResult[] = [];
-    let offset = 0;
-    const pageSize = 50;
-
-    while (true) {
-      let q = supabase
-        .from('repair_results')
-        .select(PUBLIC_REPAIR_RESULT_SELECT)
-        .eq('status', 'published')
-        .eq('privacy_checked', true)
-        .neq('before_image_path', '')
-        .neq('after_image_path', '');
-
-      if (context === 'homepage') {
-        q = q.eq('featured_on_homepage', true);
-      } else {
-        if (category) q = q.eq('device_category', category);
-        const targetBrand = isFallback ? 'apple' : brand;
-
-        if (context === 'detail') {
-          q = q.eq('brand_slug', targetBrand).eq('model_slug', model).eq('repair_type_slug', repairType).limit(3);
-        } else if (context === 'model') {
-          q = q.eq('brand_slug', targetBrand).eq('model_slug', model);
-        } else if (context === 'brand') {
-          q = q.eq('brand_slug', targetBrand);
-        }
-      }
-
-      if (context !== 'homepage') {
-        q = q.order('published_at', { ascending: false, nullsFirst: false })
-             .order('created_at', { ascending: false, nullsFirst: false })
-             .order('id', { ascending: false });
-      } else {
-        q = q.order('sort_order', { ascending: true })
-             .order('published_at', { ascending: false, nullsFirst: false });
-      }
-
-      if (context === 'model' || context === 'brand' || context === 'category') {
-        q = q.range(offset, offset + pageSize - 1);
-      }
-
-      let data, error;
-      for (let attempt = 1; attempt <= 5; attempt++) {
-        const res = await q;
-        data = res.data;
-        error = res.error;
-        if (!error || !isAbortError(error)) {
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-      }
-
-      if (error) {
-        console.error('[repair-results] Query failed:', error);
-        throw new Error(`Supabase query failed: ${error.message || JSON.stringify(error)}`);
-      }
-
-      const rawResults = (data || []) as unknown as PublicRepairResult[];
-      const validResults = rawResults.filter(isPublicRepairResult);
-
-      accumulated.push(...validResults);
-
-      if (context === 'homepage' || context === 'detail') {
-        break;
-      }
-
-      const dedupedAccumulated = applyExactGroupDeduplication(accumulated);
-      const testDiversity = applyDeterministicDiversity(dedupedAccumulated, context);
-
-      const targetLimit = 4;
-      if (testDiversity.length >= targetLimit || validResults.length < pageSize) {
-        break;
-      }
-
-      offset += pageSize;
+  if (context === 'homepage') {
+    filtered = filtered.filter(r => r.featured_on_homepage);
+  } else {
+    if (category) {
+      filtered = filtered.filter(r => r.device_category === category);
     }
 
-    return accumulated;
+    if (brand) {
+      let targetBrand = brand;
+      let brandFiltered = filtered.filter(r => r.brand_slug === targetBrand);
+
+      const requiresFallbackCheck = brand === 'ipad' && (context === 'detail' || context === 'model' || context === 'brand');
+
+      if (requiresFallbackCheck) {
+         let finalMatches = brandFiltered;
+         if (context === 'detail') finalMatches = finalMatches.filter(r => r.model_slug === model && r.repair_type_slug === repairType);
+         else if (context === 'model') finalMatches = finalMatches.filter(r => r.model_slug === model);
+
+         if (finalMatches.length === 0) {
+           targetBrand = 'apple';
+           brandFiltered = filtered.filter(r => r.brand_slug === targetBrand);
+         }
+      }
+      filtered = brandFiltered;
+    }
+
+    if (context === 'detail') {
+      filtered = filtered.filter(r => r.model_slug === model && r.repair_type_slug === repairType);
+    } else if (context === 'model') {
+      filtered = filtered.filter(r => r.model_slug === model);
+    }
   }
 
-  let candidates = await getCandidates(false);
-
-  if (candidates.length === 0 && brand === 'ipad' && (context === 'detail' || context === 'model' || context === 'brand')) {
-    candidates = await getCandidates(true);
-  }
-
-  const dedupedResults = applyExactGroupDeduplication(candidates);
+  const dedupedResults = applyExactGroupDeduplication(filtered);
 
   if (context === 'homepage') {
     // Re-sort homepage by sort_order
@@ -349,17 +288,4 @@ async function fetchRepairResultsData(params: GetRepairResultsParams): Promise<P
   }
 
   return applyDeterministicDiversity(dedupedResults, context);
-}
-
-export async function getRepairResults(params: GetRepairResultsParams): Promise<PublicRepairResult[]> {
-  const cacheKey = getCacheKey(params);
-  const tags = getCacheTagsForScope(params);
-
-  const cachedFn = unstable_cache(
-    async () => fetchRepairResultsData(params),
-    [cacheKey],
-    { tags, revalidate: false }
-  );
-
-  return cachedFn();
 }
