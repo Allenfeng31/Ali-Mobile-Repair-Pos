@@ -110,9 +110,9 @@ export default function RepairTypeModelGrid({
     <section aria-labelledby="repair-type-hub-models" className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
         <div>
-          <p className={styles.sectionEyebrow}>Find Your Device</p>
+          <p className={styles.sectionEyebrow}>Choose your device path</p>
           <h2 id="repair-type-hub-models" className={styles.sectionTitle}>
-            {title ?? 'Find your device'}
+            {title ?? 'Choose your brand and model'}
           </h2>
         </div>
         <p className={styles.sectionBody}>
@@ -170,7 +170,7 @@ export default function RepairTypeModelGrid({
         </div>
         {!normalizedSearch && (
           <p className={styles.searchHint}>
-            Start typing to search by model, or browse the brand list below.
+            Search by model name or model code, or browse the brand list below.
           </p>
         )}
       </div>
@@ -222,11 +222,11 @@ export default function RepairTypeModelGrid({
               <div>
                 <p className={styles.subsectionEyebrow}>Browse By Brand</p>
                 <h3 id="repair-type-brand-browser-heading" className={styles.subsectionTitle}>
-                  Expand one brand at a time
+                  Browse supported brands
                 </h3>
               </div>
               <p className={styles.subsectionBody}>
-                Choose a brand to open its supported models. Only the expanded brand list is loaded into the page at once.
+                Pick one brand to open its supported models. Only the expanded brand list is loaded into the page at once.
               </p>
             </div>
             <div className={styles.brandAccordion}>

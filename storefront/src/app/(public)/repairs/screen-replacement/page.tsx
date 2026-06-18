@@ -5,9 +5,7 @@ import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
 import {
   buildRepairTypeHubCatalog,
-  getRepairTypeHubDefinition,
   type RepairTypeHubBrandGroup,
-  type RepairTypeHubModelLink,
 } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
@@ -84,42 +82,6 @@ export const metadata: Metadata = {
   },
 };
 
-function flattenBrandModels(brands: RepairTypeHubBrandGroup[]) {
-  return brands.flatMap((brand) => brand.models);
-}
-
-function buildPricingItems(models: RepairTypeHubModelLink[]) {
-  const selected: RepairTypeHubModelLink[] = [];
-  const seen = new Set<string>();
-
-  const byBrandLead = models.reduce<RepairTypeHubModelLink[]>((acc, model) => {
-    if (acc.some((entry) => entry.brandSlug === model.brandSlug)) {
-      return acc;
-    }
-
-    const sameBrand = models.filter((entry) => entry.brandSlug === model.brandSlug);
-    acc.push(sameBrand.find((entry) => entry.price > 0) ?? sameBrand[0]);
-    return acc;
-  }, []);
-
-  const pricedRemainder = models.filter((model) => model.price > 0);
-  const quoteRemainder = models.filter((model) => model.price <= 0);
-
-  for (const model of [...byBrandLead, ...pricedRemainder, ...quoteRemainder]) {
-    if (seen.has(model.href)) continue;
-    seen.add(model.href);
-    selected.push(model);
-    if (selected.length === 8) break;
-  }
-
-  return selected.map((model) => ({
-    label: model.model,
-    description: model.repairName,
-    value: model.price > 0 ? `Starting at $${model.price}` : 'Quote only',
-    href: model.href,
-  }));
-}
-
 function buildBrandHubLinks(brands: RepairTypeHubBrandGroup[]) {
   const preferred = ['iphone', 'samsung', 'google', 'oppo'];
   return preferred
@@ -138,8 +100,8 @@ function buildHeroHighlights() {
       description: 'Walk-ins welcome at Kiosk C1 inside Ringwood Square.',
     },
     {
-      title: 'Live model-based pricing',
-      description: 'Choose your exact phone model before you book.',
+      title: 'Find the right model',
+      description: 'Search by model name or code and open the correct repair page directly.',
     },
     {
       title: 'Technician inspection first',
@@ -151,9 +113,8 @@ function buildHeroHighlights() {
 export default async function ScreenReplacementPage() {
   const catalog = await fetchRepairCatalog();
   const data = buildRepairTypeHubCatalog(catalog, 'screen-replacement');
-  const hub = getRepairTypeHubDefinition('screen-replacement');
 
-  if (!data || !hub || data.categories.length === 0) {
+  if (!data || data.categories.length === 0) {
     notFound();
   }
 
@@ -162,8 +123,6 @@ export default async function ScreenReplacementPage() {
     notFound();
   }
 
-  const phoneModels = flattenBrandModels(phoneCategory.brands);
-  const pricingItems = buildPricingItems(phoneModels);
   const brandHubLinks = buildBrandHubLinks(phoneCategory.brands);
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -205,11 +164,11 @@ export default async function ScreenReplacementPage() {
       <RepairTypeHubPage
         data={data}
         title="Screen Replacement Services in Ringwood"
-        description="Choose a supported phone model for screen replacement at Ali Mobile & Repair in Ringwood Square. Screen options, timing, and available part quality can vary by model, stock, and the condition of the phone after inspection."
+        description="Choose your supported phone model for screen replacement at Ali Mobile & Repair in Ringwood Square. Parts, timing, and screen options can vary by model."
         heroKicker="Phone Screen Repairs"
         heroProof={
           <p>
-            In Ringwood Square. Call ahead for parts and timing, or choose your phone model below to go straight to the right repair page.
+            Ringwood Square Kiosk C1. Call ahead for parts and timing, or choose your phone model below.
           </p>
         }
         heroActions={
@@ -226,41 +185,58 @@ export default async function ScreenReplacementPage() {
         }
         heroHighlights={buildHeroHighlights()}
         symptoms={[
-          'Cracked front glass after a drop or impact.',
-          'Blank display, no image, or a screen that stays black.',
-          'Touch not responding properly across part or all of the panel.',
-          'Lines, black spots, ink-style marks, or flickering on the display.',
-          'Display separation after impact or pressure.',
-          'Screen lifting that may also point to a swollen battery and needs inspection before quoting.',
-          'Inspection may show that frame, battery, connector, or board damage is part of the problem rather than the screen alone.',
+          {
+            title: 'Cracked glass',
+            description: 'Front glass broken after a drop, pressure, or another impact.',
+          },
+          {
+            title: 'Black or blank display',
+            description: 'No image, no backlight, or a screen that stays dark after damage.',
+          },
+          {
+            title: 'Touch problems',
+            description: 'Touch not responding properly across part or all of the panel.',
+          },
+          {
+            title: 'Lines, spots, or flicker',
+            description: 'Display lines, black spots, ink-style marks, or flickering after impact.',
+          },
+          {
+            title: 'Screen lifting or separation',
+            description: 'The display is lifting away from the frame and needs inspection before quoting.',
+          },
+          {
+            title: 'Other damage may be involved',
+            description: 'Inspection may show frame, battery, connector, or board damage as part of the issue.',
+          },
         ]}
-        modelGridTitle="Find your device"
-        modelGridDescription="Search your phone model or expand one brand at a time. Every link goes straight to the existing canonical repair detail page."
-        pricing={{
-          title: 'Popular live pricing',
-          items: pricingItems,
-        }}
-        technicalContent={
-          <div className={styles.contentStack}>
-            <div className={styles.contentBlock}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <p className={styles.sectionEyebrow}>Screen Options</p>
-                  <h2 className={styles.sectionTitle}>Screen quality guidance before repair</h2>
-                </div>
-              </div>
-              <p className={styles.sectionBody}>
-                Screen options can vary by phone model and current stock. Depending on the device, the available path may involve LCD, OLED, Soft OLED, or another premium-quality assembly, and each option can differ in brightness, colour, touch response, durability, and price.
-              </p>
-              <p className={styles.sectionBody}>
-                Not every option is available for every phone. Before installation, the technician checks the frame condition and overall fit because a bent frame or heavy impact damage can affect how well a replacement screen sits and how durable the finished repair will be.
-              </p>
-              <p className={styles.sectionBody}>
-                We explain the suitable options for your model before repair starts so you can make an informed decision about price, expected finish, and practical limitations.
-              </p>
-            </div>
-          </div>
-        }
+        modelGridTitle="Choose your brand and model"
+        modelGridDescription="Search your phone model first, or open one brand at a time to view supported repair pages."
+        technicalEyebrow="Screen Options"
+        technicalTitle="Screen quality guidance before repair"
+        technicalIntro="Different phones can have different screen options and different practical repair limits. These short answers cover the most common questions we explain at the counter before screen work begins."
+        technicalFaqs={[
+          {
+            question: 'What screen options might be available for my phone?',
+            answer:
+              'Depending on the model and current stock, the practical repair path may involve LCD, OLED, Soft OLED, or another premium-quality assembly.',
+          },
+          {
+            question: 'Why can two screen options feel different in use?',
+            answer:
+              'Brightness, colour, touch response, durability, and price can vary between available screen types, even when they fit the same phone.',
+          },
+          {
+            question: 'Why does frame condition matter before a screen is fitted?',
+            answer:
+              'A bent frame or heavy impact damage can affect fit, sealing, and long-term durability, so the technician checks this before confirming the repair.',
+          },
+          {
+            question: 'Will every model have every screen option available?',
+            answer:
+              'No. Not every option is available for every phone, so we explain the suitable choices for your exact model before repair starts.',
+          },
+        ]}
         processSteps={[
           'Complete a pre-repair functional test where the phone condition allows it.',
           'Inspect the display, frame, and any related impact damage.',

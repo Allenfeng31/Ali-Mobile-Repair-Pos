@@ -6,7 +6,6 @@ import { fetchRepairCatalog } from '@/lib/api';
 import {
   buildRepairTypeHubCatalog,
   type RepairTypeHubBrandGroup,
-  type RepairTypeHubModelLink,
 } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
@@ -88,42 +87,6 @@ export const metadata: Metadata = {
   },
 };
 
-function flattenBrandModels(brands: RepairTypeHubBrandGroup[]) {
-  return brands.flatMap((brand) => brand.models);
-}
-
-function buildPricingItems(models: RepairTypeHubModelLink[]) {
-  const selected: RepairTypeHubModelLink[] = [];
-  const seen = new Set<string>();
-
-  const byBrandLead = models.reduce<RepairTypeHubModelLink[]>((acc, model) => {
-    if (acc.some((entry) => entry.brandSlug === model.brandSlug)) {
-      return acc;
-    }
-
-    const sameBrand = models.filter((entry) => entry.brandSlug === model.brandSlug);
-    acc.push(sameBrand.find((entry) => entry.price > 0) ?? sameBrand[0]);
-    return acc;
-  }, []);
-
-  const pricedRemainder = models.filter((model) => model.price > 0);
-  const quoteRemainder = models.filter((model) => model.price <= 0);
-
-  for (const model of [...byBrandLead, ...pricedRemainder, ...quoteRemainder]) {
-    if (seen.has(model.href)) continue;
-    seen.add(model.href);
-    selected.push(model);
-    if (selected.length === 8) break;
-  }
-
-  return selected.map((model) => ({
-    label: model.model,
-    description: model.repairName,
-    value: model.price > 0 ? `Starting at $${model.price}` : 'Quote only',
-    href: model.href,
-  }));
-}
-
 function buildBrandHubLinks(brands: RepairTypeHubBrandGroup[]) {
   const preferred = ['iphone', 'samsung', 'google', 'oppo'];
   return preferred
@@ -142,8 +105,8 @@ function buildHeroHighlights() {
       description: 'Walk-ins welcome at Kiosk C1 inside Ringwood Square.',
     },
     {
-      title: 'Live model-based pricing',
-      description: 'Choose your exact phone model before you book.',
+      title: 'Find the right model',
+      description: 'Search by model name or code and open the correct repair page directly.',
     },
     {
       title: 'Battery and power diagnosis',
@@ -165,8 +128,6 @@ export default async function BatteryReplacementPage() {
     notFound();
   }
 
-  const phoneModels = flattenBrandModels(phoneCategory.brands);
-  const pricingItems = buildPricingItems(phoneModels);
   const brandHubLinks = buildBrandHubLinks(phoneCategory.brands);
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -208,11 +169,11 @@ export default async function BatteryReplacementPage() {
       <RepairTypeHubPage
         data={data}
         title="Battery Replacement Services in Ringwood"
-        description="Choose a supported phone model for battery replacement at Ali Mobile & Repair in Ringwood Square. Battery availability, price, and expected timing can vary by model, stock, and the condition of the phone after inspection."
+        description="Choose your supported phone model for battery replacement at Ali Mobile & Repair in Ringwood Square. Battery availability, price, and timing can vary by model."
         heroKicker="Phone Battery Repairs"
         heroProof={
           <p>
-            In Ringwood Square. Call ahead for battery availability and timing, or choose your phone model below to go straight to the right repair page.
+            Ringwood Square Kiosk C1. Call ahead for battery availability and timing, or choose your phone model below.
           </p>
         }
         heroActions={
@@ -229,12 +190,30 @@ export default async function BatteryReplacementPage() {
         }
         heroHighlights={buildHeroHighlights()}
         symptoms={[
-          'Battery draining quickly or dropping percentage faster than normal use suggests.',
-          'Unexpected shutdowns or random restarts, especially under load.',
-          'Reduced battery health or a phone that no longer lasts through normal daily use.',
-          'Battery swelling or a lifted screen edge that needs prompt assessment.',
-          'Slow charging, unstable charging, or the phone becoming unusually warm.',
-          'These symptoms can also involve charging accessories, charging-port faults, software or background activity, display issues, board-level faults, or hidden liquid and impact damage.',
+          {
+            title: 'Fast battery drain',
+            description: 'The phone loses charge unusually quickly during normal use.',
+          },
+          {
+            title: 'Shutdowns or restarts',
+            description: 'The device switches off or restarts unexpectedly, especially under load.',
+          },
+          {
+            title: 'Low battery health',
+            description: 'Battery capacity has dropped and the phone no longer lasts through the day.',
+          },
+          {
+            title: 'Swelling or screen lifting',
+            description: 'A swollen battery can lift the display and needs prompt assessment.',
+          },
+          {
+            title: 'Slow charging or running hot',
+            description: 'Charging feels unstable, unusually slow, or the phone becomes warmer than normal.',
+          },
+          {
+            title: 'Other faults can look similar',
+            description: 'Charging accessories, charging ports, software activity, display issues, or board faults can overlap with battery symptoms.',
+          },
         ]}
         preModelGridContent={
           <div className={styles.contentStack}>
@@ -249,33 +228,33 @@ export default async function BatteryReplacementPage() {
             </p>
           </div>
         }
-        modelGridTitle="Find your device"
-        modelGridDescription="Search your phone model or expand one brand at a time. Every link goes straight to the existing canonical repair detail page."
-        pricing={{
-          title: 'Popular live pricing',
-          items: pricingItems,
-        }}
-        technicalContent={
-          <div className={styles.contentStack}>
-            <div className={styles.contentBlock}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <p className={styles.sectionEyebrow}>Battery Guidance</p>
-                  <h2 className={styles.sectionTitle}>Battery quality and diagnostic guidance</h2>
-                </div>
-              </div>
-              <p className={styles.sectionBody}>
-                Battery capacity and performance decline over time, but battery-health indicators are only one part of the diagnosis. We also look at shutdown behaviour, heat, charging response, swelling signs, and how the phone behaves under normal use before confirming the repair recommendation.
-              </p>
-              <p className={styles.sectionBody}>
-                Replacement options and availability can vary by model. A swollen battery may affect the display, frame, or internal components, and some no-power or charging faults need further diagnosis because the battery is not always the only cause.
-              </p>
-              <p className={styles.sectionBody}>
-                We inspect the device first, then confirm the quote, battery availability, and the practical repair path before work proceeds.
-              </p>
-            </div>
-          </div>
-        }
+        modelGridTitle="Choose your brand and model"
+        modelGridDescription="Search your phone model first, or open one brand at a time to view supported repair pages."
+        technicalEyebrow="Battery Guidance"
+        technicalTitle="Battery quality and diagnostic guidance"
+        technicalIntro="Battery problems are not always as simple as one health number or one symptom. These quick answers explain what we normally check before confirming a battery repair."
+        technicalFaqs={[
+          {
+            question: 'Does Battery Health tell the whole story?',
+            answer:
+              'No. Battery Health can help, but we also look at shutdown behaviour, heat, charging response, swelling signs, and how the phone behaves in normal use.',
+          },
+          {
+            question: 'Why can battery availability and price vary by model?',
+            answer:
+              'Replacement options and stock can differ between phone models, so we confirm the available part and the practical quote for your exact device before work proceeds.',
+          },
+          {
+            question: 'Why does a swollen battery need extra inspection?',
+            answer:
+              'A swollen battery can affect the display, frame, or internal components, so we check the full condition of the phone before confirming the repair path.',
+          },
+          {
+            question: 'Could a no-power or charging fault be something other than the battery?',
+            answer:
+              'Yes. Some no-power or charging problems need further diagnosis because the battery is not always the only cause.',
+          },
+        ]}
         processSteps={[
           'Complete a pre-repair functional and charging check where the phone condition allows it.',
           'Inspect battery condition, swelling signs, and any related display, frame, liquid, or impact damage.',
@@ -357,24 +336,9 @@ export default async function BatteryReplacementPage() {
               </div>
             </section>
 
-            <section className={styles.sectionCard}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <p className={styles.sectionEyebrow}>FAQs</p>
-                  <h2 className={styles.sectionTitle}>Battery replacement questions we answer every day</h2>
-                </div>
-              </div>
-              <div className={styles.faqStack}>
-                {FAQS.map((faq) => (
-                  <details key={faq.question} className={styles.faqItem}>
-                    <summary>{faq.question}</summary>
-                    <p>{faq.answer}</p>
-                  </details>
-                ))}
-              </div>
-            </section>
           </>
         }
+        faqs={FAQS}
       />
     </>
   );
