@@ -38,6 +38,7 @@ interface RepairTypeHubPageProps {
     value: string | number;
   }>;
   symptoms?: string[];
+  preModelGridContent?: ReactNode;
   modelGridTitle?: string;
   modelGridDescription?: string;
   technicalContent?: ReactNode;
@@ -61,6 +62,7 @@ export default function RepairTypeHubPage({
   heroActions,
   heroStats,
   symptoms,
+  preModelGridContent,
   modelGridTitle,
   modelGridDescription,
   technicalContent,
@@ -120,6 +122,8 @@ export default function RepairTypeHubPage({
             </ul>
           </section>
         ) : null}
+
+        {preModelGridContent ? <section className={styles.sectionCard}>{preModelGridContent}</section> : null}
 
         <RepairTypeModelGrid
           hubLabel={data.hub.label}

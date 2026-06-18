@@ -119,7 +119,7 @@ export default function RepairTypeRepairResultsSection(props: RepairTypeRepairRe
         <p>{props.description}</p>
 
         {results.length > 1 && (
-          <div className={styles.resultTabs} role="tablist" aria-label="Recent screen repair results">
+          <div className={styles.resultTabs} role="tablist" aria-label={`${props.heading} tabs`}>
             {results.map((result, index) => (
               <button
                 key={result.id}
