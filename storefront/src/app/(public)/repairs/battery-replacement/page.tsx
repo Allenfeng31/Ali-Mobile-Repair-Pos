@@ -135,6 +135,23 @@ function buildBrandHubLinks(brands: RepairTypeHubBrandGroup[]) {
     }));
 }
 
+function buildHeroHighlights() {
+  return [
+    {
+      title: 'Ringwood Square',
+      description: 'Walk-ins welcome at Kiosk C1 inside Ringwood Square.',
+    },
+    {
+      title: 'Live model-based pricing',
+      description: 'Choose your exact phone model before you book.',
+    },
+    {
+      title: 'Battery and power diagnosis',
+      description: 'We inspect the device before confirming the repair path.',
+    },
+  ];
+}
+
 export default async function BatteryReplacementPage() {
   const catalog = await fetchRepairCatalog();
   const data = buildRepairTypeHubCatalog(catalog, 'battery-replacement');
@@ -193,15 +210,10 @@ export default async function BatteryReplacementPage() {
         title="Battery Replacement Services in Ringwood"
         description="Choose a supported phone model for battery replacement at Ali Mobile & Repair in Ringwood Square. Battery availability, price, and expected timing can vary by model, stock, and the condition of the phone after inspection."
         heroKicker="Phone Battery Repairs"
-        intro={
-          <>
-            <p>
-              Visit Ali Mobile &amp; Repair at Ringwood Square Shopping Centre, Kiosk C1, for phone battery replacement guidance backed by the live repair catalogue. We confirm the likely repair path for your model before any work starts.
-            </p>
-            <p>
-              Fast drain, shutdowns, swelling, heat, and unstable charging can point toward battery wear, but they can also overlap with charging accessories, charging-port issues, software activity, or board-level faults that need inspection first.
-            </p>
-          </>
+        heroProof={
+          <p>
+            In Ringwood Square. Call ahead for battery availability and timing, or choose your phone model below to go straight to the right repair page.
+          </p>
         }
         heroActions={
           <>
@@ -215,11 +227,7 @@ export default async function BatteryReplacementPage() {
             </a>
           </>
         }
-        heroStats={[
-          { label: 'Phone brands', value: phoneCategory.brands.length },
-          { label: 'Supported models', value: phoneModels.length },
-          { label: 'Popular price cards', value: pricingItems.length },
-        ]}
+        heroHighlights={buildHeroHighlights()}
         symptoms={[
           'Battery draining quickly or dropping percentage faster than normal use suggests.',
           'Unexpected shutdowns or random restarts, especially under load.',
@@ -241,8 +249,8 @@ export default async function BatteryReplacementPage() {
             </p>
           </div>
         }
-        modelGridTitle="Choose your phone model"
-        modelGridDescription="Search real phone models that currently have a live battery repair path in our catalogue. Every model card goes straight to the existing canonical repair detail page for that exact model and repair slug."
+        modelGridTitle="Find your device"
+        modelGridDescription="Search your phone model or expand one brand at a time. Every link goes straight to the existing canonical repair detail page."
         pricing={{
           title: 'Popular live pricing',
           items: pricingItems,

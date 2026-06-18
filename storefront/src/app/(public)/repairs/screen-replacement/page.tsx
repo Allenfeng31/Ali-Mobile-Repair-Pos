@@ -131,6 +131,23 @@ function buildBrandHubLinks(brands: RepairTypeHubBrandGroup[]) {
     }));
 }
 
+function buildHeroHighlights() {
+  return [
+    {
+      title: 'Ringwood Square',
+      description: 'Walk-ins welcome at Kiosk C1 inside Ringwood Square.',
+    },
+    {
+      title: 'Live model-based pricing',
+      description: 'Choose your exact phone model before you book.',
+    },
+    {
+      title: 'Technician inspection first',
+      description: 'We confirm the practical screen repair path before work begins.',
+    },
+  ];
+}
+
 export default async function ScreenReplacementPage() {
   const catalog = await fetchRepairCatalog();
   const data = buildRepairTypeHubCatalog(catalog, 'screen-replacement');
@@ -190,15 +207,10 @@ export default async function ScreenReplacementPage() {
         title="Screen Replacement Services in Ringwood"
         description="Choose a supported phone model for screen replacement at Ali Mobile & Repair in Ringwood Square. Screen options, timing, and available part quality can vary by model, stock, and the condition of the phone after inspection."
         heroKicker="Phone Screen Repairs"
-        intro={
-          <>
-            <p>
-              Visit Ali Mobile &amp; Repair at Ringwood Square Shopping Centre, Kiosk C1, for phone screen replacement guidance backed by the live repair catalogue. We explain the available screen path for your model before any work starts.
-            </p>
-            <p>
-              Cracked glass, black spots, flickering, lifted panels, and touch issues can have different causes. Some phones need extra checks for frame damage, battery swelling, or connector faults before the right repair can be confirmed.
-            </p>
-          </>
+        heroProof={
+          <p>
+            In Ringwood Square. Call ahead for parts and timing, or choose your phone model below to go straight to the right repair page.
+          </p>
         }
         heroActions={
           <>
@@ -212,11 +224,7 @@ export default async function ScreenReplacementPage() {
             </a>
           </>
         }
-        heroStats={[
-          { label: 'Phone brands', value: phoneCategory.brands.length },
-          { label: 'Supported models', value: phoneModels.length },
-          { label: 'Popular price cards', value: pricingItems.length },
-        ]}
+        heroHighlights={buildHeroHighlights()}
         symptoms={[
           'Cracked front glass after a drop or impact.',
           'Blank display, no image, or a screen that stays black.',
@@ -226,8 +234,8 @@ export default async function ScreenReplacementPage() {
           'Screen lifting that may also point to a swollen battery and needs inspection before quoting.',
           'Inspection may show that frame, battery, connector, or board damage is part of the problem rather than the screen alone.',
         ]}
-        modelGridTitle="Choose your phone model"
-        modelGridDescription="Search real phone models that currently have a live screen repair path in our catalogue. Every model card goes straight to the existing canonical repair detail page for that exact model and repair slug."
+        modelGridTitle="Find your device"
+        modelGridDescription="Search your phone model or expand one brand at a time. Every link goes straight to the existing canonical repair detail page."
         pricing={{
           title: 'Popular live pricing',
           items: pricingItems,

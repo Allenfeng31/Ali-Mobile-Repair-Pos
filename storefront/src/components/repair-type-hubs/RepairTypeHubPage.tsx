@@ -17,13 +17,9 @@ interface RepairTypeHubPricingItem {
   description?: string;
 }
 
-interface RepairTypeHubCta {
+interface RepairTypeHubHeroHighlight {
   title: string;
-  description: string;
-  primaryHref: string;
-  primaryLabel: string;
-  secondaryHref?: string;
-  secondaryLabel?: string;
+  description?: string;
 }
 
 interface RepairTypeHubPageProps {
@@ -31,12 +27,9 @@ interface RepairTypeHubPageProps {
   title?: string;
   description?: string;
   heroKicker?: string;
-  intro?: ReactNode;
+  heroProof?: ReactNode;
   heroActions?: ReactNode;
-  heroStats?: Array<{
-    label: string;
-    value: string | number;
-  }>;
+  heroHighlights?: RepairTypeHubHeroHighlight[];
   symptoms?: string[];
   preModelGridContent?: ReactNode;
   modelGridTitle?: string;
@@ -49,7 +42,6 @@ interface RepairTypeHubPageProps {
   };
   additionalSections?: ReactNode;
   faqs?: RepairTypeHubFaq[];
-  cta?: RepairTypeHubCta;
   repairResultsSlot?: ReactNode;
 }
 
@@ -58,9 +50,9 @@ export default function RepairTypeHubPage({
   title,
   description,
   heroKicker,
-  intro,
+  heroProof,
   heroActions,
-  heroStats,
+  heroHighlights,
   symptoms,
   preModelGridContent,
   modelGridTitle,
@@ -70,17 +62,16 @@ export default function RepairTypeHubPage({
   pricing,
   additionalSections,
   faqs,
-  cta,
   repairResultsSlot,
 }: RepairTypeHubPageProps) {
   const pageTitle = title ?? `${data.hub.label} Repair`;
   const pageDescription =
     description ??
     `Browse supported ${data.hub.label.toLowerCase()} matches from the live repair catalogue and jump straight to the existing canonical repair page.`;
-  const stats = heroStats ?? [
-    { label: 'Enabled categories', value: data.categories.length },
-    { label: 'Brands', value: data.totalBrands },
-    { label: 'Matching models', value: data.totalModels },
+  const highlights = heroHighlights ?? [
+    { title: 'Ringwood Square', description: 'Visit Kiosk C1 for walk-in repair help.' },
+    { title: 'Live model-based pricing', description: 'Choose your phone first to see the right repair path.' },
+    { title: 'Technician inspection', description: 'We confirm the practical repair before work begins.' },
   ];
 
   return (
@@ -93,18 +84,18 @@ export default function RepairTypeHubPage({
             <span className={styles.heroKicker}>{heroKicker ?? 'Repair Type Hub'}</span>
             <h1 className={styles.heroTitle}>{pageTitle}</h1>
             <p className={styles.heroDescription}>{pageDescription}</p>
-            {intro ? <div className={styles.heroIntro}>{intro}</div> : null}
+            {heroProof ? <div className={styles.heroProof}>{heroProof}</div> : null}
             {heroActions ? <div className={styles.heroActions}>{heroActions}</div> : null}
           </div>
 
-          <dl className={styles.heroStats}>
-            {stats.map((stat) => (
-              <div key={stat.label} className={styles.heroStat}>
-                <dt>{stat.label}</dt>
-                <dd>{stat.value}</dd>
+          <div className={styles.heroHighlights} aria-label="Repair hub highlights">
+            {highlights.map((highlight) => (
+              <div key={highlight.title} className={styles.heroHighlightCard}>
+                <strong>{highlight.title}</strong>
+                {highlight.description ? <span>{highlight.description}</span> : null}
               </div>
             ))}
-          </dl>
+          </div>
         </section>
 
         {symptoms && symptoms.length > 0 ? (
@@ -191,7 +182,7 @@ export default function RepairTypeHubPage({
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>FAQs</p>
-                <h2 className={styles.sectionTitle}>Screen replacement questions we answer every day</h2>
+                <h2 className={styles.sectionTitle}>{data.hub.label} questions we answer every day</h2>
               </div>
             </div>
             <div className={styles.faqStack}>
@@ -201,25 +192,6 @@ export default function RepairTypeHubPage({
                   <p>{faq.answer}</p>
                 </details>
               ))}
-            </div>
-          </section>
-        ) : null}
-
-        {cta ? (
-          <section className={styles.ctaCard}>
-            <div>
-              <h2 className={styles.ctaTitle}>{cta.title}</h2>
-              <p className={styles.ctaDescription}>{cta.description}</p>
-            </div>
-            <div className={styles.ctaActions}>
-              <Link href={cta.primaryHref} className={styles.primaryButton}>
-                {cta.primaryLabel}
-              </Link>
-              {cta.secondaryHref && cta.secondaryLabel ? (
-                <Link href={cta.secondaryHref} className={styles.secondaryButton}>
-                  {cta.secondaryLabel}
-                </Link>
-              ) : null}
             </div>
           </section>
         ) : null}
