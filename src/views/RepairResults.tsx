@@ -36,6 +36,7 @@ interface PublicRepairResult {
   status: RepairResultStatus;
   privacy_checked: boolean;
   featured_on_homepage: boolean;
+  featured_on_repair_hub: boolean;
   sort_order: number;
   related_repair_url: string | null;
   created_at: string;
@@ -57,6 +58,7 @@ interface FormState {
   image_aspect_ratio: string;
   related_repair_url: string;
   featured_on_homepage: boolean;
+  featured_on_repair_hub: boolean;
   sort_order: string;
   status: RepairResultStatus;
   privacy_checked: boolean;
@@ -98,6 +100,7 @@ const INITIAL_FORM_STATE: FormState = {
   image_aspect_ratio: '4:3',
   related_repair_url: '',
   featured_on_homepage: false,
+  featured_on_repair_hub: false,
   sort_order: '0',
   status: 'draft',
   privacy_checked: false,
@@ -334,7 +337,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
     }
   }
 
-  async function updateResult(id: string, updates: Partial<Pick<PublicRepairResult, 'status' | 'privacy_checked' | 'featured_on_homepage'>>) {
+  async function updateResult(id: string, updates: Partial<Pick<PublicRepairResult, 'status' | 'privacy_checked' | 'featured_on_homepage' | 'featured_on_repair_hub'>>) {
     setError(null);
     setSuccess(null);
     setUpdatingId(id);
@@ -624,6 +627,21 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                 <span>Featured on homepage</span>
               </label>
 
+              <label className="flex items-start gap-3 rounded-[1.5rem] border border-black/5 bg-white p-4 text-sm font-bold text-neu-text-primary md:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={form.featured_on_repair_hub}
+                  onChange={(event) => updateField('featured_on_repair_hub', event.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600"
+                />
+                <div className="flex flex-col">
+                  <span>Feature on Repair Hub</span>
+                  <span className="text-xs font-semibold text-neu-text-secondary mt-1">
+                    Shows this result on its matching Phone, Tablet, Laptop or Watch Repair Hub.
+                  </span>
+                </div>
+              </label>
+
               <label className="flex items-start gap-3 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-6 text-emerald-900 md:col-span-2">
                 <input
                   type="checkbox"
@@ -695,6 +713,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                         {result.device_category === 'laptop' ? 'MacBook' : statusLabel(result.device_category)}
                       </span>
                       {result.featured_on_homepage && <span className="rounded-full bg-blue-50 px-2 py-1 text-blue-700">Homepage</span>}
+                      {result.featured_on_repair_hub && <span className="rounded-full bg-violet-50 px-2 py-1 text-violet-700">Repair Hub</span>}
                       {result.privacy_checked && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
                           <ShieldCheck size={13} strokeWidth={2.4} aria-hidden="true" />
@@ -734,6 +753,25 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                           className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-700 hover:bg-amber-200 transition disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove from homepage
+                        </button>
+                      )}
+                      {result.featured_on_repair_hub ? (
+                        <button
+                          type="button"
+                          disabled={updatingId === result.id}
+                          onClick={() => void updateResult(result.id, { featured_on_repair_hub: false })}
+                          className="rounded-full bg-violet-100 px-3 py-1.5 text-xs font-black text-violet-700 hover:bg-violet-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Remove from Repair Hub
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={updatingId === result.id}
+                          onClick={() => void updateResult(result.id, { featured_on_repair_hub: true })}
+                          className="rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs font-black text-violet-700 hover:bg-violet-50 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Feature on Repair Hub
                         </button>
                       )}
                       {result.status !== 'archived' && (
