@@ -9,7 +9,6 @@ import ScrollReveal from '@/components/ScrollReveal';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
-import RepairResultsServerSection from '@/components/repair-results/RepairResultsServerSection';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -818,10 +817,6 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             />
           </ScrollReveal>
         )}
-
-        <ScrollReveal>
-          <RepairResultsServerSection context="category" category={category} />
-        </ScrollReveal>
 
         <ScrollReveal>
           <section className="repair-content-band" aria-labelledby="category-faq-heading">

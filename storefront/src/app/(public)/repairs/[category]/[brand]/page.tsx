@@ -5,7 +5,7 @@ import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
-import RepairResultsServerSection from "@/components/repair-results/RepairResultsServerSection";
+import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
 import AppleWatchModelFinder from "./AppleWatchModelFinder";
@@ -260,6 +260,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             categorySlug={categorySlug}
             brandSlug={brandSlug}
           />
+
+          <RepairResultsMatchingSection
+            category={categorySlug}
+            brand={brandSlug}
+            model={brandSlug}
+            context="model"
+          />
+
           <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
             <div className="repair-types-showcase-header">
               <div>
@@ -380,6 +388,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             categorySlug={categorySlug}
             brandSlug={brandSlug}
           />
+
+          <RepairResultsMatchingSection
+            category={categorySlug}
+            brand={brandSlug}
+            model={brandSlug}
+            context="model"
+          />
+
           <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
             <div className="repair-types-showcase-header">
               <div>
@@ -653,12 +669,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </section>
         </>
       )}
-
-      <RepairResultsServerSection 
-        context="brand" 
-        category={categorySlug} 
-        brand={brandSlug} 
-      />
     </main>
   );
 }

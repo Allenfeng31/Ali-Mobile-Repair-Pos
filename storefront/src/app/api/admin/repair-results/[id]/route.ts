@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { invalidateRepairResultScopes } from '@/lib/repair-results-cache';
+
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
@@ -240,14 +240,6 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (error) throw error;
 
     let warningMessage = '';
-    try {
-      invalidateRepairResultScopes(record as any); 
-      invalidateRepairResultScopes(data as any);   
-    } catch (cacheError) {
-      console.warn('[repair-results] Cache invalidation failed after successful PATCH DB save:', cacheError);
-      warningMessage = 'Record updated successfully, but Storefront cache refresh failed. Please refresh the page manually or update to retry.';
-    }
-
     return jsonWithCors(request, { 
       status: 'SUCCESS', 
       data,

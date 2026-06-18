@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { invalidateRepairResultScopes } from '@/lib/repair-results-cache';
+
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
@@ -338,16 +338,7 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    try {
-      invalidateRepairResultScopes(data as any);
-    } catch (cacheError) {
-      console.warn('[repair-results] Cache invalidation failed after successful DB save:', cacheError);
-      return jsonWithCors(request, {
-        status: 'SUCCESS',
-        data,
-        warning: 'Record saved successfully, but Storefront cache refresh failed. Please refresh the page manually or update to retry.',
-      }, { status: 201 });
-    }
+
 
     return jsonWithCors(request, { status: 'SUCCESS', data }, { status: 201 });
   } catch (error) {

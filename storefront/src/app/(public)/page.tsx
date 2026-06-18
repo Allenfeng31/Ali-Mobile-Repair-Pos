@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
-import RepairResultsServerSection from "@/components/repair-results/RepairResultsServerSection";
+import RealRepairResultsSection from "@/components/repair-results/RealRepairResultsSection";
 import heroStyles from "./HomeHero.module.css";
 import homeStyles from "./HomePage.module.css";
 
@@ -161,7 +161,7 @@ export default function Home() {
       </ScrollReveal>
 
       <ScrollReveal>
-        <RepairResultsServerSection context="homepage" />
+        <RealRepairResultsSection />
       </ScrollReveal>
 
       <ScrollReveal>
