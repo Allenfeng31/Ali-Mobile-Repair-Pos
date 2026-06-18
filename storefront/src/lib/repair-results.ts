@@ -26,6 +26,7 @@ export interface PublicRepairResult {
   privacy_checked: boolean;
   featured_on_homepage: boolean;
   featured_on_repair_hub: boolean;
+  featured_on_brand_hub: boolean;
   sort_order: number;
   related_repair_url: string | null;
   created_at: string;
@@ -140,6 +141,7 @@ export const PUBLIC_REPAIR_RESULT_SELECT = [
   'privacy_checked',
   'featured_on_homepage',
   'featured_on_repair_hub',
+  'featured_on_brand_hub',
   'sort_order',
   'related_repair_url',
   'created_at',

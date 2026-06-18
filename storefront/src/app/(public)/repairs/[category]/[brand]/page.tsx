@@ -5,7 +5,8 @@ import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
-import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
+import HubRepairResultsSection from "@/components/repair-results/HubRepairResultsSection";
+import { type RepairResultDeviceCategory } from "@/lib/repair-results";
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
 import AppleWatchModelFinder from "./AppleWatchModelFinder";
@@ -261,11 +262,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             brandSlug={brandSlug}
           />
 
-          <RepairResultsMatchingSection
-            category={categorySlug}
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
             brand={brandSlug}
-            model={brandSlug}
-            context="model"
+            scope="brand-hub"
           />
 
           <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
@@ -389,11 +389,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             brandSlug={brandSlug}
           />
 
-          <RepairResultsMatchingSection
-            category={categorySlug}
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
             brand={brandSlug}
-            model={brandSlug}
-            context="model"
+            scope="brand-hub"
           />
 
           <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
@@ -519,6 +518,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             seriesGroups={seriesGroups}
             categorySlug={categorySlug}
             brandSlug={brandSlug}
+          />
+
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
+            brand={brandSlug}
+            scope="brand-hub"
           />
 
           <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
@@ -648,6 +653,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               brandSlug={brandSlug}
             />
           </section>
+
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
+            brand={brandSlug}
+            scope="brand-hub"
+          />
 
           <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
             <div className="repair-types-showcase-header">

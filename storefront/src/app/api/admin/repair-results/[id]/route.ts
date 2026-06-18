@@ -176,6 +176,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const nextPrivacyChecked = typeof body.privacy_checked === 'boolean' ? body.privacy_checked : undefined;
     const nextFeaturedOnHomepage = typeof body.featured_on_homepage === 'boolean' ? body.featured_on_homepage : undefined;
     const nextFeaturedOnRepairHub = typeof body.featured_on_repair_hub === 'boolean' ? body.featured_on_repair_hub : undefined;
+    const nextFeaturedOnBrandHub = typeof body.featured_on_brand_hub === 'boolean' ? body.featured_on_brand_hub : undefined;
 
     if (nextStatus && !VALID_STATUSES.has(nextStatus)) {
       return jsonWithCors(request, { error: 'Invalid status.' }, { status: 400 });
@@ -213,6 +214,10 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     if (nextFeaturedOnRepairHub !== undefined) {
       updates.featured_on_repair_hub = nextFeaturedOnRepairHub;
+    }
+
+    if (nextFeaturedOnBrandHub !== undefined) {
+      updates.featured_on_brand_hub = nextFeaturedOnBrandHub;
     }
 
     // Process generic content edits if provided

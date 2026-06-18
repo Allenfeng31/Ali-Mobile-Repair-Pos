@@ -298,6 +298,7 @@ export async function POST(request: Request) {
           privacy_checked: privacyChecked,
           featured_on_homepage: getBoolean(formData, 'featured_on_homepage'),
           featured_on_repair_hub: getBoolean(formData, 'featured_on_repair_hub'),
+          featured_on_brand_hub: getBoolean(formData, 'featured_on_brand_hub'),
           sort_order: getInteger(formData, 'sort_order'),
           related_repair_url: getOptionalString(formData, 'related_repair_url'),
           published_at: status === 'published' ? new Date().toISOString() : null,

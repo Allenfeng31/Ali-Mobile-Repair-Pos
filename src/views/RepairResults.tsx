@@ -37,6 +37,7 @@ interface PublicRepairResult {
   privacy_checked: boolean;
   featured_on_homepage: boolean;
   featured_on_repair_hub: boolean;
+  featured_on_brand_hub: boolean;
   sort_order: number;
   related_repair_url: string | null;
   created_at: string;
@@ -59,6 +60,7 @@ interface FormState {
   related_repair_url: string;
   featured_on_homepage: boolean;
   featured_on_repair_hub: boolean;
+  featured_on_brand_hub: boolean;
   sort_order: string;
   status: RepairResultStatus;
   privacy_checked: boolean;
@@ -101,6 +103,7 @@ const INITIAL_FORM_STATE: FormState = {
   related_repair_url: '',
   featured_on_homepage: false,
   featured_on_repair_hub: false,
+  featured_on_brand_hub: false,
   sort_order: '0',
   status: 'draft',
   privacy_checked: false,
@@ -337,7 +340,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
     }
   }
 
-  async function updateResult(id: string, updates: Partial<Pick<PublicRepairResult, 'status' | 'privacy_checked' | 'featured_on_homepage' | 'featured_on_repair_hub'>>) {
+  async function updateResult(id: string, updates: Partial<Pick<PublicRepairResult, 'status' | 'privacy_checked' | 'featured_on_homepage' | 'featured_on_repair_hub' | 'featured_on_brand_hub'>>) {
     setError(null);
     setSuccess(null);
     setUpdatingId(id);
@@ -642,6 +645,21 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                 </div>
               </label>
 
+              <label className="flex items-start gap-3 rounded-[1.5rem] border border-black/5 bg-white p-4 text-sm font-bold text-neu-text-primary md:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={form.featured_on_brand_hub}
+                  onChange={(event) => updateField('featured_on_brand_hub', event.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600"
+                />
+                <div className="flex flex-col">
+                  <span>Feature on Brand Repair Hub</span>
+                  <span className="text-xs font-semibold text-neu-text-secondary mt-1">
+                    Shows this result on its matching brand page, such as iPhone, Samsung, Oppo, Google, iPad, MacBook or Apple Watch.
+                  </span>
+                </div>
+              </label>
+
               <label className="flex items-start gap-3 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-6 text-emerald-900 md:col-span-2">
                 <input
                   type="checkbox"
@@ -714,6 +732,7 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                       </span>
                       {result.featured_on_homepage && <span className="rounded-full bg-blue-50 px-2 py-1 text-blue-700">Homepage</span>}
                       {result.featured_on_repair_hub && <span className="rounded-full bg-violet-50 px-2 py-1 text-violet-700">Repair Hub</span>}
+                      {result.featured_on_brand_hub && <span className="rounded-full bg-purple-50 px-2 py-1 text-purple-700">Brand Hub</span>}
                       {result.privacy_checked && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
                           <ShieldCheck size={13} strokeWidth={2.4} aria-hidden="true" />
@@ -774,13 +793,32 @@ export function RepairResultsView({ onBack }: { onBack: () => void }) {
                           Feature on Repair Hub
                         </button>
                       )}
+                      {result.featured_on_brand_hub ? (
+                        <button
+                          type="button"
+                          disabled={updatingId === result.id}
+                          onClick={() => void updateResult(result.id, { featured_on_brand_hub: false })}
+                          className="rounded-full bg-purple-100 px-3 py-1.5 text-xs font-black text-purple-700 hover:bg-purple-200 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Remove from Brand Hub
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={updatingId === result.id}
+                          onClick={() => void updateResult(result.id, { featured_on_brand_hub: true })}
+                          className="rounded-full border border-purple-200 bg-white px-3 py-1.5 text-xs font-black text-purple-700 hover:bg-purple-50 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Feature on Brand Hub
+                        </button>
+                      )}
                       {result.status !== 'archived' && (
                         <button
                           type="button"
                           disabled={updatingId === result.id}
                           onClick={() => {
-                            if (window.confirm('Are you sure you want to archive this result? It will be removed from the homepage and public storefront.')) {
-                              void updateResult(result.id, { status: 'archived', featured_on_homepage: false });
+                            if (window.confirm('Are you sure you want to archive this result?')) {
+                              void updateResult(result.id, { status: 'archived' });
                             }
                           }}
                           className="rounded-full bg-rose-100 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-200 transition disabled:cursor-not-allowed disabled:opacity-60"

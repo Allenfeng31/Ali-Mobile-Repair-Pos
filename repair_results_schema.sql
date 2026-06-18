@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS public.repair_results (
   privacy_checked BOOLEAN DEFAULT false,
   featured_on_homepage BOOLEAN DEFAULT false,
   featured_on_repair_hub BOOLEAN NOT NULL DEFAULT false,
+  featured_on_brand_hub BOOLEAN NOT NULL DEFAULT false,
   sort_order INTEGER DEFAULT 0,
   related_repair_url TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
