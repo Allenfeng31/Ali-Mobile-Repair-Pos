@@ -81,6 +81,7 @@ export default function BrandModelSearch({
                 <Link
                   key={entry.slug}
                   href={`/repairs/${categorySlug}/${brandSlug}/${entry.slug}`}
+                  prefetch={false}
                   className="model-card"
                   onClick={() => analytics.trackModelClick(entry.model)}
                 >

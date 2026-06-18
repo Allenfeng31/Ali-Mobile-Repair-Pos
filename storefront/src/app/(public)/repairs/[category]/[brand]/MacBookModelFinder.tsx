@@ -126,6 +126,7 @@ export default function MacBookModelFinder({
                     <Link
                       key={entry.slug}
                       href={`/repairs/${categorySlug}/${brandSlug}/${entry.slug}`}
+                      prefetch={false}
                       className="model-card h-full items-start rounded-[22px] px-5 py-4"
                       style={{ minHeight: "126px" }}
                       onClick={() => analytics.trackModelClick(entry.model)}
