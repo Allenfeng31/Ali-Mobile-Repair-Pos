@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -31,6 +32,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: BrandPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const { brand } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
+  if (!brand) {
+    notFound();
+  }
   const brandName = brand?.brand || formatDynamicParam(resolvedParams.brand);
   const canonicalPath = `/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`;
   const isAppleWatch = resolvedParams.category === "watch" && resolvedParams.brand === "apple";
@@ -69,6 +73,9 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
 export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const resolvedParams = await params;
   const { brand: brandEntry } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
+  if (!brandEntry) {
+    notFound();
+  }
 
   const brandName = brandEntry?.brand || formatDynamicParam(resolvedParams.brand);
   const models = brandEntry?.models || [];

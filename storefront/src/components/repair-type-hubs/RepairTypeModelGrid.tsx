@@ -8,9 +8,16 @@ import styles from './RepairTypeHub.module.css';
 interface RepairTypeModelGridProps {
   hubLabel: string;
   categories: RepairTypeHubCategoryGroup[];
+  title?: string;
+  description?: string;
 }
 
-export default function RepairTypeModelGrid({ hubLabel, categories }: RepairTypeModelGridProps) {
+export default function RepairTypeModelGrid({
+  hubLabel,
+  categories,
+  title,
+  description,
+}: RepairTypeModelGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const searchId = useId();
   const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -40,11 +47,11 @@ export default function RepairTypeModelGrid({ hubLabel, categories }: RepairType
         <div>
           <p className={styles.sectionEyebrow}>Supported Models</p>
           <h2 id="repair-type-hub-models" className={styles.sectionTitle}>
-            Find a matching model for {hubLabel}
+            {title ?? `Find a matching model for ${hubLabel}`}
           </h2>
         </div>
         <p className={styles.sectionBody}>
-          Only real catalogue matches are shown here. Every link goes directly to the existing brand, model, and repair page.
+          {description ?? 'Only real catalogue matches are shown here. Every link goes directly to the existing brand, model, and repair page.'}
         </p>
       </div>
 

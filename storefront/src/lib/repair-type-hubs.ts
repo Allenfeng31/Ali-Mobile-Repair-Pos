@@ -26,6 +26,7 @@ export interface RepairTypeHubModelLink {
   modelCode?: string;
   repairName: string;
   repairSlug: string;
+  price: number;
   href: string;
 }
 
@@ -154,6 +155,7 @@ export function buildRepairTypeHubCatalog(
         modelCode: modelEntry.modelCode,
         repairName: matchingRepair.name,
         repairSlug: matchingRepair.slug,
+        price: matchingRepair.price,
         href: `/repairs/${category}/${brandEntry.slug}/${modelEntry.slug}/${matchingRepair.slug}`,
       });
     }

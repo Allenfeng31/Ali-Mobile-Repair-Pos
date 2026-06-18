@@ -8,6 +8,7 @@ import {
   type RepairResultDeviceCategory,
   type RepairResultMatchingItem,
 } from '@/lib/repair-results';
+import { getRepairTypeHubDefinition } from '@/lib/repair-type-hubs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -17,10 +18,10 @@ const CACHE_HEADERS = {
 };
 
 const VALID_CATEGORIES = new Set(REPAIR_RESULT_CATEGORIES.map((category) => category.value));
-const VALID_CONTEXTS = new Set(['model', 'detail']);
+const VALID_CONTEXTS = new Set(['model', 'detail', 'hub']);
 const MAX_LIMIT = 3;
 
-type MatchingContext = 'model' | 'detail';
+type MatchingContext = 'model' | 'detail' | 'hub';
 
 function emptyResponse() {
   return NextResponse.json({ status: 'SUCCESS', data: [] }, { headers: CACHE_HEADERS });
@@ -82,7 +83,11 @@ export async function GET(request: Request) {
   const context = searchParams.get('context')?.trim().toLowerCase() as MatchingContext | null;
   const limit = getLimit(searchParams);
 
-  if (!VALID_CATEGORIES.has(category) || !brand || !model || !context || !VALID_CONTEXTS.has(context)) {
+  if (!VALID_CATEGORIES.has(category) || !context || !VALID_CONTEXTS.has(context)) {
+    return emptyResponse();
+  }
+
+  if (context !== 'hub' && (!brand || !model)) {
     return emptyResponse();
   }
 
@@ -90,10 +95,48 @@ export async function GET(request: Request) {
     return emptyResponse();
   }
 
+  if (context === 'hub' && !repairType) {
+    return emptyResponse();
+  }
+
   const supabase = createPublicRepairResultsClient();
   if (!supabase) return emptyResponse();
 
   try {
+    if (context === 'hub') {
+      const repairHub = getRepairTypeHubDefinition(repairType);
+
+      if (!repairHub) {
+        return emptyResponse();
+      }
+
+      const { data, error } = await supabase
+        .from('repair_results')
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .eq('status', 'published')
+        .eq('privacy_checked', true)
+        .eq('device_category', category)
+        .in('repair_type_slug', repairHub.aliases)
+        .neq('before_image_path', '')
+        .neq('after_image_path', '')
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('[repair-results-matching] Failed to load repair-type hub results:', error);
+        return emptyResponse();
+      }
+
+      const publicResults = ((data || []) as unknown as PublicRepairResult[]).filter(isPublicRepairResult);
+
+      return NextResponse.json(
+        { status: 'SUCCESS', data: publicResults.slice(0, limit).map(pickPublicFields) },
+        { headers: CACHE_HEADERS }
+      );
+    }
+
     const buildQuery = (targetBrand: string) => {
       let q = supabase
         .from('repair_results')

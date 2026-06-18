@@ -13,6 +13,8 @@ interface RepairTypeHubFaq {
 interface RepairTypeHubPricingItem {
   label: string;
   value: string;
+  href?: string;
+  description?: string;
 }
 
 interface RepairTypeHubCta {
@@ -28,14 +30,23 @@ interface RepairTypeHubPageProps {
   data: RepairTypeHubCatalogResult;
   title?: string;
   description?: string;
+  heroKicker?: string;
   intro?: ReactNode;
+  heroActions?: ReactNode;
+  heroStats?: Array<{
+    label: string;
+    value: string | number;
+  }>;
   symptoms?: string[];
+  modelGridTitle?: string;
+  modelGridDescription?: string;
   technicalContent?: ReactNode;
   processSteps?: string[];
   pricing?: {
     title: string;
     items: RepairTypeHubPricingItem[];
   };
+  additionalSections?: ReactNode;
   faqs?: RepairTypeHubFaq[];
   cta?: RepairTypeHubCta;
   repairResultsSlot?: ReactNode;
@@ -45,11 +56,17 @@ export default function RepairTypeHubPage({
   data,
   title,
   description,
+  heroKicker,
   intro,
+  heroActions,
+  heroStats,
   symptoms,
+  modelGridTitle,
+  modelGridDescription,
   technicalContent,
   processSteps,
   pricing,
+  additionalSections,
   faqs,
   cta,
   repairResultsSlot,
@@ -58,6 +75,11 @@ export default function RepairTypeHubPage({
   const pageDescription =
     description ??
     `Browse supported ${data.hub.label.toLowerCase()} matches from the live repair catalogue and jump straight to the existing canonical repair page.`;
+  const stats = heroStats ?? [
+    { label: 'Enabled categories', value: data.categories.length },
+    { label: 'Brands', value: data.totalBrands },
+    { label: 'Matching models', value: data.totalModels },
+  ];
 
   return (
     <div className={styles.pageShell}>
@@ -66,29 +88,22 @@ export default function RepairTypeHubPage({
 
         <section className={styles.heroCard}>
           <div className={styles.heroCopy}>
-            <span className={styles.heroKicker}>Repair Type Hub Foundation</span>
+            <span className={styles.heroKicker}>{heroKicker ?? 'Repair Type Hub'}</span>
             <h1 className={styles.heroTitle}>{pageTitle}</h1>
             <p className={styles.heroDescription}>{pageDescription}</p>
             {intro ? <div className={styles.heroIntro}>{intro}</div> : null}
+            {heroActions ? <div className={styles.heroActions}>{heroActions}</div> : null}
           </div>
 
           <dl className={styles.heroStats}>
-            <div className={styles.heroStat}>
-              <dt>Enabled categories</dt>
-              <dd>{data.categories.length}</dd>
-            </div>
-            <div className={styles.heroStat}>
-              <dt>Brands</dt>
-              <dd>{data.totalBrands}</dd>
-            </div>
-            <div className={styles.heroStat}>
-              <dt>Matching models</dt>
-              <dd>{data.totalModels}</dd>
-            </div>
+            {stats.map((stat) => (
+              <div key={stat.label} className={styles.heroStat}>
+                <dt>{stat.label}</dt>
+                <dd>{stat.value}</dd>
+              </div>
+            ))}
           </dl>
         </section>
-
-        <RepairTypeModelGrid hubLabel={data.hub.label} categories={data.categories} />
 
         {symptoms && symptoms.length > 0 ? (
           <section className={styles.sectionCard}>
@@ -106,23 +121,12 @@ export default function RepairTypeHubPage({
           </section>
         ) : null}
 
-        {technicalContent ? <section className={styles.sectionCard}>{technicalContent}</section> : null}
-
-        {processSteps && processSteps.length > 0 ? (
-          <section className={styles.sectionCard}>
-            <div className={styles.sectionHeader}>
-              <div>
-                <p className={styles.sectionEyebrow}>Process</p>
-                <h2 className={styles.sectionTitle}>How this hub will guide repairs</h2>
-              </div>
-            </div>
-            <ol className={styles.simpleList}>
-              {processSteps.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-          </section>
-        ) : null}
+        <RepairTypeModelGrid
+          hubLabel={data.hub.label}
+          categories={data.categories}
+          title={modelGridTitle}
+          description={modelGridDescription}
+        />
 
         {pricing && pricing.items.length > 0 ? (
           <section className={styles.sectionCard}>
@@ -134,21 +138,56 @@ export default function RepairTypeHubPage({
             </div>
             <div className={styles.pricingGrid}>
               {pricing.items.map((item) => (
-                <div key={item.label} className={styles.pricingCard}>
-                  <span className={styles.pricingLabel}>{item.label}</span>
-                  <strong className={styles.pricingValue}>{item.value}</strong>
-                </div>
+                item.href ? (
+                  <Link
+                    key={item.href ?? item.label}
+                    href={item.href}
+                    prefetch={false}
+                    className={`${styles.pricingCard} ${styles.pricingCardLink}`}
+                  >
+                    <span className={styles.pricingLabel}>{item.label}</span>
+                    {item.description ? <span className={styles.pricingDescription}>{item.description}</span> : null}
+                    <strong className={styles.pricingValue}>{item.value}</strong>
+                  </Link>
+                ) : (
+                  <div key={item.href ?? item.label} className={styles.pricingCard}>
+                    <span className={styles.pricingLabel}>{item.label}</span>
+                    {item.description ? <span className={styles.pricingDescription}>{item.description}</span> : null}
+                    <strong className={styles.pricingValue}>{item.value}</strong>
+                  </div>
+                )
               ))}
             </div>
           </section>
         ) : null}
+
+        {technicalContent ? <section className={styles.sectionCard}>{technicalContent}</section> : null}
+
+        {processSteps && processSteps.length > 0 ? (
+          <section className={styles.sectionCard}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.sectionEyebrow}>Process</p>
+                <h2 className={styles.sectionTitle}>How this repair usually moves through the bench</h2>
+              </div>
+            </div>
+            <ol className={styles.simpleList}>
+              {processSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
+        {repairResultsSlot ? <section>{repairResultsSlot}</section> : null}
+        {additionalSections}
 
         {faqs && faqs.length > 0 ? (
           <section className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>FAQs</p>
-                <h2 className={styles.sectionTitle}>Questions this hub can answer</h2>
+                <h2 className={styles.sectionTitle}>Screen replacement questions we answer every day</h2>
               </div>
             </div>
             <div className={styles.faqStack}>
@@ -161,8 +200,6 @@ export default function RepairTypeHubPage({
             </div>
           </section>
         ) : null}
-
-        {repairResultsSlot ? <section>{repairResultsSlot}</section> : null}
 
         {cta ? (
           <section className={styles.ctaCard}>

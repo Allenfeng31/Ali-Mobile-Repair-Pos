@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
-  if (!data) return {};
+  if (!data) {
+    notFound();
+  }
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
