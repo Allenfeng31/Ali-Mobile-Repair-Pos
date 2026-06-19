@@ -77,8 +77,8 @@ export default function Home() {
           </div>
 
           <div className={heroStyles.repairIssueBlock}>
-            <span className={heroStyles.repairIssueLabel}>Repair by issue</span>
-            <nav className={heroStyles.repairIssueGrid} aria-label="Repair by issue">
+            <span className={heroStyles.repairIssueLabel}>Common Repair Issues</span>
+            <nav className={heroStyles.repairIssueGrid} aria-label="Common repair issues">
               {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
