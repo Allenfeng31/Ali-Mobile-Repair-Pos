@@ -431,70 +431,6 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           )}
         </section>
 
-        
-        {isPhone && (
-          <ScrollReveal>
-            <section className="repair-content-band" aria-labelledby="phone-repair-types-heading">
-              <div className="repair-section-header">
-                <span>Repair by issue</span>
-                <h2 id="phone-repair-types-heading">Common Phone Repair Services</h2>
-                <p>Select the repair type that best matches your fault to see details and book.</p>
-              </div>
-              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
-                <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
-                  <span>01</span>
-                  <strong>Screen Replacement</strong>
-                  <small>Cracked glass or display faults</small>
-                </Link>
-                <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
-                  <span>02</span>
-                  <strong>Battery Replacement</strong>
-                  <small>Fast drain or shutdown issues</small>
-                </Link>
-                <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
-                  <span>03</span>
-                  <strong>Charging Port Repair</strong>
-                  <small>Not charging or loose connection</small>
-                </Link>
-                <Link href="/repairs/back-glass-replacement" prefetch={false} className="repair-type-mini-card">
-                  <span>04</span>
-                  <strong>Back Glass & Housing</strong>
-                  <small>Cracked rear glass or frame</small>
-                </Link>
-              </div>
-            </section>
-          </ScrollReveal>
-        )}
-
-        {isPhone && (
-          <ScrollReveal>
-            <section className="repair-assist-panel" aria-labelledby="phone-timing-heading">
-              <div className="w-full">
-                <span className="repair-kicker repair-kicker-muted">Parts and Timing</span>
-                <h2 id="phone-timing-heading">How phone diagnosis, parts and timing work</h2>
-                <p>We confirm the exact model, condition, and fault first, then explain the compatible repair options and practical timing.</p>
-                <div className="repair-signal-grid mt-5">
-                  <article className="repair-signal-card">
-                    <span>01</span>
-                    <h3>Common screen repairs</h3>
-                    <p>Most supported iPhone, Samsung and Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Many supported Oppo screens take about 30–45 minutes.</p>
-                  </article>
-                  <article className="repair-signal-card">
-                    <span>02</span>
-                    <h3>Same-day repairs</h3>
-                    <p>Around 70% of common phone models are supported by parts that are regularly kept in stock, so many repairs can be completed the same day.</p>
-                  </article>
-                  <article className="repair-signal-card">
-                    <span>03</span>
-                    <h3>Parts ordering</h3>
-                    <p>Less common models may require a part to be ordered, which usually takes around 1–2 days.</p>
-                  </article>
-                </div>
-              </div>
-            </section>
-          </ScrollReveal>
-        )}
-
         <section
           id={isLaptop ? 'laptop-brands' : undefined}
           className="repair-content-band"
@@ -581,6 +517,69 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </>
           )}
         </section>
+
+        {isPhone && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="phone-repair-types-heading">
+              <div className="repair-section-header">
+                <span>Repair by issue</span>
+                <h2 id="phone-repair-types-heading">Common Phone Repair Services</h2>
+                <p>Select the repair type that best matches your fault to see details and book.</p>
+              </div>
+              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
+                <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>01</span>
+                  <strong>Screen Replacement</strong>
+                  <small>Cracked glass or display faults</small>
+                </Link>
+                <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>02</span>
+                  <strong>Battery Replacement</strong>
+                  <small>Fast drain or shutdown issues</small>
+                </Link>
+                <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>03</span>
+                  <strong>Charging Port Repair</strong>
+                  <small>Not charging or loose connection</small>
+                </Link>
+                <Link href="/repairs/back-glass-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>04</span>
+                  <strong>Back Glass & Housing</strong>
+                  <small>Cracked rear glass or frame</small>
+                </Link>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
+        {isPhone && (
+          <ScrollReveal>
+            <section className="repair-assist-panel" aria-labelledby="phone-timing-heading">
+              <div className="w-full">
+                <span className="repair-kicker repair-kicker-muted">Parts and Timing</span>
+                <h2 id="phone-timing-heading">How phone diagnosis, parts and timing work</h2>
+                <p>We confirm the exact model, condition, and fault first, then explain the compatible repair options and practical timing.</p>
+                <div className="repair-signal-grid mt-5">
+                  <article className="repair-signal-card">
+                    <span>01</span>
+                    <h3>Common screen repairs</h3>
+                    <p>Most supported iPhone, Samsung and Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Many supported Oppo screens take about 30–45 minutes.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>02</span>
+                    <h3>Same-day repairs</h3>
+                    <p>Around 70% of common phone models are supported by parts that are regularly kept in stock, so many repairs can be completed the same day.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>03</span>
+                    <h3>Parts ordering</h3>
+                    <p>Less common models may require a part to be ordered, which usually takes around 1–2 days.</p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
 
         {isWatch && (
           <>
