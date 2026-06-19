@@ -89,21 +89,19 @@ export default function RepairTypeModelGrid({
     setExpandedBrandSlug('');
   }, [normalizedSearch]);
 
-  function handleBrandToggle(nextBrandSlug: string) {
-    setExpandedBrandSlug((current) => {
-      const willOpen = current !== nextBrandSlug;
+  useEffect(() => {
+    if (!expandedBrandSlug) return;
 
-      if (willOpen) {
-        window.requestAnimationFrame(() => {
-          expandedRegionRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
-        });
-      }
-
-      return willOpen ? nextBrandSlug : '';
+    window.requestAnimationFrame(() => {
+      expandedRegionRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     });
+  }, [expandedBrandSlug]);
+
+  function handleBrandToggle(nextBrandSlug: string) {
+    setExpandedBrandSlug((current) => (current === nextBrandSlug ? '' : nextBrandSlug));
   }
 
   return (
@@ -237,7 +235,10 @@ export default function RepairTypeModelGrid({
                 const sortedBrandModels = sortModelLinks(brandGroup.models);
 
                 return (
-                  <div key={`${currentCategory.category}-${brandGroup.brandSlug}`} className={styles.brandAccordionItem}>
+                  <div
+                    key={`${currentCategory.category}-${brandGroup.brandSlug}`}
+                    className={`${styles.brandAccordionItem} ${isExpanded ? styles.brandAccordionItemOpen : ''}`}
+                  >
                     <button
                       id={buttonId}
                       type="button"

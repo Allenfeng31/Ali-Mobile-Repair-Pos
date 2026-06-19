@@ -238,12 +238,26 @@ export default async function ScreenReplacementPage() {
           },
         ]}
         processSteps={[
-          'Complete a pre-repair functional test where the phone condition allows it.',
-          'Inspect the display, frame, and any related impact damage.',
-          'Confirm the available screen option, price, and expected timing for that exact model.',
-          'Install the selected replacement screen using the appropriate repair path.',
-          'Test display quality, touch, cameras, speakers, charging, and relevant sensors after fitting.',
-          'Explain any limitations, seal expectations, and aftercare before handover.',
+          {
+            question: 'What do we check before replacing this display?',
+            answer:
+              'We complete a pre-repair functional test where the phone condition allows it, then inspect the display, frame, and any related impact damage before confirming the repair path.',
+          },
+          {
+            question: 'How do we confirm the screen option?',
+            answer:
+              'We confirm the available screen option, price, and expected timing for that exact model before the replacement work starts.',
+          },
+          {
+            question: 'What happens during the screen replacement?',
+            answer:
+              'The selected replacement screen is installed using the appropriate repair path for the device and its condition.',
+          },
+          {
+            question: 'What gets tested before handover?',
+            answer:
+              'We test display quality, touch, cameras, speakers, charging, and relevant sensors, then explain any limitations, seal expectations, and aftercare before handover.',
+          },
         ]}
         repairResultsSlot={
           <RepairTypeRepairResultsSection

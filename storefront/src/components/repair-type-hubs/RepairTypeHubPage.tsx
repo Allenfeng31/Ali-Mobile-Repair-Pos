@@ -19,6 +19,11 @@ interface RepairTypeHubHeroHighlight {
   description?: string;
 }
 
+interface RepairTypeHubProcessStep {
+  question: string;
+  answer: string;
+}
+
 interface RepairTypeHubPageProps {
   data: RepairTypeHubCatalogResult;
   title?: string;
@@ -35,7 +40,7 @@ interface RepairTypeHubPageProps {
   technicalEyebrow?: string;
   technicalIntro?: string;
   technicalFaqs?: RepairTypeHubFaq[];
-  processSteps?: string[];
+  processSteps?: RepairTypeHubProcessStep[];
   additionalSections?: ReactNode;
   faqs?: RepairTypeHubFaq[];
   repairResultsSlot?: ReactNode;
@@ -96,6 +101,13 @@ export default function RepairTypeHubPage({
           </div>
         </section>
 
+        <RepairTypeModelGrid
+          hubLabel={data.hub.label}
+          categories={data.categories}
+          title={modelGridTitle}
+          description={modelGridDescription}
+        />
+
         {symptoms && symptoms.length > 0 ? (
           <section className={`repair-content-band ${styles.sectionCard}`}>
             <div className={styles.sectionHeader}>
@@ -113,17 +125,9 @@ export default function RepairTypeHubPage({
                 </article>
               ))}
             </div>
+            {preModelGridContent ? <div className={styles.reasonCallout}>{preModelGridContent}</div> : null}
           </section>
         ) : null}
-
-        {preModelGridContent ? <section className={`repair-content-band ${styles.sectionCard}`}>{preModelGridContent}</section> : null}
-
-        <RepairTypeModelGrid
-          hubLabel={data.hub.label}
-          categories={data.categories}
-          title={modelGridTitle}
-          description={modelGridDescription}
-        />
 
         {technicalFaqs && technicalFaqs.length > 0 ? (
           <section className={`repair-content-band ${styles.sectionCard}`}>
@@ -146,19 +150,25 @@ export default function RepairTypeHubPage({
         ) : null}
 
         {processSteps && processSteps.length > 0 ? (
-          <section className={`repair-content-band ${styles.sectionCard}`}>
-            <div className={styles.sectionHeader}>
+          <section className={`repair-content-band ${styles.workbenchSection}`}>
+            <div className={styles.workbenchHeading}>
               <div>
                 <p className={styles.sectionEyebrow}>Process</p>
                 <h2 className={styles.sectionTitle}>How this repair usually moves through the bench</h2>
               </div>
             </div>
-            <div className={styles.processGrid}>
+            <div className={styles.workbenchGrid}>
               {processSteps.map((step, index) => (
-                <article key={step} className={styles.processCard}>
-                  <span className={styles.reasonIndex}>{String(index + 1).padStart(2, '0')}</span>
-                  <p>{step}</p>
-                </article>
+                <details key={step.question} className={styles.workbenchBox}>
+                  <summary>
+                    <span className={styles.workbenchNumber}>{String(index + 1).padStart(2, '0')}</span>
+                    <span className={styles.workbenchQuestion}>{step.question}</span>
+                    <span className={styles.workbenchChevron} aria-hidden="true">
+                      ↓
+                    </span>
+                  </summary>
+                  <p>{step.answer}</p>
+                </details>
               ))}
             </div>
           </section>

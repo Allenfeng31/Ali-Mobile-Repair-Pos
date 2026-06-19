@@ -216,14 +216,12 @@ export default async function BatteryReplacementPage() {
           },
         ]}
         preModelGridContent={
-          <div className={styles.contentStack}>
-            <div className={styles.sectionHeader}>
-              <div>
-                <p className={styles.sectionEyebrow}>Safety Warning</p>
-                <h2 className={styles.sectionTitle}>If the battery looks swollen or the screen is lifting</h2>
-              </div>
+          <div className={styles.reasonCalloutInner}>
+            <div>
+              <p className={styles.reasonCalloutEyebrow}>Safety warning</p>
+              <h3 className={styles.reasonCalloutTitle}>If the battery looks swollen or the screen is lifting</h3>
             </div>
-            <p className={styles.sectionBody}>
+            <p>
               Do not press a lifted screen back into place, and avoid puncturing, bending, or continuing to charge a visibly swollen device. Arrange an assessment promptly so we can check the safest repair path and whether the display, frame, or other internal parts have also been affected.
             </p>
           </div>
@@ -256,12 +254,26 @@ export default async function BatteryReplacementPage() {
           },
         ]}
         processSteps={[
-          'Complete a pre-repair functional and charging check where the phone condition allows it.',
-          'Inspect battery condition, swelling signs, and any related display, frame, liquid, or impact damage.',
-          'Confirm battery availability, quote, and expected timing for that exact model.',
-          'Safely open the device and replace the battery where that is the appropriate repair path.',
-          'Test charging, power behaviour, display, cameras, speakers, and other relevant functions after fitting.',
-          'Explain calibration expectations, limitations, and aftercare before handover.',
+          {
+            question: 'What do we check before opening the phone?',
+            answer:
+              'We complete a pre-repair functional and charging check where the phone condition allows it, then inspect battery condition, swelling signs, and any related display, frame, liquid, or impact damage.',
+          },
+          {
+            question: 'How do we confirm the battery repair path?',
+            answer:
+              'We confirm battery availability, quote, and expected timing for that exact model before work proceeds.',
+          },
+          {
+            question: 'What happens during replacement?',
+            answer:
+              'We safely open the device and replace the battery where that is the appropriate repair path for the inspected condition.',
+          },
+          {
+            question: 'What gets tested before handover?',
+            answer:
+              'We test charging, power behaviour, display, cameras, speakers, and other relevant functions after fitting, then explain calibration expectations, limitations, and aftercare.',
+          },
         ]}
         repairResultsSlot={
           <RepairTypeRepairResultsSection
