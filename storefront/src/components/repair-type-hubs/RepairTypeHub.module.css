@@ -260,7 +260,8 @@
 .faqStack,
 .searchResultsGrid,
 .brandAccordion,
-.modelGrid {
+.modelGrid,
+.processGrid {
   display: grid;
   gap: 14px;
 }
@@ -270,6 +271,7 @@
 }
 
 .reasonCard,
+.processCard,
 .infoCard {
   padding: 1.35rem;
   border-radius: 22px;
@@ -300,12 +302,17 @@
 }
 
 .reasonCard p,
+.processCard p,
 .infoCard p,
 .infoCard li {
   margin: 0;
   color: #64748b;
   font-size: 0.94rem;
   line-height: 1.65;
+}
+
+.processCard p {
+  font-weight: 700;
 }
 
 .infoCard ul {
@@ -416,8 +423,8 @@
 .resultCard:focus-visible,
 .supportingLink:focus-visible,
 .faqItem summary:focus-visible,
-.primaryButton:focus-visible,
-.secondaryButton:focus-visible {
+.heroActions :global(.repair-primary-action):focus-visible,
+.heroActions :global(.repair-secondary-action):focus-visible {
   outline: 2px solid rgba(37, 99, 235, 0.2);
   outline-offset: 3px;
 }
@@ -721,37 +728,6 @@
   padding: 24px 22px;
 }
 
-.ctaActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.primaryButton,
-.secondaryButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 50px;
-  padding: 0 18px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 700;
-}
-
-.primaryButton {
-  background: var(--primary);
-  color: #fff;
-}
-
-.secondaryButton {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.72);
-  color: #020617;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
-}
-
 @media (min-width: 768px) {
   .pageShell {
     padding-top: 136px;
@@ -771,6 +747,7 @@
 
   .searchResultsGrid,
   .modelGrid,
+  .processGrid,
   .infoGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -787,6 +764,7 @@
   }
 
   .modelGrid,
+  .processGrid,
   .infoGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -830,5 +808,19 @@
   .modelCard,
   .resultCard {
     padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultCard,
+  .brandToggle,
+  .modelCard {
+    transition: none;
+  }
+
+  .resultCard:hover,
+  .brandToggle:hover,
+  .modelCard:hover {
+    transform: none;
   }
 }

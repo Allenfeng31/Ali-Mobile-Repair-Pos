@@ -173,11 +173,11 @@ export default async function ScreenReplacementPage() {
         }
         heroActions={
           <>
-            <Link href="/book-repair" className={styles.primaryButton}>
+            <Link href="/book-repair" className="repair-primary-action">
               Book Repair Now
               <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
             </Link>
-            <a href="tel:0481058514" className={styles.secondaryButton}>
+            <a href="tel:0481058514" className="repair-secondary-action">
               <PhoneCall size={18} strokeWidth={2.6} aria-hidden="true" />
               Call 0481 058 514
             </a>
@@ -255,7 +255,7 @@ export default async function ScreenReplacementPage() {
         }
         additionalSections={
           <>
-            <section className={styles.sectionCard}>
+            <section className={`repair-content-band ${styles.sectionCard}`}>
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionEyebrow}>Ringwood Store</p>
@@ -280,12 +280,12 @@ export default async function ScreenReplacementPage() {
                   <p>
                     We can explain model-specific screen options, likely turnaround, and practical limitations in English, 中文, and 粤语 support where needed.
                   </p>
-                  <div className={styles.heroActions}>
-                    <a href={DIRECTIONS_URL} className={styles.secondaryButton}>
+                  <div className={`repair-hero-actions ${styles.heroActions}`}>
+                    <a href={DIRECTIONS_URL} className="repair-secondary-action">
                       <MapPin size={18} strokeWidth={2.4} aria-hidden="true" />
                       Get Directions
                     </a>
-                    <Link href="/book-repair" className={styles.primaryButton}>
+                    <Link href="/book-repair" className="repair-primary-action">
                       Book Repair Now
                     </Link>
                   </div>
@@ -294,7 +294,7 @@ export default async function ScreenReplacementPage() {
             </section>
 
             {brandHubLinks.length > 0 && (
-              <section className={styles.sectionCard}>
+              <section className={`repair-content-band ${styles.sectionCard}`}>
                 <div className={styles.sectionHeader}>
                   <div>
                     <p className={styles.sectionEyebrow}>Explore More</p>

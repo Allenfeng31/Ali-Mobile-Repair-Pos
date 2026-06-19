@@ -77,13 +77,13 @@ export default function RepairTypeHubPage({
       <div className={styles.pageContainer}>
         <RepairTypeHubBreadcrumbs label={data.hub.label} />
 
-        <section className={styles.heroCard}>
+        <section className={`repair-tech-hero repair-tech-hero-compact ${styles.heroCard}`}>
           <div className={styles.heroCopy}>
             <span className={styles.heroKicker}>{heroKicker ?? 'Repair Type Hub'}</span>
             <h1 className={styles.heroTitle}>{pageTitle}</h1>
             <p className={styles.heroDescription}>{pageDescription}</p>
             {heroProof ? <div className={styles.heroProof}>{heroProof}</div> : null}
-            {heroActions ? <div className={styles.heroActions}>{heroActions}</div> : null}
+            {heroActions ? <div className={`repair-hero-actions ${styles.heroActions}`}>{heroActions}</div> : null}
           </div>
 
           <div className={styles.heroHighlights} aria-label="Repair hub highlights">
@@ -97,7 +97,7 @@ export default function RepairTypeHubPage({
         </section>
 
         {symptoms && symptoms.length > 0 ? (
-          <section className={styles.sectionCard}>
+          <section className={`repair-content-band ${styles.sectionCard}`}>
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>Symptoms</p>
@@ -116,7 +116,7 @@ export default function RepairTypeHubPage({
           </section>
         ) : null}
 
-        {preModelGridContent ? <section className={styles.sectionCard}>{preModelGridContent}</section> : null}
+        {preModelGridContent ? <section className={`repair-content-band ${styles.sectionCard}`}>{preModelGridContent}</section> : null}
 
         <RepairTypeModelGrid
           hubLabel={data.hub.label}
@@ -126,7 +126,7 @@ export default function RepairTypeHubPage({
         />
 
         {technicalFaqs && technicalFaqs.length > 0 ? (
-          <section className={styles.sectionCard}>
+          <section className={`repair-content-band ${styles.sectionCard}`}>
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>{technicalEyebrow ?? 'Repair Guidance'}</p>
@@ -146,18 +146,21 @@ export default function RepairTypeHubPage({
         ) : null}
 
         {processSteps && processSteps.length > 0 ? (
-          <section className={styles.sectionCard}>
+          <section className={`repair-content-band ${styles.sectionCard}`}>
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>Process</p>
                 <h2 className={styles.sectionTitle}>How this repair usually moves through the bench</h2>
               </div>
             </div>
-            <ol className={styles.simpleList}>
-              {processSteps.map((step) => (
-                <li key={step}>{step}</li>
+            <div className={styles.processGrid}>
+              {processSteps.map((step, index) => (
+                <article key={step} className={styles.processCard}>
+                  <span className={styles.reasonIndex}>{String(index + 1).padStart(2, '0')}</span>
+                  <p>{step}</p>
+                </article>
               ))}
-            </ol>
+            </div>
           </section>
         ) : null}
 
@@ -165,7 +168,7 @@ export default function RepairTypeHubPage({
         {additionalSections}
 
         {faqs && faqs.length > 0 ? (
-          <section className={styles.sectionCard}>
+          <section className={`repair-content-band ${styles.sectionCard}`}>
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>FAQs</p>
