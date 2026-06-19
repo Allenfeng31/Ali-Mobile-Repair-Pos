@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import RealRepairResultsSection from "@/components/repair-results/RealRepairResultsSection";
+import { REPAIR_CATEGORY_NAV_ITEMS } from "@/lib/repairCategoryNavigation";
 import heroStyles from "./HomeHero.module.css";
 import homeStyles from "./HomePage.module.css";
 
@@ -75,12 +76,25 @@ export default function Home() {
             <span className="contact-item">Call ahead for parts and timing</span>
           </div>
 
+          <div className={heroStyles.repairIssueBlock}>
+            <span className={heroStyles.repairIssueLabel}>Repair by issue</span>
+            <nav className={heroStyles.repairIssueGrid} aria-label="Repair by issue">
+              {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={false}
+                  className={heroStyles.repairIssueLink}
+                >
+                  <span className={heroStyles.repairIssueLinkText}>{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+
           <div className="hero-cta">
             <a className="primary-btn" href="/book-repair">
               Book Repair Now
-            </a>
-            <a className="secondary-btn" href="/track-status">
-              Track Status
             </a>
           </div>
         </div>

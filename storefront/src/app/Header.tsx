@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { analytics } from '@/lib/analytics';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
+import { REPAIR_CATEGORY_NAV_ITEMS } from '@/lib/repairCategoryNavigation';
 
 type ThemeMode = 'light' | 'dark';
 
@@ -25,6 +26,7 @@ function getInitialTheme(): ThemeMode {
 export default function Header() {
   const { devices } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openMobileGroup, setOpenMobileGroup] = useState<'service' | 'repair-categories' | null>(null);
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
 
   useEffect(() => {
@@ -35,6 +37,15 @@ export default function Header() {
   // Lock to light mode, ignore toggles
   const toggleTheme = () => {
     setTheme('light');
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setOpenMobileGroup(null);
+  };
+
+  const toggleMobileGroup = (group: 'service' | 'repair-categories') => {
+    setOpenMobileGroup((current) => (current === group ? null : group));
   };
 
   return (
@@ -84,8 +95,25 @@ export default function Header() {
                   ))}
                 </div>
               </div>
+              <div className="nav-dropdown">
+                <button type="button" className="nav-dropdown-trigger nav-dropdown-trigger--button">
+                  Repair Categories
+                </button>
+                <div
+                  className="nav-dropdown-menu nav-dropdown-menu--repair-categories"
+                  aria-label="Repair categories"
+                >
+                  {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
+                    <Link key={item.href} href={item.href} prefetch={true} className="nav-dropdown-card">
+                      <span className="nav-dropdown-card-label">{item.label}</span>
+                      <span className="nav-dropdown-card-note">{item.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
               <Link href="/about-us" prefetch={true}>About Us</Link>
               <Link href="/blog" prefetch={true}>Blog</Link>
+              <Link href="/track-status" prefetch={true}>Track Status</Link>
             </nav>
           </div>
 
@@ -129,7 +157,7 @@ export default function Header() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white/95 backdrop-blur-sm flex flex-col">
           <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200/50">
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center h-10">
+            <Link href="/" onClick={closeMobileMenu} className="flex items-center h-10">
               <Image 
                 src="/images/logo.png" 
                 alt="Ali Mobile & Repair Ringwood" 
@@ -140,7 +168,7 @@ export default function Header() {
               />
             </Link>
             <button 
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
               className="p-2 text-slate-800 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors"
               aria-label="Close menu"
             >
@@ -149,23 +177,63 @@ export default function Header() {
           </div>
           
           <nav className="flex flex-col pt-8 px-8 overflow-y-auto gap-8">
-            <div className="flex flex-col gap-4">
-              <Link href="/repairs" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Service &amp; Repairs</Link>
-              <div className="mobile-repair-links" aria-label="Service and repair categories">
-                {repairMenuItems.map((item) => (
-                  <Link key={item.href} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
-                    {item.label}
-                  </Link>
-                ))}
+            <div className="mobile-nav-group">
+              <button
+                type="button"
+                className="mobile-nav-group-trigger"
+                aria-expanded={openMobileGroup === 'service'}
+                aria-controls="mobile-service-repairs-panel"
+                onClick={() => toggleMobileGroup('service')}
+              >
+                <span>Service &amp; Repairs</span>
+                <ChevronDown size={18} className={openMobileGroup === 'service' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
+              </button>
+              <div
+                id="mobile-service-repairs-panel"
+                className={openMobileGroup === 'service' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
+              >
+                <Link href="/repairs" onClick={closeMobileMenu} className="mobile-nav-group-link mobile-nav-group-link--overview">
+                  All Service &amp; Repairs
+                </Link>
+                <div className="mobile-repair-links" aria-label="Service and repair categories">
+                  {repairMenuItems.map((item) => (
+                    <Link key={item.href} href={item.href} onClick={closeMobileMenu}>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-            <Link href="/about-us" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
-            <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Shop</Link>
-            <Link href="/track-status" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
-            <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
+            <div className="mobile-nav-group">
+              <button
+                type="button"
+                className="mobile-nav-group-trigger"
+                aria-expanded={openMobileGroup === 'repair-categories'}
+                aria-controls="mobile-repair-categories-panel"
+                onClick={() => toggleMobileGroup('repair-categories')}
+              >
+                <span>Repair Categories</span>
+                <ChevronDown size={18} className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
+              </button>
+              <div
+                id="mobile-repair-categories-panel"
+                className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
+              >
+                <div className="mobile-repair-links" aria-label="Repair category hubs">
+                  {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
+                    <Link key={item.href} href={item.href} onClick={closeMobileMenu}>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <Link href="/about-us" onClick={closeMobileMenu} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
+            <Link href="/blog" onClick={closeMobileMenu} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
+            <Link href="/track-status" onClick={closeMobileMenu} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
             
             <div className="pt-6 mt-4 border-t border-slate-200/50">
-              <Link href="/book-repair" onClick={() => setIsMobileMenuOpen(false)} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md" style={{ color: '#ffffff' }}>
+              <Link href="/book-repair" onClick={closeMobileMenu} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md" style={{ color: '#ffffff' }}>
                 Book Repair Now {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>{devices.length}</span>}
               </Link>
             </div>
