@@ -32,7 +32,7 @@ function sortModelLinks<T extends RepairTypeHubModelLink>(models: T[]): T[] {
     repairTypes: [],
   })) as Array<T & SortableModelLink>;
 
-  return smartSortModels(sortable) as Array<T>;
+  return smartSortModels(sortable as any) as Array<T>;
 }
 
 function sortSearchResults(results: SearchResultLink[]) {
