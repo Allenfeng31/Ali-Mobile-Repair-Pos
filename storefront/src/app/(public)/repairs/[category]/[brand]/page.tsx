@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -39,18 +40,24 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const canonicalPath = `/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`;
   const isAppleWatch = resolvedParams.category === "watch" && resolvedParams.brand === "apple";
   const isIPad = resolvedParams.category === "tablet" && resolvedParams.brand === "ipad";
+  const isPhone = resolvedParams.category === "phone";
 
-  const title = isAppleWatch
-    ? 'Apple Watch Repair Services Ringwood | Fast & Reliable | Ali Mobile'
-    : isIPad
-    ? 'iPad Repair Services in Ringwood | Fast & Reliable | Ali Mobile'
-    : `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
+  let title, description;
 
-  const description = isAppleWatch
-    ? 'Expert Apple Watch repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.'
-    : isIPad
-    ? 'Expert iPad repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact iPad family, generation, screen size or A-number for compatible repair options and current pricing.'
-    : `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`;
+  if (isPhone) {
+    const phoneContent = getPhoneBrandHubContent(resolvedParams.brand, brandName);
+    title = phoneContent.metadata.title;
+    description = phoneContent.metadata.description;
+  } else if (isAppleWatch) {
+    title = 'Apple Watch Repair Services Ringwood | Fast & Reliable | Ali Mobile';
+    description = 'Expert Apple Watch repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.';
+  } else if (isIPad) {
+    title = 'iPad Repair Services in Ringwood | Fast & Reliable | Ali Mobile';
+    description = 'Expert iPad repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact iPad family, generation, screen size or A-number for compatible repair options and current pricing.';
+  } else {
+    title = `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
+    description = `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`;
+  }
 
   const metadata: Metadata = {
     title,
@@ -59,7 +66,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
       canonical: canonicalPath,
     },
     openGraph: {
-      title: isAppleWatch ? 'Apple Watch Repair Services Ringwood | Fast & Reliable' : `${brandName} Repair Services in Ringwood | Fast & Reliable`,
+      title,
       description,
       url: canonicalPath,
       type: "website",
@@ -84,6 +91,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isMacBookHub = categorySlug === "laptop" && brandSlug === "macbook";
   const isAppleWatchHub = categorySlug === "watch" && brandSlug === "apple";
   const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
+  const isPhoneHub = categorySlug === "phone";
+  const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
   const macbookRepairPaths = [
@@ -136,7 +145,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   ];
 
   return (
-    <main className="repair-page-shell repair-page-shell-narrow">
+    <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""}`}>
       <nav className="repair-breadcrumb" aria-label="breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
@@ -643,6 +652,128 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div className="repair-hero-actions">
               <a href="#models-list" className="repair-primary-action">
                 Choose Your iPad Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : isPhoneHub ? (
+        <>
+          <section id="models-list" aria-label={`${brandName} models`}>
+            <BrandModelSearch
+              seriesGroups={seriesGroups}
+              categorySlug={categorySlug}
+              brandSlug={brandSlug}
+            />
+          </section>
+
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
+            brand={brandSlug}
+            scope="brand-hub"
+          />
+
+          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
+            <div className="repair-types-showcase-header">
+              <div>
+                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <h2 id="brand-repair-types-heading">Common {brandName} Repair Paths</h2>
+              </div>
+              <p>Choose your exact model first, then compare the repair path that best matches the fault we need to assess.</p>
+            </div>
+            <div className="repair-type-card-grid">
+              <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                <span>01</span>
+                <strong>Screen Replacement</strong>
+                <small>Cracked glass, display faults and touch issues</small>
+              </Link>
+              <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                <span>02</span>
+                <strong>Battery Replacement</strong>
+                <small>Fast drain, shutdowns, or swelling</small>
+              </Link>
+              <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
+                <span>03</span>
+                <strong>Charging Port Repair</strong>
+                <small>Not charging, debris cleaning, or cable fault</small>
+              </Link>
+              <Link href="/repairs/back-glass-replacement" prefetch={false} className="repair-type-mini-card">
+                <span>04</span>
+                <strong>Back Glass & Housing</strong>
+                <small>Rear cover or complete housing replacement</small>
+              </Link>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="phone-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="phone-diagnostic-heading">How {brandName} diagnosis, parts and timing work</h2>
+              <p>We confirm the exact model first, then explain the compatible repair options and practical timing.</p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Model-specific diagnosis</h3>
+                  <p>Compatible parts differ by model. The exact model matters before we confirm repair compatibility.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Screen replacement timing</h3>
+                  <p>{phoneContent?.timing.screen || 'Repair timing depends on the exact model and parts availability. We confirm the timeline once diagnosis is complete.'}</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Battery replacement timing</h3>
+                  <p>{phoneContent?.timing.battery || 'Many common battery replacements can be completed quickly when the correct part is in stock.'}</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="phone-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="phone-ringwood-heading">{brandName} repair support at Ringwood Square</h2>
+              <p>Ali Mobile & Repair works from Ringwood Square Shopping Centre Kiosk C1. Walk-ins are welcome, and we offer free underground and outdoor parking. Our team provides English, 中文, and 粤语 support. Call 0481 058 514 to confirm parts or timing before travelling.</p>
+            </div>
+            <div className="repair-chip-cloud" aria-label="Phone repair support actions">
+              <span><MapPin size={15} strokeWidth={2.2} aria-hidden="true" /> Ringwood Square Kiosk C1</span>
+              <span><Clock3 size={15} strokeWidth={2.2} aria-hidden="true" /> Walk-ins welcome</span>
+              <span><ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" /> Clear quote before approval</span>
+            </div>
+          </section>
+
+          <section className="faq-section" aria-labelledby="phone-faq-heading">
+            <h2 id="phone-faq-heading" className="faq-heading">{brandName} repair FAQs</h2>
+            <div className="faq-accordion">
+              {phoneContent?.faqs.map((faq) => (
+                <details key={faq.question} className="faq-item">
+                  <summary className="faq-question">
+                    <span>{faq.question}</span>
+                    <svg className="faq-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </summary>
+                  <div className="faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel" aria-labelledby="phone-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="phone-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>Start with the {brandName} model selector above to check compatible repair paths, then book or call once you have the exact model.</p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your {brandName} Model
                 <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
               </a>
               <Link href="/book-repair" className="repair-secondary-action">

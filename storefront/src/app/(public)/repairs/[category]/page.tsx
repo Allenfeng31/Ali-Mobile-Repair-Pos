@@ -110,11 +110,16 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "Do you offer same-day phone repairs?", answer: "Most common phone screen and battery repairs can be completed the same day when parts are in stock. We confirm timing after checking your model, part availability, repair queue, and device condition." },
-      { question: "How long does a typical phone screen repair take at your Ringwood store?", answer: "Many common phone screen repairs are completed quickly while you wait, but timing depends on the model and the device condition. We are centrally located in Ringwood, making us a quick drive from Croydon, Mitcham, Heathmont, and Wantirna." },
-      { question: "Will I lose my data during the repair process?", answer: "Data is normally not affected during standard screen or battery repairs, but we recommend backing up first whenever possible." },
-      { question: "What is your warranty on phone repairs?", answer: "We proudly offer a 180-day comprehensive warranty on all parts and labor. If you experience any technical faults related to the repair within this 6-month period, warranty support depends on the fault confirmed at inspection and whether it relates to the completed repair." },
-      { question: "Which phone brands do you repair?", answer: "We support major brands including Apple iPhone, Samsung Galaxy, Google Pixel, Oppo, and Huawei. Call ahead if you want part availability checked before visiting." }
+      { question: "How long does a common phone screen repair take?", answer: "Most supported iPhone, Samsung, and Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes." },
+      { question: "Can my phone usually be repaired the same day?", answer: "Around 70% of common phone models are supported by parts that are regularly kept in stock, so many repairs can be completed the same day. Less common models may require a part to be ordered, which usually takes around 1–2 days." },
+      { question: "What happens when a part is not in stock?", answer: "If your model requires a part to be ordered, it usually takes around 1–2 days to arrive. We will confirm part availability and the expected timeline before any repair begins." },
+      { question: "Do I need to know the exact model?", answer: "Knowing your exact model helps us confirm part availability and pricing immediately. However, if you are unsure, you can bring the device to our Ringwood Square location and we will identify it for you." },
+      { question: "Does every charging problem require port replacement?", answer: "No. Many charging issues are caused by debris buildup, battery wear, or a faulty charging cable. We will inspect the port and diagnose the root cause before confirming if a replacement is needed." },
+      { question: "Is back glass the same as complete housing replacement?", answer: "Not always. Some phone models support replacing only the rear glass pane, while others require a full housing replacement that includes the frame and camera lens. The repair method depends on your exact model and the extent of the damage." },
+      { question: "Will water resistance remain after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. While we may reseal the device where appropriate, adhesive replacement does not restore guaranteed factory water-resistance certification." },
+      { question: "Can I walk in without an appointment?", answer: "Yes, walk-ins are welcome at our Kiosk C1 in Ringwood Square Shopping Centre. However, we recommend booking or calling ahead to confirm part availability for your specific model." },
+      { question: "Will data normally remain on the phone?", answer: "Data is normally not affected during standard screen or battery repairs. However, we always recommend backing up your phone before any repair, as data preservation cannot be guaranteed." },
+      { question: "What happens if there is frame or board damage?", answer: "If we discover internal frame, connector, or logic board damage during our pre-repair assessment, we will explain the implications and confirm any revised timing or quote with you before proceeding." }
     ]
   },
   tablet: {
@@ -304,11 +309,14 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const isLaptop = category === 'laptop';
   const isWatch = category === 'watch';
   const isTablet = category === 'tablet';
+  const isPhone = category === 'phone';
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
   const watchBrandSectionCopy = 'Select your brand and exact model to view compatible repair options and current pricing. Apple Watch repair options are currently available, with additional supported smartwatch brands added after service review.';
   const ringwoodSupportCopy = isWatch
     ? 'We confirm the exact model, device condition, parts availability and practical repair path before quoting timing or starting work. Ali Mobile & Repair operates from Ringwood Square Shopping Centre Kiosk C1, and you can call ahead or book before visiting.'
+    : isPhone
+    ? 'Ali Mobile & Repair is located at Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Walk-ins are welcome, and we offer free underground and outdoor parking. Our team provides English, 中文, and 粤语 support. Call 0481 058 514 to confirm parts or timing before travelling.'
     : `Ali Mobile & Repair, Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134. Opposite the Bunnings entrance inside Ringwood Square Shopping Centre. Call ahead if you want to confirm parts, timing or the right ${isLaptop ? 'laptop' : isTablet ? 'tablet' : 'phone'} repair path before travelling.`;
   const macBookHubHref = laptopMacBookBrand ? `/repairs/${category}/${laptopMacBookBrand.slug}` : '/repairs/laptop/macbook';
 
@@ -422,6 +430,70 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </div>
           )}
         </section>
+
+        
+        {isPhone && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="phone-repair-types-heading">
+              <div className="repair-section-header">
+                <span>Repair by issue</span>
+                <h2 id="phone-repair-types-heading">Common Phone Repair Services</h2>
+                <p>Select the repair type that best matches your fault to see details and book.</p>
+              </div>
+              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
+                <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>01</span>
+                  <strong>Screen Replacement</strong>
+                  <small>Cracked glass or display faults</small>
+                </Link>
+                <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>02</span>
+                  <strong>Battery Replacement</strong>
+                  <small>Fast drain or shutdown issues</small>
+                </Link>
+                <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>03</span>
+                  <strong>Charging Port Repair</strong>
+                  <small>Not charging or loose connection</small>
+                </Link>
+                <Link href="/repairs/back-glass-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>04</span>
+                  <strong>Back Glass & Housing</strong>
+                  <small>Cracked rear glass or frame</small>
+                </Link>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
+        {isPhone && (
+          <ScrollReveal>
+            <section className="repair-assist-panel" aria-labelledby="phone-timing-heading">
+              <div className="w-full">
+                <span className="repair-kicker repair-kicker-muted">Parts and Timing</span>
+                <h2 id="phone-timing-heading">How phone diagnosis, parts and timing work</h2>
+                <p>We confirm the exact model, condition, and fault first, then explain the compatible repair options and practical timing.</p>
+                <div className="repair-signal-grid mt-5">
+                  <article className="repair-signal-card">
+                    <span>01</span>
+                    <h3>Common screen repairs</h3>
+                    <p>Most supported iPhone, Samsung and Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Many supported Oppo screens take about 30–45 minutes.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>02</span>
+                    <h3>Same-day repairs</h3>
+                    <p>Around 70% of common phone models are supported by parts that are regularly kept in stock, so many repairs can be completed the same day.</p>
+                  </article>
+                  <article className="repair-signal-card">
+                    <span>03</span>
+                    <h3>Parts ordering</h3>
+                    <p>Less common models may require a part to be ordered, which usually takes around 1–2 days.</p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
 
         <section
           id={isLaptop ? 'laptop-brands' : undefined}
