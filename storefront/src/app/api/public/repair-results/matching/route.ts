@@ -162,17 +162,37 @@ export async function GET(request: Request) {
       return q;
     };
 
-    let { data, error } = await buildQuery(brand);
+    const aliases = brand === 'iphone' || brand === 'ipad' ? [brand, 'apple'] : [brand];
+    let data: any[] = [];
+    let fetchError: any = null;
 
-    if (!error && (!data || data.length === 0) && brand === 'ipad') {
-      const fallback = await buildQuery('apple');
-      data = fallback.data;
-      error = fallback.error;
+    for (const targetBrand of aliases) {
+      const { data: aliasData, error: aliasError } = await buildQuery(targetBrand);
+      if (aliasError) {
+        fetchError = aliasError;
+        break;
+      }
+      if (aliasData) {
+        data = data.concat(aliasData);
+      }
     }
 
-    if (error) {
-      console.error('[repair-results-matching] Failed to load matching results:', error);
+    if (fetchError) {
+      console.error('[repair-results-matching] Failed to load matching results:', fetchError);
       return emptyResponse();
+    }
+
+    // Deduplicate by Repair Result id before returning data
+    if (aliases.length > 1) {
+      const seen = new Set<string>();
+      const uniqueData = [];
+      for (const row of data) {
+        if (!seen.has(row.id)) {
+          seen.add(row.id);
+          uniqueData.push(row);
+        }
+      }
+      data = uniqueData;
     }
 
     const publicResults = ((data || []) as unknown as PublicRepairResult[]).filter(isPublicRepairResult);

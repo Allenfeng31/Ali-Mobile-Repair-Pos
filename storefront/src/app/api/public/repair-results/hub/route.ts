@@ -49,7 +49,8 @@ export async function GET(request: Request) {
       .eq('device_category', category);
 
     if (brand) {
-      query = query.eq('brand_slug', brand).eq('featured_on_brand_hub', true);
+      const aliases = brand === 'iphone' || brand === 'ipad' ? [brand, 'apple'] : [brand];
+      query = query.in('brand_slug', aliases).eq('featured_on_brand_hub', true);
     } else {
       query = query.eq('featured_on_repair_hub', true);
     }
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
       .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
-      .limit(50); // Fetch enough to cover duplicates across groups
+      .limit(50);
 
     const { data, error } = await query;
 
