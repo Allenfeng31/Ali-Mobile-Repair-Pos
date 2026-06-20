@@ -22,6 +22,27 @@ interface BrandPageProps {
   params: Promise<{ category: string; brand: string }>;
 }
 
+function getStartingRepairPrice(
+  models: Array<{ repairTypes: Array<{ price: number }> }>
+): number | null {
+  const prices = models
+    .flatMap((model) => model.repairTypes)
+    .map((repair) => repair.price)
+    .filter((price) => Number.isFinite(price) && price > 0);
+
+  if (prices.length === 0) {
+    return null;
+  }
+
+  return Math.min(...prices);
+}
+
+function formatStartingRepairPrice(price: number): string {
+  return new Intl.NumberFormat('en-AU', {
+    maximumFractionDigits: 0,
+  }).format(price);
+}
+
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
   return catalog.brands.map((b) => ({
@@ -93,6 +114,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
   const isPhoneHub = categorySlug === "phone";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
+  const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
   const macbookRepairPaths = [
@@ -143,6 +165,43 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         "If your MacBook is not shown in the selector, contact Ali Mobile & Repair for an assessment before you travel and we can confirm the next step.",
     },
   ];
+  const phoneHeroInsightCards = isPhoneHub
+    ? brandSlug === "iphone"
+      ? [
+          {
+            title: startingRepairPrice ? `iPhone Repairs from $${formatStartingRepairPrice(startingRepairPrice)}` : "iPhone Repair Pricing",
+            body: startingRepairPrice
+              ? `Selected iPhone repair services start from $${formatStartingRepairPrice(startingRepairPrice)}. Choose your exact model to view current repair options and pricing.`
+              : "Choose your exact iPhone model to view current repair options and pricing.",
+          },
+          {
+            title: "Fast Screen & Battery Repairs",
+            body: "Most iPhone screen replacements take about 30 minutes, while most iPhone battery replacements take less than 30 minutes once the correct part is available.",
+          },
+          {
+            title: "Same-Day Repairs for Common Models",
+            body: "Many common iPhone repairs can be completed the same day when parts are available. Less common parts usually take around 1–2 days to arrive.",
+          },
+        ]
+      : [
+          {
+            title: startingRepairPrice ? `${brandName} Repairs from $${formatStartingRepairPrice(startingRepairPrice)}` : `${brandName} Repair Pricing`,
+            body: startingRepairPrice
+              ? `Selected ${brandName} repair services start from $${formatStartingRepairPrice(startingRepairPrice)}. Choose your exact model to view current repair options and pricing.`
+              : `Choose your exact ${brandName} model to view current repair options and pricing.`,
+          },
+          {
+            title: phoneContent?.timing.battery ? "Fast Screen & Battery Repairs" : "Fast Screen Repairs",
+            body: phoneContent?.timing.battery
+              ? `${phoneContent.timing.screen} ${phoneContent.timing.battery}`
+              : phoneContent?.timing.screen || `Many supported ${brandName} repairs can be completed quickly once the exact model and correct part are confirmed.`,
+          },
+          {
+            title: "Same-Day Repairs for Common Models",
+            body: `Many common ${brandName} repairs can be completed the same day when parts are available. Less common parts usually take around 1–2 days to arrive.`,
+          },
+        ]
+    : [];
 
   return (
     <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""}`}>
@@ -193,7 +252,17 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </Link>
           </div>
         </div>
-        {!isMacBookHub && !isAppleWatchHub && !isIPadHub && (
+        {isPhoneHub && (
+          <div className="repair-hero-brand-proof" aria-label={`${brandName} repair pricing and timing highlights`}>
+            {phoneHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+        )}
+        {!isPhoneHub && !isMacBookHub && !isAppleWatchHub && !isIPadHub && (
           <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
             <div className="repair-device-card" aria-hidden="true">
               <span className="repair-device-frame">

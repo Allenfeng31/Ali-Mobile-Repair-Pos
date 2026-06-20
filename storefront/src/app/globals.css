@@ -4674,6 +4674,41 @@ input:checked+.toggle-slider:before {
   min-height: 100%;
 }
 
+.repair-hero-brand-proof {
+  display: grid;
+  gap: 1rem;
+  align-content: center;
+  min-height: 100%;
+}
+
+.repair-hero-brand-proof-card {
+  border: 2px solid rgba(15, 23, 42, 0.78);
+  border-radius: 24px;
+  padding: 1.35rem 1.45rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.72)),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.04), rgba(202, 138, 4, 0.03));
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+}
+
+.repair-hero-brand-proof-card h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+  font-weight: 950;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.repair-hero-brand-proof-card p {
+  max-width: none;
+  margin: 0.55rem 0 0;
+  color: #475569;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
 .repair-hero-insight-panel::before {
   content: "";
   position: absolute;
@@ -5670,6 +5705,10 @@ input:checked+.toggle-slider:before {
   .repair-assist-panel,
   .repair-detail-hero {
     border-radius: 24px;
+  }
+
+  .repair-hero-brand-proof {
+    min-height: 0;
   }
 
   .repair-hero-actions,
