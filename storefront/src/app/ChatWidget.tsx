@@ -13,6 +13,11 @@ const INTRO_PREFIX = '[CUSTOMER_INFO]'; // plain text prefix - no emoji encoding
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
 
+type EnsureSessionResult = 'success' | 'failure' | 'in-progress' | 'backoff' | 'cooldown';
+const RETRY_DELAYS_MS = [3000, 10000, 30000, 60000];
+const MAX_FAILURES = 5;
+const COOLDOWN_MS = 5 * 60 * 1000;
+
 function getApiBase() {
   return '/api/proxy';
 }
@@ -61,6 +66,9 @@ export default function ChatWidget() {
   const tokenRef = useRef('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const creationPromiseRef = useRef<Promise<EnsureSessionResult> | null>(null);
+  const failureCountRef = useRef(0);
+  const backoffUntilRef = useRef(0);
 
   // Initialise: check if we need name/phone step
   useEffect(() => {
@@ -86,48 +94,91 @@ export default function ChatWidget() {
   // ── Session recovery ───────────────────────────────────────────────────────
   // Recreates the session on the backend if staff deleted it, and resends
   // the customer intro message so the staff still knows who this customer is.
-  const ensureSession = useCallback(async (): Promise<boolean> => {
+  const ensureSession = useCallback(async (): Promise<EnsureSessionResult> => {
     const token = tokenRef.current;
-    if (!token) return false;
-    try {
-      const res = await fetch(`${getApiBase()}/chat/session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-      if (!res.ok) return false;
+    if (!token) return 'failure';
 
-      // If we have saved customer info, check whether intro is present
-      const savedName  = localStorage.getItem(CUSTOMER_NAME_KEY);
-      const savedPhone = localStorage.getItem(CUSTOMER_PHONE_KEY);
-      const introSent  = localStorage.getItem(CUSTOMER_INTRO_SENT_KEY);
+    if (!navigator.onLine || document.hidden) {
+      return 'backoff';
+    }
 
-      if (savedName && savedPhone && introSent) {
-        const msgsRes = await fetch(`${getApiBase()}/chat/session/${token}/messages`);
-        if (msgsRes.ok) {
-          const msgs: Message[] = await msgsRes.json();
-          const hasIntro = msgs.some(m => m.content.startsWith(INTRO_PREFIX));
-          if (!hasIntro) {
-            // Session was deleted and just recreated — resend customer info
-            await fetch(`${getApiBase()}/chat/session/${token}/message`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                content: `${INTRO_PREFIX}\nName: ${savedName}\nPhone: ${savedPhone}`,
-              }),
-            });
+    const now = Date.now();
+    if (failureCountRef.current >= MAX_FAILURES && now < backoffUntilRef.current) {
+      return 'cooldown';
+    } else if (now < backoffUntilRef.current) {
+      return 'backoff';
+    }
+
+    if (creationPromiseRef.current) {
+      return creationPromiseRef.current;
+    }
+
+    const attemptCreation = async (): Promise<EnsureSessionResult> => {
+      try {
+        const res = await fetch(`${getApiBase()}/chat/session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+        if (!res.ok) throw new Error('creation failed');
+
+        // If we have saved customer info, check whether intro is present
+        const savedName  = localStorage.getItem(CUSTOMER_NAME_KEY);
+        const savedPhone = localStorage.getItem(CUSTOMER_PHONE_KEY);
+        const introSent  = localStorage.getItem(CUSTOMER_INTRO_SENT_KEY);
+
+        if (savedName && savedPhone && introSent) {
+          const msgsRes = await fetch(`${getApiBase()}/chat/session/${token}/messages`);
+          if (msgsRes.ok) {
+            const msgs: Message[] = await msgsRes.json();
+            const hasIntro = msgs.some(m => m.content.startsWith(INTRO_PREFIX));
+            if (!hasIntro) {
+              // Session was deleted and just recreated — resend customer info
+              await fetch(`${getApiBase()}/chat/session/${token}/message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `${INTRO_PREFIX}\nName: ${savedName}\nPhone: ${savedPhone}`,
+                }),
+              });
+            }
           }
         }
+        
+        failureCountRef.current = 0;
+        backoffUntilRef.current = 0;
+        return 'success';
+      } catch (_) {
+        failureCountRef.current += 1;
+        if (failureCountRef.current >= MAX_FAILURES) {
+          backoffUntilRef.current = Date.now() + COOLDOWN_MS;
+        } else {
+          const delayIndex = Math.min(failureCountRef.current - 1, RETRY_DELAYS_MS.length - 1);
+          backoffUntilRef.current = Date.now() + RETRY_DELAYS_MS[delayIndex];
+        }
+        return 'failure';
+      } finally {
+        creationPromiseRef.current = null;
       }
-      return true;
-    } catch (_) {
-      return false;
-    }
+    };
+
+    creationPromiseRef.current = attemptCreation();
+    return creationPromiseRef.current;
   }, []);
 
   const fetchMessages = useCallback(async () => {
     const token = tokenRef.current;
     if (!token) return;
+
+    if (!navigator.onLine || document.hidden) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now < backoffUntilRef.current) {
+      return; // Do not poll while backing off from session creation failures
+    }
+
     try {
       const res = await fetch(`${getApiBase()}/chat/session/${token}/messages`);
       if (res.status === 404) {
@@ -205,7 +256,10 @@ export default function ChatWidget() {
     setSending(true);
     try {
       // Ensure session exists — recreates it if staff deleted it on the backend
-      await ensureSession();
+      const ensureResult = await ensureSession();
+      if (ensureResult === 'cooldown') {
+        throw new Error('Chat service temporarily unavailable');
+      }
 
       // Trigger first-message alert asynchronously
       const alertSent = localStorage.getItem('ali_chat_alert_sent');
@@ -230,8 +284,12 @@ export default function ChatWidget() {
       });
       if (!res.ok) throw new Error('Failed to send');
       await fetchMessages();
-    } catch (_) {
-      alert('Network error: Message could not be sent. Please try again.');
+    } catch (err: any) {
+      if (err?.message === 'Chat service temporarily unavailable') {
+        alert('Chat service is temporarily unavailable due to repeated network errors. Please try again later.');
+      } else {
+        alert('Network error: Message could not be sent. Please try again.');
+      }
       setInput(text); // Restore text on failure
     }
     setSending(false);

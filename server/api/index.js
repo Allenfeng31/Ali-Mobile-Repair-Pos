@@ -17,22 +17,38 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // Middleware
-const allowedOrigins = [
-  'https://pos.alimobile.com.au',
+const defaultAllowedOrigins = [
+  'https://alimobile.com.au',
   'https://www.alimobile.com.au',
+  'https://pos.alimobile.com.au',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
   'http://localhost:3003'
 ];
 
+let allowedOrigins = [...defaultAllowedOrigins];
+if (process.env.CORS_ALLOWED_ORIGINS) {
+  const envOrigins = process.env.CORS_ALLOWED_ORIGINS.split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
+  allowedOrigins = [...new Set([...allowedOrigins, ...envOrigins])];
+}
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with genuinely missing origin (like mobile apps or server-to-server)
     if (!origin) return callback(null, true);
+    // Treat the literal string 'null' as an unapproved origin
+    if (origin === 'null') {
+      const err = new Error('Origin not allowed');
+      err.code = 'CORS_ORIGIN_DENIED';
+      return callback(err, false);
+    }
     if (allowedOrigins.indexOf(origin) === -1) {
-      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+      const err = new Error('Origin not allowed');
+      err.code = 'CORS_ORIGIN_DENIED';
+      return callback(err, false);
     }
     return callback(null, true);
   },
@@ -2505,6 +2521,33 @@ app.post('/api/admin/sync-contacts/retry', async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+});
+
+// ----------------------------------------------------------------------
+// ERROR HANDLING
+// ----------------------------------------------------------------------
+app.use((err, req, res, next) => {
+  if (err.code === 'CORS_ORIGIN_DENIED') {
+    const origin = req.headers.origin;
+    const truncatedOrigin = origin ? origin.substring(0, 100) : 'missing';
+    const userAgent = req.headers['user-agent'];
+    const truncatedUserAgent = userAgent ? userAgent.substring(0, 200) : 'missing';
+    const requestId = req.headers['x-vercel-id'] || req.headers['x-request-id'] || 'unknown';
+
+    console.warn(JSON.stringify({
+      event: 'cors_origin_denied',
+      method: req.method,
+      path: req.path,
+      origin: truncatedOrigin,
+      userAgent: truncatedUserAgent,
+      requestId
+    }));
+
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
+
+  // Pass all other errors to the default Express handler
+  next(err);
 });
 
 // ----------------------------------------------------------------------
