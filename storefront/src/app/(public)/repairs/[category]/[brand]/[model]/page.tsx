@@ -129,11 +129,12 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
   const canonicalPath = `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${preserveRouteSegment(modelSlug)}`;
+  const isPhoneModelPage = categorySlug === "phone";
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
-  const isEnhancedPhoneModelPage = isIPhoneModelPage || isSamsungModelPage || isGooglePixelModelPage || isOppoModelPage;
+  const isEnhancedPhoneModelPage = isPhoneModelPage;
 
   return {
     title: isEnhancedPhoneModelPage
@@ -147,6 +148,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? `Choose the available Google Pixel repairs for ${modelName}, view current pricing, check Pixel screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
       : isOppoModelPage
       ? `Choose the available Oppo repairs for ${modelName}, view current pricing, check Oppo screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
+      : isPhoneModelPage
+      ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
       : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
     alternates: {
       canonical: canonicalPath,
@@ -163,6 +166,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `Choose the available Google Pixel repairs for ${modelName}, view current pricing, check Pixel screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
         : isOppoModelPage
         ? `Choose the available Oppo repairs for ${modelName}, view current pricing, check Oppo screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
+        : isPhoneModelPage
+        ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
         : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
       url: canonicalPath,
       type: "website",
@@ -184,11 +189,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const brandName = data?.brand || formatDynamicParam(brandSlug);
   const introBrandPrefix = brandName && modelName.toLowerCase().startsWith(brandName.toLowerCase()) ? "" : `${brandName} `;
   const repairTypes = data?.repairTypes || [];
+  const isPhoneModelPage = categorySlug === "phone";
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
-  const isEnhancedPhoneModelPage = isIPhoneModelPage || isSamsungModelPage || isGooglePixelModelPage || isOppoModelPage;
+  const isEnhancedPhoneModelPage = isPhoneModelPage;
   const screenRepair = getRepairBySlugs(repairTypes, ["screen-replacement", "screen-repair"]);
   const batteryRepair = getRepairBySlugs(repairTypes, ["battery-replacement", "battery-service", "battery-repair"]);
   const chargingRepair = getRepairBySlugs(repairTypes, ["charging-port-replacement", "charging-port-repair", "charging-port"]);
@@ -917,63 +923,246 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins to Ringwood Square Kiosk C1 are welcome. We recommend calling ahead so we can check stock for your specific Oppo model.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const genericPhoneHeroCards = [
+    {
+      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
+      body: startingPrice
+        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the available ${brandName} repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+    },
+    {
+      title: "Model-specific repair path",
+      body: `${brandName} parts and repair methods can vary by exact model, generation and construction. We confirm the compatible repair path before work begins.`,
+    },
+    {
+      title: "Parts and timing confirmed first",
+      body: "Some common repairs can be completed the same day when parts are available. Less common or specific parts usually take around 1–2 days to arrive.",
+    },
+  ];
+  const genericPhoneQuickAnswers = [
+    {
+      number: "01",
+      title: "How much does the repair cost?",
+      body: startingPrice
+        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the repair option for this exact ${brandName} model to see the current price or quote requirement.`,
+    },
+    hasScreenRepair
+      ? {
+          number: "02",
+          title: "How long does a screen replacement take?",
+          body: `${brandName} screen replacement timing depends on the exact model, part availability, frame condition and device damage. We confirm the likely timing before work begins.`,
+        }
+      : null,
+    hasBatteryRepair
+      ? {
+          number: "03",
+          title: "How long does a battery replacement take?",
+          body: `${brandName} battery replacement timing depends on the exact model, battery availability and device condition. We confirm the likely timing before work begins.`,
+        }
+      : null,
+    {
+      number: "04",
+      title: "Can it normally be repaired today?",
+      body: "Some common phone repairs can be completed the same day when parts are available. Less common or specific parts usually take around 1–2 days to arrive.",
+    },
+    {
+      number: "05",
+      title: "Why does the exact model matter?",
+      body: `${brandName} parts can vary between model families, generations and regional variants. The exact model is needed to confirm compatible parts, repair method and pricing.`,
+    },
+    hasWarrantyRepair
+      ? {
+          number: "06",
+          title: "What warranty is included?",
+          body: "Eligible screen, battery, charging-port and back-cover repairs include a 6-month warranty on the fitted part and workmanship. The warranty does not cover new impact damage, bending, liquid damage, misuse or unrelated faults.",
+        }
+      : null,
+    {
+      number: "07",
+      title: "Can charging symptoms be another fault?",
+      body: "Yes. Charging problems can come from debris, a cable or charger issue, battery wear, port damage, internal connector damage or a board-level fault. We check the likely cause before confirming the repair.",
+    },
+    {
+      number: "08",
+      title: "Will it remain water-resistant?",
+      body: "Factory water resistance cannot be guaranteed after a phone has been opened or repaired. New adhesive may help reseal the device, but it does not restore certified factory water resistance.",
+    },
+  ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const genericPhoneProcessSteps = [
+    {
+      number: "01",
+      title: "Identify the exact model",
+      body: `The technician confirms the ${brandName} model, variant and reported fault so the repair path matches the correct part and device construction.`,
+    },
+    {
+      number: "02",
+      title: "Inspect related damage",
+      body: "We check display condition, frame alignment, battery swelling, charging symptoms, liquid signs and visible impact damage where the device condition allows.",
+    },
+    {
+      number: "03",
+      title: "Confirm repair and price",
+      body: "The exact repair option, part availability, price and expected timing are explained before work begins.",
+    },
+    {
+      number: "04",
+      title: "Complete the selected repair",
+      body: `The selected ${brandName} repair is completed using the appropriate part and method for that exact model.`,
+    },
+    {
+      number: "05",
+      title: "Test before handover",
+      body: "Relevant display, touch, charging, camera, speaker, microphone, button, vibration, battery and network checks are repeated before handover where practical.",
+    },
+  ];
+  const genericPhoneServiceNotes = [
+    {
+      title: "Exact model and part matching",
+      body: `${brandName} repairs can vary by exact model, generation and construction. We identify the phone before confirming compatible parts, pricing and repair method.`,
+    },
+    {
+      title: "Battery, charging and related faults",
+      body: "Fast drain, no charging or intermittent charging can come from battery wear, the cable, port debris, connector damage or a board-level fault. We check likely causes before replacing parts.",
+    },
+    {
+      title: "Data, testing and passcode",
+      body: "Most hardware repairs do not intentionally erase customer data, but a backup is recommended because damaged devices carry data risk. We generally do not require the lock-screen passcode and will ask first if additional unlocked testing is needed.",
+    },
+    {
+      title: "Warranty and water resistance",
+      body: "Eligible repairs include a 6-month warranty on the fitted part and workmanship. Factory water resistance cannot be guaranteed after opening or repair.",
+    },
+  ];
+  const genericPhoneFaqs = [
+    {
+      question: `How much does a ${modelName} repair cost?`,
+      answer: startingPrice
+        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the repair option for this exact ${brandName} model to see the current price or quote requirement.`,
+    },
+    hasScreenRepair
+      ? {
+          question: `How long does a ${modelName} screen replacement take?`,
+          answer: `${brandName} screen replacement timing depends on the exact model, part availability, frame condition and any liquid or impact damage. We confirm the likely timing before work begins.`,
+        }
+      : null,
+    hasBatteryRepair
+      ? {
+          question: `How long does a ${modelName} battery replacement take?`,
+          answer: `${brandName} battery replacement timing is confirmed after checking the exact model, battery availability and device condition.`,
+        }
+      : null,
+    {
+      question: `Can my ${modelName} normally be repaired the same day?`,
+      answer: "Some common phone repairs can be completed the same day when parts are available. Less common or specific parts usually take around 1–2 days to arrive.",
+    },
+    activeScreenOptions.length > 0
+      ? {
+          question: "What screen replacement options are available?",
+          answer: `For this model, the currently published screen options may include ${activeScreenOptions.map((option) => option.title).join(", ")} where available. Choose Screen Replacement below for current pricing and service notes.`,
+        }
+      : null,
+    {
+      question: "Why do you need the exact model?",
+      answer: `${brandName} parts can vary between model families, generations and regional variants. We need the exact model to quote accurately and match the right part.`,
+    },
+    {
+      question: "Can a charging issue be caused by something else?",
+      answer: "Yes. A charging issue can come from debris, a faulty cable or charger, battery wear, charging-port damage, internal connectors or a board-level fault. We inspect the likely cause before confirming the repair.",
+    },
+    {
+      question: "Will my phone remain water-resistant after repair?",
+      answer: "Factory water resistance cannot be guaranteed after opening or repair. Adhesive replacement does not restore guaranteed factory water-resistance certification.",
+    },
+    hasWarrantyRepair
+      ? {
+          question: "What does the 6-month warranty cover?",
+          answer: "This repair includes a 6-month warranty covering the fitted part and our workmanship. It does not cover new physical damage, liquid damage, misuse, another repairer’s work or unrelated faults.",
+        }
+      : null,
+    {
+      question: "Can I walk in without an appointment?",
+      answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm part availability before you travel.",
+    },
+  ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const enhancedHeroCards = isSamsungModelPage
     ? samsungHeroCards
     : isGooglePixelModelPage
     ? googlePixelHeroCards
     : isOppoModelPage
     ? oppoHeroCards
-    : iPhoneHeroCards;
+    : isIPhoneModelPage
+    ? iPhoneHeroCards
+    : genericPhoneHeroCards;
   const enhancedQuickAnswers = isSamsungModelPage
     ? samsungQuickAnswers
     : isGooglePixelModelPage
     ? googlePixelQuickAnswers
     : isOppoModelPage
     ? oppoQuickAnswers
-    : iPhoneQuickAnswers;
+    : isIPhoneModelPage
+    ? iPhoneQuickAnswers
+    : genericPhoneQuickAnswers;
   const enhancedProcessSteps = isSamsungModelPage
     ? samsungProcessSteps
     : isGooglePixelModelPage
     ? googlePixelProcessSteps
     : isOppoModelPage
     ? oppoProcessSteps
-    : iPhoneProcessSteps;
+    : isIPhoneModelPage
+    ? iPhoneProcessSteps
+    : genericPhoneProcessSteps;
   const enhancedServiceNotes = isSamsungModelPage
     ? samsungServiceNotes
     : isGooglePixelModelPage
     ? googlePixelServiceNotes
     : isOppoModelPage
     ? oppoServiceNotes
-    : iPhoneServiceNotes;
+    : isIPhoneModelPage
+    ? iPhoneServiceNotes
+    : genericPhoneServiceNotes;
   const enhancedFaqs = isSamsungModelPage
     ? samsungFaqs
     : isGooglePixelModelPage
     ? googlePixelFaqs
     : isOppoModelPage
     ? oppoFaqs
-    : iPhoneFaqs;
+    : isIPhoneModelPage
+    ? iPhoneFaqs
+    : genericPhoneFaqs;
   const enhancedBrandLabel = isSamsungModelPage
     ? "Samsung"
     : isGooglePixelModelPage
     ? "Google Pixel"
     : isOppoModelPage
     ? "Oppo"
-    : "iPhone";
+    : isIPhoneModelPage
+    ? "iPhone"
+    : brandName;
   const enhancedMenuLabel = isSamsungModelPage
     ? "Samsung Repair Menu"
     : isGooglePixelModelPage
     ? "Google Pixel Repair Menu"
     : isOppoModelPage
     ? "Oppo Repair Menu"
-    : "iPhone Repair Menu";
+    : isIPhoneModelPage
+    ? "iPhone Repair Menu"
+    : `${brandName} Repair Menu`;
   const enhancedRepairNoun = isSamsungModelPage
     ? "Samsung repair"
     : isGooglePixelModelPage
     ? "Google Pixel repair"
     : isOppoModelPage
     ? "Oppo repair"
-    : "iPhone repair";
-  const enhancedRepairArticle = isIPhoneModelPage || isOppoModelPage ? "an" : "a";
+    : isIPhoneModelPage
+    ? "iPhone repair"
+    : `${brandName} repair`;
+  const enhancedRepairPhrase = isIPhoneModelPage || isOppoModelPage
+    ? `an ${enhancedRepairNoun}`
+    : isSamsungModelPage || isGooglePixelModelPage
+    ? `a ${enhancedRepairNoun}`
+    : `your ${modelName} repair`;
   const nonIPhoneScreenNote = isGooglePixelModelPage
     ? {
         kicker: "Pixel service notes",
@@ -995,11 +1184,15 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         secondBody: "We explain the available screen option, likely fit, price and timing before work begins.",
       }
     : {
-        kicker: "Samsung service notes",
+        kicker: isSamsungModelPage ? "Samsung service notes" : `${brandName} service notes`,
         title: "Display assembly, frame and model-specific parts",
-        body: "Samsung screen repairs vary by Galaxy series and exact model. Display type, frame condition, fingerprint-sensor placement and folding-display construction can all affect the correct repair path.",
-        firstTitle: "Exact model matters",
-        firstBody: "Galaxy S, Note, A, J, Z Fold and Z Flip models can use different display assemblies and repair methods.",
+        body: isSamsungModelPage
+          ? "Samsung screen repairs vary by Galaxy series and exact model. Display type, frame condition, fingerprint-sensor placement and folding-display construction can all affect the correct repair path."
+          : `${brandName} screen repairs vary by exact model. Display type, frame condition and part availability can all affect the correct repair path.`,
+        firstTitle: isSamsungModelPage ? "Exact model matters" : `Exact ${brandName} model matters`,
+        firstBody: isSamsungModelPage
+          ? "Galaxy S, Note, A, J, Z Fold and Z Flip models can use different display assemblies and repair methods."
+          : `${brandName} models can use different display assemblies and repair methods across generations and variants.`,
         secondTitle: "Confirmed before repair",
         secondBody: "We explain the available screen option, likely fit, price and timing before work begins.",
       };
@@ -1263,7 +1456,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             <section className="repair-content-band" aria-labelledby="model-policy-heading">
               <div className="repair-section-header">
                 <span>Repair policies</span>
-                <h2 id="model-policy-heading">What to know before booking {enhancedRepairArticle} {enhancedRepairNoun}</h2>
+                <h2 id="model-policy-heading">What to know before booking {enhancedRepairPhrase}</h2>
                 <p>
                   These are the most important service notes customers usually ask about before approving a repair on a model page.
                 </p>
