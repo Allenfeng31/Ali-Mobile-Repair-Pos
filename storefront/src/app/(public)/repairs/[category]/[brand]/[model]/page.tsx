@@ -8,7 +8,7 @@ import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
 import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
 import ScrollReveal from "@/components/ScrollReveal";
-import { ArrowRight, Battery, Camera, Clock3, Droplets, PhoneCall, PlugZap, ShieldCheck, Smartphone, Wrench } from "lucide-react";
+import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -99,7 +99,7 @@ function getPublishedScreenOptions(
 
   return uniqueGrades.map((grade) => ({
     title: grade,
-    body: `A published ${grade} screen option for this exact Samsung model. Choose Screen Replacement below to view the current price, availability and repair notes for this option.`,
+    body: `A published ${grade} option for this exact model. Choose the matching repair below to view the current price, availability and repair notes for this option.`,
   }));
 }
 
@@ -134,7 +134,10 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
-  const isEnhancedPhoneModelPage = isPhoneModelPage;
+  const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
+  const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
+  const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
+  const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage;
 
   return {
     title: isEnhancedPhoneModelPage
@@ -148,6 +151,12 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? `Choose the available Google Pixel repairs for ${modelName}, view current pricing, check Pixel screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
       : isOppoModelPage
       ? `Choose the available Oppo repairs for ${modelName}, view current pricing, check Oppo screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
+      : isIPadModelPage
+      ? `Choose the available iPad repairs for ${modelName}, view current pricing, confirm the exact iPad family, generation or A-number, and book with Ali Mobile & Repair in Ringwood.`
+      : isMacBookModelPage
+      ? `Choose the available MacBook repairs for ${modelName}, view current pricing, confirm the exact model or A-number, and book with Ali Mobile & Repair in Ringwood.`
+      : isAppleWatchModelPage
+      ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
       : isPhoneModelPage
       ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
       : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
@@ -166,6 +175,12 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `Choose the available Google Pixel repairs for ${modelName}, view current pricing, check Pixel screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
         : isOppoModelPage
         ? `Choose the available Oppo repairs for ${modelName}, view current pricing, check Oppo screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
+        : isIPadModelPage
+        ? `Choose the available iPad repairs for ${modelName}, view current pricing, confirm the exact iPad family, generation or A-number, and book with Ali Mobile & Repair in Ringwood.`
+        : isMacBookModelPage
+        ? `Choose the available MacBook repairs for ${modelName}, view current pricing, confirm the exact model or A-number, and book with Ali Mobile & Repair in Ringwood.`
+        : isAppleWatchModelPage
+        ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
         : isPhoneModelPage
         ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
         : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
@@ -194,7 +209,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
-  const isEnhancedPhoneModelPage = isPhoneModelPage;
+  const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
+  const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
+  const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
+  const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage;
   const screenRepair = getRepairBySlugs(repairTypes, ["screen-replacement", "screen-repair"]);
   const batteryRepair = getRepairBySlugs(repairTypes, ["battery-replacement", "battery-service", "battery-repair"]);
   const chargingRepair = getRepairBySlugs(repairTypes, ["charging-port-replacement", "charging-port-repair", "charging-port"]);
@@ -1086,12 +1104,205 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm part availability before you travel.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const iPadHeroCards = [
+    {
+      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
+      body: startingPrice
+        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the available iPad repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+    },
+    {
+      title: "Exact iPad generation matters",
+      body: "Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
+    },
+    {
+      title: "Frame and charging checks first",
+      body: "We inspect frame bend, touch response, charging behaviour and visible impact signs before confirming the practical iPad repair path.",
+    },
+  ];
+  const iPadQuickAnswers = [
+    {
+      number: "01",
+      title: "How much does the repair cost?",
+      body: startingPrice
+        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : "Choose the repair option for this exact iPad model to see the current price or quote requirement.",
+    },
+    hasScreenRepair
+      ? {
+          number: "02",
+          title: "What affects iPad screen repair?",
+          body: "iPad screen repair depends on the exact generation, glass or display construction, frame condition, button or camera-area damage, and whether the correct part is available.",
+        }
+      : null,
+    hasBatteryRepair
+      ? {
+          number: "03",
+          title: "How is battery service confirmed?",
+          body: "iPad battery service depends on the exact model, battery availability, charging behaviour and device condition. We confirm the likely repair path before work begins.",
+        }
+      : null,
+    {
+      number: "04",
+      title: "How do I identify the model?",
+      body: "Check Settings → General → About, or look for the A-number printed on the rear casing. Bring the iPad in if you are unsure.",
+    },
+    {
+      number: "05",
+      title: "Should I back up first?",
+      body: "Standard hardware repairs normally do not require access to personal content, but backing up important data before repair is recommended because damaged devices carry data risk.",
+    },
+    hasWarrantyRepair
+      ? {
+          number: "06",
+          title: "What warranty is included?",
+          body: "Eligible iPad repairs include a 6-month warranty on the fitted part and workmanship. It does not cover new physical damage, bending, liquid damage, misuse or unrelated faults.",
+        }
+      : null,
+    {
+      number: "07",
+      title: "Can charging symptoms be another fault?",
+      body: "Yes. iPad charging issues can come from the cable, charger, USB-C or Lightning port, battery, board-level fault, case pressure or impact damage.",
+    },
+    {
+      number: "08",
+      title: "Does frame bend matter?",
+      body: "Yes. A bent iPad frame can stop a new screen from sitting flush or sealing correctly. We inspect the frame before confirming the repair option.",
+    },
+  ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const iPadProcessSteps = [
+    { number: "01", title: "Confirm exact iPad model", body: "We identify the family, generation, screen size and A-number where possible so the repair path matches the correct part." },
+    { number: "02", title: "Inspect frame and fault signs", body: "We check glass, display, touch response, charging behaviour, buttons, camera area, frame pressure and liquid or impact signs." },
+    { number: "03", title: "Confirm quote and part path", body: "The available repair option, part availability, price and expected timing are explained before work begins." },
+    { number: "04", title: "Complete the selected repair", body: "The selected iPad repair is completed using the appropriate part and method for that exact model." },
+    { number: "05", title: "Retest before handover", body: "Relevant display, touch, charging, camera, speaker, microphone, button and Apple Pencil interaction checks are repeated where practical." },
+  ];
+  const iPadServiceNotes = [
+    { title: "Generation, size and A-number", body: "iPad compatibility can change between standard iPad, iPad Air, iPad Pro and iPad mini models. The A-number helps confirm the correct part path." },
+    { title: "Screen, frame and charging diagnosis", body: "Bent corners, case pressure, USB-C or Lightning wear and impact around the camera or button area can change the repair scope." },
+    { title: "Data and testing", body: "Standard hardware repairs normally do not require access to personal content, but backing up the iPad where possible is recommended before repair." },
+    { title: "Approval before extra work", body: "If additional damage changes the repair method, price or expected result, we explain it and obtain approval before carrying out extra work." },
+  ];
+  const iPadFaqs = [
+    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact iPad model to see the current price or quote requirement." },
+    { question: "How do I identify the exact iPad model?", answer: "Check Settings → General → About, or look for the A-number printed on the rear casing of your iPad." },
+    hasScreenRepair ? { question: `What affects ${modelName} screen replacement?`, answer: "Frame bend, touch response, glass/display construction, button or camera-area damage and part availability can all affect the final repair path." } : null,
+    hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We confirm availability and condition before repair." } : null,
+    { question: "Is my data safe during iPad repair?", answer: "Standard hardware repairs normally do not require access to personal content. However, backing up the iPad where possible is recommended because damaged devices carry data risk." },
+    { question: "Do bent frames affect iPad screen replacement?", answer: "Yes. Bent frames can prevent a new screen from sitting flush and sealing correctly. We inspect the frame condition before confirming the repair option." },
+    hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and our workmanship. It does not cover new physical damage, liquid damage, bending, misuse or unrelated faults." } : null,
+    { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm iPad part availability before you travel." },
+  ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const macBookHeroCards = [
+    {
+      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
+      body: startingPrice
+        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the available MacBook repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+    },
+    {
+      title: "A-number and year matter",
+      body: "MacBook repair compatibility, parts selection and quote accuracy depend on the exact model, year, chip generation and A-number.",
+    },
+    {
+      title: "Parts and diagnosis first",
+      body: "Many MacBook parts commonly take around one to two days to obtain, then repair timing is confirmed once the correct part arrives.",
+    },
+  ];
+  const macBookQuickAnswers = [
+    { number: "01", title: "How much does the repair cost?", body: startingPrice ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact MacBook model to see the current price or quote requirement." },
+    hasScreenRepair ? { number: "02", title: "What affects display repair?", body: "MacBook display repair can depend on the exact A-number, lid assembly, hinge condition, liquid damage signs, camera area and whether the correct display assembly is available." } : null,
+    hasBatteryRepair ? { number: "03", title: "What affects battery service?", body: "MacBook battery service depends on the exact model, battery condition, charging response, trackpad behaviour and whether top-case related parts are involved." } : null,
+    { number: "04", title: "How do I identify the model?", body: "Check About This Mac and the A-number printed on the underside. Bring the MacBook and charger if you are unsure." },
+    { number: "05", title: "Should I back up first?", body: "Yes. If the MacBook still powers on, back up important data before bringing it in for battery, display, keyboard or liquid-damage assessment." },
+    hasWarrantyRepair ? { number: "06", title: "What warranty is included?", body: "Eligible MacBook repairs include a 6-month warranty on the fitted part and workmanship. It does not cover liquid damage, new impact damage, misuse or unrelated faults." } : null,
+    { number: "07", title: "Could charging be another fault?", body: "Yes. Charging symptoms can involve the charger, USB-C port, battery, trackpad, top case, internal connectors or board-level faults." },
+    { number: "08", title: "Is keyboard work separate?", body: "MacBook keyboard work commonly uses a top case assembly, and the replacement top case does not automatically include unrelated parts unless quoted and approved." },
+  ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const macBookProcessSteps = [
+    { number: "01", title: "Confirm exact MacBook", body: "We confirm the model, year, chip generation and A-number so the quote matches the correct part path." },
+    { number: "02", title: "Inspect symptoms and related parts", body: "We check display behaviour, charging response, keyboard, trackpad, battery condition, liquid signs and visible impact damage where practical." },
+    { number: "03", title: "Confirm quote and timing", body: "Part availability, price and expected timing are explained before work begins." },
+    { number: "04", title: "Complete approved repair", body: "The selected MacBook repair is completed using the appropriate part and method for that exact model." },
+    { number: "05", title: "Retest before handover", body: "Relevant display, keyboard, trackpad, charging, battery, camera, speaker, microphone and startup checks are repeated before handover where practical." },
+  ];
+  const macBookServiceNotes = [
+    { title: "A-number and chip generation", body: "MacBook Air and MacBook Pro parts can change by A-number, year, screen size and Intel or Apple Silicon generation." },
+    { title: "Battery, keyboard and top case", body: "Battery, keyboard, trackpad and top-case repairs may be related on some models, but each repair path is quoted and approved before work starts." },
+    { title: "Data and charger testing", body: "Back up important data where possible. Bring the charger if charging or power behaviour is part of the fault." },
+    { title: "Liquid or board-level faults", body: "Liquid-damaged or severely damaged MacBooks may require detailed diagnosis before we can confirm whether repair is practical." },
+  ];
+  const macBookFaqs = [
+    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact MacBook model to see the current price or quote requirement." },
+    { question: "Why do I need the exact MacBook model?", answer: "MacBook repair compatibility, parts selection and quote accuracy depend on the exact model, year, chip generation and A-number." },
+    hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery replacement is available for this model, choose Battery Replacement below for the current price or quote path. We check battery condition and charging response before repair." } : null,
+    hasScreenRepair ? { question: `What affects ${modelName} screen repair?`, answer: "Display assembly compatibility, lid-angle symptoms, hinge condition, camera area, liquid signs and impact damage can all affect the repair path." } : null,
+    { question: "How long do MacBook parts usually take to arrive?", answer: "Many MacBook parts commonly take around one to two days to obtain. We confirm timing after checking the exact model and part path." },
+    { question: "Should I back up my MacBook before repair?", answer: "Yes. If the MacBook still powers on, back up important data before bringing it in for service." },
+    hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and workmanship. It does not cover liquid damage, new physical damage, misuse or unrelated faults." } : null,
+    { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm the likely MacBook part path before you travel." },
+  ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const appleWatchHeroCards = [
+    {
+      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
+      body: startingPrice
+        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the available Apple Watch repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+    },
+    {
+      title: "Series, SE or Ultra first",
+      body: "Apple Watch repair compatibility depends on the exact Series, SE or Ultra model, case size, housing condition and visible fault signs.",
+    },
+    {
+      title: "Quote before opening",
+      body: "We confirm the practical repair path and quote before opening the watch. Same-day completion is not promised for Apple Watch repairs.",
+    },
+  ];
+  const appleWatchQuickAnswers = [
+    { number: "01", title: "How much does the repair cost?", body: startingPrice ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact Apple Watch model to see the current price or quote requirement." },
+    hasScreenRepair ? { number: "02", title: "What affects screen repair?", body: "Apple Watch screen repair depends on the exact model, case size, display condition, housing damage and part availability." } : null,
+    hasBatteryRepair ? { number: "03", title: "What affects battery service?", body: "Apple Watch battery service depends on runtime symptoms, charging response, model, seal condition and part availability." } : null,
+    { number: "04", title: "Can it be same-day?", body: "We do not promise same-day Apple Watch completion. Timing depends on the exact model, condition, parts availability and repair queue." },
+    { number: "05", title: "Will it stay water-resistant?", body: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
+    hasWarrantyRepair ? { number: "06", title: "What warranty is included?", body: "Eligible Apple Watch repairs include a 6-month warranty on the fitted part and workmanship. It does not cover new impact damage, liquid exposure, misuse or unrelated faults." } : null,
+    { number: "07", title: "Can no-power be another fault?", body: "Yes. No-power or charging symptoms can involve the battery, charging hardware, display, internal connectors or board-level faults." },
+    { number: "08", title: "Is repair worth it?", body: "That depends on the exact model, device condition, repair quote and replacement-device value. We explain the practical repair path after assessment." },
+  ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const appleWatchProcessSteps = [
+    { number: "01", title: "Confirm exact watch model", body: "We confirm the Series, SE or Ultra model, case size and reported fault before quoting." },
+    { number: "02", title: "Inspect condition", body: "We inspect display, housing, seal condition, charging response and visible impact or liquid signs where practical." },
+    { number: "03", title: "Confirm quote and scope", body: "We confirm the practical repair option, part availability, price and expected timing before opening the watch." },
+    { number: "04", title: "Complete approved repair", body: "The selected Apple Watch repair is completed using the appropriate part and method for that exact model." },
+    { number: "05", title: "Retest and explain limits", body: "We retest key watch functions where practical and explain water-resistance limitations before handover." },
+  ];
+  const appleWatchServiceNotes = [
+    { title: "Model, case size and condition", body: "Apple Watch parts and repair paths vary by Series, SE, Ultra, case size and housing condition." },
+    { title: "Seal and water-resistance limits", body: "After watch opening, water resistance cannot be guaranteed. Resealing does not restore factory water-resistance certification." },
+    { title: "Battery and charging symptoms", body: "Runtime, no-power and charging symptoms can have several causes, so we inspect before confirming a battery or charging repair." },
+    { title: "Quote before service", body: "Repair scope, price and timing are confirmed before opening the watch or ordering a specific part." },
+  ];
+  const appleWatchFaqs = [
+    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact Apple Watch model to see the current price or quote requirement." },
+    { question: "How do I confirm the exact Apple Watch model?", answer: "Check the Watch app, device settings, or the case size and model details on the watch. Bring it in if you are unsure." },
+    hasScreenRepair ? { question: `What affects ${modelName} screen repair?`, answer: "Display condition, housing damage, case size, seal condition and part availability can all affect the practical repair path." } : null,
+    hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We check runtime and charging response first." } : null,
+    { question: "Do you offer same-day Apple Watch repairs?", answer: "We do not promise same-day completion. Timing depends on the exact model, condition, parts availability and repair queue." },
+    { question: "Will my Apple Watch remain water-resistant?", answer: "Factory water resistance cannot be guaranteed after opening or repair. Adhesive replacement does not restore guaranteed factory water-resistance certification." },
+    hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and workmanship. It does not cover liquid exposure, new impact damage, misuse or unrelated faults." } : null,
+    { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm whether assessment or part ordering is the best next step." },
+  ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const enhancedHeroCards = isSamsungModelPage
     ? samsungHeroCards
     : isGooglePixelModelPage
     ? googlePixelHeroCards
     : isOppoModelPage
     ? oppoHeroCards
+    : isIPadModelPage
+    ? iPadHeroCards
+    : isMacBookModelPage
+    ? macBookHeroCards
+    : isAppleWatchModelPage
+    ? appleWatchHeroCards
     : isIPhoneModelPage
     ? iPhoneHeroCards
     : genericPhoneHeroCards;
@@ -1101,6 +1312,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? googlePixelQuickAnswers
     : isOppoModelPage
     ? oppoQuickAnswers
+    : isIPadModelPage
+    ? iPadQuickAnswers
+    : isMacBookModelPage
+    ? macBookQuickAnswers
+    : isAppleWatchModelPage
+    ? appleWatchQuickAnswers
     : isIPhoneModelPage
     ? iPhoneQuickAnswers
     : genericPhoneQuickAnswers;
@@ -1110,6 +1327,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? googlePixelProcessSteps
     : isOppoModelPage
     ? oppoProcessSteps
+    : isIPadModelPage
+    ? iPadProcessSteps
+    : isMacBookModelPage
+    ? macBookProcessSteps
+    : isAppleWatchModelPage
+    ? appleWatchProcessSteps
     : isIPhoneModelPage
     ? iPhoneProcessSteps
     : genericPhoneProcessSteps;
@@ -1119,6 +1342,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? googlePixelServiceNotes
     : isOppoModelPage
     ? oppoServiceNotes
+    : isIPadModelPage
+    ? iPadServiceNotes
+    : isMacBookModelPage
+    ? macBookServiceNotes
+    : isAppleWatchModelPage
+    ? appleWatchServiceNotes
     : isIPhoneModelPage
     ? iPhoneServiceNotes
     : genericPhoneServiceNotes;
@@ -1128,6 +1357,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? googlePixelFaqs
     : isOppoModelPage
     ? oppoFaqs
+    : isIPadModelPage
+    ? iPadFaqs
+    : isMacBookModelPage
+    ? macBookFaqs
+    : isAppleWatchModelPage
+    ? appleWatchFaqs
     : isIPhoneModelPage
     ? iPhoneFaqs
     : genericPhoneFaqs;
@@ -1137,6 +1372,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "Google Pixel"
     : isOppoModelPage
     ? "Oppo"
+    : isIPadModelPage
+    ? "iPad"
+    : isMacBookModelPage
+    ? "MacBook"
+    : isAppleWatchModelPage
+    ? "Apple Watch"
     : isIPhoneModelPage
     ? "iPhone"
     : brandName;
@@ -1146,6 +1387,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "Google Pixel Repair Menu"
     : isOppoModelPage
     ? "Oppo Repair Menu"
+    : isIPadModelPage
+    ? "iPad Repair Menu"
+    : isMacBookModelPage
+    ? "MacBook Repair Menu"
+    : isAppleWatchModelPage
+    ? "Apple Watch Repair Menu"
     : isIPhoneModelPage
     ? "iPhone Repair Menu"
     : `${brandName} Repair Menu`;
@@ -1155,14 +1402,28 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "Google Pixel repair"
     : isOppoModelPage
     ? "Oppo repair"
+    : isIPadModelPage
+    ? "iPad repair"
+    : isMacBookModelPage
+    ? "MacBook repair"
+    : isAppleWatchModelPage
+    ? "Apple Watch repair"
     : isIPhoneModelPage
     ? "iPhone repair"
     : `${brandName} repair`;
-  const enhancedRepairPhrase = isIPhoneModelPage || isOppoModelPage
+  const enhancedRepairPhrase = isIPhoneModelPage || isOppoModelPage || isIPadModelPage || isAppleWatchModelPage
     ? `an ${enhancedRepairNoun}`
-    : isSamsungModelPage || isGooglePixelModelPage
+    : isSamsungModelPage || isGooglePixelModelPage || isMacBookModelPage
     ? `a ${enhancedRepairNoun}`
     : `your ${modelName} repair`;
+  const EnhancedBadgeIcon = isIPadModelPage
+    ? Tablet
+    : isMacBookModelPage
+    ? Laptop
+    : isAppleWatchModelPage
+    ? Watch
+    : Smartphone;
+  const screenOptionsLabel = isMacBookModelPage ? "display options" : "screen options";
   const nonIPhoneScreenNote = isGooglePixelModelPage
     ? {
         kicker: "Pixel service notes",
@@ -1182,6 +1443,36 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         firstBody: "Find, Reno, A series and other Oppo models can use different display assemblies and repair methods.",
         secondTitle: "Confirmed before repair",
         secondBody: "We explain the available screen option, likely fit, price and timing before work begins.",
+      }
+    : isIPadModelPage
+    ? {
+        kicker: "iPad service notes",
+        title: "Display, touch, frame and model-specific parts",
+        body: "iPad screen repairs vary by family, generation, screen size and A-number. Touch response, frame bend, button area and front camera condition can affect the correct repair path.",
+        firstTitle: "Exact iPad model matters",
+        firstBody: "iPad, iPad Air, iPad Pro and iPad mini models can use different glass, digitiser and display assemblies.",
+        secondTitle: "Confirmed before repair",
+        secondBody: "We explain the available repair option, likely fit, price and timing before work begins.",
+      }
+    : isMacBookModelPage
+    ? {
+        kicker: "MacBook service notes",
+        title: "Display assembly, hinge and A-number checks",
+        body: "MacBook screen repairs vary by A-number, year, chip generation and display assembly. Lid angle, hinge condition, camera area and liquid signs can affect the correct repair path.",
+        firstTitle: "Exact MacBook model matters",
+        firstBody: "MacBook Air and MacBook Pro models can use different display assemblies across years, screen sizes and chip generations.",
+        secondTitle: "Confirmed before repair",
+        secondBody: "We explain the available display option, likely fit, price and timing before work begins.",
+      }
+    : isAppleWatchModelPage
+    ? {
+        kicker: "Apple Watch service notes",
+        title: "Display, housing and seal-condition checks",
+        body: "Apple Watch repairs vary by Series, SE or Ultra model, case size, display condition and housing damage. Seal condition can affect the practical repair path.",
+        firstTitle: "Exact Apple Watch model matters",
+        firstBody: "Series, SE and Ultra models can use different display assemblies, case sizes and repair methods.",
+        secondTitle: "Confirmed before opening",
+        secondBody: "We confirm the practical repair option, quote and timing before opening the watch.",
       }
     : {
         kicker: isSamsungModelPage ? "Samsung service notes" : `${brandName} service notes`,
@@ -1206,7 +1497,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           <div className="repair-tech-hero-copy">
             <BackButton fallbackHref={`/repairs/${categorySlug}/${brandSlug}`} />
             <span className="repair-hero-badge">
-              <Smartphone size={16} strokeWidth={2.4} aria-hidden="true" />
+              <EnhancedBadgeIcon size={16} strokeWidth={2.4} aria-hidden="true" />
               {enhancedMenuLabel}
             </span>
             <h1 id="model-repair-heading">{modelName} repair options</h1>
@@ -1342,9 +1633,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               <section className="repair-content-band" aria-labelledby="model-screen-options-heading">
                 <div className="repair-section-header">
                   <span>Screen options</span>
-                  <h2 id="model-screen-options-heading">Available screen options for this {enhancedBrandLabel} model</h2>
+                  <h2 id="model-screen-options-heading">Available {screenOptionsLabel} for this {enhancedBrandLabel} model</h2>
                   <p>
-                    Choose Screen Replacement below for the detailed repair page. This model page summarises the available display choices and {isIPhoneModelPage ? "the calibration notes" : "the model-specific repair notes"} that matter before you book.
+                    Choose the matching repair below for the detailed repair page. This model page summarises the available display choices and {isIPhoneModelPage ? "the calibration notes" : "the model-specific repair notes"} that matter before you book.
                   </p>
                 </div>
                 <div className="repair-signal-grid">
