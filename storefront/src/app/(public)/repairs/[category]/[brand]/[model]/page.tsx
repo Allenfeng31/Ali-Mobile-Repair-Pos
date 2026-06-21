@@ -8,6 +8,7 @@ import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
 import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
 import ScrollReveal from "@/components/ScrollReveal";
+import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
 
 export const revalidate = 86400;
@@ -1929,6 +1930,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </ScrollReveal>
         </>
       )}
+      <FloatingJumpCTA targetId="repair-options" label="Choose Your Repair" />
     </main>
   );
 }

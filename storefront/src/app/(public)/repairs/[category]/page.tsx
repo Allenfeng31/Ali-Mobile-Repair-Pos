@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import LivePricingGrid from '@/components/services/LivePricingGrid';
 import ScrollReveal from '@/components/ScrollReveal';
+import FloatingJumpCTA from '@/components/FloatingJumpCTA';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
@@ -432,7 +433,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         </section>
 
         <section
-          id={isLaptop ? 'laptop-brands' : undefined}
+          id={isLaptop ? 'laptop-brands' : 'brands-list'}
           className="repair-content-band"
           aria-labelledby="popular-brands-heading"
         >
@@ -920,6 +921,11 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             </Link>
           </div>
         </ScrollReveal>
+
+        <FloatingJumpCTA
+          targetId={isLaptop ? 'laptop-brands' : 'brands-list'}
+          label="Choose Your Brand"
+        />
       </main>
     </>
   );

@@ -8,6 +8,7 @@ import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
 import HubRepairResultsSection from "@/components/repair-results/HubRepairResultsSection";
+import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { type RepairResultDeviceCategory } from "@/lib/repair-results";
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
@@ -113,6 +114,22 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isAppleWatchHub = categorySlug === "watch" && brandSlug === "apple";
   const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
   const isPhoneHub = categorySlug === "phone";
+  const floatingJumpLabel =
+    categorySlug === "phone" && brandSlug === "iphone"
+      ? "Choose Your iPhone"
+      : categorySlug === "phone" && brandSlug === "samsung"
+      ? "Choose Your Samsung"
+      : categorySlug === "phone" && ["google", "google-pixel"].includes(brandSlug)
+      ? "Choose Your Google Pixel"
+      : categorySlug === "phone" && brandSlug === "oppo"
+      ? "Choose Your Oppo"
+      : categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug)
+      ? "Choose Your iPad"
+      : categorySlug === "laptop" && brandSlug === "macbook"
+      ? "Choose Your MacBook"
+      : categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug)
+      ? "Choose Your Apple Watch"
+      : "Choose Your Model";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
   const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
@@ -887,6 +904,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </section>
         </>
       )}
+      <FloatingJumpCTA targetId="models-list" label={floatingJumpLabel} />
     </main>
   );
 }
