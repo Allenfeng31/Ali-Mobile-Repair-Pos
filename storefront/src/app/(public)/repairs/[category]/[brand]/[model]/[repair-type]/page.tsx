@@ -3307,15 +3307,31 @@ function getRepairTypeSeoPocket(params: {
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
   const params: { category: string; brand: string; model: string; 'repair-type': string }[] = [];
+  const seen = new Set<string>();
 
   for (const brand of catalog.brands) {
     for (const model of brand.models) {
-      for (const repair of REPAIR_TYPES) {
+      for (const repair of model.repairTypes) {
+        if (!repair.slug || !repair.slug.trim()) continue;
+
+        const publicRepairSlug = getPublicRepairSlug(brand.category, brand.slug, repair.slug);
+        if (!publicRepairSlug || !publicRepairSlug.trim()) continue;
+
+        const dedupeKey = [
+          brand.category,
+          brand.slug,
+          model.slug,
+          publicRepairSlug,
+        ].join("|");
+
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+
         params.push({
           category: brand.category,
           brand: brand.slug,
           model: model.slug,
-          'repair-type': repair.slug
+          'repair-type': publicRepairSlug,
         });
       }
     }
