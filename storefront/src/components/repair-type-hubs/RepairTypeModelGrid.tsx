@@ -20,19 +20,24 @@ interface SearchResultLink extends RepairTypeHubModelLink {
   brand: string;
 }
 
-type SortableModelLink = RepairTypeHubModelLink & {
-  repairTypes: { slug: string; name: string; price: number }[];
-};
-
 const SEARCH_RESULT_LIMIT = 20;
 
 function sortModelLinks<T extends RepairTypeHubModelLink>(models: T[]): T[] {
   const sortable = models.map((model) => ({
-    ...model,
+    model: model.model,
+    slug: model.modelSlug,
     repairTypes: [],
-  })) as Array<T & SortableModelLink>;
+  }));
 
-  return smartSortModels(sortable) as Array<T>;
+  const sorted = smartSortModels(sortable);
+  const modelsBySlug = new Map(
+    models.map((model) => [model.modelSlug, model] as const),
+  );
+
+  return sorted.flatMap((item) => {
+    const original = modelsBySlug.get(item.slug);
+    return original ? [original] : [];
+  });
 }
 
 function sortSearchResults(results: SearchResultLink[]) {
