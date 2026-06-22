@@ -157,6 +157,8 @@ const nextConfig: NextConfig = {
       // 9. SAFE LEGACY REDIRECTS (Tablet / iPad)
       { source: '/repairs/tablets/apple/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
       { source: '/repairs/tablets/ipad/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
+      { source: '/repairs/tablet/apple', destination: '/repairs/tablet/ipad', permanent: true },
+      { source: '/repairs/tablet/apple/:model', destination: '/repairs/tablet/ipad/:model', permanent: true },
       { source: '/repairs/tablet/apple/:model/:repairType', destination: '/repairs/tablet/ipad/:model/:repairType', permanent: true },
       // 9.1 ALIAS REDIRECTS (iPad Pro 12.9 Naked Model)
       { source: '/repairs/tablet/ipad/ipad-pro-12-9/:repairType', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-3rd-generation/:repairType', permanent: true },
@@ -165,6 +167,7 @@ const nextConfig: NextConfig = {
       { source: '/repairs/watches/apple/:model/:repairType', destination: '/repairs/watch/apple/:model/:repairType', permanent: true },
       { source: '/repairs/smart-watch/apple/:model/:repairType', destination: '/repairs/watch/apple/:model/:repairType', permanent: true },
       // 10.1 FIX WRONG DESTINATIONS (apple-watch -> apple)
+      { source: '/repairs/watch/apple-watch', destination: '/repairs/watch/apple', permanent: true },
       { source: '/repairs/watch/apple-watch/:model', destination: '/repairs/watch/apple/:model', permanent: true },
       { source: '/repairs/watch/apple-watch/:model/:repairType', destination: '/repairs/watch/apple/:model/:repairType', permanent: true },
       // 10.2 ALIAS REDIRECTS (Apple Watch Ultra 1/2 Naked Models)
