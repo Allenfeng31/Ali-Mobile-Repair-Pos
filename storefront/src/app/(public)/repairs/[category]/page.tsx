@@ -80,15 +80,15 @@ interface CategoryPageProps {
 const CATEGORY_SEO_DATA: Record<string, any> = {
   phone: {
     metadata: {
-      title: 'Phone Repair Ringwood | Fast Screen and Battery Fixes | Ali Mobile & Repair',
-      description: 'Phone repairs in Ringwood for iPhone, Samsung, Google Pixel, Oppo, and more. Same-day options may be available for common screen and battery repairs when parts are in stock.',
+      title: 'Mobile Phone Repair Services Ringwood | Brands & Models | Ali Mobile',
+      description: 'Explore mobile phone repair services for supported iPhone, Samsung Galaxy, Google Pixel, Oppo and other models. Compare screen, battery, charging, camera and back housing repair options, then confirm pricing and parts availability with Ali Mobile & Repair in Ringwood.',
     },
     hero: {
       pillType: 'primary',
       pillText: 'Phone Specialist',
-      title: 'Phone & iPhone Repair in Ringwood, Melbourne',
-      intro1: 'At Ali Mobile Repair, we specialize in high-quality iPhone and Android screen replacements. Centrally located in Ringwood, we are the go-to repair shop for the Eastern Suburbs including Croydon, Mitcham, Heathmont, and Wantirna.',
-      intro2: 'Most common screen and battery repairs can be completed the same day when parts are in stock. We confirm timing after checking the model, part availability, repair queue, and device condition.',
+      title: 'Mobile Phone Repair Services in Ringwood',
+      intro1: 'Select your mobile phone brand and exact model to view our supported repair pathways. We handle screen, battery, charging port, camera, and back housing repairs for supported devices.',
+      intro2: 'Check available service options and pricing for your specific phone model, then confirm parts availability with Ali Mobile & Repair in Ringwood before your visit.',
     },
     schema: {
       serviceName: 'Phone Repair Services Ringwood',
@@ -126,21 +126,21 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   tablet: {
     metadata: {
       title: 'iPad & Tablet Repair Ringwood | Battery & Screen Fixes | Ali Mobile & Repair',
-      description: 'Tablet repairs in Ringwood for iPad and Samsung Tab. Same-day options may be available for common repairs when parts are in stock.',
+      description: 'Tablet repair services in Ringwood for supported iPad and Samsung Galaxy Tab models. Explore screen, battery, charging and diagnostic options, then confirm the exact model, pricing, parts availability and repair timing with Ali Mobile & Repair.',
     },
     hero: {
       pillType: 'primary',
       pillText: 'Tablet Specialist',
       title: 'Professional Tablet & iPad Repairs in Ringwood',
       intro1: 'From shattered iPad touch glasses to unresponsive Samsung Tabs batteries, we provide expert hardware repairs for the Eastern Suburbs including Croydon, Mitcham, and Wantirna.',
-      intro2: 'Common screen and battery repairs may be completed the same day when parts are in stock. We confirm timing after checking the model, part availability, repair queue, and device condition.',
+      intro2: 'We confirm repair timing after checking the exact tablet model, part availability, repair queue, and device condition.',
     },
     schema: {
       serviceName: 'Tablet & iPad Repair Services Ringwood',
       description: "Professional iPad and tablet repair services in Ringwood, Melbourne. Expert screen and battery replacements for supported models.",
     },
     features: [
-      { t: "Same-day options when parts are in stock", d: "Timing is confirmed after model, part, and queue checks." },
+      { t: "Parts availability & timing checks", d: "Timing is confirmed after model, part, and repair queue checks." },
       { t: "Quality replacement batteries", d: "Selected for compatible tablet models and confirmed before repair." },
       { t: "Detailed diagnostic checks prior to repair", d: "" },
       { t: "180-Day Comprehensive Warranty Coverage", d: "" }
@@ -329,6 +329,27 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
       />
 
       <main className="repair-page-shell">
+        <nav className="repair-breadcrumb" aria-label="breadcrumb">
+          <Link href="/">Home</Link>
+          <span>/</span>
+          <Link href="/repairs">Repairs</Link>
+          <span>/</span>
+          <strong>{formatDynamicParam(category)} Repair</strong>
+        </nav>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobile.com.au/" },
+                { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobile.com.au/repairs" },
+                { "@type": "ListItem", "position": 3, "name": `${formatDynamicParam(category)} Repair`, "item": `https://www.alimobile.com.au/repairs/${category}` }
+              ]
+            })
+          }}
+        />
         <section
           className={`repair-tech-hero repair-tech-hero-${category}`}
           aria-labelledby="category-repair-heading"

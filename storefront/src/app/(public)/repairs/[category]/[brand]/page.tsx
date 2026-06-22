@@ -62,7 +62,10 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const canonicalPath = `/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`;
   const isAppleWatch = resolvedParams.category === "watch" && resolvedParams.brand === "apple";
   const isIPad = resolvedParams.category === "tablet" && resolvedParams.brand === "ipad";
+  const isSamsungTablet = resolvedParams.category === "tablet" && resolvedParams.brand === "samsung";
   const isPhone = resolvedParams.category === "phone";
+
+  const isMacBookHub = resolvedParams.category === "laptop" && resolvedParams.brand === "macbook";
 
   let title, description;
 
@@ -71,11 +74,17 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     title = phoneContent.metadata.title;
     description = phoneContent.metadata.description;
   } else if (isAppleWatch) {
-    title = 'Apple Watch Repair Services Ringwood | Fast & Reliable | Ali Mobile';
+    title = 'Apple Watch Repair Services in Ringwood | Models & Repair Options | Ali Mobile';
     description = 'Expert Apple Watch repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.';
   } else if (isIPad) {
-    title = 'iPad Repair Services in Ringwood | Fast & Reliable | Ali Mobile';
+    title = 'iPad Repair Services in Ringwood | Models & Repair Options | Ali Mobile';
     description = 'Expert iPad repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact iPad family, generation, screen size or A-number for compatible repair options and current pricing.';
+  } else if (isSamsungTablet) {
+    title = 'Samsung Galaxy Tab Repair Services | Models & Repair Options | Ali Mobile';
+    description = 'Explore repair options for supported Samsung Galaxy Tab models, including screen, battery, charging and diagnostic services. Confirm the exact model, parts availability, pricing and repair timing with Ali Mobile & Repair in Ringwood.';
+  } else if (isMacBookHub) {
+    title = 'MacBook Repair in Ringwood | Ali Mobile & Repair';
+    description = 'MacBook repair services in Ringwood for supported screen, battery, keyboard or top case, charging and diagnostic issues. Visit Ali Mobile & Repair at Ringwood Square to confirm the model, parts availability and suitable repair options.';
   } else {
     title = `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
     description = `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`;
@@ -227,8 +236,25 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         <span>/</span>
         <Link href="/repairs">Repairs</Link>
         <span>/</span>
-        <strong>{brandName}</strong>
+        <Link href={`/repairs/${categorySlug}`}>{formatDynamicParam(categorySlug)} Repair</Link>
+        <span>/</span>
+        <strong>{brandName} Repair</strong>
       </nav>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.alimobile.com.au/" },
+              { "@type": "ListItem", "position": 2, "name": "Repairs", "item": "https://www.alimobile.com.au/repairs" },
+              { "@type": "ListItem", "position": 3, "name": `${formatDynamicParam(categorySlug)} Repair`, "item": `https://www.alimobile.com.au/repairs/${categorySlug}` },
+              { "@type": "ListItem", "position": 4, "name": `${brandName} Repair`, "item": `https://www.alimobile.com.au/repairs/${categorySlug}/${brandSlug}` }
+            ]
+          })
+        }}
+      />
 
       <section
         className="repair-tech-hero repair-tech-hero-compact"
@@ -243,7 +269,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </span>
           <h1 id="category-repair-heading">
             {isMacBookHub
-              ? "MacBook Repair Services in Ringwood"
+              ? "MacBook Repair in Ringwood"
               : isAppleWatchHub
               ? "Apple Watch Repair Services in Ringwood"
               : isIPadHub
@@ -252,7 +278,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </h1>
           <p>
             {isMacBookHub
-              ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1. We confirm your repair path before any work begins.'
+              ? 'Professional MacBook repair in Ringwood Square. We support screen, battery, keyboard/top case, charging, and diagnostic services. Use your model name or A-number below to find your MacBook and view repair options. Timing depends on parts availability and exact model confirmation.'
               : isAppleWatchHub
               ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.'
               : isIPadHub

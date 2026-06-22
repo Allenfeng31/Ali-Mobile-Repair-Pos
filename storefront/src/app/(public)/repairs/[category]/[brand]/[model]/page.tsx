@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
@@ -138,10 +139,15 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
-  const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage;
+  const isSamsungTabletModelPage = categorySlug === "tablet" && brandSlug === "samsung";
+  const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage || isSamsungTabletModelPage;
 
   return {
-    title: isEnhancedPhoneModelPage
+    title: isMacBookModelPage
+      ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+      : isSamsungTabletModelPage
+      ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+      : isEnhancedPhoneModelPage
       ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking | Ali Mobile`
       : `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
     description: isIPhoneModelPage
@@ -158,6 +164,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? `Choose the available MacBook repairs for ${modelName}, view current pricing, confirm the exact model or A-number, and book with Ali Mobile & Repair in Ringwood.`
       : isAppleWatchModelPage
       ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
+      : isSamsungTabletModelPage
+      ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
       : isPhoneModelPage
       ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
       : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
@@ -165,7 +173,11 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       canonical: canonicalPath,
     },
     openGraph: {
-      title: isEnhancedPhoneModelPage
+      title: isMacBookModelPage
+        ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+        : isSamsungTabletModelPage
+        ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+        : isEnhancedPhoneModelPage
         ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking`
         : `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
       description: isIPhoneModelPage
@@ -182,6 +194,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `Choose the available MacBook repairs for ${modelName}, view current pricing, confirm the exact model or A-number, and book with Ali Mobile & Repair in Ringwood.`
         : isAppleWatchModelPage
         ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
+        : isSamsungTabletModelPage
+        ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
         : isPhoneModelPage
         ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
         : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
@@ -1575,6 +1589,17 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           modelSlug={modelSlug}
           modelName={modelName}
         />
+        {isMacBookModelPage && (
+          <div className="mt-8 text-center">
+            <Link
+              href="/repairs/laptop/macbook"
+              className="inline-flex items-center gap-2 text-[0.95rem] font-bold text-slate-600 hover:text-blue-600 transition-colors"
+            >
+              <ArrowRight size={16} strokeWidth={2.5} aria-hidden="true" className="rotate-180" />
+              View all MacBook repair models and service options
+            </Link>
+          </div>
+        )}
       </section>
 
       {isEnhancedPhoneModelPage ? (
