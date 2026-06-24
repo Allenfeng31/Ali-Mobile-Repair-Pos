@@ -1,7 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import styles from "./AboutUs.module.css";
+
+export const metadata: Metadata = {
+  title: "About Ali Mobile & Repair | Ringwood Repair Team",
+  description:
+    "Learn about Ali Mobile & Repair in Ringwood Square, our repair approach, No Fix, No Charge policy, and how we help local customers with phones, tablets, and laptops.",
+  alternates: {
+    canonical: "/about-us",
+  },
+  openGraph: {
+    title: "About Ali Mobile & Repair | Ringwood Repair Team",
+    description:
+      "Learn about Ali Mobile & Repair in Ringwood Square, our repair approach, No Fix, No Charge policy, and how we help local customers with phones, tablets, and laptops.",
+    url: "https://www.alimobile.com.au/about-us",
+    type: "website",
+    locale: "en_AU",
+    siteName: "Ali Mobile & Repair",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Ali Mobile & Repair | Ringwood Repair Team",
+    description:
+      "Learn about Ali Mobile & Repair in Ringwood Square, our repair approach, No Fix, No Charge policy, and how we help local customers with phones, tablets, and laptops.",
+  },
+};
 
 const proofPoints = [
   { value: "10+", label: "Years Experience" },
