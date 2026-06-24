@@ -68,7 +68,13 @@ function WorkbenchBox({
   );
 }
 
-export default function TechnicianWorkbenchProcess({ pocket }: { pocket: RepairTypeSeoPocket }) {
+export default function TechnicianWorkbenchProcess({
+  pocket,
+  showCommonProblems = true,
+}: {
+  pocket: RepairTypeSeoPocket;
+  showCommonProblems?: boolean;
+}) {
   const [openPanel, setOpenPanel] = useState<OpenWorkbenchPanel>(null);
   const splitIndex = Math.max(1, Math.ceil(pocket.commonProblems.length / 2));
   const primaryProblems = pocket.commonProblems.slice(0, splitIndex);
@@ -130,35 +136,39 @@ export default function TechnicianWorkbenchProcess({ pocket }: { pocket: RepairT
           ))}
         </WorkbenchBox>
 
-        <WorkbenchBox
-          number="03"
-          title={headings.symptoms}
-          panel="symptoms"
-          isOpen={openPanel === "symptoms"}
-          onToggle={togglePanel}
-        >
-          {primaryProblems.map((problem) => (
-            <article key={problem.title} className="repair-workbench-mini-card">
-              <h3>{problem.title}</h3>
-              <p>{problem.description}</p>
-            </article>
-          ))}
-        </WorkbenchBox>
+        {showCommonProblems ? (
+          <>
+            <WorkbenchBox
+              number="03"
+              title={headings.symptoms}
+              panel="symptoms"
+              isOpen={openPanel === "symptoms"}
+              onToggle={togglePanel}
+            >
+              {primaryProblems.map((problem) => (
+                <article key={problem.title} className="repair-workbench-mini-card">
+                  <h3>{problem.title}</h3>
+                  <p>{problem.description}</p>
+                </article>
+              ))}
+            </WorkbenchBox>
 
-        <WorkbenchBox
-          number="04"
-          title={headings.outcomes}
-          panel="outcomes"
-          isOpen={openPanel === "outcomes"}
-          onToggle={togglePanel}
-        >
-          {outcomesProblems.map((problem) => (
-            <article key={problem.title} className="repair-workbench-mini-card">
-              <h3>{problem.title}</h3>
-              <p>{problem.description}</p>
-            </article>
-          ))}
-        </WorkbenchBox>
+            <WorkbenchBox
+              number="04"
+              title={headings.outcomes}
+              panel="outcomes"
+              isOpen={openPanel === "outcomes"}
+              onToggle={togglePanel}
+            >
+              {outcomesProblems.map((problem) => (
+                <article key={problem.title} className="repair-workbench-mini-card">
+                  <h3>{problem.title}</h3>
+                  <p>{problem.description}</p>
+                </article>
+              ))}
+            </WorkbenchBox>
+          </>
+        ) : null}
       </div>
     </section>
   );
