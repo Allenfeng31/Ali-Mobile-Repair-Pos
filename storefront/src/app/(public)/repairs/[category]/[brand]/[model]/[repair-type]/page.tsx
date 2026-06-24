@@ -11,11 +11,17 @@ import ReviewsSection from '@/components/ReviewsSection';
 import FaqAccordion from '@/components/FaqAccordion';
 import ServiceAreas from '@/components/seo/ServiceAreas';
 import CommonRepairProblemsSection from '@/components/services/CommonRepairProblemsSection';
-import WhyChooseUsSection, { type WhyChooseUsRepairType } from '@/components/services/WhyChooseUsSection';
+import WhyChooseUsSection from '@/components/services/WhyChooseUsSection';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
 import { generateFaqs } from './repairFaqs';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
 import { getRepairTypeHubDefinition } from '@/lib/repair-type-hubs';
+import {
+  getAliMobileIphone14ProMaxPilotRepairType,
+  getAliMobileIphone14ProMaxPilotSeoPocket,
+  type Iphone14ProMaxPilotRepairType,
+  type RepairTypeSeoPocket,
+} from '@/lib/seo/content/iphone';
 
 export const revalidate = 86400;
 
@@ -130,41 +136,12 @@ function dedupeRelatedRepairLinks(links: SameModelRepairLink[]) {
   });
 }
 
-const PILOT_REPAIR_TYPE_HUB_LINK_TEXT: Record<WhyChooseUsRepairType, string> = {
+const PILOT_REPAIR_TYPE_HUB_LINK_TEXT: Record<Iphone14ProMaxPilotRepairType, string> = {
   'screen-replacement': 'View all screen replacement services',
   'battery-replacement': 'View all battery replacement services',
   'charging-port-replacement': 'View all charging port replacement services',
   'back-glass-replacement': 'View all back glass repair services',
 };
-
-interface RepairTypeSeoPocket {
-  quickAnswer: string;
-  workbenchHeadings?: {
-    options: string;
-    diagnostics: string;
-    symptoms: string;
-    outcomes: string;
-  };
-  repairOptions: Array<{
-    name: string;
-    shortDescription: string;
-    bestFor: string;
-    notes: string;
-  }>;
-  commonProblems: Array<{
-    title: string;
-    description: string;
-  }>;
-  diagnosticSteps: Array<{
-    step: string;
-    title: string;
-    description: string;
-  }>;
-  faq: Array<{
-    question: string;
-    answer: string;
-  }>;
-}
 
 const IPHONE_13_SCREEN_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
   quickAnswer:
@@ -3510,352 +3487,6 @@ function shouldShowIphoneBackHousingNotice(category: string, brand: string, mode
   return IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES.some((prefix) => normalizedModel === prefix || normalizedModel.startsWith(`${prefix}-`));
 }
 
-interface AliMobilePilotRouteParams {
-  category: string;
-  brand: string;
-  model: string;
-  'repair-type': string;
-}
-
-function getAliMobileIphone14ProMaxPilotRepairType(
-  params: AliMobilePilotRouteParams
-): WhyChooseUsRepairType | null {
-  const category = slugify(params.category);
-  const brand = slugify(params.brand);
-  const model = slugify(params.model);
-  const repairType = slugify(params['repair-type']);
-
-  if (category !== "phone" || brand !== "iphone" || model !== "iphone-14-pro-max") {
-    return null;
-  }
-
-  switch (repairType) {
-    case "screen-replacement":
-    case "battery-replacement":
-    case "charging-port-replacement":
-    case PHONE_BACK_GLASS_PUBLIC_SLUG:
-      return repairType;
-    default:
-      return null;
-  }
-}
-
-function getAliMobileIphone14ProMaxPilotSeoPocket(
-  pocket: RepairTypeSeoPocket | null,
-  pilotRepairType: WhyChooseUsRepairType | null
-): RepairTypeSeoPocket | null {
-  if (!pocket || !pilotRepairType) {
-    return pocket;
-  }
-
-  const appendUniqueRepairOptions = (
-    existing: RepairTypeSeoPocket["repairOptions"],
-    additions: RepairTypeSeoPocket["repairOptions"]
-  ) => [
-    ...existing,
-    ...additions.filter((addition) => !existing.some((item) => item.name === addition.name)),
-  ];
-
-  const appendUniqueCommonProblems = (
-    existing: RepairTypeSeoPocket["commonProblems"],
-    additions: RepairTypeSeoPocket["commonProblems"]
-  ) => [
-    ...existing,
-    ...additions.filter((addition) => !existing.some((item) => item.title === addition.title)),
-  ];
-
-  const appendUniqueDiagnosticSteps = (
-    existing: RepairTypeSeoPocket["diagnosticSteps"],
-    additions: RepairTypeSeoPocket["diagnosticSteps"]
-  ) => [
-    ...existing,
-    ...additions.filter(
-      (addition) =>
-        !existing.some((item) => item.step === addition.step && item.title === addition.title)
-    ),
-  ];
-
-  const appendUniqueFaqs = (
-    existing: RepairTypeSeoPocket["faq"],
-    additions: RepairTypeSeoPocket["faq"]
-  ) => [
-    ...existing,
-    ...additions.filter((addition) => !existing.some((item) => item.question === addition.question)),
-  ];
-
-  switch (pilotRepairType) {
-    case "screen-replacement":
-      return {
-        ...pocket,
-        quickAnswer:
-          "Need iPhone 14 Pro Max screen replacement in Ringwood? Ali Mobile & Repair checks cracked or damaged glass, touch-response faults, lines, flickering, available OLED or display options, frame condition, and the front sensor or Face ID area before confirming the repair path.",
-        workbenchHeadings: {
-          options: "What do we check before replacing this screen?",
-          diagnostics: "How do we confirm the display fault?",
-          symptoms: "Which screen symptoms matter most?",
-          outcomes: "What can affect the final screen result?",
-        },
-        repairOptions: appendUniqueRepairOptions(pocket.repairOptions, [
-          {
-            name: "Front sensor area and final function checks",
-            shortDescription:
-              "We inspect the top display area, relevant front sensors, and the practical daily-use functions linked to the screen assembly.",
-            bestFor:
-              "Drops near the top edge or front sensor zone, plus phones with frame pressure around the display opening.",
-            notes:
-              "If Face ID or another front sensor fault is already present, we assess it carefully but do not promise a screen replacement alone will resolve it.",
-          },
-        ]),
-        commonProblems: appendUniqueCommonProblems(pocket.commonProblems, [
-          {
-            title: "Ghost touch or unintended touch input",
-            description:
-              "The display may tap on its own, open apps, or type without normal input after impact damage. We test the screen assembly before confirming that replacement is the right fix.",
-          },
-          {
-            title: "Black screen while the phone still responds",
-            description:
-              "The phone may still ring, vibrate, or make sounds while the display remains black. This can be caused by OLED or screen damage, and in some cases the display connector may be loose, damaged, or have failed. We test the display and related connection path before confirming whether screen replacement is the correct repair.",
-          },
-          {
-            title: "OLED ink marks, black spots, or dead pixels",
-            description:
-              "Dark blotches, spreading ink-like damage, or dead pixel areas can appear after pressure or impact even when the glass damage looks limited. We inspect the panel before quoting the repair path.",
-          },
-        ]),
-        diagnosticSteps: appendUniqueDiagnosticSteps(pocket.diagnosticSteps, []),
-        faq: appendUniqueFaqs(pocket.faq, [
-          {
-            question: "Can you fix an iPhone 14 Pro Max with cracked glass but working touch?",
-            answer:
-              "Yes. We still test the display and frame first because cracked glass can overlap with OLED damage, lifted edges, or touch faults even when the phone still unlocks.",
-          },
-          {
-            question: "Do you check lines, flickering, or a black screen before replacing the display?",
-            answer:
-              "Yes. We test the image, touch response, and visible OLED behaviour before confirming that a screen replacement is the right repair path.",
-          },
-        ]),
-      };
-    case "battery-replacement":
-      return {
-        ...pocket,
-        quickAnswer:
-          "Need iPhone 14 Pro Max battery replacement in Ringwood? We check battery health symptoms, fast drain, battery-percentage instability, charging behaviour, swelling signs, and shutdown patterns before confirming whether battery replacement is the right path.",
-        repairOptions: appendUniqueRepairOptions(pocket.repairOptions, [
-          {
-            name: "Battery health review",
-            shortDescription:
-              "We check the reported battery health, service message, fast drain, battery-percentage instability, and shutdown behaviour.",
-            bestFor: "Battery health drop, short runtime, or unexpected shutdowns.",
-            notes: "Battery Health helps the diagnosis, but it is not the only indicator we rely on before quoting.",
-          },
-          {
-            name: "Charging path check",
-            shortDescription:
-              "We test cable response, charging behaviour, and port condition before assuming the battery is the only fault.",
-            bestFor: "Phones that charge but drain quickly, charge unpredictably, or only respond with certain cables.",
-            notes: "Bring the cable or charger that shows the issue if you can.",
-          },
-          {
-            name: "Swelling and fit inspection",
-            shortDescription:
-              "We look for lifted screen edges, pressure marks, visible swelling, or heat symptoms that can point to battery stress inside the phone.",
-            bestFor: "Devices with screen lift, heat, sudden power loss, or concern about internal pressure.",
-            notes: "Back up important data before any repair when possible.",
-          },
-          {
-            name: "Post-repair charging and power checks",
-            shortDescription:
-              "After fitting, we confirm charging response, startup behaviour, and practical power stability before handover.",
-            bestFor:
-              "Customers who want the phone rechecked before pickup rather than only having the battery fitted.",
-            notes:
-              "Battery percentage reporting can settle over the next few charge cycles, so we explain what to watch after collection.",
-          },
-        ]),
-        commonProblems: appendUniqueCommonProblems(pocket.commonProblems, [
-          {
-            title: "Battery percentage jumps or unstable reading",
-            description:
-              "A percentage that drops suddenly, stalls while charging, or behaves unpredictably can be part of the symptom picture, but it is not proof on its own.",
-          },
-          {
-            title: "Service Battery or battery-health warning",
-            description:
-              "A service warning or low health reading can point to battery wear, but we still compare it with charging behaviour, shutdown history, and heat before confirming the repair path.",
-          },
-          {
-            title: "Phone becomes unusually warm",
-            description:
-              "If the phone heats up during normal use, charging, or standby, we assess whether battery wear is involved or whether another power-path issue may be contributing.",
-          },
-          {
-            title: "Screen lifting from internal battery pressure",
-            description:
-              "A raised display or lifting edge can be a warning sign that the battery is swelling underneath. We inspect the fit and internal pressure signs before confirming the repair path.",
-          },
-          {
-            title: "Only works while connected to power",
-            description:
-              "If the phone powers off as soon as the cable is removed, we check whether the battery can still hold stable voltage or whether another charging-path issue is involved.",
-          },
-          {
-            title: "Charging shows but the percentage does not increase normally",
-            description:
-              "A charging icon without normal battery gain can point to battery wear, charging-path instability, or another power issue, so we test before confirming the replacement.",
-          },
-        ]),
-        diagnosticSteps: appendUniqueDiagnosticSteps(pocket.diagnosticSteps, [
-          {
-            step: "01",
-            title: "Check the charging setup",
-            description:
-              "We test charging response with known-good cable and charger before confirming the battery path.",
-          },
-          {
-            step: "02",
-            title: "Inspect battery symptoms in context",
-            description:
-              "We review shutdowns, heat, swelling signs, display lifting, battery-percentage behaviour, and reported Battery Health before quoting.",
-          },
-          {
-            step: "03",
-            title: "Confirm quote and repair scope",
-            description:
-              "We confirm whether the symptoms still point to battery replacement after checking the charging path and practical power behaviour.",
-          },
-          {
-            step: "04",
-            title: "Final charging and power checks",
-            description:
-              "After repair, we check startup, charging response, and practical power stability before handover.",
-          },
-        ]),
-        faq: appendUniqueFaqs(pocket.faq, [
-          {
-            question: "Can Battery Health alone prove my iPhone 14 Pro Max needs a new battery?",
-            answer:
-              "No. Battery Health is one useful indicator, but we also look at shutdowns, charging behaviour, heat, runtime, swelling signs, and general power stability before confirming the repair path.",
-          },
-          {
-            question: "What if my iPhone 14 Pro Max battery problem also involves charging issues?",
-            answer:
-              "We check charging behaviour first because a port, cable, or another power-path fault can overlap with battery complaints. That is why we do not assume every battery symptom is caused by the battery alone.",
-          },
-        ]),
-      };
-    case "charging-port-replacement":
-      return {
-        ...pocket,
-        quickAnswer:
-          "Need iPhone 14 Pro Max charging port replacement in Ringwood? Ali Mobile & Repair checks angle-only charging, loose cable fit, intermittent or slow charging, debris or contamination, cable and charger response, cleaning suitability, and charging-port versus battery or board-level diagnosis before confirming replacement.",
-        workbenchHeadings: {
-          options: "What do we check before replacing this charging port?",
-          diagnostics: "How do we confirm the charging fault?",
-          symptoms: "Which charging symptoms matter most?",
-          outcomes: "What can affect the final charging result?",
-        },
-        repairOptions: appendUniqueRepairOptions(pocket.repairOptions, [
-          {
-            name: "Cable and charger test first",
-            shortDescription:
-              "We test known-good charging gear and compare cable fit before assuming the port assembly needs to be replaced.",
-            bestFor:
-              "Phones that charge with one cable, only respond at certain angles, or show inconsistent charging behaviour.",
-            notes:
-              "Bring the cable or charger that shows the issue if you can so we can compare it during the diagnosis.",
-          },
-        ]),
-        commonProblems: appendUniqueCommonProblems(pocket.commonProblems, [
-          {
-            title: "Loose cable connection",
-            description:
-              "If the cable no longer seats firmly, the problem can come from contamination, damaged contacts, or port wear rather than the charger alone.",
-          },
-          {
-            title: "Intermittent or slow charging",
-            description:
-              "Unstable cable charging can overlap with accessory issues, battery behaviour, or lower-assembly faults, so we test first.",
-          },
-          {
-            title: "Wireless charging works but cable charging does not",
-            description:
-              "If the phone charges wirelessly but not through the port, we check the cable, charger, debris, port wear, and the wired charging path before confirming whether port replacement is needed.",
-          },
-        ]),
-        diagnosticSteps: appendUniqueDiagnosticSteps(pocket.diagnosticSteps, []),
-        faq: appendUniqueFaqs(pocket.faq, [
-          {
-            question: "Does my iPhone 14 Pro Max need charging port replacement if it only charges at an angle?",
-            answer:
-              "Not always. We inspect for debris, contamination, cable fit, and wear first because some angle-only charging faults can be confirmed or ruled out before a replacement is quoted.",
-          },
-          {
-            question: "Can a battery or board fault look like a charging port problem?",
-            answer:
-              "Yes. That is why we test the charging path first and do not promise that every charging fault is solved by the port alone.",
-          },
-        ]),
-      };
-    case "back-glass-replacement":
-      return {
-        ...pocket,
-        quickAnswer:
-          "Need iPhone 14 Pro Max back glass replacement in Ringwood? Ali Mobile & Repair checks cracked or missing rear glass, sharp edges, lifting or exposed areas, camera-area damage, surrounding housing condition, repair-method suitability, and relevant wireless-charging checks before confirming the rear glass or back housing path.",
-        workbenchHeadings: {
-          options: "What do we check before rear glass work starts?",
-          diagnostics: "How do we confirm the rear repair path?",
-          symptoms: "Which back-glass symptoms matter most?",
-          outcomes: "What can affect the final rear-glass result?",
-        },
-        repairOptions: appendUniqueRepairOptions(pocket.repairOptions, []),
-        commonProblems: appendUniqueCommonProblems(pocket.commonProblems, [
-          {
-            title: "Sharp edges and lifting sections",
-            description:
-              "Broken rear glass can lift away from the housing or leave sharp edges that should be assessed before further use.",
-          },
-          {
-            title: "Missing glass pieces or exposed rear sections",
-            description:
-              "If parts of the rear glass are missing, the phone may have exposed sections that collect dust or feel unsafe to handle. We inspect the damage extent before confirming the repair path.",
-          },
-          {
-            title: "Damage that may change the back glass / back housing method",
-            description:
-              "Severe corner, frame, or housing damage can affect whether the current back glass / back housing method is suitable, so we confirm the practical repair path before proceeding.",
-          },
-        ]),
-        diagnosticSteps: appendUniqueDiagnosticSteps(pocket.diagnosticSteps, []),
-        faq: appendUniqueFaqs(pocket.faq, [
-          {
-            question: "Can you repair cracked iPhone 14 Pro Max back glass with sharp edges or missing sections?",
-            answer:
-              "Yes. We assess the full damage extent first, including exposed areas, lifting sections, and whether the surrounding housing condition changes the repair path.",
-          },
-          {
-            question: "Do you check the camera area before iPhone 14 Pro Max back glass replacement?",
-            answer:
-              "Yes. Damage around the camera area is reviewed before we confirm the practical rear-glass or back-housing method.",
-          },
-          {
-            question: "Will Ali Mobile confirm the rear-glass repair method before proceeding?",
-            answer:
-              "Yes. We confirm the repair method and quote before work starts so you know whether the job suits the current rear-glass or back-housing path on the page.",
-          },
-          {
-            question: "Will iPhone 14 Pro Max back glass replacement restore factory water resistance?",
-            answer:
-              "No. We handle resealing carefully, but factory water resistance cannot be guaranteed after the phone has been opened.",
-          },
-        ]),
-      };
-    default:
-      return pocket;
-  }
-}
-
 export async function generateMetadata({ params }: RepairPageProps) {
   const resolvedParams = await params;
   const internalRepairSlug = resolveRepairSlugForLookup(
@@ -4069,7 +3700,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     model: resolvedParams.model,
     repairType: internalRepairSlug,
   });
-  const seoPocket = getAliMobileIphone14ProMaxPilotSeoPocket(baseSeoPocket, pilotRepairType);
+  const seoPocket = getAliMobileIphone14ProMaxPilotSeoPocket({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+    pocket: baseSeoPocket,
+  });
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
