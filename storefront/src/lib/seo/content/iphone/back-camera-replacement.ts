@@ -4,16 +4,71 @@ import {
   appendUniqueFaqs,
   appendUniqueRepairOptions,
 } from './shared';
+import type { IphoneHardwareConfig } from './config';
 import type { RepairTypeSeoPocket } from './types';
+
+function getBackCameraCopy(config: IphoneHardwareConfig) {
+  const supportsRearCameraModes =
+    config.rearCameraClass === 'dual' || config.rearCameraClass === 'triple';
+
+  return {
+    rearCameraModeLabel: supportsRearCameraModes ? 'rear camera mode behaviour' : 'rear camera behaviour',
+    moduleDiagnosisDescription: supportsRearCameraModes
+      ? 'We check focus, image shake, black preview, rear camera switching, and whether the module behaviour points to an internal camera fault.'
+      : 'We check focus, image shake, black preview, and whether the module behaviour points to an internal camera fault.',
+    moduleDiagnosisBestFor: supportsRearCameraModes
+      ? 'Phones with blurry rear photos, shaking image, failed rear camera modes, or no rear camera image after impact.'
+      : 'Phones with blurry rear photos, shaking image, or no rear camera image after impact.',
+    housingInspectionBestFor: supportsRearCameraModes
+      ? 'Phones with drop damage near the rear camera area, one rear lens failing, or concern about camera-area housing condition.'
+      : 'Phones with drop damage near the rear camera area or concern about camera-area housing condition.',
+    finalRetestingDescription: supportsRearCameraModes
+      ? 'After repair, we retest image clarity, focus, rear camera switching, and the main rear-camera modes linked to the repair area.'
+      : 'After repair, we retest image clarity, focus, and the main rear-camera functions linked to the repair area.',
+    modeFailureTitle: supportsRearCameraModes
+      ? 'One rear lens or camera mode failing'
+      : 'Rear camera preview or focus failing',
+    modeFailureDescription: supportsRearCameraModes
+      ? 'We test rear camera modes separately because one lens, one mode, or the switching behaviour can fail without the entire camera system being the same fault.'
+      : 'We test the rear camera carefully because focus, image stability, or preview faults can fail without every rear-camera symptom coming from the same cause.',
+    focusConsistencyDescription: supportsRearCameraModes
+      ? 'If the phone struggles to switch between supported rear cameras or cannot settle focus, we test whether the fault is in the module, lens-glass path, or housing area.'
+      : 'If the rear camera cannot settle focus or behaves inconsistently, we test whether the fault is in the module, lens-glass path, or housing area.',
+    diagnosticTitle: supportsRearCameraModes
+      ? 'Test rear camera modes and lens switching'
+      : 'Test rear camera preview, focus, and image stability',
+    diagnosticDescription: supportsRearCameraModes
+      ? 'We check rear photo, video, focus, exposure, stabilisation behaviour, and switching across supported rear camera modes.'
+      : 'We check rear photo, video, focus, exposure, stabilisation behaviour, and whether the main rear camera fails consistently.',
+    finalDiagnosticDescription: supportsRearCameraModes
+      ? 'After repair, we retest rear image clarity, focus, supported rear camera modes, and normal app behaviour linked to the repair area.'
+      : 'After repair, we retest rear image clarity, focus, and normal app behaviour linked to the repair area.',
+    scopeDescription: supportsRearCameraModes
+      ? 'We confirm whether the fault still points to back camera replacement after checking lens glass, housing fit, and rear camera mode behaviour.'
+      : 'We confirm whether the fault still points to back camera replacement after checking lens glass, housing fit, and rear camera behaviour.',
+    shakyFaqAnswer: supportsRearCameraModes
+      ? 'Yes. We test focus, stabilisation symptoms, rear camera switching, and app behaviour to confirm whether the internal back camera module, lens-glass path, or another fault is causing the issue.'
+      : 'Yes. We test focus, stabilisation symptoms, and app behaviour to confirm whether the internal back camera module, lens-glass path, or another fault is causing the issue.',
+    modeFaqQuestion: supportsRearCameraModes
+      ? `Will Ali Mobile check whether one ${config.modelName} rear camera mode is failing before replacement?`
+      : `Will Ali Mobile check ${config.modelName} rear camera preview and focus behaviour before replacement?`,
+    modeFaqAnswer: supportsRearCameraModes
+      ? 'Yes. We test rear camera modes and switching behaviour first because one lens or one mode can fail without automatically meaning the entire rear camera path needs the same repair.'
+      : 'Yes. We test rear camera preview, focus, and image stability first because not every rear-camera symptom points to the same internal fault.',
+  };
+}
 
 export function applyIphoneBackCameraReplacementSeoPocket(
   pocket: RepairTypeSeoPocket,
-  modelName: string
+  config: IphoneHardwareConfig
 ): RepairTypeSeoPocket {
+  const { modelName } = config;
+  const copy = getBackCameraCopy(config);
+
   return {
     ...pocket,
     quickAnswer:
-      `Need ${modelName} back camera replacement in Ringwood? Ali Mobile & Repair checks rear camera focus, image failure, stabilisation symptoms, lens-glass damage, camera-area impact, housing fit, and rear camera mode behaviour before confirming whether back camera replacement is the right path.`,
+      `Need ${modelName} back camera replacement in Ringwood? Ali Mobile & Repair checks rear camera focus, image failure, stabilisation symptoms, lens-glass damage, camera-area impact, housing fit, and ${copy.rearCameraModeLabel} before confirming whether back camera replacement is the right path.`,
     workbenchHeadings: {
       options: "What do we check before replacing this back camera?",
       diagnostics: "How do we confirm the rear camera fault?",
@@ -27,10 +82,8 @@ export function applyIphoneBackCameraReplacementSeoPocket(
             return {
               ...option,
               name: "Rear camera focus and stabilisation diagnosis",
-              shortDescription:
-                "We check focus, image shake, black preview, rear camera switching, and whether the module behaviour points to an internal camera fault.",
-              bestFor:
-                "Phones with blurry rear photos, shaking image, failed rear camera modes, or no rear camera image after impact.",
+              shortDescription: copy.moduleDiagnosisDescription,
+              bestFor: copy.moduleDiagnosisBestFor,
               notes:
                 "We do not assume every rear camera symptom means the module itself must be replaced.",
             };
@@ -40,8 +93,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
               name: "Rear camera area and housing inspection",
               shortDescription:
                 "We inspect the camera island, surrounding housing fit, impact around the rear camera area, and whether alignment or housing damage changes the repair scope.",
-              bestFor:
-                "Phones with drop damage near the rear camera area, one rear lens failing, or concern about camera-area housing condition.",
+              bestFor: copy.housingInspectionBestFor,
               notes:
                 "Rear housing damage, alignment issues, or prior impact can change whether the module alone is the practical repair path.",
             };
@@ -63,8 +115,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
       [
         {
           name: "Final rear-camera mode retesting",
-          shortDescription:
-            "After repair, we retest image clarity, focus, rear camera switching, and the main rear-camera modes linked to the repair area.",
+          shortDescription: copy.finalRetestingDescription,
           bestFor:
             "Customers who want the rear camera path checked again before pickup rather than only having the module fitted.",
           notes:
@@ -107,9 +158,8 @@ export function applyIphoneBackCameraReplacementSeoPocket(
             };
           case "Software versus hardware fault":
             return {
-              title: "One rear lens or camera mode failing",
-              description:
-                "We test rear camera modes separately because one lens, one mode, or the switching behaviour can fail without the entire camera system being the same fault.",
+              title: copy.modeFailureTitle,
+              description: copy.modeFailureDescription,
             };
           default:
             return problem;
@@ -118,8 +168,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
       [
         {
           title: "Rear camera switching or focus inconsistency",
-          description:
-            "If the phone struggles to switch between supported rear cameras or cannot settle focus, we test whether the fault is in the module, lens-glass path, or housing area.",
+          description: copy.focusConsistencyDescription,
         },
         {
           title: "Camera-area housing or fit concern",
@@ -134,9 +183,8 @@ export function applyIphoneBackCameraReplacementSeoPocket(
           case "Test camera modes":
             return {
               ...step,
-              title: "Test rear camera modes and lens switching",
-              description:
-                "We check rear photo, video, focus, exposure, stabilisation behaviour, and switching across supported rear camera modes.",
+              title: copy.diagnosticTitle,
+              description: copy.diagnosticDescription,
             };
           case "Inspect lens and housing":
             return {
@@ -156,8 +204,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
             return {
               ...step,
               title: "Confirm final rear camera function",
-              description:
-                "After repair, we retest rear image clarity, focus, supported rear camera modes, and normal app behaviour linked to the repair area.",
+              description: copy.finalDiagnosticDescription,
             };
           default:
             return step;
@@ -167,8 +214,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
         {
           step: "05",
           title: "Confirm scope before back camera replacement",
-          description:
-            "We confirm whether the fault still points to back camera replacement after checking lens glass, housing fit, and rear camera mode behaviour.",
+          description: copy.scopeDescription,
         },
       ]
     ),
@@ -178,8 +224,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
           case "Can you fix an iPhone 13 camera that is blurry or shaking?":
             return {
               question: `Can you fix a ${modelName} back camera that is blurry or shaking?`,
-              answer:
-                "Yes. We test focus, stabilisation symptoms, rear camera switching, and app behaviour to confirm whether the internal back camera module, lens-glass path, or another fault is causing the issue.",
+              answer: copy.shakyFaqAnswer,
             };
           case "Do you repair cracked iPhone 13 camera lens glass?":
             return {
@@ -205,9 +250,8 @@ export function applyIphoneBackCameraReplacementSeoPocket(
       }),
       [
         {
-          question: `Will Ali Mobile check whether one ${modelName} rear camera mode is failing before replacement?`,
-          answer:
-            "Yes. We test rear camera modes and switching behaviour first because one lens or one mode can fail without automatically meaning the entire rear camera path needs the same repair.",
+          question: copy.modeFaqQuestion,
+          answer: copy.modeFaqAnswer,
         },
         {
           question: `Does ${modelName} back camera replacement guarantee every image-quality issue will be solved?`,

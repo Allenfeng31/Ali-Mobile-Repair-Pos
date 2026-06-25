@@ -1,10 +1,13 @@
 import { appendUniqueCommonProblems, appendUniqueDiagnosticSteps, appendUniqueFaqs, appendUniqueRepairOptions } from './shared';
+import type { IphoneHardwareConfig } from './config';
 import type { RepairTypeSeoPocket } from './types';
 
 export function applyIphoneBatteryReplacementSeoPocket(
   pocket: RepairTypeSeoPocket,
-  modelName: string
+  config: IphoneHardwareConfig
 ): RepairTypeSeoPocket {
+  const { modelName } = config;
+
   return {
     ...pocket,
     quickAnswer:

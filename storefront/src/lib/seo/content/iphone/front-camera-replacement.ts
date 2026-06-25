@@ -4,16 +4,73 @@ import {
   appendUniqueFaqs,
   appendUniqueRepairOptions,
 } from './shared';
+import type { IphoneHardwareConfig } from './config';
 import type { RepairTypeSeoPocket } from './types';
+
+function getFrontCameraCopy(config: IphoneHardwareConfig) {
+  const supportsFaceIdCopy = config.biometrics === 'face-id';
+
+  return {
+    trueDepthRiskLabel: supportsFaceIdCopy ? 'TrueDepth-related risk' : 'top sensor-area risk',
+    inspectionOptionName: supportsFaceIdCopy
+      ? 'TrueDepth-area and connector-path inspection'
+      : 'Front sensor-area and connector-path inspection',
+    inspectionBestFor: supportsFaceIdCopy
+      ? 'Phones with impact near the earpiece, top screen area, or symptoms involving both the front camera and Face ID-related functions.'
+      : 'Phones with impact near the earpiece, top screen area, or symptoms involving both the front camera and another top sensor-area function.',
+    inspectionNotes: supportsFaceIdCopy
+      ? 'Front camera replacement does not automatically guarantee Face ID restoration because paired or separate components may also be involved.'
+      : 'Front camera replacement does not automatically guarantee that every top sensor-area symptom will be resolved because paired or separate components may also be involved.',
+    finalRetestNotes: supportsFaceIdCopy
+      ? 'If another TrueDepth-related issue remains, we explain that separately instead of assuming the front camera alone resolves it.'
+      : 'If another top sensor-area issue remains, we explain that separately instead of assuming the front camera alone resolves it.',
+    impactProblemTitle: supportsFaceIdCopy
+      ? 'Front camera or TrueDepth-area impact'
+      : 'Front camera or top sensor-area impact',
+    impactProblemDescription: supportsFaceIdCopy
+      ? 'Damage near the earpiece and top sensor area can affect front camera behaviour and may overlap with Face ID-related symptoms.'
+      : 'Damage near the earpiece and top sensor area can affect front camera behaviour and may overlap with other top sensor-area symptoms.',
+    extraProblemTitle: supportsFaceIdCopy
+      ? 'Face ID symptoms alongside front camera faults'
+      : 'Top sensor-area symptoms alongside front camera faults',
+    extraProblemDescription: supportsFaceIdCopy
+      ? 'Front camera problems can appear alongside Face ID symptoms, but front camera replacement alone does not prove the paired TrueDepth path will be restored.'
+      : 'Front camera problems can appear alongside other top sensor-area symptoms, but front camera replacement alone does not prove the paired front sensor path will be restored.',
+    limitationStepTitle: supportsFaceIdCopy
+      ? 'Check TrueDepth and Face ID-related limitations'
+      : 'Check front sensor-area limitations',
+    limitationStepDescription: supportsFaceIdCopy
+      ? 'Where front camera symptoms overlap with the top sensor area, we explain that TrueDepth and Face ID problems may involve paired or separate components.'
+      : 'Where front camera symptoms overlap with the top sensor area, we explain that paired or separate front sensor components may also be involved.',
+    scopeDescription: supportsFaceIdCopy
+      ? 'We confirm whether the fault still points to front camera replacement after checking image behaviour, surrounding fit, and any TrueDepth-related risk.'
+      : 'We confirm whether the fault still points to front camera replacement after checking image behaviour, surrounding fit, and any top sensor-area risk.',
+    faceIdFaqQuestion: supportsFaceIdCopy
+      ? 'Does front camera replacement automatically restore Face ID?'
+      : 'Does front camera replacement automatically restore every top sensor-area function?',
+    faceIdFaqAnswer: supportsFaceIdCopy
+      ? 'No. Front camera replacement does not automatically guarantee Face ID restoration because the TrueDepth and Face ID path can involve paired or separate components that still need inspection.'
+      : 'No. Front camera replacement does not automatically guarantee every top sensor-area function will be restored because paired or separate components may still need inspection.',
+    finalFaqQuestion: supportsFaceIdCopy
+      ? `Will Ali Mobile check TrueDepth-related symptoms before ${config.modelName} front camera replacement?`
+      : `Will Ali Mobile check top sensor-area symptoms before ${config.modelName} front camera replacement?`,
+    finalFaqAnswer: supportsFaceIdCopy
+      ? 'Yes. If the front camera fault overlaps with Face ID or TrueDepth symptoms, we explain that inspection first because the repair scope may involve more than the front camera alone.'
+      : 'Yes. If the front camera fault overlaps with another top sensor-area symptom, we explain that inspection first because the repair scope may involve more than the front camera alone.',
+  };
+}
 
 export function applyIphoneFrontCameraReplacementSeoPocket(
   pocket: RepairTypeSeoPocket,
-  modelName: string
+  config: IphoneHardwareConfig
 ): RepairTypeSeoPocket {
+  const { modelName } = config;
+  const copy = getFrontCameraCopy(config);
+
   return {
     ...pocket,
     quickAnswer:
-      `Need ${modelName} front camera replacement in Ringwood? Ali Mobile & Repair checks selfie image failure, blur, haze, portrait-camera problems, top sensor-area impact, front camera alignment, and TrueDepth-related risk before confirming whether front camera replacement is the right path.`,
+      `Need ${modelName} front camera replacement in Ringwood? Ali Mobile & Repair checks selfie image failure, blur, haze, portrait-camera problems, top sensor-area impact, front camera alignment, and ${copy.trueDepthRiskLabel} before confirming whether front camera replacement is the right path.`,
     workbenchHeadings: {
       options: "What do we check before replacing this front camera?",
       diagnostics: "How do we confirm the front camera fault?",
@@ -37,13 +94,11 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
           case "Front camera and Face ID area check":
             return {
               ...option,
-              name: "TrueDepth-area and connector-path inspection",
+              name: copy.inspectionOptionName,
               shortDescription:
                 "We inspect the top sensor area, front camera alignment, surrounding components, and related connector risk before quoting.",
-              bestFor:
-                "Phones with impact near the earpiece, top screen area, or symptoms involving both the front camera and Face ID-related functions.",
-              notes:
-                "Front camera replacement does not automatically guarantee Face ID restoration because paired or separate components may also be involved.",
+              bestFor: copy.inspectionBestFor,
+              notes: copy.inspectionNotes,
             };
           case "Lens glass and dust assessment":
             return {
@@ -68,7 +123,7 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
           bestFor:
             "Customers who want the front camera path checked again before pickup rather than only having the module fitted.",
           notes:
-            "If another TrueDepth-related issue remains, we explain that separately instead of assuming the front camera alone resolves it.",
+            copy.finalRetestNotes,
         },
       ]
     ),
@@ -95,9 +150,8 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
             };
           case "Front camera or Face ID area impact":
             return {
-              title: "Front camera or TrueDepth-area impact",
-              description:
-                "Damage near the earpiece and top sensor area can affect front camera behaviour and may overlap with Face ID-related symptoms.",
+              title: copy.impactProblemTitle,
+              description: copy.impactProblemDescription,
             };
           case "Dust, fog, or moisture marks":
             return {
@@ -122,9 +176,8 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
             "A screen-area impact or prior screen work can affect the front camera path, so we inspect before confirming replacement.",
         },
         {
-          title: "Face ID symptoms alongside front camera faults",
-          description:
-            "Front camera problems can appear alongside Face ID symptoms, but front camera replacement alone does not prove the paired TrueDepth path will be restored.",
+          title: copy.extraProblemTitle,
+          description: copy.extraProblemDescription,
         },
       ]
     ),
@@ -148,9 +201,8 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
           case "Check front camera risk":
             return {
               ...step,
-              title: "Check TrueDepth and Face ID-related limitations",
-              description:
-                "Where front camera symptoms overlap with the top sensor area, we explain that TrueDepth and Face ID problems may involve paired or separate components.",
+              title: copy.limitationStepTitle,
+              description: copy.limitationStepDescription,
             };
           case "Confirm final camera function":
             return {
@@ -167,8 +219,7 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
         {
           step: "05",
           title: "Confirm scope before front camera replacement",
-          description:
-            "We confirm whether the fault still points to front camera replacement after checking image behaviour, surrounding fit, and any TrueDepth-related risk.",
+          description: copy.scopeDescription,
         },
       ]
     ),
@@ -189,9 +240,8 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
             };
           case "Will front camera repair affect Face ID?":
             return {
-              question: "Does front camera replacement automatically restore Face ID?",
-              answer:
-                "No. Front camera replacement does not automatically guarantee Face ID restoration because the TrueDepth and Face ID path can involve paired or separate components that still need inspection.",
+              question: copy.faceIdFaqQuestion,
+              answer: copy.faceIdFaqAnswer,
             };
           case "Can iPhone 13 camera repair be done same day in Ringwood?":
             return {
@@ -210,9 +260,8 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
             "Yes. Damage near the top display and earpiece area can affect the front camera path, which is why we inspect the surrounding assembly before confirming replacement.",
         },
         {
-          question: `Will Ali Mobile check TrueDepth-related symptoms before ${modelName} front camera replacement?`,
-          answer:
-            "Yes. If the front camera fault overlaps with Face ID or TrueDepth symptoms, we explain that inspection first because the repair scope may involve more than the front camera alone.",
+          question: copy.finalFaqQuestion,
+          answer: copy.finalFaqAnswer,
         },
       ]
     ),

@@ -9,6 +9,7 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
+import { getIphoneHardwareConfigByModelName } from './config';
 import type { AliMobileEnhancedIphoneRepairType, Iphone14ProMaxPilotRepairType } from './types';
 
 export interface WhyChooseCard {
@@ -37,19 +38,29 @@ export const IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS: Array<{ icon: LucideIcon; text
 export function getIphoneWhyChooseContent(
   modelName: string
 ): Record<AliMobileEnhancedIphoneRepairType, WhyChooseConfig> {
+  const hardwareConfig = getIphoneHardwareConfigByModelName(modelName);
+  const supportsOledCopy = hardwareConfig?.displayType === 'oled';
+  const supportsFaceIdCopy = hardwareConfig?.biometrics === 'face-id';
+  const supportsRearCameraModes =
+    hardwareConfig?.rearCameraClass === 'dual' || hardwareConfig?.rearCameraClass === 'triple';
+
   return {
     "screen-replacement": {
       kicker: "Ali Mobile support",
       heading: `Why choose Ali Mobile for ${modelName} screen replacement`,
       intro:
-        "For cracked displays and OLED faults, Ali Mobile starts with a practical screen assessment before confirming which repair option makes sense for the phone in front of us.",
+        supportsOledCopy
+          ? "For cracked displays and OLED faults, Ali Mobile starts with a practical screen assessment before confirming which repair option makes sense for the phone in front of us."
+          : "For cracked displays and screen faults, Ali Mobile starts with a practical screen assessment before confirming which repair option makes sense for the phone in front of us.",
       cards: [
         {
           title: "Display-first diagnosis",
           icon: Smartphone,
           points: [
             "We assess cracked glass, black display, lines, flickering, and touch-response faults before confirming the screen path.",
-            "Available OLED or display options are explained clearly before work starts.",
+            supportsOledCopy
+              ? "Available OLED or display options are explained clearly before work starts."
+              : "Available display options are explained clearly before work starts.",
           ],
         },
         {
@@ -57,7 +68,9 @@ export function getIphoneWhyChooseContent(
           icon: Search,
           points: [
             "Frame condition, lifted edges, and impact around the top display area are checked before fitting a replacement screen.",
-            "Relevant front sensor or Face ID behaviour is checked where applicable, without assuming a screen repair will fix pre-existing sensor faults.",
+            supportsFaceIdCopy
+              ? "Relevant front sensor or Face ID behaviour is checked where applicable, without assuming a screen repair will fix pre-existing sensor faults."
+              : "Relevant front sensor behaviour is checked where applicable, without assuming a screen repair will fix pre-existing sensor faults.",
           ],
         },
         {
@@ -175,11 +188,13 @@ export function getIphoneWhyChooseContent(
           ],
         },
         {
-          title: "TrueDepth-area inspection first",
+          title: supportsFaceIdCopy ? "TrueDepth-area inspection first" : "Top sensor-area inspection first",
           icon: Search,
           points: [
             "Impact near the earpiece and top sensor area is inspected before work begins.",
-            "Front camera replacement does not automatically guarantee Face ID restoration because the TrueDepth path can involve paired or separate components.",
+            supportsFaceIdCopy
+              ? "Front camera replacement does not automatically guarantee Face ID restoration because the TrueDepth path can involve paired or separate components."
+              : "Front camera replacement does not automatically guarantee every top sensor-area function will be restored because paired or separate components may also be involved.",
           ],
         },
         {
@@ -201,7 +216,9 @@ export function getIphoneWhyChooseContent(
           title: "Rear camera fault diagnosis",
           icon: Smartphone,
           points: [
-            "We check focus, black preview, image shake, switching between supported rear cameras, and stabilisation-related symptoms before confirming the repair path.",
+            supportsRearCameraModes
+              ? "We check focus, black preview, image shake, switching between supported rear cameras, and stabilisation-related symptoms before confirming the repair path."
+              : "We check focus, black preview, image shake, and stabilisation-related symptoms before confirming the repair path.",
           ],
         },
         {
@@ -216,7 +233,9 @@ export function getIphoneWhyChooseContent(
           title: "Relevant rear-camera retesting",
           icon: ClipboardCheck,
           points: [
-            "After repair we retest the main rear-camera modes linked to the repair area and explain any remaining housing or lens-glass limitation clearly before handover.",
+            supportsRearCameraModes
+              ? "After repair we retest the main rear-camera modes linked to the repair area and explain any remaining housing or lens-glass limitation clearly before handover."
+              : "After repair we retest the main rear-camera functions linked to the repair area and explain any remaining housing or lens-glass limitation clearly before handover.",
           ],
         },
       ],

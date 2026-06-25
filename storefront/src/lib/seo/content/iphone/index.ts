@@ -3,6 +3,10 @@ import { applyIphoneBackGlassReplacementSeoPocket } from './back-glass-replaceme
 import { applyIphoneBackCameraReplacementSeoPocket } from './back-camera-replacement';
 import { applyIphoneBatteryReplacementSeoPocket } from './battery-replacement';
 import { applyIphoneChargingPortReplacementSeoPocket } from './charging-port-replacement';
+import {
+  getIphoneHardwareConfig,
+  IPHONE_BATCH1_HARDWARE_CONFIG,
+} from './config';
 import { applyIphoneFrontCameraReplacementSeoPocket } from './front-camera-replacement';
 import { applyIphoneScreenReplacementSeoPocket } from './screen-replacement';
 import type {
@@ -37,22 +41,12 @@ interface AliMobileEnhancedIphoneSeoPocketParams {
 export const ENHANCED_REPAIR_TYPES_BY_MODEL: Record<
   AliMobileEnhancedIphoneModelSlug,
   ReadonlySet<AliMobileEnhancedIphoneRepairType>
-> = {
-  'iphone-14-pro-max': new Set([
-    'screen-replacement',
-    'battery-replacement',
-    'charging-port-replacement',
-    'back-glass-replacement',
-  ]),
-  'iphone-14-pro': new Set([
-    'screen-replacement',
-    'battery-replacement',
-    'charging-port-replacement',
-    'back-glass-replacement',
-    'front-camera-replacement',
-    'back-camera-replacement',
-  ]),
-};
+> = Object.fromEntries(
+  Object.values(IPHONE_BATCH1_HARDWARE_CONFIG).map((config) => [
+    config.modelSlug,
+    new Set(config.supportedRepairTypes),
+  ])
+) as Record<AliMobileEnhancedIphoneModelSlug, ReadonlySet<AliMobileEnhancedIphoneRepairType>>;
 
 function getAliMobileEnhancedIphoneModelSlug(
   params: AliMobileEnhancedIphoneRouteParams
@@ -65,8 +59,9 @@ function getAliMobileEnhancedIphoneModelSlug(
     return null;
   }
 
-  if (model === 'iphone-14-pro-max' || model === 'iphone-14-pro') {
-    return model;
+  const hardwareConfig = getIphoneHardwareConfig(model);
+  if (hardwareConfig) {
+    return hardwareConfig.modelSlug;
   }
 
   return null;
@@ -90,14 +85,7 @@ export function isAliMobileEnhancedIphoneRepairPage(params: AliMobileEnhancedIph
 }
 
 export function getAliMobileEnhancedIphoneModelName(modelSlug: string): string | null {
-  switch (slugify(modelSlug)) {
-    case 'iphone-14-pro-max':
-      return 'iPhone 14 Pro Max';
-    case 'iphone-14-pro':
-      return 'iPhone 14 Pro';
-    default:
-      return null;
-  }
+  return getIphoneHardwareConfig(modelSlug)?.modelName ?? null;
 }
 
 export function getAliMobileEnhancedIphoneSeoPocket({
@@ -122,24 +110,24 @@ export function getAliMobileEnhancedIphoneSeoPocket({
     return pocket;
   }
 
-  const modelName = getAliMobileEnhancedIphoneModelName(model);
-  if (!modelName) {
+  const hardwareConfig = getIphoneHardwareConfig(model);
+  if (!hardwareConfig) {
     return pocket;
   }
 
   switch (enhancedRepairType) {
     case "screen-replacement":
-      return applyIphoneScreenReplacementSeoPocket(pocket, modelName);
+      return applyIphoneScreenReplacementSeoPocket(pocket, hardwareConfig);
     case "battery-replacement":
-      return applyIphoneBatteryReplacementSeoPocket(pocket, modelName);
+      return applyIphoneBatteryReplacementSeoPocket(pocket, hardwareConfig);
     case "charging-port-replacement":
-      return applyIphoneChargingPortReplacementSeoPocket(pocket, modelName);
+      return applyIphoneChargingPortReplacementSeoPocket(pocket, hardwareConfig);
     case "back-glass-replacement":
-      return applyIphoneBackGlassReplacementSeoPocket(pocket, modelName);
+      return applyIphoneBackGlassReplacementSeoPocket(pocket, hardwareConfig);
     case "front-camera-replacement":
-      return applyIphoneFrontCameraReplacementSeoPocket(pocket, modelName);
+      return applyIphoneFrontCameraReplacementSeoPocket(pocket, hardwareConfig);
     case "back-camera-replacement":
-      return applyIphoneBackCameraReplacementSeoPocket(pocket, modelName);
+      return applyIphoneBackCameraReplacementSeoPocket(pocket, hardwareConfig);
     default:
       return pocket;
   }

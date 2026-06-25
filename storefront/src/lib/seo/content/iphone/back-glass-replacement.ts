@@ -1,12 +1,68 @@
 import { appendUniqueCommonProblems, appendUniqueDiagnosticSteps, appendUniqueFaqs, appendUniqueRepairOptions } from './shared';
+import type { IphoneHardwareConfig } from './config';
 import type { RepairTypeSeoPocket } from './types';
 
-export function applyIphoneBackGlassReplacementSeoPocket(
+function mapPocketText(
   pocket: RepairTypeSeoPocket,
-  modelName: string
+  transform: (value: string) => string
 ): RepairTypeSeoPocket {
   return {
     ...pocket,
+    quickAnswer: transform(pocket.quickAnswer),
+    workbenchHeadings: pocket.workbenchHeadings
+      ? {
+          options: transform(pocket.workbenchHeadings.options),
+          diagnostics: transform(pocket.workbenchHeadings.diagnostics),
+          symptoms: transform(pocket.workbenchHeadings.symptoms),
+          outcomes: transform(pocket.workbenchHeadings.outcomes),
+        }
+      : undefined,
+    repairOptions: pocket.repairOptions.map((option) => ({
+      name: transform(option.name),
+      shortDescription: transform(option.shortDescription),
+      bestFor: transform(option.bestFor),
+      notes: transform(option.notes),
+    })),
+    commonProblems: pocket.commonProblems.map((problem) => ({
+      title: transform(problem.title),
+      description: transform(problem.description),
+    })),
+    diagnosticSteps: pocket.diagnosticSteps.map((step) => ({
+      step: step.step,
+      title: transform(step.title),
+      description: transform(step.description),
+    })),
+    faq: pocket.faq.map((item) => ({
+      question: transform(item.question),
+      answer: transform(item.answer),
+    })),
+  };
+}
+
+export function applyIphoneBackGlassReplacementSeoPocket(
+  pocket: RepairTypeSeoPocket,
+  config: IphoneHardwareConfig
+): RepairTypeSeoPocket {
+  const { modelName, supportsBackGlassContent } = config;
+
+  if (!supportsBackGlassContent) {
+    return pocket;
+  }
+
+  const adjustedPocket =
+    config.hasMagSafe === true
+      ? pocket
+      : mapPocketText(pocket, (value) =>
+          value
+            .replaceAll('MagSafe alignment', 'wireless charging alignment')
+            .replaceAll('MagSafe area', 'wireless charging area')
+            .replaceAll('MagSafe coil', 'wireless charging coil')
+            .replaceAll('MagSafe', 'wireless charging')
+            .replaceAll('wireless charging and wireless charging', 'wireless charging')
+        );
+
+  return {
+    ...adjustedPocket,
     quickAnswer:
       `Need ${modelName} back glass replacement in Ringwood? Ali Mobile & Repair checks cracked or missing rear glass, sharp edges, lifting or exposed areas, camera-area damage, surrounding housing condition, repair-method suitability, and relevant wireless-charging checks before confirming the rear glass or back housing path.`,
     workbenchHeadings: {
@@ -15,8 +71,8 @@ export function applyIphoneBackGlassReplacementSeoPocket(
       symptoms: "Which back-glass symptoms matter most?",
       outcomes: "What can affect the final rear-glass result?",
     },
-    repairOptions: appendUniqueRepairOptions(pocket.repairOptions, []),
-    commonProblems: appendUniqueCommonProblems(pocket.commonProblems, [
+    repairOptions: appendUniqueRepairOptions(adjustedPocket.repairOptions, []),
+    commonProblems: appendUniqueCommonProblems(adjustedPocket.commonProblems, [
       {
         title: "Sharp edges and lifting sections",
         description:
@@ -33,8 +89,8 @@ export function applyIphoneBackGlassReplacementSeoPocket(
           "Severe corner, frame, or housing damage can affect whether the current back glass / back housing method is suitable, so we confirm the practical repair path before proceeding.",
       },
     ]),
-    diagnosticSteps: appendUniqueDiagnosticSteps(pocket.diagnosticSteps, []),
-    faq: appendUniqueFaqs(pocket.faq, [
+    diagnosticSteps: appendUniqueDiagnosticSteps(adjustedPocket.diagnosticSteps, []),
+    faq: appendUniqueFaqs(adjustedPocket.faq, [
       {
         question: `Can you repair cracked ${modelName} back glass with sharp edges or missing sections?`,
         answer:
