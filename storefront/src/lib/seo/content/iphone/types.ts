@@ -38,7 +38,25 @@ export type AliMobileEnhancedIphoneModelSlug =
   | "iphone-12-mini"
   | "iphone-12"
   | "iphone-12-pro"
-  | "iphone-12-pro-max";
+  | "iphone-12-pro-max"
+  | "iphone-11"
+  | "iphone-11-pro"
+  | "iphone-11-pro-max"
+  | "iphone-x"
+  | "iphone-xr"
+  | "iphone-xs"
+  | "iphone-xs-max"
+  | "iphone-se"
+  | "iphone-se-2"
+  | "iphone-se-3"
+  | "iphone-8"
+  | "iphone-8-plus"
+  | "iphone-7"
+  | "iphone-7-plus"
+  | "iphone-6"
+  | "iphone-6-plus"
+  | "iphone-6s"
+  | "iphone-6s-plus";
 
 export interface RepairTypeSeoPocket {
   quickAnswer: string;

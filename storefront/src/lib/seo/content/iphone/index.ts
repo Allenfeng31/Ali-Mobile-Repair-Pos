@@ -5,7 +5,7 @@ import { applyIphoneBatteryReplacementSeoPocket } from './battery-replacement';
 import { applyIphoneChargingPortReplacementSeoPocket } from './charging-port-replacement';
 import {
   getIphoneHardwareConfig,
-  IPHONE_BATCH1_HARDWARE_CONFIG,
+  IPHONE_HARDWARE_CONFIG,
 } from './config';
 import { applyIphoneFrontCameraReplacementSeoPocket } from './front-camera-replacement';
 import { applyIphoneScreenReplacementSeoPocket } from './screen-replacement';
@@ -42,7 +42,7 @@ export const ENHANCED_REPAIR_TYPES_BY_MODEL: Record<
   AliMobileEnhancedIphoneModelSlug,
   ReadonlySet<AliMobileEnhancedIphoneRepairType>
 > = Object.fromEntries(
-  Object.values(IPHONE_BATCH1_HARDWARE_CONFIG).map((config) => [
+  Object.values(IPHONE_HARDWARE_CONFIG).map((config) => [
     config.modelSlug,
     new Set(config.supportedRepairTypes),
   ])
