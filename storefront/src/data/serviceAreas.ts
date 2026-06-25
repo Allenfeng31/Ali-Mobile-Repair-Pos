@@ -90,9 +90,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Ringwood East iPhone screen assessment options" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery checks near Ringwood East" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display diagnostics for Ringwood East residents" }
+      { href: "/repairs/screen-replacement", label: "Ringwood East screen assessment options" },
+      { href: "/repairs/battery-replacement", label: "Battery checks near Ringwood East" },
+      { href: "/repairs/tablet/ipad", label: "iPad display diagnostics for Ringwood East residents" }
     ]
   },
   {
@@ -152,9 +152,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Ringwood North iPhone touch & screen diagnostics" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "battery health & drainage checks near Ringwood North" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "tablet screen checks for Ringwood North families" }
+      { href: "/repairs/screen-replacement", label: "Ringwood North touch and screen diagnostics" },
+      { href: "/repairs/battery-replacement", label: "Battery health and drainage checks near Ringwood North" },
+      { href: "/repairs/tablet/ipad", label: "iPad screen checks for Ringwood North families" }
     ]
   },
   {
@@ -214,9 +214,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Heathmont battery replacement options" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging diagnostics and clean services near Heathmont" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display & touch assessments for Heathmont" }
+      { href: "/repairs/battery-replacement", label: "Heathmont battery replacement options" },
+      { href: "/repairs/charging-port-replacement", label: "Charging diagnostics and clean services near Heathmont" },
+      { href: "/repairs/tablet/ipad", label: "iPad display and touch assessments for Heathmont" }
     ]
   },
   {
@@ -276,9 +276,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15/back-glass-replacement", label: "charging and battery checks for Croydon devices" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Croydon iPhone battery diagnostic options" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung charging port repair near Croydon" }
+      { href: "/repairs/back-glass-replacement", label: "Back glass repair near Croydon" },
+      { href: "/repairs/battery-replacement", label: "Croydon battery diagnostic options" },
+      { href: "/repairs/charging-port-replacement", label: "Charging port repair near Croydon" }
     ]
   },
   {
@@ -338,9 +338,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Mitcham customers comparing iPhone screen repair options" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery diagnostic checks near Mitcham" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Samsung and iPad repair support near Mitcham" }
+      { href: "/repairs/screen-replacement", label: "Mitcham customers comparing screen repair options" },
+      { href: "/repairs/battery-replacement", label: "Battery diagnostic checks near Mitcham" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair support near Mitcham" }
     ]
   },
   {
@@ -400,9 +400,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Samsung and iPad repair support near Nunawading" },
-      { href: "/repairs/phone/iphone/iphone-13/back-camera-replacement", label: "Nunawading iPhone camera and screen diagnostics" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display repair solutions close to Nunawading" }
+      { href: "/repairs/screen-replacement", label: "Screen repair support near Nunawading" },
+      { href: "/repairs/phone", label: "Phone repair options near Nunawading" },
+      { href: "/repairs/tablet/ipad", label: "iPad display repair solutions close to Nunawading" }
     ]
   },
   {
@@ -482,9 +482,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Wantirna iPad and tablet repair diagnostics" },
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone display checks near Wantirna" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung charging port repair options for Wantirna" }
+      { href: "/repairs/tablet/ipad", label: "Wantirna iPad repair diagnostics" },
+      { href: "/repairs/screen-replacement", label: "Display checks near Wantirna" },
+      { href: "/repairs/charging-port-replacement", label: "Charging port repair options for Wantirna" }
     ]
   },
   {
@@ -554,9 +554,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Bayswater work-phone and charging repair options" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery assessments near Bayswater" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "tablet screen diagnostics for Bayswater small businesses" }
+      { href: "/repairs/charging-port-replacement", label: "Bayswater work-phone and charging repair options" },
+      { href: "/repairs/battery-replacement", label: "Battery assessments near Bayswater" },
+      { href: "/repairs/tablet/ipad", label: "iPad screen diagnostics for Bayswater small businesses" }
     ]
   },
   {
@@ -616,9 +616,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "battery and screen assessments for Boronia customers" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Boronia iPhone battery replacement services" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging port checks near Boronia" }
+      { href: "/repairs/screen-replacement", label: "Screen assessments for Boronia customers" },
+      { href: "/repairs/battery-replacement", label: "Boronia battery replacement services" },
+      { href: "/repairs/charging-port-replacement", label: "Charging port checks near Boronia" }
     ]
   },
   {
@@ -689,9 +689,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone, Samsung and MacBook support near Balwyn" },
-      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "MacBook diagnostics near Balwyn" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Balwyn iPad screen replacement checks" }
+      { href: "/repairs/screen-replacement", label: "Screen replacement support near Balwyn" },
+      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Balwyn" },
+      { href: "/repairs/tablet/ipad", label: "Balwyn iPad screen replacement checks" }
     ]
   },
   {
@@ -751,9 +751,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and phone repair choices for Vermont families" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery checks near Vermont" },
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Vermont iPhone screen replacement options" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair choices for Vermont families" },
+      { href: "/repairs/battery-replacement", label: "Battery checks near Vermont" },
+      { href: "/repairs/screen-replacement", label: "Vermont screen replacement options" }
     ]
   },
   {
@@ -814,9 +814,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone and Samsung repair options for Springvale customers" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad screen replacements near Springvale" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging port diagnostics for Springvale devices" }
+      { href: "/repairs/screen-replacement", label: "Screen repair options for Springvale customers" },
+      { href: "/repairs/tablet/ipad", label: "iPad screen replacements near Springvale" },
+      { href: "/repairs/charging-port-replacement", label: "Charging port diagnostics for Springvale devices" }
     ]
   },
   {
@@ -876,9 +876,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "charging and work-device checks for Kilsyth customers" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery diagnostic options near Kilsyth" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display & touch assessments close to Kilsyth" }
+      { href: "/repairs/charging-port-replacement", label: "Charging and work-device checks for Kilsyth customers" },
+      { href: "/repairs/battery-replacement", label: "Battery diagnostic options near Kilsyth" },
+      { href: "/repairs/tablet/ipad", label: "iPad display and touch assessments close to Kilsyth" }
     ]
   },
   {
@@ -938,9 +938,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "phone screen and iPad repair options near Mooroolbark" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery replacement services close to Mooroolbark" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung charging diagnostics near Mooroolbark" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair options near Mooroolbark" },
+      { href: "/repairs/battery-replacement", label: "Battery replacement services close to Mooroolbark" },
+      { href: "/repairs/charging-port-replacement", label: "Charging diagnostics near Mooroolbark" }
     ]
   },
   {
@@ -1001,9 +1001,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "laptop and phone diagnostics for Clayton devices" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Clayton iPad screen and battery options" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "USB-C charging diagnostics close to Clayton" }
+      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Clayton" },
+      { href: "/repairs/tablet/ipad", label: "Clayton iPad screen and battery options" },
+      { href: "/repairs/charging-port-replacement", label: "USB-C charging diagnostics close to Clayton" }
     ]
   },
   {
@@ -1063,9 +1063,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "device repair advice for Lilydale customers" },
-      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "MacBook diagnostics near Lilydale" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "Lilydale iPad screen replacement options" }
+      { href: "/repairs/screen-replacement", label: "Screen repair advice for Lilydale customers" },
+      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Lilydale" },
+      { href: "/repairs/tablet/ipad", label: "Lilydale iPad screen replacement options" }
     ]
   },
   {
@@ -1125,9 +1125,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "iPhone, Samsung and tablet support for Chirnside Park families" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad touch and screen repair options near Chirnside Park" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Chirnside Park iPhone battery diagnostic options" }
+      { href: "/repairs/screen-replacement", label: "Screen repair support for Chirnside Park families" },
+      { href: "/repairs/tablet/ipad", label: "iPad touch and screen repair options near Chirnside Park" },
+      { href: "/repairs/battery-replacement", label: "Chirnside Park battery diagnostic options" }
     ]
   },
   {
@@ -1187,9 +1187,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "charging and screen assessments near Ferntree Gully" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Ferntree Gully phone battery checks" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component diagnostics near Ferntree Gully" }
+      { href: "/repairs/screen-replacement", label: "Screen assessments near Ferntree Gully" },
+      { href: "/repairs/battery-replacement", label: "Ferntree Gully phone battery checks" },
+      { href: "/repairs/charging-port-replacement", label: "Charging port diagnostics near Ferntree Gully" }
     ]
   },
   {
@@ -1249,9 +1249,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "work-device and USB-C diagnostics for Knoxfield customers" },
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "Knoxfield iPhone and Samsung repair options" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component checks near Knoxfield" }
+      { href: "/repairs/charging-port-replacement", label: "Charging and USB-C diagnostics near Knoxfield" },
+      { href: "/repairs/tablet/ipad", label: "Knoxfield iPad repair checks" },
+      { href: "/repairs/screen-replacement", label: "Phone screen repair options near Knoxfield" }
     ]
   },
   {
@@ -1311,9 +1311,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and family-device repair options for Rowville" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "iPhone battery checks close to Rowville" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung phone repair assessments near Rowville" }
+      { href: "/repairs/charging-port-replacement", label: "Rowville charging port and power diagnostics" },
+      { href: "/repairs/battery-replacement", label: "Battery checks close to Rowville" },
+      { href: "/repairs/screen-replacement", label: "Rowville phone screen repair options" }
     ]
   },
   {
@@ -1373,9 +1373,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "phone and tablet assessments for Donvale customers" },
-      { href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", label: "MacBook and laptop diagnostics near Donvale" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Donvale Samsung charging port assessments" }
+      { href: "/repairs/screen-replacement", label: "Screen repair assessments for Donvale customers" },
+      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Donvale" },
+      { href: "/repairs/charging-port-replacement", label: "Donvale charging port assessments" }
     ]
   },
   {
@@ -1435,9 +1435,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "device repair planning for Park Orchards residents" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad screen replacements near Park Orchards" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Park Orchards phone battery checks" }
+      { href: "/repairs/screen-replacement", label: "Screen repair planning for Park Orchards residents" },
+      { href: "/repairs/tablet/ipad", label: "iPad screen replacements near Park Orchards" },
+      { href: "/repairs/battery-replacement", label: "Park Orchards phone battery checks" }
     ]
   },
   {
@@ -1497,9 +1497,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/phone/iphone/iphone-15-pro-max/screen-replacement", label: "charging and camera diagnostics near Warrandyte" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Warrandyte iPhone battery diagnostics" },
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad display and component checks near Warrandyte" }
+      { href: "/repairs/screen-replacement", label: "Screen diagnostics near Warrandyte" },
+      { href: "/repairs/battery-replacement", label: "Warrandyte battery diagnostics" },
+      { href: "/repairs/charging-port-replacement", label: "Charging port support near Warrandyte" }
     ]
   },
   {
@@ -1569,9 +1569,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/tablet/ipad/ipad-9th-generation/screen-replacement", label: "iPad and phone repair options for Warranwood residents" },
-      { href: "/repairs/phone/iphone/iphone-13/battery-replacement", label: "Warranwood iPhone battery replacement options" },
-      { href: "/repairs/phone/samsung/galaxy-s22/charging-port-replacement", label: "Samsung phone repair checks near Warranwood" }
+      { href: "/repairs/screen-replacement", label: "Warranwood screen repair options" },
+      { href: "/repairs/battery-replacement", label: "Warranwood battery replacement options" },
+      { href: "/repairs/tablet/ipad", label: "iPad diagnostics and repair near Warranwood" }
     ]
   },
 ];
