@@ -1,8 +1,20 @@
+export type AliMobileEnhancedIphoneRepairType =
+  | "screen-replacement"
+  | "battery-replacement"
+  | "charging-port-replacement"
+  | "back-glass-replacement"
+  | "front-camera-replacement"
+  | "back-camera-replacement";
+
 export type Iphone14ProMaxPilotRepairType =
   | "screen-replacement"
   | "battery-replacement"
   | "charging-port-replacement"
   | "back-glass-replacement";
+
+export type AliMobileEnhancedIphoneModelSlug =
+  | "iphone-14-pro-max"
+  | "iphone-14-pro";
 
 export interface RepairTypeSeoPocket {
   quickAnswer: string;

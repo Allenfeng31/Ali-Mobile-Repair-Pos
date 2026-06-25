@@ -1,8 +1,6 @@
-export type CommonRepairProblemsRepairType =
-  | "screen-replacement"
-  | "battery-replacement"
-  | "charging-port-replacement"
-  | "back-glass-replacement";
+import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
+
+export type CommonRepairProblemsRepairType = AliMobileEnhancedIphoneRepairType;
 
 interface RepairProblem {
   title: string;
@@ -18,24 +16,32 @@ interface CommonRepairProblemsSectionProps {
 const SECTION_COPY: Record<
   CommonRepairProblemsRepairType,
   {
-    heading: string;
+    heading: (modelName: string) => string;
     intro: string;
   }
 > = {
   "screen-replacement": {
-    heading: "Common iPhone 14 Pro Max Screen Repair Problems",
+    heading: (modelName) => `Common ${modelName} Screen Repair Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
   "battery-replacement": {
-    heading: "Common iPhone 14 Pro Max Battery Problems",
+    heading: (modelName) => `Common ${modelName} Battery Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
   "charging-port-replacement": {
-    heading: "Common iPhone 14 Pro Max Charging Port Problems",
+    heading: (modelName) => `Common ${modelName} Charging Port Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
   "back-glass-replacement": {
-    heading: "Common iPhone 14 Pro Max Back Glass Problems",
+    heading: (modelName) => `Common ${modelName} Back Glass Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "front-camera-replacement": {
+    heading: (modelName) => `Common ${modelName} Front Camera Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "back-camera-replacement": {
+    heading: (modelName) => `Common ${modelName} Back Camera Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
 };
@@ -56,7 +62,7 @@ export default function CommonRepairProblemsSection({
       <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
         <div className="repair-workbench-heading">
           <span>Common problems</span>
-          <h2 id={headingId}>{copy.heading}</h2>
+          <h2 id={headingId} className="scroll-mt-32">{copy.heading(modelName)}</h2>
           <p className="mx-auto mt-4 max-w-3xl text-pretty">
             {copy.intro}
           </p>
@@ -69,13 +75,13 @@ export default function CommonRepairProblemsSection({
           {problems.map((problem) => (
             <article
               key={problem.title}
-              className="flex h-full min-h-[280px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] md:min-h-[296px]"
+              className="flex h-full min-h-[188px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] md:min-h-[198px]"
             >
-              <div className="flex flex-1 flex-col items-center text-center">
-                <h3 className="mx-auto max-w-[18rem] text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950">
+              <div className="flex flex-1 flex-col items-start text-left md:items-center md:text-center">
+                <h3 className="w-full text-left text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950 md:mx-auto md:max-w-[18rem] md:text-center">
                   {problem.title}
                 </h3>
-                <p className="mx-auto mt-5 max-w-[22rem] text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">
+                <p className="mt-5 w-full text-left text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:mx-auto md:max-w-[22rem] md:text-center">
                   {problem.description}
                 </p>
               </div>

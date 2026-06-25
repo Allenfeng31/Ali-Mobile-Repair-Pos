@@ -1,20 +1,32 @@
 import { slugify } from '@/lib/inventoryUtils';
-import { applyIphone14ProMaxBackGlassReplacementSeoPocket } from './back-glass-replacement';
-import { applyIphone14ProMaxBatteryReplacementSeoPocket } from './battery-replacement';
-import { applyIphone14ProMaxChargingPortReplacementSeoPocket } from './charging-port-replacement';
-import { applyIphone14ProMaxScreenReplacementSeoPocket } from './screen-replacement';
-import type { Iphone14ProMaxPilotRepairType, RepairTypeSeoPocket } from './types';
+import { applyIphoneBackGlassReplacementSeoPocket } from './back-glass-replacement';
+import { applyIphoneBackCameraReplacementSeoPocket } from './back-camera-replacement';
+import { applyIphoneBatteryReplacementSeoPocket } from './battery-replacement';
+import { applyIphoneChargingPortReplacementSeoPocket } from './charging-port-replacement';
+import { applyIphoneFrontCameraReplacementSeoPocket } from './front-camera-replacement';
+import { applyIphoneScreenReplacementSeoPocket } from './screen-replacement';
+import type {
+  AliMobileEnhancedIphoneModelSlug,
+  AliMobileEnhancedIphoneRepairType,
+  Iphone14ProMaxPilotRepairType,
+  RepairTypeSeoPocket,
+} from './types';
 
-export type { Iphone14ProMaxPilotRepairType, RepairTypeSeoPocket } from './types';
+export type {
+  AliMobileEnhancedIphoneModelSlug,
+  AliMobileEnhancedIphoneRepairType,
+  Iphone14ProMaxPilotRepairType,
+  RepairTypeSeoPocket,
+} from './types';
 
-interface AliMobilePilotRouteParams {
+interface AliMobileEnhancedIphoneRouteParams {
   category: string;
   brand: string;
   model: string;
   'repair-type': string;
 }
 
-interface AliMobilePilotSeoPocketParams {
+interface AliMobileEnhancedIphoneSeoPocketParams {
   category: string;
   brand: string;
   model: string;
@@ -22,60 +34,112 @@ interface AliMobilePilotSeoPocketParams {
   pocket: RepairTypeSeoPocket | null;
 }
 
-export function getAliMobileIphone14ProMaxPilotRepairType(
-  params: AliMobilePilotRouteParams
-): Iphone14ProMaxPilotRepairType | null {
+export const ENHANCED_REPAIR_TYPES_BY_MODEL: Record<
+  AliMobileEnhancedIphoneModelSlug,
+  ReadonlySet<AliMobileEnhancedIphoneRepairType>
+> = {
+  'iphone-14-pro-max': new Set([
+    'screen-replacement',
+    'battery-replacement',
+    'charging-port-replacement',
+    'back-glass-replacement',
+  ]),
+  'iphone-14-pro': new Set([
+    'screen-replacement',
+    'battery-replacement',
+    'charging-port-replacement',
+    'back-glass-replacement',
+    'front-camera-replacement',
+    'back-camera-replacement',
+  ]),
+};
+
+function getAliMobileEnhancedIphoneModelSlug(
+  params: AliMobileEnhancedIphoneRouteParams
+): AliMobileEnhancedIphoneModelSlug | null {
   const category = slugify(params.category);
   const brand = slugify(params.brand);
   const model = slugify(params.model);
-  const repairType = slugify(params['repair-type']);
 
-  if (category !== "phone" || brand !== "iphone" || model !== "iphone-14-pro-max") {
+  if (category !== "phone" || brand !== "iphone") {
     return null;
   }
 
-  switch (repairType) {
-    case "screen-replacement":
-    case "battery-replacement":
-    case "charging-port-replacement":
-    case "back-glass-replacement":
-      return repairType;
+  if (model === 'iphone-14-pro-max' || model === 'iphone-14-pro') {
+    return model;
+  }
+
+  return null;
+}
+
+export function getAliMobileEnhancedIphoneRepairType(
+  params: AliMobileEnhancedIphoneRouteParams
+): AliMobileEnhancedIphoneRepairType | null {
+  const modelSlug = getAliMobileEnhancedIphoneModelSlug(params);
+  const repairType = slugify(params['repair-type']) as AliMobileEnhancedIphoneRepairType;
+
+  if (!modelSlug) {
+    return null;
+  }
+
+  return ENHANCED_REPAIR_TYPES_BY_MODEL[modelSlug].has(repairType) ? repairType : null;
+}
+
+export function isAliMobileEnhancedIphoneRepairPage(params: AliMobileEnhancedIphoneRouteParams): boolean {
+  return getAliMobileEnhancedIphoneRepairType(params) !== null;
+}
+
+export function getAliMobileEnhancedIphoneModelName(modelSlug: string): string | null {
+  switch (slugify(modelSlug)) {
+    case 'iphone-14-pro-max':
+      return 'iPhone 14 Pro Max';
+    case 'iphone-14-pro':
+      return 'iPhone 14 Pro';
     default:
       return null;
   }
 }
 
-export function getAliMobileIphone14ProMaxPilotSeoPocket({
+export function getAliMobileEnhancedIphoneSeoPocket({
   category,
   brand,
   model,
   repairType,
   pocket,
-}: AliMobilePilotSeoPocketParams): RepairTypeSeoPocket | null {
+}: AliMobileEnhancedIphoneSeoPocketParams): RepairTypeSeoPocket | null {
   if (!pocket) {
     return pocket;
   }
 
-  const pilotRepairType = getAliMobileIphone14ProMaxPilotRepairType({
+  const enhancedRepairType = getAliMobileEnhancedIphoneRepairType({
     category,
     brand,
     model,
     'repair-type': repairType,
   });
 
-  if (!pilotRepairType) {
+  if (!enhancedRepairType) {
     return pocket;
   }
 
-  switch (pilotRepairType) {
+  const modelName = getAliMobileEnhancedIphoneModelName(model);
+  if (!modelName) {
+    return pocket;
+  }
+
+  switch (enhancedRepairType) {
     case "screen-replacement":
-      return applyIphone14ProMaxScreenReplacementSeoPocket(pocket);
+      return applyIphoneScreenReplacementSeoPocket(pocket, modelName);
     case "battery-replacement":
-      return applyIphone14ProMaxBatteryReplacementSeoPocket(pocket);
+      return applyIphoneBatteryReplacementSeoPocket(pocket, modelName);
     case "charging-port-replacement":
-      return applyIphone14ProMaxChargingPortReplacementSeoPocket(pocket);
+      return applyIphoneChargingPortReplacementSeoPocket(pocket, modelName);
     case "back-glass-replacement":
-      return applyIphone14ProMaxBackGlassReplacementSeoPocket(pocket);
+      return applyIphoneBackGlassReplacementSeoPocket(pocket, modelName);
+    case "front-camera-replacement":
+      return applyIphoneFrontCameraReplacementSeoPocket(pocket, modelName);
+    case "back-camera-replacement":
+      return applyIphoneBackCameraReplacementSeoPocket(pocket, modelName);
     default:
       return pocket;
   }

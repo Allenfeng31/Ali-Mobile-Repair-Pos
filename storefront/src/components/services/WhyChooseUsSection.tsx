@@ -1,7 +1,11 @@
-import { IPHONE_WHY_CHOOSE_CONTENT, IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/iphone/why-choose';
-import type { Iphone14ProMaxPilotRepairType } from '@/lib/seo/content/iphone';
+"use client";
 
-export type WhyChooseUsRepairType = Iphone14ProMaxPilotRepairType;
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { getIphoneWhyChooseContent, IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/iphone/why-choose';
+import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
+
+export type WhyChooseUsRepairType = AliMobileEnhancedIphoneRepairType;
 
 interface WhyChooseUsSectionProps {
   modelName: string;
@@ -9,8 +13,9 @@ interface WhyChooseUsSectionProps {
 }
 
 export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseUsSectionProps) {
-  const content = IPHONE_WHY_CHOOSE_CONTENT[repairType];
+  const content = getIphoneWhyChooseContent(modelName)[repairType];
   const headingId = `why-choose-us-${repairType}`;
+  const [openCardIndex, setOpenCardIndex] = useState<number | null>(null);
 
   return (
     <section
@@ -20,7 +25,7 @@ export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseU
       <div className="mx-auto flex w-full max-w-[1180px] flex-col items-center gap-8 text-center lg:gap-10">
         <div className="repair-workbench-heading">
           <span>{content.kicker}</span>
-          <h2 id={headingId}>{content.heading}</h2>
+          <h2 id={headingId} className="scroll-mt-32">{content.heading}</h2>
           <p className="mx-auto mt-4 max-w-3xl text-pretty">
             {content.intro} Customers can walk in to our Ringwood Square store, book online, or contact
             the store before visiting.
@@ -45,26 +50,55 @@ export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseU
           className="mx-auto grid w-full max-w-sm justify-items-center gap-5 md:max-w-5xl md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:max-w-[1180px] xl:grid-cols-3"
           aria-label={`${modelName} repair assessment details`}
         >
-          {content.cards.map((card) => {
+          {content.cards.map((card, index) => {
             const Icon = card.icon;
+            const isOpen = openCardIndex === index;
+            const panelId = `why-choose-panel-${repairType}-${index}`;
 
             return (
               <article
                 key={card.title}
-                className="flex h-full min-h-[372px] w-full max-w-sm flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] text-center md:min-h-[388px]"
+                className="flex h-full w-full max-w-sm flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-5 py-4 text-left sm:px-6 sm:py-5 md:min-h-[388px] md:px-8 md:py-10 md:text-center lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px]"
               >
-                <div className="flex flex-1 flex-col items-center text-center">
-                  <h3 className="flex min-h-[4rem] items-start justify-center gap-2 text-center text-[1.02rem] font-black leading-[1.16] tracking-[-0.015em] text-slate-950">
+                <div className="flex flex-1 flex-col md:items-center md:text-center">
+                  <button
+                    type="button"
+                    className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:hidden"
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    onClick={() => setOpenCardIndex((current) => current === index ? null : index)}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <Icon size={18} strokeWidth={2.2} aria-hidden="true" className="shrink-0 text-blue-600" />
+                      <span className="text-[1rem] font-black leading-[1.16] tracking-[-0.015em] text-slate-950">
+                        {card.title}
+                      </span>
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      strokeWidth={2.2}
+                      aria-hidden="true"
+                      className={`shrink-0 text-slate-500 transition-transform duration-200 motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  <h3 className="hidden min-h-[4rem] items-start justify-center gap-2 text-center text-[1.02rem] font-black leading-[1.16] tracking-[-0.015em] text-slate-950 md:flex">
                     <Icon size={18} strokeWidth={2.2} aria-hidden="true" className="mt-0.5 shrink-0 text-blue-600" />
                     {card.title}
                   </h3>
-                  <ul className="mt-5 list-none space-y-4 pl-0 text-center text-[0.96rem] font-medium leading-[1.68] text-slate-500">
-                    {card.points.map((point) => (
-                      <li key={point} className="text-center">
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
+                  <div
+                    id={panelId}
+                    className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin] duration-200 ease-out motion-reduce:transition-none ${isOpen ? 'mt-4 grid-rows-[1fr] opacity-100 visible' : 'mt-0 grid-rows-[0fr] opacity-0 invisible'} md:mt-5 md:grid-rows-[1fr] md:opacity-100 md:visible`}
+                  >
+                    <div className="overflow-hidden md:overflow-visible">
+                      <ul className="list-none space-y-4 pl-0 text-left text-[0.96rem] font-medium leading-[1.68] text-slate-500 md:text-center">
+                        {card.points.map((point) => (
+                          <li key={point} className="text-left md:text-center">
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </article>
             );

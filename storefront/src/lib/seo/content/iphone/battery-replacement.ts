@@ -1,13 +1,14 @@
 import { appendUniqueCommonProblems, appendUniqueDiagnosticSteps, appendUniqueFaqs, appendUniqueRepairOptions } from './shared';
 import type { RepairTypeSeoPocket } from './types';
 
-export function applyIphone14ProMaxBatteryReplacementSeoPocket(
-  pocket: RepairTypeSeoPocket
+export function applyIphoneBatteryReplacementSeoPocket(
+  pocket: RepairTypeSeoPocket,
+  modelName: string
 ): RepairTypeSeoPocket {
   return {
     ...pocket,
     quickAnswer:
-      "Need iPhone 14 Pro Max battery replacement in Ringwood? We check battery health symptoms, fast drain, battery-percentage instability, charging behaviour, swelling signs, and shutdown patterns before confirming whether battery replacement is the right path.",
+      `Need ${modelName} battery replacement in Ringwood? We check battery health symptoms, fast drain, battery-percentage instability, charging behaviour, swelling signs, and shutdown patterns before confirming whether battery replacement is the right path.`,
     repairOptions: appendUniqueRepairOptions(pocket.repairOptions, [
       {
         name: "Battery health review",
@@ -100,12 +101,12 @@ export function applyIphone14ProMaxBatteryReplacementSeoPocket(
     ]),
     faq: appendUniqueFaqs(pocket.faq, [
       {
-        question: "Can Battery Health alone prove my iPhone 14 Pro Max needs a new battery?",
+        question: `Can Battery Health alone prove my ${modelName} needs a new battery?`,
         answer:
           "No. Battery Health is one useful indicator, but we also look at shutdowns, charging behaviour, heat, runtime, swelling signs, and general power stability before confirming the repair path.",
       },
       {
-        question: "What if my iPhone 14 Pro Max battery problem also involves charging issues?",
+        question: `What if my ${modelName} battery problem also involves charging issues?`,
         answer:
           "We check charging behaviour first because a port, cable, or another power-path fault can overlap with battery complaints. That is why we do not assume every battery symptom is caused by the battery alone.",
       },

@@ -12,14 +12,16 @@ import FaqAccordion from '@/components/FaqAccordion';
 import ServiceAreas from '@/components/seo/ServiceAreas';
 import CommonRepairProblemsSection from '@/components/services/CommonRepairProblemsSection';
 import WhyChooseUsSection from '@/components/services/WhyChooseUsSection';
+import ExploreRepairNetworkSection, { type ExploreRepairLink } from '@/components/services/ExploreRepairNetworkSection';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
 import { generateFaqs } from './repairFaqs';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
 import { getRepairTypeHubDefinition } from '@/lib/repair-type-hubs';
 import {
-  getAliMobileIphone14ProMaxPilotRepairType,
-  getAliMobileIphone14ProMaxPilotSeoPocket,
-  type Iphone14ProMaxPilotRepairType,
+  getAliMobileEnhancedIphoneRepairType,
+  getAliMobileEnhancedIphoneSeoPocket,
+  isAliMobileEnhancedIphoneRepairPage,
+  type AliMobileEnhancedIphoneRepairType,
   type RepairTypeSeoPocket,
 } from '@/lib/seo/content/iphone';
 
@@ -136,11 +138,89 @@ function dedupeRelatedRepairLinks(links: SameModelRepairLink[]) {
   });
 }
 
-const PILOT_REPAIR_TYPE_HUB_LINK_TEXT: Record<Iphone14ProMaxPilotRepairType, string> = {
+function getIphoneModelGeneration(modelSlug: string) {
+  const match = slugify(modelSlug).match(/^iphone-(\d+)(?:-|$)/);
+  return match ? Number.parseInt(match[1], 10) : null;
+}
+
+function getIphoneModelVariantKey(modelSlug: string) {
+  const normalized = slugify(modelSlug);
+  if (normalized.includes('pro-max')) return 'pro-max';
+  if (normalized.includes('pro')) return 'pro';
+  if (normalized.includes('plus')) return 'plus';
+  if (normalized.includes('mini')) return 'mini';
+  return 'base';
+}
+
+function getIphoneModelVariantDistance(currentVariant: string, candidateVariant: string) {
+  const variantOrder = ['base', 'mini', 'plus', 'pro', 'pro-max'];
+  const currentIndex = variantOrder.indexOf(currentVariant);
+  const candidateIndex = variantOrder.indexOf(candidateVariant);
+
+  if (currentIndex === -1 || candidateIndex === -1) {
+    return 10;
+  }
+
+  return Math.abs(currentIndex - candidateIndex);
+}
+
+function getEnhancedIphoneModelHubLinks(
+  models: ReadonlyArray<{ slug: string; model: string }>,
+  currentModelSlug: string
+): ExploreRepairLink[] {
+  const currentGeneration = getIphoneModelGeneration(currentModelSlug);
+  const currentVariant = getIphoneModelVariantKey(currentModelSlug);
+
+  return models
+    .filter((model) => model.slug !== currentModelSlug)
+    .map((model) => {
+      const generation = getIphoneModelGeneration(model.slug);
+      const variant = getIphoneModelVariantKey(model.slug);
+      const generationDistance =
+        currentGeneration !== null && generation !== null ? Math.abs(generation - currentGeneration) : 10;
+      const sameGenerationBoost = generationDistance === 0 ? -100 : 0;
+      const futureTieBreaker =
+        currentGeneration !== null && generation !== null && generation > currentGeneration ? 1 : 0;
+
+      return {
+        href: `/repairs/phone/iphone/${preserveRouteSegment(model.slug)}`,
+        label: `Explore ${model.model} repairs`,
+        sortScore:
+          generationDistance * 100 +
+          getIphoneModelVariantDistance(currentVariant, variant) * 10 +
+          sameGenerationBoost +
+          futureTieBreaker,
+      };
+    })
+    .sort((left, right) => {
+      if (left.sortScore !== right.sortScore) {
+        return left.sortScore - right.sortScore;
+      }
+
+      return left.label.localeCompare(right.label);
+    })
+    .slice(0, 5)
+    .map(({ href, label }) => ({ href, label }));
+}
+
+function getEnhancedRepairCategoryHubLinks(): ExploreRepairLink[] {
+  return [
+    { href: '/repairs/phone', label: 'Explore phone repairs' },
+    { href: '/repairs/phone/samsung', label: 'Explore Samsung phone repairs' },
+    { href: '/repairs/phone/google-pixel', label: 'Explore Google Pixel repairs' },
+    { href: '/repairs/tablet/ipad', label: 'Explore iPad repairs' },
+    { href: '/repairs/laptop/macbook', label: 'Explore MacBook repairs' },
+    { href: '/repairs/watch/apple', label: 'Explore Apple Watch repairs' },
+  ];
+}
+
+const ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT: Record<AliMobileEnhancedIphoneRepairType, string> = {
   'screen-replacement': 'View all screen replacement services',
   'battery-replacement': 'View all battery replacement services',
   'charging-port-replacement': 'View all charging port replacement services',
   'back-glass-replacement': 'View all back glass repair services',
+  'front-camera-replacement': 'View all front camera replacement services',
+  'back-camera-replacement': 'View all back camera replacement services',
 };
 
 const IPHONE_13_SCREEN_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
@@ -872,6 +952,8 @@ const IPHONE_REPAIR_POCKET_TEMPLATE_BY_TYPE: Record<string, RepairTypeSeoPocket>
   "back-glass-repair": IPHONE_13_BACK_HOUSING_SEO_POCKET,
   "rear-glass-repair": IPHONE_13_BACK_HOUSING_SEO_POCKET,
   "camera-repair": IPHONE_13_CAMERA_REPAIR_SEO_POCKET,
+  "front-camera-replacement": IPHONE_13_CAMERA_REPAIR_SEO_POCKET,
+  "back-camera-replacement": IPHONE_13_CAMERA_REPAIR_SEO_POCKET,
   "water-damage-repair": IPHONE_13_WATER_DAMAGE_SEO_POCKET,
 };
 
@@ -3587,6 +3669,8 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   };
   otherRepairLinks: SameModelRepairLink[];
   crossModelLinks: SameModelRepairLink[];
+  iphoneModelHubLinks: ExploreRepairLink[];
+  categoryHubLinks: ExploreRepairLink[];
 } | null> {
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(
@@ -3660,6 +3744,14 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     },
     otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, 4),
     crossModelLinks: dedupeRelatedRepairLinks(crossModelLinks).slice(0, 4),
+    iphoneModelHubLinks:
+      resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
+        ? getEnhancedIphoneModelHubLinks(brandEntry.models, resolvedParams.model)
+        : [],
+    categoryHubLinks:
+      resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
+        ? getEnhancedRepairCategoryHubLinks()
+        : [],
   };
 }
 
@@ -3678,7 +3770,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     notFound();
   }
 
-  const { details, otherRepairLinks, crossModelLinks } = pageData;
+  const { details, otherRepairLinks, crossModelLinks, iphoneModelHubLinks, categoryHubLinks } = pageData;
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
@@ -3686,8 +3778,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
-  const pilotRepairType = getAliMobileIphone14ProMaxPilotRepairType(resolvedParams);
-  const isAliMobilePilotPage = pilotRepairType !== null;
+  const enhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
+  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const repairTypeHub = getRepairTypeHubDefinition(resolvedParams['repair-type']);
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
@@ -3700,7 +3792,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     model: resolvedParams.model,
     repairType: internalRepairSlug,
   });
-  const seoPocket = getAliMobileIphone14ProMaxPilotSeoPocket({
+  const seoPocket = getAliMobileEnhancedIphoneSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
@@ -3810,11 +3902,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        {isAliMobilePilotPage && pilotRepairType && seoPocket && seoPocket.commonProblems.length > 0 && (
+        {isAliMobileEnhancedRepairPage && enhancedRepairType && seoPocket && seoPocket.commonProblems.length > 0 && (
           <ScrollReveal>
             <CommonRepairProblemsSection
               modelName={displayModel}
-              repairType={pilotRepairType}
+              repairType={enhancedRepairType}
               problems={seoPocket.commonProblems}
             />
           </ScrollReveal>
@@ -3831,13 +3923,18 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         {otherRepairLinks.length > 0 && (
           <ScrollReveal>
             <section className="w-full" aria-labelledby="same-model-repairs-heading">
-              <div className="flex w-full flex-col gap-5">
+              <div className="flex w-full flex-col gap-6">
                 <div className="w-full max-w-none">
                   <span className="repair-kicker repair-kicker-muted">More repair paths</span>
-                  <h2 id="same-model-repairs-heading" className="break-words leading-tight">
+                  <h2
+                    id="same-model-repairs-heading"
+                    className="mt-3 break-words text-[1.35rem] font-black leading-[1.15] tracking-[-0.02em] text-slate-950 sm:text-[1.5rem] md:text-[1.9rem] md:leading-tight"
+                  >
                     Other {displayModel} repairs
                   </h2>
-                  <p>Explore other repair paths confirmed for this model.</p>
+                  <p className="mt-2 max-w-[34rem] text-[1rem] font-semibold leading-6 text-slate-700 md:text-[1.05rem] md:font-medium md:text-slate-600">
+                    Explore other repair paths confirmed for this model.
+                  </p>
                 </div>
                 <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
                   {otherRepairLinks.map((link) => (
@@ -3869,10 +3966,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         {crossModelLinks && crossModelLinks.length > 0 && (
           <ScrollReveal>
             <section className="mt-8 w-full" aria-labelledby="cross-model-repairs-heading">
-              <div className="flex w-full flex-col gap-5">
+              <div className="flex w-full flex-col gap-6">
                 <div className="w-full max-w-none">
                   <span className="repair-kicker repair-kicker-muted">More options</span>
-                  <h2 id="cross-model-repairs-heading" className="break-words leading-tight">
+                  <h2
+                    id="cross-model-repairs-heading"
+                    className="mt-3 break-words text-[1.3rem] font-black leading-[1.2] tracking-[-0.015em] text-slate-950 sm:text-[1.45rem] md:text-[1.9rem] md:leading-tight"
+                  >
                     More {displayBrand} models for {finalRepairName}
                   </h2>
                 </div>
@@ -3905,15 +4005,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
                       className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                     >
-                      {isAliMobilePilotPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
+                      {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
                     </Link>
 
-                    {isAliMobilePilotPage && pilotRepairType && repairTypeHub && (
+                    {isAliMobileEnhancedRepairPage && enhancedRepairType && repairTypeHub && (
                       <Link
                         href={`/repairs/${repairTypeHub.slug}`}
                         className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                       >
-                        {PILOT_REPAIR_TYPE_HUB_LINK_TEXT[pilotRepairType]} &rarr;
+                        {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType]} &rarr;
                       </Link>
                     )}
                   </div>
@@ -3925,7 +4025,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       </main>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
-      {!isAliMobilePilotPage && (
+      {!isAliMobileEnhancedRepairPage && (
         <ScrollReveal>
           <ReviewsSection />
         </ScrollReveal>
@@ -3942,16 +4042,16 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <ScrollReveal>
           <TechnicianWorkbenchProcess
             pocket={seoPocket}
-            showCommonProblems={!isAliMobilePilotPage}
+            showCommonProblems={!isAliMobileEnhancedRepairPage}
           />
         </ScrollReveal>
       )}
 
-      {isAliMobilePilotPage && pilotRepairType && (
+      {isAliMobileEnhancedRepairPage && enhancedRepairType && (
         <ScrollReveal>
           <WhyChooseUsSection
             modelName={displayModel}
-            repairType={pilotRepairType}
+            repairType={enhancedRepairType}
           />
         </ScrollReveal>
       )}
@@ -3961,15 +4061,24 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <FaqAccordion faqs={faqs} />
       </ScrollReveal>
 
-      {isAliMobilePilotPage && (
+      {isAliMobileEnhancedRepairPage && (
         <ScrollReveal>
           <ReviewsSection />
         </ScrollReveal>
       )}
 
-      {isAliMobilePilotPage && (
+      {isAliMobileEnhancedRepairPage && (
         <ScrollReveal>
           <ServiceAreas />
+        </ScrollReveal>
+      )}
+
+      {isAliMobileEnhancedRepairPage && (iphoneModelHubLinks.length > 0 || categoryHubLinks.length > 0) && (
+        <ScrollReveal>
+          <ExploreRepairNetworkSection
+            iphoneModelLinks={iphoneModelHubLinks}
+            categoryLinks={categoryHubLinks}
+          />
         </ScrollReveal>
       )}
     </>

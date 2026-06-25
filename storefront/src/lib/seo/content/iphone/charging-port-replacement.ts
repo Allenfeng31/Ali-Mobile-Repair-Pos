@@ -1,13 +1,14 @@
 import { appendUniqueCommonProblems, appendUniqueDiagnosticSteps, appendUniqueFaqs, appendUniqueRepairOptions } from './shared';
 import type { RepairTypeSeoPocket } from './types';
 
-export function applyIphone14ProMaxChargingPortReplacementSeoPocket(
-  pocket: RepairTypeSeoPocket
+export function applyIphoneChargingPortReplacementSeoPocket(
+  pocket: RepairTypeSeoPocket,
+  modelName: string
 ): RepairTypeSeoPocket {
   return {
     ...pocket,
     quickAnswer:
-      "Need iPhone 14 Pro Max charging port replacement in Ringwood? Ali Mobile & Repair checks angle-only charging, loose cable fit, intermittent or slow charging, debris or contamination, cable and charger response, cleaning suitability, and charging-port versus battery or board-level diagnosis before confirming replacement.",
+      `Need ${modelName} charging port replacement in Ringwood? Ali Mobile & Repair checks angle-only charging, loose cable fit, intermittent or slow charging, debris or contamination, cable and charger response, cleaning suitability, and charging-port versus battery or board-level diagnosis before confirming replacement.`,
     workbenchHeadings: {
       options: "What do we check before replacing this charging port?",
       diagnostics: "How do we confirm the charging fault?",
@@ -45,7 +46,7 @@ export function applyIphone14ProMaxChargingPortReplacementSeoPocket(
     diagnosticSteps: appendUniqueDiagnosticSteps(pocket.diagnosticSteps, []),
     faq: appendUniqueFaqs(pocket.faq, [
       {
-        question: "Does my iPhone 14 Pro Max need charging port replacement if it only charges at an angle?",
+        question: `Does my ${modelName} need charging port replacement if it only charges at an angle?`,
         answer:
           "Not always. We inspect for debris, contamination, cable fit, and wear first because some angle-only charging faults can be confirmed or ruled out before a replacement is quoted.",
       },
