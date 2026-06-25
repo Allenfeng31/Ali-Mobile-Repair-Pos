@@ -3830,7 +3830,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
         {otherRepairLinks.length > 0 && (
           <ScrollReveal>
-            <section className="repair-assist-panel" aria-labelledby="same-model-repairs-heading">
+            <section className="w-full" aria-labelledby="same-model-repairs-heading">
               <div className="flex w-full flex-col gap-5">
                 <div className="w-full max-w-none">
                   <span className="repair-kicker repair-kicker-muted">More repair paths</span>
@@ -3868,7 +3868,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
         {crossModelLinks && crossModelLinks.length > 0 && (
           <ScrollReveal>
-            <section className="repair-assist-panel mt-8" aria-labelledby="cross-model-repairs-heading">
+            <section className="mt-8 w-full" aria-labelledby="cross-model-repairs-heading">
               <div className="flex w-full flex-col gap-5">
                 <div className="w-full max-w-none">
                   <span className="repair-kicker repair-kicker-muted">More options</span>
@@ -3925,9 +3925,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       </main>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
-      <ScrollReveal>
-        <ReviewsSection />
-      </ScrollReveal>
+      {!isAliMobilePilotPage && (
+        <ScrollReveal>
+          <ReviewsSection />
+        </ScrollReveal>
+      )}
 
       {/* ─── WATER DAMAGE POLICY ──────────────────────── */}
       {resolvedParams['repair-type'] === 'water-damage-repair' && (
@@ -3958,6 +3960,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       <ScrollReveal>
         <FaqAccordion faqs={faqs} />
       </ScrollReveal>
+
+      {isAliMobilePilotPage && (
+        <ScrollReveal>
+          <ReviewsSection />
+        </ScrollReveal>
+      )}
 
       {isAliMobilePilotPage && (
         <ScrollReveal>

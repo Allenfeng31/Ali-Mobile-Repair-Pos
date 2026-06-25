@@ -34,7 +34,7 @@ export function applyIphone14ProMaxScreenReplacementSeoPocket(
       {
         title: "Black screen while the phone still responds",
         description:
-          "The phone may still ring, vibrate, or make sounds while the display remains black. This can be caused by OLED or screen damage, and in some cases the display connector may be loose, damaged, or have failed. We test the display and related connection path before confirming whether screen replacement is the correct repair.",
+          "Phone still rings or vibrates while the display stays black. OLED or screen damage, or a loose or failed display connector, may be involved. We test before confirming screen replacement.",
       },
       {
         title: "OLED ink marks, black spots, or dead pixels",

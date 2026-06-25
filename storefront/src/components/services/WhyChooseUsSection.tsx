@@ -34,7 +34,7 @@ export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseU
           {IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS.map(({ icon: Icon, text }) => (
             <span
               key={text}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-blue-200/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.88))] px-4 py-2 text-center text-sm font-extrabold text-slate-700 shadow-[0_10px_26px_rgba(15,23,42,0.05)]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 bg-transparent px-1 py-1 text-center text-sm font-extrabold text-slate-700"
             >
               <Icon size={15} strokeWidth={2.2} aria-hidden="true" className="text-blue-600" /> {text}
             </span>
@@ -42,28 +42,25 @@ export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseU
         </div>
 
         <div
-          className="mx-auto grid w-full max-w-sm justify-items-center gap-5 md:max-w-4xl md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:max-w-[1180px] xl:grid-cols-3"
+          className="mx-auto grid w-full max-w-sm justify-items-center gap-5 md:max-w-5xl md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:max-w-[1180px] xl:grid-cols-3"
           aria-label={`${modelName} repair assessment details`}
         >
-          {content.cards.map((card, index) => {
+          {content.cards.map((card) => {
             const Icon = card.icon;
 
             return (
               <article
                 key={card.title}
-                className="flex h-full min-h-[320px] w-full max-w-sm flex-col items-center overflow-hidden rounded-[30px] border border-blue-200/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(248,250,252,0.86)),radial-gradient(circle_at_top_right,rgba(37,99,235,0.1),transparent_48%)] p-6 text-center shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_26px_70px_rgba(15,23,42,0.08)] transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_86px_rgba(37,99,235,0.12)] sm:p-7"
+                className="flex h-full min-h-[372px] w-full max-w-sm flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] text-center md:min-h-[388px]"
               >
-                <span className="mb-4 inline-flex h-[42px] w-[42px] items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-[0.78rem] font-black text-slate-500 shadow-[0_10px_26px_rgba(15,23,42,0.06)]">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="flex flex-1 flex-col">
-                  <h3 className="flex min-h-[4.8rem] items-start justify-center gap-2 text-center text-[clamp(1.18rem,2vw,1.58rem)] font-black leading-[1.08] tracking-[-0.015em] text-slate-900">
-                    <Icon size={18} strokeWidth={2.2} aria-hidden="true" className="mt-1 shrink-0 text-blue-600" />
+                <div className="flex flex-1 flex-col items-center text-center">
+                  <h3 className="flex min-h-[4rem] items-start justify-center gap-2 text-center text-[1.02rem] font-black leading-[1.16] tracking-[-0.015em] text-slate-950">
+                    <Icon size={18} strokeWidth={2.2} aria-hidden="true" className="mt-0.5 shrink-0 text-blue-600" />
                     {card.title}
                   </h3>
-                  <ul className="mt-5 space-y-4 pl-5 text-[1rem] font-medium leading-8 text-slate-600">
+                  <ul className="mt-5 list-none space-y-4 pl-0 text-center text-[0.96rem] font-medium leading-[1.68] text-slate-500">
                     {card.points.map((point) => (
-                      <li key={point} className="text-left">
+                      <li key={point} className="text-center">
                         {point}
                       </li>
                     ))}

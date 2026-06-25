@@ -63,22 +63,19 @@ export default function CommonRepairProblemsSection({
         </div>
 
         <div
-          className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6"
+          className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3"
           aria-label={`${modelName} common repair problems`}
         >
-          {problems.map((problem, index) => (
+          {problems.map((problem) => (
             <article
               key={problem.title}
-              className="flex h-full min-h-[220px] flex-col overflow-hidden rounded-[30px] border border-blue-200/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(248,250,252,0.86)),radial-gradient(circle_at_top_right,rgba(37,99,235,0.1),transparent_48%)] p-6 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_26px_70px_rgba(15,23,42,0.08)] transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_86px_rgba(37,99,235,0.12)] sm:p-7 md:min-h-[240px]"
+              className="flex h-full min-h-[280px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] md:min-h-[296px]"
             >
-              <span className="mb-4 inline-flex h-[42px] w-[42px] items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-[0.78rem] font-black text-slate-500 shadow-[0_10px_26px_rgba(15,23,42,0.06)]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="flex flex-1 flex-col">
-                <h3 className="max-w-[28rem] text-[clamp(1.22rem,2vw,1.58rem)] font-black leading-[1.08] tracking-[-0.015em] text-slate-900 md:min-h-[5.5rem]">
+              <div className="flex flex-1 flex-col items-center text-center">
+                <h3 className="mx-auto max-w-[18rem] text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950">
                   {problem.title}
                 </h3>
-                <p className="mt-5 max-w-[32rem] text-[1rem] font-medium leading-8 text-slate-600">
+                <p className="mx-auto mt-5 max-w-[22rem] text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">
                   {problem.description}
                 </p>
               </div>
