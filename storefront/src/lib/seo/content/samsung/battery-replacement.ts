@@ -251,6 +251,119 @@ export function buildSamsungBatteryReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-a') {
+    return {
+      quickAnswer: `Need ${config.modelName} battery replacement in Ringwood? Ali Mobile & Repair checks rapid drain, unexpected shutdown, percentage instability, heat, swelling, and rear-housing pressure before confirming whether the battery is the main fault path.`,
+      workbenchHeadings: {
+        options: `Which battery path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before battery replacement?',
+        symptoms: 'Which battery symptoms matter most?',
+        outcomes: 'What can change the battery result?',
+      },
+      repairOptions: [
+        {
+          name: 'Battery and power diagnosis',
+          shortDescription: 'We check rapid drain, unexpected shutdown, and percentage instability before assuming the battery is the only problem.',
+          bestFor: 'Phones that no longer hold power or shut down unexpectedly.',
+          notes: 'Symptoms can overlap with port or board faults, so battery-versus-port-versus-board diagnosis comes first.',
+        },
+        {
+          name: 'Swelling and housing inspection',
+          shortDescription: 'We inspect swelling pressure and rear-housing condition.',
+          bestFor: 'Phones with heat, swelling, or rear pressure.',
+          notes: 'If swelling affects the rear housing, we confirm the safe repair path.',
+        },
+        {
+          name: 'Functional testing',
+          shortDescription: 'We test charging stability and power hold after installation.',
+          bestFor: 'Customers who want the battery path checked in context.',
+          notes: 'Functional testing after installation ensures stable power.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Rapid battery drain',
+          description: 'Fast drain can come from battery wear, but it can also overlap with charging or board faults.',
+        },
+        {
+          title: 'Unexpected shutdown',
+          description: 'Shutdowns under load can point to battery wear.',
+        },
+        {
+          title: 'Percentage instability',
+          description: 'Sudden jumps or drops in percentage can indicate battery wear.',
+        },
+        {
+          title: 'Charging but not holding power',
+          description: 'If the phone recognizes a charger but drops power quickly off the cable, the battery is typically worn.',
+        },
+        {
+          title: 'Heat and swelling',
+          description: 'Heat and swelling are checked carefully to assess rear-housing pressure and safety.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Review power symptoms',
+          description: 'We document drain, shutdown, and percentage instability.',
+        },
+        {
+          step: '02',
+          title: 'Check charging overlap',
+          description: 'We perform battery-versus-port-versus-board diagnosis.',
+        },
+        {
+          step: '03',
+          title: 'Inspect for swelling',
+          description: 'We check rear-housing pressure and heat.',
+        },
+        {
+          step: '04',
+          title: 'Retest battery path',
+          description: 'We conduct functional testing after installation.',
+        },
+      ],
+      faq: [
+        {
+          question: `How long should a replacement battery last in my ${config.modelName}?`,
+          answer:
+            'A replacement battery should restore stable power delivery, but we do not promise a fixed runtime or exact battery-health percentage. Real battery life still depends on usage, signal strength, apps, charging habits, and overall device condition.',
+        },
+        {
+          question: `Can battery swelling damage the display or housing on my ${config.modelName}?`,
+          answer:
+            'Yes. Swelling can press on the rear housing, lift the back section, or affect the display fit. We inspect the frame and housing before confirming the repair path.',
+        },
+        {
+          question: `Will battery replacement erase my data on ${config.modelName}?`,
+          answer:
+            'Battery replacement does not normally erase data. We still recommend backing up important files before service as a sensible precaution.',
+        },
+        {
+          question: `Could a charging-port or board fault cause similar battery symptoms on my ${config.modelName}?`,
+          answer:
+            'Yes. Fast drain, shutdowns, and unstable percentages can overlap with charging-path or board-level faults, so we diagnose the full power path before replacing the battery.',
+        },
+        {
+          question: `Will a new ${config.modelName} battery fix overheating?`,
+          answer:
+            'It can help when the battery is the source of the heat, but not every overheating complaint comes from the battery alone. We check for charging overlap, board-level faults, and swelling-related pressure first.',
+        },
+        {
+          question: `How is the final ${config.modelName} battery quote confirmed?`,
+          answer:
+            'The quote follows the live catalogue-backed battery listing for this model and repair path. We confirm the current route before work begins so the repair matches the available product.',
+        },
+        {
+          question: `How long does battery replacement usually take on my ${config.modelName}?`,
+          answer:
+            'Timing depends on part availability and whether the battery fault overlaps with charging or board-level symptoms. We confirm the likely turnaround after diagnosis rather than promising a fixed completion time.',
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} battery replacement in Ringwood? Ali Mobile & Repair checks rapid drain, shutdowns, charging-percentage instability, heat, swelling, and charging behaviour before confirming whether battery replacement is the right quote-only path.`,

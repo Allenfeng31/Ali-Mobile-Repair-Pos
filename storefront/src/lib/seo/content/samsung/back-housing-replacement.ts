@@ -14,6 +14,114 @@ export function buildSamsungBackHousingReplacementPocket(
   const sPenCheck = hasIntegratedSPen ? ', S Pen slot alignment' : '';
   const checks = `rear-panel damage, frame or housing deformation${hingeCheck}${sPenCheck}, camera-area impact, and wireless-charging behaviour`;
 
+  if (config.seriesFamily === 'galaxy-a') {
+    return {
+      quickAnswer: `Need ${config.modelName} Back Housing Replacement in Ringwood? Ali Mobile & Repair checks for cracked or damaged rear housing, lifted or separated rear panels, camera-opening alignment, button and port alignment, and frame condition before replacing the housing assembly.`,
+      workbenchHeadings: {
+        options: `Which housing path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before housing replacement?',
+        symptoms: 'Which rear panel symptoms matter most?',
+        outcomes: 'What can change the housing repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Rear panel and frame inspection',
+          shortDescription: 'We inspect cracked or damaged rear housing and overall frame condition.',
+          bestFor: 'Phones with shattered rear panels or dented frames.',
+          notes: 'Frame condition dictates whether the rear housing can be safely replaced and sealed.',
+        },
+        {
+          name: 'Alignment check',
+          shortDescription: 'We check camera-opening alignment and button and port alignment.',
+          bestFor: 'Phones that have suffered impact near lenses or buttons.',
+          notes: 'Proper alignment is critical for the new Back Housing Replacement to sit flush.',
+        },
+        {
+          name: 'Pressure and seal review',
+          shortDescription: 'We inspect for lifted or separated rear panels and swelling-related pressure.',
+          bestFor: 'Phones where the back is peeling off.',
+          notes: 'Seal limitations mean factory water resistance is not guaranteed after structural damage or repair. We also perform pre- and post-repair testing.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Cracked or damaged rear housing',
+          description: 'Impact can shatter the rear panel, risking internal damage.',
+        },
+        {
+          title: 'Lifted or separated rear panel',
+          description: 'The back peeling off can indicate swelling-related pressure or degraded adhesive.',
+        },
+        {
+          title: 'Frame condition issues',
+          description: 'A bent frame can prevent a new rear panel from seating correctly.',
+        },
+        {
+          title: 'Camera-opening alignment',
+          description: 'Damage around the lens cutouts can affect rear camera safety.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Assess rear damage',
+          description: 'We check for cracked or damaged rear housing and lifted or separated rear panels.',
+        },
+        {
+          step: '02',
+          title: 'Inspect frame and swelling',
+          description: 'We review frame condition and check for swelling-related pressure.',
+        },
+        {
+          step: '03',
+          title: 'Check alignment',
+          description: 'We verify camera-opening alignment and button and port alignment.',
+        },
+        {
+          step: '04',
+          title: 'Post-repair validation',
+          description: 'We perform pre- and post-repair testing, noting seal limitations.',
+        },
+      ],
+      faq: [
+        {
+          question: `What is included in ${config.modelName} Back Housing Replacement?`,
+          answer:
+            'The exact included parts depend on the supplied catalogue-backed assembly. We inspect the rear panel, rear housing, frame fit, camera openings, and button alignment before confirming the final scope.',
+        },
+        {
+          question: `Is this the same as Back Glass Replacement for my ${config.modelName}?`,
+          answer:
+            'No. Back Housing is the approved POS taxonomy for this Galaxy A route, and we do not advertise an isolated Back Glass Replacement service here.',
+        },
+        {
+          question: `Does ${config.modelName} back housing repair include the complete metal frame?`,
+          answer:
+            'Not automatically. Severe frame deformation may require separate inspection, so we confirm the safe repair path before promising any particular assembly outcome.',
+        },
+        {
+          question: `Can battery swelling cause the rear housing on my ${config.modelName} to lift?`,
+          answer:
+            'Yes. Swelling can push on the rear section, affect the way the housing sits, and change the safe repair path, so we inspect for pressure before quoting.',
+        },
+        {
+          question: `Will camera openings and buttons be checked during ${config.modelName} back housing work?`,
+          answer:
+            'Yes. We check camera openings, button alignment, port alignment, and overall fit because housing damage can affect more than the visible rear panel.',
+        },
+        {
+          question: `Will back housing replacement restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+        {
+          question: `How is the final ${config.modelName} back housing quote confirmed?`,
+          answer:
+            'The quote follows the live catalogue-backed Back Housing listing and the inspected assembly path. We confirm the current route before work begins so the price matches the actual repair scope.',
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} back housing replacement in Ringwood? Ali Mobile & Repair checks ${checks} before confirming the quote-only scope.`,

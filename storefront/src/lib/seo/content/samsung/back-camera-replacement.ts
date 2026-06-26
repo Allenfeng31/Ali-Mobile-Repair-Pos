@@ -285,7 +285,109 @@ export function buildSamsungBackCameraReplacementPocket(
         ? 'dual rear-camera'
         : config.rearCameraClass === 'triple'
           ? 'triple rear-camera'
-          : 'rear-camera';
+      : 'rear-camera';
+
+  if (config.seriesFamily === 'galaxy-a') {
+    return {
+      quickAnswer: `Need ${config.modelName} back camera replacement in Ringwood? Ali Mobile & Repair checks for a blurred or shaking image, focus failure, black preview, image spots, and impact damage before confirming the module fault.`,
+      workbenchHeadings: {
+        options: `Which rear camera path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before back camera replacement?',
+        symptoms: 'Which rear camera symptoms matter most?',
+        outcomes: 'What can change the rear camera repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Module and focus diagnosis',
+          shortDescription: 'We assess a blurred or shaking image, focus failure, and black preview.',
+          bestFor: 'Phones that produce shaky videos or fail to load the rear camera.',
+          notes: 'We perform module-versus-lens-glass-versus-housing diagnosis to ensure the module itself requires replacement.',
+        },
+        {
+          name: 'Lens and impact inspection',
+          shortDescription: 'We check for image spots and impact damage to the rear housing.',
+          bestFor: 'Phones with visible damage to the rear glass over the camera.',
+          notes: 'If the external lens glass is shattered, it must be addressed to protect the new back camera module.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Blurred or shaking image',
+          description: 'Optical stabilisation failure causes the image to vibrate or blur.',
+        },
+        {
+          title: 'Focus failure',
+          description: 'The camera cannot lock focus on near or distant subjects.',
+        },
+        {
+          title: 'Black preview',
+          description: 'The camera app loads but the rear view is completely dark.',
+        },
+        {
+          title: 'Image spots',
+          description: 'Dark spots or blemishes that appear consistently in photos due to sensor damage or dust.',
+        },
+        {
+          title: 'Impact damage',
+          description: 'Physical damage to the lens area or housing.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Assess optical stability',
+          description: 'We check for a blurred or shaking image and focus failure.',
+        },
+        {
+          step: '02',
+          title: 'Inspect physical damage',
+          description: 'We perform module-versus-lens-glass-versus-housing diagnosis after impact damage.',
+        },
+        {
+          step: '03',
+          title: 'Check sensor output',
+          description: 'We look for a black preview or permanent image spots.',
+        },
+        {
+          step: '04',
+          title: 'Isolate the fault',
+          description: 'We confirm whether the module itself has failed before quoting.',
+        },
+      ],
+      faq: [
+        {
+          question: `Does Back Camera Repair on my ${config.modelName} replace every rear camera module?`,
+          answer:
+            'No. The technician identifies the affected internal camera module first, and the repair scope depends on that fault path rather than automatically replacing every rear camera together.',
+        },
+        {
+          question: `Is external camera lens glass included in ${config.modelName} back camera repair?`,
+          answer:
+            'External lens glass is not a confirmed standalone public service here. We inspect it separately because lens glass, housing damage, and internal module faults can look similar.',
+        },
+        {
+          question: `Why does the rear camera on my ${config.modelName} shake or fail to focus?`,
+          answer:
+            'Shake or focus problems can come from the camera module, housing damage, or impact around the camera area. We test the supported rear-camera modes before confirming the repair path.',
+        },
+        {
+          question: `Could housing damage affect the back camera on my ${config.modelName}?`,
+          answer:
+            'Yes. Rear housing deformation can affect the camera alignment or the way the module sits, so we inspect the outer structure before assuming the module alone has failed.',
+        },
+        {
+          question: `Could software or a board fault cause a black rear-camera preview on my ${config.modelName}?`,
+          answer:
+            'Yes. A black preview can also come from software or board-level faults, so we do not assume every image problem is a camera-module failure.',
+        },
+        {
+          question: `How is the quote confirmed for ${config.modelName} back camera repair?`,
+          answer:
+            'We confirm the quote after identifying the affected camera module and checking whether the fault sits in the module, lens glass, housing, or a broader diagnostic path.',
+        },
+      ],
+    };
+  }
 
   return {
     quickAnswer:

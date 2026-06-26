@@ -476,6 +476,108 @@ export function buildSamsungFrontCameraReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-a') {
+    return {
+      quickAnswer: `Need ${config.modelName} front camera replacement in Ringwood? Ali Mobile & Repair checks for a blurry image, haze or dust, black preview, focus inconsistency, and impact near the camera opening before confirming the module fault.`,
+      workbenchHeadings: {
+        options: `Which front camera path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before front camera replacement?',
+        symptoms: 'Which selfie camera symptoms matter most?',
+        outcomes: 'What can change the front camera repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Image and focus diagnosis',
+          shortDescription: 'We assess a blurry image, black preview, and focus inconsistency.',
+          bestFor: 'Phones that produce unclear selfies or fail to load the front camera.',
+          notes: 'We perform camera-versus-software diagnosis to ensure the module requires physical replacement.',
+        },
+        {
+          name: 'Lens opening inspection',
+          shortDescription: 'We check for haze or dust and impact near the camera opening.',
+          bestFor: 'Phones with visible dust under the screen glass near the camera.',
+          notes: 'If the screen glass covering the camera is cracked, a front camera replacement alone will not clear the image.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Blurry image',
+          description: 'Smudges or lack of sharpness during front camera use.',
+        },
+        {
+          title: 'Haze or dust',
+          description: 'Particulates trapped between the module and the display glass.',
+        },
+        {
+          title: 'Black preview',
+          description: 'The camera app loads but the front preview remains completely dark.',
+        },
+        {
+          title: 'Focus inconsistency',
+          description: 'The camera struggles to lock onto subjects.',
+        },
+        {
+          title: 'Impact near the camera opening',
+          description: 'Physical damage to the display area covering the module.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Software validation',
+          description: 'We perform camera-versus-software diagnosis.',
+        },
+        {
+          step: '02',
+          title: 'Inspect physical damage',
+          description: 'We check for impact near the camera opening.',
+        },
+        {
+          step: '03',
+          title: 'Assess image quality',
+          description: 'We check for a blurry image or focus inconsistency.',
+        },
+        {
+          step: '04',
+          title: 'Check for debris',
+          description: 'We look for haze or dust trapped over the lens.',
+        },
+      ],
+      faq: [
+        {
+          question: `Why is the front camera on my ${config.modelName} blurry or hazy?`,
+          answer:
+            'Blur or haze can come from the camera module, dust, impact, or nearby display-area damage. We inspect the camera opening and surrounding area before confirming the repair path.',
+        },
+        {
+          question: `Could software cause a black front-camera preview on my ${config.modelName}?`,
+          answer:
+            'Yes. A black preview can be caused by software, connection, or deeper board-level issues as well as physical camera failure, so we diagnose before replacing parts.',
+        },
+        {
+          question: `Will front-camera repair on ${config.modelName} erase my data?`,
+          answer:
+            'No. Front camera repair does not normally erase data, but we still recommend backing up important files before service as a precaution.',
+        },
+        {
+          question: `Will the camera opening and display area be checked on my ${config.modelName}?`,
+          answer:
+            'Yes. We inspect the camera opening and nearby display area because impact around the lens path can overlap with the camera symptom.',
+        },
+        {
+          question: `How is the final front-camera price confirmed for ${config.modelName}?`,
+          answer:
+            'The price follows the live catalogue-backed front-camera product for this model and repair path. We confirm the current route before work begins so the quote matches the available listing.',
+        },
+        {
+          question: `How long does front-camera diagnosis and repair usually take on ${config.modelName}?`,
+          answer:
+            'Timing depends on the fault path, part availability, and whether the issue is limited to the camera or overlaps with nearby display or board symptoms.',
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} front camera replacement in Ringwood? Ali Mobile & Repair first identifies whether the issue affects the cover-screen camera or the inner display camera, then checks for related display, protector, or fold-area overlap before confirming the quote-only scope.`,

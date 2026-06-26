@@ -33,6 +33,7 @@ import {
 } from '@/lib/seo/content/samsung';
 import {
   getSamsungHardwareConfig,
+  GALAXY_A_MODEL_ORDER,
   SAMSUNG_GALAXY_S_MODEL_ORDER,
   SAMSUNG_HARDWARE_CONFIG,
 } from '@/lib/seo/content/samsung/config';
@@ -324,6 +325,76 @@ function getEnhancedSamsungFamilyModelHubLinks(
       .map(({ href, label }) => ({ href, label }));
   }
 
+  if (currentConfig.seriesFamily === 'galaxy-a') {
+    const currentGeneration = currentConfig.generation ?? 0;
+    const currentOrderIndex = GALAXY_A_MODEL_ORDER.indexOf(currentConfig.modelSlug);
+    const currentTensGroup = Math.floor(currentGeneration / 10);
+    const currentConnectivityClass = getGalaxyAConnectivityClass(currentConfig.modelSlug);
+    const seenHrefs = new Set<string>();
+
+    return models
+      .filter((model) => model.slug !== currentModelSlug)
+      .map((model) => {
+        const candidateConfig = getSamsungHardwareConfig(model.slug);
+        if (!candidateConfig || candidateConfig.seriesFamily !== 'galaxy-a') {
+          return null;
+        }
+
+        const candidateOrderIndex = GALAXY_A_MODEL_ORDER.indexOf(candidateConfig.modelSlug);
+        const generationDistance = Math.abs((candidateConfig.generation ?? 0) - currentGeneration);
+        const candidateTensGroup = Math.floor((candidateConfig.generation ?? 0) / 10);
+        const orderDistance =
+          currentOrderIndex >= 0 && candidateOrderIndex >= 0
+            ? Math.abs(candidateOrderIndex - currentOrderIndex)
+            : generationDistance;
+
+        return {
+          href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}`,
+          label: `Explore ${candidateConfig.modelName} repairs`,
+          sameTensGroupScore: candidateTensGroup === currentTensGroup ? 0 : 1,
+          generationDistance,
+          orderDistance,
+          connectivityScore: getGalaxyAConnectivityClass(candidateConfig.modelSlug) === currentConnectivityClass ? 0 : 1,
+          newerTieBreaker: candidateConfig.generation > currentGeneration ? 0 : 1,
+          slug: candidateConfig.modelSlug,
+        };
+      })
+      .filter((model): model is NonNullable<typeof model> => Boolean(model))
+      .sort((left, right) => {
+        if (left.sameTensGroupScore !== right.sameTensGroupScore) {
+          return left.sameTensGroupScore - right.sameTensGroupScore;
+        }
+
+        if (left.generationDistance !== right.generationDistance) {
+          return left.generationDistance - right.generationDistance;
+        }
+
+        if (left.orderDistance !== right.orderDistance) {
+          return left.orderDistance - right.orderDistance;
+        }
+
+        if (left.connectivityScore !== right.connectivityScore) {
+          return left.connectivityScore - right.connectivityScore;
+        }
+
+        if (left.newerTieBreaker !== right.newerTieBreaker) {
+          return left.newerTieBreaker - right.newerTieBreaker;
+        }
+
+        return left.slug.localeCompare(right.slug);
+      })
+      .filter((link) => {
+        if (seenHrefs.has(link.href)) {
+          return false;
+        }
+
+        seenHrefs.add(link.href);
+        return true;
+      })
+      .slice(0, 5)
+      .map(({ href, label }) => ({ href, label }));
+  }
+
   const familyModelOrder = Object.values(SAMSUNG_HARDWARE_CONFIG)
     .filter((config) => config.deviceFamily === currentConfig.deviceFamily)
     .map((config) => config.modelSlug);
@@ -379,6 +450,97 @@ function getEnhancedSamsungFamilyModelHubLinks(
     })
     .slice(0, 5)
     .map(({ href, label }) => ({ href, label }));
+}
+
+function getGalaxyAModelNumber(modelSlug: string) {
+  const match = slugify(modelSlug).match(/^galaxy-a(\d+)(?:-5g)?(?:-|$)/);
+  return match ? Number.parseInt(match[1], 10) : 0;
+}
+
+function getGalaxyAConnectivityClass(modelSlug: string) {
+  return slugify(modelSlug).includes('-5g') ? '5g' : '4g';
+}
+
+function getEnhancedSamsungGalaxyARelatedRepairLinks(
+  models: ReadonlyArray<{ slug: string; model: string }>,
+  currentModelSlug: string,
+  repairSlug: string,
+  repairName: string
+): SameModelRepairLink[] {
+  const currentConfig = getSamsungHardwareConfig(currentModelSlug);
+
+  if (!currentConfig || currentConfig.seriesFamily !== 'galaxy-a') {
+    return [];
+  }
+
+  const currentModelNumber = getGalaxyAModelNumber(currentConfig.modelSlug);
+  const currentTensGroup = Math.floor(currentModelNumber / 10);
+  const currentConnectivityClass = getGalaxyAConnectivityClass(currentConfig.modelSlug);
+  const seenHrefs = new Set<string>();
+
+  return models
+    .filter((model) => model.slug !== currentModelSlug)
+    .map((model) => {
+      const candidateConfig = getSamsungHardwareConfig(model.slug);
+
+      if (!candidateConfig || candidateConfig.seriesFamily !== 'galaxy-a') {
+        return null;
+      }
+
+      if (!candidateConfig.supportedRepairTypes.includes(repairSlug as AliMobileEnhancedSamsungRepairType)) {
+        return null;
+      }
+
+      const candidateModelNumber = getGalaxyAModelNumber(candidateConfig.modelSlug);
+      const candidateTensGroup = Math.floor(candidateModelNumber / 10);
+      const candidateConnectivityClass = getGalaxyAConnectivityClass(candidateConfig.modelSlug);
+
+      return {
+        href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}/${getPublicRepairSlug('phone', 'samsung', repairSlug)}`,
+        label: getRelatedRepairAnchorText({
+          category: 'phone',
+          brand: 'samsung',
+          modelName: candidateConfig.modelName,
+          repairSlug,
+          repairName,
+        }),
+        sameTensGroupScore: candidateTensGroup === currentTensGroup ? 0 : 1,
+        generationDistance: Math.abs(candidateModelNumber - currentModelNumber),
+        connectivityScore: candidateConnectivityClass === currentConnectivityClass ? 0 : 1,
+        newerTieBreaker: candidateModelNumber > currentModelNumber ? 0 : 1,
+        slug: candidateConfig.modelSlug,
+      };
+    })
+    .filter((model): model is NonNullable<typeof model> => Boolean(model))
+    .sort((left, right) => {
+      if (left.sameTensGroupScore !== right.sameTensGroupScore) {
+        return left.sameTensGroupScore - right.sameTensGroupScore;
+      }
+
+      if (left.generationDistance !== right.generationDistance) {
+        return left.generationDistance - right.generationDistance;
+      }
+
+      if (left.connectivityScore !== right.connectivityScore) {
+        return left.connectivityScore - right.connectivityScore;
+      }
+
+      if (left.newerTieBreaker !== right.newerTieBreaker) {
+        return left.newerTieBreaker - right.newerTieBreaker;
+      }
+
+      return left.slug.localeCompare(right.slug);
+    })
+    .filter((link) => {
+      if (seenHrefs.has(link.href)) {
+        return false;
+      }
+
+      seenHrefs.add(link.href);
+      return true;
+    })
+    .slice(0, 5)
+    .map(({ href, label, slug }) => ({ href, label, slug }));
 }
 
 type EnhancedRepairType = AliMobileEnhancedIphoneRepairType | AliMobileEnhancedSamsungRepairType;
@@ -3751,7 +3913,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const title = modelCode
     ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
     : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
-    
+
   const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
   const description = META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
 
@@ -3760,8 +3922,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
 
   const isFlexCable = resolvedParams['repair-type'].includes('flex-cable');
 
-  return { 
-    title, 
+  return {
+    title,
     description,
     alternates: {
       canonical: canonicalUrl
@@ -3820,6 +3982,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   };
   otherRepairLinks: SameModelRepairLink[];
   crossModelLinks: SameModelRepairLink[];
+  galaxyARelatedRepairLinks: SameModelRepairLink[];
   iphoneModelHubLinks: ExploreRepairLink[];
   samsungFamilyModelHubLinks: ExploreRepairLink[];
   categoryHubLinks: ExploreRepairLink[];
@@ -3890,6 +4053,16 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     .filter((repair) => !isExcludedRelatedRepairPresentationItem(repair))
     .map(({ href, label, slug }) => ({ href, label, slug }));
 
+  const galaxyARelatedRepairLinks =
+    getSamsungHardwareConfig(resolvedParams.model)?.seriesFamily === 'galaxy-a'
+      ? getEnhancedSamsungGalaxyARelatedRepairLinks(
+          brandEntry.models,
+          resolvedParams.model,
+          internalRepairSlug,
+          repairEntry.name
+        )
+      : [];
+
   return {
     details: {
       brand: brandEntry.brand,
@@ -3902,6 +4075,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     },
     otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, isEnhancedSamsungFamilyPage ? 6 : 4),
     crossModelLinks: dedupeRelatedRepairLinks(crossModelLinks).slice(0, 4),
+    galaxyARelatedRepairLinks,
     iphoneModelHubLinks:
       resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
         ? getEnhancedIphoneModelHubLinks(brandEntry.models, resolvedParams.model)
@@ -3936,6 +4110,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     details,
     otherRepairLinks,
     crossModelLinks,
+    galaxyARelatedRepairLinks,
     iphoneModelHubLinks,
     samsungFamilyModelHubLinks,
     categoryHubLinks,
@@ -3983,11 +4158,22 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     pocket: iphoneSeoPocket,
   });
   const sameModelLinks = otherRepairLinks;
-  const displayCrossModelLinks = isAliMobileEnhancedSamsungPage ? [] : crossModelLinks;
+  const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
+  const displayCrossModelLinks = isGalaxyAEnhancedPage
+    ? galaxyARelatedRepairLinks
+    : isAliMobileEnhancedSamsungPage
+      ? []
+      : crossModelLinks;
   const samsungMidPageHubLinks =
-    samsungHardwareConfig?.seriesFamily === 'galaxy-s'
+    samsungHardwareConfig?.seriesFamily === 'galaxy-s' || samsungHardwareConfig?.seriesFamily === 'galaxy-a'
       ? getAliMobileEnhancedSamsungHubLinks(resolvedParams.model)
       : [];
+  const isGalaxyALogicBoardRoute =
+    samsungHardwareConfig?.seriesFamily === 'galaxy-a' &&
+    slugify(resolvedParams['repair-type']) === 'logic-board-repair';
+  if (isGalaxyALogicBoardRoute && !samsungEnhancedRepairType) {
+    notFound();
+  }
   const exploreRepairNetworkSectionProps = isAliMobileEnhancedIphonePage
     ? {
         sectionDescription: 'Browse other iPhone models or explore repair services for other devices.',
@@ -4003,12 +4189,19 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           categoryLinks: categoryHubLinks,
         }
       : samsungHardwareConfig?.deviceFamily === 'z-flip'
-        ? {
-            sectionDescription: 'Browse other Galaxy Z Flip models or explore repair services for other devices.',
-            modelGroupHeading: 'More Galaxy Z Flip Models',
-            modelLinks: samsungFamilyModelHubLinks,
-            categoryLinks: categoryHubLinks,
-          }
+          ? {
+              sectionDescription: 'Browse other Galaxy Z Flip models or explore repair services for other devices.',
+              modelGroupHeading: 'More Galaxy Z Flip Models',
+              modelLinks: samsungFamilyModelHubLinks,
+              categoryLinks: categoryHubLinks,
+            }
+        : samsungHardwareConfig?.seriesFamily === 'galaxy-a'
+          ? {
+              sectionDescription: 'Explore Samsung repairs or browse repair services for other devices.',
+              modelGroupHeading: 'More Galaxy A Models',
+              modelLinks: samsungFamilyModelHubLinks,
+              categoryLinks: categoryHubLinks,
+            }
         : samsungHardwareConfig?.seriesFamily === 'galaxy-s'
           ? {
               sectionDescription: 'Explore Samsung repairs or browse repair services for other devices.',
@@ -4046,6 +4239,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type'],
     knownRepair?.name || repairTypeDerived
   );
+  const crossModelSectionRepairName = isGalaxyAEnhancedPage
+    ? getRelatedRepairPresentationName(
+        resolvedParams.category,
+        resolvedParams.brand,
+        resolvedParams['repair-type'],
+        finalRepairName
+      )
+    : finalRepairName;
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -4062,7 +4263,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         url={repairPageUrl}
       />
 
-      <RepairTypeClient 
+      <RepairTypeClient
         deviceModel={displayModel}
         repairType={finalRepairName}
         price={price}
@@ -4077,7 +4278,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           <h1>{displayModel} {finalRepairName} in Ringwood</h1>
           <p className="repair-detail-subtitle">Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.</p>
 
-          <RepairPricingAndCTA 
+          <RepairPricingAndCTA
             brandName={displayBrand}
             modelName={displayModel}
             repairName={finalRepairName}
@@ -4111,8 +4312,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               <>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-                  {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing')) 
-                    ? 'Timeframe Varies' 
+                  {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
+                    ? 'Timeframe Varies'
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
                     ? 'Diagnostic Required'
                     : 'Fast Turnaround'}
@@ -4220,7 +4421,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     id="cross-model-repairs-heading"
                     className="mt-3 break-words text-[1.3rem] font-black leading-[1.2] tracking-[-0.015em] text-slate-950 sm:text-[1.45rem] md:text-[1.9rem] md:leading-tight"
                   >
-                    More {displayBrand} models for {finalRepairName}
+                    {isGalaxyAEnhancedPage
+                      ? `More Galaxy A models for ${crossModelSectionRepairName}`
+                      : `More ${displayBrand} models for ${finalRepairName}`}
                   </h2>
                 </div>
                 <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
@@ -4246,25 +4449,27 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   ))}
                 </div>
 
-                <div className="mt-2 text-center">
-                  <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-                    <Link
-                      href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
-                      className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                    >
-                      {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
-                    </Link>
-
-                    {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType] && (
+                {!isGalaxyAEnhancedPage && (
+                  <div className="mt-2 text-center">
+                    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
                       <Link
-                        href={`/repairs/${repairTypeHub.slug}`}
+                        href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
                         className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                       >
-                        {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType]} &rarr;
+                        {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
                       </Link>
-                    )}
+
+                      {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType] && (
+                        <Link
+                          href={`/repairs/${repairTypeHub.slug}`}
+                          className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                        >
+                          {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType]} &rarr;
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </section>
           </ScrollReveal>

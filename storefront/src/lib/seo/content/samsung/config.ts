@@ -261,11 +261,93 @@ const SAMSUNG_GALAXY_S_CONFIGS = SAMSUNG_GALAXY_S_MODEL_SPECS.flatMap((spec) =>
   spec.variants.map((variantClass) => buildSamsungGalaxySConfig(spec.generation, variantClass))
 );
 
+
+
+function defineSamsungGalaxyAConfig(modelName: string): SamsungHardwareConfig {
+  const modelSlug = slugify(modelName) as AliMobileEnhancedSamsungModelSlug;
+  const isLbSupported = ["galaxy-a20","galaxy-a21","galaxy-a30","galaxy-a31","galaxy-a32","galaxy-a40","galaxy-a50","galaxy-a51","galaxy-a52","galaxy-a53","galaxy-a54","galaxy-a55","galaxy-a70","galaxy-a71","galaxy-a72","galaxy-a73"].includes(modelSlug);
+
+  let biometrics: SamsungBiometricClass = 'unknown';
+  if (['galaxy-a11', 'galaxy-a20', 'galaxy-a21', 'galaxy-a30', 'galaxy-a40'].includes(modelSlug)) biometrics = 'rear-fingerprint';
+  else if (['galaxy-a12', 'galaxy-a13', 'galaxy-a14', 'galaxy-a15', 'galaxy-a16', 'galaxy-a17'].includes(modelSlug)) biometrics = 'side-fingerprint';
+  else biometrics = 'under-display-fingerprint';
+
+  const supportedRepairTypes: AliMobileEnhancedSamsungRepairType[] = [
+    'screen-replacement',
+    'battery-replacement',
+    'charging-port-replacement',
+    'back-housing-replacement',
+    'front-camera-replacement',
+    'back-camera-replacement'
+  ];
+  if (isLbSupported) supportedRepairTypes.push('logic-board-repair');
+
+  return defineSamsungHardwareConfig({
+    modelSlug,
+    modelName,
+    seriesFamily: 'galaxy-a',
+    deviceFamily: 'galaxy-a',
+    generation: Number.parseInt(modelSlug.match(/(\d+)/)?.[1] ?? '0', 10),
+    variantClass: 'base',
+    displayForm: 'flat',
+    displayEdgeClass: 'flat',
+    supportedRepairTypes,
+    hasInnerFoldableDisplay: false,
+    hasOuterCoverDisplay: false,
+    biometrics,
+    chargingPortType: 'usb-c',
+    supportsWirelessCharging: false,
+    rearCameraClass: 'unknown',
+    frontCameraClass: 'single-punch-hole',
+    sPenCapability: 'none'
+  });
+}
+
+const SAMSUNG_GALAXY_A_CONFIGS = [
+  'Galaxy A11',
+  'Galaxy A12',
+  'Galaxy A13',
+  'Galaxy A14',
+  'Galaxy A15',
+  'Galaxy A16',
+  'Galaxy A17',
+  'Galaxy A20',
+  'Galaxy A21',
+  'Galaxy A30',
+  'Galaxy A31',
+  'Galaxy A32',
+  'Galaxy A34 5G',
+  'Galaxy A35 5G',
+  'Galaxy A36 5G',
+  'Galaxy A40',
+  'Galaxy A50',
+  'Galaxy A51',
+  'Galaxy A52',
+  'Galaxy A53',
+  'Galaxy A54',
+  'Galaxy A55',
+  'Galaxy A56 5G',
+  'Galaxy A70',
+  'Galaxy A71',
+  'Galaxy A72',
+  'Galaxy A73'
+].map(defineSamsungGalaxyAConfig);
+
+export const GALAXY_A_MODEL_ORDER = [
+  'galaxy-a73', 'galaxy-a72', 'galaxy-a71', 'galaxy-a70',
+  'galaxy-a56-5g', 'galaxy-a55', 'galaxy-a54', 'galaxy-a53', 'galaxy-a52', 'galaxy-a51', 'galaxy-a50',
+  'galaxy-a40',
+  'galaxy-a36-5g', 'galaxy-a35-5g', 'galaxy-a34-5g', 'galaxy-a32', 'galaxy-a31', 'galaxy-a30',
+  'galaxy-a21', 'galaxy-a20',
+  'galaxy-a17', 'galaxy-a16', 'galaxy-a15', 'galaxy-a14', 'galaxy-a13', 'galaxy-a12', 'galaxy-a11'
+];
+
 export const SAMSUNG_HARDWARE_CONFIG: Record<
   AliMobileEnhancedSamsungModelSlug,
   SamsungHardwareConfig
 > = buildSamsungHardwareConfigRecord([
   ...SAMSUNG_GALAXY_S_CONFIGS,
+  ...SAMSUNG_GALAXY_A_CONFIGS,
   defineSamsungHardwareConfig({
     modelSlug: 'galaxy-s23-ultra',
     modelName: 'Galaxy S23 Ultra',

@@ -250,6 +250,120 @@ export function buildSamsungChargingPortReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-a') {
+    const portTypeStr = config.chargingPortType === 'usb-c' ? 'USB-C' : 'charging port';
+    return {
+      quickAnswer: `Need ${config.modelName} ${portTypeStr} replacement in Ringwood? Ali Mobile & Repair checks cable and adapter compatibility, debris, loose connections, damaged port pins, intermittent charging, and data-transfer issues before quoting.`,
+      workbenchHeadings: {
+        options: `Which charging path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before charging port replacement?',
+        symptoms: 'Which charging symptoms matter most?',
+        outcomes: 'What can change the port repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Debris and accessory check',
+          shortDescription: 'We check cable and adapter testing alongside port debris.',
+          bestFor: 'Phones with intermittent charging or loose connections.',
+          notes: `Sometimes the ${portTypeStr} just needs safe clearing or a new cable.`,
+        },
+        {
+          name: 'Port pin inspection',
+          shortDescription: 'We inspect for a damaged port or data-transfer issues.',
+          bestFor: 'Phones that only charge at certain angles.',
+          notes: 'A damaged port requires replacement to restore stable connection.',
+        },
+        {
+          name: 'Power path validation',
+          shortDescription: 'We separate battery or board faults from the port.',
+          bestFor: 'Phones that do not respond to charging at all.',
+          notes: 'We confirm the port is the main issue before proceeding.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Intermittent charging',
+          description: 'The connection drops out unless the cable is held at an angle.',
+        },
+        {
+          title: 'Loose connection',
+          description: 'The cable falls out easily or lacks a solid click.',
+        },
+        {
+          title: 'Damaged port',
+          description: `Visible pin damage inside the ${portTypeStr}.`,
+        },
+        {
+          title: 'Data-transfer issues',
+          description: 'The phone charges but cannot transfer data to a computer.',
+        },
+        {
+          title: 'Debris',
+          description: `Lint or dirt packed into the ${portTypeStr} preventing a connection.`,
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Accessory testing',
+          description: 'We perform cable and adapter testing.',
+        },
+        {
+          step: '02',
+          title: 'Inspect for debris',
+          description: 'We check for a loose connection caused by dirt.',
+        },
+        {
+          step: '03',
+          title: 'Check pin condition',
+          description: 'We look for damaged port pins and data-transfer issues.',
+        },
+        {
+          step: '04',
+          title: 'Isolate power path',
+          description: 'We check for underlying battery or board faults.',
+        },
+      ],
+      faq: [
+        {
+          question: `Could lint or debris cause the charging problem on my ${config.modelName}?`,
+          answer:
+            'Yes. Compacted lint or contamination can prevent the USB-C plug from seating properly, so we inspect and clean the port before recommending replacement when safe.',
+        },
+        {
+          question: `How do you tell whether the USB-C port, cable, battery, or board is faulty on ${config.modelName}?`,
+          answer:
+            'We test with known-good cables and adapters, then separate port wear from battery and board-level behaviour. That helps us avoid replacing the wrong part when the symptoms overlap.',
+        },
+        {
+          question: `Does charging-port repair on ${config.modelName} automatically include microphone or antenna replacement?`,
+          answer:
+            'No. Lower-board parts vary by model variant, so microphone, antenna, or complete daughterboard work is only included when the live catalogue-backed repair listing proves it.',
+        },
+        {
+          question: `Will USB-C data transfer be tested during ${config.modelName} charging-port repair?`,
+          answer:
+            'Yes. We test wired charging and data transfer together because a phone can charge while still failing to communicate over USB-C.',
+        },
+        {
+          question: `Will charging-port repair erase my data on ${config.modelName}?`,
+          answer:
+            'Charging-port repair does not normally erase data. We still recommend backing up important files before service as a precaution.',
+        },
+        {
+          question: `How long does ${config.modelName} charging-port repair usually take?`,
+          answer:
+            'Timing depends on the fault path, part availability, and whether the USB-C issue is limited to the port or overlaps with battery or board-level symptoms.',
+        },
+        {
+          question: `How is the final ${config.modelName} charging-port price confirmed?`,
+          answer:
+            'The final price follows the live catalogue-backed USB-C charging-port listing for this model. We confirm the route before work begins so the quote matches the available product.',
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} charging port replacement in Ringwood? Ali Mobile & Repair checks intermittent USB-C charging, cable movement, debris, contamination, data-connection faults, and overlapping battery or board-level causes before confirming the quote-only path.`,

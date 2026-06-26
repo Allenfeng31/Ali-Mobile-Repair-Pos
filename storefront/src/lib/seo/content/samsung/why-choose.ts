@@ -51,6 +51,15 @@ const SAMSUNG_GALAXY_S_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[]
   { icon: Wrench, text: 'Seal limitations explained clearly' },
 ];
 
+const SAMSUNG_GALAXY_A_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] = [
+  { icon: Smartphone, text: 'Model-specific diagnostics with clear repair-path confirmation' },
+  { icon: Search, text: 'Screen, battery, port, housing, and camera faults separated carefully' },
+  { icon: ClipboardCheck, text: 'Quote scope confirmed before work starts' },
+  { icon: ShieldCheck, text: 'Careful device handling with seal limitations explained clearly' },
+  { icon: BatteryCharging, text: 'Biometric and charging checks where relevant' },
+  { icon: Wrench, text: 'Post-repair testing before handover' },
+];
+
 export function getSamsungWhyChooseSharedHighlights(
   modelName: string
 ): SamsungWhyChooseHighlight[] {
@@ -60,6 +69,10 @@ export function getSamsungWhyChooseSharedHighlights(
     return hardwareConfig.modelSlug === 'galaxy-s23-ultra'
       ? SAMSUNG_GALAXY_S_ULTRA_WHY_CHOOSE_SHARED_HIGHLIGHTS
       : SAMSUNG_GALAXY_S_WHY_CHOOSE_SHARED_HIGHLIGHTS;
+  }
+
+  if (hardwareConfig?.seriesFamily === 'galaxy-a') {
+    return SAMSUNG_GALAXY_A_WHY_CHOOSE_SHARED_HIGHLIGHTS;
   }
 
   return SAMSUNG_FOLDABLE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
@@ -72,6 +85,7 @@ export function getSamsungWhyChooseContent(
   const isFlip = hardwareConfig?.deviceFamily === 'z-flip';
   const isGalaxyS23Ultra = hardwareConfig?.modelSlug === 'galaxy-s23-ultra';
   const isGalaxyS = hardwareConfig?.seriesFamily === 'galaxy-s';
+  const isGalaxyA = hardwareConfig?.seriesFamily === 'galaxy-a';
   const frontCameraIsInnerOnly = hardwareConfig?.frontCameraClass === 'inner-only';
 
   if (isGalaxyS23Ultra) {
@@ -506,6 +520,186 @@ export function getSamsungWhyChooseContent(
             icon: ClipboardCheck,
             points: [
               'Board-level work is only approved after we explain the likely scope, uncertainty, and limitations without fabricating a fixed price.',
+            ],
+          },
+        ],
+      },
+    };
+  }
+
+  if (isGalaxyA && hardwareConfig) {
+    let biometricLabel = 'fingerprint scanner';
+    if (hardwareConfig.biometrics === 'rear-fingerprint') biometricLabel = 'rear fingerprint scanner';
+    else if (hardwareConfig.biometrics === 'side-fingerprint') biometricLabel = 'side-key fingerprint scanner';
+    else if (hardwareConfig.biometrics === 'under-display-fingerprint') biometricLabel = 'under-display fingerprint scanner';
+    const chargingPortLabel = hardwareConfig.chargingPortType === 'usb-c' ? 'USB-C charging path' : 'charging path';
+    const displayLabel = 'display path';
+
+    return {
+      'screen-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} screen replacement`,
+        intro:
+          `We test the display output, touch response, and ${biometricLabel} to ensure your ${modelName} functions as expected after screen repair. Screen damage, frame condition, and calibration requirements can overlap, so we confirm the repair path before promising the outcome.`,
+        cards: [
+          {
+            title: 'Under 1 Hour',
+            icon: ClipboardCheck,
+            points: [
+              `Many straightforward ${modelName} screen repairs can be completed in under an hour once the correct part and repair path are confirmed.`,
+              `We still inspect the ${displayLabel}, frame fit, and ${biometricLabel} before giving a timing estimate, so the quote stays realistic.`,
+            ],
+          },
+          {
+            title: 'Diagnostic first',
+            icon: Search,
+            points: [
+              `We test the ${biometricLabel} and ${displayLabel} before confirming the repair.`,
+              `If calibration or frame concerns are present, we explain those limits before any work begins.`,
+            ],
+          },
+        ],
+      },
+      'battery-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} battery replacement`,
+        intro:
+          `We test your ${modelName} power path to confirm the battery is the main fault before replacing it. Battery wear, charging behaviour, and board-level faults can overlap, so we separate them before quoting.`,
+        cards: [
+          {
+            title: 'Fast Turnaround',
+            icon: ClipboardCheck,
+            points: [
+              `Many straightforward battery jobs are completed quickly once the correct battery and repair path are confirmed.`,
+              `We keep the handover practical by checking runtime, charging, and swelling risks before pickup.`,
+            ],
+          },
+          {
+            title: 'Power path check',
+            icon: BatteryCharging,
+            points: [
+              `We test the charging port and board before assuming the battery is the only fault.`,
+              `That helps avoid replacing a battery when the real issue is charge delivery or deeper power draw.`,
+            ],
+          },
+        ],
+      },
+      'charging-port-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} charging port replacement`,
+        intro:
+          `We clear debris and test cables before quoting a full port replacement for your ${modelName}. USB-C faults can overlap with battery or board issues, so we check the full charging path first.`,
+        cards: [
+          {
+            title: 'Under 1 Hour',
+            icon: ClipboardCheck,
+            points: [
+              `Many straightforward ${chargingPortLabel} repairs can be completed in under an hour once the fault is confirmed.`,
+              `We still test cable fit, debris, and charge draw first so timing matches the actual repair path.`,
+            ],
+          },
+          {
+            title: 'Clear diagnostics',
+            icon: Search,
+            points: [
+              `We check for dirt and debris before replacing the physical port.`,
+              `If the fault points to battery or board behaviour, we explain that before starting the repair.`,
+            ],
+          },
+        ],
+      },
+      'back-housing-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+        intro:
+          `We inspect the frame condition and rear-panel fit before confirming back housing work for your ${modelName}. Rear damage, button alignment, and charging behaviour can overlap, so we confirm the structural path first.`,
+        cards: [
+          {
+            title: 'Frame inspection',
+            icon: Search,
+            points: [
+              `We check the frame and rear-panel seating to ensure the new housing sits flush.`,
+              `If deformation or swelling is present, we explain whether that needs separate attention before fitment.`,
+            ],
+          },
+          {
+            title: 'Seal protection',
+            icon: ShieldCheck,
+            points: [
+              `We replace the housing with a fresh seal where appropriate, though factory water resistance is not guaranteed.`,
+              `You get a clear explanation of what the housing work covers and what it does not.`,
+            ],
+          },
+        ],
+      },
+      'front-camera-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} front camera replacement`,
+        intro:
+          `We test the camera module and inspect the display glass to ensure the best selfie outcome for your ${modelName}. Camera faults can overlap with display-area damage, so we identify the likely cause before confirming the repair.`,
+        cards: [
+          {
+            title: 'Module check',
+            icon: Search,
+            points: [
+              `We perform camera-versus-software testing to confirm the physical module has failed.`,
+              `That keeps the quote tied to the actual fault path instead of a guess.`,
+            ],
+          },
+          {
+            title: 'Glass inspection',
+            icon: ShieldCheck,
+            points: [
+              `We check for impact over the lens that might require a screen or housing repair.`,
+              `If the glass is damaged, we explain the overlap before you approve the work.`,
+            ],
+          },
+        ],
+      },
+      'back-camera-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} back camera replacement`,
+        intro:
+          `We test optical stability and inspect the external lens glass before replacing your ${modelName} rear camera. Multiple rear-camera paths can look similar, so we identify the fault first.`,
+        cards: [
+          {
+            title: 'Stability testing',
+            icon: Search,
+            points: [
+              `We test focus and optical stability to confirm the internal camera is faulty.`,
+              `That helps separate module failure from lens or housing damage.`,
+            ],
+          },
+          {
+            title: 'Lens glass check',
+            icon: ShieldCheck,
+            points: [
+              `We inspect the external lens to ensure the new camera stays protected.`,
+              `If the lens or housing is the only damaged part, we explain that before any replacement is approved.`,
+            ],
+          },
+        ],
+      },
+      'logic-board-repair': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} logic board repair`,
+        intro:
+          `We perform board diagnostics when your ${modelName} fails to power on, restarts unpredictably, or will not charge normally. Logic-board work is quote-only because the real fault path has to be confirmed first.`,
+        cards: [
+          {
+            title: 'Micro-soldering',
+            icon: Search,
+            points: [
+              `We address board-level faults after excluding modular issues like batteries or ports.`,
+              `That keeps the repair path focused on the actual fault rather than on a generic replacement guess.`,
+            ],
+          },
+          {
+            title: 'Diagnostic approach',
+            icon: ShieldCheck,
+            points: [
+              `We assess the viability of the repair before anything is approved.`,
+              `Data recovery can be discussed separately, but it is never promised as part of the board job.`,
             ],
           },
         ],

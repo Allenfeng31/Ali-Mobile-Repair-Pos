@@ -57,10 +57,37 @@ export type AliMobileEnhancedSamsungModelSlug =
   | 'galaxy-z-fold-5'
   | 'galaxy-z-fold-6'
   | 'galaxy-z-fold-7'
-  | 'galaxy-s23-ultra';
+  | 'galaxy-s23-ultra'
+  | 'galaxy-a20'
+  | 'galaxy-a21'
+  | 'galaxy-a30'
+  | 'galaxy-a31'
+  | 'galaxy-a32'
+  | 'galaxy-a40'
+  | 'galaxy-a50'
+  | 'galaxy-a51'
+  | 'galaxy-a52'
+  | 'galaxy-a53'
+  | 'galaxy-a54'
+  | 'galaxy-a55'
+  | 'galaxy-a70'
+  | 'galaxy-a71'
+  | 'galaxy-a72'
+  | 'galaxy-a73'
+  | 'galaxy-a17'
+  | 'galaxy-a16'
+  | 'galaxy-a15'
+  | 'galaxy-a14'
+  | 'galaxy-a13'
+  | 'galaxy-a12'
+  | 'galaxy-a11'
+  | 'galaxy-a34-5g'
+  | 'galaxy-a35-5g'
+  | 'galaxy-a36-5g'
+  | 'galaxy-a56-5g';
 
-export type SamsungSeriesFamily = 'galaxy-z' | 'galaxy-s';
-export type SamsungDeviceFamily = 'z-fold' | 'z-flip' | 'galaxy-s' | 'galaxy-s-ultra';
+export type SamsungSeriesFamily = 'galaxy-z' | 'galaxy-s' | 'galaxy-a';
+export type SamsungDeviceFamily = 'z-fold' | 'z-flip' | 'galaxy-s' | 'galaxy-s-ultra' | 'galaxy-a';
 export type SamsungVariantClass = 'base' | 'plus' | 'ultra' | 'fe' | 'edge' | 'active' | 'other';
 export type SamsungDisplayForm = 'flat' | 'curved' | 'foldable' | 'unknown';
 export type SamsungBiometricClass =
@@ -74,6 +101,8 @@ export type SamsungChargingPortType = 'micro-usb' | 'usb-c' | 'unknown';
 export type SamsungRearCameraClass = 'single' | 'dual' | 'triple' | 'quad' | 'unknown';
 export type SamsungFrontCameraClass = 'cover-and-inner' | 'inner-only' | 'single-punch-hole' | 'single-bezel' | 'dual-front' | 'unknown';
 
+export type SamsungConnectivityClass = '4g' | '5g' | 'unspecified';
+export type SamsungWaterResistanceClass = 'ip67' | 'other-rated' | 'none' | 'unknown';
 export type SamsungDisplayEdgeClass = 'flat' | 'curved' | 'unknown';
 
 export type SamsungSPenCapability =
@@ -94,6 +123,7 @@ export interface SamsungHardwareConfig {
   supportedRepairTypes: ReadonlyArray<AliMobileEnhancedSamsungRepairType>;
   hasInnerFoldableDisplay: boolean;
   hasOuterCoverDisplay: boolean;
+  waterResistanceClass?: SamsungWaterResistanceClass;
   biometrics: SamsungBiometricClass;
   chargingPortType: SamsungChargingPortType;
   supportsWirelessCharging: boolean;

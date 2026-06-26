@@ -394,6 +394,139 @@ export function buildSamsungScreenReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-a') {
+    let biometricTestingStr = 'biometric sensor function';
+    let biometricNotesStr = 'Screen condition and calibration requirements may affect biometric response.';
+    const biometricLabel = getSamsungBiometricLabel(config);
+
+    if (config.biometrics === 'rear-fingerprint') {
+      biometricTestingStr = 'rear fingerprint function';
+      biometricNotesStr = 'We test rear fingerprint function after the repair to ensure the entire assembly is secure.';
+    } else if (config.biometrics === 'side-fingerprint') {
+      biometricTestingStr = 'side fingerprint function';
+      biometricNotesStr = 'We test side fingerprint function after the repair to confirm the new display fits correctly without obstruction.';
+    } else if (config.biometrics === 'under-display-fingerprint') {
+      biometricTestingStr = 'under-display fingerprint response';
+      biometricNotesStr = 'We test under-display fingerprint response because screen condition and calibration requirements may overlap with biometric symptoms.';
+    }
+
+    let waterStr = '';
+    if (config.waterResistanceClass && config.waterResistanceClass !== 'none' && config.waterResistanceClass !== 'unknown') {
+      waterStr = ' While we reseal the device, factory water resistance is not guaranteed after structural damage or repair.';
+    }
+
+    return {
+      quickAnswer: `Need ${config.modelName} screen replacement in Ringwood? Ali Mobile & Repair checks for cracked display glass, black or blank displays, vertical or horizontal lines, flicker, touch failure, and frame edge condition before confirming the final repair path.`,
+      workbenchHeadings: {
+        options: `What screen issues does this ${config.modelName} have?`,
+        diagnostics: 'What do we inspect before screen replacement?',
+        symptoms: 'Which display symptoms matter most?',
+        outcomes: 'What can change the screen repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Display and touch diagnosis',
+          shortDescription:
+            'We assess cracked glass, blank displays, vertical lines, flicker, and touch failure to confirm the screen is the primary fault.',
+          bestFor: 'Phones with visible screen damage, distorted output, or unresponsive touch.',
+          notes:
+            'Display symptoms can occasionally overlap with board-level faults, so diagnosis comes first and we explain the likely repair path clearly.',
+        },
+        {
+          name: 'Frame and edge inspection',
+          shortDescription:
+            'We inspect frame edge condition to ensure a new flat display will seat correctly.',
+          bestFor: 'Phones that have suffered corner impacts or bends along the housing.',
+          notes:
+            'Frame deformation can change the safest repair path and affect the seal, so we check it before quoting replacement.',
+        },
+        {
+          name: 'Post-repair validation',
+          shortDescription:
+            `We test display output, touch response, and ${biometricTestingStr} after installation.`,
+          bestFor: 'Ensuring the phone is fully functional before handover.',
+          notes: `${biometricNotesStr}${waterStr}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Cracked display glass',
+          description: 'A cracked screen can lead to further touch failure or allow debris inside the device.',
+        },
+        {
+          title: 'Black or blank display',
+          description: 'When the phone vibrates or rings but the screen is dark, the OLED or LCD panel has typically failed.',
+        },
+        {
+          title: 'Vertical or horizontal lines',
+          description: 'Lines or flicker usually indicate impact damage directly to the display panel layer beneath the glass.',
+        },
+        {
+          title: 'Touch failure',
+          description: 'Dead spots or ghost touching mean the digitiser layer is compromised, requiring a full screen assembly replacement.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Assess screen condition',
+          description: 'We document cracked glass, blank output, lines, flicker, and touch failure.',
+        },
+        {
+          step: '02',
+          title: 'Inspect frame and edge condition',
+          description: 'We check the housing to ensure a new flat display will fit securely.',
+        },
+        {
+          step: '03',
+          title: 'Perform biometric testing',
+          description: 'We check ' + biometricTestingStr + ' where relevant.',
+        },
+        {
+          step: '04',
+          title: 'Retest display path',
+          description: 'We confirm stable output and touch response before handover.',
+        },
+      ],
+      faq: [
+        {
+          question: `Will my ${config.modelName} ${biometricLabel} sensor still work after screen replacement?`,
+          answer:
+            `We test ${biometricTestingStr} after the repair, but screen replacement does not guarantee biometric restoration or calibration success. The result depends on the original sensor condition, frame fit, and the impact that caused the screen damage.`,
+        },
+        {
+          question: `Does a cracked ${config.modelName} screen always need a full display replacement?`,
+          answer:
+            'Not always, but cracked glass can sit alongside panel damage, touch problems, or frame pressure. We inspect the display and housing together so the quote matches the actual fault path.',
+        },
+        {
+          question: `Can lines, flickering, or a black display on my ${config.modelName} be repaired?`,
+          answer:
+            'Yes, if the display assembly is the fault. We still separate screen damage from deeper board-level issues before confirming the repair path.',
+        },
+        {
+          question: `Will my data be erased during ${config.modelName} screen replacement?`,
+          answer:
+            'Screen replacement does not normally affect your data. We still recommend backing up important files before service as a general precaution.',
+        },
+        {
+          question: `How is the final ${config.modelName} screen price confirmed?`,
+          answer:
+            'The final price follows the live catalogue-backed repair listing for this model and repair path. We confirm the current route before work begins so the quoted repair matches the available product.',
+        },
+        {
+          question: `What screen options are available for my ${config.modelName}?`,
+          answer:
+            'We follow the live catalogue-backed screen listing for this model, so the available option depends on the current POS product rather than a fixed SEO-only choice. We confirm the current listing before service starts.',
+        },
+        {
+          question: `Will ${config.modelName} screen repair restore factory water resistance?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} screen replacement in Ringwood? Ali Mobile & Repair keeps this route quote-only while we separate inner foldable display faults, outer cover-display faults, protector or fold-area concerns, and hinge-related impact before confirming scope.`,

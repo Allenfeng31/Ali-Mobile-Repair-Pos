@@ -246,6 +246,104 @@ export function buildSamsungLogicBoardRepairPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-a') {
+    return {
+      quickAnswer: `Need ${config.modelName} logic board repair in Ringwood? Ali Mobile & Repair investigates no power, restart loops, charging communication faults, and impact-related faults before confirming if board-level work is viable.`,
+      workbenchHeadings: {
+        options: `Which board path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before logic board repair?',
+        symptoms: 'Which board symptoms matter most?',
+        outcomes: 'What can change the board repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Power and boot diagnosis',
+          shortDescription: 'We assess no power and restart loops.',
+          bestFor: 'Phones that are completely dead or stuck on the Samsung logo.',
+          notes: 'We perform board-level inspection after simpler causes are excluded.',
+        },
+        {
+          name: 'Component and impact review',
+          shortDescription: 'We investigate charging communication faults and impact-related faults.',
+          bestFor: 'Phones that fail to charge despite a new port or battery.',
+          notes: 'We note any liquid-related board symptoms as diagnostic context, but data recovery remains a separate and uncertain outcome.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'No power',
+          description: 'The device is completely unresponsive to chargers or button presses.',
+        },
+        {
+          title: 'Restart loops',
+          description: 'The phone continuously reboots or freezes during startup.',
+        },
+        {
+          title: 'Charging communication faults',
+          description: 'The phone draws no current or reports false temperature warnings.',
+        },
+        {
+          title: 'Impact-related faults',
+          description: 'Severe drops can sever internal board connections.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Exclude modular faults',
+          description: 'We perform board-level inspection after simpler causes are excluded.',
+        },
+        {
+          step: '02',
+          title: 'Assess boot sequence',
+          description: 'We investigate no power and restart loops.',
+        },
+        {
+          step: '03',
+          title: 'Review charging path',
+          description: 'We check for charging communication faults on the board.',
+        },
+        {
+          step: '04',
+          title: 'Contextual review',
+          description: 'We document impact-related faults and liquid-related board symptoms as diagnostic context.',
+        },
+      ],
+      faq: [
+        {
+          question: `What symptoms may indicate a logic-board fault on my ${config.modelName}?`,
+          answer:
+            'No power, restart loops, and persistent charging or communication faults are common signs, but we still rule out simpler causes first before calling it a board-level issue.',
+        },
+        {
+          question: `Is successful ${config.modelName} logic-board repair guaranteed?`,
+          answer:
+            'No. Board-level repair depends on the exact fault path, prior damage, and whether the affected circuits can be recovered safely.',
+        },
+        {
+          question: `Can data recovery be guaranteed from a failed ${config.modelName} board?`,
+          answer:
+            'No. Data recovery is discussed as a separate outcome, and success depends on the board condition and the type of damage present.',
+        },
+        {
+          question: `Why is ${config.modelName} logic board repair quote-only?`,
+          answer:
+            'Board-level symptoms vary too much for fixed pricing, so we confirm the likely scope after diagnosis rather than publishing a fixed quote first.',
+        },
+        {
+          question: `How long does diagnosis usually take for ${config.modelName} logic board repair?`,
+          answer:
+            'Diagnosis takes time because we first rule out battery, screen, and charging-port faults. The overall timeframe depends on the board condition and the complexity of the fault.',
+        },
+        {
+          question: `Could battery, screen, or charging-port faults cause similar symptoms on my ${config.modelName}?`,
+          answer:
+            'Yes. Those simpler faults can overlap with board symptoms, which is why we test the device path step by step before recommending board work.',
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} logic board repair in Ringwood? Ali Mobile & Repair uses board-level diagnosis for no-power faults, restart loops, and charging or communication faults after simpler causes are excluded, then explains the quote-only repair or data-first path.`,
