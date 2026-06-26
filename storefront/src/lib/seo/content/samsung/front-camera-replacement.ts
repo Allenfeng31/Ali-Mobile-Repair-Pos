@@ -1,0 +1,245 @@
+import type { RepairTypeSeoPocket, SamsungHardwareConfig } from './types';
+import {
+  SAMSUNG_FOLD_TESTING_NOTE,
+  SAMSUNG_QUOTE_ONLY_SCOPE,
+  SAMSUNG_WATER_RESISTANCE_NOTE,
+} from './shared';
+
+export function buildSamsungFrontCameraReplacementPocket(
+  config: SamsungHardwareConfig
+): RepairTypeSeoPocket {
+  if (config.frontCameraClass === 'inner-only') {
+    return {
+      quickAnswer:
+        `Need ${config.modelName} front camera replacement in Ringwood? Ali Mobile & Repair keeps this route quote-only while we focus on the inner selfie-camera path, check preview failure, blur, haze, or impact around the inner display area, and confirm whether display or fold-area issues overlap with the complaint.`,
+      workbenchHeadings: {
+        options: `Which front-camera path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before front-camera work?',
+        symptoms: 'Which front-camera symptoms matter most?',
+        outcomes: 'What can change the front-camera scope?',
+      },
+      repairOptions: [
+        {
+          name: 'Inner selfie-camera diagnosis',
+          shortDescription:
+            'We test blur, haze, spots, preview failure, and impact around the inner display area before confirming whether the selfie camera itself is at fault.',
+          bestFor:
+            'Phones where selfies, video calls, or inner-display camera preview fail during normal unfolded use.',
+          notes:
+            'This content stays focused on the inner selfie-camera path and does not treat the rear cameras used with the cover display as a second front-camera product.',
+        },
+        {
+          name: 'Display, protector, and fold-area overlap review',
+          shortDescription:
+            'We inspect whether inner-display, protector, crease-area, or hinge-side findings overlap with the selfie-camera complaint before quoting.',
+          bestFor:
+            'Phones where impact, protector issues, or fold-area pressure may be affecting the front-camera result.',
+          notes:
+            'The technician confirms whether the fault is camera-specific or whether the display/fold area changes the repair path.',
+        },
+        {
+          name: 'Quote-only scope confirmation',
+          shortDescription:
+            'We identify the affected selfie-camera path, explain the likely scope, and confirm the quote before any parts are approved.',
+          bestFor:
+            'Phones where the complaint is mixed, inconsistent, or likely to overlap with display-area damage.',
+          notes:
+            `${SAMSUNG_FOLD_TESTING_NOTE} ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Blur, haze, or spots on selfies',
+          description:
+            'Blur or haze can come from the selfie camera path itself, but we also inspect for overlap with display-area impact or contamination.',
+        },
+        {
+          title: 'Preview failure or black image',
+          description:
+            'A failed selfie preview can overlap with inner-display or fold-area damage, so we diagnose before quoting parts.',
+        },
+        {
+          title: 'Impact near the inner display camera area',
+          description:
+            'Impact around the inner display area can affect more than the camera alone and may change the correct repair scope.',
+        },
+        {
+          title: 'Quote-only diagnosis',
+          description:
+            'Final scope and price still require inspection because camera, display, protector, and fold-area faults can overlap.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Test the inner selfie-camera path',
+          description:
+            'We check preview, clarity, blur, spots, and general camera response during normal inner-display use.',
+        },
+        {
+          step: '02',
+          title: 'Inspect related display and fold-area overlap',
+          description:
+            'The inner display, protector, crease area, and nearby impact are checked before confirming whether front-camera replacement is the right scope.',
+        },
+        {
+          step: '03',
+          title: 'Separate selfie-camera faults from rear-camera use cases',
+          description:
+            'We keep the diagnosis on the actual inner selfie-camera path and do not mislabel rear-camera use with the cover display as a second front-camera issue.',
+        },
+        {
+          step: '04',
+          title: 'Confirm the quote-only repair path',
+          description:
+            'We explain the likely scope, testing outcome, and any remaining uncertainty before work starts.',
+        },
+      ],
+      faq: [
+        {
+          question: `Does ${config.modelName} front camera replacement cover more than one front-facing camera?`,
+          answer:
+            'No. On this Galaxy Z Flip model, the Front Camera product stays focused on the inner selfie-camera path, and we do not treat rear-camera use with the cover display as a second front-camera replacement.',
+        },
+        {
+          question: `Can inner-display or protector issues affect the front camera on my ${config.modelName}?`,
+          answer:
+            'Yes. We inspect the inner display, protector, crease area, and nearby impact before confirming whether the fault is isolated to the camera.',
+        },
+        {
+          question: `Why is ${config.modelName} front camera repair quote-only?`,
+          answer:
+            'The final scope depends on whether the issue is limited to the inner selfie camera or overlaps with inner-display, protector, or fold-area findings.',
+        },
+        {
+          question: `Do you guarantee recalibration or every secondary function after ${config.modelName} front camera work?`,
+          answer:
+            'No. We retest the camera path and explain any remaining limitations after inspection and repair, but we do not promise outcomes that depend on separate faults.',
+        },
+        {
+          question: `Will front camera repair restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
+  return {
+    quickAnswer:
+      `Need ${config.modelName} front camera replacement in Ringwood? Ali Mobile & Repair first identifies whether the issue affects the cover-screen camera or the inner display camera, then checks for related display, protector, or fold-area overlap before confirming the quote-only scope.`,
+    workbenchHeadings: {
+      options: `Which front-camera path fits this ${config.modelName}?`,
+      diagnostics: 'What do we inspect before front-camera work?',
+      symptoms: 'Which front-camera symptoms matter most?',
+      outcomes: 'What can change the front-camera scope?',
+    },
+    repairOptions: [
+      {
+        name: 'Cover-screen camera diagnosis',
+        shortDescription:
+          'We test blur, haze, spots, preview failure, and impact around the cover-display area to confirm whether the outer front-facing camera is affected.',
+        bestFor:
+          'Phones with selfie or video-call problems while using the outer cover display.',
+        notes:
+          'Repairing the cover-screen camera does not automatically replace the inner front-facing camera.',
+      },
+      {
+        name: 'Inner display camera diagnosis',
+        shortDescription:
+          'We assess the inner display camera while accounting for its normal image characteristics and any overlap with inner-display, protector, or fold-area issues.',
+        bestFor:
+          'Phones where the complaint only appears while using the inner unfolded display.',
+        notes:
+          'The inner display camera can look different from a conventional lens, so its normal appearance is not automatically labelled damage.',
+      },
+      {
+        name: 'Shared quote confirmation and testing',
+        shortDescription:
+          'We identify which front-facing camera is affected, inspect related display areas, and confirm the correct quote-only path before work begins.',
+        bestFor:
+          'Phones where the faulty camera is unclear or where impact may have affected more than one front-facing component.',
+        notes:
+          `${SAMSUNG_FOLD_TESTING_NOTE} ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+      },
+    ],
+    commonProblems: [
+      {
+        title: 'Blur, haze, or spots on the cover camera',
+        description:
+          'Impact near the cover display can affect the outer front-facing camera path and needs to be separated from display-only damage.',
+      },
+      {
+        title: 'Inner camera preview concerns',
+        description:
+          'The inner display camera may show unusual-looking output compared with a normal lens, so we diagnose before labelling it as damage.',
+      },
+      {
+        title: 'Preview failure or black image',
+        description:
+          'Preview failure can overlap with inner-display, protector, or fold-area faults, especially when the issue only appears while unfolded.',
+      },
+      {
+        title: 'Unclear camera identification',
+        description:
+          'We confirm whether the cover-screen camera or the inner camera is actually affected because replacing one does not replace the other.',
+      },
+    ],
+    diagnosticSteps: [
+      {
+        step: '01',
+        title: 'Test both front-facing cameras',
+        description:
+          'We compare the cover-screen camera and the inner display camera so the fault is tied to the correct camera path.',
+      },
+      {
+        step: '02',
+        title: 'Inspect related display and fold-area overlap',
+        description:
+          'Impact near the cover screen, inner display, protector, or fold area is reviewed before confirming whether camera replacement is the right scope.',
+      },
+      {
+        step: '03',
+        title: 'Separate normal inner-camera traits from damage',
+        description:
+          'The inner display camera is assessed carefully so its normal image characteristics are not mistaken for a hardware fault.',
+      },
+      {
+        step: '04',
+        title: 'Confirm the quote-only repair path',
+        description:
+          'We identify the affected camera, explain the final scope, and avoid fixed-price assumptions before work starts.',
+      },
+    ],
+    faq: [
+      {
+        question: `Does ${config.modelName} front camera replacement cover both front-facing cameras?`,
+        answer:
+          'No. The cover-screen camera and the inner display camera are different components, so we identify the affected camera before quoting.',
+      },
+      {
+        question: `How do you tell whether the cover camera or inner camera is faulty on my ${config.modelName}?`,
+        answer:
+          'We test both front-facing cameras in their normal display contexts and compare the symptoms before confirming the repair path.',
+      },
+      {
+        question: `Can the inner display camera on my ${config.modelName} look different from the cover camera?`,
+        answer:
+          'Yes. The inner display camera can have different normal image characteristics from a standard camera, so we do not automatically label that as damage.',
+      },
+      {
+        question: `Why is ${config.modelName} front camera repair quote-only?`,
+        answer:
+          'The final scope depends on which front-facing camera is affected and whether inner-display, protector, or fold-area issues overlap with the complaint.',
+      },
+      {
+        question: `Do you guarantee recalibration or every secondary function after ${config.modelName} front camera work?`,
+        answer:
+          'No. We retest the camera path and explain any remaining limitations after inspection and repair, but we do not promise outcomes that depend on separate faults.',
+      },
+      {
+        question: `Will front camera repair restore factory water resistance on my ${config.modelName}?`,
+        answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+      },
+    ],
+  };
+}

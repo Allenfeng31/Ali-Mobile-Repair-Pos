@@ -1,6 +1,9 @@
 import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
+import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
 
-export type CommonRepairProblemsRepairType = AliMobileEnhancedIphoneRepairType;
+export type CommonRepairProblemsRepairType =
+  | AliMobileEnhancedIphoneRepairType
+  | AliMobileEnhancedSamsungRepairType;
 
 interface RepairProblem {
   title: string;
@@ -42,6 +45,14 @@ const SECTION_COPY: Record<
   },
   "back-camera-replacement": {
     heading: (modelName) => `Common ${modelName} Back Camera Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "back-housing-replacement": {
+    heading: (modelName) => `Common ${modelName} Back Housing Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "logic-board-repair": {
+    heading: (modelName) => `Common ${modelName} Logic Board Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
 };

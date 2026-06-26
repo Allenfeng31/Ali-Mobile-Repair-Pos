@@ -24,6 +24,13 @@ import {
   type AliMobileEnhancedIphoneRepairType,
   type RepairTypeSeoPocket,
 } from '@/lib/seo/content/iphone';
+import {
+  getAliMobileEnhancedSamsungRepairType,
+  getAliMobileEnhancedSamsungSeoPocket,
+  isAliMobileEnhancedSamsungRepairPage,
+  type AliMobileEnhancedSamsungRepairType,
+} from '@/lib/seo/content/samsung';
+import { getSamsungHardwareConfig, SAMSUNG_HARDWARE_CONFIG } from '@/lib/seo/content/samsung/config';
 
 export const revalidate = 86400;
 
@@ -214,11 +221,85 @@ function getEnhancedRepairCategoryHubLinks(): ExploreRepairLink[] {
   ];
 }
 
-const ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT: Record<AliMobileEnhancedIphoneRepairType, string> = {
+function getSamsungFoldableGeneration(modelSlug: string) {
+  const match = slugify(modelSlug).match(/^galaxy-z-(?:fold|flip)-(\d+)(?:-|$)/);
+  return match ? Number.parseInt(match[1], 10) : 0;
+}
+
+function getEnhancedSamsungFamilyModelHubLinks(
+  models: ReadonlyArray<{ slug: string; model: string }>,
+  currentModelSlug: string
+): ExploreRepairLink[] {
+  const currentConfig = getSamsungHardwareConfig(currentModelSlug);
+  if (!currentConfig) {
+    return [];
+  }
+
+  const familyModelOrder = Object.values(SAMSUNG_HARDWARE_CONFIG)
+    .filter((config) => config.deviceFamily === currentConfig.deviceFamily)
+    .map((config) => config.modelSlug);
+  const currentGeneration = getSamsungFoldableGeneration(currentModelSlug);
+  const currentOrderIndex = familyModelOrder.indexOf(currentConfig.modelSlug);
+  const seenHrefs = new Set<string>();
+
+  return models
+    .filter((model) => model.slug !== currentModelSlug)
+    .filter((model) => getSamsungHardwareConfig(model.slug)?.deviceFamily === currentConfig.deviceFamily)
+    .map((model) => {
+      const href = `/repairs/phone/samsung/${preserveRouteSegment(model.slug)}`;
+      const candidateOrderIndex = familyModelOrder.indexOf(model.slug as keyof typeof SAMSUNG_HARDWARE_CONFIG);
+      const candidateGeneration = getSamsungFoldableGeneration(model.slug);
+      const generationDistance = Math.abs(candidateGeneration - currentGeneration);
+      const orderDistance =
+        currentOrderIndex >= 0 && candidateOrderIndex >= 0
+          ? Math.abs(candidateOrderIndex - currentOrderIndex)
+          : Number.MAX_SAFE_INTEGER;
+
+      return {
+        href,
+        label: `Explore ${model.model} repairs`,
+        candidateOrderIndex,
+        generationDistance,
+        orderDistance,
+        sortDistance:
+          currentOrderIndex >= 0 && candidateOrderIndex >= 0 ? orderDistance : generationDistance,
+        newerTieBreaker:
+          currentOrderIndex >= 0 && candidateOrderIndex >= 0 && candidateOrderIndex > currentOrderIndex ? 0 : 1,
+        slug: model.slug,
+      };
+    })
+    .filter((model) => model.candidateOrderIndex >= 0)
+    .sort((left, right) => {
+      if (left.sortDistance !== right.sortDistance) {
+        return left.sortDistance - right.sortDistance;
+      }
+
+      if (left.newerTieBreaker !== right.newerTieBreaker) {
+        return left.newerTieBreaker - right.newerTieBreaker;
+      }
+
+      return left.slug.localeCompare(right.slug);
+    })
+    .filter((link) => {
+      if (seenHrefs.has(link.href)) {
+        return false;
+      }
+
+      seenHrefs.add(link.href);
+      return true;
+    })
+    .slice(0, 5)
+    .map(({ href, label }) => ({ href, label }));
+}
+
+type EnhancedRepairType = AliMobileEnhancedIphoneRepairType | AliMobileEnhancedSamsungRepairType;
+
+const ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT: Partial<Record<EnhancedRepairType, string>> = {
   'screen-replacement': 'View all screen replacement services',
   'battery-replacement': 'View all battery replacement services',
   'charging-port-replacement': 'View all charging port replacement services',
   'back-glass-replacement': 'View all back glass repair services',
+  'back-housing-replacement': 'View all back housing replacement services',
   'front-camera-replacement': 'View all front camera replacement services',
   'back-camera-replacement': 'View all back camera replacement services',
 };
@@ -3405,25 +3486,6 @@ function getRepairTypeSeoPocket(params: {
     }
   }
 
-  if (category === "phone" && (brand === "samsung" || brand === "galaxy")) {
-    const sPocket = getSamsungGalaxySRepairPocket(model, repairType);
-    if (sPocket) return sPocket;
-
-    const aPocket = getSamsungGalaxyARepairPocket(model, repairType);
-    if (aPocket) return aPocket;
-
-    const normalizedModel = model.replace(/note-(\d)/, "note$1");
-    const normalizedZModel = normalizedModel
-      .replace(/z-fold-(\d)/, "z-fold$1")
-      .replace(/z-flip-(\d)/, "z-flip$1");
-
-    const notePocket = getSamsungGalaxyNoteRepairPocket(normalizedModel, repairType);
-    if (notePocket) return notePocket;
-
-    const zPocket = getSamsungGalaxyZRepairPocket(normalizedZModel, repairType);
-    if (zPocket) return zPocket;
-  }
-
   if (category === "phone" && (brand === "google" || brand === "google-pixel" || brand === "googlepixel" || brand === "pixel")) {
     const googlePocket = getGooglePixelRepairPocket(model, repairType);
     if (googlePocket) return googlePocket;
@@ -3670,6 +3732,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   otherRepairLinks: SameModelRepairLink[];
   crossModelLinks: SameModelRepairLink[];
   iphoneModelHubLinks: ExploreRepairLink[];
+  samsungFamilyModelHubLinks: ExploreRepairLink[];
   categoryHubLinks: ExploreRepairLink[];
 } | null> {
   const catalog = await fetchRepairCatalog();
@@ -3689,10 +3752,16 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   );
   const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === internalRepairSlug);
   if (!repairEntry) return null;
+  const isEnhancedSamsungFamilyPage = isAliMobileEnhancedSamsungRepairPage({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    'repair-type': resolvedParams['repair-type'],
+  });
 
   const otherRepairLinks = modelEntry.repairTypes
     .filter((repair) => repair.slug !== internalRepairSlug)
-    .filter((repair) => !repair.slug.includes('logic-board'))
+    .filter((repair) => isEnhancedSamsungFamilyPage || !repair.slug.includes('logic-board'))
     .filter((repair) => resolvedParams.category === 'watch' || !repair.slug.includes('water-damage'))
     .map((repair) => ({
       href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, repair.slug)}`,
@@ -3742,14 +3811,18 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       variants: repairEntry.variants || [],
       source: catalog.source,
     },
-    otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, 4),
+    otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, isEnhancedSamsungFamilyPage ? 6 : 4),
     crossModelLinks: dedupeRelatedRepairLinks(crossModelLinks).slice(0, 4),
     iphoneModelHubLinks:
       resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
         ? getEnhancedIphoneModelHubLinks(brandEntry.models, resolvedParams.model)
         : [],
+    samsungFamilyModelHubLinks:
+      isEnhancedSamsungFamilyPage
+        ? getEnhancedSamsungFamilyModelHubLinks(brandEntry.models, resolvedParams.model)
+        : [],
     categoryHubLinks:
-      resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
+      resolvedParams.category === 'phone' && (resolvedParams.brand === 'iphone' || isEnhancedSamsungFamilyPage)
         ? getEnhancedRepairCategoryHubLinks()
         : [],
   };
@@ -3770,7 +3843,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     notFound();
   }
 
-  const { details, otherRepairLinks, crossModelLinks, iphoneModelHubLinks, categoryHubLinks } = pageData;
+  const {
+    details,
+    otherRepairLinks,
+    crossModelLinks,
+    iphoneModelHubLinks,
+    samsungFamilyModelHubLinks,
+    categoryHubLinks,
+  } = pageData;
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
@@ -3778,8 +3858,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
-  const enhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
-  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
+  const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
+  const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
+  const enhancedRepairType = iphoneEnhancedRepairType ?? samsungEnhancedRepairType;
+  const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
+  const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
+  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphonePage || isAliMobileEnhancedSamsungPage;
+  const samsungHardwareConfig = isAliMobileEnhancedSamsungPage
+    ? getSamsungHardwareConfig(resolvedParams.model)
+    : null;
   const repairTypeHub = getRepairTypeHubDefinition(resolvedParams['repair-type']);
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
@@ -3792,13 +3879,53 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     model: resolvedParams.model,
     repairType: internalRepairSlug,
   });
-  const seoPocket = getAliMobileEnhancedIphoneSeoPocket({
+  const iphoneSeoPocket = getAliMobileEnhancedIphoneSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
     pocket: baseSeoPocket,
   });
+  const seoPocket = getAliMobileEnhancedSamsungSeoPocket({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+    pocket: iphoneSeoPocket,
+  });
+  const sameModelLinks = otherRepairLinks;
+  const displayCrossModelLinks = isAliMobileEnhancedSamsungPage ? [] : crossModelLinks;
+  const exploreRepairNetworkSectionProps = isAliMobileEnhancedIphonePage
+    ? {
+        sectionDescription: 'Browse other iPhone models or explore repair services for other devices.',
+        modelGroupHeading: 'More iPhone Models',
+        modelLinks: iphoneModelHubLinks,
+        categoryLinks: categoryHubLinks,
+      }
+    : samsungHardwareConfig?.deviceFamily === 'z-fold'
+      ? {
+          sectionDescription: 'Browse other Galaxy Z Fold models or explore repair services for other devices.',
+          modelGroupHeading: 'More Galaxy Z Fold Models',
+          modelLinks: samsungFamilyModelHubLinks,
+          categoryLinks: categoryHubLinks,
+        }
+      : samsungHardwareConfig?.deviceFamily === 'z-flip'
+        ? {
+            sectionDescription: 'Browse other Galaxy Z Flip models or explore repair services for other devices.',
+            modelGroupHeading: 'More Galaxy Z Flip Models',
+            modelLinks: samsungFamilyModelHubLinks,
+            categoryLinks: categoryHubLinks,
+          }
+        : null;
+  const isAliMobileEnhancedSamsungExplorePage = Boolean(
+    isAliMobileEnhancedSamsungPage &&
+      samsungHardwareConfig &&
+      samsungEnhancedRepairType &&
+      samsungHardwareConfig.supportedRepairTypes.includes(samsungEnhancedRepairType)
+  );
+  const shouldRenderExploreRepairNetworkSection =
+    Boolean(isAliMobileEnhancedIphonePage && exploreRepairNetworkSectionProps) ||
+    Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps);
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
@@ -3852,6 +3979,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
             showBackHousingNotice={showBackHousingNotice}
+            showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && price === 0)}
             variants={details?.variants || []}
           />
 
@@ -3920,7 +4048,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           context="detail"
         />
 
-        {otherRepairLinks.length > 0 && (
+        {sameModelLinks.length > 0 && (
           <ScrollReveal>
             <section className="w-full" aria-labelledby="same-model-repairs-heading">
               <div className="flex w-full flex-col gap-6">
@@ -3937,7 +4065,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   </p>
                 </div>
                 <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                  {otherRepairLinks.map((link) => (
+                  {sameModelLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
@@ -3963,7 +4091,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
-        {crossModelLinks && crossModelLinks.length > 0 && (
+        {displayCrossModelLinks.length > 0 && (
           <ScrollReveal>
             <section className="mt-8 w-full" aria-labelledby="cross-model-repairs-heading">
               <div className="flex w-full flex-col gap-6">
@@ -3977,7 +4105,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   </h2>
                 </div>
                 <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                  {crossModelLinks.map((link) => (
+                  {displayCrossModelLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
@@ -4008,7 +4136,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
                     </Link>
 
-                    {isAliMobileEnhancedRepairPage && enhancedRepairType && repairTypeHub && (
+                    {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType] && (
                       <Link
                         href={`/repairs/${repairTypeHub.slug}`}
                         className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
@@ -4052,6 +4180,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           <WhyChooseUsSection
             modelName={displayModel}
             repairType={enhancedRepairType}
+            contentFamily={isAliMobileEnhancedSamsungPage ? 'samsung' : 'iphone'}
           />
         </ScrollReveal>
       )}
@@ -4073,11 +4202,16 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && (iphoneModelHubLinks.length > 0 || categoryHubLinks.length > 0) && (
+      {shouldRenderExploreRepairNetworkSection &&
+        exploreRepairNetworkSectionProps &&
+        (exploreRepairNetworkSectionProps.modelLinks.length > 0 ||
+          exploreRepairNetworkSectionProps.categoryLinks.length > 0) && (
         <ScrollReveal>
           <ExploreRepairNetworkSection
-            iphoneModelLinks={iphoneModelHubLinks}
-            categoryLinks={categoryHubLinks}
+            sectionDescription={exploreRepairNetworkSectionProps.sectionDescription}
+            modelGroupHeading={exploreRepairNetworkSectionProps.modelGroupHeading}
+            modelLinks={exploreRepairNetworkSectionProps.modelLinks}
+            categoryLinks={exploreRepairNetworkSectionProps.categoryLinks}
           />
         </ScrollReveal>
       )}

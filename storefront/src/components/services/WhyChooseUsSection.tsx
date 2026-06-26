@@ -4,16 +4,31 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getIphoneWhyChooseContent, IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/iphone/why-choose';
 import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
+import { getSamsungWhyChooseContent, SAMSUNG_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/samsung/why-choose';
+import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
 
-export type WhyChooseUsRepairType = AliMobileEnhancedIphoneRepairType;
+export type WhyChooseUsRepairType =
+  | AliMobileEnhancedIphoneRepairType
+  | AliMobileEnhancedSamsungRepairType;
+export type WhyChooseUsContentFamily = 'iphone' | 'samsung';
 
 interface WhyChooseUsSectionProps {
   modelName: string;
   repairType: WhyChooseUsRepairType;
+  contentFamily?: WhyChooseUsContentFamily;
 }
 
-export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseUsSectionProps) {
-  const content = getIphoneWhyChooseContent(modelName)[repairType];
+export default function WhyChooseUsSection({
+  modelName,
+  repairType,
+  contentFamily = 'iphone',
+}: WhyChooseUsSectionProps) {
+  const content = contentFamily === 'samsung'
+    ? getSamsungWhyChooseContent(modelName)[repairType as AliMobileEnhancedSamsungRepairType]
+    : getIphoneWhyChooseContent(modelName)[repairType as AliMobileEnhancedIphoneRepairType];
+  const sharedHighlights = contentFamily === 'samsung'
+    ? SAMSUNG_WHY_CHOOSE_SHARED_HIGHLIGHTS
+    : IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
   const headingId = `why-choose-us-${repairType}`;
   const [openCardIndex, setOpenCardIndex] = useState<number | null>(null);
 
@@ -36,7 +51,7 @@ export default function WhyChooseUsSection({ modelName, repairType }: WhyChooseU
           className="mx-auto flex w-full max-w-4xl flex-wrap items-center justify-center gap-3"
           aria-label={`${modelName} repair support highlights`}
         >
-          {IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS.map(({ icon: Icon, text }) => (
+          {sharedHighlights.map(({ icon: Icon, text }) => (
             <span
               key={text}
               className="inline-flex min-h-11 items-center justify-center gap-2 bg-transparent px-1 py-1 text-center text-sm font-extrabold text-slate-700"

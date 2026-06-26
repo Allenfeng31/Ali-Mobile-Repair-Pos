@@ -46,7 +46,7 @@ export const ENHANCED_REPAIR_TYPES_BY_MODEL: Record<
     config.modelSlug,
     new Set(config.supportedRepairTypes),
   ])
-) as Record<AliMobileEnhancedIphoneModelSlug, ReadonlySet<AliMobileEnhancedIphoneRepairType>>;
+) as unknown as Record<AliMobileEnhancedIphoneModelSlug, ReadonlySet<AliMobileEnhancedIphoneRepairType>>;
 
 function getAliMobileEnhancedIphoneModelSlug(
   params: AliMobileEnhancedIphoneRouteParams

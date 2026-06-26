@@ -18,6 +18,7 @@ interface RepairPricingAndCTAProps {
   repairName: string;
   bookingRepairName?: string;
   showBackHousingNotice?: boolean;
+  showStartingPriceFallback?: boolean;
   variants?: RepairVariant[];
 }
 
@@ -72,6 +73,7 @@ export default function RepairPricingAndCTA({
   repairName,
   bookingRepairName,
   showBackHousingNotice = false,
+  showStartingPriceFallback = true,
   variants = []
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
@@ -105,7 +107,7 @@ export default function RepairPricingAndCTA({
   const displayVariants = variants.length > 0 ? variants : [];
   const isMultiple = displayVariants.length > 1;
 
-  const startingPrice = (displayVariants.length === 0 || displayVariants[0].price === 0)
+  const startingPrice = showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
     ? getStartingPrice(categorySlug, brandSlug, repairSlug)
     : null;
 
