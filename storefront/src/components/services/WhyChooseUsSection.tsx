@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getIphoneWhyChooseContent, IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/iphone/why-choose';
 import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
-import { getSamsungWhyChooseContent, SAMSUNG_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/samsung/why-choose';
+import { getSamsungWhyChooseContent, getSamsungWhyChooseSharedHighlights } from '@/lib/seo/content/samsung/why-choose';
 import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
 
 export type WhyChooseUsRepairType =
@@ -27,7 +27,7 @@ export default function WhyChooseUsSection({
     ? getSamsungWhyChooseContent(modelName)[repairType as AliMobileEnhancedSamsungRepairType]
     : getIphoneWhyChooseContent(modelName)[repairType as AliMobileEnhancedIphoneRepairType];
   const sharedHighlights = contentFamily === 'samsung'
-    ? SAMSUNG_WHY_CHOOSE_SHARED_HIGHLIGHTS
+    ? getSamsungWhyChooseSharedHighlights(modelName)
     : IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
   const headingId = `why-choose-us-${repairType}`;
   const [openCardIndex, setOpenCardIndex] = useState<number | null>(null);

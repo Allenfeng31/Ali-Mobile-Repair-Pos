@@ -1,6 +1,7 @@
 import type { RepairTypeSeoPocket, SamsungHardwareConfig } from './types';
 import {
   SAMSUNG_FOLD_TESTING_NOTE,
+  SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE,
   SAMSUNG_QUOTE_ONLY_SCOPE,
   SAMSUNG_WATER_RESISTANCE_NOTE,
 } from './shared';
@@ -8,6 +9,248 @@ import {
 export function buildSamsungBatteryReplacementPocket(
   config: SamsungHardwareConfig
 ): RepairTypeSeoPocket {
+  if (config.modelSlug === 'galaxy-s23-ultra') {
+    return {
+      quickAnswer:
+        `Need ${config.modelName} battery replacement in Ringwood? Ali Mobile & Repair checks rapid drain, shutdowns, charging-percentage instability, heat, swelling, and charging behaviour before confirming whether the battery is the main fault path.`,
+      workbenchHeadings: {
+        options: `Which battery path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before battery replacement?',
+        symptoms: 'Which battery symptoms matter most?',
+        outcomes: 'What can change the battery result?',
+      },
+      repairOptions: [
+        {
+          name: 'Battery and power-path diagnosis',
+          shortDescription:
+            'We check rapid drain, reduced runtime, unexpected shutdowns, charge-percentage instability, and heat before assuming the battery is the only problem.',
+          bestFor:
+            'Phones that no longer last well through the day, shut down unexpectedly, or report unstable battery behaviour.',
+          notes:
+            'Battery symptoms can overlap with charging-port, accessory, and board-level faults, so diagnosis comes before replacement.',
+        },
+        {
+          name: 'Swelling and rear-housing safety inspection',
+          shortDescription:
+            'We inspect swelling pressure, rear lift, and whether the rear housing or frame condition changes the safe repair path.',
+          bestFor:
+            'Phones with heat, swelling, lifted rear sections, or pressure that affects the way the phone sits.',
+          notes:
+            'Where swelling affects the rear housing, we check whether the housing condition also needs attention before the battery work is finalised.',
+        },
+        {
+          name: 'Pre-repair and post-repair validation',
+          shortDescription:
+            'We compare charging response, stability, and the practical power result before and after service.',
+          bestFor:
+            'Customers who want the battery path checked in context rather than assuming every power complaint comes from the battery alone.',
+          notes:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Rapid battery drain or reduced runtime',
+          description:
+            'Fast drain can come from battery wear, but it can also overlap with charging or board-level power-path faults that need diagnosis first.',
+        },
+        {
+          title: 'Unexpected shutdowns',
+          description:
+            'Shutdowns under load or at unstable percentages can point to battery wear or a deeper power-path issue.',
+        },
+        {
+          title: 'Charging-percentage instability',
+          description:
+            'Sudden jumps or drops in percentage can indicate battery wear, charging instability, or another fault that overlaps with the battery symptoms.',
+        },
+        {
+          title: 'Heat or swelling',
+          description:
+            'Heat and swelling are checked carefully because swelling can affect the rear housing, safe opening, and the surrounding structure.',
+        },
+        {
+          title: 'Charging overlap',
+          description:
+            'USB-C charging issues can look like battery failure, so the charging path is separated before battery replacement is treated as the final answer.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Review power symptoms in context',
+          description:
+            'We document drain, runtime loss, shutdowns, charge-percentage instability, and heat before deciding whether the battery is the main cause.',
+        },
+        {
+          step: '02',
+          title: 'Check charging behaviour and overlap',
+          description:
+            'USB-C charging response and general power stability are tested so battery replacement is not quoted on the wrong fault path.',
+        },
+        {
+          step: '03',
+          title: 'Inspect swelling and rear-housing condition',
+          description:
+            'If swelling affects the rear housing, lift, or structure, we confirm the safe repair path before proceeding.',
+        },
+        {
+          step: '04',
+          title: 'Retest the battery path before handover',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `Does every ${config.modelName} power problem mean the battery is bad?`,
+          answer:
+            'No. Battery, charging-port, accessory, and board-level faults can overlap, so we diagnose the power path before treating the battery as the only cause.',
+        },
+        {
+          question: `Do you inspect swelling on my ${config.modelName} before battery replacement?`,
+          answer:
+            'Yes. We inspect heat, swelling, rear lift, and whether the rear housing condition changes the safe repair path before proceeding.',
+        },
+        {
+          question: `Will a new battery guarantee a certain runtime on my ${config.modelName}?`,
+          answer:
+            'No. Battery replacement aims to restore safe, stable battery function, but real runtime still depends on usage, signal conditions, apps, and overall device health.',
+        },
+        {
+          question: `Is the ${config.modelName} battery page based on a genuine catalogue-backed repair listing?`,
+          answer:
+            'Yes. The displayed battery route follows the live catalogue-backed repair listing for this model rather than a fabricated SEO-only service.',
+        },
+        {
+          question: `Will battery replacement restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
+  if (config.seriesFamily === 'galaxy-s') {
+    return {
+      quickAnswer:
+        `Need ${config.modelName} battery replacement in Ringwood? Ali Mobile & Repair checks rapid drain, shutdowns, charging-percentage instability, heat, swelling, and charging behaviour before confirming whether the battery is the main fault path.`,
+      workbenchHeadings: {
+        options: `Which battery path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before battery replacement?',
+        symptoms: 'Which battery symptoms matter most?',
+        outcomes: 'What can change the battery result?',
+      },
+      repairOptions: [
+        {
+          name: 'Battery and power-path diagnosis',
+          shortDescription:
+            'We check rapid drain, reduced runtime, unexpected shutdowns, charge-percentage instability, and heat before assuming the battery is the only problem.',
+          bestFor:
+            'Phones that no longer last well through the day, shut down unexpectedly, or report unstable battery behaviour.',
+          notes:
+            'Battery symptoms can overlap with charging-port, accessory, and board-level faults, so diagnosis comes before replacement.',
+        },
+        {
+          name: 'Swelling and rear-housing safety inspection',
+          shortDescription:
+            'We inspect swelling pressure, rear lift, and whether the rear housing or frame condition changes the safe repair path.',
+          bestFor:
+            'Phones with heat, swelling, lifted rear sections, or pressure that affects the way the phone sits.',
+          notes:
+            'Where swelling affects the rear housing, we check whether the housing condition also needs attention before the battery work is finalised.',
+        },
+        {
+          name: 'Pre-repair and post-repair validation',
+          shortDescription:
+            'We compare charging response, stability, and the practical power result before and after service.',
+          bestFor:
+            'Customers who want the battery path checked in context rather than assuming every power complaint comes from the battery alone.',
+          notes:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Rapid battery drain or reduced runtime',
+          description:
+            'Fast drain can come from battery wear, but it can also overlap with charging or board-level power-path faults that need diagnosis first.',
+        },
+        {
+          title: 'Unexpected shutdowns',
+          description:
+            'Shutdowns under load or at unstable percentages can point to battery wear or a deeper power-path issue.',
+        },
+        {
+          title: 'Charging-percentage instability',
+          description:
+            'Sudden jumps or drops in percentage can indicate battery wear, charging instability, or another fault that overlaps with the battery symptoms.',
+        },
+        {
+          title: 'Heat or swelling',
+          description:
+            'Heat and swelling are checked carefully because swelling can affect the rear housing, safe opening, and the surrounding structure.',
+        },
+        {
+          title: 'Charging overlap',
+          description:
+            'USB-C charging issues can look like battery failure, so the charging path is separated before battery replacement is treated as the final answer.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Review power symptoms in context',
+          description:
+            'We document drain, runtime loss, shutdowns, charge-percentage instability, and heat before deciding whether the battery is the main cause.',
+        },
+        {
+          step: '02',
+          title: 'Check charging behaviour and overlap',
+          description:
+            'USB-C charging response and general power stability are tested so battery replacement is not quoted on the wrong fault path.',
+        },
+        {
+          step: '03',
+          title: 'Inspect swelling and rear-housing condition',
+          description:
+            'If swelling affects the rear housing, lift, or structure, we confirm the safe repair path before proceeding.',
+        },
+        {
+          step: '04',
+          title: 'Retest the battery path before handover',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `Does every ${config.modelName} power problem mean the battery is bad?`,
+          answer:
+            'No. Battery, charging-port, accessory, and board-level faults can overlap, so we diagnose the power path before treating the battery as the only cause.',
+        },
+        {
+          question: `Do you inspect swelling on my ${config.modelName} before battery replacement?`,
+          answer:
+            'Yes. We inspect heat, swelling, rear lift, and whether the rear housing condition changes the safe repair path before proceeding.',
+        },
+        {
+          question: `Will a new battery guarantee a certain runtime on my ${config.modelName}?`,
+          answer:
+            'No. Battery replacement aims to restore safe, stable battery function, but real runtime still depends on usage, signal conditions, apps, and overall device health.',
+        },
+        {
+          question: `Is the ${config.modelName} battery page based on a genuine catalogue-backed repair listing?`,
+          answer:
+            'Yes. The displayed battery route follows the live catalogue-backed repair listing for this model rather than a fabricated SEO-only service.',
+        },
+        {
+          question: `Will battery replacement restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} battery replacement in Ringwood? Ali Mobile & Repair checks rapid drain, shutdowns, charging-percentage instability, heat, swelling, and charging behaviour before confirming whether battery replacement is the right quote-only path.`,

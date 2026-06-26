@@ -25,12 +25,17 @@ import {
   type RepairTypeSeoPocket,
 } from '@/lib/seo/content/iphone';
 import {
+  getAliMobileEnhancedSamsungHubLinks,
   getAliMobileEnhancedSamsungRepairType,
   getAliMobileEnhancedSamsungSeoPocket,
   isAliMobileEnhancedSamsungRepairPage,
   type AliMobileEnhancedSamsungRepairType,
 } from '@/lib/seo/content/samsung';
-import { getSamsungHardwareConfig, SAMSUNG_HARDWARE_CONFIG } from '@/lib/seo/content/samsung/config';
+import {
+  getSamsungHardwareConfig,
+  SAMSUNG_GALAXY_S_MODEL_ORDER,
+  SAMSUNG_HARDWARE_CONFIG,
+} from '@/lib/seo/content/samsung/config';
 
 export const revalidate = 86400;
 
@@ -226,6 +231,12 @@ function getSamsungFoldableGeneration(modelSlug: string) {
   return match ? Number.parseInt(match[1], 10) : 0;
 }
 
+function getSamsungVariantRank(variantClass: string) {
+  const variantOrder = ['base', 'plus', 'ultra', 'fe', 'edge', 'active', 'other'];
+  const index = variantOrder.indexOf(variantClass);
+  return index === -1 ? variantOrder.length : index;
+}
+
 function getEnhancedSamsungFamilyModelHubLinks(
   models: ReadonlyArray<{ slug: string; model: string }>,
   currentModelSlug: string
@@ -233,6 +244,84 @@ function getEnhancedSamsungFamilyModelHubLinks(
   const currentConfig = getSamsungHardwareConfig(currentModelSlug);
   if (!currentConfig) {
     return [];
+  }
+
+  if (currentConfig.seriesFamily === 'galaxy-s') {
+    const currentGeneration = currentConfig.generation ?? 0;
+    const currentVariantRank = getSamsungVariantRank(currentConfig.variantClass);
+    const familyModelOrder = SAMSUNG_GALAXY_S_MODEL_ORDER;
+    const currentOrderIndex = familyModelOrder.indexOf(currentConfig.modelSlug);
+    const seenHrefs = new Set<string>();
+
+    return models
+      .filter((model) => model.slug !== currentModelSlug)
+      .map((model) => {
+        const candidateConfig = getSamsungHardwareConfig(model.slug);
+        if (!candidateConfig || candidateConfig.seriesFamily !== 'galaxy-s') {
+          return null;
+        }
+
+        const generationDistance = Math.abs((candidateConfig.generation ?? 0) - currentGeneration);
+        const sameGenerationScore = candidateConfig.generation === currentGeneration ? 0 : 1;
+        const sameVariantAdjacencyScore =
+          generationDistance === 1 && candidateConfig.variantClass === currentConfig.variantClass ? 0 : 1;
+        const variantDistance = Math.abs(getSamsungVariantRank(candidateConfig.variantClass) - currentVariantRank);
+        const candidateOrderIndex = familyModelOrder.indexOf(candidateConfig.modelSlug);
+
+        return {
+          href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}`,
+          label: `Explore ${candidateConfig.modelName} repairs`,
+          sameGenerationScore,
+          sameVariantAdjacencyScore,
+          generationDistance,
+          orderDistance:
+            currentOrderIndex >= 0 && candidateOrderIndex >= 0
+              ? Math.abs(candidateOrderIndex - currentOrderIndex)
+              : generationDistance,
+          newerTieBreaker: candidateConfig.generation > currentGeneration ? 0 : 1,
+          variantDistance,
+          candidateOrderIndex,
+          slug: candidateConfig.modelSlug,
+        };
+      })
+      .filter((model): model is NonNullable<typeof model> => Boolean(model))
+      .sort((left, right) => {
+        if (left.sameGenerationScore !== right.sameGenerationScore) {
+          return left.sameGenerationScore - right.sameGenerationScore;
+        }
+
+        if (left.sameVariantAdjacencyScore !== right.sameVariantAdjacencyScore) {
+          return left.sameVariantAdjacencyScore - right.sameVariantAdjacencyScore;
+        }
+
+        if (left.generationDistance !== right.generationDistance) {
+          return left.generationDistance - right.generationDistance;
+        }
+
+        if (left.orderDistance !== right.orderDistance) {
+          return left.orderDistance - right.orderDistance;
+        }
+
+        if (left.variantDistance !== right.variantDistance) {
+          return left.variantDistance - right.variantDistance;
+        }
+
+        if (left.newerTieBreaker !== right.newerTieBreaker) {
+          return left.newerTieBreaker - right.newerTieBreaker;
+        }
+
+        return left.slug.localeCompare(right.slug);
+      })
+      .filter((link) => {
+        if (seenHrefs.has(link.href)) {
+          return false;
+        }
+
+        seenHrefs.add(link.href);
+        return true;
+      })
+      .slice(0, 5)
+      .map(({ href, label }) => ({ href, label }));
   }
 
   const familyModelOrder = Object.values(SAMSUNG_HARDWARE_CONFIG)
@@ -3595,12 +3684,12 @@ const IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES = [
   "iphone-14-pro",
 ];
 
-function isPhoneBackGlassPublicAlias(category: string, repairSlug: string) {
-  return category === "phone" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
+function isIphoneBackGlassPublicAlias(category: string, brand: string, repairSlug: string) {
+  return category === "phone" && brand === "iphone" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
 }
 
 function resolveRepairSlugForLookup(category: string, brand: string, repairSlug: string) {
-  if (isPhoneBackGlassPublicAlias(category, repairSlug)) {
+  if (isIphoneBackGlassPublicAlias(category, brand, repairSlug)) {
     return PHONE_BACK_HOUSING_INTERNAL_SLUG;
   }
 
@@ -3608,7 +3697,7 @@ function resolveRepairSlugForLookup(category: string, brand: string, repairSlug:
 }
 
 function getPublicRepairSlug(category: string, brand: string, repairSlug: string) {
-  if (category === "phone" && repairSlug === PHONE_BACK_HOUSING_INTERNAL_SLUG) {
+  if (category === "phone" && brand === "iphone" && repairSlug === PHONE_BACK_HOUSING_INTERNAL_SLUG) {
     return PHONE_BACK_GLASS_PUBLIC_SLUG;
   }
 
@@ -3616,7 +3705,7 @@ function getPublicRepairSlug(category: string, brand: string, repairSlug: string
 }
 
 function getRepairDisplayName(category: string, brand: string, publicRepairSlug: string, repairName: string) {
-  if (isPhoneBackGlassPublicAlias(category, publicRepairSlug)) {
+  if (isIphoneBackGlassPublicAlias(category, brand, publicRepairSlug)) {
     return brand === "iphone" ? IPHONE_BACK_GLASS_DISPLAY_NAME : NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
   }
 
@@ -3895,6 +3984,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   });
   const sameModelLinks = otherRepairLinks;
   const displayCrossModelLinks = isAliMobileEnhancedSamsungPage ? [] : crossModelLinks;
+  const samsungMidPageHubLinks =
+    samsungHardwareConfig?.seriesFamily === 'galaxy-s'
+      ? getAliMobileEnhancedSamsungHubLinks(resolvedParams.model)
+      : [];
   const exploreRepairNetworkSectionProps = isAliMobileEnhancedIphonePage
     ? {
         sectionDescription: 'Browse other iPhone models or explore repair services for other devices.',
@@ -3916,6 +4009,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             modelLinks: samsungFamilyModelHubLinks,
             categoryLinks: categoryHubLinks,
           }
+        : samsungHardwareConfig?.seriesFamily === 'galaxy-s'
+          ? {
+              sectionDescription: 'Explore Samsung repairs or browse repair services for other devices.',
+              modelGroupHeading: 'More Galaxy S Models',
+              modelLinks: samsungFamilyModelHubLinks,
+              categoryLinks: categoryHubLinks,
+            }
         : null;
   const isAliMobileEnhancedSamsungExplorePage = Boolean(
     isAliMobileEnhancedSamsungPage &&
@@ -3929,7 +4029,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
-  const bookingRepairName = isPhoneBackGlassPublicAlias(resolvedParams.category, resolvedParams['repair-type']) ? (knownRepair?.name || repairTypeDerived) : undefined;
+  const bookingRepairName = isIphoneBackGlassPublicAlias(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams['repair-type']
+  ) ? (knownRepair?.name || repairTypeDerived) : undefined;
   const showBackHousingNotice = shouldShowIphoneBackHousingNotice(
     resolvedParams.category,
     resolvedParams.brand,
@@ -4086,6 +4190,21 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     </Link>
                   ))}
                 </div>
+                {samsungMidPageHubLinks.length > 0 && (
+                  <div className="mt-2 text-center">
+                    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                      {samsungMidPageHubLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 transition-colors hover:text-blue-700 hover:underline"
+                        >
+                          {link.label} &rarr;
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           </ScrollReveal>

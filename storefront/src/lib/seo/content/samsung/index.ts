@@ -35,15 +35,28 @@ interface AliMobileEnhancedSamsungSeoPocketParams {
   pocket: RepairTypeSeoPocket | null;
 }
 
+function buildEnhancedSamsungRepairTypesByModel(): Record<
+  AliMobileEnhancedSamsungModelSlug,
+  ReadonlySet<AliMobileEnhancedSamsungRepairType>
+> {
+  const repairTypesByModel = {} as Record<
+    AliMobileEnhancedSamsungModelSlug,
+    ReadonlySet<AliMobileEnhancedSamsungRepairType>
+  >;
+
+  for (const config of Object.values(SAMSUNG_HARDWARE_CONFIG)) {
+    repairTypesByModel[config.modelSlug] = new Set<AliMobileEnhancedSamsungRepairType>(
+      config.supportedRepairTypes
+    );
+  }
+
+  return repairTypesByModel;
+}
+
 export const ENHANCED_SAMSUNG_REPAIR_TYPES_BY_MODEL: Record<
   AliMobileEnhancedSamsungModelSlug,
   ReadonlySet<AliMobileEnhancedSamsungRepairType>
-> = Object.fromEntries(
-  Object.values(SAMSUNG_HARDWARE_CONFIG).map((config) => [
-    config.modelSlug,
-    new Set(config.supportedRepairTypes),
-  ])
-) as unknown as Record<AliMobileEnhancedSamsungModelSlug, ReadonlySet<AliMobileEnhancedSamsungRepairType>>;
+> = buildEnhancedSamsungRepairTypesByModel();
 
 function getAliMobileEnhancedSamsungModelSlug(
   params: AliMobileEnhancedSamsungRouteParams

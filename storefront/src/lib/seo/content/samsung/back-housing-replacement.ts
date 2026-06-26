@@ -7,9 +7,16 @@ import {
 export function buildSamsungBackHousingReplacementPocket(
   config: SamsungHardwareConfig
 ): RepairTypeSeoPocket {
+  const isFoldable = config.displayForm === 'foldable';
+  const hasIntegratedSPen = config.sPenCapability === 'integrated-slot';
+
+  const hingeCheck = isFoldable ? ', hinge-enclosure damage' : '';
+  const sPenCheck = hasIntegratedSPen ? ', S Pen slot alignment' : '';
+  const checks = `rear-panel damage, frame or housing deformation${hingeCheck}${sPenCheck}, camera-area impact, and wireless-charging behaviour`;
+
   return {
     quickAnswer:
-      `Need ${config.modelName} back housing replacement in Ringwood? Ali Mobile & Repair checks rear-panel damage, frame or housing deformation, hinge-enclosure damage, camera-area impact, and wireless-charging behaviour before confirming the quote-only scope.`,
+      `Need ${config.modelName} back housing replacement in Ringwood? Ali Mobile & Repair checks ${checks} before confirming the quote-only scope.`,
     workbenchHeadings: {
       options: `Which back housing path fits this ${config.modelName}?`,
       diagnostics: 'What do we inspect before back housing work?',
@@ -27,13 +34,15 @@ export function buildSamsungBackHousingReplacementPocket(
           'Back Housing Replacement is kept as the canonical route because scope can extend beyond cosmetic rear-panel damage.',
       },
       {
-        name: 'Hinge enclosure and camera-area review',
+        name: isFoldable ? 'Hinge enclosure and camera-area review' : 'Camera-area and structural review',
         shortDescription:
-          'We check whether hinge-side impact, enclosure damage, or camera-area distortion changes the repair path before quoting.',
+          `We check whether ${isFoldable ? 'hinge-side impact, enclosure damage, or ' : ''}camera-area distortion changes the repair path before quoting.`,
         bestFor:
-          'Phones with impact around the hinge enclosure, rear camera area, or corners that affect rear fit.',
+          `Phones with impact around the ${isFoldable ? 'hinge enclosure, ' : ''}rear camera area, or corners that affect rear fit.`,
         notes:
-          'Housing work does not automatically include hinge repair, and hinge damage may require separate assessment.',
+          isFoldable
+            ? 'Housing work does not automatically include hinge repair, and hinge damage may require separate assessment.'
+            : 'Housing work does not automatically include rear cameras, which are assessed separately if internal faults exist.',
       },
       {
         name: 'Wireless-charging and structural validation',
@@ -56,11 +65,24 @@ export function buildSamsungBackHousingReplacementPocket(
         description:
           'Rear impact can change how the housing sits, which matters before any new rear assembly is fitted.',
       },
-      {
-        title: 'Hinge enclosure damage',
-        description:
-          'Damage near the hinge enclosure can look like rear housing work but may need a separate hinge assessment.',
-      },
+      ...(isFoldable
+        ? [
+            {
+              title: 'Hinge enclosure damage',
+              description:
+                'Damage near the hinge enclosure can look like rear housing work but may need a separate hinge assessment.',
+            },
+          ]
+        : []),
+      ...(hasIntegratedSPen
+        ? [
+            {
+              title: 'S Pen slot deformation',
+              description:
+                'Impact near the S Pen slot can prevent the stylus from seating correctly, which requires housing-level correction.',
+            },
+          ]
+        : []),
       {
         title: 'Camera-area impact',
         description:
@@ -81,9 +103,9 @@ export function buildSamsungBackHousingReplacementPocket(
       },
       {
         step: '02',
-        title: 'Review hinge enclosure and camera-area impact',
+        title: isFoldable ? 'Review hinge enclosure and camera-area impact' : 'Review camera-area impact',
         description:
-          'Hinge-side and camera-area damage are inspected so we do not confuse housing work with separate hinge or camera-related faults.',
+          `Camera-area ${isFoldable ? 'and hinge-side ' : ''}damage are inspected so we do not confuse housing work with separate faults.`,
       },
       {
         step: '03',
@@ -95,15 +117,28 @@ export function buildSamsungBackHousingReplacementPocket(
         step: '04',
         title: 'Confirm the quote-only repair path',
         description:
-          'Back housing work does not automatically include hinge repair, and final scope is only confirmed after technician inspection.',
+          `Back housing work does not automatically include ${isFoldable ? 'hinge repair' : 'internal camera replacement'}, and final scope is only confirmed after technician inspection.`,
       },
     ],
     faq: [
-      {
-        question: `Is ${config.modelName} Back Housing Replacement the same as hinge repair?`,
-        answer:
-          'No. Back Housing Replacement covers the rear housing path. Hinge damage may require separate assessment and is not automatically included.',
-      },
+      ...(isFoldable
+        ? [
+            {
+              question: `Is ${config.modelName} Back Housing Replacement the same as hinge repair?`,
+              answer:
+                'No. Back Housing Replacement covers the rear housing path. Hinge damage may require separate assessment and is not automatically included.',
+            },
+          ]
+        : []),
+      ...(hasIntegratedSPen
+        ? [
+            {
+              question: `Will back housing repair fix a stuck S Pen on my ${config.modelName}?`,
+              answer:
+                'If the S Pen is stuck due to housing deformation, a new housing assembly will correct the slot alignment. We inspect this before quoting.',
+            },
+          ]
+        : []),
       {
         question: `Can rear-panel damage on my ${config.modelName} affect wireless charging?`,
         answer:
@@ -117,7 +152,7 @@ export function buildSamsungBackHousingReplacementPocket(
       {
         question: `Why is ${config.modelName} back housing work quote-only?`,
         answer:
-          'Rear-panel damage, frame condition, hinge enclosure findings, and wireless-charging behaviour can all change the final repair scope and price.',
+          `Rear-panel damage, frame condition, ${isFoldable ? 'hinge enclosure findings, ' : ''}${hasIntegratedSPen ? 'S Pen slot alignment, ' : ''}and wireless-charging behaviour can all change the final repair scope and price.`,
       },
       {
         question: `Will back housing replacement restore factory water resistance on my ${config.modelName}?`,

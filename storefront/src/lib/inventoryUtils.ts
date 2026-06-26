@@ -46,8 +46,11 @@ export function preserveRouteSegment(input: unknown): string {
 export function slugify(text: string): string {
   if (!text) return "";
   return text.toLowerCase()
+    .replace(/\+/g, '-plus')
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 /** 

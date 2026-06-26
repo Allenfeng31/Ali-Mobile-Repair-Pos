@@ -12,6 +12,11 @@ import {
 } from 'lucide-react';
 import type { WhyChooseConfig } from '../iphone/why-choose';
 import { getSamsungHardwareConfigByModelName } from './config';
+import {
+  getSamsungBiometricLabel,
+  getSamsungFrontCameraLabel,
+  getSamsungRearCameraLabel,
+} from './shared';
 import type { AliMobileEnhancedSamsungRepairType } from './types';
 
 export interface SamsungWhyChooseHighlight {
@@ -19,7 +24,7 @@ export interface SamsungWhyChooseHighlight {
   text: string;
 }
 
-export const SAMSUNG_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] = [
+const SAMSUNG_FOLDABLE_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] = [
   { icon: FoldHorizontal, text: 'Two-display diagnosis where relevant' },
   { icon: Search, text: 'Protector, screen, and hinge faults separated carefully' },
   { icon: ClipboardCheck, text: 'Quote-only scope confirmed before work' },
@@ -28,12 +33,485 @@ export const SAMSUNG_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] =
   { icon: Wrench, text: 'Seal limitations explained clearly' },
 ];
 
+const SAMSUNG_GALAXY_S_ULTRA_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] = [
+  { icon: Smartphone, text: 'Flagship-device diagnosis with function checks' },
+  { icon: Search, text: 'Screen, fingerprint, and frame overlap assessed carefully' },
+  { icon: Eye, text: 'Front and rear camera paths separated clearly' },
+  { icon: ClipboardCheck, text: 'Catalogue-backed options and variants shown transparently' },
+  { icon: ShieldCheck, text: 'Pre-repair and post-repair testing explained clearly' },
+  { icon: Wrench, text: 'Seal limitations explained clearly' },
+];
+
+const SAMSUNG_GALAXY_S_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] = [
+  { icon: Smartphone, text: 'Flagship-device diagnosis with display and function checks' },
+  { icon: Search, text: 'Screen, biometric, and frame overlap assessed carefully' },
+  { icon: Eye, text: 'Front and rear camera paths separated clearly' },
+  { icon: ClipboardCheck, text: 'Catalogue-backed options and variants shown transparently' },
+  { icon: ShieldCheck, text: 'Pre-repair and post-repair testing explained clearly' },
+  { icon: Wrench, text: 'Seal limitations explained clearly' },
+];
+
+export function getSamsungWhyChooseSharedHighlights(
+  modelName: string
+): SamsungWhyChooseHighlight[] {
+  const hardwareConfig = getSamsungHardwareConfigByModelName(modelName);
+
+  if (hardwareConfig?.seriesFamily === 'galaxy-s') {
+    return hardwareConfig.modelSlug === 'galaxy-s23-ultra'
+      ? SAMSUNG_GALAXY_S_ULTRA_WHY_CHOOSE_SHARED_HIGHLIGHTS
+      : SAMSUNG_GALAXY_S_WHY_CHOOSE_SHARED_HIGHLIGHTS;
+  }
+
+  return SAMSUNG_FOLDABLE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
+}
+
 export function getSamsungWhyChooseContent(
   modelName: string
 ): Record<AliMobileEnhancedSamsungRepairType, WhyChooseConfig> {
   const hardwareConfig = getSamsungHardwareConfigByModelName(modelName);
   const isFlip = hardwareConfig?.deviceFamily === 'z-flip';
+  const isGalaxyS23Ultra = hardwareConfig?.modelSlug === 'galaxy-s23-ultra';
+  const isGalaxyS = hardwareConfig?.seriesFamily === 'galaxy-s';
   const frontCameraIsInnerOnly = hardwareConfig?.frontCameraClass === 'inner-only';
+
+  if (isGalaxyS23Ultra) {
+    return {
+      'screen-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} screen replacement`,
+        intro:
+          'Screen faults on this flagship Samsung can overlap with under-display fingerprint symptoms, frame condition, and calibration requirements, so we inspect the full display path before confirming the final repair outcome.',
+        cards: [
+          {
+            title: 'Display and fingerprint testing',
+            icon: Smartphone,
+            points: [
+              'We test display output, touch response, and the fingerprint path before and after service instead of assuming every biometric symptom disappears with a new screen.',
+              'Screen damage, fingerprint symptoms, frame condition, and calibration requirements are assessed together before the repair outcome is confirmed.',
+            ],
+          },
+          {
+            title: 'Frame and impact review',
+            icon: Search,
+            points: [
+              'We inspect edge impact and frame condition before fitting a screen because deformation can change the safest repair path.',
+              'A screen replacement does not automatically guarantee that every deeper biometric or structural fault is solved.',
+            ],
+          },
+          {
+            title: 'Catalogue-backed screen path',
+            icon: ClipboardCheck,
+            points: [
+              'This page follows the live catalogue-backed screen listing for the model without inventing extra screen-quality tiers or unsupported options.',
+            ],
+          },
+        ],
+      },
+      'battery-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} battery replacement`,
+        intro:
+          'Battery complaints can overlap with charging-path or board-level faults, so we confirm the likely cause before treating the battery as the only answer.',
+        cards: [
+          {
+            title: 'Battery symptoms in context',
+            icon: BatteryCharging,
+            points: [
+              'We review rapid drain, shutdowns, unstable percentage, heat, swelling, and reduced runtime before confirming the battery path.',
+              'Swelling is checked against rear housing fit rather than being treated as a cosmetic issue only.',
+            ],
+          },
+          {
+            title: 'Charging-path separation',
+            icon: Usb,
+            points: [
+              'USB-C charging behaviour and related symptoms are checked so battery work is not quoted on the wrong fault path.',
+            ],
+          },
+          {
+            title: 'Clear scope before work',
+            icon: ClipboardCheck,
+            points: [
+              'We explain when the battery path looks appropriate and when deeper diagnosis is still needed before parts are approved.',
+            ],
+          },
+        ],
+      },
+      'charging-port-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} charging port replacement`,
+        intro:
+          'USB-C issues are diagnosed carefully because cable fit, contamination, battery symptoms, and board-level charging faults can all present similarly.',
+        cards: [
+          {
+            title: 'USB-C inspection first',
+            icon: Usb,
+            points: [
+              'We inspect cable fit, loose connection symptoms, debris, and contamination before assuming the port needs replacement.',
+            ],
+          },
+          {
+            title: 'Port-versus-power diagnosis',
+            icon: Search,
+            points: [
+              'Battery and board-level causes are separated from the USB-C path before the repair listing is treated as the final answer.',
+            ],
+          },
+          {
+            title: 'Function retesting before handover',
+            icon: ClipboardCheck,
+            points: [
+              'Charging and related connection behaviour are retested before pickup so the handover reflects the confirmed repair path.',
+            ],
+          },
+        ],
+      },
+      'back-housing-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+        intro:
+          'Rear housing work can overlap with frame damage, camera-area impact, wireless-charging behaviour, and S Pen slot-area distortion, so the scope is reviewed carefully before work starts.',
+        cards: [
+          {
+            title: 'Rear housing and frame review',
+            icon: Smartphone,
+            points: [
+              'We distinguish rear housing or rear-panel damage from broader frame deformation before confirming the repair path.',
+              'Severe frame damage stays subject to separate inspection rather than being assumed inside every housing repair.',
+            ],
+          },
+          {
+            title: 'Variant and function checks',
+            icon: Search,
+            points: [
+              'The available Premium and Genuine variants remain driven by the live catalogue, with wireless-charging and rear fit checked where relevant.',
+              'S Pen slot-area impact is reviewed as diagnostic context without implying that S Pen service is included.',
+            ],
+          },
+          {
+            title: 'Clear repair boundaries',
+            icon: ClipboardCheck,
+            points: [
+              'Back Housing Replacement does not automatically include cameras, charging components, or logic-board work, and opening the phone does not restore factory water resistance.',
+            ],
+          },
+        ],
+      },
+      'front-camera-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} front camera replacement`,
+        intro:
+          'This model uses a single punch-hole front camera, so we keep the diagnosis focused on that camera path and separate it from software, display, and broader board-level faults first.',
+        cards: [
+          {
+            title: 'Single front-camera diagnosis',
+            icon: Eye,
+            points: [
+              'We check blur, haze, spots, preview failure, and focus inconsistency around the punch-hole camera path.',
+              'Impact near the camera opening is assessed before we assume the front camera alone is the cause.',
+            ],
+          },
+          {
+            title: 'Camera-versus-system separation',
+            icon: Search,
+            points: [
+              'We separate likely camera faults from software or board-level behaviour before confirming the repair path.',
+            ],
+          },
+          {
+            title: 'Clear expectations before work',
+            icon: ClipboardCheck,
+            points: [
+              'We explain what supports the front-camera diagnosis and what remains uncertain rather than promising every image issue resolves the same way.',
+            ],
+          },
+        ],
+      },
+      'back-camera-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} back camera replacement`,
+        intro:
+          'This model has multiple rear-camera modules, so we identify the affected camera path first instead of treating every zoom, focus, or preview fault as if all rear cameras are replaced together.',
+        cards: [
+          {
+            title: 'Module-specific diagnosis',
+            icon: Eye,
+            points: [
+              'We test the supported rear-camera modes to identify which camera module appears affected before work is approved.',
+              'One repair does not automatically replace every rear camera on the phone.',
+            ],
+          },
+          {
+            title: 'Lens glass and housing separation',
+            icon: Search,
+            points: [
+              'External lens glass and camera-area housing damage are checked before internal camera replacement is assumed.',
+              'External lens glass is not presented here as a separate confirmed public service.',
+            ],
+          },
+          {
+            title: 'Catalogue-backed scope',
+            icon: ClipboardCheck,
+            points: [
+              'The displayed route stays aligned with the live catalogue while the actual affected module still has to be confirmed during diagnosis.',
+            ],
+          },
+        ],
+      },
+      'logic-board-repair': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} logic board repair`,
+        intro:
+          'Board-level faults need disciplined diagnosis after simpler causes are excluded, so we keep the route quote-only and explain repair-versus-data priorities clearly.',
+        cards: [
+          {
+            title: 'Simpler causes ruled out first',
+            icon: Search,
+            points: [
+              'Battery, charging, display, and basic connection causes are reviewed before the fault is treated as board-level.',
+            ],
+          },
+          {
+            title: 'Repair versus data priorities',
+            icon: Wrench,
+            points: [
+              'We separate the goal of restoring the phone from the separate goal of recovering data where possible.',
+            ],
+          },
+          {
+            title: 'Quote-only risk review',
+            icon: ClipboardCheck,
+            points: [
+              'Board-level work is only approved after we explain the likely scope, uncertainty, and limitations without fabricating a fixed price.',
+            ],
+          },
+        ],
+      },
+    };
+  }
+
+  if (isGalaxyS && hardwareConfig) {
+    const biometricLabel = getSamsungBiometricLabel(hardwareConfig);
+    const frontCameraLabel = getSamsungFrontCameraLabel(hardwareConfig);
+    const rearCameraLabel = getSamsungRearCameraLabel(hardwareConfig);
+    const hasSPenSlot = hardwareConfig.sPenCapability === 'integrated-slot';
+
+    return {
+      'screen-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} screen replacement`,
+        intro:
+          `Screen faults on this Samsung Galaxy S model can overlap with ${biometricLabel} symptoms, frame condition, and calibration requirements, so we inspect the full display path before confirming the final repair outcome.`,
+        cards: [
+          {
+            title: 'Display and biometric testing',
+            icon: Smartphone,
+            points: [
+              `We test display output, touch response, and the ${biometricLabel} path before and after service instead of assuming every symptom disappears with a new screen.`,
+              'Screen damage, biometric symptoms, frame condition, and calibration requirements are assessed together before the repair outcome is confirmed.',
+            ],
+          },
+          {
+            title: 'Frame and impact review',
+            icon: Search,
+            points: [
+              'We inspect edge impact and frame condition before fitting a screen because deformation can change the safest repair path.',
+              'A screen replacement does not automatically guarantee that every deeper biometric or structural fault is solved.',
+            ],
+          },
+          {
+            title: 'Catalogue-backed screen path',
+            icon: ClipboardCheck,
+            points: [
+              'This page follows the live catalogue-backed screen listing for the model without inventing extra screen-quality tiers or unsupported options.',
+            ],
+          },
+        ],
+      },
+      'battery-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} battery replacement`,
+        intro:
+          'Battery complaints can overlap with charging-path or board-level faults, so we confirm the likely cause before treating the battery as the only answer.',
+        cards: [
+          {
+            title: 'Battery symptoms in context',
+            icon: BatteryCharging,
+            points: [
+              'We review rapid drain, shutdowns, unstable percentage, heat, swelling, and reduced runtime before confirming the battery path.',
+              'Swelling is checked against rear housing fit rather than being treated as a cosmetic issue only.',
+            ],
+          },
+          {
+            title: 'Charging-path separation',
+            icon: Usb,
+            points: [
+              'USB-C charging behaviour and related symptoms are checked so battery work is not quoted on the wrong fault path.',
+            ],
+          },
+          {
+            title: 'Clear scope before work',
+            icon: ClipboardCheck,
+            points: [
+              'We explain when the battery path looks appropriate and when deeper diagnosis is still needed before parts are approved.',
+            ],
+          },
+        ],
+      },
+      'charging-port-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} charging port replacement`,
+        intro:
+          'USB-C issues are diagnosed carefully because cable fit, contamination, battery symptoms, and board-level charging faults can all present similarly.',
+        cards: [
+          {
+            title: 'USB-C inspection first',
+            icon: Usb,
+            points: [
+              'We inspect cable fit, loose connection symptoms, debris, and contamination before assuming the port needs replacement.',
+            ],
+          },
+          {
+            title: 'Port-versus-power diagnosis',
+            icon: Search,
+            points: [
+              'Battery and board-level causes are separated from the USB-C path before the repair listing is treated as the final answer.',
+            ],
+          },
+          {
+            title: 'Function retesting before handover',
+            icon: ClipboardCheck,
+            points: [
+              'Charging and related connection behaviour are retested before pickup so the handover reflects the confirmed repair path.',
+            ],
+          },
+        ],
+      },
+      'back-housing-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+        intro:
+          `Rear housing work can overlap with frame damage, camera-area impact, wireless-charging behaviour${hasSPenSlot ? ', and S Pen slot-area distortion' : ''}, so the scope is reviewed carefully before work starts.`,
+        cards: [
+          {
+            title: 'Rear housing and frame review',
+            icon: Smartphone,
+            points: [
+              'We distinguish rear housing or rear-panel damage from broader frame deformation before confirming the repair path.',
+              'Severe frame damage stays subject to separate inspection rather than being assumed inside every housing repair.',
+            ],
+          },
+          {
+            title: 'Variant and function checks',
+            icon: Search,
+            points: [
+              'The available catalogue-backed variants remain driven by the live catalogue, with wireless-charging and rear fit checked where relevant.',
+              ...(hasSPenSlot
+                ? ['S Pen slot-area impact is reviewed as diagnostic context without implying that S Pen service is included.']
+                : []),
+            ],
+          },
+          {
+            title: 'Clear repair boundaries',
+            icon: ClipboardCheck,
+            points: [
+              'Back Housing Replacement does not automatically include cameras, charging components, or logic-board work, and opening the phone does not restore factory water resistance.',
+            ],
+          },
+        ],
+      },
+      'front-camera-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} front camera replacement`,
+        intro:
+          `This model uses a ${frontCameraLabel}, so we keep the diagnosis focused on that camera path and separate it from software, display, and broader board-level faults first.`,
+        cards: [
+          {
+            title: 'Single front-camera diagnosis',
+            icon: Eye,
+            points: [
+              `We check blur, haze, spots, preview failure, and focus inconsistency around the ${frontCameraLabel} path.`,
+              'Impact near the camera opening is assessed before we assume the front camera alone is the cause.',
+            ],
+          },
+          {
+            title: 'Camera-versus-system separation',
+            icon: Search,
+            points: [
+              'We separate likely camera faults from software or board-level behaviour before confirming the repair path.',
+            ],
+          },
+          {
+            title: 'Clear expectations before work',
+            icon: ClipboardCheck,
+            points: [
+              'We explain what supports the front-camera diagnosis and what remains uncertain rather than promising every image issue resolves the same way.',
+            ],
+          },
+        ],
+      },
+      'back-camera-replacement': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} back camera replacement`,
+        intro:
+          `This model has a ${rearCameraLabel}, so we identify the affected camera path first instead of treating every zoom, focus, or preview fault as if all rear cameras are replaced together.`,
+        cards: [
+          {
+            title: 'Module-specific diagnosis',
+            icon: Eye,
+            points: [
+              'We test the supported rear-camera modes to identify which camera module appears affected before work is approved.',
+              'One repair does not automatically replace every rear camera on the phone.',
+            ],
+          },
+          {
+            title: 'Lens glass and housing separation',
+            icon: Search,
+            points: [
+              'External lens glass and camera-area housing damage are checked before internal camera replacement is assumed.',
+              'External lens glass is not presented here as a separate confirmed public service.',
+            ],
+          },
+          {
+            title: 'Catalogue-backed scope',
+            icon: ClipboardCheck,
+            points: [
+              'The displayed route stays aligned with the live catalogue while the actual affected module still has to be confirmed during diagnosis.',
+            ],
+          },
+        ],
+      },
+      'logic-board-repair': {
+        kicker: 'Ali Mobile support',
+        heading: `Why choose Ali Mobile for ${modelName} logic board repair`,
+        intro:
+          'Board-level faults need disciplined diagnosis after simpler causes are excluded, so we keep the route quote-only and explain repair-versus-data priorities clearly.',
+        cards: [
+          {
+            title: 'Simpler causes ruled out first',
+            icon: Search,
+            points: [
+              'Battery, charging, display, and basic connection causes are reviewed before the fault is treated as board-level.',
+            ],
+          },
+          {
+            title: 'Repair versus data priorities',
+            icon: Wrench,
+            points: [
+              'We separate the goal of restoring the phone from the separate goal of recovering data where possible.',
+            ],
+          },
+          {
+            title: 'Quote-only risk review',
+            icon: ClipboardCheck,
+            points: [
+              'Board-level work is only approved after we explain the likely scope, uncertainty, and limitations without fabricating a fixed price.',
+            ],
+          },
+        ],
+      },
+    };
+  }
 
   return {
     'screen-replacement': {

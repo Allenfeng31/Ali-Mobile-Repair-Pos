@@ -1,6 +1,9 @@
 import type { RepairTypeSeoPocket, SamsungHardwareConfig } from './types';
 import {
+  getSamsungBiometricLabel,
+  getSamsungDisplayFormLabel,
   SAMSUNG_FOLD_TESTING_NOTE,
+  SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE,
   SAMSUNG_QUOTE_ONLY_SCOPE,
   SAMSUNG_WATER_RESISTANCE_NOTE,
 } from './shared';
@@ -8,6 +11,253 @@ import {
 export function buildSamsungScreenReplacementPocket(
   config: SamsungHardwareConfig
 ): RepairTypeSeoPocket {
+  if (config.modelSlug === 'galaxy-s23-ultra') {
+    return {
+      quickAnswer:
+        `Need ${config.modelName} screen replacement in Ringwood? Ali Mobile & Repair checks cracked display glass, black display faults, lines, flickering, touch failure, frame condition, and fingerprint overlap before confirming that the screen path is the right repair outcome.`,
+      workbenchHeadings: {
+        options: `Which screen path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before screen replacement?',
+        symptoms: 'Which display symptoms matter most?',
+        outcomes: 'What can change the screen result?',
+      },
+      repairOptions: [
+        {
+          name: 'Display and frame assessment first',
+          shortDescription:
+            'We inspect cracked glass, black display faults, lines, flickering, touch failure, and impact near the display edge before confirming the screen path.',
+          bestFor:
+            'Phones with visible display damage, image loss, touch problems, or edge impact that may have affected the way the display assembly sits.',
+          notes:
+            'Frame condition is checked before installation because deformation can change whether the screen path alone is appropriate.',
+        },
+        {
+          name: 'Fingerprint and calibration overlap review',
+          shortDescription:
+            'We check how display damage, under-display fingerprint symptoms, frame condition, and calibration requirements overlap before confirming the likely outcome.',
+          bestFor:
+            'Phones where display damage and fingerprint behaviour may be linked, or where the biometric result is uncertain after impact.',
+          notes:
+            'Screen damage, fingerprint symptoms, frame condition and calibration requirements may overlap and must be assessed before the final repair outcome is confirmed.',
+        },
+        {
+          name: 'Pre-repair and post-repair function testing',
+          shortDescription:
+            'We test display output, touch response, and the fingerprint path before and after service to confirm the main repair area.',
+          bestFor:
+            'Customers who want the display path retested in context rather than assuming every biometric symptom disappears with the new screen.',
+          notes:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Cracked display glass or visible impact damage',
+          description:
+            'Visible cracks, edge impact, or pressure points can affect more than the outer glass, so the display assembly and frame are inspected together.',
+        },
+        {
+          title: 'Black display, lines, or flickering',
+          description:
+            'Image loss, coloured lines, or flickering can point to screen damage, but we still separate that from deeper board-level behaviour where needed.',
+        },
+        {
+          title: 'Touch failure',
+          description:
+            'Partial or full touch loss is checked alongside display output because the correct repair path depends on the full symptom pattern.',
+        },
+        {
+          title: 'Fingerprint overlap',
+          description:
+            'Under-display fingerprint symptoms can overlap with screen damage, frame condition, and calibration requirements, so we test the biometric path before and after service.',
+        },
+        {
+          title: 'Frame deformation',
+          description:
+            'A bent or distorted frame can affect how a replacement screen fits and may require separate assessment before the final repair result is confirmed.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Inspect the display and frame together',
+          description:
+            'We check cracked glass, black display faults, lines, flickering, touch response, and whether the frame is safe for a replacement screen.',
+        },
+        {
+          step: '02',
+          title: 'Compare display and fingerprint symptoms',
+          description:
+            'The under-display fingerprint path is tested because display damage and biometric symptoms can overlap without guaranteeing the same repair outcome.',
+        },
+        {
+          step: '03',
+          title: 'Separate screen faults from deeper diagnosis',
+          description:
+            'Where needed, we separate likely screen faults from board-level behaviour so a screen replacement is not used as a blanket answer for every display complaint.',
+        },
+        {
+          step: '04',
+          title: 'Retest display, touch, and fingerprint functions',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} Additional damage or calibration requirements can still affect the final outcome.`,
+        },
+      ],
+      faq: [
+        {
+          question: `Can ${config.modelName} screen damage affect the fingerprint sensor too?`,
+          answer:
+            'Yes. Screen damage, fingerprint symptoms, frame condition, and calibration requirements can overlap, so we assess them together before confirming the likely repair outcome.',
+        },
+        {
+          question: `Does ${config.modelName} screen replacement guarantee fingerprint restoration?`,
+          answer:
+            'No. We test fingerprint behaviour before and after service, but screen replacement does not guarantee that every biometric fault or calibration requirement will be resolved.',
+        },
+        {
+          question: `Do you offer more than one screen quality choice on this ${config.modelName} page?`,
+          answer:
+            'This page follows the live catalogue-backed screen replacement product shown for this model. If availability changes, we confirm the current repair listing before work begins.',
+        },
+        {
+          question: `Can frame damage change the result of ${config.modelName} screen replacement?`,
+          answer:
+            'Yes. Frame deformation can change fit, stability, and the final repair scope, so it may require separate assessment before the screen outcome is confirmed.',
+        },
+        {
+          question: `Will screen replacement restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
+  if (config.seriesFamily === 'galaxy-s') {
+    const biometricLabel = getSamsungBiometricLabel(config);
+    const isCurved = config.displayEdgeClass === 'curved';
+    const isFlat = config.displayEdgeClass === 'flat';
+    const displayEdgeWording = isCurved ? 'curved-edge' : isFlat ? 'flat-display' : 'display edge and frame';
+
+    return {
+      quickAnswer:
+        `Need ${config.modelName} screen replacement in Ringwood? Ali Mobile & Repair checks cracked display glass, black display faults, lines, flickering, touch failure, ${displayEdgeWording} condition, and ${biometricLabel} overlap before confirming the screen path.`,
+      workbenchHeadings: {
+        options: `Which screen path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before screen replacement?',
+        symptoms: 'Which display symptoms matter most?',
+        outcomes: 'What can change the screen result?',
+      },
+      repairOptions: [
+        {
+          name: 'Display and frame assessment first',
+          shortDescription:
+            `We inspect cracked glass, black display faults, lines, flickering, touch failure, and impact near the display edge before confirming the screen path.`,
+          bestFor:
+            `Phones with visible display damage, image loss, touch problems, or edge impact that may have affected the way the display assembly sits.`,
+          notes:
+            'Frame condition is checked before installation because deformation can change whether the screen path alone is appropriate.',
+        },
+        {
+          name: 'Biometric and calibration overlap review',
+          shortDescription:
+            `We check how display damage, ${biometricLabel} symptoms, frame condition, and calibration requirements overlap before confirming the likely outcome.`,
+          bestFor:
+            'Phones where display damage and biometric behaviour may be linked, or where the biometric result is uncertain after impact.',
+          notes:
+            `Screen damage, ${biometricLabel} symptoms, frame condition and calibration requirements may overlap and must be assessed before the final repair outcome is confirmed.`,
+        },
+        {
+          name: 'Pre-repair and post-repair function testing',
+          shortDescription:
+            'We test display output, touch response, and biometric behaviour before and after service to confirm the main repair area.',
+          bestFor:
+            'Customers who want the display path retested in context rather than assuming every biometric symptom disappears with the new screen.',
+          notes:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Cracked display glass or visible impact damage',
+          description:
+            'Visible cracks, edge impact, or pressure points can affect more than the outer glass, so the display assembly and frame are inspected together.',
+        },
+        {
+          title: 'Black display, lines, or flickering',
+          description:
+            'Image loss, coloured lines, or flickering can point to screen damage, but we still separate that from deeper board-level behaviour where needed.',
+        },
+        {
+          title: 'Touch failure',
+          description:
+            'Partial or full touch loss is checked alongside display output because the correct repair path depends on the full symptom pattern.',
+        },
+        {
+          title: 'Biometric overlap',
+          description:
+            `Biometric symptoms can overlap with screen damage, frame condition, and calibration requirements, so we test the ${biometricLabel} path before and after service.`,
+        },
+        {
+          title: 'Frame deformation',
+          description:
+            'A bent or distorted frame can affect how a replacement screen fits and may require separate assessment before the final repair result is confirmed.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Inspect the display and frame together',
+          description:
+            `We check cracked glass, black display faults, lines, flickering, touch response, and whether the frame is safe for a replacement screen.`,
+        },
+        {
+          step: '02',
+          title: 'Compare display and biometric symptoms',
+          description:
+            `The ${biometricLabel} path is tested because display damage and biometric symptoms can overlap without guaranteeing the same repair outcome.`,
+        },
+        {
+          step: '03',
+          title: 'Separate screen faults from deeper diagnosis',
+          description:
+            'Where needed, we separate likely screen faults from board-level behaviour so a screen replacement is not used as a blanket answer for every display complaint.',
+        },
+        {
+          step: '04',
+          title: 'Retest display, touch, and biometric functions',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} Additional damage or calibration requirements can still affect the final outcome.`,
+        },
+      ],
+      faq: [
+        {
+          question: `Can ${config.modelName} screen damage affect the biometric sensor too?`,
+          answer:
+            `Yes. Screen damage, ${biometricLabel} symptoms, frame condition, and calibration requirements can overlap, so we assess them together before confirming the likely repair outcome.`,
+        },
+        {
+          question: `Does ${config.modelName} screen replacement guarantee biometric restoration?`,
+          answer:
+            'No. We test biometric behaviour before and after service, but screen replacement does not guarantee that every biometric fault or calibration requirement will be resolved.',
+        },
+        {
+          question: `Do you offer more than one screen quality choice on this ${config.modelName} page?`,
+          answer:
+            'This page follows the live catalogue-backed screen replacement product shown for this model. If availability changes, we confirm the current repair listing before work begins.',
+        },
+        {
+          question: `Can frame damage change the result of ${config.modelName} screen replacement?`,
+          answer:
+            'Yes. Frame deformation can change fit, stability, and the final repair scope, so it may require separate assessment before the screen outcome is confirmed.',
+        },
+        {
+          question: `Will screen replacement restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
   if (config.deviceFamily === 'z-flip') {
     return {
       quickAnswer:
