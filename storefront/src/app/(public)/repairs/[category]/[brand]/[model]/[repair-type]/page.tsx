@@ -38,6 +38,13 @@ import {
   SAMSUNG_GALAXY_S_MODEL_ORDER,
   SAMSUNG_HARDWARE_CONFIG,
 } from '@/lib/seo/content/samsung/config';
+import {
+  getAliMobileEnhancedGooglePixelHubLinks,
+  getAliMobileEnhancedGooglePixelRepairType,
+  getAliMobileEnhancedGooglePixelSeoPocket,
+  isAliMobileEnhancedGooglePixelRepairPage,
+  type AliMobileEnhancedGooglePixelRepairType,
+} from '@/lib/seo/content/google-pixel';
 
 export const revalidate = 86400;
 
@@ -751,7 +758,10 @@ function getEnhancedSamsungGalaxyNoteRelatedRepairLinks(
     .map(({ href, label, slug }) => ({ href, label, slug }));
 }
 
-type EnhancedRepairType = AliMobileEnhancedIphoneRepairType | AliMobileEnhancedSamsungRepairType;
+type EnhancedRepairType =
+  | AliMobileEnhancedIphoneRepairType
+  | AliMobileEnhancedSamsungRepairType
+  | AliMobileEnhancedGooglePixelRepairType;
 
 const ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT: Partial<Record<EnhancedRepairType, string>> = {
   'screen-replacement': 'View all screen replacement services',
@@ -4072,6 +4082,10 @@ function isSamsungNoteBackGlassPublicAlias(
   return samsungConfig?.seriesFamily === 'galaxy-note';
 }
 
+function isGooglePixelBackGlassPublicAlias(category: string, brand: string, repairSlug: string) {
+  return category === "phone" && brand === "google-pixel" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
+}
+
 function usesPhoneBackGlassPublicAlias(
   category: string,
   brand: string,
@@ -4080,7 +4094,8 @@ function usesPhoneBackGlassPublicAlias(
 ) {
   return (
     isIphoneBackGlassPublicAlias(category, brand, repairSlug) ||
-    isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, repairSlug)
+    isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, repairSlug) ||
+    isGooglePixelBackGlassPublicAlias(category, brand, repairSlug)
   );
 }
 
@@ -4098,6 +4113,7 @@ function getPublicRepairSlug(category: string, brand: string, modelSlug: string,
     repairSlug === PHONE_BACK_HOUSING_INTERNAL_SLUG &&
     (
       brand === "iphone" ||
+      brand === "google-pixel" ||
       getSamsungHardwareConfig(modelSlug)?.seriesFamily === 'galaxy-note'
     )
   ) {
@@ -4119,6 +4135,10 @@ function getRepairDisplayName(
   }
 
   if (isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, publicRepairSlug)) {
+    return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
+  }
+
+  if (isGooglePixelBackGlassPublicAlias(category, brand, publicRepairSlug)) {
     return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
   }
 
@@ -4373,7 +4393,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
         ? getEnhancedSamsungFamilyModelHubLinks(brandEntry.models, resolvedParams.model)
         : [],
     categoryHubLinks:
-      resolvedParams.category === 'phone' && (resolvedParams.brand === 'iphone' || isEnhancedSamsungFamilyPage)
+      resolvedParams.category === 'phone' && (resolvedParams.brand === 'iphone' || isEnhancedSamsungFamilyPage || resolvedParams.brand === 'google-pixel')
         ? getEnhancedRepairCategoryHubLinks()
         : [],
   };
@@ -4413,10 +4433,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const modelCode = details?.modelCode;
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
-  const enhancedRepairType = iphoneEnhancedRepairType ?? samsungEnhancedRepairType;
+  const googlePixelEnhancedRepairType = getAliMobileEnhancedGooglePixelRepairType(resolvedParams);
+  const enhancedRepairType = iphoneEnhancedRepairType ?? samsungEnhancedRepairType ?? googlePixelEnhancedRepairType;
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
-  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphonePage || isAliMobileEnhancedSamsungPage;
+  const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
+  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphonePage || isAliMobileEnhancedSamsungPage || isAliMobileEnhancedGooglePixelPage;
   const samsungHardwareConfig = isAliMobileEnhancedSamsungPage
     ? getSamsungHardwareConfig(resolvedParams.model)
     : null;
@@ -4446,12 +4468,19 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairType: resolvedParams['repair-type'],
     pocket: baseSeoPocket,
   });
-  const seoPocket = getAliMobileEnhancedSamsungSeoPocket({
+  const samsungSeoPocket = getAliMobileEnhancedSamsungSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
     pocket: iphoneSeoPocket,
+  });
+  const seoPocket = getAliMobileEnhancedGooglePixelSeoPocket({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+    pocket: samsungSeoPocket,
   });
   const sameModelLinks = otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
@@ -4517,16 +4546,28 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               modelLinks: samsungFamilyModelHubLinks,
               categoryLinks: categoryHubLinks,
             }
-        : null;
+          : isAliMobileEnhancedGooglePixelPage
+            ? {
+                sectionDescription: 'Explore Google Pixel repairs or browse repair services for other devices.',
+                modelGroupHeading: 'More Google Pixel Models',
+                modelLinks: [], // Empty for now as only Pixel 8 Pro is implemented
+                categoryLinks: categoryHubLinks,
+              }
+            : null;
   const isAliMobileEnhancedSamsungExplorePage = Boolean(
     isAliMobileEnhancedSamsungPage &&
       samsungHardwareConfig &&
       samsungEnhancedRepairType &&
       samsungHardwareConfig.supportedRepairTypes.includes(samsungEnhancedRepairType)
   );
+  const isAliMobileEnhancedGooglePixelExplorePage = Boolean(
+    isAliMobileEnhancedGooglePixelPage &&
+      googlePixelEnhancedRepairType
+  );
   const shouldRenderExploreRepairNetworkSection =
     Boolean(isAliMobileEnhancedIphonePage && exploreRepairNetworkSectionProps) ||
-    Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps);
+    Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps) ||
+    Boolean(isAliMobileEnhancedGooglePixelExplorePage && exploreRepairNetworkSectionProps);
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
@@ -4825,7 +4866,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           <WhyChooseUsSection
             modelName={displayModel}
             repairType={enhancedRepairType}
-            contentFamily={isAliMobileEnhancedSamsungPage ? 'samsung' : 'iphone'}
+            contentFamily={isAliMobileEnhancedSamsungPage ? 'samsung' : isAliMobileEnhancedGooglePixelPage ? 'google-pixel' : 'iphone'}
           />
         </ScrollReveal>
       )}

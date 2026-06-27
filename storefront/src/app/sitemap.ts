@@ -61,6 +61,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const repairUrls: MetadataRoute.Sitemap = [];
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
+        // Expose only Pixel 8 Pro for Google Pixel brand for now
+        if (brand.slug === 'google-pixel' && model.slug !== 'pixel-8-pro') {
+          continue;
+        }
+
         modelUrls.push({
           url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}`,
           lastModified: new Date(),

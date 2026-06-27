@@ -181,6 +181,11 @@ function qualifiesForBackGlass(brandSlug: string, modelName: string): boolean {
     return false;
   }
 
+  // Google Pixel (most have glass back)
+  if (brand.includes('google')) {
+    return true;
+  }
+
   return false;
 }
 
@@ -295,10 +300,11 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
       });
     }
     const brandBaseName = brand.replace(/\s+(Tablet|Phone|Watch|Laptop)$/i, '');
+    const normalizedBrandName = brandBaseName.toLowerCase() === 'google' ? 'Google Pixel' : brandBaseName;
     brands.push({
       category,
-      brand: brandBaseName, 
-      slug: slugify(brandBaseName),
+      brand: normalizedBrandName,
+      slug: slugify(normalizedBrandName),
       icon: getCategoryIcon(category),
       models,
     });
