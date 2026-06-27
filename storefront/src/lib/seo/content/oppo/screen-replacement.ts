@@ -6,12 +6,12 @@ export function getOppoScreenPocket(modelSlug: string): RepairTypeSeoPocket | nu
   const config = getOppoModelConfig(modelSlug);
   if (!config) return null;
 
-  const displayModel = modelSlug.toUpperCase();
+  const displayModel = config.displayName;
   const title = `OPPO ${displayModel} Screen Replacement in Ringwood | Ali Mobile & Repair`;
   
   return {
     
-    quickAnswer: `A shattered screen, unresponsiveness, flickering, or a completely blank display typically requires a full screen replacement. For the OPPO ${displayModel}, this involves replacing the entire front panel assembly, which resolves both cracked glass and underlying LCD damage.`,
+    quickAnswer: `A shattered screen, unresponsiveness, flickering, or a completely blank display typically requires a full screen replacement. For the OPPO ${displayModel}, this involves replacing the entire front panel assembly, which resolves both cracked glass and underlying ${config.displayType === 'unknown' ? 'LCD or OLED' : config.displayType} damage.`,
     repairOptions: [
 
         { name: "Full Display Assembly", shortDescription: "We replace the glass and underlying display panel together. This is the industry-standard method to guarantee reliable touch response and image quality.", bestFor: "", notes: "" },
@@ -42,7 +42,7 @@ export function getOppoScreenPocket(modelSlug: string): RepairTypeSeoPocket | nu
         },
         {
           title: "Frame Damage After Impact",
-          description: "Heavy drops can deform the frame, which we inspect to ensure the new screen will sit perfectly flush."
+          description: "Heavy drops can deform the frame, which we inspect to ensure the new screen will sit securely aligned."
         }
       
     ],
@@ -67,7 +67,7 @@ export function getOppoScreenPocket(modelSlug: string): RepairTypeSeoPocket | nu
         },
         {
           question: "Will I lose my data during a screen repair?",
-          answer: "Screen replacement normally does not affect your data. However, we always recommend having a recent backup before any hardware service."
+          answer: "Screen replacement normally generally does not affect your data, though we always recommend a backup beforehand. However, we always recommend having a recent backup before any hardware service."
         },
         {
           question: "Do you replace just the top glass or the whole LCD?",
@@ -75,7 +75,7 @@ export function getOppoScreenPocket(modelSlug: string): RepairTypeSeoPocket | nu
         },
         {
           question: "How long does the screen repair take?",
-          answer: "Most screen replacements take approximately 30 to 60 minutes once the correctly matched part is available at the store."
+          answer: "Most screen replacements take approximately approximately 30 to 60 minutes, subject to part availability and device condition once the correctly matched part is available at the store."
         },
         {
           question: "Will the new screen sit flush if my frame is dented?",

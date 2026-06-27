@@ -126,8 +126,10 @@ const REPAIR_NAME_MAP: Record<string, string> = {
   "Charging Port": "Charging Port Replacement",
   "Front Camera": "Front Camera Replacement",
   "Back Camera": "Back Camera Replacement",
-  "Back Glass": "Back Housing Replacement",
-  "Back Housing": "Back Housing Replacement",
+  "Back Glass": "Back Glass Replacement",
+  "Back Housing": "Back Glass Replacement",
+  "Back Housing Replacement": "Back Glass Replacement",
+  "Logic Board": "Logic Board Repair",
   "Power Button": "Flex Cable",
   "Volume Button": "Flex Cable",
   "Power Flex": "Flex Cable",
@@ -139,7 +141,7 @@ const COMMON_SERVICES = [
   "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
   "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement",
   "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement",
-  "Flex Cable", "Power Button", "Volume Button", "Power Flex", "Volume Flex", "Flash Flex"
+  "Flex Cable", "Power Button", "Volume Button", "Power Flex", "Volume Flex", "Flash Flex", "Back Glass Replacement"
 ];
 
 function escapeRegExp(value: string): string {

@@ -6,7 +6,7 @@ export function getOppoLogicBoardPocket(modelSlug: string): RepairTypeSeoPocket 
   const config = getOppoModelConfig(modelSlug);
   if (!config) return null;
 
-  const displayModel = modelSlug.toUpperCase();
+  const displayModel = config.displayName;
   
   return {
     

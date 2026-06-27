@@ -6,7 +6,7 @@ export function getOppoFrontCameraPocket(modelSlug: string): RepairTypeSeoPocket
   const config = getOppoModelConfig(modelSlug);
   if (!config) return null;
 
-  const displayModel = modelSlug.toUpperCase();
+  const displayModel = config.displayName;
   
   return {
     
@@ -43,7 +43,7 @@ export function getOppoFrontCameraPocket(modelSlug: string): RepairTypeSeoPocket
         { question: "Will a new front camera fix blurry selfies?", answer: "Yes, if the blur is caused by a failing sensor or internal lens damage. However, if the screen glass over the camera is shattered, you may need a screen replacement instead." },
         { question: "Do you replace the screen as part of the camera repair?", answer: "No, they are separate components. If both are damaged, they require separate replacements." },
         { question: "Does this repair restore facial recognition?", answer: "We replace the camera module, but we do not make biometric restoration claims as these systems often rely on secure enclave pairing which cannot always be restored by third-party repairs." },
-        { question: "How long does a front camera replacement take?", answer: "The repair usually takes about 45 to 60 minutes once the part is available." },
+        { question: "How long does a front camera replacement take?", answer: "The repair usually takes about approximately 45 to 60 minutes, subject to part availability and device condition once the part is available." },
         { question: "Is the new camera the same quality?", answer: "We use high-quality replacement modules designed to match the original specifications of your device." },
         { question: "Will I lose my photos?", answer: "No, replacing the camera module does not delete your stored photos or data. A backup is always recommended." }
       

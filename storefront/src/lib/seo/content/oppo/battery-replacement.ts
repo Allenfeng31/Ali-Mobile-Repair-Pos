@@ -6,7 +6,7 @@ export function getOppoBatteryPocket(modelSlug: string): RepairTypeSeoPocket | n
   const config = getOppoModelConfig(modelSlug);
   if (!config) return null;
 
-  const displayModel = modelSlug.toUpperCase();
+  const displayModel = config.displayName;
   
   return {
     
@@ -45,7 +45,7 @@ export function getOppoBatteryPocket(modelSlug: string): RepairTypeSeoPocket | n
         { question: "How do I know if the battery or the charging port is broken?", answer: "We perform a diagnosis before replacement to determine if power is successfully reaching the battery from the port." },
         { question: "Is it dangerous if my phone back cover is lifting?", answer: "Yes, this is often caused by a swollen battery. We recommend bringing it in for inspection promptly to avoid pressure damage to the screen." },
         { question: "Will my data be safe?", answer: "Battery replacements do not typically affect internal storage, but a backup is always recommended." },
-        { question: "How long does a battery replacement take?", answer: "The repair normally takes around 30 to 45 minutes once the part is available." },
+        { question: "How long does a battery replacement take?", answer: "The repair normally takes around approximately 30 to 45 minutes, depending on the exact damage and part availability once the part is available." },
         { question: "Do you use safe adhesives for the battery?", answer: "Yes, we use industry-standard stretch-release adhesive strips to mount the battery securely without causing pressure points." },
         { question: "Is there a warranty?", answer: "Yes, our new batteries come with a warranty covering manufacturing faults." }
       

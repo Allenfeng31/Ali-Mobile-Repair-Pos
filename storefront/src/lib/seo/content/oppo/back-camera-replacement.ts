@@ -6,7 +6,7 @@ export function getOppoBackCameraPocket(modelSlug: string): RepairTypeSeoPocket 
   const config = getOppoModelConfig(modelSlug);
   if (!config) return null;
 
-  const displayModel = modelSlug.toUpperCase();
+  const displayModel = config.displayName;
   
   return {
     
@@ -43,7 +43,7 @@ export function getOppoBackCameraPocket(modelSlug: string): RepairTypeSeoPocket 
         { question: "Does this repair include the external glass cover?", answer: "No, this repair focuses on the internal camera module itself. External camera lens or lens-cover replacement is not automatically included." },
         { question: "Will replacing the camera fix a shattered lens?", answer: "If only the external glass is broken, you need a lens cover replacement, not a camera module replacement, unless shards have damaged the sensor beneath." },
         { question: "Do you replace every camera component?", answer: "We replace the specific module that matches the POS product. We do not imply that a single product automatically replaces every rear camera component in a multi-camera array." },
-        { question: "How long does a back camera replacement take?", answer: "The repair typically takes 45 to 60 minutes once the correctly matched part is available." },
+        { question: "How long does a back camera replacement take?", answer: "The repair typically takes approximately 45 to 60 minutes, subject to part availability and device condition once the correctly matched part is available." },
         { question: "Why is my camera shaking and buzzing?", answer: "This is usually a failure of the optical image stabilization (OIS) or autofocus mechanism inside the camera module. A replacement resolves this." },
         { question: "Will I lose my stored photos?", answer: "No, replacing the camera module does not affect your internal storage or delete existing photos." }
       

@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next';
+
 import { fetchRepairCatalog } from '@/lib/api';
+import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
@@ -66,8 +68,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           continue;
         }
 
-        // Expose only A98 for OPPO brand for now
-        if (brand.slug === 'oppo' && model.slug !== 'a98') {
+        // Wait for OPPO models to be fully validated before exposing to sitemap
+        if (brand.slug === 'oppo' && !getOppoModelConfig(model.slug)) {
           continue;
         }
 
@@ -80,13 +82,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         for (const repair of model.repairTypes) {
           if (repair.slug.includes('flex-cable')) continue;
 
-          const publicRepairSlug =
-            brand.category === 'phone' && repair.slug === 'back-housing-replacement'
-              ? 'back-glass-replacement'
-              : repair.slug;
-
           repairUrls.push({
-            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(publicRepairSlug)}`,
+            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,

@@ -6,6 +6,7 @@ import {
   displayBrand,
   normalizeSamsungCatalogModelName,
 } from './inventoryUtils';
+import { OPPO_ENHANCED_CONFIG } from './seo/content/oppo/config';
 import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -130,8 +131,8 @@ function normalizeRepairSlug(rawName: string): string {
     [/(^|-)screen-(repair|replacement)$/, 'screen-replacement'],
     [/(^|-)battery-(service|repair|replacement)$/, 'battery-replacement'],
     [/(^|-)charging-port(-(repair|replacement))?$/, 'charging-port-replacement'],
-    [/(^|-)back-housing(-(repair|replacement))?$/, 'back-housing-replacement'],
-    [/(^|-)back-glass(-(repair|replacement))?$/, 'back-housing-replacement'],
+    [/(^|-)back-housing(-(repair|replacement))?$/, 'back-glass-replacement'],
+    [/(^|-)back-glass(-(repair|replacement))?$/, 'back-glass-replacement'],
     [/(^|-)front-camera(-(repair|replacement))?$/, 'front-camera-replacement'],
     [/(^|-)back-camera(-(repair|replacement))?$/, 'back-camera-replacement'],
     [/(^|-)water-damage(-(repair|recovery))?$/, 'water-damage-repair'],
@@ -151,8 +152,8 @@ const UNIVERSAL_REPAIR_TYPES: RepairOption[] = [
 ];
 
 const BACK_GLASS_REPAIR: RepairOption = {
-  slug: 'back-housing-replacement',
-  name: 'Back Housing Replacement',
+  slug: 'back-glass-replacement',
+  name: 'Back Glass Replacement',
   price: 0,
 };
 
@@ -193,10 +194,7 @@ function qualifiesForBackGlass(brandSlug: string, modelName: string): boolean {
     return true;
   }
 
-  // OPPO A98 explicit Back Glass alias
-  if (brand === 'oppo' && model.includes('a98')) {
-    return true;
-  }
+
 
   return false;
 }
@@ -210,17 +208,60 @@ function ensureCoreRepairTypes(
   const result = [...repairTypes];
   const isGalaxyNoteModel = brandSlug.includes('samsung') && /galaxy\s+note/i.test(modelName);
 
-  // Always add universal repair types
+  const isOppo = brandSlug === 'oppo';
+
+  // For OPPO, if the model is in OPPO_ENHANCED_CONFIG, we use only genuine POS products.
+  if (isOppo) {
+    const oppoSlug = slugify(modelName);
+    const hasOppoConfig = Object.prototype.hasOwnProperty.call(OPPO_ENHANCED_CONFIG.models, oppoSlug);
+    
+    // Only apply enhanced handling if the model is explicitly configured
+    if (hasOppoConfig) {
+      // Check if it has the exactly 7 genuine POS products required for the OPPO rollout
+      // The 7 products are: screen-replacement, battery-replacement, charging-port-replacement,
+      // back-housing-replacement, front-camera-replacement, back-camera-replacement, logic-board-repair
+      const requiredSlugs = [
+        'screen-replacement',
+        'battery-replacement',
+        'charging-port-replacement',
+        'back-glass-replacement',
+        'front-camera-replacement',
+        'back-camera-replacement',
+        'logic-board-repair'
+      ];
+
+      const genuineSlugs = result.map(r => r.slug);
+      const hasAllGenuine = requiredSlugs.every(slug => genuineSlugs.includes(slug));
+      
+      // Ensure there are no unexpected extra repairs like generic water damage
+      const noExtras = result.filter(r => r.slug !== 'water-damage-repair').length === requiredSlugs.length;
+
+      console.log('[DEBUG] oppoSlug is:', oppoSlug);
+
+      if (oppoSlug === 'reno-10-pro-plus') {
+        console.log('[DEBUG] reno-10-pro-plus genuineSlugs:', genuineSlugs);
+        console.log('[DEBUG] hasAllGenuine:', hasAllGenuine, 'noExtras:', noExtras, 'filtered len:', result.filter(r => r.slug !== 'water-damage-repair').length);
+      }
+
+      if (hasAllGenuine && noExtras) {
+        // Remove synthetic water-damage-repair if it somehow got added (it shouldn't be in POS)
+        const wdIdx = result.findIndex(r => r.slug === 'water-damage-repair');
+        if (wdIdx !== -1) result.splice(wdIdx, 1);
+        
+        // Keep only genuine POS products, no synthetic additions
+        return result;
+      }
+      
+      // If it fails the 7 genuine products check, it falls through to the synthetic generic logic.
+      // This effectively excludes it from the "active" enhanced set while keeping the site from breaking.
+    }
+  }
+
+  // Always add universal repair types for non-OPPO (or unconfigured OPPO) models
   for (const core of UNIVERSAL_REPAIR_TYPES) {
     if (!result.some(r => r.slug === core.slug)) {
       result.push({ ...core });
     }
-  }
-
-  // Remove water-damage-repair for OPPO A98
-  if (brandSlug === 'oppo' && modelName.toLowerCase().includes('a98')) {
-    const wdIdx = result.findIndex(r => r.slug === 'water-damage-repair');
-    if (wdIdx !== -1) result.splice(wdIdx, 1);
   }
 
   // Galaxy Note models keep only the genuine POS rows already present in the catalogue.

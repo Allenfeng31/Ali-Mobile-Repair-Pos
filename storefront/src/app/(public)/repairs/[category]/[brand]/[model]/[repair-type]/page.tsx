@@ -45,7 +45,7 @@ import {
   isAliMobileEnhancedGooglePixelRepairPage,
   type AliMobileEnhancedGooglePixelRepairType,
 } from '@/lib/seo/content/google-pixel';
-import { getAliMobileEnhancedOppoSeoPocket } from '@/lib/seo/content/oppo';
+import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
 
 export const revalidate = 86400;
 
@@ -231,7 +231,9 @@ function getEnhancedIphoneModelHubLinks(
 function getEnhancedRepairCategoryHubLinks(): ExploreRepairLink[] {
   return [
     { href: '/repairs/phone', label: 'Explore phone repairs' },
+    { href: '/repairs/phone/iphone', label: 'Explore iPhone repairs' },
     { href: '/repairs/phone/samsung', label: 'Explore Samsung phone repairs' },
+    { href: '/repairs/phone/oppo', label: 'Explore OPPO phone repairs' },
     { href: '/repairs/phone/google-pixel', label: 'Explore Google Pixel repairs' },
     { href: '/repairs/tablet/ipad', label: 'Explore iPad repairs' },
     { href: '/repairs/laptop/macbook', label: 'Explore MacBook repairs' },
@@ -752,6 +754,56 @@ function getEnhancedSamsungGalaxyNoteRelatedRepairLinks(
         return false;
       }
 
+      seenHrefs.add(link.href);
+      return true;
+    })
+    .slice(0, 5)
+    .map(({ href, label, slug }) => ({ href, label, slug }));
+}
+
+function getEnhancedOppoRelatedRepairLinks(
+  models: ReadonlyArray<{ slug: string; model: string }>,
+  currentModelSlug: string,
+  repairSlug: string,
+  repairName: string
+): SameModelRepairLink[] {
+  const currentConfig = getOppoModelConfig(currentModelSlug);
+  if (!currentConfig) return [];
+
+  const currentSeries = currentConfig.series;
+  const seenHrefs = new Set<string>();
+
+  return models
+    .filter((model) => model.slug !== currentModelSlug)
+    .map((model) => {
+      const candidateConfig = getOppoModelConfig(model.slug);
+      if (!candidateConfig || candidateConfig.series !== currentSeries) {
+        return null;
+      }
+
+      return {
+        href: `/repairs/phone/oppo/${model.slug}/${repairSlug}`,
+        label: getRelatedRepairAnchorText({
+          category: 'phone',
+          brand: 'oppo',
+          modelSlug: model.slug,
+          modelName: candidateConfig.displayName 
+            ? (candidateConfig.displayName.toLowerCase().startsWith('oppo') ? candidateConfig.displayName : `OPPO ${candidateConfig.displayName}`)
+            : (model.model.toLowerCase().startsWith('oppo') ? model.model : `OPPO ${model.model}`),
+          repairSlug,
+          repairName,
+        }),
+        slug: model.slug,
+      };
+    })
+    .filter((model): model is NonNullable<typeof model> => Boolean(model))
+    .sort((left, right) => {
+       const hashLeft = (left.slug.length + currentModelSlug.length) % 3;
+       const hashRight = (right.slug.length + currentModelSlug.length) % 3;
+       return hashLeft - hashRight || left.slug.localeCompare(right.slug);
+    })
+    .filter((link) => {
+      if (seenHrefs.has(link.href)) return false;
       seenHrefs.add(link.href);
       return true;
     })
@@ -4087,9 +4139,6 @@ function isGooglePixelBackGlassPublicAlias(category: string, brand: string, repa
   return category === "phone" && brand === "google-pixel" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
 }
 
-function isOppoBackGlassPublicAlias(category: string, brand: string, modelSlug: string, repairSlug: string) {
-  return category === "phone" && brand === "oppo" && modelSlug === "a98" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
-}
 
 function usesPhoneBackGlassPublicAlias(
   category: string,
@@ -4101,15 +4150,13 @@ function usesPhoneBackGlassPublicAlias(
     isIphoneBackGlassPublicAlias(category, brand, repairSlug) ||
     isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, repairSlug) ||
     isGooglePixelBackGlassPublicAlias(category, brand, repairSlug) ||
-    isOppoBackGlassPublicAlias(category, brand, modelSlug, repairSlug)
+    (category === "phone" && brand === "oppo" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG)
   );
 }
 
 function resolveRepairSlugForLookup(category: string, brand: string, modelSlug: string, repairSlug: string) {
-  if (usesPhoneBackGlassPublicAlias(category, brand, modelSlug, repairSlug)) {
-    return PHONE_BACK_HOUSING_INTERNAL_SLUG;
-  }
-
+  // Back Housing Replacement is normalized at the API/Data layer to back-glass-replacement.
+  // The catalog natively contains 'back-glass-replacement', so we can just look it up directly.
   return repairSlug;
 }
 
@@ -4120,7 +4167,7 @@ function getPublicRepairSlug(category: string, brand: string, modelSlug: string,
     (
       brand === "iphone" ||
       brand === "google-pixel" ||
-      (brand === "oppo" && modelSlug === "a98") ||
+      brand === "oppo" ||
       getSamsungHardwareConfig(modelSlug)?.seriesFamily === 'galaxy-note'
     )
   ) {
@@ -4149,9 +4196,6 @@ function getRepairDisplayName(
     return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
   }
 
-  if (isOppoBackGlassPublicAlias(category, brand, modelSlug, publicRepairSlug)) {
-    return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
-  }
 
   return repairName;
 }
@@ -4298,8 +4342,10 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   crossModelLinks: SameModelRepairLink[];
   galaxyARelatedRepairLinks: SameModelRepairLink[];
   galaxyNoteRelatedRepairLinks: SameModelRepairLink[];
+  oppoRelatedRepairLinks: SameModelRepairLink[];
   iphoneModelHubLinks: ExploreRepairLink[];
   samsungFamilyModelHubLinks: ExploreRepairLink[];
+  oppoSeriesModelHubLinks: ExploreRepairLink[];
   categoryHubLinks: ExploreRepairLink[];
 } | null> {
   if (isUnsupportedSamsungNoteRepairRoute(resolvedParams)) {
@@ -4311,10 +4357,16 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     (brand) => brand.category === resolvedParams.category && brand.slug === resolvedParams.brand
   );
 
-  if (!brandEntry) return null;
+  if (!brandEntry) {
+    console.log('[DEBUG] brandEntry is null');
+    return null;
+  }
 
   const modelEntry = brandEntry.models.find((model) => model.slug === resolvedParams.model);
-  if (!modelEntry) return null;
+  if (!modelEntry) {
+    console.log('[DEBUG] modelEntry is null');
+    return null;
+  }
 
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
@@ -4322,8 +4374,12 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     resolvedParams.model,
     resolvedParams['repair-type']
   );
+  console.log('[DEBUG] internalRepairSlug:', internalRepairSlug);
   const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === internalRepairSlug);
-  if (!repairEntry) return null;
+  if (!repairEntry) {
+    console.log('[DEBUG] repairEntry is null, looking for', internalRepairSlug, 'in', modelEntry.repairTypes.map(r => r.slug));
+    return null;
+  }
   const isEnhancedSamsungFamilyPage = isAliMobileEnhancedSamsungRepairPage({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
@@ -4333,7 +4389,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
 
   const otherRepairLinks = modelEntry.repairTypes
     .filter((repair) => repair.slug !== internalRepairSlug)
-    .filter((repair) => isEnhancedSamsungFamilyPage || !repair.slug.includes('logic-board'))
+    .filter((repair) => isEnhancedSamsungFamilyPage || isAliMobileEnhancedOppoRepairPage(resolvedParams) || !repair.slug.includes('logic-board'))
     .filter((repair) => resolvedParams.category === 'watch' || !repair.slug.includes('water-damage'))
     .map((repair) => ({
       href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, resolvedParams.model, repair.slug)}`,
@@ -4341,7 +4397,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
         category: resolvedParams.category,
         brand: resolvedParams.brand,
         modelSlug: resolvedParams.model,
-        modelName: modelEntry.model,
+        modelName: resolvedParams.brand === 'oppo' && !modelEntry.model.toLowerCase().startsWith('oppo') ? `OPPO ${modelEntry.model}` : modelEntry.model,
         repairSlug: repair.slug,
         repairName: repair.name,
       }),
@@ -4350,6 +4406,8 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     }))
     .filter((repair) => !isExcludedRelatedRepairPresentationItem(repair))
     .map(({ href, label, slug }) => ({ href, label, slug }));
+
+
 
   const crossModelLinks = getCrossModelRepairRecommendations({
     category: resolvedParams.category,
@@ -4365,7 +4423,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       category: resolvedParams.category,
       brand: resolvedParams.brand,
       modelSlug: candidate.modelSlug,
-      modelName: candidate.modelName,
+      modelName: resolvedParams.brand === 'oppo' && !candidate.modelName.toLowerCase().startsWith('oppo') ? `OPPO ${candidate.modelName}` : candidate.modelName,
       repairSlug: candidate.repairSlug,
       repairName: repairEntry.name,
     }),
@@ -4394,6 +4452,16 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
         )
       : [];
 
+  const oppoRelatedRepairLinks =
+    isAliMobileEnhancedOppoRepairPage(resolvedParams)
+      ? getEnhancedOppoRelatedRepairLinks(
+          brandEntry.models,
+          resolvedParams.model,
+          internalRepairSlug,
+          repairEntry.name
+        )
+      : [];
+
   return {
     details: {
       brand: brandEntry.brand,
@@ -4404,10 +4472,11 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       variants: repairEntry.variants || [],
       source: catalog.source,
     },
-    otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, isEnhancedSamsungFamilyPage ? 6 : 4),
+    otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, (isEnhancedSamsungFamilyPage || isAliMobileEnhancedOppoRepairPage(resolvedParams)) ? 6 : 4),
     crossModelLinks: dedupeRelatedRepairLinks(crossModelLinks).slice(0, 4),
     galaxyARelatedRepairLinks,
     galaxyNoteRelatedRepairLinks,
+    oppoRelatedRepairLinks,
     iphoneModelHubLinks:
       resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
         ? getEnhancedIphoneModelHubLinks(brandEntry.models, resolvedParams.model)
@@ -4416,8 +4485,12 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       isEnhancedSamsungFamilyPage
         ? getEnhancedSamsungFamilyModelHubLinks(brandEntry.models, resolvedParams.model)
         : [],
+    oppoSeriesModelHubLinks:
+      isAliMobileEnhancedOppoRepairPage(resolvedParams)
+        ? getEnhancedOppoSeriesModelHubLinks(brandEntry.models, resolvedParams.model) as any
+        : [],
     categoryHubLinks:
-      resolvedParams.category === 'phone' && (resolvedParams.brand === 'iphone' || isEnhancedSamsungFamilyPage || resolvedParams.brand === 'google-pixel')
+      resolvedParams.category === 'phone' && (resolvedParams.brand === 'iphone' || isEnhancedSamsungFamilyPage || resolvedParams.brand === 'google-pixel' || isAliMobileEnhancedOppoRepairPage(resolvedParams))
         ? getEnhancedRepairCategoryHubLinks()
         : [],
   };
@@ -4432,12 +4505,15 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
+  console.log('[DEBUG] checking route:', resolvedParams);
   if (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) {
+    console.log('[DEBUG] isUnsupported route');
     notFound();
   }
   const pageData = await fetchRepairPageData(resolvedParams);
 
   if (!pageData) {
+    console.log('[DEBUG] pageData is null');
     notFound();
   }
 
@@ -4447,25 +4523,32 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     crossModelLinks,
     galaxyARelatedRepairLinks,
     galaxyNoteRelatedRepairLinks,
+    oppoRelatedRepairLinks,
     iphoneModelHubLinks,
     samsungFamilyModelHubLinks,
+    oppoSeriesModelHubLinks,
     categoryHubLinks,
   } = pageData;
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
-  const displayModel = details?.model || formatDynamicParam(resolvedParams.model);
+  let displayModel = details?.model || formatDynamicParam(resolvedParams.model);
+  if (resolvedParams.brand === 'oppo' && !displayModel.toLowerCase().startsWith('oppo')) {
+    displayModel = `OPPO ${displayModel}`;
+  }
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
   const googlePixelEnhancedRepairType = getAliMobileEnhancedGooglePixelRepairType(resolvedParams);
-  const enhancedRepairType = iphoneEnhancedRepairType ?? samsungEnhancedRepairType ?? googlePixelEnhancedRepairType;
+  const oppoEnhancedRepairType = getAliMobileEnhancedOppoRepairType(resolvedParams);
+  const enhancedRepairType = iphoneEnhancedRepairType ?? samsungEnhancedRepairType ?? googlePixelEnhancedRepairType ?? oppoEnhancedRepairType;
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
   const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
-  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphonePage || isAliMobileEnhancedSamsungPage || isAliMobileEnhancedGooglePixelPage;
+  const isAliMobileEnhancedOppoPage = isAliMobileEnhancedOppoRepairPage(resolvedParams);
+  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIphonePage || isAliMobileEnhancedSamsungPage || isAliMobileEnhancedGooglePixelPage || isAliMobileEnhancedOppoPage;
   const samsungHardwareConfig = isAliMobileEnhancedSamsungPage
     ? getSamsungHardwareConfig(resolvedParams.model)
     : null;
@@ -4525,7 +4608,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       ? galaxyNoteRelatedRepairLinks
       : isAliMobileEnhancedSamsungPage
         ? []
-        : crossModelLinks;
+        : isAliMobileEnhancedOppoRepairPage(resolvedParams)
+          ? oppoRelatedRepairLinks
+          : (resolvedParams.brand === 'oppo' ? [] : crossModelLinks);
   const samsungMidPageHubLinks =
     samsungHardwareConfig?.seriesFamily === 'galaxy-s' ||
     samsungHardwareConfig?.seriesFamily === 'galaxy-a' ||
@@ -4538,17 +4623,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   if (isGalaxyALogicBoardRoute && !samsungEnhancedRepairType) {
     notFound();
   }
-  if (resolvedParams.brand === 'oppo' && resolvedParams.model === 'a98') {
-    const supportedA98Routes = [
-      'screen-replacement',
-      'battery-replacement',
-      'charging-port-replacement',
-      'back-glass-replacement',
-      'front-camera-replacement',
-      'back-camera-replacement',
-      'logic-board-repair'
-    ];
-    if (!supportedA98Routes.includes(slugify(resolvedParams['repair-type']))) {
+  if (isAliMobileEnhancedOppoRepairPage(resolvedParams)) {
+    const oppoEnhancedRepairType = getAliMobileEnhancedOppoRepairType(resolvedParams);
+    if (!oppoEnhancedRepairType) {
       notFound();
     }
   }
@@ -4601,7 +4678,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 modelLinks: [], // Empty for now as only Pixel 8 Pro is implemented
                 categoryLinks: categoryHubLinks,
               }
-            : null;
+            : isAliMobileEnhancedOppoRepairPage(resolvedParams)
+              ? {
+                  sectionDescription: 'Explore OPPO repairs or browse repair services for other devices.',
+                  modelGroupHeading: `MORE OPPO ${getOppoModelConfig(resolvedParams.model)?.series.toUpperCase() || ''} MODELS`,
+                  modelLinks: oppoSeriesModelHubLinks,
+                  categoryLinks: categoryHubLinks,
+                }
+              : null;
   const isAliMobileEnhancedSamsungExplorePage = Boolean(
     isAliMobileEnhancedSamsungPage &&
       samsungHardwareConfig &&
@@ -4612,10 +4696,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedGooglePixelPage &&
       googlePixelEnhancedRepairType
   );
+  const isAliMobileEnhancedOppoExplorePage = Boolean(
+    isAliMobileEnhancedOppoRepairPage(resolvedParams)
+  );
   const shouldRenderExploreRepairNetworkSection =
     Boolean(isAliMobileEnhancedIphonePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps) ||
-    Boolean(isAliMobileEnhancedGooglePixelExplorePage && exploreRepairNetworkSectionProps);
+    Boolean(isAliMobileEnhancedGooglePixelExplorePage && exploreRepairNetworkSectionProps) ||
+    Boolean(isAliMobileEnhancedOppoExplorePage && exploreRepairNetworkSectionProps);
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
@@ -4743,11 +4831,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        {isAliMobileEnhancedRepairPage && enhancedRepairType && seoPocket && seoPocket.commonProblems.length > 0 && (
+        {isAliMobileEnhancedRepairPage && enhancedRepairType && seoPocket && (seoPocket.commonProblems?.length ?? 0) > 0 && (
           <ScrollReveal>
             <CommonRepairProblemsSection
               modelName={displayModel}
-              repairType={enhancedRepairType}
+              repairType={enhancedRepairType as any}
               problems={seoPocket.commonProblems}
             />
           </ScrollReveal>
@@ -4869,12 +4957,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                         {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
                       </Link>
 
-                      {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType] && (
+                      {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT] && (
                         <Link
                           href={`/repairs/${repairTypeHub.slug}`}
                           className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                         >
-                          {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType]} &rarr;
+                          {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT]} &rarr;
                         </Link>
                       )}
                     </div>
@@ -4913,7 +5001,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <ScrollReveal>
           <WhyChooseUsSection
             modelName={displayModel}
-            repairType={enhancedRepairType}
+            repairType={enhancedRepairType as any}
             contentFamily={isAliMobileEnhancedSamsungPage ? 'samsung' : isAliMobileEnhancedGooglePixelPage ? 'google-pixel' : 'iphone'}
           />
         </ScrollReveal>

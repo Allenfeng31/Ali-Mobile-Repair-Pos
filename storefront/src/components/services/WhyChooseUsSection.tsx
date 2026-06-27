@@ -40,6 +40,10 @@ export default function WhyChooseUsSection({
   const headingId = `why-choose-us-${repairType}`;
   const [openCardIndex, setOpenCardIndex] = useState<number | null>(null);
 
+  if (!content) {
+    return null;
+  }
+
   return (
     <section
       className="mx-auto flex w-full justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
