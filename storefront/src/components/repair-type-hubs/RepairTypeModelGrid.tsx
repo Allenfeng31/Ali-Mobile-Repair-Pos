@@ -20,6 +20,12 @@ interface SearchResultLink extends RepairTypeHubModelLink {
   brand: string;
 }
 
+interface SeriesGroup {
+  key: string;
+  label: string;
+  models: RepairTypeHubModelLink[];
+}
+
 const SEARCH_RESULT_LIMIT = 20;
 
 function sortModelLinks<T extends RepairTypeHubModelLink>(models: T[]): T[] {
@@ -44,6 +50,97 @@ function sortSearchResults(results: SearchResultLink[]) {
   return sortModelLinks(results);
 }
 
+function getSamsungSeriesKey(model: RepairTypeHubModelLink) {
+  const slug = model.modelSlug.toLowerCase();
+  const name = model.model.toLowerCase();
+
+  if (slug.startsWith('galaxy-a') || name.includes('galaxy a')) return 'a';
+  if (slug.startsWith('galaxy-s') || name.includes('galaxy s')) return 's';
+  if (slug.startsWith('galaxy-note') || name.includes('note')) return 'note';
+  if (slug.startsWith('galaxy-z') || name.includes('fold') || name.includes('flip')) return 'z';
+  return 'other';
+}
+
+function getOppoSeriesKey(model: RepairTypeHubModelLink) {
+  const slug = model.modelSlug.toLowerCase();
+  const name = model.model.toLowerCase();
+
+  if (name.includes('reno') || slug.includes('reno')) return 'reno';
+  if (name.includes('find') || slug.includes('find')) return 'find';
+  if (/^a\d+/i.test(name) || /\ba\d+\b/i.test(name) || /^a\d+/i.test(slug) || /-a\d+/i.test(slug)) return 'a';
+  return 'other';
+}
+
+function getSeriesLabel(brandSlug: string, seriesKey: string) {
+  if (brandSlug === 'samsung') {
+    switch (seriesKey) {
+      case 'a':
+        return 'Galaxy A Series';
+      case 's':
+        return 'Galaxy S Series';
+      case 'note':
+        return 'Galaxy Note Series';
+      case 'z':
+        return 'Galaxy Z Series';
+      default:
+        return 'Other Samsung Models';
+    }
+  }
+
+  switch (seriesKey) {
+    case 'a':
+      return 'A Series';
+    case 'reno':
+      return 'Reno Series';
+    case 'find':
+      return 'Find Series';
+    default:
+      return 'Other Oppo Models';
+  }
+}
+
+function getSeriesOrder(brandSlug: string) {
+  return brandSlug === 'samsung'
+    ? ['a', 's', 'note', 'z', 'other']
+    : ['a', 'reno', 'find', 'other'];
+}
+
+function getBrandSeriesGroups(
+  brandSlug: string,
+  models: RepairTypeHubModelLink[],
+): SeriesGroup[] | null {
+  if (brandSlug !== 'samsung' && brandSlug !== 'oppo') {
+    return null;
+  }
+
+  const groups = new Map<string, RepairTypeHubModelLink[]>();
+
+  for (const model of models) {
+    const seriesKey =
+      brandSlug === 'samsung'
+        ? getSamsungSeriesKey(model)
+        : getOppoSeriesKey(model);
+    const bucket = groups.get(seriesKey) ?? [];
+    bucket.push(model);
+    groups.set(seriesKey, bucket);
+  }
+
+  return getSeriesOrder(brandSlug)
+    .map((seriesKey) => {
+      const seriesModels = groups.get(seriesKey);
+      if (!seriesModels || seriesModels.length === 0) {
+        return null;
+      }
+
+      return {
+        key: seriesKey,
+        label: getSeriesLabel(brandSlug, seriesKey),
+        models: sortModelLinks(seriesModels),
+      };
+    })
+    .filter((group): group is SeriesGroup => Boolean(group));
+}
+
 export default function RepairTypeModelGrid({
   hubLabel,
   categories,
@@ -53,6 +150,7 @@ export default function RepairTypeModelGrid({
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState(categories[0]?.category ?? '');
   const [expandedBrandSlug, setExpandedBrandSlug] = useState('');
+  const [expandedSeriesKey, setExpandedSeriesKey] = useState('');
   const searchId = useId();
   const expandedRegionRef = useRef<HTMLDivElement | null>(null);
   const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -92,6 +190,7 @@ export default function RepairTypeModelGrid({
   useEffect(() => {
     if (!normalizedSearch) return;
     setExpandedBrandSlug('');
+    setExpandedSeriesKey('');
   }, [normalizedSearch]);
 
   useEffect(() => {
@@ -106,7 +205,15 @@ export default function RepairTypeModelGrid({
   }, [expandedBrandSlug]);
 
   function handleBrandToggle(nextBrandSlug: string) {
-    setExpandedBrandSlug((current) => (current === nextBrandSlug ? '' : nextBrandSlug));
+    setExpandedBrandSlug((current) => {
+      const nextValue = current === nextBrandSlug ? '' : nextBrandSlug;
+      setExpandedSeriesKey('');
+      return nextValue;
+    });
+  }
+
+  function handleSeriesToggle(nextSeriesKey: string) {
+    setExpandedSeriesKey((current) => (current === nextSeriesKey ? '' : nextSeriesKey));
   }
 
   return (
@@ -135,6 +242,7 @@ export default function RepairTypeModelGrid({
               onClick={() => {
                 setActiveCategory(categoryGroup.category);
                 setExpandedBrandSlug('');
+                setExpandedSeriesKey('');
               }}
             >
               {categoryGroup.categoryLabel}
@@ -238,6 +346,7 @@ export default function RepairTypeModelGrid({
                 const buttonId = `${searchId}-${brandGroup.brandSlug}-button`;
                 const regionId = `${searchId}-${brandGroup.brandSlug}-panel`;
                 const sortedBrandModels = sortModelLinks(brandGroup.models);
+                const groupedSeries = getBrandSeriesGroups(brandGroup.brandSlug, sortedBrandModels);
 
                 return (
                   <div
@@ -280,24 +389,108 @@ export default function RepairTypeModelGrid({
                             Select your exact model to go straight to the current {hubLabel.toLowerCase()} detail page.
                           </p>
                         </div>
-                        <div className={styles.modelGrid}>
-                          {sortedBrandModels.map((model) => (
-                            <Link
-                              key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
-                              href={model.href}
-                              prefetch={false}
-                              className={styles.modelCard}
-                            >
-                              <div className={styles.modelCardInfo}>
-                                <span className={styles.modelName}>{model.model}</span>
-                                {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
-                              </div>
-                              <span className={styles.modelCardArrow} aria-hidden="true">
-                                →
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
+                        {groupedSeries ? (
+                          <div className={styles.seriesBrowser}>
+                            <div className={styles.seriesGrid}>
+                              {groupedSeries.map((seriesGroup) => {
+                                const seriesPanelKey = `${brandGroup.brandSlug}:${seriesGroup.key}`;
+                                const isSeriesExpanded = expandedSeriesKey === seriesPanelKey;
+                                const seriesButtonId = `${buttonId}-${seriesGroup.key}-button`;
+                                const seriesRegionId = `${regionId}-${seriesGroup.key}-panel`;
+
+                                return (
+                                  <button
+                                    key={seriesPanelKey}
+                                    id={seriesButtonId}
+                                    type="button"
+                                    className={`${styles.seriesCard} ${isSeriesExpanded ? styles.seriesCardActive : ''}`}
+                                    aria-expanded={isSeriesExpanded}
+                                    aria-controls={seriesRegionId}
+                                    onClick={() => handleSeriesToggle(seriesPanelKey)}
+                                  >
+                                    <div className={styles.seriesCardCopy}>
+                                      <span className={styles.seriesHeading}>{seriesGroup.label}</span>
+                                      <span className={styles.seriesCount}>
+                                        {seriesGroup.models.length} model{seriesGroup.models.length === 1 ? '' : 's'}
+                                      </span>
+                                    </div>
+                                    <span
+                                      className={`${styles.seriesToggleIndicator} ${isSeriesExpanded ? styles.seriesToggleIndicatorOpen : ''}`}
+                                      aria-hidden="true"
+                                    >
+                                      +
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {groupedSeries.map((seriesGroup) => {
+                              const seriesPanelKey = `${brandGroup.brandSlug}:${seriesGroup.key}`;
+                              const isSeriesExpanded = expandedSeriesKey === seriesPanelKey;
+                              const seriesButtonId = `${buttonId}-${seriesGroup.key}-button`;
+                              const seriesRegionId = `${regionId}-${seriesGroup.key}-panel`;
+
+                              if (!isSeriesExpanded) {
+                                return null;
+                              }
+
+                              return (
+                                <div
+                                  key={seriesPanelKey}
+                                  id={seriesRegionId}
+                                  className={styles.seriesPanel}
+                                  role="region"
+                                  aria-labelledby={seriesButtonId}
+                                >
+                                  <div className={styles.seriesPanelHeader}>
+                                    <h5 className={styles.seriesPanelTitle}>{seriesGroup.label}</h5>
+                                    <p className={styles.seriesPanelBody}>
+                                      Choose your exact {seriesGroup.label.toLowerCase()} model to open the current {hubLabel.toLowerCase()} page directly.
+                                    </p>
+                                  </div>
+                                  <div className={styles.modelGrid}>
+                                    {seriesGroup.models.map((model) => (
+                                      <Link
+                                        key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
+                                        href={model.href}
+                                        prefetch={false}
+                                        className={styles.modelCard}
+                                      >
+                                        <div className={styles.modelCardInfo}>
+                                          <span className={styles.modelName}>{model.model}</span>
+                                          {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
+                                        </div>
+                                        <span className={styles.modelCardArrow} aria-hidden="true">
+                                          →
+                                        </span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className={styles.modelGrid}>
+                            {sortedBrandModels.map((model) => (
+                              <Link
+                                key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
+                                href={model.href}
+                                prefetch={false}
+                                className={styles.modelCard}
+                              >
+                                <div className={styles.modelCardInfo}>
+                                  <span className={styles.modelName}>{model.model}</span>
+                                  {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
+                                </div>
+                                <span className={styles.modelCardArrow} aria-hidden="true">
+                                  →
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ) : null}
                   </div>

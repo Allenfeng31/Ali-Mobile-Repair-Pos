@@ -777,6 +777,102 @@
   line-height: 1.6;
 }
 
+.seriesBrowser {
+  display: grid;
+  gap: 16px;
+}
+
+.seriesGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.seriesCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 72px;
+  padding: 16px 18px;
+  border: 2px solid rgba(15, 23, 42, 0.88);
+  border-radius: 22px;
+  background: transparent;
+  color: #020617;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.seriesCard:hover,
+.seriesCardActive {
+  border-color: rgba(37, 99, 235, 0.9);
+  color: var(--primary);
+}
+
+.seriesCardCopy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.seriesHeading {
+  color: inherit;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.seriesCount {
+  color: rgba(15, 23, 42, 0.58);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.seriesToggleIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  font-size: 1.2rem;
+  font-weight: 900;
+  transition: transform 160ms ease;
+}
+
+.seriesToggleIndicatorOpen {
+  transform: rotate(45deg);
+}
+
+.seriesPanel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 2px solid rgba(15, 23, 42, 0.88);
+  border-radius: 24px;
+  scroll-margin-top: 104px;
+}
+
+.seriesPanelHeader {
+  display: grid;
+  gap: 8px;
+}
+
+.seriesPanelTitle {
+  margin: 0;
+  color: #020617;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.seriesPanelBody {
+  margin: 0;
+  max-width: 58ch;
+  color: rgba(15, 23, 42, 0.72);
+  line-height: 1.6;
+}
+
 .simpleList {
   margin: 0;
   padding-left: 20px;
@@ -1081,7 +1177,8 @@
 
   .searchResultsGrid,
   .modelGrid,
-  .infoGrid {
+  .infoGrid,
+  .seriesGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1106,6 +1203,10 @@
 
   .infoGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .seriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .modelGrid {
