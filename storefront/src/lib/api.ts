@@ -1,4 +1,11 @@
-import { RawItem, ParsedItem, parseItem, slugify, displayBrand } from './inventoryUtils';
+import {
+  RawItem,
+  ParsedItem,
+  parseItem,
+  slugify,
+  displayBrand,
+  normalizeSamsungCatalogModelName,
+} from './inventoryUtils';
 import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -242,6 +249,10 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     const standardSlug = normalizeRepairSlug(standardName);
 
     const cleanBrand = displayBrand(item.brand);
+    const normalizedModelName =
+      slugify(cleanBrand) === 'samsung'
+        ? normalizeSamsungCatalogModelName(item.deviceModel, item.modelCode)
+        : item.deviceModel;
     const category = getDeviceCategory(cleanBrand, item.deviceModel);
     const compoundKey = `${category}|${cleanBrand}`;
 
@@ -250,14 +261,14 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     }
 
     const modelMap = brandMap.get(compoundKey)!;
-    if (!modelMap.has(item.deviceModel)) {
-      modelMap.set(item.deviceModel, { repairTypes: [], code: item.modelCode });
-    } else if (item.modelCode && !modelMap.get(item.deviceModel)!.code) {
+    if (!modelMap.has(normalizedModelName)) {
+      modelMap.set(normalizedModelName, { repairTypes: [], code: item.modelCode });
+    } else if (item.modelCode && !modelMap.get(normalizedModelName)!.code) {
       // Opportunistically pick up the code if it wasn't on the first row
-      modelMap.get(item.deviceModel)!.code = item.modelCode;
+      modelMap.get(normalizedModelName)!.code = item.modelCode;
     }
 
-    const { repairTypes } = modelMap.get(item.deviceModel)!;
+    const { repairTypes } = modelMap.get(normalizedModelName)!;
 
     // ── Dedup: if a slug already exists, push as a variant ──
     const existingIdx = repairTypes.findIndex(r => r.slug === standardSlug);

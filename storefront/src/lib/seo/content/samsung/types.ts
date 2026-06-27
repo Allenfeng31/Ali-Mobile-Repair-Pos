@@ -67,6 +67,7 @@ export type AliMobileEnhancedSamsungModelSlug =
   | 'galaxy-s23-ultra'
   | 'galaxy-a20'
   | 'galaxy-a21'
+  | 'galaxy-a21s'
   | 'galaxy-a30'
   | 'galaxy-a31'
   | 'galaxy-a32'

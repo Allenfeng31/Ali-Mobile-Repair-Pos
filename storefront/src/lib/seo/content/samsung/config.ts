@@ -420,7 +420,7 @@ function defineSamsungGalaxyAConfig(modelName: string): SamsungHardwareConfig {
   const isLbSupported = ["galaxy-a20","galaxy-a21","galaxy-a30","galaxy-a31","galaxy-a32","galaxy-a40","galaxy-a50","galaxy-a51","galaxy-a52","galaxy-a53","galaxy-a54","galaxy-a55","galaxy-a70","galaxy-a71","galaxy-a72","galaxy-a73"].includes(modelSlug);
 
   let biometrics: SamsungBiometricClass = 'unknown';
-  if (['galaxy-a11', 'galaxy-a20', 'galaxy-a21', 'galaxy-a30', 'galaxy-a40'].includes(modelSlug)) biometrics = 'rear-fingerprint';
+  if (['galaxy-a11', 'galaxy-a20', 'galaxy-a21', 'galaxy-a21s', 'galaxy-a30', 'galaxy-a40'].includes(modelSlug)) biometrics = 'rear-fingerprint';
   else if (['galaxy-a12', 'galaxy-a13', 'galaxy-a14', 'galaxy-a15', 'galaxy-a16', 'galaxy-a17'].includes(modelSlug)) biometrics = 'side-fingerprint';
   else biometrics = 'under-display-fingerprint';
 
@@ -465,6 +465,7 @@ const SAMSUNG_GALAXY_A_CONFIGS = [
   'Galaxy A17',
   'Galaxy A20',
   'Galaxy A21',
+  'Galaxy A21s',
   'Galaxy A30',
   'Galaxy A31',
   'Galaxy A32',
@@ -490,7 +491,7 @@ export const GALAXY_A_MODEL_ORDER = [
   'galaxy-a56-5g', 'galaxy-a55', 'galaxy-a54', 'galaxy-a53', 'galaxy-a52', 'galaxy-a51', 'galaxy-a50',
   'galaxy-a40',
   'galaxy-a36-5g', 'galaxy-a35-5g', 'galaxy-a34-5g', 'galaxy-a32', 'galaxy-a31', 'galaxy-a30',
-  'galaxy-a21', 'galaxy-a20',
+  'galaxy-a21s', 'galaxy-a21', 'galaxy-a20',
   'galaxy-a17', 'galaxy-a16', 'galaxy-a15', 'galaxy-a14', 'galaxy-a13', 'galaxy-a12', 'galaxy-a11'
 ];
 

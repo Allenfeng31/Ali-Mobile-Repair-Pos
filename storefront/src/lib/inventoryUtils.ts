@@ -95,6 +95,20 @@ export function displayBrand(brand: string): string {
   return brand;
 }
 
+export function normalizeSamsungCatalogModelName(modelName: string, modelCode?: string): string {
+  const normalizedModelName = modelName.trim();
+
+  if (modelCode?.trim().toUpperCase() === 'SM-A217F') {
+    return 'Galaxy A21s';
+  }
+
+  if (/^samsung a21s$/i.test(normalizedModelName)) {
+    return 'Galaxy A21s';
+  }
+
+  return normalizedModelName;
+}
+
 const BRAND_MODEL_PREFIXES = [
   { brand: "T iPad", aliases: ["ipad"] },
   { brand: "T Samsung", aliases: ["samsung", "galaxy tab", "tab"] },
