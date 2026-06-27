@@ -3,6 +3,7 @@ import type {
   AliMobileEnhancedSamsungModelSlug,
   AliMobileEnhancedSamsungRepairType,
   SamsungBiometricClass,
+  SamsungConnectivityClass,
   SamsungDeviceFamily,
   SamsungDisplayEdgeClass,
   SamsungDisplayForm,
@@ -27,6 +28,15 @@ export const SAMSUNG_FOLDABLE_REPAIR_TYPES = [
 export const SAMSUNG_GALAXY_S_REPAIR_TYPES = SAMSUNG_FOLDABLE_REPAIR_TYPES;
 export const SAMSUNG_GALAXY_S23_ULTRA_REPAIR_TYPES = SAMSUNG_GALAXY_S_REPAIR_TYPES;
 export const GALAXY_Z_FOLD_5_REPAIR_TYPES = SAMSUNG_FOLDABLE_REPAIR_TYPES;
+export const SAMSUNG_GALAXY_NOTE_REPAIR_TYPES = [
+  'screen-replacement',
+  'battery-replacement',
+  'charging-port-replacement',
+  'back-glass-replacement',
+  'front-camera-replacement',
+  'back-camera-replacement',
+  'logic-board-repair',
+] as const satisfies ReadonlyArray<AliMobileEnhancedSamsungRepairType>;
 
 const SAMSUNG_VARIANT_ORDER: ReadonlyArray<SamsungVariantClass> = [
   'base',
@@ -56,6 +66,148 @@ const SAMSUNG_GALAXY_S_MODEL_SPECS: ReadonlyArray<{
 
 export const SAMSUNG_GALAXY_S_MODEL_ORDER = SAMSUNG_GALAXY_S_MODEL_SPECS.flatMap((spec) =>
   spec.variants.map((variantClass) => buildSamsungGalaxySModelSlug(spec.generation, variantClass))
+);
+
+const SAMSUNG_GALAXY_NOTE_MODEL_SPECS: ReadonlyArray<{
+  modelSlug: AliMobileEnhancedSamsungModelSlug;
+  modelName: string;
+  modelCodes: ReadonlyArray<string>;
+  generation: number;
+  connectivityClass: SamsungConnectivityClass;
+  displayForm: SamsungDisplayForm;
+  displayEdgeClass: SamsungDisplayEdgeClass;
+  variantClass: SamsungVariantClass;
+  biometrics: SamsungBiometricClass;
+  chargingPortType: 'usb-c';
+  waterResistanceClass: 'ip68';
+  rearCameraClass: SamsungRearCameraClass;
+  frontCameraClass: SamsungFrontCameraClass;
+}> = [
+  {
+    modelSlug: 'galaxy-note-8',
+    modelName: 'Galaxy Note 8',
+    modelCodes: ['SM-N950F'],
+    generation: 8,
+    connectivityClass: '4g',
+    displayForm: 'curved',
+    displayEdgeClass: 'curved',
+    variantClass: 'base',
+    biometrics: 'rear-fingerprint',
+    chargingPortType: 'usb-c',
+    waterResistanceClass: 'ip68',
+    rearCameraClass: 'dual',
+    frontCameraClass: 'single-bezel',
+  },
+  {
+    modelSlug: 'galaxy-note-9',
+    modelName: 'Galaxy Note 9',
+    modelCodes: ['SM-N960F'],
+    generation: 9,
+    connectivityClass: '4g',
+    displayForm: 'curved',
+    displayEdgeClass: 'curved',
+    variantClass: 'base',
+    biometrics: 'rear-fingerprint',
+    chargingPortType: 'usb-c',
+    waterResistanceClass: 'ip68',
+    rearCameraClass: 'dual',
+    frontCameraClass: 'single-bezel',
+  },
+  {
+    modelSlug: 'galaxy-note-10',
+    modelName: 'Galaxy Note 10',
+    modelCodes: ['SM-N970F'],
+    generation: 10,
+    connectivityClass: '4g',
+    displayForm: 'curved',
+    displayEdgeClass: 'curved',
+    variantClass: 'base',
+    biometrics: 'under-display-fingerprint',
+    chargingPortType: 'usb-c',
+    waterResistanceClass: 'ip68',
+    rearCameraClass: 'triple',
+    frontCameraClass: 'single-punch-hole',
+  },
+  {
+    modelSlug: 'galaxy-note-10-plus',
+    modelName: 'Galaxy Note 10+',
+    modelCodes: ['SM-N975F'],
+    generation: 10,
+    connectivityClass: '4g',
+    displayForm: 'curved',
+    displayEdgeClass: 'curved',
+    variantClass: 'plus',
+    biometrics: 'under-display-fingerprint',
+    chargingPortType: 'usb-c',
+    waterResistanceClass: 'ip68',
+    rearCameraClass: 'triple',
+    frontCameraClass: 'single-punch-hole',
+  },
+  {
+    modelSlug: 'galaxy-note-20',
+    modelName: 'Galaxy Note 20',
+    modelCodes: ['SM-N980F'],
+    generation: 20,
+    connectivityClass: '4g',
+    displayForm: 'flat',
+    displayEdgeClass: 'flat',
+    variantClass: 'base',
+    biometrics: 'under-display-fingerprint',
+    chargingPortType: 'usb-c',
+    waterResistanceClass: 'ip68',
+    rearCameraClass: 'triple',
+    frontCameraClass: 'single-punch-hole',
+  },
+  {
+    modelSlug: 'galaxy-note-20-ultra',
+    modelName: 'Galaxy Note 20 Ultra',
+    modelCodes: ['SM-N986B'],
+    generation: 20,
+    connectivityClass: '5g',
+    displayForm: 'curved',
+    displayEdgeClass: 'curved',
+    variantClass: 'ultra',
+    biometrics: 'under-display-fingerprint',
+    chargingPortType: 'usb-c',
+    waterResistanceClass: 'ip68',
+    rearCameraClass: 'triple',
+    frontCameraClass: 'single-punch-hole',
+  },
+];
+
+export const SAMSUNG_GALAXY_NOTE_MODEL_ORDER = SAMSUNG_GALAXY_NOTE_MODEL_SPECS.map(
+  (spec) => spec.modelSlug
+);
+
+function buildSamsungGalaxyNoteConfig(
+  spec: (typeof SAMSUNG_GALAXY_NOTE_MODEL_SPECS)[number]
+): SamsungHardwareConfig {
+  return defineSamsungHardwareConfig({
+    modelSlug: spec.modelSlug,
+    modelName: spec.modelName,
+    modelCodes: spec.modelCodes,
+    seriesFamily: 'galaxy-note',
+    deviceFamily: 'galaxy-note',
+    generation: spec.generation,
+    connectivityClass: spec.connectivityClass,
+    variantClass: spec.variantClass,
+    displayForm: spec.displayForm,
+    displayEdgeClass: spec.displayEdgeClass,
+    supportedRepairTypes: SAMSUNG_GALAXY_NOTE_REPAIR_TYPES,
+    hasInnerFoldableDisplay: false,
+    hasOuterCoverDisplay: false,
+    waterResistanceClass: spec.waterResistanceClass,
+    biometrics: spec.biometrics,
+    chargingPortType: spec.chargingPortType,
+    supportsWirelessCharging: true,
+    rearCameraClass: spec.rearCameraClass,
+    frontCameraClass: spec.frontCameraClass,
+    sPenCapability: 'integrated-slot',
+  });
+}
+
+const SAMSUNG_GALAXY_NOTE_CONFIGS = SAMSUNG_GALAXY_NOTE_MODEL_SPECS.map((spec) =>
+  buildSamsungGalaxyNoteConfig(spec)
 );
 
 function defineSamsungHardwareConfig(config: SamsungHardwareConfig): SamsungHardwareConfig {
@@ -348,6 +500,7 @@ export const SAMSUNG_HARDWARE_CONFIG: Record<
 > = buildSamsungHardwareConfigRecord([
   ...SAMSUNG_GALAXY_S_CONFIGS,
   ...SAMSUNG_GALAXY_A_CONFIGS,
+  ...SAMSUNG_GALAXY_NOTE_CONFIGS,
   defineSamsungHardwareConfig({
     modelSlug: 'galaxy-s23-ultra',
     modelName: 'Galaxy S23 Ultra',

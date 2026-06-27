@@ -63,6 +63,12 @@ const nextConfig: NextConfig = {
       { source: '/repairs/phone/samsung/samsung-a9-plus/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/battery-replacement', permanent: true },
       { source: '/repairs/phone/samsung/samsung-a9-plus/charging-port-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/charging-port-replacement', permanent: true },
       { source: '/repairs/phone/samsung/samsung-a9-plus/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/water-damage-repair', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-note-8/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-8/back-glass-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-note-9/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-9/back-glass-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-note-10/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-10/back-glass-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-note-10-plus/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-10-plus/back-glass-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-note-20/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-20/back-glass-replacement', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-note-20-ultra/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-20-ultra/back-glass-replacement', permanent: true },
 
       // 5. EXISTING REDIRECTS
       {

@@ -122,6 +122,136 @@ export function buildSamsungBackHousingReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-note') {
+    return {
+      quickAnswer: `Need ${config.modelName} Back Glass Replacement in Ringwood? Ali Mobile & Repair checks cracked rear glass, separated rear-panel fit, camera-opening alignment, button and USB-C port alignment, frame condition, swelling-related separation, and integrated S Pen slot-area condition before confirming the quote-only rear glass path.`,
+      workbenchHeadings: {
+        options: `Which back glass path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before back glass replacement?',
+        symptoms: 'Which rear panel symptoms matter most?',
+        outcomes: 'What can change the housing repair result?',
+      },
+      repairOptions: [
+        {
+          name: 'Rear panel and frame inspection',
+          shortDescription:
+            'We inspect cracked rear glass, separated rear-panel fit, and structural condition before confirming the rear glass path.',
+          bestFor:
+            'Phones with visible rear damage, lifted edges, or a rear panel that no longer sits flush with the frame.',
+          notes:
+            'Severe frame deformation can require separate assessment rather than being assumed inside every rear glass replacement.',
+        },
+        {
+          name: 'Alignment and function review',
+          shortDescription:
+            'We check camera openings, buttons, the USB-C port area, and the rear fit so the rear glass path matches the actual fault.',
+          bestFor:
+            'Phones with impact around the camera area, buttons, or charging port where alignment is no longer reliable.',
+          notes:
+            'If swelling or another deeper fault has pushed the housing out of shape, we explain that before confirming the final scope.',
+        },
+        {
+          name: 'Quote-only housing handover',
+          shortDescription:
+            'We confirm the replacement path before work and retest the final fit and function before pickup.',
+          bestFor:
+            'Customers who need the housing checked in context rather than assuming every rear-panel crack needs the same fix.',
+          notes:
+            `${SAMSUNG_QUOTE_ONLY_SCOPE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Cracked or separated rear glass',
+          description:
+            'Cracks, lifting, or a separated rear panel can change the fit of the device and affect the safe repair path.',
+        },
+        {
+          title: 'Camera-opening alignment',
+          description:
+            'Impact around the camera opening can change how the rear assembly sits and whether the housing alone is the correct repair.',
+        },
+        {
+          title: 'Swelling-related separation',
+          description:
+            'Battery swelling can push on the rear housing, so we check whether the swelling has changed the structural fit.',
+        },
+        {
+          title: 'Integrated S Pen slot-area condition',
+          description:
+            'S Pen slot-area damage is reviewed as diagnostic context, but the housing product does not automatically include S Pen service.',
+        },
+        {
+          title: 'Water-resistance limitation',
+          description:
+            'Opening and resealing the phone does not restore factory IP68 performance, so we explain that limitation before repair.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Inspect rear glass and frame condition',
+          description:
+            'We check whether the rear panel is cracked, separated, or no longer sitting flush with the frame.',
+        },
+        {
+          step: '02',
+          title: 'Check alignment around openings and buttons',
+          description:
+            'Camera openings, buttons, and the USB-C port area are reviewed so the housing quote matches the visible damage.',
+        },
+        {
+          step: '03',
+          title: 'Review swelling and slot-area impact',
+          description:
+            'Swelling, pressure, and integrated S Pen slot-area damage are considered before the final scope is confirmed.',
+        },
+        {
+          step: '04',
+          title: 'Retest fit and function before handover',
+          description:
+            `We confirm the final fit and function after repair, while ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `What is included in ${config.modelName} Back Glass Replacement?`,
+          answer:
+            'It covers the applicable rear glass or housing assembly shown by the live catalogue, but the exact included parts still depend on the supplied assembly and the final inspection.',
+        },
+        {
+          question: `Is this the same as Back Housing Replacement on my ${config.modelName}?`,
+          answer:
+            'The public Note page is presented as Back Glass Replacement, while the live POS product behind it remains Back Housing Replacement. That keeps the customer-facing route consistent without inventing a second purchasable product.',
+        },
+        {
+          question: `Does ${config.modelName} Back Glass Replacement include the complete metal frame?`,
+          answer:
+            'Not always. Severe frame deformation may need separate assessment, and the rear glass route does not automatically guarantee a complete metal-frame replacement.',
+        },
+        {
+          question: `Can battery swelling cause the rear glass to lift on my ${config.modelName}?`,
+          answer:
+            'Yes. We inspect swelling-related pressure carefully because it can change the way the rear panel sits and whether more than the rear glass itself needs attention.',
+        },
+        {
+          question: `Will camera openings and buttons be checked during ${config.modelName} Back Glass Replacement?`,
+          answer:
+            'Yes. Camera openings, buttons, and the USB-C port area are checked because alignment problems can change the repair path.',
+        },
+        {
+          question: `Is the S Pen included in ${config.modelName} Back Glass Replacement?`,
+          answer:
+            'No. The S Pen is not included in the underlying POS housing product, and S Pen replacement is not a public service here.',
+        },
+        {
+          question: `Will factory IP68 resistance be restored on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
   return {
     quickAnswer:
       `Need ${config.modelName} back housing replacement in Ringwood? Ali Mobile & Repair checks ${checks} before confirming the quote-only scope.`,

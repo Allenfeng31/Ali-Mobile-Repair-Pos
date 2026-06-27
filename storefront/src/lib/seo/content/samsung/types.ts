@@ -6,6 +6,7 @@ export type AliMobileEnhancedSamsungRepairType =
   | 'screen-replacement'
   | 'battery-replacement'
   | 'charging-port-replacement'
+  | 'back-glass-replacement'
   | 'back-housing-replacement'
   | 'front-camera-replacement'
   | 'back-camera-replacement'
@@ -44,6 +45,12 @@ export type AliMobileEnhancedSamsungModelSlug =
   | 'galaxy-s26'
   | 'galaxy-s26-plus'
   | 'galaxy-s26-ultra'
+  | 'galaxy-note-8'
+  | 'galaxy-note-9'
+  | 'galaxy-note-10'
+  | 'galaxy-note-10-plus'
+  | 'galaxy-note-20'
+  | 'galaxy-note-20-ultra'
   | 'galaxy-z-flip'
   | 'galaxy-z-flip-3'
   | 'galaxy-z-flip-4'
@@ -86,8 +93,8 @@ export type AliMobileEnhancedSamsungModelSlug =
   | 'galaxy-a36-5g'
   | 'galaxy-a56-5g';
 
-export type SamsungSeriesFamily = 'galaxy-z' | 'galaxy-s' | 'galaxy-a';
-export type SamsungDeviceFamily = 'z-fold' | 'z-flip' | 'galaxy-s' | 'galaxy-s-ultra' | 'galaxy-a';
+export type SamsungSeriesFamily = 'galaxy-z' | 'galaxy-s' | 'galaxy-a' | 'galaxy-note';
+export type SamsungDeviceFamily = 'z-fold' | 'z-flip' | 'galaxy-s' | 'galaxy-s-ultra' | 'galaxy-a' | 'galaxy-note';
 export type SamsungVariantClass = 'base' | 'plus' | 'ultra' | 'fe' | 'edge' | 'active' | 'other';
 export type SamsungDisplayForm = 'flat' | 'curved' | 'foldable' | 'unknown';
 export type SamsungBiometricClass =
@@ -102,7 +109,7 @@ export type SamsungRearCameraClass = 'single' | 'dual' | 'triple' | 'quad' | 'un
 export type SamsungFrontCameraClass = 'cover-and-inner' | 'inner-only' | 'single-punch-hole' | 'single-bezel' | 'dual-front' | 'unknown';
 
 export type SamsungConnectivityClass = '4g' | '5g' | 'unspecified';
-export type SamsungWaterResistanceClass = 'ip67' | 'other-rated' | 'none' | 'unknown';
+export type SamsungWaterResistanceClass = 'ip67' | 'ip68' | 'other-rated' | 'none' | 'unknown';
 export type SamsungDisplayEdgeClass = 'flat' | 'curved' | 'unknown';
 
 export type SamsungSPenCapability =
@@ -114,9 +121,11 @@ export type SamsungSPenCapability =
 export interface SamsungHardwareConfig {
   modelSlug: AliMobileEnhancedSamsungModelSlug;
   modelName: string;
+  modelCodes?: ReadonlyArray<string>;
   seriesFamily: SamsungSeriesFamily;
   deviceFamily: SamsungDeviceFamily;
   generation: number;
+  connectivityClass?: SamsungConnectivityClass;
   variantClass: SamsungVariantClass;
   displayForm: SamsungDisplayForm;
   displayEdgeClass: SamsungDisplayEdgeClass;

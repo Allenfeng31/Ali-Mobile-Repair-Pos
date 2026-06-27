@@ -122,6 +122,7 @@ export function getAliMobileEnhancedSamsungSeoPocket({
       return buildSamsungBatteryReplacementPocket(hardwareConfig);
     case 'charging-port-replacement':
       return buildSamsungChargingPortReplacementPocket(hardwareConfig);
+    case 'back-glass-replacement':
     case 'back-housing-replacement':
       return buildSamsungBackHousingReplacementPocket(hardwareConfig);
     case 'front-camera-replacement':

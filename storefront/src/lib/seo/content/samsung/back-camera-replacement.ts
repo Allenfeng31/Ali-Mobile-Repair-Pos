@@ -131,6 +131,135 @@ export function buildSamsungBackCameraReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-note') {
+    const rearCameraLabel = getSamsungRearCameraLabel(config);
+
+    return {
+      quickAnswer:
+        `Need ${config.modelName} back camera replacement in Ringwood? Ali Mobile & Repair checks blurred image, focus failure, camera shaking, black preview, image spots, impact damage, and module-versus-lens-glass-versus-housing diagnosis before confirming the quote-only rear-camera path.`,
+      workbenchHeadings: {
+        options: `Which rear-camera path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before rear-camera work?',
+        symptoms: 'Which rear-camera symptoms matter most?',
+        outcomes: 'What can change the rear-camera result?',
+      },
+      repairOptions: [
+        {
+          name: 'Module-specific diagnosis',
+          shortDescription:
+            `We test the supported ${rearCameraLabel} path to identify which camera module appears affected before work is approved.`,
+          bestFor:
+            'Phones where one rear camera mode fails, the image shakes, or focus no longer behaves normally.',
+          notes:
+            'One repair does not automatically replace every rear camera on the phone.',
+        },
+        {
+          name: 'Lens glass and housing separation',
+          shortDescription:
+            'External lens glass and camera-area housing damage are checked before internal camera replacement is assumed.',
+          bestFor:
+            'Phones with impact around the camera cluster where the visible glass or housing may be part of the fault.',
+          notes:
+            'External lens glass is not presented here as a separate confirmed public service.',
+        },
+        {
+          name: 'Quote-only scope review',
+          shortDescription:
+            'The displayed route stays aligned with the live catalogue while the actual affected module still has to be confirmed during diagnosis.',
+          bestFor:
+            'Customers who want the rear-camera path checked before committing to the repair quote.',
+          notes:
+            `${SAMSUNG_QUOTE_ONLY_SCOPE} ${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Blurred image or focus failure',
+          description:
+            'Blur or focus inconsistency can come from a camera module fault, but it can also overlap with the surrounding camera-area damage.',
+        },
+        {
+          title: 'Camera shaking or image instability',
+          description:
+            'Shaky or unstable output can indicate the affected module is struggling, but we still separate that from other causes before confirming the quote.',
+        },
+        {
+          title: 'Black preview or image spots',
+          description:
+            'A black preview or spots on the image can be tied to the module, the lens glass, or the camera-area housing.',
+        },
+        {
+          title: 'Impact damage around the camera cluster',
+          description:
+            'Rear impact can affect more than one physical part, so the camera cluster is reviewed together with the housing.',
+        },
+        {
+          title: 'Software or board overlap',
+          description:
+            'Some camera faults are actually software or board issues, so the final path is set only after diagnosis.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Test each supported rear-camera mode',
+          description:
+            `We compare the supported ${rearCameraLabel} behaviour so the affected module can be identified before quoting.`,
+        },
+        {
+          step: '02',
+          title: 'Inspect lens glass and housing damage',
+          description:
+            'We check whether external glass or housing damage overlaps with the camera complaint before assuming the module alone is at fault.',
+        },
+        {
+          step: '03',
+          title: 'Separate hardware from software or board overlap',
+          description:
+            'If the fault still looks ambiguous, we compare it with likely software or board-level causes before confirming replacement.',
+        },
+        {
+          step: '04',
+          title: 'Retest the rear-camera path before handover',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `Does ${config.modelName} back camera repair replace every rear camera?`,
+          answer:
+            'No. The technician identifies the affected module, and one repair does not automatically replace every rear camera on the phone.',
+        },
+        {
+          question: `Is external camera lens glass included in ${config.modelName} back camera repair?`,
+          answer:
+            'We inspect lens glass and housing damage, but external lens glass is not presented here as a separate confirmed public service.',
+        },
+        {
+          question: `Why does the camera shake or fail to focus on my ${config.modelName}?`,
+          answer:
+            'Camera shake or focus failure can come from the module itself, but it can also overlap with housing damage or a deeper software or board issue.',
+        },
+        {
+          question: `Could housing damage affect the rear camera on my ${config.modelName}?`,
+          answer:
+            'Yes. We inspect the camera-area housing and rear-panel fit because physical damage there can change the way the camera behaves.',
+        },
+        {
+          question: `Could software or board faults cause a black preview on my ${config.modelName}?`,
+          answer:
+            'Yes. A black preview can be hardware-related, software-related, or board-related, so we diagnose before confirming the quote.',
+        },
+        {
+          question: `How is the quote confirmed for rear-camera work on my ${config.modelName}?`,
+          answer:
+            `We confirm the affected module and the likely repair path first, then explain the quote-only route before any work starts. ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+        },
+      ],
+    };
+  }
+
   if (config.seriesFamily === 'galaxy-s') {
     const rearCameraLabel = getSamsungRearCameraLabel(config);
     const rearCameraModesLabel =

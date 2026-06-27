@@ -129,6 +129,138 @@ export function buildSamsungChargingPortReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-note') {
+    return {
+      quickAnswer:
+        `Need ${config.modelName} charging port replacement in Ringwood? Ali Mobile & Repair checks intermittent USB-C charging, loose cable fit, debris, contamination, data-transfer faults, accessory testing, and overlapping battery or board causes before confirming the quote-only charging path.`,
+      workbenchHeadings: {
+        options: `Which USB-C charging path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before USB-C port work?',
+        symptoms: 'Which USB-C symptoms matter most?',
+        outcomes: 'What can change the charging-port result?',
+      },
+      repairOptions: [
+        {
+          name: 'USB-C port inspection first',
+          shortDescription:
+            'We inspect loose cable fit, debris, contamination, visible wear, and moisture history before assuming the port itself needs replacement.',
+          bestFor:
+            'Phones that charge only at certain angles, feel loose at the port, or stop charging when the cable moves.',
+          notes:
+            'Not every charging issue needs port replacement, so cleaning or a broader diagnosis may be the safer first step.',
+        },
+        {
+          name: 'Charging-path separation',
+          shortDescription:
+            'We separate cable, USB-C port, battery, and board-level causes before confirming whether the charging-port product is the right repair path.',
+          bestFor:
+            'Phones with no charge draw, unstable wired charging, or symptoms that change across different chargers and cables.',
+          notes:
+            'Lower-path symptoms can overlap with microphone or daughterboard-related issues, but those are treated as diagnostic possibilities rather than automatically included parts.',
+        },
+        {
+          name: 'USB-C data and function validation',
+          shortDescription:
+            'We test wired charging, data transfer, and related lower-path behaviour before and after service.',
+          bestFor:
+            'Phones that will not maintain a stable wired connection to accessories or a computer.',
+          notes:
+            `${SAMSUNG_QUOTE_ONLY_SCOPE} ${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Intermittent USB-C charging',
+          description:
+            'Charging that cuts in and out can come from cable movement, compacted debris, worn contacts, or deeper charging-path issues.',
+        },
+        {
+          title: 'Loose cable connection',
+          description:
+            'If the cable feels loose or only charges at one angle, we inspect the USB-C path before deciding whether replacement is necessary.',
+        },
+        {
+          title: 'Debris or contamination',
+          description:
+            'Compacted lint or contamination can mimic port failure, so we inspect and separate that from actual port wear.',
+        },
+        {
+          title: 'USB-C data-transfer faults',
+          description:
+            'A phone can show some charge response but still fail data transfer or accessory communication on the same USB-C path.',
+        },
+        {
+          title: 'Battery or board overlap',
+          description:
+            'Battery and board-level issues can mimic port failure, so the final repair path is based on diagnosis rather than assumption.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Inspect the USB-C connection physically',
+          description:
+            'We check cable seating, accessory behaviour, debris, contamination, and visible wear before treating the port as the final fault.',
+        },
+        {
+          step: '02',
+          title: 'Separate charging and lower-path causes',
+          description:
+            'Battery behaviour, board-level symptoms, and related lower-path findings are checked before confirming the port route.',
+        },
+        {
+          step: '03',
+          title: 'Test wired charging and data transfer',
+          description:
+            'We compare USB-C charging response and data-transfer behaviour so the repair scope matches the actual fault path.',
+        },
+        {
+          step: '04',
+          title: 'Retest the USB-C path before handover',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `Could lint or debris cause the charging problem on my ${config.modelName}?`,
+          answer:
+            'Yes. Compacted lint or contamination can mimic a port fault, so we inspect the USB-C path before deciding whether replacement is needed.',
+        },
+        {
+          question: `How do you tell whether the port, cable, battery, or board is faulty on my ${config.modelName}?`,
+          answer:
+            'We test the USB-C path, battery behaviour, and board-level symptoms together so the quote is based on the actual cause rather than one symptom alone.',
+        },
+        {
+          question: `Does this ${config.modelName} charging-port repair include microphone or antenna replacement?`,
+          answer:
+            'Not automatically. Microphone- or daughterboard-related symptoms are treated as diagnostic possibilities only unless the live catalogue specifically proves otherwise.',
+        },
+        {
+          question: `Will USB-C data transfer be tested on my ${config.modelName}?`,
+          answer:
+            'Yes. Wired charging and data-transfer behaviour are both checked because they can fail differently even when they share the same physical path.',
+        },
+        {
+          question: `Will the repair erase my data on my ${config.modelName}?`,
+          answer:
+            'Charging-port work does not normally target storage data, but we still recommend a backup because deeper faults can appear during diagnosis or repair.',
+        },
+        {
+          question: `How is the quote confirmed for charging-port work on my ${config.modelName}?`,
+          answer:
+            `We confirm the likely fault path first, then explain the quote-only charging route before any work starts. ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+        },
+        {
+          question: `How long can charging-port diagnosis take on my ${config.modelName}?`,
+          answer:
+            'Many straightforward repairs can be completed in under an hour once the correct part and repair path are confirmed, but we still inspect the device before giving a timing estimate.',
+        },
+      ],
+    };
+  }
+
   if (config.seriesFamily === 'galaxy-s') {
     return {
       quickAnswer:

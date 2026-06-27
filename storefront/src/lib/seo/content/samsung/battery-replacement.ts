@@ -130,6 +130,138 @@ export function buildSamsungBatteryReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-note') {
+    return {
+      quickAnswer:
+        `Need ${config.modelName} battery replacement in Ringwood? Ali Mobile & Repair checks rapid drain, unexpected shutdowns, unstable percentage, heat, swelling, charging-without-holding-power symptoms, and power-path overlap before confirming the quote-only battery route.`,
+      workbenchHeadings: {
+        options: `Which battery path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before battery replacement?',
+        symptoms: 'Which battery symptoms matter most?',
+        outcomes: 'What can change the battery result?',
+      },
+      repairOptions: [
+        {
+          name: 'Battery and power-path diagnosis',
+          shortDescription:
+            'We check rapid drain, reduced runtime, unexpected shutdowns, charge-percentage instability, and heat before assuming the battery is the only problem.',
+          bestFor:
+            'Phones that no longer last well through the day, shut down unexpectedly, or report unstable battery behaviour.',
+          notes:
+            'Battery symptoms can overlap with charging-port, accessory, and board-level faults, so diagnosis comes before the quote is confirmed.',
+        },
+        {
+          name: 'Swelling and rear-housing safety inspection',
+          shortDescription:
+            'We inspect swelling pressure, rear lift, and whether the rear housing or frame condition changes the safe repair path.',
+          bestFor:
+            'Phones with heat, swelling, lifted rear sections, or pressure that affects the way the phone sits.',
+          notes:
+            'Where swelling affects the rear housing, we check whether the housing condition also needs attention before the battery work is finalised.',
+        },
+        {
+          name: 'Quote-only battery handover',
+          shortDescription:
+            'We compare charging response, stability, and the practical power result before and after service.',
+          bestFor:
+            'Customers who want the battery path checked in context rather than assuming every power complaint comes from the battery alone.',
+          notes:
+            `${SAMSUNG_QUOTE_ONLY_SCOPE} ${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Rapid battery drain or reduced runtime',
+          description:
+            'Fast drain can come from battery wear, but it can also overlap with charging or board-level power-path faults that need diagnosis first.',
+        },
+        {
+          title: 'Unexpected shutdowns',
+          description:
+            'Shutdowns under load or at unstable percentages can point to battery wear or a deeper power-path issue.',
+        },
+        {
+          title: 'Charging-percentage instability',
+          description:
+            'Sudden jumps or drops in percentage can indicate battery wear, charging instability, or another fault that overlaps with the battery symptoms.',
+        },
+        {
+          title: 'Heat or swelling',
+          description:
+            'Heat and swelling are checked carefully because swelling can affect the rear housing, safe opening, and the surrounding structure.',
+        },
+        {
+          title: 'Charging overlap',
+          description:
+            'USB-C charging issues can look like battery failure, so the charging path is separated before battery replacement is treated as the final answer.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Review power symptoms in context',
+          description:
+            'We document drain, runtime loss, shutdowns, charge-percentage instability, and heat before deciding whether the battery is the main cause.',
+        },
+        {
+          step: '02',
+          title: 'Check charging behaviour and overlap',
+          description:
+            'USB-C charging response and general power stability are tested so battery replacement is not quoted on the wrong fault path.',
+        },
+        {
+          step: '03',
+          title: 'Inspect swelling and rear-housing condition',
+          description:
+            'If swelling affects the rear housing, lift, or structure, we confirm the safe repair path before proceeding.',
+        },
+        {
+          step: '04',
+          title: 'Retest the battery path before handover',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `How long should a replacement battery last in my ${config.modelName}?`,
+          answer:
+            'We do not promise an exact battery lifespan. Runtime still depends on usage, signal strength, apps, temperature, and the rest of the phone’s condition after the repair.',
+        },
+        {
+          question: `Can swelling damage the display or housing on my ${config.modelName}?`,
+          answer:
+            'Yes. We inspect swelling carefully because pressure can affect the rear housing, frame fit, and sometimes the display path as well.',
+        },
+        {
+          question: `Will battery replacement erase my data on my ${config.modelName}?`,
+          answer:
+            'Battery replacement does not normally target storage data, but we still recommend a backup because deeper faults can appear during diagnosis or repair.',
+        },
+        {
+          question: `Could a charging-port or board fault cause the same symptoms on my ${config.modelName}?`,
+          answer:
+            'Yes. Battery, charging-port, accessory, and board-level faults can overlap, so we diagnose the full power path before confirming the battery route.',
+        },
+        {
+          question: `Will a new battery fix overheating on my ${config.modelName}?`,
+          answer:
+            'Not always. Heat can be battery-related, but it can also come from charging, board-level, or usage-related causes that need separate assessment.',
+        },
+        {
+          question: `How is the quote confirmed for battery work on my ${config.modelName}?`,
+          answer:
+            `We confirm the likely fault path first, then explain the quote-only battery route before any work starts. ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+        },
+        {
+          question: `How long can battery replacement take on my ${config.modelName}?`,
+          answer:
+            'Many straightforward repairs can be completed in under an hour once the correct part and repair path are confirmed, but we still inspect the actual device before giving a timing estimate.',
+        },
+      ],
+    };
+  }
+
   if (config.seriesFamily === 'galaxy-s') {
     return {
       quickAnswer:

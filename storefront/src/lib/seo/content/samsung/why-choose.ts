@@ -16,8 +16,10 @@ import {
   getSamsungBiometricLabel,
   getSamsungFrontCameraLabel,
   getSamsungRearCameraLabel,
+  SAMSUNG_QUOTE_ONLY_SCOPE,
+  SAMSUNG_WATER_RESISTANCE_NOTE,
 } from './shared';
-import type { AliMobileEnhancedSamsungRepairType } from './types';
+import type { AliMobileEnhancedSamsungRepairType, SamsungHardwareConfig } from './types';
 
 export interface SamsungWhyChooseHighlight {
   icon: LucideIcon;
@@ -60,6 +62,39 @@ const SAMSUNG_GALAXY_A_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[]
   { icon: Wrench, text: 'Post-repair testing before handover' },
 ];
 
+const SAMSUNG_GALAXY_NOTE_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighlight[] = [
+  { icon: Smartphone, text: 'Model-specific Note diagnostics' },
+  { icon: Search, text: 'S Pen and digitizer checks where relevant' },
+  { icon: ClipboardCheck, text: 'Repair path confirmed before work' },
+  { icon: ShieldCheck, text: 'Quote confirmed before commitment' },
+  { icon: Eye, text: 'Display and biometric checks' },
+  { icon: Wrench, text: 'Seal limitations explained clearly' },
+];
+
+function buildSamsungNoteTimingCards(
+  underHourPoints: [string, string],
+  fastTurnaroundPoints: [string, string],
+  quoteFirstPoints: [string, string]
+): WhyChooseConfig['cards'] {
+  return [
+    {
+      title: 'Under 1 Hour',
+      icon: ClipboardCheck,
+      points: underHourPoints,
+    },
+    {
+      title: 'Fast Turnaround',
+      icon: Wrench,
+      points: fastTurnaroundPoints,
+    },
+    {
+      title: 'Clear Quote First',
+      icon: ShieldCheck,
+      points: quoteFirstPoints,
+    },
+  ];
+}
+
 export function getSamsungWhyChooseSharedHighlights(
   modelName: string
 ): SamsungWhyChooseHighlight[] {
@@ -75,12 +110,189 @@ export function getSamsungWhyChooseSharedHighlights(
     return SAMSUNG_GALAXY_A_WHY_CHOOSE_SHARED_HIGHLIGHTS;
   }
 
+  if (hardwareConfig?.seriesFamily === 'galaxy-note') {
+    return SAMSUNG_GALAXY_NOTE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
+  }
+
   return SAMSUNG_FOLDABLE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
+}
+
+function buildSamsungNoteWhyChooseContent(
+  hardwareConfig: SamsungHardwareConfig
+): Record<string, WhyChooseConfig> {
+  const biometricLabel = getSamsungBiometricLabel(hardwareConfig);
+  const frontCameraLabel = getSamsungFrontCameraLabel(hardwareConfig);
+  const rearCameraLabel = getSamsungRearCameraLabel(hardwareConfig);
+  const displayEdgeDescriptor = hardwareConfig.displayEdgeClass === 'flat' ? 'flat-display' : 'curved-edge';
+  const hasIntegratedSPen = hardwareConfig.sPenCapability === 'integrated-slot';
+
+  return {
+    'screen-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} screen replacement`,
+      intro:
+        `Screen faults on this Note can overlap with ${biometricLabel} symptoms, ${displayEdgeDescriptor} condition, frame condition, and S Pen digitizer response, so we inspect the full display path before confirming the final repair outcome.`,
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward Note screen repairs can be completed in under an hour once the correct part and repair path are confirmed.',
+          `We still check the ${biometricLabel} path, frame fit, and S Pen input response before giving a timing estimate so the handover stays realistic.`,
+        ],
+        [
+          'We test the display, touch, fingerprint, and S Pen response before and after service so the repair follows the actual fault path.',
+          'That keeps the handover focused on the confirmed repair result rather than a generic promise.',
+        ],
+        [
+          `Screen damage, ${biometricLabel} symptoms, ${displayEdgeDescriptor} condition, frame condition, and calibration requirements may overlap and must be assessed before the final repair outcome is confirmed.`,
+          `Opening the device affects factory seals. ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        ]
+      ),
+    },
+    'battery-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} battery replacement`,
+      intro:
+        'Battery complaints can overlap with charging-path or board-level faults, so we confirm the likely cause before treating the battery as the only answer.',
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward battery jobs are completed quickly once the correct battery and repair path are confirmed.',
+          'We still inspect runtime, charging, and swelling risks before pickup so the handover remains practical.',
+        ],
+        [
+          'We test the charging port and board before assuming the battery is the only fault.',
+          'That helps avoid replacing a battery when the real issue is charge delivery or deeper power draw.',
+        ],
+        [
+          'We confirm the quote-only battery path before work starts and explain any remaining diagnosis limits clearly.',
+          'Battery replacement aims to restore safe, stable battery function, but real runtime still depends on usage, signal conditions, apps, and overall device health.',
+        ]
+      ),
+    },
+    'charging-port-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} charging port replacement`,
+      intro:
+        'USB-C issues are diagnosed carefully because cable fit, contamination, battery symptoms, and board-level charging faults can all present similarly.',
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward USB-C repairs can be completed in under an hour once the fault is confirmed.',
+          'We still test cable fit, debris, and charge draw first so the timing matches the actual repair path.',
+        ],
+        [
+          'We check for dirt and debris before replacing the physical port.',
+          'If the fault points to battery or board behaviour, we explain that before starting the repair.',
+        ],
+        [
+          `We confirm the quote-only USB-C path before work starts. ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+          'We also test wired charging and data transfer so the repair reflects the live catalogue-backed route rather than a guess.',
+        ]
+      ),
+    },
+    'back-glass-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} back glass replacement`,
+      intro:
+        `Rear glass work can overlap with frame damage, camera-area impact, ${hasIntegratedSPen ? 'S Pen slot-area distortion, ' : ''}and wireless-charging behaviour, so the scope is reviewed carefully before work starts.`,
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward rear-glass jobs can move quickly once the right assembly is confirmed.',
+          'We still inspect the rear panel, frame fit, and slot-area condition before giving a timing estimate.',
+        ],
+        [
+          'We check the frame and rear-panel seating to ensure the new assembly sits flush.',
+          'If deformation or swelling is present, we explain whether that needs separate attention before fitment.',
+        ],
+        [
+          `Back Glass Replacement is quote-only on this Note page, while the live POS product remains Back Housing Replacement. ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+          'We also explain that this route does not automatically include S Pen service, cameras, or board work.',
+        ]
+      ),
+    },
+    'back-housing-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} back glass replacement`,
+      intro:
+        `Rear glass work can overlap with frame damage, camera-area impact, ${hasIntegratedSPen ? 'S Pen slot-area distortion, ' : ''}and wireless-charging behaviour, so the scope is reviewed carefully before work starts.`,
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward rear-glass jobs can move quickly once the right assembly is confirmed.',
+          'We still inspect the rear panel, frame fit, and slot-area condition before giving a timing estimate.',
+        ],
+        [
+          'We check the frame and rear-panel seating to ensure the new assembly sits flush.',
+          'If deformation or swelling is present, we explain whether that needs separate attention before fitment.',
+        ],
+        [
+          `Back Glass Replacement is quote-only on this Note page, while the live POS product remains Back Housing Replacement. ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+          'We also explain that this route does not automatically include S Pen service, cameras, or board work.',
+        ]
+      ),
+    },
+    'front-camera-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} front camera replacement`,
+      intro:
+        `This model uses ${frontCameraLabel}, so we keep the diagnosis focused on that camera path and separate it from software, display, and broader board-level faults first.`,
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward front-camera jobs can move quickly once the camera path is confirmed.',
+          'We still check the camera opening, nearby impact, and preview behaviour before giving a timing estimate.',
+        ],
+        [
+          'We perform camera-versus-software testing to confirm the physical module has failed.',
+          'That keeps the quote tied to the actual fault path instead of a guess.',
+        ],
+        [
+          `Front camera work is quote-only on this Note page. ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+          'We do not promise that every image issue resolves the same way because display-area damage or software faults can overlap with the camera complaint.',
+        ]
+      ),
+    },
+    'back-camera-replacement': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} back camera replacement`,
+      intro:
+        `This model has a ${rearCameraLabel}, so we identify the affected camera path first instead of treating every zoom, focus, or preview fault as if all rear cameras are replaced together.`,
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Many straightforward rear-camera jobs can move quickly once the affected module is identified.',
+          'We still test the supported camera modes and inspect lens glass and housing condition before giving a timing estimate.',
+        ],
+        [
+          'We test focus and optical stability to confirm the internal camera is faulty.',
+          'That helps separate module failure from lens or housing damage.',
+        ],
+        [
+          `Back camera work is quote-only on this Note page. ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+          'We do not imply that every rear camera module is replaced together, because the affected module must be identified first.',
+        ]
+      ),
+    },
+    'logic-board-repair': {
+      kicker: 'Ali Mobile support',
+      heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} logic board repair`,
+      intro:
+        'Board-level faults need disciplined diagnosis after simpler causes are excluded, so we keep the route quote-only and explain repair-versus-data priorities clearly.',
+      cards: buildSamsungNoteTimingCards(
+        [
+          'Board-level work is only approved after we explain the likely scope, uncertainty, and limitations without fabricating a fixed price.',
+          'That keeps the quote practical when no-power or restart symptoms may still be tied to simpler causes.',
+        ],
+        [
+          'We address board-level faults after excluding modular issues like batteries or ports.',
+          'That keeps the repair path focused on the actual fault rather than on a generic replacement guess.',
+        ],
+        [
+          `Logic-board repair is quote-only on this Note page. ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+          'Data recovery can be discussed separately, but it is never promised as part of the board job.',
+        ]
+      ),
+    },
+  };
 }
 
 export function getSamsungWhyChooseContent(
   modelName: string
-): Record<AliMobileEnhancedSamsungRepairType, WhyChooseConfig> {
+): Record<string, WhyChooseConfig> {
   const hardwareConfig = getSamsungHardwareConfigByModelName(modelName);
   const isFlip = hardwareConfig?.deviceFamily === 'z-flip';
   const isGalaxyS23Ultra = hardwareConfig?.modelSlug === 'galaxy-s23-ultra';
@@ -302,6 +514,10 @@ export function getSamsungWhyChooseContent(
         ],
       },
     };
+  }
+
+  if (hardwareConfig?.seriesFamily === 'galaxy-note' && hardwareConfig) {
+    return buildSamsungNoteWhyChooseContent(hardwareConfig);
   }
 
   if (isGalaxyS && hardwareConfig) {

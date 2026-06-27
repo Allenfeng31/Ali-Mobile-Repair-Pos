@@ -34,6 +34,7 @@ import {
 import {
   getSamsungHardwareConfig,
   GALAXY_A_MODEL_ORDER,
+  SAMSUNG_GALAXY_NOTE_MODEL_ORDER,
   SAMSUNG_GALAXY_S_MODEL_ORDER,
   SAMSUNG_HARDWARE_CONFIG,
 } from '@/lib/seo/content/samsung/config';
@@ -101,10 +102,11 @@ function isExcludedRelatedRepairPresentationItem({
 function getRelatedRepairPresentationName(
   category: string,
   brand: string,
+  modelSlug: string,
   repairSlug: string,
   repairName: string
 ) {
-  const publicRepairSlug = getPublicRepairSlug(category, brand, repairSlug);
+  const publicRepairSlug = getPublicRepairSlug(category, brand, modelSlug, repairSlug);
 
   if (publicRepairSlug === 'front-camera-replacement') {
     return 'Front Camera Repair';
@@ -118,23 +120,25 @@ function getRelatedRepairPresentationName(
     return 'Camera Repair';
   }
 
-  return getRepairDisplayName(category, brand, publicRepairSlug, repairName);
+  return getRepairDisplayName(category, brand, modelSlug, publicRepairSlug, repairName);
 }
 
 function getRelatedRepairAnchorText({
   category,
   brand,
+  modelSlug,
   modelName,
   repairSlug,
   repairName,
 }: {
   category: string;
   brand: string;
+  modelSlug: string;
   modelName: string;
   repairSlug: string;
   repairName: string;
 }) {
-  const presentationName = getRelatedRepairPresentationName(category, brand, repairSlug, repairName);
+  const presentationName = getRelatedRepairPresentationName(category, brand, modelSlug, repairSlug, repairName);
   return `${modelName} ${presentationName.toLowerCase()}`;
 }
 
@@ -245,6 +249,91 @@ function getEnhancedSamsungFamilyModelHubLinks(
   const currentConfig = getSamsungHardwareConfig(currentModelSlug);
   if (!currentConfig) {
     return [];
+  }
+
+  if (currentConfig.seriesFamily === 'galaxy-note') {
+    const currentGeneration = currentConfig.generation ?? 0;
+    const currentVariantRank = getSamsungVariantRank(currentConfig.variantClass);
+    const familyModelOrder = SAMSUNG_GALAXY_NOTE_MODEL_ORDER;
+    const currentOrderIndex = familyModelOrder.indexOf(currentConfig.modelSlug);
+    const currentConnectivityClass = currentConfig.connectivityClass ?? 'unspecified';
+    const seenHrefs = new Set<string>();
+
+    return models
+      .filter((model) => model.slug !== currentModelSlug)
+      .map((model) => {
+        const candidateConfig = getSamsungHardwareConfig(model.slug);
+        if (!candidateConfig || candidateConfig.seriesFamily !== 'galaxy-note') {
+          return null;
+        }
+
+        const generationDistance = Math.abs((candidateConfig.generation ?? 0) - currentGeneration);
+        const sameGenerationScore = candidateConfig.generation === currentGeneration ? 0 : 1;
+        const sameVariantAdjacencyScore =
+          generationDistance === 1 && candidateConfig.variantClass === currentConfig.variantClass ? 0 : 1;
+        const variantDistance = Math.abs(getSamsungVariantRank(candidateConfig.variantClass) - currentVariantRank);
+        const candidateOrderIndex = familyModelOrder.indexOf(candidateConfig.modelSlug);
+        const candidateConnectivityClass = candidateConfig.connectivityClass ?? 'unspecified';
+
+        return {
+          href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}`,
+          label: `Explore ${candidateConfig.modelName} repairs`,
+          sameGenerationScore,
+          sameVariantAdjacencyScore,
+          generationDistance,
+          orderDistance:
+            currentOrderIndex >= 0 && candidateOrderIndex >= 0
+              ? Math.abs(candidateOrderIndex - currentOrderIndex)
+              : generationDistance,
+          connectivityScore: candidateConnectivityClass === currentConnectivityClass ? 0 : 1,
+          newerTieBreaker: candidateConfig.generation > currentGeneration ? 0 : 1,
+          variantDistance,
+          candidateOrderIndex,
+          slug: candidateConfig.modelSlug,
+        };
+      })
+      .filter((model): model is NonNullable<typeof model> => Boolean(model))
+      .sort((left, right) => {
+        if (left.sameGenerationScore !== right.sameGenerationScore) {
+          return left.sameGenerationScore - right.sameGenerationScore;
+        }
+
+        if (left.sameVariantAdjacencyScore !== right.sameVariantAdjacencyScore) {
+          return left.sameVariantAdjacencyScore - right.sameVariantAdjacencyScore;
+        }
+
+        if (left.generationDistance !== right.generationDistance) {
+          return left.generationDistance - right.generationDistance;
+        }
+
+        if (left.orderDistance !== right.orderDistance) {
+          return left.orderDistance - right.orderDistance;
+        }
+
+        if (left.connectivityScore !== right.connectivityScore) {
+          return left.connectivityScore - right.connectivityScore;
+        }
+
+        if (left.variantDistance !== right.variantDistance) {
+          return left.variantDistance - right.variantDistance;
+        }
+
+        if (left.newerTieBreaker !== right.newerTieBreaker) {
+          return left.newerTieBreaker - right.newerTieBreaker;
+        }
+
+        return left.slug.localeCompare(right.slug);
+      })
+      .filter((link) => {
+        if (seenHrefs.has(link.href)) {
+          return false;
+        }
+
+        seenHrefs.add(link.href);
+        return true;
+      })
+      .slice(0, 5)
+      .map(({ href, label }) => ({ href, label }));
   }
 
   if (currentConfig.seriesFamily === 'galaxy-s') {
@@ -487,7 +576,14 @@ function getEnhancedSamsungGalaxyARelatedRepairLinks(
         return null;
       }
 
-      if (!candidateConfig.supportedRepairTypes.includes(repairSlug as AliMobileEnhancedSamsungRepairType)) {
+      const candidateRepairSlug = getPublicRepairSlug(
+        'phone',
+        'samsung',
+        candidateConfig.modelSlug,
+        repairSlug
+      ) as AliMobileEnhancedSamsungRepairType;
+
+      if (!candidateConfig.supportedRepairTypes.includes(candidateRepairSlug)) {
         return null;
       }
 
@@ -496,10 +592,11 @@ function getEnhancedSamsungGalaxyARelatedRepairLinks(
       const candidateConnectivityClass = getGalaxyAConnectivityClass(candidateConfig.modelSlug);
 
       return {
-        href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}/${getPublicRepairSlug('phone', 'samsung', repairSlug)}`,
+        href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}/${getPublicRepairSlug('phone', 'samsung', candidateConfig.modelSlug, repairSlug)}`,
         label: getRelatedRepairAnchorText({
           category: 'phone',
           brand: 'samsung',
+          modelSlug: candidateConfig.modelSlug,
           modelName: candidateConfig.modelName,
           repairSlug,
           repairName,
@@ -523,6 +620,117 @@ function getEnhancedSamsungGalaxyARelatedRepairLinks(
 
       if (left.connectivityScore !== right.connectivityScore) {
         return left.connectivityScore - right.connectivityScore;
+      }
+
+      if (left.newerTieBreaker !== right.newerTieBreaker) {
+        return left.newerTieBreaker - right.newerTieBreaker;
+      }
+
+      return left.slug.localeCompare(right.slug);
+    })
+    .filter((link) => {
+      if (seenHrefs.has(link.href)) {
+        return false;
+      }
+
+      seenHrefs.add(link.href);
+      return true;
+    })
+    .slice(0, 5)
+    .map(({ href, label, slug }) => ({ href, label, slug }));
+}
+
+function getEnhancedSamsungGalaxyNoteRelatedRepairLinks(
+  models: ReadonlyArray<{ slug: string; model: string }>,
+  currentModelSlug: string,
+  repairSlug: string,
+  repairName: string
+): SameModelRepairLink[] {
+  const currentConfig = getSamsungHardwareConfig(currentModelSlug);
+
+  if (!currentConfig || currentConfig.seriesFamily !== 'galaxy-note') {
+    return [];
+  }
+
+  const currentGeneration = currentConfig.generation ?? 0;
+  const currentVariantRank = getSamsungVariantRank(currentConfig.variantClass);
+  const currentOrderIndex = SAMSUNG_GALAXY_NOTE_MODEL_ORDER.indexOf(currentConfig.modelSlug);
+  const currentConnectivityClass = currentConfig.connectivityClass ?? 'unspecified';
+  const seenHrefs = new Set<string>();
+
+  return models
+    .filter((model) => model.slug !== currentModelSlug)
+    .map((model) => {
+      const candidateConfig = getSamsungHardwareConfig(model.slug);
+
+      if (!candidateConfig || candidateConfig.seriesFamily !== 'galaxy-note') {
+        return null;
+      }
+
+      const candidateRepairSlug = getPublicRepairSlug(
+        'phone',
+        'samsung',
+        candidateConfig.modelSlug,
+        repairSlug
+      ) as AliMobileEnhancedSamsungRepairType;
+
+      if (!candidateConfig.supportedRepairTypes.includes(candidateRepairSlug)) {
+        return null;
+      }
+
+      const candidateGeneration = candidateConfig.generation ?? 0;
+      const candidateVariantRank = getSamsungVariantRank(candidateConfig.variantClass);
+      const candidateOrderIndex = SAMSUNG_GALAXY_NOTE_MODEL_ORDER.indexOf(candidateConfig.modelSlug);
+      const candidateConnectivityClass = candidateConfig.connectivityClass ?? 'unspecified';
+
+      return {
+        href: `/repairs/phone/samsung/${preserveRouteSegment(candidateConfig.modelSlug)}/${candidateRepairSlug}`,
+        label: getRelatedRepairAnchorText({
+          category: 'phone',
+          brand: 'samsung',
+          modelSlug: candidateConfig.modelSlug,
+          modelName: candidateConfig.modelName,
+          repairSlug: candidateRepairSlug,
+          repairName,
+        }),
+        sameGenerationScore: candidateGeneration === currentGeneration ? 0 : 1,
+        sameVariantAdjacencyScore:
+          Math.abs(candidateGeneration - currentGeneration) === 1 && candidateConfig.variantClass === currentConfig.variantClass ? 0 : 1,
+        generationDistance: Math.abs(candidateGeneration - currentGeneration),
+        orderDistance:
+          currentOrderIndex >= 0 && candidateOrderIndex >= 0
+            ? Math.abs(candidateOrderIndex - currentOrderIndex)
+            : Math.abs(candidateGeneration - currentGeneration),
+        connectivityScore: candidateConnectivityClass === currentConnectivityClass ? 0 : 1,
+        newerTieBreaker: candidateGeneration > currentGeneration ? 0 : 1,
+        variantDistance: Math.abs(candidateVariantRank - currentVariantRank),
+        slug: candidateConfig.modelSlug,
+      };
+    })
+    .filter((model): model is NonNullable<typeof model> => Boolean(model))
+    .sort((left, right) => {
+      if (left.sameGenerationScore !== right.sameGenerationScore) {
+        return left.sameGenerationScore - right.sameGenerationScore;
+      }
+
+      if (left.sameVariantAdjacencyScore !== right.sameVariantAdjacencyScore) {
+        return left.sameVariantAdjacencyScore - right.sameVariantAdjacencyScore;
+      }
+
+      if (left.generationDistance !== right.generationDistance) {
+        return left.generationDistance - right.generationDistance;
+      }
+
+      if (left.orderDistance !== right.orderDistance) {
+        return left.orderDistance - right.orderDistance;
+      }
+
+      if (left.connectivityScore !== right.connectivityScore) {
+        return left.connectivityScore - right.connectivityScore;
+      }
+
+      if (left.variantDistance !== right.variantDistance) {
+        return left.variantDistance - right.variantDistance;
       }
 
       if (left.newerTieBreaker !== right.newerTieBreaker) {
@@ -3785,7 +3993,7 @@ export async function generateStaticParams() {
       for (const repair of model.repairTypes) {
         if (!repair.slug || !repair.slug.trim()) continue;
 
-        const publicRepairSlug = getPublicRepairSlug(brand.category, brand.slug, repair.slug);
+        const publicRepairSlug = getPublicRepairSlug(brand.category, brand.slug, model.slug, repair.slug);
         if (!publicRepairSlug || !publicRepairSlug.trim()) continue;
 
         const dedupeKey = [
@@ -3850,25 +4058,68 @@ function isIphoneBackGlassPublicAlias(category: string, brand: string, repairSlu
   return category === "phone" && brand === "iphone" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
 }
 
-function resolveRepairSlugForLookup(category: string, brand: string, repairSlug: string) {
-  if (isIphoneBackGlassPublicAlias(category, brand, repairSlug)) {
+function isSamsungNoteBackGlassPublicAlias(
+  category: string,
+  brand: string,
+  modelSlug: string,
+  repairSlug: string
+) {
+  if (category !== "phone" || brand !== "samsung" || repairSlug !== PHONE_BACK_GLASS_PUBLIC_SLUG) {
+    return false;
+  }
+
+  const samsungConfig = getSamsungHardwareConfig(modelSlug);
+  return samsungConfig?.seriesFamily === 'galaxy-note';
+}
+
+function usesPhoneBackGlassPublicAlias(
+  category: string,
+  brand: string,
+  modelSlug: string,
+  repairSlug: string
+) {
+  return (
+    isIphoneBackGlassPublicAlias(category, brand, repairSlug) ||
+    isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, repairSlug)
+  );
+}
+
+function resolveRepairSlugForLookup(category: string, brand: string, modelSlug: string, repairSlug: string) {
+  if (usesPhoneBackGlassPublicAlias(category, brand, modelSlug, repairSlug)) {
     return PHONE_BACK_HOUSING_INTERNAL_SLUG;
   }
 
   return repairSlug;
 }
 
-function getPublicRepairSlug(category: string, brand: string, repairSlug: string) {
-  if (category === "phone" && brand === "iphone" && repairSlug === PHONE_BACK_HOUSING_INTERNAL_SLUG) {
+function getPublicRepairSlug(category: string, brand: string, modelSlug: string, repairSlug: string) {
+  if (
+    category === "phone" &&
+    repairSlug === PHONE_BACK_HOUSING_INTERNAL_SLUG &&
+    (
+      brand === "iphone" ||
+      getSamsungHardwareConfig(modelSlug)?.seriesFamily === 'galaxy-note'
+    )
+  ) {
     return PHONE_BACK_GLASS_PUBLIC_SLUG;
   }
 
   return repairSlug;
 }
 
-function getRepairDisplayName(category: string, brand: string, publicRepairSlug: string, repairName: string) {
+function getRepairDisplayName(
+  category: string,
+  brand: string,
+  modelSlug: string,
+  publicRepairSlug: string,
+  repairName: string
+) {
   if (isIphoneBackGlassPublicAlias(category, brand, publicRepairSlug)) {
     return brand === "iphone" ? IPHONE_BACK_GLASS_DISPLAY_NAME : NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
+  }
+
+  if (isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, publicRepairSlug)) {
+    return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
   }
 
   return repairName;
@@ -3882,11 +4133,29 @@ function shouldShowIphoneBackHousingNotice(category: string, brand: string, mode
   return IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES.some((prefix) => normalizedModel === prefix || normalizedModel.startsWith(`${prefix}-`));
 }
 
+function isUnsupportedSamsungNoteRepairRoute(resolvedParams: Awaited<RepairPageProps['params']>) {
+  const noteConfig = getSamsungHardwareConfig(resolvedParams.model);
+  if (!noteConfig || noteConfig.seriesFamily !== 'galaxy-note') {
+    return false;
+  }
+
+  return getAliMobileEnhancedSamsungRepairType({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    'repair-type': resolvedParams['repair-type'],
+  }) === null;
+}
+
 export async function generateMetadata({ params }: RepairPageProps) {
   const resolvedParams = await params;
+  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams)) {
+    notFound();
+  }
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
     resolvedParams.brand,
+    resolvedParams.model,
     resolvedParams['repair-type']
   );
   const details = await fetchRepairDetails(
@@ -3904,6 +4173,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const repairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
+    resolvedParams.model,
     resolvedParams['repair-type'],
     details?.repairType || formatDynamicParam(resolvedParams['repair-type'])
   );
@@ -3983,10 +4253,15 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   otherRepairLinks: SameModelRepairLink[];
   crossModelLinks: SameModelRepairLink[];
   galaxyARelatedRepairLinks: SameModelRepairLink[];
+  galaxyNoteRelatedRepairLinks: SameModelRepairLink[];
   iphoneModelHubLinks: ExploreRepairLink[];
   samsungFamilyModelHubLinks: ExploreRepairLink[];
   categoryHubLinks: ExploreRepairLink[];
 } | null> {
+  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams)) {
+    return null;
+  }
+
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(
     (brand) => brand.category === resolvedParams.category && brand.slug === resolvedParams.brand
@@ -4000,6 +4275,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
     resolvedParams.brand,
+    resolvedParams.model,
     resolvedParams['repair-type']
   );
   const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === internalRepairSlug);
@@ -4016,10 +4292,11 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     .filter((repair) => isEnhancedSamsungFamilyPage || !repair.slug.includes('logic-board'))
     .filter((repair) => resolvedParams.category === 'watch' || !repair.slug.includes('water-damage'))
     .map((repair) => ({
-      href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, repair.slug)}`,
+      href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${resolvedParams.model}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, resolvedParams.model, repair.slug)}`,
       label: getRelatedRepairAnchorText({
         category: resolvedParams.category,
         brand: resolvedParams.brand,
+        modelSlug: resolvedParams.model,
         modelName: modelEntry.model,
         repairSlug: repair.slug,
         repairName: repair.name,
@@ -4039,10 +4316,11 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     models: brandEntry.models,
     limit: 4,
   }).map((candidate) => ({
-    href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${candidate.modelSlug}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, candidate.repairSlug)}`,
+    href: `/repairs/${resolvedParams.category}/${resolvedParams.brand}/${candidate.modelSlug}/${getPublicRepairSlug(resolvedParams.category, resolvedParams.brand, candidate.modelSlug, candidate.repairSlug)}`,
     label: getRelatedRepairAnchorText({
       category: resolvedParams.category,
       brand: resolvedParams.brand,
+      modelSlug: candidate.modelSlug,
       modelName: candidate.modelName,
       repairSlug: candidate.repairSlug,
       repairName: repairEntry.name,
@@ -4056,6 +4334,15 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   const galaxyARelatedRepairLinks =
     getSamsungHardwareConfig(resolvedParams.model)?.seriesFamily === 'galaxy-a'
       ? getEnhancedSamsungGalaxyARelatedRepairLinks(
+          brandEntry.models,
+          resolvedParams.model,
+          internalRepairSlug,
+          repairEntry.name
+        )
+      : [];
+  const galaxyNoteRelatedRepairLinks =
+    getSamsungHardwareConfig(resolvedParams.model)?.seriesFamily === 'galaxy-note'
+      ? getEnhancedSamsungGalaxyNoteRelatedRepairLinks(
           brandEntry.models,
           resolvedParams.model,
           internalRepairSlug,
@@ -4076,6 +4363,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, isEnhancedSamsungFamilyPage ? 6 : 4),
     crossModelLinks: dedupeRelatedRepairLinks(crossModelLinks).slice(0, 4),
     galaxyARelatedRepairLinks,
+    galaxyNoteRelatedRepairLinks,
     iphoneModelHubLinks:
       resolvedParams.category === 'phone' && resolvedParams.brand === 'iphone'
         ? getEnhancedIphoneModelHubLinks(brandEntry.models, resolvedParams.model)
@@ -4111,6 +4399,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     otherRepairLinks,
     crossModelLinks,
     galaxyARelatedRepairLinks,
+    galaxyNoteRelatedRepairLinks,
     iphoneModelHubLinks,
     samsungFamilyModelHubLinks,
     categoryHubLinks,
@@ -4135,6 +4424,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
     resolvedParams.brand,
+    resolvedParams.model,
+    resolvedParams['repair-type']
+  );
+  const isNoteBackGlass = isSamsungNoteBackGlassPublicAlias(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams.model,
     resolvedParams['repair-type']
   );
   const baseSeoPocket = getRepairTypeSeoPocket({
@@ -4159,13 +4455,18 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   });
   const sameModelLinks = otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
+  const isGalaxyNoteEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-note';
   const displayCrossModelLinks = isGalaxyAEnhancedPage
     ? galaxyARelatedRepairLinks
-    : isAliMobileEnhancedSamsungPage
-      ? []
-      : crossModelLinks;
+    : isGalaxyNoteEnhancedPage
+      ? galaxyNoteRelatedRepairLinks
+      : isAliMobileEnhancedSamsungPage
+        ? []
+        : crossModelLinks;
   const samsungMidPageHubLinks =
-    samsungHardwareConfig?.seriesFamily === 'galaxy-s' || samsungHardwareConfig?.seriesFamily === 'galaxy-a'
+    samsungHardwareConfig?.seriesFamily === 'galaxy-s' ||
+    samsungHardwareConfig?.seriesFamily === 'galaxy-a' ||
+    samsungHardwareConfig?.seriesFamily === 'galaxy-note'
       ? getAliMobileEnhancedSamsungHubLinks(resolvedParams.model)
       : [];
   const isGalaxyALogicBoardRoute =
@@ -4188,7 +4489,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           modelLinks: samsungFamilyModelHubLinks,
           categoryLinks: categoryHubLinks,
         }
-      : samsungHardwareConfig?.deviceFamily === 'z-flip'
+    : samsungHardwareConfig?.deviceFamily === 'z-flip'
           ? {
               sectionDescription: 'Browse other Galaxy Z Flip models or explore repair services for other devices.',
               modelGroupHeading: 'More Galaxy Z Flip Models',
@@ -4199,6 +4500,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           ? {
               sectionDescription: 'Explore Samsung repairs or browse repair services for other devices.',
               modelGroupHeading: 'More Galaxy A Models',
+              modelLinks: samsungFamilyModelHubLinks,
+              categoryLinks: categoryHubLinks,
+            }
+        : isGalaxyNoteEnhancedPage
+          ? {
+              sectionDescription: 'Explore Samsung repairs or browse repair services for other devices.',
+              modelGroupHeading: 'More Galaxy Note Models',
               modelLinks: samsungFamilyModelHubLinks,
               categoryLinks: categoryHubLinks,
             }
@@ -4222,9 +4530,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
   // Validate repair type exists in our known list, or accept POS-provided name
   const knownRepair = REPAIR_TYPES.find(r => r.slug === internalRepairSlug);
-  const bookingRepairName = isIphoneBackGlassPublicAlias(
+  const bookingRepairName = usesPhoneBackGlassPublicAlias(
     resolvedParams.category,
     resolvedParams.brand,
+    resolvedParams.model,
     resolvedParams['repair-type']
   ) ? (knownRepair?.name || repairTypeDerived) : undefined;
   const showBackHousingNotice = shouldShowIphoneBackHousingNotice(
@@ -4236,17 +4545,27 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const finalRepairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
+    resolvedParams.model,
     resolvedParams['repair-type'],
     knownRepair?.name || repairTypeDerived
   );
   const crossModelSectionRepairName = isGalaxyAEnhancedPage
-    ? getRelatedRepairPresentationName(
+      ? getRelatedRepairPresentationName(
         resolvedParams.category,
         resolvedParams.brand,
+        resolvedParams.model,
         resolvedParams['repair-type'],
         finalRepairName
       )
-    : finalRepairName;
+    : isGalaxyNoteEnhancedPage
+      ? getRelatedRepairPresentationName(
+          resolvedParams.category,
+          resolvedParams.brand,
+          resolvedParams.model,
+          resolvedParams['repair-type'],
+          finalRepairName
+        )
+      : finalRepairName;
 
   const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -4284,7 +4603,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
             showBackHousingNotice={showBackHousingNotice}
-            showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && price === 0)}
+            showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && price === 0 && !isNoteBackGlass)}
             variants={details?.variants || []}
           />
 
@@ -4423,6 +4742,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   >
                     {isGalaxyAEnhancedPage
                       ? `More Galaxy A models for ${crossModelSectionRepairName}`
+                      : isGalaxyNoteEnhancedPage
+                        ? `More Galaxy Note models for ${crossModelSectionRepairName}`
                       : `More ${displayBrand} models for ${finalRepairName}`}
                   </h2>
                 </div>

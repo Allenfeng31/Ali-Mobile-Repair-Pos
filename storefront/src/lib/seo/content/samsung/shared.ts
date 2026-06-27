@@ -22,6 +22,10 @@ export const SAMSUNG_CATALOGUE_VARIANT_NOTE =
   'Displayed pricing and available variants follow the live repair catalogue for this route.';
 
 export function getSamsungSeriesLabel(config: SamsungHardwareConfig): string {
+  if (config.seriesFamily === 'galaxy-note') {
+    return 'Galaxy Note';
+  }
+
   if (config.seriesFamily === 'galaxy-s') {
     return config.deviceFamily === 'galaxy-s-ultra' ? 'Galaxy S Ultra' : 'Galaxy S';
   }

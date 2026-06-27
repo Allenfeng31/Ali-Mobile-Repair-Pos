@@ -191,12 +191,18 @@ function ensureCoreRepairTypes(
   modelName: string
 ): RepairOption[] {
   const result = [...repairTypes];
+  const isGalaxyNoteModel = brandSlug.includes('samsung') && /galaxy\s+note/i.test(modelName);
 
   // Always add universal repair types
   for (const core of UNIVERSAL_REPAIR_TYPES) {
     if (!result.some(r => r.slug === core.slug)) {
       result.push({ ...core });
     }
+  }
+
+  // Galaxy Note models keep only the genuine POS rows already present in the catalogue.
+  if (isGalaxyNoteModel) {
+    return result;
   }
 
   // Conditionally add back-glass-repair

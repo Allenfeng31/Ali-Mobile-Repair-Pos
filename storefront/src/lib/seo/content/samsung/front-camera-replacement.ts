@@ -126,6 +126,134 @@ export function buildSamsungFrontCameraReplacementPocket(
     };
   }
 
+  if (config.seriesFamily === 'galaxy-note') {
+    const frontCameraLabel = getSamsungFrontCameraLabel(config);
+
+    return {
+      quickAnswer:
+        `Need ${config.modelName} front camera replacement in Ringwood? Ali Mobile & Repair checks blurry or hazy image, black preview, focus inconsistency, dust or impact near the opening, and camera-versus-software diagnosis before confirming the quote-only front-camera path.`,
+      workbenchHeadings: {
+        options: `Which front-camera path fits this ${config.modelName}?`,
+        diagnostics: 'What do we inspect before front-camera work?',
+        symptoms: 'Which front-camera symptoms matter most?',
+        outcomes: 'What can change the front-camera result?',
+      },
+      repairOptions: [
+        {
+          name: 'Front-camera diagnosis',
+          shortDescription:
+            `We test blur, haze, spots, preview failure, and focus inconsistency before confirming whether the ${frontCameraLabel} itself is the main fault.`,
+          bestFor:
+            'Phones where selfies, video calls, or front-camera preview no longer look clear or fail to load normally.',
+          notes:
+            'Impact around the camera opening is inspected carefully because nearby display-area damage can overlap with the camera complaint.',
+        },
+        {
+          name: 'Camera-versus-software or board-path review',
+          shortDescription:
+            'We separate likely hardware camera faults from software behaviour, connection issues, or deeper board-level overlap before replacement is confirmed.',
+          bestFor:
+            'Phones with inconsistent preview failure, intermittent focus, or symptoms that do not behave like a simple camera-only fault.',
+          notes:
+            'Front camera replacement does not automatically include screen work or guarantee that every secondary function tied to the area will be restored.',
+        },
+        {
+          name: 'Quote-only validation',
+          shortDescription:
+            `We confirm the front-camera path before service and retest the main front-facing functions before handover.`,
+          bestFor:
+            'Customers who want the front camera tested in context rather than assuming every image issue needs the same repair.',
+          notes:
+            `${SAMSUNG_QUOTE_ONLY_SCOPE} ${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Blur, haze, or spots in selfies',
+          description:
+            'Blur or haze can come from the front camera path itself, but we also inspect whether impact or contamination around the camera opening is involved.',
+        },
+        {
+          title: 'Preview failure or black image',
+          description:
+            'A failed selfie preview can be camera-related, software-related, or part of a deeper board-level problem, so we diagnose before replacing parts.',
+        },
+        {
+          title: 'Focus inconsistency',
+          description:
+            'Front-camera image quality can shift if the camera path is damaged, but inconsistent results still need diagnosis rather than assumption.',
+        },
+        {
+          title: 'Impact near the front-camera opening',
+          description:
+            'Impact close to the camera opening can affect more than the visible lens area, so we inspect the surrounding repair zone first.',
+        },
+        {
+          title: 'Quote-only scope',
+          description:
+            'Front camera work is confirmed through the live catalogue-backed route rather than a fabricated or fixed-price assumption.',
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Test the front-camera preview and image quality',
+          description:
+            'We check clarity, focus, spots, and preview behaviour before confirming whether the front camera is the main fault path.',
+        },
+        {
+          step: '02',
+          title: 'Inspect the camera opening and nearby impact',
+          description:
+            'Impact around the opening is checked before the front camera is treated as an isolated part failure.',
+        },
+        {
+          step: '03',
+          title: 'Separate camera faults from software or board overlap',
+          description:
+            'We compare the symptoms with likely software, connection, and board-level possibilities before confirming replacement.',
+        },
+        {
+          step: '04',
+          title: 'Retest the front-camera path before handover',
+          description:
+            `${SAMSUNG_PRE_AND_POST_REPAIR_TESTING_NOTE} ${SAMSUNG_WATER_RESISTANCE_NOTE}`,
+        },
+      ],
+      faq: [
+        {
+          question: `Why is ${config.modelName} front camera blurry or hazy?`,
+          answer:
+            'Blur or haze can come from the camera path, contamination, or nearby impact, so we inspect the whole front-camera area before confirming the quote.',
+        },
+        {
+          question: `Could software cause a black front-camera preview on my ${config.modelName}?`,
+          answer:
+            'Yes. A black preview can be camera-related, software-related, or part of a deeper board-level fault, so diagnosis comes first.',
+        },
+        {
+          question: `Does the repair affect my data on my ${config.modelName}?`,
+          answer:
+            'Front camera work does not normally target storage data, but we still recommend a backup because deeper faults can appear during diagnosis or repair.',
+        },
+        {
+          question: `Will the camera opening and display area be checked on my ${config.modelName}?`,
+          answer:
+            'Yes. We inspect the camera opening and nearby display area because impact there can overlap with the front-camera complaint.',
+        },
+        {
+          question: `How is the final price confirmed for ${config.modelName} front camera work?`,
+          answer:
+            `We confirm the quote-only path after diagnosis and before work begins. ${SAMSUNG_QUOTE_ONLY_SCOPE}`,
+        },
+        {
+          question: `Will front camera repair restore factory water resistance on my ${config.modelName}?`,
+          answer: SAMSUNG_WATER_RESISTANCE_NOTE,
+        },
+      ],
+    };
+  }
+
   if (config.frontCameraClass === 'single-punch-hole') {
     return {
       quickAnswer:
