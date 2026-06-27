@@ -5,7 +5,7 @@ export function buildGooglePixelBackGlassReplacementPocket(
   config: GooglePixelHardwareConfig
 ): RepairTypeSeoPocket {
   return {
-    quickAnswer: `Need ${config.modelName} back glass replacement in Ringwood? Ali Mobile & Repair checks rear-glass damage, frame condition, camera-bar openings, and battery swelling. The exact replacement method depends on damage extent and available assembly, which we map to our internal back housing service.`,
+    quickAnswer: `Need ${config.modelName} back ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} replacement in Ringwood? Ali Mobile & Repair checks rear-${config.rearPanelType === 'glass' ? 'glass' : 'panel'} damage, frame condition, camera-bar openings, and battery swelling. The exact replacement method depends on damage extent and available assembly, which we map to our internal back housing service.`,
     workbenchHeadings: {
       options: 'Back glass replacement approach',
       diagnostics: 'What do we check first?',
@@ -15,8 +15,8 @@ export function buildGooglePixelBackGlassReplacementPocket(
     repairOptions: [
       {
         name: 'Back Glass Assessment',
-        shortDescription: `Evaluation of the cracked or lifting rear glass on your ${config.modelName}.`,
-        bestFor: 'Determining if a swollen battery is causing the glass to lift, or if frame damage requires full housing replacement.',
+        shortDescription: `Evaluation of the cracked or lifting rear ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} on your ${config.modelName}.`,
+        bestFor: `Determining if a swollen battery is causing the ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} to lift, or if frame damage requires full housing replacement.`,
         notes: 'The public Back Glass service is fulfilled using the model-specific POS Back Housing product.',
       },
       {
@@ -28,13 +28,13 @@ export function buildGooglePixelBackGlassReplacementPocket(
     ],
     commonProblems: [
       {
-        title: 'Cracked or Chipped Rear Glass',
-        description: 'Visible fractures or missing chips of glass on the rear panel.',
+        title: `Cracked or Chipped Rear ${config.rearPanelType === 'glass' ? 'Glass' : 'Panel'}`,
+        description: `Visible fractures or missing chips on the rear panel.`,
         // context: 'Can expose internal components to moisture and create sharp edges.',
       },
       {
         title: 'Loose or Lifting Rear Panel',
-        description: 'The back glass is separating from the frame, creating a gap.',
+        description: `The back ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} is separating from the frame, creating a gap.`,
         // context: 'Often a secondary symptom of battery swelling pushing the rear panel upward.',
       },
       {
@@ -55,14 +55,14 @@ export function buildGooglePixelBackGlassReplacementPocket(
         description: 'We identify the exact model and map the repair to the correct POS Back Housing part.',
       },
       {
-        step: 'Inspect rear glass and frame',
-        title: 'Inspect rear glass and frame',
+        step: `Inspect rear ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} and frame`,
+        title: `Inspect rear ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} and frame`,
         description: 'We assess the extent of the cracking and check for any frame bends.',
       },
       {
         step: 'Check battery swelling',
         title: 'Check battery swelling',
-        description: 'We verify that the battery is not expanding and pushing against the glass.',
+        description: `We verify that the battery is not expanding and pushing against the ${config.rearPanelType === 'glass' ? 'glass' : 'panel'}.`,
       },
       {
         step: 'Inspect camera-bar alignment',
@@ -92,20 +92,20 @@ export function buildGooglePixelBackGlassReplacementPocket(
     ],
     faq: [
       {
-        question: 'Is this rear glass or the full housing?',
-        answer: 'Depending on the exact damage and part availability, we fulfill back glass repairs using the appropriate housing assembly to ensure structural integrity and correct alignment around the camera bar.',
+        question: `Is this rear ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} or the full housing?`,
+        answer: `Depending on the exact damage and part availability, we fulfill back ${config.rearPanelType === 'glass' ? 'glass' : 'panel'} repairs using the appropriate housing assembly to ensure structural integrity and correct alignment around the camera bar.`,
       },
       {
         question: `How much does ${config.modelName} Back Glass Replacement cost?`,
         answer: 'We provide a clear quote upfront based on the extent of the damage to the rear panel and frame. Please bring your device in for a thorough assessment.',
       },
       {
-        question: 'Can a swollen battery lift the rear glass?',
+        question: `Can a swollen battery lift the rear ${config.rearPanelType === 'glass' ? 'glass' : 'panel'}?`,
         answer: 'Yes, a degraded battery can swell and generate enough internal pressure to lift the rear panel away from the frame. We always check for this during inspection.',
       },
       {
         question: 'Is camera-lens replacement included?',
-        answer: 'The external camera lens cover is typically separate from standard back glass. We inspect the camera bar and advise if lens replacement is also required.',
+        answer: `The external camera lens cover is typically separate from standard back ${config.rearPanelType === 'glass' ? 'glass' : 'panel'}. We inspect the camera bar and advise if lens replacement is also required.`,
       },
       {
         question: 'Will my data normally remain on the phone?',

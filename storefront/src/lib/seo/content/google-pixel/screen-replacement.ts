@@ -5,7 +5,7 @@ export function buildGooglePixelScreenReplacementPocket(
   config: GooglePixelHardwareConfig
 ): RepairTypeSeoPocket {
   return {
-    quickAnswer: `Need ${config.modelName} screen replacement in Ringwood? Ali Mobile & Repair inspects cracked display glass, black display areas, lines or flickering, touch response, OLED image quality, under-display fingerprint operation, and frame condition after impact before starting work.`,
+    quickAnswer: `Need ${config.modelName} screen replacement in Ringwood? Ali Mobile & Repair inspects cracked display glass, black display areas, lines or flickering, touch response, OLED image quality, ${config.fingerprintType === 'under-display' ? 'under-display fingerprint' : config.fingerprintType === 'none' ? 'face unlock' : 'fingerprint'} operation, and frame condition after impact before starting work.`,
     workbenchHeadings: {
       options: `Display options for the ${config.modelName}`,
       diagnostics: 'What do we check first?',
@@ -17,7 +17,7 @@ export function buildGooglePixelScreenReplacementPocket(
         name: 'Standard Screen Replacement',
         shortDescription: `A practical display replacement for cracked glass, dead pixels, or a failing touch panel on your ${config.modelName}.`,
         bestFor: 'Users who need their device working reliably without demanding premium panel specifications.',
-        notes: 'We test brightness, touch, speaker alignment, and fingerprint functionality where applicable before returning the device.',
+        notes: `We test brightness, touch, speaker alignment, and ${config.fingerprintType === 'none' ? 'face unlock' : 'fingerprint'} functionality where applicable before returning the device.`,
       },
       {
         name: 'Diagnosis and Assessment',
@@ -48,8 +48,8 @@ export function buildGooglePixelScreenReplacementPocket(
         // context: 'Touch layer damage requires full display assembly replacement.',
       },
       {
-        title: 'Fingerprint Recognition Issues',
-        description: 'The under-display fingerprint sensor fails to read consistently after a drop or impact.',
+        title: `${config.fingerprintType === 'none' ? 'Face Unlock' : 'Fingerprint'} Recognition Issues`,
+        description: `The ${config.fingerprintType === 'under-display' ? 'under-display fingerprint sensor' : config.fingerprintType === 'none' ? 'face unlock system' : 'fingerprint sensor'} fails to read consistently after a drop or impact.`,
         // context: 'Can be caused by display damage directly over the sensor or a misalignment from the impact.',
       },
     ],
@@ -85,9 +85,9 @@ export function buildGooglePixelScreenReplacementPocket(
         description: 'We verify the display renders correctly without artifacts and that touch responds across the entire panel.',
       },
       {
-        step: 'Test fingerprint function',
-        title: 'Test fingerprint function',
-        description: 'We check the under-display fingerprint sensor operation where applicable.',
+        step: `Test ${config.fingerprintType === 'none' ? 'biometric' : 'fingerprint'} function`,
+        title: `Test ${config.fingerprintType === 'none' ? 'biometric' : 'fingerprint'} function`,
+        description: `We check the ${config.fingerprintType === 'under-display' ? 'under-display fingerprint sensor' : config.fingerprintType === 'none' ? 'face unlock' : 'fingerprint sensor'} operation where applicable.`,
       },
       {
         step: 'Test cameras, speakers and charging',
@@ -110,7 +110,7 @@ export function buildGooglePixelScreenReplacementPocket(
         answer: 'Yes, our screen replacement service replaces the entire front display assembly, which includes both the outer glass and the underlying OLED panel.',
       },
       {
-        question: 'Will the under-display fingerprint sensor still work?',
+        question: `Will the ${config.fingerprintType === 'under-display' ? 'under-display fingerprint sensor' : config.fingerprintType === 'none' ? 'face unlock' : 'fingerprint sensor'} still work?`,
         answer: 'We test fingerprint functionality during and after repair. If the original sensor is undamaged by the drop, it generally continues to function normally with the new display.',
       },
       {

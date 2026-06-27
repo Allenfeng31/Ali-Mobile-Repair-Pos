@@ -4167,9 +4167,22 @@ function isUnsupportedSamsungNoteRepairRoute(resolvedParams: Awaited<RepairPageP
   }) === null;
 }
 
+function isUnsupportedGooglePixelRepairRoute(resolvedParams: Awaited<RepairPageProps['params']>) {
+  if (resolvedParams.brand !== 'google-pixel' && resolvedParams.brand !== 'google') {
+    return false;
+  }
+
+  return getAliMobileEnhancedGooglePixelRepairType({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    'repair-type': resolvedParams['repair-type'],
+  }) === null;
+}
+
 export async function generateMetadata({ params }: RepairPageProps) {
   const resolvedParams = await params;
-  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams)) {
+  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) {
     notFound();
   }
   const internalRepairSlug = resolveRepairSlugForLookup(
@@ -4408,6 +4421,9 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
   const resolvedParams = await params;
+  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) {
+    notFound();
+  }
   const pageData = await fetchRepairPageData(resolvedParams);
 
   if (!pageData) {
