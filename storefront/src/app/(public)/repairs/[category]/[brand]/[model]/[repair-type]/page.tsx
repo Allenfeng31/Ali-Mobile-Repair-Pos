@@ -45,6 +45,7 @@ import {
   isAliMobileEnhancedGooglePixelRepairPage,
   type AliMobileEnhancedGooglePixelRepairType,
 } from '@/lib/seo/content/google-pixel';
+import { getAliMobileEnhancedOppoSeoPocket } from '@/lib/seo/content/oppo';
 
 export const revalidate = 86400;
 
@@ -4086,6 +4087,10 @@ function isGooglePixelBackGlassPublicAlias(category: string, brand: string, repa
   return category === "phone" && brand === "google-pixel" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
 }
 
+function isOppoBackGlassPublicAlias(category: string, brand: string, modelSlug: string, repairSlug: string) {
+  return category === "phone" && brand === "oppo" && modelSlug === "a98" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
+}
+
 function usesPhoneBackGlassPublicAlias(
   category: string,
   brand: string,
@@ -4095,7 +4100,8 @@ function usesPhoneBackGlassPublicAlias(
   return (
     isIphoneBackGlassPublicAlias(category, brand, repairSlug) ||
     isSamsungNoteBackGlassPublicAlias(category, brand, modelSlug, repairSlug) ||
-    isGooglePixelBackGlassPublicAlias(category, brand, repairSlug)
+    isGooglePixelBackGlassPublicAlias(category, brand, repairSlug) ||
+    isOppoBackGlassPublicAlias(category, brand, modelSlug, repairSlug)
   );
 }
 
@@ -4114,6 +4120,7 @@ function getPublicRepairSlug(category: string, brand: string, modelSlug: string,
     (
       brand === "iphone" ||
       brand === "google-pixel" ||
+      (brand === "oppo" && modelSlug === "a98") ||
       getSamsungHardwareConfig(modelSlug)?.seriesFamily === 'galaxy-note'
     )
   ) {
@@ -4139,6 +4146,10 @@ function getRepairDisplayName(
   }
 
   if (isGooglePixelBackGlassPublicAlias(category, brand, publicRepairSlug)) {
+    return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
+  }
+
+  if (isOppoBackGlassPublicAlias(category, brand, modelSlug, publicRepairSlug)) {
     return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
   }
 
@@ -4491,12 +4502,19 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairType: resolvedParams['repair-type'],
     pocket: iphoneSeoPocket,
   });
-  const seoPocket = getAliMobileEnhancedGooglePixelSeoPocket({
+  const pixelSeoPocket = getAliMobileEnhancedGooglePixelSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
     pocket: samsungSeoPocket,
+  });
+  const seoPocket = getAliMobileEnhancedOppoSeoPocket({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+    pocket: pixelSeoPocket,
   });
   const sameModelLinks = otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
@@ -4519,6 +4537,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     slugify(resolvedParams['repair-type']) === 'logic-board-repair';
   if (isGalaxyALogicBoardRoute && !samsungEnhancedRepairType) {
     notFound();
+  }
+  if (resolvedParams.brand === 'oppo' && resolvedParams.model === 'a98') {
+    const supportedA98Routes = [
+      'screen-replacement',
+      'battery-replacement',
+      'charging-port-replacement',
+      'back-glass-replacement',
+      'front-camera-replacement',
+      'back-camera-replacement',
+      'logic-board-repair'
+    ];
+    if (!supportedA98Routes.includes(slugify(resolvedParams['repair-type']))) {
+      notFound();
+    }
   }
   const exploreRepairNetworkSectionProps = isAliMobileEnhancedIphonePage
     ? {

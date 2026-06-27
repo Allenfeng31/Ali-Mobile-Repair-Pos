@@ -66,6 +66,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           continue;
         }
 
+        // Expose only A98 for OPPO brand for now
+        if (brand.slug === 'oppo' && model.slug !== 'a98') {
+          continue;
+        }
+
         modelUrls.push({
           url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}`,
           lastModified: new Date(),

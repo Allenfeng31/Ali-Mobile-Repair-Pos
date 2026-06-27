@@ -193,6 +193,11 @@ function qualifiesForBackGlass(brandSlug: string, modelName: string): boolean {
     return true;
   }
 
+  // OPPO A98 explicit Back Glass alias
+  if (brand === 'oppo' && model.includes('a98')) {
+    return true;
+  }
+
   return false;
 }
 
@@ -210,6 +215,12 @@ function ensureCoreRepairTypes(
     if (!result.some(r => r.slug === core.slug)) {
       result.push({ ...core });
     }
+  }
+
+  // Remove water-damage-repair for OPPO A98
+  if (brandSlug === 'oppo' && modelName.toLowerCase().includes('a98')) {
+    const wdIdx = result.findIndex(r => r.slug === 'water-damage-repair');
+    if (wdIdx !== -1) result.splice(wdIdx, 1);
   }
 
   // Galaxy Note models keep only the genuine POS rows already present in the catalogue.
