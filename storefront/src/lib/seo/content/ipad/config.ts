@@ -710,15 +710,28 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
 
 export const IPAD_MODEL_CONFIG_LIST = Object.values(IPAD_HARDWARE_CONFIG);
 
+const IPAD_MODEL_SLUG_ALIASES: Record<string, AliMobileEnhancedIpadModelSlug> = {
+  'ipad-mini-6': 'ipad-mini-6th-generation',
+  'ipad-pro-129-inch-m2': 'ipad-pro-129-inch-6th-generation',
+};
+
 export function getIpadHardwareConfig(modelSlug: string): IpadHardwareConfig | null {
-  const normalizedModelSlug = slugify(modelSlug) as AliMobileEnhancedIpadModelSlug;
-  return IPAD_HARDWARE_CONFIG[normalizedModelSlug] ?? null;
+  const normalizedSlug = slugify(modelSlug);
+
+  // Exact canonical match
+  if (Object.prototype.hasOwnProperty.call(IPAD_HARDWARE_CONFIG, normalizedSlug)) {
+    return IPAD_HARDWARE_CONFIG[normalizedSlug as AliMobileEnhancedIpadModelSlug];
+  }
+
+  // Explicit alias match
+  const aliasKey = IPAD_MODEL_SLUG_ALIASES[normalizedSlug];
+  if (aliasKey && Object.prototype.hasOwnProperty.call(IPAD_HARDWARE_CONFIG, aliasKey)) {
+    return IPAD_HARDWARE_CONFIG[aliasKey];
+  }
+
+  return null;
 }
 
 export function getIpadHardwareConfigByModelName(modelName: string): IpadHardwareConfig | null {
-  const normalizedModelName = slugify(modelName);
-
-  return (
-    IPAD_MODEL_CONFIG_LIST.find((config) => slugify(config.modelName) === normalizedModelName) ?? null
-  );
+  return getIpadHardwareConfig(slugify(modelName));
 }

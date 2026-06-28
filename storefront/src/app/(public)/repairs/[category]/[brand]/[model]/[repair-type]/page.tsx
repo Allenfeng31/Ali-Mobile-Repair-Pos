@@ -60,6 +60,8 @@ import {
 } from '@/lib/seo/content/ipad';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
 
+import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
+
 export const revalidate = 86400;
 
 function getRepairIcon(slug: string, size = 48) {
@@ -132,30 +134,32 @@ function RepairDetailFinalCta({
   headingId,
   section,
   bookRepairHref,
+  isCentered = false,
 }: {
   headingId: string;
   section: IpadEnhancedSeoPocket['finalCta'];
   bookRepairHref: string;
+  isCentered?: boolean;
 }) {
   return (
     <section
       className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
       aria-labelledby={headingId}
     >
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 px-6 py-8 shadow-sm shadow-blue-950/5 sm:px-8 lg:px-10">
-        <div className="repair-workbench-heading">
+      <div className={`mx-auto flex w-full max-w-5xl flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 px-6 py-8 shadow-sm shadow-blue-950/5 sm:px-8 lg:px-10 ${isCentered ? 'items-center text-center' : ''}`}>
+        <div className={`repair-workbench-heading ${isCentered ? 'items-center text-center' : ''}`}>
           <span>{section.kicker}</span>
           <h2 id={headingId} className="scroll-mt-32">{section.heading}</h2>
-          <p className="mx-auto mt-4 max-w-3xl text-pretty">
+          <p className={`mt-4 text-pretty ${isCentered ? 'mx-auto max-w-3xl' : 'max-w-3xl'}`}>
             {section.body}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className={`grid grid-cols-1 gap-3 ${isCentered ? 'md:grid-cols-3' : 'md:grid-cols-3'}`}>
           {section.bullets.map((bullet) => (
             <article
               key={bullet}
-              className="rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-4 text-sm font-semibold leading-6 text-slate-700"
+              className={`rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-4 text-sm font-semibold leading-6 text-slate-700 ${isCentered ? 'text-center' : ''}`}
             >
               {bullet}
             </article>
@@ -5157,35 +5161,24 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {enhancedIpadSeoPocket && (
         <ScrollReveal>
-          <RepairDetailBulletSection
-            headingId="ipad-model-notes-heading"
-            section={enhancedIpadSeoPocket.modelSpecificNotes}
+          <IpadEnhancedSeoSection 
+            modelName={seoDisplayModel} 
+            repairName={finalRepairName} 
           />
         </ScrollReveal>
       )}
 
-      {enhancedIpadSeoPocket && (
-        <ScrollReveal>
-          <RepairDetailBulletSection
-            headingId="ipad-repair-limitations-heading"
-            section={enhancedIpadSeoPocket.repairLimitations}
-          />
-        </ScrollReveal>
-      )}
-
-      {isAliMobileEnhancedRepairPage && enhancedRepairType && (
+      {isAliMobileEnhancedRepairPage && enhancedRepairType && !isAliMobileEnhancedIpadPage && (
         <ScrollReveal>
           <WhyChooseUsSection
             modelName={seoDisplayModel}
             repairType={enhancedRepairType as any}
             contentFamily={
-              isAliMobileEnhancedIpadPage
-                ? 'ipad'
-                : isAliMobileEnhancedSamsungPage
-                  ? 'samsung'
-                  : isAliMobileEnhancedGooglePixelPage
-                    ? 'google-pixel'
-                    : 'iphone'
+              isAliMobileEnhancedSamsungPage
+                ? 'samsung'
+                : isAliMobileEnhancedGooglePixelPage
+                  ? 'google-pixel'
+                  : 'iphone'
             }
           />
         </ScrollReveal>
@@ -5199,15 +5192,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       {isAliMobileEnhancedRepairPage && (
         <ScrollReveal>
           <ReviewsSection />
-        </ScrollReveal>
-      )}
-
-      {enhancedIpadSeoPocket && (
-        <ScrollReveal>
-          <RepairDetailBulletSection
-            headingId="ipad-local-service-heading"
-            section={enhancedIpadSeoPocket.localService}
-          />
         </ScrollReveal>
       )}
 
@@ -5237,6 +5221,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             headingId="ipad-final-cta-heading"
             section={enhancedIpadSeoPocket.finalCta}
             bookRepairHref={bookRepairUrl}
+            isCentered={isAliMobileEnhancedIpadPage}
           />
         </ScrollReveal>
       )}
