@@ -4,6 +4,12 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getIphoneWhyChooseContent, IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/iphone/why-choose';
 import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
+import {
+  getIpadHardwareConfigByModelName,
+  getIpadWhyChooseConfig,
+  IPAD_WHY_CHOOSE_SHARED_HIGHLIGHTS,
+  type AliMobileEnhancedIpadRepairType,
+} from '@/lib/seo/content/ipad';
 import { getSamsungWhyChooseContent, getSamsungWhyChooseSharedHighlights } from '@/lib/seo/content/samsung/why-choose';
 import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
 import { getGooglePixelWhyChooseConfig } from '@/lib/seo/content/google-pixel/why-choose';
@@ -13,8 +19,9 @@ import { getGooglePixelHardwareConfigByModelName } from '@/lib/seo/content/googl
 export type WhyChooseUsRepairType =
   | AliMobileEnhancedIphoneRepairType
   | AliMobileEnhancedSamsungRepairType
-  | AliMobileEnhancedGooglePixelRepairType;
-export type WhyChooseUsContentFamily = 'iphone' | 'samsung' | 'google-pixel';
+  | AliMobileEnhancedGooglePixelRepairType
+  | AliMobileEnhancedIpadRepairType;
+export type WhyChooseUsContentFamily = 'iphone' | 'samsung' | 'google-pixel' | 'ipad';
 
 interface WhyChooseUsSectionProps {
   modelName: string;
@@ -29,11 +36,18 @@ export default function WhyChooseUsSection({
 }: WhyChooseUsSectionProps) {
   const content = contentFamily === 'samsung'
     ? getSamsungWhyChooseContent(modelName)[repairType as AliMobileEnhancedSamsungRepairType]
+    : contentFamily === 'ipad'
+      ? getIpadWhyChooseConfig(
+          getIpadHardwareConfigByModelName(modelName)!,
+          repairType as AliMobileEnhancedIpadRepairType
+        )
     : contentFamily === 'google-pixel'
       ? getGooglePixelWhyChooseConfig(getGooglePixelHardwareConfigByModelName(modelName)!, repairType as AliMobileEnhancedGooglePixelRepairType)
       : getIphoneWhyChooseContent(modelName)[repairType as AliMobileEnhancedIphoneRepairType];
   const sharedHighlights = contentFamily === 'samsung'
     ? getSamsungWhyChooseSharedHighlights(modelName)
+    : contentFamily === 'ipad'
+      ? IPAD_WHY_CHOOSE_SHARED_HIGHLIGHTS
     : contentFamily === 'google-pixel'
       ? IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS // Assuming Google Pixel can use the same shared highlights or similar for now
       : IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS;
