@@ -150,10 +150,10 @@ export function getIpadScreenTechnologySummary(config: IpadHardwareConfig): stri
   return config.displayMarketingName;
 }
 
-export function getIpadBatteryRiskSentence(config: IpadHardwareConfig): string {
+export function getIpadBatteryHandlingSentence(config: IpadHardwareConfig): string {
   return config.hasLargerFrameInspectionNote
     ? 'The larger frame and display edges are checked carefully because swelling or previous impact can widen the repair scope.'
-    : 'Swelling, pressure on the display, and any existing frame damage are checked before the iPad is opened.';
+    : 'Swelling condition, display fit, and any existing frame damage are checked before the iPad is opened.';
 }
 
 export function getIpadAccessoryLabel(config: IpadHardwareConfig): string {

@@ -2,7 +2,7 @@ import type { IpadEnhancedSeoPocket, IpadHardwareConfig } from './types';
 import {
   ALI_MOBILE_IPAD_BUSINESS,
   getIpadAccessoryLabel,
-  getIpadBatteryRiskSentence,
+  getIpadBatteryHandlingSentence,
   getIpadBiometricLabel,
   getIpadBiometricTestLabel,
   getIpadConnectorLabel,
@@ -32,7 +32,7 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
     heroSubtitle:
       `Bring your ${config.modelName} to ${ALI_MOBILE_IPAD_BUSINESS.businessName} at ${ALI_MOBILE_IPAD_BUSINESS.locationShort} for battery diagnosis, existing live pricing, and booking support.`,
     schemaDescription:
-      `Battery replacement for ${config.modelName} in Ringwood with inspection of drain, shutdown, charging behavior, swelling risk, and the broader power path before confirming repair.`,
+      `Battery replacement for ${config.modelName} in Ringwood with inspection of drain, shutdown, charging behavior, swelling condition, and the broader power path before confirming repair.`,
     supportLabel,
     quickAnswer:
       `${config.modelName} battery symptoms can also be caused by the charger, cable, charging port, software state, or another power issue, so diagnosis confirms whether battery replacement is appropriate. If the battery is swollen, the iPad should not be pressed back together. Backing up the iPad before repair is recommended whenever it still powers on.`,
@@ -64,7 +64,7 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
       {
         name: 'Safe opening and model-specific care',
         shortDescription:
-          `${getIpadBatteryRiskSentence(config)} ${config.connectorType === 'lightning' ? 'Home Button and Touch ID handling is protected throughout the repair.' : 'The top-button Touch ID path is checked before and after the repair.'}`,
+          `${getIpadBatteryHandlingSentence(config)} ${config.connectorType === 'lightning' ? 'Home Button and Touch ID handling is protected throughout the repair.' : 'The top-button Touch ID path is checked before and after the repair.'}`,
         bestFor:
           'Swollen batteries, screen lift, frame pressure, or iPads with visible impact around the edges.',
         notes:
@@ -109,7 +109,7 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
       {
         title: 'Unusual heat',
         description:
-          'Heat during charging or use can point to battery wear, swelling risk, or another electrical issue that needs inspection.',
+          'Heat during charging or use can point to battery wear, swelling condition, or another electrical issue that needs inspection.',
       },
       {
         title: 'Screen or frame lifting',
@@ -192,7 +192,7 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
         'Swelling can affect the display and frame, which may expand the repair scope beyond the battery alone.',
         'Existing impact or liquid damage can affect the result and may require separate diagnosis.',
         'Backing up the iPad before repair is recommended whenever the device still powers on normally.',
-        'Turnaround depends on bench diagnosis and part availability rather than a fixed promise.',
+        'Turnaround depends on bench diagnosis and part availability rather than a fixed timeline.',
       ],
     },
     localService: {
@@ -234,9 +234,9 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
           'No. A swollen battery should not be pressed back into the iPad or kept in normal use. Bring it in for inspection as soon as practical.',
       },
       {
-        question: `Will ${config.modelName} battery replacement remove my data?`,
+        question: `Should I back up my ${config.modelName} before bringing it in?`,
         answer:
-          'Battery replacement is not normally performed to remove data, but backing up the iPad before repair is still recommended whenever possible.',
+          'Backing up your iPad data before any repair is always recommended whenever the device still powers on and functions well enough to do so.',
       },
       {
         question: `Why do you check the charging system before replacing the battery in ${config.modelName}?`,

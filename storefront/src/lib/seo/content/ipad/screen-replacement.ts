@@ -45,7 +45,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
       `Model-aware screen replacement for ${config.modelName} in Ringwood. We inspect glass damage, touch response, display output, frame pressure, and nearby camera or biometric functions before confirming the repair scope.`,
     supportLabel,
     quickAnswer:
-      `${config.modelName} screen replacement starts with inspection of cracked glass, touch response, display output, frame condition, and ${cameraAreaLabel}. We do not promise glass-only replacement because the exact part and repair scope depend on diagnosis. If the screen is lifting, we also check for battery pressure or frame damage. Screen repair is not normally performed to remove data, but backing up the iPad before repair is still recommended.`,
+      `${config.modelName} screen replacement starts with inspection of cracked glass, touch response, display output, frame condition, and ${cameraAreaLabel}. We do not assume glass-only replacement because the exact part and repair scope depend on diagnosis. If the screen is lifting, we also check for battery swelling or frame damage. Backing up the iPad before repair is always recommended.`,
     workbenchHeadings: {
       options: `What does the technician confirm before ${config.modelName} screen repair?`,
       diagnostics: 'How is the screen fault confirmed step by step?',
@@ -69,7 +69,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         bestFor:
           'Dropped iPads with dented corners, bent edges, lifting screen areas, or visible damage near the camera or biometric zone.',
         notes:
-          'Screen lifting can point to battery pressure or structural damage, so the iPad is assessed before repair is booked in.',
+          'Screen lifting can point to battery swelling or structural damage, so the iPad is assessed before repair is booked in.',
       },
       {
         name: 'Model-specific handling notes',
@@ -109,7 +109,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
       {
         title: 'Ghost touch',
         description:
-          'Repeated taps or drifting input can come from damaged screen layers, impact stress, or broader hardware pressure around the frame.',
+          'Repeated taps or drifting input can come from damaged screen layers, impact stress, or broader hardware distortion around the frame.',
       },
       {
         title: 'Black display while the iPad still responds',
@@ -119,12 +119,12 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
       {
         title: 'Lines, flickering, dark areas, or colour blocks',
         description:
-          'Image faults can show up as lines, unstable brightness, dark patches, or blocked colour zones after impact or pressure.',
+          'Image faults can show up as lines, unstable brightness, dark patches, or blocked colour zones after impact or distortion.',
       },
       {
         title: 'Screen lifting',
         description:
-          'A lifted edge can point to failed bonding, frame distortion, or battery pressure, so the underlying cause is checked before repair.',
+          'A lifted edge can point to failed bonding, frame distortion, or battery swelling, so the underlying cause is checked before repair.',
       },
       {
         title: 'Bent frame or damaged corners',
@@ -166,7 +166,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         step: '05',
         title: 'Distinguish the likely repair cause',
         description:
-          `We separate screen damage from frame issues, battery pressure, connection faults, and broader hardware damage before quoting.`,
+          `We separate screen damage from frame issues, battery swelling, connection faults, and broader hardware damage before quoting.`,
       },
       {
         step: '06',
@@ -190,8 +190,8 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         `${config.modelName} uses ${screenTechnology}.`,
         `${config.modelName} has ${getIpadFrontCameraPositionLabel(config)} and ${biometricLabel}.`,
         config.biometricType === 'face-id'
-          ? 'Face ID and the TrueDepth camera path are tested separately after repair, but they are never guaranteed as an automatic result of screen replacement.'
-          : `The ${biometricLabel.toLowerCase()} path is checked after repair without guaranteeing restoration of any pre-existing biometric fault.`,
+          ? 'Face ID and the TrueDepth camera path are tested separately after repair, but they are never assumed as an automatic result of screen replacement.'
+          : `The ${biometricLabel.toLowerCase()} path is checked after repair without assuming restoration of any pre-existing biometric fault.`,
         config.hasLargerFrameInspectionNote
           ? 'This larger 13-inch frame needs extra inspection around the display edges and corners before the replacement scope is confirmed.'
           : 'Frame edges, corners, and alignment are checked carefully before the replacement scope is confirmed.',
@@ -204,12 +204,12 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         'Screen replacement can still depend on the physical condition of the iPad around the display area.',
       items: [
         'Bent frames, damaged corners, or existing structural distortion can affect final fit and may expand the repair scope.',
-        'Screen lifting can be linked to battery pressure, failed bonding, or frame damage rather than the screen alone.',
+        'Screen lifting can be linked to battery swelling, failed bonding, or frame damage rather than the screen alone.',
         'Existing liquid damage can affect the result and may require separate diagnosis.',
         config.biometricType === 'face-id'
-          ? 'Face ID requires separate testing and is never guaranteed through screen repair alone.'
-          : `${biometricLabel} requires separate testing and is not guaranteed through screen repair alone.`,
-        'The original seal is not guaranteed to be restored after the iPad has been opened.',
+          ? 'Face ID requires separate testing and is never assumed through screen repair alone.'
+          : `${biometricLabel} requires separate testing and is not assumed through screen repair alone.`,
+        'The iPad\'s original assembly is carefully managed, though post-repair fit can depend on the existing frame condition.',
       ],
     },
     localService: {
@@ -236,44 +236,29 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
     },
     faq: [
       {
-        question: `Is only the outer glass replaced on ${config.modelName}?`,
-        answer:
-          'Not automatically. We inspect the glass, touch response, display output, and frame condition first because the exact repair scope depends on what is actually damaged.',
-      },
-      {
-        question: `Why can ${config.modelName} still show an image when touch does not work?`,
-        answer:
-          'The image path and touch path can fail differently, so we test both before confirming whether screen replacement is the right repair.',
-      },
-      {
-        question: `Can a bent frame affect ${config.modelName} screen replacement?`,
-        answer:
-          'Yes. A bent frame or damaged corner can affect safe opening, screen fit, and the final repair scope, so it is inspected before work begins.',
-      },
-      {
-        question: `What if the screen on ${config.modelName} is lifting?`,
-        answer:
-          'Screen lifting can be linked to battery pressure, frame damage, or bonding issues. We inspect the cause first instead of pushing the screen back down.',
-      },
-      {
-        question: `Will the cameras and biometric functions be tested after ${config.modelName} screen repair?`,
-        answer:
-          `Yes. We retest the front and rear cameras, ${biometricTestLabel.toLowerCase()}, charging response, and the repaired screen before handover.`,
-      },
-      {
-        question: `Will ${config.modelName} screen replacement remove my data?`,
-        answer:
-          'Data removal is not normally the purpose of screen repair, but backing up the iPad before repair is still recommended as a precaution.',
-      },
-      {
-        question: `Is the original seal restored after ${config.modelName} screen replacement?`,
-        answer:
-          'No factory seal is guaranteed after the iPad has been opened. We explain that limitation clearly before the repair is approved.',
-      },
-      {
-        question: `How is the final screen repair scope confirmed for ${config.modelName}?`,
+        question: `How is the correct repair option confirmed for ${config.modelName}?`,
         answer:
           'We confirm the exact iPad model, inspect the screen and frame, reproduce the fault, test related functions, and then explain the practical repair approach before fitting parts.',
+      },
+      {
+        question: `What functions are tested after ${config.modelName} screen repair?`,
+        answer:
+          `We retest the front and rear cameras, ${biometricTestLabel.toLowerCase()}, charging response, and the repaired screen before handover.`,
+      },
+      {
+        question: `Should I back up my ${config.modelName} before bringing it in?`,
+        answer:
+          'Backing up your iPad data before any repair is always recommended whenever the device still powers on and functions well enough to do so.',
+      },
+      {
+        question: `How can I book this repair in Ringwood?`,
+        answer:
+          `You can book online through our existing system, call ${ALI_MOBILE_IPAD_BUSINESS.phone} to discuss parts availability, or visit the Ringwood store in person.`,
+      },
+      {
+        question: `What should I bring when visiting the store for ${config.modelName} repair?`,
+        answer:
+          'Bring the iPad as it is. If the issue is related to charging or a specific accessory, bring that accessory with you so we can test the complete setup.',
       },
     ],
   };

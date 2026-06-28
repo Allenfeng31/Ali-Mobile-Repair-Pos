@@ -33,7 +33,7 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
       : 'This model uses the traditional front-camera position, so impact and alignment checks stay focused on the usual camera area.';
   const faceIdSentence =
     config.biometricType === 'face-id'
-      ? 'Face ID is tested separately and is never guaranteed as an automatic result of front-camera replacement.'
+      ? 'Face ID is tested separately and is never assumed as an automatic result of front-camera replacement.'
       : config.biometricType === 'home-button-touch-id'
         ? 'Home Button and current Touch ID state are checked separately because front-camera repair does not automatically restore unrelated biometric faults.'
         : 'The top button and current Touch ID state are checked separately because front-camera repair does not automatically restore unrelated biometric faults.';
@@ -206,12 +206,12 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
         'Permissions, settings, and app support can still affect front-camera behavior even when the camera module is working normally.',
         'Connector or board-related faults can mimic a simple front-camera problem and may require broader diagnosis.',
         config.biometricType === 'face-id'
-          ? 'Face ID requires separate testing and is never guaranteed through front-camera replacement alone.'
+          ? 'Face ID requires separate testing and is never assumed through front-camera replacement alone.'
           : `${biometricLabel} requires separate testing and is not automatically restored through front-camera replacement alone.`,
         config.supportsCenterStage
           ? 'Center Stage behavior can still vary by app support, settings, and software state after the camera path is repaired.'
           : 'External impact around the front-camera area can expand the repair scope beyond the camera module itself.',
-        'Turnaround depends on diagnosis and part availability rather than a fixed promise.',
+        'Turnaround depends on diagnosis and part availability rather than a fixed timeline.',
       ],
     },
     localService: {
@@ -253,7 +253,7 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
           ? `Can a front-camera problem affect Face ID on ${config.modelName}?`
           : `Will ${config.modelName} Touch ID be tested during front-camera repair?`,
         answer: config.biometricType === 'face-id'
-          ? 'It can overlap, which is why Face ID is tested separately. Front-camera replacement never guarantees Face ID restoration by itself.'
+          ? 'It can overlap, which is why Face ID is tested separately. Front-camera replacement never assumes Face ID restoration by itself.'
           : `${biometricLabel} is tested separately, but front-camera replacement does not automatically restore unrelated biometric faults.`,
       },
       {
@@ -268,9 +268,9 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
           'Inspection and repair access still depend on the model and the confirmed fault path. We explain the practical repair scope before work begins.',
       },
       {
-        question: `Will ${config.modelName} front-camera repair remove my data?`,
+        question: `Should I back up my ${config.modelName} before bringing it in?`,
         answer:
-          'Front-camera repair is not normally performed to remove data, but backing up the iPad beforehand is still recommended whenever possible.',
+          'Backing up your iPad data before any repair is always recommended whenever the device still powers on and functions well enough to do so.',
       },
       {
         question: `What is tested after ${config.modelName} front-camera repair?`,

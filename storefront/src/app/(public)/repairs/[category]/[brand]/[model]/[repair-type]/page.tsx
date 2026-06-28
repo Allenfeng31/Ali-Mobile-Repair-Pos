@@ -143,11 +143,12 @@ function RepairDetailFinalCta({
 }) {
   return (
     <section
-      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+      className="repair-workbench-shell repair-workbench-shell-tablet"
       aria-labelledby={headingId}
     >
-      <div className={`mx-auto flex w-full max-w-5xl flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 px-6 py-8 shadow-sm shadow-blue-950/5 sm:px-8 lg:px-10 ${isCentered ? 'items-center text-center' : ''}`}>
-        <div className={`repair-workbench-heading ${isCentered ? 'items-center text-center' : ''}`}>
+      <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
+        <div className={`mx-auto flex w-full max-w-5xl flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 px-6 py-8 shadow-sm shadow-blue-950/5 sm:px-8 lg:px-10 ${isCentered ? 'items-center text-center' : ''}`}>
+          <div className={`repair-workbench-heading ${isCentered ? 'items-center text-center' : ''}`}>
           <span>{section.kicker}</span>
           <h2 id={headingId} className="scroll-mt-32">{section.heading}</h2>
           <p className={`mt-4 text-pretty ${isCentered ? 'mx-auto max-w-3xl' : 'max-w-3xl'}`}>
@@ -182,6 +183,7 @@ function RepairDetailFinalCta({
           <ChatNowButton
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-extrabold text-slate-800 transition-colors hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           />
+        </div>
         </div>
       </div>
     </section>

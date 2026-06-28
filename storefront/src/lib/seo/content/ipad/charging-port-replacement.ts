@@ -178,7 +178,7 @@ export function buildIpadChargingPortReplacementPocket(config: IpadHardwareConfi
         'Debris may be removable without replacing the connector, while visible physical damage can expand the repair path.',
         'Third-party accessory compatibility can still vary after repair, especially when the accessory itself is part of the original problem.',
         'Impact or liquid exposure around the connector can affect the result and may require wider diagnosis.',
-        'Turnaround depends on diagnosis and part availability rather than a fixed promise.',
+        'Turnaround depends on diagnosis and part availability rather than a fixed timeline.',
       ],
     },
     localService: {
@@ -224,9 +224,9 @@ export function buildIpadChargingPortReplacementPocket(config: IpadHardwareConfi
           'Sometimes, yes. If the issue is debris rather than physical damage, cleaning may be the practical fix. We inspect the connector first.',
       },
       {
-        question: `Will ${config.modelName} charging port repair remove my data?`,
+        question: `Should I back up my ${config.modelName} before bringing it in?`,
         answer:
-          'Charging-port repair is not normally performed to remove data, but backing up the iPad is still recommended whenever it powers on and charges well enough to do so.',
+          'Backing up your iPad data before any repair is always recommended whenever the device still powers on and functions well enough to do so.',
       },
       {
         question: `How is the charging fault confirmed on ${config.modelName}?`,

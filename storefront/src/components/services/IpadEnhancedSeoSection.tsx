@@ -31,35 +31,37 @@ export default function IpadEnhancedSeoSection({
   return (
     <section 
       id="ipad-enhanced-seo"
-      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+      className="repair-workbench-shell repair-workbench-shell-tablet"
       aria-label={`${modelName} ${repairName} in Ringwood`}
     >
-      <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
-        <div className="flex flex-col items-center text-center">
-          <span className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
-            Model-Aware iPad Repair
-          </span>
-          <h2 className="text-balance text-[1.5rem] font-black leading-[1.12] tracking-[-0.015em] text-slate-950 sm:text-[1.75rem] md:max-w-3xl lg:text-[2.25rem]">
-            {modelName} {repairName} in Ringwood
-          </h2>
-        </div>
+      <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
+          <div className="flex flex-col items-center text-center">
+            <span className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+              Model-Aware iPad Repair
+            </span>
+            <h2 className="text-balance text-[1.5rem] font-black leading-[1.12] tracking-[-0.015em] text-slate-950 sm:text-[1.75rem] md:max-w-3xl lg:text-[2.25rem]">
+              {modelName} {repairName} in Ringwood
+            </h2>
+          </div>
 
-        <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-4">
-          {cards.map((card, index) => (
-            <article
-              key={index}
-              className="flex h-full min-h-[188px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-6 sm:px-8 sm:py-8 lg:px-8 lg:py-8 xl:px-8 xl:py-8 md:min-h-[198px]"
-            >
-              <div className="flex flex-1 flex-col items-center text-center">
-                <h3 className="w-full text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950">
-                  {card.title}
-                </h3>
-                <p className="mt-4 w-full text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">
-                  {card.description}
-                </p>
-              </div>
-            </article>
-          ))}
+          <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-4">
+            {cards.map((card, index) => (
+              <article
+                key={index}
+                className="flex h-full min-h-[188px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-6 sm:px-8 sm:py-8 lg:px-8 lg:py-8 xl:px-8 xl:py-8 md:min-h-[198px]"
+              >
+                <div className="flex flex-1 flex-col items-center text-center">
+                  <h3 className="w-full text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950">
+                    {card.title}
+                  </h3>
+                  <p className="mt-4 w-full text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">
+                    {card.description}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

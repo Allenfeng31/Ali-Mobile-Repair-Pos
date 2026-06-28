@@ -710,9 +710,54 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
 
 export const IPAD_MODEL_CONFIG_LIST = Object.values(IPAD_HARDWARE_CONFIG);
 
-const IPAD_MODEL_SLUG_ALIASES: Record<string, AliMobileEnhancedIpadModelSlug> = {
-  'ipad-mini-6': 'ipad-mini-6th-generation',
-  'ipad-pro-129-inch-m2': 'ipad-pro-129-inch-6th-generation',
+const IPAD_RUNTIME_MODEL_ALIASES: Record<string, AliMobileEnhancedIpadModelSlug> = {
+  't-ipad-ipad-10th-generation': 'ipad-10th-generation',
+  't-ipad-ipad-5th-generation': 'ipad-5th-generation',
+  't-ipad-ipad-6th-generation': 'ipad-6th-generation',
+  't-ipad-ipad-7th-generation': 'ipad-7th-generation',
+  't-ipad-ipad-8th-generation': 'ipad-8th-generation',
+  't-ipad-ipad-9th-generation': 'ipad-9th-generation',
+  't-ipad-ipad-air-3rd-generation': 'ipad-air-3rd-generation',
+  't-ipad-ipad-air-4th-generation': 'ipad-air-4th-generation',
+  't-ipad-ipad-air-5th-generation': 'ipad-air-5th-generation',
+  't-ipad-ipad-pro-11-inch-1st-generation': 'ipad-pro-11-inch-1st-generation',
+  't-ipad-ipad-pro-11-inch-2nd-generation': 'ipad-pro-11-inch-2nd-generation',
+  't-ipad-ipad-pro-11-inch-3rd-generation': 'ipad-pro-11-inch-3rd-generation',
+  't-ipad-ipad-pro-11-inch-4th-generation': 'ipad-pro-11-inch-4th-generation',
+  't-ipad-ipad-pro-11-inch-m4': 'ipad-pro-11-inch-m4',
+  't-ipad-ipad-pro-129-inch-3rd-generation': 'ipad-pro-129-inch-3rd-generation',
+  't-ipad-ipad-pro-129-inch-4th-generation': 'ipad-pro-129-inch-4th-generation',
+  't-ipad-ipad-pro-129-inch-5th-generation': 'ipad-pro-129-inch-5th-generation',
+  't-ipad-ipad-pro-129-inch-6th-generation': 'ipad-pro-129-inch-6th-generation',
+  't-ipad-ipad-pro-13-inch-m4': 'ipad-pro-13-inch-m4',
+  't-ipad-ipad-mini-5th-generation': 'ipad-mini-5th-generation',
+  't-ipad-ipad-mini-6th-generation': 'ipad-mini-6th-generation',
+  't-ipad-ipad-mini-7th-generation': 'ipad-mini-7th-generation',
+  'ipad-10th-generation': 'ipad-10th-generation',
+  'ipad-11th-generation': 'ipad-11th-generation',
+  'ipad-5th-generation': 'ipad-5th-generation',
+  'ipad-6th-generation': 'ipad-6th-generation',
+  'ipad-7th-generation': 'ipad-7th-generation',
+  'ipad-8th-generation': 'ipad-8th-generation',
+  'ipad-9th-generation': 'ipad-9th-generation',
+  'ipad-air-3rd-generation': 'ipad-air-3rd-generation',
+  'ipad-air-4th-generation': 'ipad-air-4th-generation',
+  'ipad-air-5th-generation': 'ipad-air-5th-generation',
+  'ipad-air-m2-11-inch': 'ipad-air-m2-11-inch',
+  'ipad-air-m2-13-inch': 'ipad-air-m2-13-inch',
+  'ipad-pro-11-inch-1st-generation': 'ipad-pro-11-inch-1st-generation',
+  'ipad-pro-11-inch-2nd-generation': 'ipad-pro-11-inch-2nd-generation',
+  'ipad-pro-11-inch-3rd-generation': 'ipad-pro-11-inch-3rd-generation',
+  'ipad-pro-11-inch-4th-generation': 'ipad-pro-11-inch-4th-generation',
+  'ipad-pro-11-inch-m4': 'ipad-pro-11-inch-m4',
+  'ipad-pro-129-inch-3rd-generation': 'ipad-pro-129-inch-3rd-generation',
+  'ipad-pro-129-inch-4th-generation': 'ipad-pro-129-inch-4th-generation',
+  'ipad-pro-129-inch-5th-generation': 'ipad-pro-129-inch-5th-generation',
+  'ipad-pro-129-inch-6th-generation': 'ipad-pro-129-inch-6th-generation',
+  'ipad-pro-13-inch-m4': 'ipad-pro-13-inch-m4',
+  'ipad-mini-5th-generation': 'ipad-mini-5th-generation',
+  'ipad-mini-6th-generation': 'ipad-mini-6th-generation',
+  'ipad-mini-7th-generation': 'ipad-mini-7th-generation',
 };
 
 export function getIpadHardwareConfig(modelSlug: string): IpadHardwareConfig | null {
@@ -724,7 +769,7 @@ export function getIpadHardwareConfig(modelSlug: string): IpadHardwareConfig | n
   }
 
   // Explicit alias match
-  const aliasKey = IPAD_MODEL_SLUG_ALIASES[normalizedSlug];
+  const aliasKey = IPAD_RUNTIME_MODEL_ALIASES[normalizedSlug];
   if (aliasKey && Object.prototype.hasOwnProperty.call(IPAD_HARDWARE_CONFIG, aliasKey)) {
     return IPAD_HARDWARE_CONFIG[aliasKey];
   }

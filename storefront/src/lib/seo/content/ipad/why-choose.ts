@@ -47,15 +47,15 @@ export function getIpadWhyChooseConfig(
           icon: Search,
           points: [
             `We confirm the exact ${config.modelName} screen path before quoting.`,
-            'Glass, touch, display, frame pressure, and screen lifting are checked together rather than assumed to be one simple issue.',
+            'Glass, touch, display, frame condition, and screen lifting are checked together rather than assumed to be one simple issue.',
           ],
         },
         {
           title: 'Scope explained before fitting',
           icon: ClipboardCheck,
           points: [
-            'We explain whether frame condition, battery pressure, or corner damage may affect the repair path.',
-            'We do not promise glass-only service before diagnosis confirms what the screen assembly needs.',
+            'We explain whether frame condition, battery condition, or corner damage may affect the repair path.',
+            'We do not assume glass-only service before diagnosis confirms what the screen assembly needs.',
           ],
         },
         {
@@ -88,7 +88,7 @@ export function getIpadWhyChooseConfig(
           title: 'Safe opening and handling',
           icon: Wrench,
           points: [
-            'Display lift, frame pressure, and existing impact damage are checked before opening the iPad.',
+            'Display lift, frame condition, and existing impact damage are checked before opening the iPad.',
             config.hasLargerFrameInspectionNote
               ? 'The larger 13-inch frame and display edges receive extra inspection before the work begins.'
               : 'We inspect the areas most likely to show swelling pressure before the work begins.',
@@ -158,7 +158,7 @@ export function getIpadWhyChooseConfig(
           points: [
             `We inspect the front-camera area, related openings, and ${biometricLabel.toLowerCase()} during diagnosis and handover testing.`,
             config.biometricType === 'face-id'
-              ? 'Face ID is tested separately and is never promised as an automatic result of camera repair.'
+              ? 'Face ID is tested separately and is never assumed as an automatic result of camera repair.'
               : 'Biometric behavior is checked separately because it is not automatically restored by a front-camera replacement.',
           ],
         },

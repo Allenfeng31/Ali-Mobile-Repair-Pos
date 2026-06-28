@@ -211,7 +211,7 @@ export function buildIpadBackCameraReplacementPocket(config: IpadHardwareConfig)
         'External lens-area damage and camera-module damage are not treated as the same thing until the iPad is inspected.',
         config.hasLidar
           ? 'LiDAR requires separate testing and is never assumed to be repaired through rear-camera replacement alone.'
-          : 'Turnaround still depends on diagnosis and part availability rather than a fixed promise.',
+          : 'Turnaround still depends on diagnosis and part availability rather than a fixed timeline.',
         config.rearCameraSystem === 'dual-wide-ultra-wide-lidar'
           ? 'Wide and Ultra Wide problems can differ, so a single repair claim is not made until the exact faulty path is confirmed.'
           : 'The exact repair scope depends on the confirmed faulty camera path rather than the visible symptom alone.',
@@ -258,9 +258,9 @@ export function buildIpadBackCameraReplacementPocket(config: IpadHardwareConfig)
           'If the blur remains after the outer area is cleaned, the fault may still be inside the camera path or related to focus behavior. We diagnose that before quoting replacement.',
       },
       {
-        question: `Will ${config.modelName} back-camera repair remove my data?`,
+        question: `Should I back up my ${config.modelName} before bringing it in?`,
         answer:
-          'Back-camera repair is not normally performed to remove data, but backing up the iPad beforehand is still recommended whenever possible.',
+          'Backing up your iPad data before any repair is always recommended whenever the device still powers on and functions well enough to do so.',
       },
       {
         question: `How is the faulty camera component identified on ${config.modelName}?`,
