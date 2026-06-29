@@ -4050,6 +4050,32 @@ input:checked+.toggle-slider:before {
   margin: 0;
 }
 
+.faq-section-compact {
+  max-width: 1180px;
+  padding: 2.5rem 1rem 3.5rem;
+}
+
+.faq-section-compact .faq-heading {
+  margin-bottom: 1.5rem;
+}
+
+.faq-section-compact .faq-accordion {
+  gap: 0.9rem;
+}
+
+.faq-section-compact .faq-item {
+  border-radius: 20px;
+}
+
+.faq-section-compact .faq-question {
+  min-height: 56px;
+  padding: 1rem 1.25rem;
+}
+
+.faq-section-compact .faq-answer {
+  padding: 0 1.25rem 1.25rem;
+}
+
 /* ─── Responsive: Silo / Repair pages ───────────── */
 @media (max-width: 767px) {
   .brand-grid {
@@ -5664,8 +5690,30 @@ input:checked+.toggle-slider:before {
   overflow-wrap: anywhere;
 }
 
+.repair-workbench-shell-compact .repair-workbench-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.repair-workbench-box-compact,
+.repair-workbench-box-compact summary {
+  min-height: 0;
+}
+
+.repair-workbench-box-compact summary {
+  min-height: 56px;
+  padding: 1.1rem 1.25rem;
+}
+
+.repair-workbench-shell-compact .repair-workbench-box-content {
+  padding: 0 1.25rem 1.25rem;
+}
+
 @media (max-width: 768px) {
   .repair-workbench-shell-tablet .repair-workbench-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .repair-workbench-shell-compact .repair-workbench-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -5700,6 +5748,26 @@ input:checked+.toggle-slider:before {
     padding: 0 1.2rem 1.2rem;
   }
 
+  .repair-workbench-box-compact summary {
+    min-height: 56px;
+    padding: 1rem 1.25rem;
+  }
+
+  .repair-workbench-shell-compact .repair-workbench-box-content {
+    padding: 0 1.25rem 1.25rem;
+  }
+
+  .faq-section-compact {
+    padding: 2.5rem 1rem 3rem;
+  }
+
+  .faq-section-compact .faq-question {
+    padding: 1rem 1.25rem;
+  }
+
+  .faq-section-compact .faq-answer {
+    padding: 0 1.25rem 1.25rem;
+  }
 }
 
 .repair-detail-icon {

@@ -58,9 +58,26 @@ import {
   type IpadDetailSection,
   type IpadEnhancedSeoPocket,
 } from '@/lib/seo/content/ipad';
+import {
+  ALI_MOBILE_SAMSUNG_TABLET_BUSINESS,
+  getAliMobileEnhancedSamsungTabletRepairType,
+  getAliMobileEnhancedSamsungTabletSeoPocket,
+  getSamsungTabletCategoryHubLinks,
+  getSamsungTabletModelHubLinks,
+  getSamsungTabletRepairLabel,
+  getSamsungTabletSameModelRepairLinks,
+  getSamsungTabletSameRepairLinks,
+  isAliMobileEnhancedSamsungTabletRepairPage,
+  type AliMobileEnhancedSamsungTabletRepairType,
+  type SamsungTabletDetailSection,
+  type SamsungTabletDiagnosticProcessSection,
+  type SamsungTabletEnhancedSeoPocket,
+  type SamsungTabletFinalCtaSection,
+} from '@/lib/seo/content/samsung-tablet';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
+import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTabletEnhancedSeoSection';
 
 export const revalidate = 86400;
 
@@ -87,12 +104,26 @@ interface SameModelRepairLink {
   slug: string;
 }
 
+interface BulletSectionContent {
+  kicker: string;
+  heading: string;
+  intro: string;
+  items: ReadonlyArray<string>;
+}
+
+interface FinalCtaSectionContent {
+  kicker: string;
+  heading: string;
+  body: string;
+  bullets: ReadonlyArray<string>;
+}
+
 function RepairDetailBulletSection({
   headingId,
   section,
 }: {
   headingId: string;
-  section: IpadDetailSection;
+  section: BulletSectionContent;
 }) {
   return (
     <section
@@ -130,15 +161,86 @@ function RepairDetailBulletSection({
   );
 }
 
+function RepairQuickAnswerSection({
+  headingId,
+  answer,
+}: {
+  headingId: string;
+  answer: string;
+}) {
+  return (
+    <section
+      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+      aria-labelledby={headingId}
+    >
+      <div className="mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12">
+        <div className="repair-workbench-heading">
+          <span>Quick Answer</span>
+          <h2 id={headingId} className="scroll-mt-32">Quick Answer</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-pretty">
+            {answer}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RepairDiagnosticProcessSection({
+  headingId,
+  section,
+}: {
+  headingId: string;
+  section: SamsungTabletDiagnosticProcessSection;
+}) {
+  return (
+    <section
+      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+      aria-labelledby={headingId}
+    >
+      <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
+        <div className="repair-workbench-heading">
+          <span>{section.kicker}</span>
+          <h2 id={headingId} className="scroll-mt-32">{section.heading}</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-pretty">
+            {section.intro}
+          </p>
+        </div>
+
+        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+          {section.steps.map((step) => (
+            <article
+              key={`${step.step}-${step.title}`}
+              className="flex h-full w-full flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 sm:p-6 lg:p-10 xl:p-12"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-sm font-black text-white">
+                {step.step}
+              </span>
+              <h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950">
+                {step.title}
+              </h3>
+              <p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">
+                {step.description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function RepairDetailFinalCta({
   headingId,
   section,
   bookRepairHref,
+  phoneNumber,
   isCentered = false,
 }: {
   headingId: string;
-  section: IpadEnhancedSeoPocket['finalCta'];
+  section: FinalCtaSectionContent;
   bookRepairHref: string;
+  phoneNumber: string;
   isCentered?: boolean;
 }) {
   return (
@@ -175,10 +277,10 @@ function RepairDetailFinalCta({
             Book Repair
           </Link>
           <a
-            href={`tel:${ALI_MOBILE_IPAD_BUSINESS.phone.replace(/\s+/g, '')}`}
+            href={`tel:${phoneNumber.replace(/\s+/g, '')}`}
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
-            Call {ALI_MOBILE_IPAD_BUSINESS.phone}
+            Call {phoneNumber}
           </a>
           <ChatNowButton
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-extrabold text-slate-800 transition-colors hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -4391,16 +4493,24 @@ export async function generateMetadata({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const enhancedSamsungTabletSeoPocket = getAliMobileEnhancedSamsungTabletSeoPocket({
+    modelSlug: resolvedParams.model,
+    repairSlug: resolvedParams['repair-type'],
+  });
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
   const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
-  const title = enhancedIpadSeoPocket
+  const title = enhancedSamsungTabletSeoPocket
+    ? enhancedSamsungTabletSeoPocket.metaTitle
+    : enhancedIpadSeoPocket
     ? enhancedIpadSeoPocket.metaTitle
     : modelCode
       ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
       : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
-  const description = enhancedIpadSeoPocket
+  const description = enhancedSamsungTabletSeoPocket
+    ? enhancedSamsungTabletSeoPocket.metaDescription
+    : enhancedIpadSeoPocket
     ? enhancedIpadSeoPocket.metaDescription
     : META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
 
@@ -4684,18 +4794,32 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   );
   const isGenuinePosIpadRepair = pageData.ipadGenuineRepairSlugs?.includes(internalRepairSlug) ?? false;
 
+  const samsungTabletEnhancedRepairType = getAliMobileEnhancedSamsungTabletRepairType(resolvedParams);
   const ipadEnhancedRepairType = getAliMobileEnhancedIpadRepairType(resolvedParams, isGenuinePosIpadRepair);
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
   const googlePixelEnhancedRepairType = getAliMobileEnhancedGooglePixelRepairType(resolvedParams);
   const oppoEnhancedRepairType = getAliMobileEnhancedOppoRepairType(resolvedParams);
-  const enhancedRepairType = ipadEnhancedRepairType ?? iphoneEnhancedRepairType ?? samsungEnhancedRepairType ?? googlePixelEnhancedRepairType ?? oppoEnhancedRepairType;
+  const enhancedRepairType =
+    samsungTabletEnhancedRepairType ??
+    ipadEnhancedRepairType ??
+    iphoneEnhancedRepairType ??
+    samsungEnhancedRepairType ??
+    googlePixelEnhancedRepairType ??
+    oppoEnhancedRepairType;
+  const isAliMobileEnhancedSamsungTabletPage = isAliMobileEnhancedSamsungTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams, isGenuinePosIpadRepair);
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
   const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
   const isAliMobileEnhancedOppoPage = isAliMobileEnhancedOppoRepairPage(resolvedParams);
-  const isAliMobileEnhancedRepairPage = isAliMobileEnhancedIpadPage || isAliMobileEnhancedIphonePage || isAliMobileEnhancedSamsungPage || isAliMobileEnhancedGooglePixelPage || isAliMobileEnhancedOppoPage;
+  const isAliMobileEnhancedRepairPage =
+    isAliMobileEnhancedSamsungTabletPage ||
+    isAliMobileEnhancedIpadPage ||
+    isAliMobileEnhancedIphonePage ||
+    isAliMobileEnhancedSamsungPage ||
+    isAliMobileEnhancedGooglePixelPage ||
+    isAliMobileEnhancedOppoPage;
   const samsungHardwareConfig = isAliMobileEnhancedSamsungPage
     ? getSamsungHardwareConfig(resolvedParams.model)
     : null;
@@ -4720,6 +4844,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairType: resolvedParams['repair-type'],
     pocket: baseSeoPocket,
   });
+  const enhancedSamsungTabletSeoPocket = getAliMobileEnhancedSamsungTabletSeoPocket({
+    modelSlug: resolvedParams.model,
+    repairSlug: resolvedParams['repair-type'],
+  });
   const enhancedIpadSeoPocket = getAliMobileEnhancedIpadSeoPocket({
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
@@ -4729,7 +4857,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
-    pocket: enhancedIpadSeoPocket ?? iphoneSeoPocket,
+    pocket: enhancedSamsungTabletSeoPocket ?? enhancedIpadSeoPocket ?? iphoneSeoPocket,
   });
   const pixelSeoPocket = getAliMobileEnhancedGooglePixelSeoPocket({
     category: resolvedParams.category,
@@ -4745,13 +4873,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairType: resolvedParams['repair-type'],
     pocket: pixelSeoPocket,
   });
-  const seoDisplayModel = enhancedIpadSeoPocket?.modelName ?? displayModel;
-  const sameModelLinks = isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
+  const seoDisplayModel =
+    enhancedSamsungTabletSeoPocket?.modelName ??
+    enhancedIpadSeoPocket?.modelName ??
+    displayModel;
+  const sameModelLinks = isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
+    ? getSamsungTabletSameModelRepairLinks(resolvedParams.model as any, samsungTabletEnhancedRepairType)
+    : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
     ? getIpadSameModelRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineRepairSlugs ?? [])
     : otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
   const isGalaxyNoteEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-note';
-  const displayCrossModelLinks = isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
+  const displayCrossModelLinks = isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
+    ? getSamsungTabletSameRepairLinks(resolvedParams.model as any, samsungTabletEnhancedRepairType)
+    : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
     ? getIpadSameRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineModelsWithRepair ?? [])
     : isGalaxyAEnhancedPage
       ? galaxyARelatedRepairLinks
@@ -4780,7 +4915,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       notFound();
     }
   }
-  const exploreRepairNetworkSectionProps = isAliMobileEnhancedIpadPage
+  const exploreRepairNetworkSectionProps = isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
+    ? {
+        sectionDescription: 'Explore related Samsung Tablet model hubs or browse repair services for other devices.',
+        modelGroupHeading: 'Related Samsung Tablet Models',
+        modelLinks: getSamsungTabletModelHubLinks(resolvedParams.model as any),
+        categoryLinks: getSamsungTabletCategoryHubLinks(),
+      }
+    : isAliMobileEnhancedIpadPage
     ? {
         sectionDescription: 'Explore related iPad model hubs or browse repair services for other devices.',
         modelGroupHeading: 'Related iPad Models',
@@ -4844,6 +4986,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   categoryLinks: categoryHubLinks,
                 }
               : null;
+  const isAliMobileEnhancedSamsungTabletExplorePage = Boolean(
+    isAliMobileEnhancedSamsungTabletPage &&
+      samsungTabletEnhancedRepairType &&
+      enhancedSamsungTabletSeoPocket
+  );
   const isAliMobileEnhancedSamsungExplorePage = Boolean(
     isAliMobileEnhancedSamsungPage &&
       samsungHardwareConfig &&
@@ -4863,6 +5010,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedOppoRepairPage(resolvedParams)
   );
   const shouldRenderExploreRepairNetworkSection =
+    Boolean(isAliMobileEnhancedSamsungTabletExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedIpadExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedIphonePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps) ||
@@ -4921,8 +5069,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   return (
     <>
       <RepairServiceSchema
-        serviceName={`${displayModel} ${finalRepairName} in Ringwood`}
-        description={enhancedIpadSeoPocket?.schemaDescription ?? `Professional ${finalRepairName} for ${displayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`}
+        serviceName={`${seoDisplayModel} ${finalRepairName} in Ringwood`}
+        description={
+          enhancedSamsungTabletSeoPocket?.schemaDescription ??
+          enhancedIpadSeoPocket?.schemaDescription ??
+          `Professional ${finalRepairName} for ${seoDisplayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`
+        }
         price={price > 0 ? String(price) : undefined}
         url={repairPageUrl}
       />
@@ -4935,17 +5087,29 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {/* Repair detail hero */}
       <main className="repair-page-shell repair-page-shell-narrow" style={{ paddingBottom: '0' }}>
-        <Breadcrumbs category={resolvedParams.category} brand={resolvedParams.brand} model={resolvedParams.model} service={resolvedParams['repair-type']} />
+        <Breadcrumbs
+          category={resolvedParams.category}
+          brand={resolvedParams.brand}
+          model={resolvedParams.model}
+          service={resolvedParams['repair-type']}
+          brandLabel={displayBrand}
+          modelLabel={seoDisplayModel}
+          serviceLabel={finalRepairName}
+        />
 
         <section className="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">
           <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
-          <h1>{displayModel} {finalRepairName} in Ringwood</h1>
-          {enhancedIpadSeoPocket?.supportLabel ? (
+          <h1>{seoDisplayModel} {finalRepairName} in Ringwood</h1>
+          {(enhancedSamsungTabletSeoPocket?.supportLabel ?? enhancedIpadSeoPocket?.supportLabel) ? (
             <p className="mx-auto mt-4 max-w-3xl text-sm font-semibold leading-6 text-slate-600">
-              {enhancedIpadSeoPocket.supportLabel}
+              {enhancedSamsungTabletSeoPocket?.supportLabel ?? enhancedIpadSeoPocket?.supportLabel}
             </p>
           ) : null}
-          <p className="repair-detail-subtitle">{enhancedIpadSeoPocket?.heroSubtitle ?? 'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}</p>
+          <p className="repair-detail-subtitle">
+            {enhancedSamsungTabletSeoPocket?.heroSubtitle ??
+              enhancedIpadSeoPocket?.heroSubtitle ??
+              'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
+          </p>
 
           <RepairPricingAndCTA
             brandName={displayBrand}
@@ -5004,6 +5168,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
+        {enhancedSamsungTabletSeoPocket && (
+          <ScrollReveal>
+            <RepairQuickAnswerSection
+              headingId="samsung-tablet-quick-answer-heading"
+              answer={enhancedSamsungTabletSeoPocket.quickAnswer}
+            />
+          </ScrollReveal>
+        )}
+
         {isAliMobileEnhancedRepairPage && enhancedRepairType && seoPocket && (seoPocket.commonProblems?.length ?? 0) > 0 && (
           <ScrollReveal>
             <CommonRepairProblemsSection
@@ -5032,7 +5205,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     id="same-model-repairs-heading"
                     className="mt-3 break-words text-[1.35rem] font-black leading-[1.15] tracking-[-0.02em] text-slate-950 sm:text-[1.5rem] md:text-[1.9rem] md:leading-tight"
                   >
-                    Other {displayModel} repairs
+                    Other {seoDisplayModel} repairs
                   </h2>
                   <p className="mt-2 max-w-[34rem] text-[1rem] font-semibold leading-6 text-slate-700 md:text-[1.05rem] md:font-medium md:text-slate-600">
                     Explore other repair paths confirmed for this model.
@@ -5090,7 +5263,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     id="cross-model-repairs-heading"
                     className="mt-3 break-words text-[1.3rem] font-black leading-[1.2] tracking-[-0.015em] text-slate-950 sm:text-[1.45rem] md:text-[1.9rem] md:leading-tight"
                   >
-                    {isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
+                    {isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
+                      ? `Same ${getSamsungTabletRepairLabel(samsungTabletEnhancedRepairType)} on other Samsung Tablet models`
+                      : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
                       ? `Same ${getIpadRepairLabel(ipadEnhancedRepairType)} on other iPad models`
                       : isGalaxyAEnhancedPage
                       ? `More Galaxy A models for ${crossModelSectionRepairName}`
@@ -5163,12 +5338,28 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
+      {enhancedSamsungTabletSeoPocket && (
+        <ScrollReveal>
+          <RepairDiagnosticProcessSection
+            headingId="samsung-tablet-diagnostic-process-heading"
+            section={enhancedSamsungTabletSeoPocket.diagnosticProcess}
+          />
+        </ScrollReveal>
+      )}
+
       {seoPocket && (
         <ScrollReveal>
           <TechnicianWorkbenchProcess
             pocket={seoPocket}
             showCommonProblems={!isAliMobileEnhancedRepairPage}
+            density={isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
           />
+        </ScrollReveal>
+      )}
+
+      {enhancedSamsungTabletSeoPocket && (
+        <ScrollReveal>
+          <SamsungTabletEnhancedSeoSection section={enhancedSamsungTabletSeoPocket.serviceSection} />
         </ScrollReveal>
       )}
 
@@ -5187,24 +5378,39 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             modelName={seoDisplayModel}
             repairType={enhancedRepairType as any}
             contentFamily={
-              isAliMobileEnhancedSamsungPage
+              isAliMobileEnhancedSamsungTabletPage
+                ? 'samsung-tablet'
+                : isAliMobileEnhancedSamsungPage
                 ? 'samsung'
                 : isAliMobileEnhancedGooglePixelPage
                   ? 'google-pixel'
                   : 'iphone'
             }
+            density={isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
           />
         </ScrollReveal>
       )}
 
       {/* ─── FAQ SECTION ──────────────────────────────── */}
       <ScrollReveal>
-        <FaqAccordion faqs={faqs} />
+        <FaqAccordion
+          faqs={faqs}
+          density={isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
+        />
       </ScrollReveal>
 
       {isAliMobileEnhancedRepairPage && (
         <ScrollReveal>
           <ReviewsSection />
+        </ScrollReveal>
+      )}
+
+      {enhancedSamsungTabletSeoPocket && (
+        <ScrollReveal>
+          <RepairDetailBulletSection
+            headingId="samsung-tablet-local-service-heading"
+            section={enhancedSamsungTabletSeoPocket.localService}
+          />
         </ScrollReveal>
       )}
 
@@ -5234,7 +5440,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             headingId="ipad-final-cta-heading"
             section={enhancedIpadSeoPocket.finalCta}
             bookRepairHref={bookRepairUrl}
+            phoneNumber={ALI_MOBILE_IPAD_BUSINESS.phone}
             isCentered={isAliMobileEnhancedIpadPage}
+          />
+        </ScrollReveal>
+      )}
+
+      {enhancedSamsungTabletSeoPocket && (
+        <ScrollReveal>
+          <RepairDetailFinalCta
+            headingId="samsung-tablet-final-cta-heading"
+            section={enhancedSamsungTabletSeoPocket.finalCta}
+            bookRepairHref={bookRepairUrl}
+            phoneNumber={ALI_MOBILE_SAMSUNG_TABLET_BUSINESS.phone}
+            isCentered
           />
         </ScrollReveal>
       )}

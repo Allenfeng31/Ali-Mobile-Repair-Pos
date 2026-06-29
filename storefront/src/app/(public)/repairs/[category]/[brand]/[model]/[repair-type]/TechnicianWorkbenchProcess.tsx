@@ -36,6 +36,7 @@ function WorkbenchBox({
   panel,
   isOpen,
   onToggle,
+  density,
   children,
 }: {
   number: string;
@@ -43,12 +44,16 @@ function WorkbenchBox({
   panel: WorkbenchPanel;
   isOpen: boolean;
   onToggle: (panel: WorkbenchPanel) => void;
+  density: 'default' | 'comfortable';
   children: React.ReactNode;
 }) {
   const contentId = useId();
 
   return (
-    <details className="repair-workbench-box" open={isOpen}>
+    <details
+      className={`repair-workbench-box ${density === 'comfortable' ? 'repair-workbench-box-compact' : ''}`}
+      open={isOpen}
+    >
       <summary
         aria-controls={contentId}
         aria-expanded={isOpen}
@@ -71,9 +76,11 @@ function WorkbenchBox({
 export default function TechnicianWorkbenchProcess({
   pocket,
   showCommonProblems = true,
+  density = 'default',
 }: {
   pocket: RepairTypeSeoPocket;
   showCommonProblems?: boolean;
+  density?: 'default' | 'comfortable';
 }) {
   const [openPanel, setOpenPanel] = useState<OpenWorkbenchPanel>(null);
   const splitIndex = Math.max(1, Math.ceil(pocket.commonProblems.length / 2));
@@ -92,7 +99,10 @@ export default function TechnicianWorkbenchProcess({
   }
 
   return (
-    <section className="repair-workbench-shell" aria-labelledby="technician-workbench-heading">
+    <section
+      className={`repair-workbench-shell ${density === 'comfortable' ? 'repair-workbench-shell-tablet repair-workbench-shell-compact' : ''}`}
+      aria-labelledby="technician-workbench-heading"
+    >
       <div className="repair-workbench-heading">
         <span>Repair clarity</span>
         <h2 id="technician-workbench-heading">Technician Workbench Process</h2>
@@ -106,6 +116,7 @@ export default function TechnicianWorkbenchProcess({
           panel="options"
           isOpen={openPanel === "options"}
           onToggle={togglePanel}
+          density={density}
         >
           {pocket.repairOptions.map((option) => (
             <article key={option.name} className="repair-workbench-mini-card">
@@ -124,6 +135,7 @@ export default function TechnicianWorkbenchProcess({
           panel="diagnostics"
           isOpen={openPanel === "diagnostics"}
           onToggle={togglePanel}
+          density={density}
         >
           {pocket.diagnosticSteps.map((step) => (
             <article key={step.step} className="repair-workbench-step-card">
@@ -144,6 +156,7 @@ export default function TechnicianWorkbenchProcess({
               panel="symptoms"
               isOpen={openPanel === "symptoms"}
               onToggle={togglePanel}
+              density={density}
             >
               {primaryProblems.map((problem) => (
                 <article key={problem.title} className="repair-workbench-mini-card">
@@ -159,6 +172,7 @@ export default function TechnicianWorkbenchProcess({
               panel="outcomes"
               isOpen={openPanel === "outcomes"}
               onToggle={togglePanel}
+              density={density}
             >
               {outcomesProblems.map((problem) => (
                 <article key={problem.title} className="repair-workbench-mini-card">

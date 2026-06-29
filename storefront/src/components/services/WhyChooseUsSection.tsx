@@ -12,6 +12,14 @@ import {
 } from '@/lib/seo/content/ipad';
 import { getSamsungWhyChooseContent, getSamsungWhyChooseSharedHighlights } from '@/lib/seo/content/samsung/why-choose';
 import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
+import {
+  getSamsungTabletModelConfigByModelName,
+} from '@/lib/seo/content/samsung-tablet/config';
+import {
+  getSamsungTabletWhyChooseConfig,
+  SAMSUNG_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS,
+} from '@/lib/seo/content/samsung-tablet/why-choose';
+import type { AliMobileEnhancedSamsungTabletRepairType } from '@/lib/seo/content/samsung-tablet';
 import { getGooglePixelWhyChooseConfig } from '@/lib/seo/content/google-pixel/why-choose';
 import type { AliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getGooglePixelHardwareConfigByModelName } from '@/lib/seo/content/google-pixel/config';
@@ -19,23 +27,31 @@ import { getGooglePixelHardwareConfigByModelName } from '@/lib/seo/content/googl
 export type WhyChooseUsRepairType =
   | AliMobileEnhancedIphoneRepairType
   | AliMobileEnhancedSamsungRepairType
+  | AliMobileEnhancedSamsungTabletRepairType
   | AliMobileEnhancedGooglePixelRepairType
   | AliMobileEnhancedIpadRepairType;
-export type WhyChooseUsContentFamily = 'iphone' | 'samsung' | 'google-pixel' | 'ipad';
+export type WhyChooseUsContentFamily = 'iphone' | 'samsung' | 'samsung-tablet' | 'google-pixel' | 'ipad';
 
 interface WhyChooseUsSectionProps {
   modelName: string;
   repairType: WhyChooseUsRepairType;
   contentFamily?: WhyChooseUsContentFamily;
+  density?: 'default' | 'comfortable';
 }
 
 export default function WhyChooseUsSection({
   modelName,
   repairType,
   contentFamily = 'iphone',
+  density = 'default',
 }: WhyChooseUsSectionProps) {
   const content = contentFamily === 'samsung'
     ? getSamsungWhyChooseContent(modelName)[repairType as AliMobileEnhancedSamsungRepairType]
+    : contentFamily === 'samsung-tablet'
+      ? getSamsungTabletWhyChooseConfig(
+          getSamsungTabletModelConfigByModelName(modelName)!,
+          repairType as AliMobileEnhancedSamsungTabletRepairType
+        )
     : contentFamily === 'ipad'
       ? getIpadWhyChooseConfig(
           getIpadHardwareConfigByModelName(modelName)!,
@@ -46,6 +62,8 @@ export default function WhyChooseUsSection({
       : getIphoneWhyChooseContent(modelName)[repairType as AliMobileEnhancedIphoneRepairType];
   const sharedHighlights = contentFamily === 'samsung'
     ? getSamsungWhyChooseSharedHighlights(modelName)
+    : contentFamily === 'samsung-tablet'
+      ? SAMSUNG_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS
     : contentFamily === 'ipad'
       ? IPAD_WHY_CHOOSE_SHARED_HIGHLIGHTS
     : contentFamily === 'google-pixel'
@@ -99,7 +117,11 @@ export default function WhyChooseUsSection({
             return (
               <article
                 key={card.title}
-                className="flex h-full w-full max-w-sm flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-5 py-4 text-left sm:px-6 sm:py-5 md:min-h-[388px] md:px-8 md:py-10 md:text-center lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px]"
+                className={`flex h-full w-full max-w-sm flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent text-left md:text-center ${
+                  density === 'comfortable'
+                    ? 'px-5 py-4 sm:px-6 sm:py-5 md:px-6 md:py-6 lg:px-10 lg:py-10 xl:px-12 xl:py-12'
+                    : 'px-5 py-4 sm:px-6 sm:py-5 md:min-h-[388px] md:px-8 md:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px]'
+                }`}
               >
                 <div className="flex flex-1 flex-col md:items-center md:text-center">
                   <button

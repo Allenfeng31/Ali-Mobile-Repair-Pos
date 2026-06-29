@@ -6,13 +6,24 @@ interface BreadcrumbsProps {
   brand: string;
   model: string;
   service?: string;
+  brandLabel?: string;
+  modelLabel?: string;
+  serviceLabel?: string;
 }
 
-export default function Breadcrumbs({ category, brand, model, service }: BreadcrumbsProps) {
+export default function Breadcrumbs({
+  category,
+  brand,
+  model,
+  service,
+  brandLabel,
+  modelLabel,
+  serviceLabel,
+}: BreadcrumbsProps) {
   const fCategory = formatDynamicParam(category);
-  const fBrand = formatDynamicParam(brand);
-  const fModel = formatDynamicParam(model);
-  const fService = service ? formatDynamicParam(service) : null;
+  const fBrand = brandLabel || formatDynamicParam(brand);
+  const fModel = modelLabel || formatDynamicParam(model);
+  const fService = service ? (serviceLabel || formatDynamicParam(service)) : null;
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
 

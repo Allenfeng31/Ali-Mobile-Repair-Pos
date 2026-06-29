@@ -1,11 +1,13 @@
 import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
 import type { AliMobileEnhancedIpadRepairType } from '@/lib/seo/content/ipad';
 import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
+import type { AliMobileEnhancedSamsungTabletRepairType } from '@/lib/seo/content/samsung-tablet';
 
 export type CommonRepairProblemsRepairType =
   | AliMobileEnhancedIphoneRepairType
   | AliMobileEnhancedSamsungRepairType
-  | AliMobileEnhancedIpadRepairType;
+  | AliMobileEnhancedIpadRepairType
+  | AliMobileEnhancedSamsungTabletRepairType;
 
 interface RepairProblem {
   title: string;
