@@ -198,8 +198,8 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
       ],
     },
     repairLimitations: {
-      kicker: 'Repair limitations',
-      heading: `What can limit ${config.modelName} front-camera repair`,
+      kicker: 'Inspection process',
+      heading: `How we confirm ${config.modelName} front-camera repair`,
       intro:
         'Front-camera replacement is confirmed only after software and nearby hardware overlap have been considered.',
       items: [

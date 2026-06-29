@@ -201,8 +201,8 @@ export function buildIpadBackCameraReplacementPocket(config: IpadHardwareConfig)
       ],
     },
     repairLimitations: {
-      kicker: 'Repair limitations',
-      heading: `What can limit ${config.modelName} back-camera repair`,
+      kicker: 'Inspection process',
+      heading: `How we confirm ${config.modelName} back-camera repair`,
       intro:
         'Rear-camera replacement is confirmed only after external damage, software overlap, and camera-system differences have been considered.',
       items: [

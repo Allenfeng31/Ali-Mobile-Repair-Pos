@@ -187,16 +187,16 @@ export function getIpadLocalSuburbReference(repairType: AliMobileEnhancedIpadRep
 
 export function getIpadSameModelRepairLinks(
   modelSlug: AliMobileEnhancedIpadModelSlug,
-  currentRepairType: AliMobileEnhancedIpadRepairType
+  currentRepairType: AliMobileEnhancedIpadRepairType,
+  genuineRepairSlugs: string[]
 ): IpadRepairDetailLink[] {
   const config = getIpadHardwareConfig(modelSlug);
   if (!config) {
     return [];
   }
 
-  return config.supportedRepairTypes
-    .filter((repairType) => repairType !== currentRepairType)
-    .sort((left, right) => IPAD_REPAIR_ORDER.indexOf(left) - IPAD_REPAIR_ORDER.indexOf(right))
+  return IPAD_REPAIR_ORDER
+    .filter((repairType) => repairType !== currentRepairType && genuineRepairSlugs.includes(repairType))
     .map((repairType) => ({
       href: buildIpadRepairDetailHref(config.modelSlug, repairType),
       label: `${config.modelName} ${getIpadRepairLabel(repairType).toLowerCase()}`,
@@ -281,6 +281,7 @@ function getSameRepairSimilarityScore(
 export function getIpadSameRepairLinks(
   modelSlug: AliMobileEnhancedIpadModelSlug,
   repairType: AliMobileEnhancedIpadRepairType,
+  genuineModelsWithRepair: string[],
   limit = 6
 ): IpadRepairDetailLink[] {
   const currentConfig = getIpadHardwareConfig(modelSlug);
@@ -290,7 +291,7 @@ export function getIpadSameRepairLinks(
 
   return IPAD_MODEL_CONFIG_LIST
     .filter((candidate) => candidate.modelSlug !== currentConfig.modelSlug)
-    .filter((candidate) => candidate.supportedRepairTypes.includes(repairType))
+    .filter((candidate) => genuineModelsWithRepair.includes(candidate.modelSlug))
     .map((candidate) => ({
       href: buildIpadRepairDetailHref(candidate.modelSlug, repairType),
       label: `${candidate.modelName} ${getIpadRepairLabel(repairType).toLowerCase()}`,

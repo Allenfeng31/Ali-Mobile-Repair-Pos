@@ -4476,6 +4476,8 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   samsungFamilyModelHubLinks: ExploreRepairLink[];
   oppoSeriesModelHubLinks: ExploreRepairLink[];
   categoryHubLinks: ExploreRepairLink[];
+  ipadGenuineRepairSlugs?: string[];
+  ipadGenuineModelsWithRepair?: string[];
 } | null> {
   if (isUnsupportedSamsungNoteRepairRoute(resolvedParams)) {
     return null;
@@ -4622,6 +4624,12 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       resolvedParams.category === 'phone' && (resolvedParams.brand === 'iphone' || isEnhancedSamsungFamilyPage || resolvedParams.brand === 'google-pixel' || isAliMobileEnhancedOppoRepairPage(resolvedParams))
         ? getEnhancedRepairCategoryHubLinks()
         : [],
+    ipadGenuineRepairSlugs: catalog.source === 'pos'
+      ? modelEntry.repairTypes.filter(r => (r.variants?.length ?? 0) > 0).map(r => r.slug)
+      : [],
+    ipadGenuineModelsWithRepair: catalog.source === 'pos'
+      ? brandEntry.models.filter(m => m.repairTypes.some(r => r.slug === internalRepairSlug && (r.variants?.length ?? 0) > 0)).map(m => m.slug)
+      : [],
   };
 }
 
@@ -4668,13 +4676,21 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
   const modelCode = details?.modelCode;
-  const ipadEnhancedRepairType = getAliMobileEnhancedIpadRepairType(resolvedParams);
+  const internalRepairSlug = resolveRepairSlugForLookup(
+    resolvedParams.category,
+    resolvedParams.brand,
+    resolvedParams.model,
+    resolvedParams['repair-type']
+  );
+  const isGenuinePosIpadRepair = pageData.ipadGenuineRepairSlugs?.includes(internalRepairSlug) ?? false;
+
+  const ipadEnhancedRepairType = getAliMobileEnhancedIpadRepairType(resolvedParams, isGenuinePosIpadRepair);
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
   const googlePixelEnhancedRepairType = getAliMobileEnhancedGooglePixelRepairType(resolvedParams);
   const oppoEnhancedRepairType = getAliMobileEnhancedOppoRepairType(resolvedParams);
   const enhancedRepairType = ipadEnhancedRepairType ?? iphoneEnhancedRepairType ?? samsungEnhancedRepairType ?? googlePixelEnhancedRepairType ?? oppoEnhancedRepairType;
-  const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams);
+  const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams, isGenuinePosIpadRepair);
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
   const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
@@ -4684,12 +4700,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     ? getSamsungHardwareConfig(resolvedParams.model)
     : null;
   const repairTypeHub = getRepairTypeHubDefinition(resolvedParams['repair-type']);
-  const internalRepairSlug = resolveRepairSlugForLookup(
-    resolvedParams.category,
-    resolvedParams.brand,
-    resolvedParams.model,
-    resolvedParams['repair-type']
-  );
+
   const isNoteBackGlass = isSamsungNoteBackGlassPublicAlias(
     resolvedParams.category,
     resolvedParams.brand,
@@ -4736,12 +4747,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   });
   const seoDisplayModel = enhancedIpadSeoPocket?.modelName ?? displayModel;
   const sameModelLinks = isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
-    ? getIpadSameModelRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType)
+    ? getIpadSameModelRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineRepairSlugs ?? [])
     : otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
   const isGalaxyNoteEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-note';
   const displayCrossModelLinks = isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
-    ? getIpadSameRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType)
+    ? getIpadSameRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineModelsWithRepair ?? [])
     : isGalaxyAEnhancedPage
       ? galaxyARelatedRepairLinks
       : isGalaxyNoteEnhancedPage

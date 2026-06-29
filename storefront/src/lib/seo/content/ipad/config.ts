@@ -5,38 +5,6 @@ import type {
   IpadHardwareConfig,
 } from './types';
 
-const FRONT_CAMERA_ONLY_REPAIRS = [
-  'front-camera-replacement',
-  'back-camera-replacement',
-] as const satisfies ReadonlyArray<AliMobileEnhancedIpadRepairType>;
-
-const BATTERY_CAMERA_REPAIRS = [
-  'battery-replacement',
-  'front-camera-replacement',
-  'back-camera-replacement',
-] as const satisfies ReadonlyArray<AliMobileEnhancedIpadRepairType>;
-
-const FULL_REPAIR_SET = [
-  'screen-replacement',
-  'battery-replacement',
-  'charging-port-replacement',
-  'front-camera-replacement',
-  'back-camera-replacement',
-] as const satisfies ReadonlyArray<AliMobileEnhancedIpadRepairType>;
-
-const AIR_REPAIR_SET = [
-  'battery-replacement',
-  'charging-port-replacement',
-  'front-camera-replacement',
-  'back-camera-replacement',
-] as const satisfies ReadonlyArray<AliMobileEnhancedIpadRepairType>;
-
-const FRONT_BACK_SCREEN_REPAIRS = [
-  'screen-replacement',
-  'front-camera-replacement',
-  'back-camera-replacement',
-] as const satisfies ReadonlyArray<AliMobileEnhancedIpadRepairType>;
-
 function createConfig(config: IpadHardwareConfig): IpadHardwareConfig {
   return config;
 }
@@ -66,7 +34,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-6th-generation': createConfig({
     modelSlug: 'ipad-6th-generation',
@@ -92,7 +59,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-7th-generation': createConfig({
     modelSlug: 'ipad-7th-generation',
@@ -118,7 +84,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-8th-generation': createConfig({
     modelSlug: 'ipad-8th-generation',
@@ -144,7 +109,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-9th-generation': createConfig({
     modelSlug: 'ipad-9th-generation',
@@ -170,7 +134,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-10th-generation': createConfig({
     modelSlug: 'ipad-10th-generation',
@@ -196,7 +159,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: BATTERY_CAMERA_REPAIRS,
   }),
   'ipad-11th-generation': createConfig({
     modelSlug: 'ipad-11th-generation',
@@ -223,7 +185,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FULL_REPAIR_SET,
   }),
   'ipad-air-3rd-generation': createConfig({
     modelSlug: 'ipad-air-3rd-generation',
@@ -249,7 +210,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: AIR_REPAIR_SET,
   }),
   'ipad-air-4th-generation': createConfig({
     modelSlug: 'ipad-air-4th-generation',
@@ -275,7 +235,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: AIR_REPAIR_SET,
   }),
   'ipad-air-5th-generation': createConfig({
     modelSlug: 'ipad-air-5th-generation',
@@ -301,7 +260,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: AIR_REPAIR_SET,
   }),
   'ipad-air-m2-11-inch': createConfig({
     modelSlug: 'ipad-air-m2-11-inch',
@@ -328,7 +286,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FULL_REPAIR_SET,
   }),
   'ipad-air-m2-13-inch': createConfig({
     modelSlug: 'ipad-air-m2-13-inch',
@@ -355,7 +312,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: true,
-    supportedRepairTypes: FULL_REPAIR_SET,
   }),
   'ipad-mini-5th-generation': createConfig({
     modelSlug: 'ipad-mini-5th-generation',
@@ -381,7 +337,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-mini-6th-generation': createConfig({
     modelSlug: 'ipad-mini-6th-generation',
@@ -407,7 +362,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: true,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-mini-7th-generation': createConfig({
     modelSlug: 'ipad-mini-7th-generation',
@@ -434,7 +388,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: true,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_BACK_SCREEN_REPAIRS,
   }),
   'ipad-pro-11-inch-1st-generation': createConfig({
     modelSlug: 'ipad-pro-11-inch-1st-generation',
@@ -461,7 +414,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-11-inch-2nd-generation': createConfig({
     modelSlug: 'ipad-pro-11-inch-2nd-generation',
@@ -488,7 +440,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-11-inch-3rd-generation': createConfig({
     modelSlug: 'ipad-pro-11-inch-3rd-generation',
@@ -515,7 +466,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-11-inch-4th-generation': createConfig({
     modelSlug: 'ipad-pro-11-inch-4th-generation',
@@ -542,7 +492,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: true,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_BACK_SCREEN_REPAIRS,
   }),
   'ipad-pro-11-inch-m4': createConfig({
     modelSlug: 'ipad-pro-11-inch-m4',
@@ -569,7 +518,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_BACK_SCREEN_REPAIRS,
   }),
   'ipad-pro-129-inch-3rd-generation': createConfig({
     modelSlug: 'ipad-pro-129-inch-3rd-generation',
@@ -596,7 +544,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-129-inch-4th-generation': createConfig({
     modelSlug: 'ipad-pro-129-inch-4th-generation',
@@ -623,7 +570,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-129-inch-5th-generation': createConfig({
     modelSlug: 'ipad-pro-129-inch-5th-generation',
@@ -650,7 +596,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-129-inch-6th-generation': createConfig({
     modelSlug: 'ipad-pro-129-inch-6th-generation',
@@ -677,7 +622,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: false,
-    supportedRepairTypes: FRONT_CAMERA_ONLY_REPAIRS,
   }),
   'ipad-pro-13-inch-m4': createConfig({
     modelSlug: 'ipad-pro-13-inch-m4',
@@ -704,7 +648,6 @@ export const IPAD_HARDWARE_CONFIG: Record<AliMobileEnhancedIpadModelSlug, IpadHa
     hasTrueToneFlash: false,
     hasProMotion: false,
     hasLargerFrameInspectionNote: true,
-    supportedRepairTypes: FRONT_BACK_SCREEN_REPAIRS,
   }),
 };
 

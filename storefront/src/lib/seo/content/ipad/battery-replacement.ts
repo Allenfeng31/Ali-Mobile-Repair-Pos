@@ -66,7 +66,7 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
         shortDescription:
           `${getIpadBatteryHandlingSentence(config)} ${config.connectorType === 'lightning' ? 'Home Button and Touch ID handling is protected throughout the repair.' : 'The top-button Touch ID path is checked before and after the repair.'}`,
         bestFor:
-          'Swollen batteries, screen lift, frame pressure, or iPads with visible impact around the edges.',
+          'Ensuring safe handling of iPads that show signs of swelling, screen lift, or visible frame impact.',
         notes:
           'Existing damage is explained clearly before the repair scope is confirmed.',
       },
@@ -112,9 +112,9 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
           'Heat during charging or use can point to battery wear, swelling condition, or another electrical issue that needs inspection.',
       },
       {
-        title: 'Screen or frame lifting',
+        title: 'Screen or frame separation',
         description:
-          'Battery swelling can push against the display or frame and should not be pressed back into place before the iPad is inspected.',
+          'If the display or frame has separated, bring the iPad in for inspection so we can confirm the cause and explain the options.',
       },
       {
         title: 'Poor standby time',
@@ -131,9 +131,9 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
       },
       {
         step: '02',
-        title: 'Inspect the frame, display, and impact history',
+        title: 'Inspect the frame, display, and overall condition',
         description:
-          'We inspect for swelling signs, screen lift, frame pressure, and existing impact that may affect safe opening or expand the repair scope.',
+          'We check the battery condition, display fit and device response before confirming the repair plan.',
       },
       {
         step: '03',
@@ -177,22 +177,22 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
           ? 'Lightning charging behavior, Home Button condition, and current Touch ID state are part of the bench checks.'
           : 'USB-C charging behavior and the top-button Touch ID path are part of the bench checks.',
         config.hasLargerFrameInspectionNote
-          ? 'The larger 13-inch frame and display edges receive extra inspection when the battery or display shows pressure signs.'
-          : 'Display lift, frame pressure, and swelling signs are checked carefully before the iPad is opened.',
+          ? 'The larger 13-inch frame and display edges receive extra inspection so we can confirm the full condition before opening.'
+          : 'We check the battery condition, display fit and device response before confirming the repair plan.',
         `The exact battery scope is only confirmed after the charging path and ${accessoryLabel.toLowerCase()} response have been checked.`,
       ],
     },
     repairLimitations: {
-      kicker: 'Repair limitations',
-      heading: `What can limit ${config.modelName} battery replacement`,
+      kicker: 'Inspection process',
+      heading: `How we confirm ${config.modelName} battery replacement`,
       intro:
         'Battery replacement is confirmed only after the wider power path has been considered.',
       items: [
         'Battery-like symptoms can also be caused by charging accessories, connector faults, software state, or another power-system issue.',
-        'Swelling can affect the display and frame, which may expand the repair scope beyond the battery alone.',
-        'Existing impact or liquid damage can affect the result and may require separate diagnosis.',
+        'If swelling has affected the display or frame, we will explain the options clearly before proceeding.',
+        'We inspect for existing impact or liquid exposure so you know the exact condition before we begin.',
         'Backing up the iPad before repair is recommended whenever the device still powers on normally.',
-        'Turnaround depends on bench diagnosis and part availability rather than a fixed timeline.',
+        'Turnaround is confirmed after bench diagnosis once the exact repair path is clear.',
       ],
     },
     localService: {

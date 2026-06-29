@@ -169,8 +169,8 @@ export function buildIpadChargingPortReplacementPocket(config: IpadHardwareConfi
       ],
     },
     repairLimitations: {
-      kicker: 'Repair limitations',
-      heading: `What can limit ${config.modelName} charging port repair`,
+      kicker: 'Inspection process',
+      heading: `How we confirm ${config.modelName} charging port repair`,
       intro:
         'Charging-port replacement is only confirmed after the full charging path has been considered.',
       items: [

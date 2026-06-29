@@ -42,10 +42,10 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
     heroSubtitle:
       `Bring your ${config.modelName} to ${ALI_MOBILE_IPAD_BUSINESS.businessName} at ${ALI_MOBILE_IPAD_BUSINESS.locationShort} for model-aware screen inspection, live pricing, and booking support.`,
     schemaDescription:
-      `Model-aware screen replacement for ${config.modelName} in Ringwood. We inspect glass damage, touch response, display output, frame pressure, and nearby camera or biometric functions before confirming the repair scope.`,
+      `Model-aware screen replacement for ${config.modelName} in Ringwood. We inspect glass damage, touch response, display output, frame condition, and nearby camera or biometric functions before confirming the repair scope.`,
     supportLabel,
     quickAnswer:
-      `${config.modelName} screen replacement starts with inspection of cracked glass, touch response, display output, frame condition, and ${cameraAreaLabel}. We do not assume glass-only replacement because the exact part and repair scope depend on diagnosis. If the screen is lifting, we also check for battery swelling or frame damage. Backing up the iPad before repair is always recommended.`,
+      `${config.modelName} screen replacement starts with inspection of cracked glass, touch response, display output, frame condition, and ${cameraAreaLabel}. We confirm the exact part and repair scope through diagnosis rather than assuming a glass-only replacement. We check the battery condition, display fit and device response before confirming the repair plan. Backing up the iPad before repair is always recommended.`,
     workbenchHeadings: {
       options: `What does the technician confirm before ${config.modelName} screen repair?`,
       diagnostics: 'How is the screen fault confirmed step by step?',
@@ -69,7 +69,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         bestFor:
           'Dropped iPads with dented corners, bent edges, lifting screen areas, or visible damage near the camera or biometric zone.',
         notes:
-          'Screen lifting can point to battery swelling or structural damage, so the iPad is assessed before repair is booked in.',
+          'We check the battery condition, display fit and device response before confirming the repair plan.',
       },
       {
         name: 'Model-specific handling notes',
@@ -122,14 +122,14 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
           'Image faults can show up as lines, unstable brightness, dark patches, or blocked colour zones after impact or distortion.',
       },
       {
-        title: 'Screen lifting',
+        title: 'Screen separation',
         description:
-          'A lifted edge can point to failed bonding, frame distortion, or battery swelling, so the underlying cause is checked before repair.',
+          'A separated edge is inspected to confirm the underlying cause so we can explain the full repair scope before work begins.',
       },
       {
-        title: 'Bent frame or damaged corners',
+        title: 'Frame and corner condition',
         description:
-          'A bent corner or twisted frame can affect how safely the iPad opens and how cleanly the replacement screen sits afterward.',
+          'We inspect the frame and corners so the replacement screen fits correctly and the repair plan covers everything you need.',
       },
       {
         title: 'Camera-area damage',
@@ -166,7 +166,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         step: '05',
         title: 'Distinguish the likely repair cause',
         description:
-          `We separate screen damage from frame issues, battery swelling, connection faults, and broader hardware damage before quoting.`,
+          `We distinguish screen damage from frame condition, connection faults, and broader hardware factors before quoting.`,
       },
       {
         step: '06',
@@ -198,14 +198,14 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
       ],
     },
     repairLimitations: {
-      kicker: 'Repair limitations',
-      heading: `What can limit ${config.modelName} screen repair`,
+      kicker: 'Inspection process',
+      heading: `How we confirm ${config.modelName} screen repair`,
       intro:
         'Screen replacement can still depend on the physical condition of the iPad around the display area.',
       items: [
-        'Bent frames, damaged corners, or existing structural distortion can affect final fit and may expand the repair scope.',
-        'Screen lifting can be linked to battery swelling, failed bonding, or frame damage rather than the screen alone.',
-        'Existing liquid damage can affect the result and may require separate diagnosis.',
+        'We check the frame, corners and overall structure so the replacement screen fits correctly.',
+        'If the screen has separated, we identify the underlying cause and explain all options before proceeding.',
+        'Any signs of liquid exposure are noted so you understand the full condition before we begin.',
         config.biometricType === 'face-id'
           ? 'Face ID requires separate testing and is never assumed through screen repair alone.'
           : `${biometricLabel} requires separate testing and is not assumed through screen repair alone.`,
@@ -218,7 +218,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
       intro:
         `${ALI_MOBILE_IPAD_BUSINESS.businessName} works from ${ALI_MOBILE_IPAD_BUSINESS.locationName} in ${ALI_MOBILE_IPAD_BUSINESS.locality}. ${getIpadLocalSuburbReference('screen-replacement')}`,
       items: [
-        `Bring the ${config.modelName} in as it is, especially if the frame is bent or the screen is lifting.`,
+        `Bring the ${config.modelName} in as it is so we can inspect the full condition on site.`,
         'If the iPad still powers on, backing up important data before the visit is recommended.',
         `Call ${ALI_MOBILE_IPAD_BUSINESS.phone} or book online if you want help checking likely part availability before travelling.`,
       ],

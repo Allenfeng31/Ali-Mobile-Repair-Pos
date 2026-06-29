@@ -56,15 +56,13 @@ interface AliMobileEnhancedIpadSeoPocketParams {
   repairSlug: string;
 }
 
-export const ENHANCED_IPAD_REPAIR_TYPES_BY_MODEL: Record<
-  AliMobileEnhancedIpadModelSlug,
-  ReadonlySet<AliMobileEnhancedIpadRepairType>
-> = Object.fromEntries(
-  Object.values(IPAD_HARDWARE_CONFIG).map((config) => [
-    config.modelSlug,
-    new Set<AliMobileEnhancedIpadRepairType>(config.supportedRepairTypes),
-  ])
-) as unknown as Record<AliMobileEnhancedIpadModelSlug, ReadonlySet<AliMobileEnhancedIpadRepairType>>;
+const APPROVED_IPAD_ENHANCED_REPAIR_TYPES = new Set<string>([
+  'screen-replacement',
+  'battery-replacement',
+  'charging-port-replacement',
+  'front-camera-replacement',
+  'back-camera-replacement'
+]);
 
 function getAliMobileEnhancedIpadModelSlug(
   params: AliMobileEnhancedIpadRouteParams
@@ -77,20 +75,24 @@ function getAliMobileEnhancedIpadModelSlug(
 }
 
 export function getAliMobileEnhancedIpadRepairType(
-  params: AliMobileEnhancedIpadRouteParams
+  params: AliMobileEnhancedIpadRouteParams,
+  isGenuinePos: boolean = false
 ): AliMobileEnhancedIpadRepairType | null {
   const modelSlug = getAliMobileEnhancedIpadModelSlug(params);
-  const repairType = slugify(params['repair-type']) as AliMobileEnhancedIpadRepairType;
+  const repairType = slugify(params['repair-type']);
 
-  if (!modelSlug) {
+  if (!modelSlug || !isGenuinePos) {
     return null;
   }
 
-  return ENHANCED_IPAD_REPAIR_TYPES_BY_MODEL[modelSlug].has(repairType) ? repairType : null;
+  return APPROVED_IPAD_ENHANCED_REPAIR_TYPES.has(repairType) ? (repairType as AliMobileEnhancedIpadRepairType) : null;
 }
 
-export function isAliMobileEnhancedIpadRepairPage(params: AliMobileEnhancedIpadRouteParams): boolean {
-  return getAliMobileEnhancedIpadRepairType(params) !== null;
+export function isAliMobileEnhancedIpadRepairPage(
+  params: AliMobileEnhancedIpadRouteParams,
+  isGenuinePos: boolean = false
+): boolean {
+  return getAliMobileEnhancedIpadRepairType(params, isGenuinePos) !== null;
 }
 
 export function getAliMobileEnhancedIpadModelName(modelSlug: string): string | null {
@@ -102,9 +104,9 @@ export function getAliMobileEnhancedIpadSeoPocket({
   repairSlug,
 }: AliMobileEnhancedIpadSeoPocketParams): IpadEnhancedSeoPocket | null {
   const config = getIpadHardwareConfig(modelSlug);
-  const normalizedRepairSlug = slugify(repairSlug) as AliMobileEnhancedIpadRepairType;
+  const normalizedRepairSlug = slugify(repairSlug);
 
-  if (!config || !config.supportedRepairTypes.includes(normalizedRepairSlug)) {
+  if (!config || !APPROVED_IPAD_ENHANCED_REPAIR_TYPES.has(normalizedRepairSlug)) {
     return null;
   }
 

@@ -77,7 +77,6 @@ export interface IpadHardwareConfig {
   hasTrueToneFlash: boolean;
   hasProMotion: boolean;
   hasLargerFrameInspectionNote: boolean;
-  supportedRepairTypes: ReadonlyArray<AliMobileEnhancedIpadRepairType>;
 }
 
 export interface IpadDetailSection {
