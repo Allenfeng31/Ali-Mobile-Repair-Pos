@@ -3980,6 +3980,11 @@ input:checked+.toggle-slider:before {
   padding: 3rem 1.5rem 4rem;
 }
 
+.faq-section-repair-detail {
+  max-width: 1180px;
+  padding-inline: 1rem;
+}
+
 .faq-heading {
   font-size: 1.6rem;
   font-weight: 800;
@@ -4053,6 +4058,17 @@ input:checked+.toggle-slider:before {
 .faq-section-compact {
   max-width: 1180px;
   padding: 2.5rem 1rem 3.5rem;
+}
+
+.faq-section-repair-detail.faq-section-compact {
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .faq-section-repair-detail,
+  .faq-section-repair-detail.faq-section-compact {
+    padding-inline: 1.5rem;
+  }
 }
 
 .faq-section-compact .faq-heading {
@@ -5727,14 +5743,10 @@ input:checked+.toggle-slider:before {
     grid-template-columns: 1fr;
   }
 
-  .repair-workbench-box,
-  .repair-workbench-box summary {
-    min-height: 142px;
-  }
-
   .repair-workbench-box summary {
     grid-template-columns: 40px minmax(0, 1fr) 40px;
     gap: 0.8rem;
+    align-items: center;
     padding: 1.2rem;
   }
 
@@ -5766,6 +5778,40 @@ input:checked+.toggle-slider:before {
   }
 
   .faq-section-compact .faq-answer {
+    padding: 0 1.25rem 1.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .repair-workbench-box,
+  .repair-workbench-box summary,
+  .repair-workbench-shell-tablet .repair-workbench-box,
+  .repair-workbench-shell-tablet .repair-workbench-box summary,
+  .repair-workbench-box-compact,
+  .repair-workbench-box-compact summary,
+  .repair-workbench-shell-tablet .repair-workbench-box-compact,
+  .repair-workbench-shell-tablet .repair-workbench-box-compact summary {
+    min-height: 0;
+  }
+
+  .repair-workbench-box summary,
+  .repair-workbench-box-compact summary,
+  .repair-workbench-shell-tablet .repair-workbench-box summary,
+  .repair-workbench-shell-tablet .repair-workbench-box-compact summary {
+    min-height: 56px;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .repair-workbench-box summary h3,
+  .repair-workbench-shell-tablet .repair-workbench-box summary h3 {
+    margin: 0;
+  }
+
+  .repair-workbench-box-content,
+  .repair-workbench-shell-compact .repair-workbench-box-content,
+  .repair-workbench-shell-tablet .repair-workbench-box-content,
+  .repair-workbench-shell-tablet.repair-workbench-shell-compact .repair-workbench-box-content {
     padding: 0 1.25rem 1.25rem;
   }
 }
@@ -5810,6 +5856,10 @@ input:checked+.toggle-slider:before {
   .repair-assist-panel,
   .repair-detail-hero {
     border-radius: 24px;
+  }
+
+  .repair-detail-hero {
+    padding: 1.25rem;
   }
 
   .repair-hero-brand-proof {

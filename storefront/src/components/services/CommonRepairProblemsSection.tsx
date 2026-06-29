@@ -90,13 +90,13 @@ export default function CommonRepairProblemsSection({
           {problems.map((problem) => (
             <article
               key={problem.title}
-              className="flex h-full min-h-[188px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] md:min-h-[198px]"
+              className="flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6"
             >
-              <div className="flex flex-1 flex-col items-start text-left md:items-center md:text-center">
-                <h3 className="w-full text-left text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950 md:mx-auto md:max-w-[18rem] md:text-center">
+              <div className="flex flex-col items-center text-center">
+                <h3 className="m-0 text-center text-balance text-[1rem] font-black leading-[1.3] tracking-[-0.015em] text-slate-950 md:mx-auto md:max-w-[18rem]">
                   {problem.title}
                 </h3>
-                <p className="mt-5 w-full text-left text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:mx-auto md:max-w-[22rem] md:text-center">
+                <p className="mt-4 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:mx-auto md:max-w-[22rem]">
                   {problem.description}
                 </p>
               </div>

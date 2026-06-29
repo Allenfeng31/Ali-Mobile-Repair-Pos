@@ -8,14 +8,18 @@ interface FaqItem {
 interface FaqAccordionProps {
   faqs: FaqItem[];
   density?: 'default' | 'comfortable';
+  layout?: 'default' | 'repair-detail';
 }
 
 export default function FaqAccordion({
   faqs,
   density = 'default',
+  layout = 'default',
 }: FaqAccordionProps) {
   return (
-    <section className={`faq-section ${density === 'comfortable' ? 'faq-section-compact' : ''}`}>
+    <section
+      className={`faq-section ${density === 'comfortable' ? 'faq-section-compact' : ''} ${layout === 'repair-detail' ? 'faq-section-repair-detail' : ''}`}
+    >
       <h2 className="faq-heading">Frequently Asked Questions</h2>
       <div className="faq-accordion">
         {faqs.map((faq, index) => (

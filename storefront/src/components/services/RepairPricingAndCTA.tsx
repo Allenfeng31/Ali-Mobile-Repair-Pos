@@ -161,7 +161,7 @@ export default function RepairPricingAndCTA({
   return (
     <div className="w-full flex flex-col items-center mt-8">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
-        <div className={`grid gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
+        <div className={`grid gap-4 md:gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
           {displayVariants.map((variant) => {
             const isSelected = selectedTier === variant.quality_grade;
             
@@ -175,7 +175,7 @@ export default function RepairPricingAndCTA({
                 onClick={() => handleCardClick(variant.quality_grade)}
                 onKeyDown={(e) => handleCardKeyDown(e, variant.quality_grade)}
                 className={`
-                  relative flex flex-col p-8 rounded-2xl border 
+                  relative flex flex-col rounded-2xl border p-5 sm:p-6 md:p-8
                   cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.03]
                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                   ${isSelected 
@@ -226,7 +226,7 @@ export default function RepairPricingAndCTA({
           })}
         </div>
       ) : (
-        <div className="mb-12 mt-4 text-center max-w-md mx-auto p-10 rounded-2xl border border-slate-200 bg-slate-50/50 dark:bg-white dark:border-white shadow-sm">
+        <div className="mb-12 mt-4 text-center max-w-md mx-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm dark:bg-white dark:border-white sm:p-6 md:p-10">
           {startingPrice && (
             <div className="mb-4">
               <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Starting from</span>

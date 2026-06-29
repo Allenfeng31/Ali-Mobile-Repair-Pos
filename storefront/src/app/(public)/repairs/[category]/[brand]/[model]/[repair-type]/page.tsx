@@ -245,7 +245,7 @@ function RepairDetailFinalCta({
 }) {
   return (
     <section
-      className="repair-workbench-shell repair-workbench-shell-tablet"
+      className="repair-workbench-shell repair-workbench-shell-tablet repair-detail-final-cta"
       aria-labelledby={headingId}
     >
       <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
@@ -5086,7 +5086,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       />
 
       {/* Repair detail hero */}
-      <main className="repair-page-shell repair-page-shell-narrow" style={{ paddingBottom: '0' }}>
+      <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: '0' }}>
         <Breadcrumbs
           category={resolvedParams.category}
           brand={resolvedParams.brand}
@@ -5396,6 +5396,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <FaqAccordion
           faqs={faqs}
           density={isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
+          layout="repair-detail"
         />
       </ScrollReveal>
 
