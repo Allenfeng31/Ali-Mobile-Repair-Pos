@@ -86,6 +86,15 @@ import {
   type AliMobileEnhancedLenovoTabletRepairType,
   type LenovoTabletEnhancedSeoPocket,
 } from '@/lib/seo/content/lenovo-tablet';
+import {
+  getAliMobileEnhancedMacBookRepairType,
+  getAliMobileEnhancedMacBookSeoPocket,
+  getMacBookCategoryHubLinks,
+  getMacBookModelHubLinks,
+  getMacBookRepairLabel,
+  getMacBookSameModelRepairLinks,
+  isAliMobileEnhancedMacBookRepairPage,
+} from '@/lib/seo/content/macbook';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
@@ -135,11 +144,13 @@ function RepairDetailBulletSection({
   section,
   isTabletCenteredLayout = false,
   isLenovoTabletLayout = false,
+  isMacBookLayout = false,
 }: {
   headingId: string;
   section: BulletSectionContent;
   isTabletCenteredLayout?: boolean;
   isLenovoTabletLayout?: boolean;
+  isMacBookLayout?: boolean;
 }) {
   return (
     <section
@@ -169,6 +180,8 @@ function RepairDetailBulletSection({
               className={
                 isLenovoTabletLayout
                   ? 'flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-[50px]'
+                  : isMacBookLayout
+                  ? 'flex h-auto flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent px-5 py-5 text-center'
                   : isTabletCenteredLayout
                   ? 'flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px]'
                   : 'flex h-full min-h-[188px] flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-6 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-[50px] xl:py-[50px] md:min-h-[198px]'
@@ -178,12 +191,16 @@ function RepairDetailBulletSection({
                 className={
                   isTabletCenteredLayout || isLenovoTabletLayout
                     ? 'flex flex-col items-center text-center'
+                    : isMacBookLayout
+                    ? 'flex flex-col items-center text-center'
                     : 'flex flex-1 flex-col items-start text-left md:items-center md:text-center'
                 }
               >
                 <p
                   className={
                     isLenovoTabletLayout
+                      ? 'text-center text-pretty text-[0.95rem] font-medium leading-[1.68] text-slate-500'
+                      : isMacBookLayout
                       ? 'text-center text-pretty text-[0.95rem] font-medium leading-[1.68] text-slate-500'
                       : isTabletCenteredLayout
                       ? 'text-center text-pretty text-[0.95rem] font-medium leading-[1.68] text-slate-500'
@@ -204,16 +221,24 @@ function RepairDetailBulletSection({
 function RepairQuickAnswerSection({
   headingId,
   answer,
+  isMacBookLayout = false,
 }: {
   headingId: string;
   answer: string;
+  isMacBookLayout?: boolean;
 }) {
   return (
     <section
       className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
       aria-labelledby={headingId}
     >
-      <div className="mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12">
+      <div
+        className={
+          isMacBookLayout
+            ? 'mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12 text-center'
+            : 'mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12'
+        }
+      >
         <div className="repair-workbench-heading">
           <span>Quick Answer</span>
           <h2 id={headingId} className="scroll-mt-32">Quick Answer</h2>
@@ -231,11 +256,13 @@ function RepairDiagnosticProcessSection({
   section,
   isTabletCenteredLayout = false,
   isLenovoTabletLayout = false,
+  isMacBookLayout = false,
 }: {
   headingId: string;
   section: SamsungTabletDiagnosticProcessSection;
   isTabletCenteredLayout?: boolean;
   isLenovoTabletLayout?: boolean;
+  isMacBookLayout?: boolean;
 }) {
   return (
     <section
@@ -264,6 +291,8 @@ function RepairDiagnosticProcessSection({
               className={
                 isLenovoTabletLayout
                   ? 'flex h-auto w-full flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-[50px] text-center'
+                  : isMacBookLayout
+                  ? 'flex h-full w-full flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 text-center sm:p-6 lg:p-10 xl:p-12'
                   : isTabletCenteredLayout
                   ? 'flex h-full w-full flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 text-center sm:p-6 lg:p-10 xl:p-12'
                   : 'flex h-full w-full flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 sm:p-6 lg:p-10 xl:p-12'
@@ -274,7 +303,7 @@ function RepairDiagnosticProcessSection({
               </span>
               <h3
                 className={
-                  isTabletCenteredLayout || isLenovoTabletLayout
+                  isTabletCenteredLayout || isLenovoTabletLayout || isMacBookLayout
                     ? 'mt-5 text-center text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950'
                     : 'mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950'
                 }
@@ -283,7 +312,7 @@ function RepairDiagnosticProcessSection({
               </h3>
               <p
                 className={
-                  isTabletCenteredLayout || isLenovoTabletLayout
+                  isTabletCenteredLayout || isLenovoTabletLayout || isMacBookLayout
                     ? 'mt-4 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500'
                     : 'mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500'
                 }
@@ -316,7 +345,7 @@ function RepairDetailFinalCta({
       className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
       aria-labelledby={headingId}
     >
-      <div className={`mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12 ${isCentered ? 'items-center text-center' : ''}`}>
+      <div className={`mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-transparent p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12 ${isCentered ? 'items-center text-center' : ''}`}>
           <div className={`repair-workbench-heading ${isCentered ? 'items-center text-center' : ''}`}>
           <span>{section.kicker}</span>
           <h2 id={headingId} className="scroll-mt-32">{section.heading}</h2>
@@ -329,7 +358,7 @@ function RepairDetailFinalCta({
           {section.bullets.map((bullet) => (
             <article
               key={bullet}
-              className={`rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-4 text-sm font-semibold leading-6 text-slate-700 ${isCentered ? 'text-center' : ''}`}
+              className={`rounded-2xl border border-blue-100 bg-transparent px-5 py-5 text-center text-sm font-semibold leading-6 text-slate-700 ${isCentered ? 'text-center' : ''}`}
             >
               {bullet}
             </article>
@@ -4567,6 +4596,10 @@ export async function generateMetadata({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const enhancedMacBookSeoPocket = getAliMobileEnhancedMacBookSeoPocket({
+    modelSlug: resolvedParams.model,
+    repairSlug: resolvedParams['repair-type'],
+  });
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
@@ -4577,6 +4610,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? enhancedSamsungTabletSeoPocket.metaTitle
     : enhancedIpadSeoPocket
     ? enhancedIpadSeoPocket.metaTitle
+    : enhancedMacBookSeoPocket
+    ? enhancedMacBookSeoPocket.metaTitle
     : modelCode
       ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
       : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
@@ -4586,6 +4621,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? enhancedSamsungTabletSeoPocket.metaDescription
     : enhancedIpadSeoPocket
     ? enhancedIpadSeoPocket.metaDescription
+    : enhancedMacBookSeoPocket
+    ? enhancedMacBookSeoPocket.metaDescription
     : META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -4871,6 +4908,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const lenovoTabletEnhancedRepairType = getAliMobileEnhancedLenovoTabletRepairType(resolvedParams);
   const samsungTabletEnhancedRepairType = getAliMobileEnhancedSamsungTabletRepairType(resolvedParams);
   const ipadEnhancedRepairType = getAliMobileEnhancedIpadRepairType(resolvedParams, isGenuinePosIpadRepair);
+  const macBookEnhancedRepairType = getAliMobileEnhancedMacBookRepairType(resolvedParams);
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
   const googlePixelEnhancedRepairType = getAliMobileEnhancedGooglePixelRepairType(resolvedParams);
@@ -4886,6 +4924,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const isAliMobileEnhancedLenovoTabletPage = isAliMobileEnhancedLenovoTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungTabletPage = isAliMobileEnhancedSamsungTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams, isGenuinePosIpadRepair);
+  const isAliMobileEnhancedMacBookPage = isAliMobileEnhancedMacBookRepairPage(resolvedParams);
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
   const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
@@ -4894,6 +4933,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedLenovoTabletPage ||
     isAliMobileEnhancedSamsungTabletPage ||
     isAliMobileEnhancedIpadPage ||
+    isAliMobileEnhancedMacBookPage ||
     isAliMobileEnhancedIphonePage ||
     isAliMobileEnhancedSamsungPage ||
     isAliMobileEnhancedGooglePixelPage ||
@@ -4934,12 +4974,16 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const enhancedMacBookSeoPocket = getAliMobileEnhancedMacBookSeoPocket({
+    modelSlug: resolvedParams.model,
+    repairSlug: resolvedParams['repair-type'],
+  });
   const samsungSeoPocket = getAliMobileEnhancedSamsungSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
-    pocket: enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket ?? enhancedIpadSeoPocket ?? iphoneSeoPocket,
+    pocket: enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket ?? enhancedIpadSeoPocket ?? enhancedMacBookSeoPocket ?? iphoneSeoPocket,
   });
   const pixelSeoPocket = getAliMobileEnhancedGooglePixelSeoPocket({
     category: resolvedParams.category,
@@ -4959,6 +5003,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     enhancedLenovoTabletSeoPocket?.modelName ??
     enhancedSamsungTabletSeoPocket?.modelName ??
     enhancedIpadSeoPocket?.modelName ??
+    enhancedMacBookSeoPocket?.modelName ??
     displayModel;
   const sameModelLinks = isAliMobileEnhancedLenovoTabletPage && lenovoTabletEnhancedRepairType
     ? getLenovoTabletSameModelRepairLinks(resolvedParams.model as any, lenovoTabletEnhancedRepairType)
@@ -4966,6 +5011,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     ? getSamsungTabletSameModelRepairLinks(resolvedParams.model as any, samsungTabletEnhancedRepairType)
     : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
     ? getIpadSameModelRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineRepairSlugs ?? [])
+    : isAliMobileEnhancedMacBookPage && macBookEnhancedRepairType
+    ? getMacBookSameModelRepairLinks(resolvedParams.model as any, macBookEnhancedRepairType)
     : otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
   const isGalaxyNoteEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-note';
@@ -5028,6 +5075,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         modelGroupHeading: 'Related iPad Models',
         modelLinks: getIpadModelHubLinks(resolvedParams.model as any),
         categoryLinks: getEnhancedRepairCategoryHubLinks(),
+      }
+    : isAliMobileEnhancedMacBookPage && macBookEnhancedRepairType
+    ? {
+        sectionDescription: 'Explore related MacBook model hubs or browse repair services for other devices.',
+        modelGroupHeading: 'Related MacBook Models',
+        modelLinks: getMacBookModelHubLinks(resolvedParams.model as any),
+        categoryLinks: getMacBookCategoryHubLinks(),
       }
     : isAliMobileEnhancedIphonePage
     ? {
@@ -5108,6 +5162,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       ipadEnhancedRepairType &&
       enhancedIpadSeoPocket
   );
+  const isAliMobileEnhancedMacBookExplorePage = Boolean(
+    isAliMobileEnhancedMacBookPage &&
+      macBookEnhancedRepairType &&
+      enhancedMacBookSeoPocket
+  );
   const isAliMobileEnhancedGooglePixelExplorePage = Boolean(
     isAliMobileEnhancedGooglePixelPage &&
       googlePixelEnhancedRepairType
@@ -5119,6 +5178,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     Boolean(isAliMobileEnhancedLenovoTabletExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedSamsungTabletExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedIpadExplorePage && exploreRepairNetworkSectionProps) ||
+    Boolean(isAliMobileEnhancedMacBookExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedIphonePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedGooglePixelExplorePage && exploreRepairNetworkSectionProps) ||
@@ -5275,11 +5335,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket) && (
+        {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket || enhancedMacBookSeoPocket) && (
           <ScrollReveal>
             <RepairQuickAnswerSection
-              headingId="tablet-quick-answer-heading"
-              answer={(enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket)!.quickAnswer}
+              headingId={enhancedMacBookSeoPocket ? 'macbook-quick-answer-heading' : 'tablet-quick-answer-heading'}
+              answer={(enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket ?? enhancedMacBookSeoPocket)!.quickAnswer}
+              isMacBookLayout={Boolean(enhancedMacBookSeoPocket)}
             />
           </ScrollReveal>
         )}
@@ -5441,6 +5502,21 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
+        {enhancedMacBookSeoPocket && (
+          <ScrollReveal>
+            <RepairDiagnosticProcessSection
+              headingId="macbook-diagnostic-process-heading"
+              section={{
+                kicker: 'Diagnostic process',
+                heading: `${enhancedMacBookSeoPocket.modelName} ${getMacBookRepairLabel(enhancedMacBookSeoPocket.repairSlug)} diagnostic process`,
+                intro: enhancedMacBookSeoPocket.quickAnswer,
+                steps: enhancedMacBookSeoPocket.diagnosticSteps,
+              }}
+              isMacBookLayout
+            />
+          </ScrollReveal>
+        )}
+
         {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket) && (
           <ScrollReveal>
             <SamsungTabletEnhancedSeoSection
@@ -5452,6 +5528,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   ? 'tablet-centered'
                   : 'default'
               }
+            />
+          </ScrollReveal>
+        )}
+
+        {enhancedMacBookSeoPocket && (
+          <ScrollReveal>
+            <SamsungTabletEnhancedSeoSection
+              section={enhancedMacBookSeoPocket.serviceSection}
+              layoutMode="macbook"
             />
           </ScrollReveal>
         )}
@@ -5476,29 +5561,53 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
-        {enhancedIpadSeoPocket && (
+        {enhancedMacBookSeoPocket && (
           <ScrollReveal>
-            <RepairDetailFinalCta
-              headingId="ipad-final-cta-heading"
-              section={enhancedIpadSeoPocket.finalCta}
-              bookRepairHref={bookRepairUrl}
-              phoneNumber={ALI_MOBILE_IPAD_BUSINESS.phone}
-              isCentered={isAliMobileEnhancedIpadPage}
+            <RepairDetailBulletSection
+              headingId="macbook-local-service-heading"
+              section={enhancedMacBookSeoPocket.localService}
+              isMacBookLayout
             />
           </ScrollReveal>
         )}
 
-        {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket) && (
+        {enhancedMacBookSeoPocket && (
+          <ScrollReveal>
+            <FaqAccordion
+              faqs={faqs}
+              layout="repair-detail"
+            />
+          </ScrollReveal>
+        )}
+
+        {enhancedMacBookSeoPocket && (
+          <ScrollReveal>
+            <ServiceAreas />
+          </ScrollReveal>
+        )}
+
+        {enhancedMacBookSeoPocket &&
+          shouldRenderExploreRepairNetworkSection &&
+          exploreRepairNetworkSectionProps &&
+          (exploreRepairNetworkSectionProps.modelLinks.length > 0 ||
+            exploreRepairNetworkSectionProps.categoryLinks.length > 0) && (
+          <ScrollReveal>
+            <ExploreRepairNetworkSection
+              sectionDescription={exploreRepairNetworkSectionProps.sectionDescription}
+              modelGroupHeading={exploreRepairNetworkSectionProps.modelGroupHeading}
+              modelLinks={exploreRepairNetworkSectionProps.modelLinks}
+              categoryLinks={exploreRepairNetworkSectionProps.categoryLinks}
+            />
+          </ScrollReveal>
+        )}
+
+        {enhancedMacBookSeoPocket && (
           <ScrollReveal>
             <RepairDetailFinalCta
-              headingId="tablet-final-cta-heading"
-              section={(enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket)!.finalCta}
+              headingId="macbook-final-cta-heading"
+              section={enhancedMacBookSeoPocket.finalCta}
               bookRepairHref={bookRepairUrl}
-              phoneNumber={
-                isAliMobileEnhancedLenovoTabletPage
-                  ? ALI_MOBILE_LENOVO_TABLET_BUSINESS.phone
-                  : ALI_MOBILE_SAMSUNG_TABLET_BUSINESS.phone
-              }
+              phoneNumber="0481 058 514"
               isCentered
             />
           </ScrollReveal>
@@ -5519,7 +5628,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {seoPocket && (
+      {seoPocket && !isAliMobileEnhancedMacBookPage && (
         <ScrollReveal>
           <TechnicianWorkbenchProcess
             pocket={seoPocket}
@@ -5529,7 +5638,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && enhancedRepairType && !isAliMobileEnhancedIpadPage && (
+      {isAliMobileEnhancedRepairPage && enhancedRepairType && !isAliMobileEnhancedIpadPage && !isAliMobileEnhancedMacBookPage && (
         <ScrollReveal>
           <WhyChooseUsSection
             modelName={seoDisplayModel}
@@ -5551,27 +5660,30 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       )}
 
       {/* ─── FAQ SECTION ──────────────────────────────── */}
-      <ScrollReveal>
-        <FaqAccordion
-          faqs={faqs}
-          density={isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
-          layout="repair-detail"
-        />
-      </ScrollReveal>
+      {!isAliMobileEnhancedMacBookPage && (
+        <ScrollReveal>
+          <FaqAccordion
+            faqs={faqs}
+            density={isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
+            layout="repair-detail"
+          />
+        </ScrollReveal>
+      )}
 
-      {isAliMobileEnhancedRepairPage && (
+      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && (
         <ScrollReveal>
           <ReviewsSection />
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && (
+      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && (
         <ScrollReveal>
           <ServiceAreas />
         </ScrollReveal>
       )}
 
-      {shouldRenderExploreRepairNetworkSection &&
+      {!isAliMobileEnhancedMacBookPage &&
+        shouldRenderExploreRepairNetworkSection &&
         exploreRepairNetworkSectionProps &&
         (exploreRepairNetworkSectionProps.modelLinks.length > 0 ||
           exploreRepairNetworkSectionProps.categoryLinks.length > 0) && (
@@ -5591,6 +5703,34 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               categoryLinks={exploreRepairNetworkSectionProps.categoryLinks}
             />
           )}
+        </ScrollReveal>
+      )}
+
+      {enhancedIpadSeoPocket && (
+        <ScrollReveal>
+          <RepairDetailFinalCta
+            headingId="ipad-final-cta-heading"
+            section={enhancedIpadSeoPocket.finalCta}
+            bookRepairHref={bookRepairUrl}
+            phoneNumber={ALI_MOBILE_IPAD_BUSINESS.phone}
+            isCentered={isAliMobileEnhancedIpadPage}
+          />
+        </ScrollReveal>
+      )}
+
+      {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket) && (
+        <ScrollReveal>
+          <RepairDetailFinalCta
+            headingId="tablet-final-cta-heading"
+            section={(enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket)!.finalCta}
+            bookRepairHref={bookRepairUrl}
+            phoneNumber={
+              isAliMobileEnhancedLenovoTabletPage
+                ? ALI_MOBILE_LENOVO_TABLET_BUSINESS.phone
+                : ALI_MOBILE_SAMSUNG_TABLET_BUSINESS.phone
+            }
+            isCentered
+          />
         </ScrollReveal>
       )}
 
