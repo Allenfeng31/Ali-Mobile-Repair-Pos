@@ -46,3 +46,9 @@ The admin SEO dashboard lives at `src/app/(pos)/admin/seo/page.tsx` and must sta
 - Generated campaign HTML must render in a sandboxed iframe, not directly in the admin React DOM.
 - This screen is staging/preview only; do not publish generated routes directly from here unless a future task explicitly designs an approval flow.
 <!-- END:seo-dual-agent-rules -->
+
+<!-- BEGIN:bordered-card-spacing-rule -->
+# Bordered Content Card Spacing Rule
+
+Whenever a new bordered content card is created, its visible text must be centred and its border-to-content spacing must reuse the exact approved iPhone 15 reference-card parameters (`px-5 py-5`), unless the user explicitly requests a different design.
+<!-- END:bordered-card-spacing-rule -->
