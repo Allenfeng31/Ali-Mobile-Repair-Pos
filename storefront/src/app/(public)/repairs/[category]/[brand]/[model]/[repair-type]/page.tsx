@@ -95,6 +95,15 @@ import {
   getMacBookSameModelRepairLinks,
   isAliMobileEnhancedMacBookRepairPage,
 } from '@/lib/seo/content/macbook';
+import {
+  getAliMobileEnhancedAppleWatchRepairType,
+  getAliMobileEnhancedAppleWatchSeoPocket,
+  getAppleWatchCategoryHubLinks,
+  getAppleWatchModelHubLinks,
+  getAppleWatchRepairLabel,
+  getAppleWatchSameModelRepairLinks,
+  isAliMobileEnhancedAppleWatchRepairPage,
+} from '@/lib/seo/content/apple-watch';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
@@ -4600,6 +4609,10 @@ export async function generateMetadata({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const enhancedAppleWatchSeoPocket = getAliMobileEnhancedAppleWatchSeoPocket({
+    modelSlug: resolvedParams.model,
+    repairSlug: resolvedParams['repair-type'],
+  });
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
@@ -4612,6 +4625,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? enhancedIpadSeoPocket.metaTitle
     : enhancedMacBookSeoPocket
     ? enhancedMacBookSeoPocket.metaTitle
+    : enhancedAppleWatchSeoPocket
+    ? enhancedAppleWatchSeoPocket.metaTitle
     : modelCode
       ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
       : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
@@ -4623,6 +4638,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? enhancedIpadSeoPocket.metaDescription
     : enhancedMacBookSeoPocket
     ? enhancedMacBookSeoPocket.metaDescription
+    : enhancedAppleWatchSeoPocket
+    ? enhancedAppleWatchSeoPocket.metaDescription
     : META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -4909,6 +4926,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const samsungTabletEnhancedRepairType = getAliMobileEnhancedSamsungTabletRepairType(resolvedParams);
   const ipadEnhancedRepairType = getAliMobileEnhancedIpadRepairType(resolvedParams, isGenuinePosIpadRepair);
   const macBookEnhancedRepairType = getAliMobileEnhancedMacBookRepairType(resolvedParams);
+  const appleWatchEnhancedRepairType = getAliMobileEnhancedAppleWatchRepairType(resolvedParams);
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
   const googlePixelEnhancedRepairType = getAliMobileEnhancedGooglePixelRepairType(resolvedParams);
@@ -4917,6 +4935,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     lenovoTabletEnhancedRepairType ??
     samsungTabletEnhancedRepairType ??
     ipadEnhancedRepairType ??
+    macBookEnhancedRepairType ??
+    appleWatchEnhancedRepairType ??
     iphoneEnhancedRepairType ??
     samsungEnhancedRepairType ??
     googlePixelEnhancedRepairType ??
@@ -4925,6 +4945,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const isAliMobileEnhancedSamsungTabletPage = isAliMobileEnhancedSamsungTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams, isGenuinePosIpadRepair);
   const isAliMobileEnhancedMacBookPage = isAliMobileEnhancedMacBookRepairPage(resolvedParams);
+  const isAliMobileEnhancedAppleWatchPage = isAliMobileEnhancedAppleWatchRepairPage(resolvedParams);
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
   const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
@@ -4934,6 +4955,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedSamsungTabletPage ||
     isAliMobileEnhancedIpadPage ||
     isAliMobileEnhancedMacBookPage ||
+    isAliMobileEnhancedAppleWatchPage ||
     isAliMobileEnhancedIphonePage ||
     isAliMobileEnhancedSamsungPage ||
     isAliMobileEnhancedGooglePixelPage ||
@@ -4978,12 +5000,16 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const enhancedAppleWatchSeoPocket = getAliMobileEnhancedAppleWatchSeoPocket({
+    modelSlug: resolvedParams.model,
+    repairSlug: resolvedParams['repair-type'],
+  });
   const samsungSeoPocket = getAliMobileEnhancedSamsungSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
-    pocket: enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket ?? enhancedIpadSeoPocket ?? enhancedMacBookSeoPocket ?? iphoneSeoPocket,
+    pocket: enhancedLenovoTabletSeoPocket ?? enhancedSamsungTabletSeoPocket ?? enhancedIpadSeoPocket ?? enhancedMacBookSeoPocket ?? enhancedAppleWatchSeoPocket ?? iphoneSeoPocket,
   });
   const pixelSeoPocket = getAliMobileEnhancedGooglePixelSeoPocket({
     category: resolvedParams.category,
@@ -5004,6 +5030,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     enhancedSamsungTabletSeoPocket?.modelName ??
     enhancedIpadSeoPocket?.modelName ??
     enhancedMacBookSeoPocket?.modelName ??
+    enhancedAppleWatchSeoPocket?.modelName ??
     displayModel;
   const sameModelLinks = isAliMobileEnhancedLenovoTabletPage && lenovoTabletEnhancedRepairType
     ? getLenovoTabletSameModelRepairLinks(resolvedParams.model as any, lenovoTabletEnhancedRepairType)
@@ -5013,6 +5040,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     ? getIpadSameModelRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineRepairSlugs ?? [])
     : isAliMobileEnhancedMacBookPage && macBookEnhancedRepairType
     ? getMacBookSameModelRepairLinks(resolvedParams.model as any, macBookEnhancedRepairType)
+    : isAliMobileEnhancedAppleWatchPage && appleWatchEnhancedRepairType
+    ? getAppleWatchSameModelRepairLinks(resolvedParams.model as any, appleWatchEnhancedRepairType)
     : otherRepairLinks;
   const isGalaxyAEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-a';
   const isGalaxyNoteEnhancedPage = samsungHardwareConfig?.seriesFamily === 'galaxy-note';
@@ -5082,6 +5111,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         modelGroupHeading: 'Related MacBook Models',
         modelLinks: getMacBookModelHubLinks(resolvedParams.model as any),
         categoryLinks: getMacBookCategoryHubLinks(),
+      }
+    : isAliMobileEnhancedAppleWatchPage && appleWatchEnhancedRepairType
+    ? {
+        sectionDescription: 'Explore related Apple Watch model hubs or browse repair services for other devices.',
+        modelGroupHeading: 'Related Apple Watch Models',
+        modelLinks: getAppleWatchModelHubLinks(resolvedParams.model as any),
+        categoryLinks: getAppleWatchCategoryHubLinks(),
       }
     : isAliMobileEnhancedIphonePage
     ? {
@@ -5167,6 +5203,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       macBookEnhancedRepairType &&
       enhancedMacBookSeoPocket
   );
+  const isAliMobileEnhancedAppleWatchExplorePage = Boolean(
+    isAliMobileEnhancedAppleWatchPage &&
+      appleWatchEnhancedRepairType &&
+      enhancedAppleWatchSeoPocket
+  );
   const isAliMobileEnhancedGooglePixelExplorePage = Boolean(
     isAliMobileEnhancedGooglePixelPage &&
       googlePixelEnhancedRepairType
@@ -5179,6 +5220,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     Boolean(isAliMobileEnhancedSamsungTabletExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedIpadExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedMacBookExplorePage && exploreRepairNetworkSectionProps) ||
+    Boolean(isAliMobileEnhancedAppleWatchExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedIphonePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedSamsungExplorePage && exploreRepairNetworkSectionProps) ||
     Boolean(isAliMobileEnhancedGooglePixelExplorePage && exploreRepairNetworkSectionProps) ||
@@ -5335,6 +5377,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
+        <RepairResultsMatchingSection
+          category={resolvedParams.category}
+          brand={resolvedParams.brand}
+          model={resolvedParams.model}
+          repairType={resolvedParams['repair-type']}
+          context="detail"
+        />
+
         {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket || enhancedMacBookSeoPocket) && (
           <ScrollReveal>
             <RepairQuickAnswerSection
@@ -5412,14 +5462,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             </section>
           </ScrollReveal>
         )}
-
-        <RepairResultsMatchingSection
-          category={resolvedParams.category}
-          brand={resolvedParams.brand}
-          model={resolvedParams.model}
-          repairType={resolvedParams['repair-type']}
-          context="detail"
-        />
 
         {!isAliMobileEnhancedLenovoTabletPage && displayCrossModelLinks.length > 0 && (
           <ScrollReveal>
@@ -5517,6 +5559,21 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
+        {enhancedAppleWatchSeoPocket && (
+          <ScrollReveal>
+            <RepairDiagnosticProcessSection
+              headingId="apple-watch-diagnostic-process-heading"
+              section={{
+                kicker: 'Diagnostic process',
+                heading: `${enhancedAppleWatchSeoPocket.modelName} ${getAppleWatchRepairLabel(enhancedAppleWatchSeoPocket.repairSlug)} diagnostic process`,
+                intro: enhancedAppleWatchSeoPocket.quickAnswer,
+                steps: enhancedAppleWatchSeoPocket.diagnosticSteps,
+              }}
+              isMacBookLayout
+            />
+          </ScrollReveal>
+        )}
+
         {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket) && (
           <ScrollReveal>
             <SamsungTabletEnhancedSeoSection
@@ -5536,6 +5593,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           <ScrollReveal>
             <SamsungTabletEnhancedSeoSection
               section={enhancedMacBookSeoPocket.serviceSection}
+              layoutMode="macbook"
+            />
+          </ScrollReveal>
+        )}
+
+        {enhancedAppleWatchSeoPocket && (
+          <ScrollReveal>
+            <SamsungTabletEnhancedSeoSection
+              section={enhancedAppleWatchSeoPocket.serviceSection}
               layoutMode="macbook"
             />
           </ScrollReveal>
@@ -5571,7 +5637,26 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
+        {enhancedAppleWatchSeoPocket && (
+          <ScrollReveal>
+            <RepairDetailBulletSection
+              headingId="apple-watch-local-service-heading"
+              section={enhancedAppleWatchSeoPocket.localService}
+              isMacBookLayout
+            />
+          </ScrollReveal>
+        )}
+
         {enhancedMacBookSeoPocket && (
+          <ScrollReveal>
+            <FaqAccordion
+              faqs={faqs}
+              layout="repair-detail"
+            />
+          </ScrollReveal>
+        )}
+
+        {enhancedAppleWatchSeoPocket && (
           <ScrollReveal>
             <FaqAccordion
               faqs={faqs}
@@ -5586,7 +5671,28 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
+        {enhancedAppleWatchSeoPocket && (
+          <ScrollReveal>
+            <ServiceAreas />
+          </ScrollReveal>
+        )}
+
         {enhancedMacBookSeoPocket &&
+          shouldRenderExploreRepairNetworkSection &&
+          exploreRepairNetworkSectionProps &&
+          (exploreRepairNetworkSectionProps.modelLinks.length > 0 ||
+            exploreRepairNetworkSectionProps.categoryLinks.length > 0) && (
+          <ScrollReveal>
+            <ExploreRepairNetworkSection
+              sectionDescription={exploreRepairNetworkSectionProps.sectionDescription}
+              modelGroupHeading={exploreRepairNetworkSectionProps.modelGroupHeading}
+              modelLinks={exploreRepairNetworkSectionProps.modelLinks}
+              categoryLinks={exploreRepairNetworkSectionProps.categoryLinks}
+            />
+          </ScrollReveal>
+        )}
+
+        {enhancedAppleWatchSeoPocket &&
           shouldRenderExploreRepairNetworkSection &&
           exploreRepairNetworkSectionProps &&
           (exploreRepairNetworkSectionProps.modelLinks.length > 0 ||
@@ -5612,6 +5718,18 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             />
           </ScrollReveal>
         )}
+
+        {enhancedAppleWatchSeoPocket && (
+          <ScrollReveal>
+            <RepairDetailFinalCta
+              headingId="apple-watch-final-cta-heading"
+              section={enhancedAppleWatchSeoPocket.finalCta}
+              bookRepairHref={bookRepairUrl}
+              phoneNumber="0481 058 514"
+              isCentered
+            />
+          </ScrollReveal>
+        )}
       </main>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
@@ -5628,7 +5746,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {seoPocket && !isAliMobileEnhancedMacBookPage && (
+      {seoPocket && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
         <ScrollReveal>
           <TechnicianWorkbenchProcess
             pocket={seoPocket}
@@ -5638,7 +5756,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && enhancedRepairType && !isAliMobileEnhancedIpadPage && !isAliMobileEnhancedMacBookPage && (
+      {isAliMobileEnhancedRepairPage && enhancedRepairType && !isAliMobileEnhancedIpadPage && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
         <ScrollReveal>
           <WhyChooseUsSection
             modelName={seoDisplayModel}
@@ -5660,7 +5778,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       )}
 
       {/* ─── FAQ SECTION ──────────────────────────────── */}
-      {!isAliMobileEnhancedMacBookPage && (
+      {!isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
         <ScrollReveal>
           <FaqAccordion
             faqs={faqs}
@@ -5670,19 +5788,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && (
+      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
         <ScrollReveal>
           <ReviewsSection />
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && (
+      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
         <ScrollReveal>
           <ServiceAreas />
         </ScrollReveal>
       )}
 
       {!isAliMobileEnhancedMacBookPage &&
+        !isAliMobileEnhancedAppleWatchPage &&
         shouldRenderExploreRepairNetworkSection &&
         exploreRepairNetworkSectionProps &&
         (exploreRepairNetworkSectionProps.modelLinks.length > 0 ||
