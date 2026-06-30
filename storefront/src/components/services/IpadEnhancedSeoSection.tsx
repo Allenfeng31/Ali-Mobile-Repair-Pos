@@ -31,11 +31,10 @@ export default function IpadEnhancedSeoSection({
   return (
     <section 
       id="ipad-enhanced-seo"
-      className="repair-workbench-shell repair-workbench-shell-tablet"
+      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
       aria-label={`${modelName} ${repairName} in Ringwood`}
     >
-      <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
+      <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
           <div className="flex flex-col items-center text-center">
             <span className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
               Model-Aware iPad Repair
@@ -45,7 +44,7 @@ export default function IpadEnhancedSeoSection({
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3">
             {cards.map((card, index) => (
               <article
                 key={index}
@@ -63,7 +62,6 @@ export default function IpadEnhancedSeoSection({
             ))}
           </div>
         </div>
-      </div>
     </section>
   );
 }

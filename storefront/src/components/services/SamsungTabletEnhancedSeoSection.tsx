@@ -3,19 +3,23 @@ import type { SamsungTabletServiceSection } from '@/lib/seo/content/samsung-tabl
 
 export interface SamsungTabletEnhancedSeoSectionProps {
   section: SamsungTabletServiceSection;
+  layoutMode?: 'default' | 'tablet-centered' | 'lenovo-tablet';
 }
 
 export default function SamsungTabletEnhancedSeoSection({
   section,
+  layoutMode = 'default',
 }: SamsungTabletEnhancedSeoSectionProps) {
+  const isTabletCenteredLayout = layoutMode === 'tablet-centered' || layoutMode === 'lenovo-tablet';
+  const isLenovoTabletLayout = layoutMode === 'lenovo-tablet';
+
   return (
     <section
       id="samsung-tablet-enhanced-seo"
-      className="w-full"
+      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
       aria-label={section.heading}
     >
-      <div className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
+      <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
           <div className="flex flex-col items-center text-center">
             <span className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
               {section.eyebrow}
@@ -28,17 +32,49 @@ export default function SamsungTabletEnhancedSeoSection({
             </p>
           </div>
 
-          <div className="grid w-full grid-cols-1 gap-4 items-stretch md:grid-cols-2 xl:grid-cols-4 xl:gap-6">
+          <div
+            className={
+              isTabletCenteredLayout
+                ? 'grid w-full grid-cols-1 items-stretch gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3'
+                : 'grid w-full grid-cols-1 items-stretch gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3'
+            }
+          >
             {section.cards.map((card) => (
               <article
                 key={card.title}
-                className="flex h-full w-full flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 sm:p-6 lg:p-10 xl:p-12"
+                className={
+                  isLenovoTabletLayout
+                    ? 'flex h-auto w-full flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-[50px]'
+                    : isTabletCenteredLayout
+                    ? 'flex h-auto w-full flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 sm:p-6 lg:p-10 xl:p-12'
+                    : 'flex h-full w-full flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-5 sm:p-6 lg:p-10 xl:p-12'
+                }
               >
-                <div className="flex flex-1 flex-col items-start text-left md:items-center md:text-center">
-                  <h3 className="w-full text-left text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950 md:text-center">
+                <div
+                  className={
+                    isTabletCenteredLayout
+                      ? 'flex flex-col items-center text-center'
+                      : 'flex flex-1 flex-col items-start text-left md:items-center md:text-center'
+                  }
+                >
+                  <h3
+                    className={
+                      isTabletCenteredLayout
+                        ? 'text-center text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950'
+                        : 'w-full text-left text-balance text-[1rem] font-black leading-[1.14] tracking-[-0.015em] text-slate-950 md:text-center'
+                    }
+                  >
                     {card.title}
                   </h3>
-                  <p className="mt-5 w-full text-left text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:text-center">
+                  <p
+                    className={
+                      isLenovoTabletLayout
+                        ? 'mt-4 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500'
+                        : isTabletCenteredLayout
+                        ? 'mt-5 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500'
+                        : 'mt-5 w-full text-left text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:text-center'
+                    }
+                  >
                     {card.description}
                   </p>
                 </div>
@@ -46,8 +82,6 @@ export default function SamsungTabletEnhancedSeoSection({
             ))}
           </div>
         </div>
-      </div>
     </section>
   );
 }
-

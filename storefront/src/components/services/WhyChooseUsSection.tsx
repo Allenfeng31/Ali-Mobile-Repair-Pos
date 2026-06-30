@@ -20,6 +20,14 @@ import {
   SAMSUNG_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS,
 } from '@/lib/seo/content/samsung-tablet/why-choose';
 import type { AliMobileEnhancedSamsungTabletRepairType } from '@/lib/seo/content/samsung-tablet';
+import {
+  getLenovoTabletModelConfigByModelName,
+} from '@/lib/seo/content/lenovo-tablet/config';
+import {
+  getLenovoTabletWhyChooseConfig,
+  LENOVO_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS,
+} from '@/lib/seo/content/lenovo-tablet/why-choose';
+import type { AliMobileEnhancedLenovoTabletRepairType } from '@/lib/seo/content/lenovo-tablet';
 import { getGooglePixelWhyChooseConfig } from '@/lib/seo/content/google-pixel/why-choose';
 import type { AliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getGooglePixelHardwareConfigByModelName } from '@/lib/seo/content/google-pixel/config';
@@ -28,9 +36,16 @@ export type WhyChooseUsRepairType =
   | AliMobileEnhancedIphoneRepairType
   | AliMobileEnhancedSamsungRepairType
   | AliMobileEnhancedSamsungTabletRepairType
+  | AliMobileEnhancedLenovoTabletRepairType
   | AliMobileEnhancedGooglePixelRepairType
   | AliMobileEnhancedIpadRepairType;
-export type WhyChooseUsContentFamily = 'iphone' | 'samsung' | 'samsung-tablet' | 'google-pixel' | 'ipad';
+export type WhyChooseUsContentFamily =
+  | 'iphone'
+  | 'samsung'
+  | 'samsung-tablet'
+  | 'lenovo-tablet'
+  | 'google-pixel'
+  | 'ipad';
 
 interface WhyChooseUsSectionProps {
   modelName: string;
@@ -45,12 +60,18 @@ export default function WhyChooseUsSection({
   contentFamily = 'iphone',
   density = 'default',
 }: WhyChooseUsSectionProps) {
+  const isLenovoTabletLayout = contentFamily === 'lenovo-tablet';
   const content = contentFamily === 'samsung'
     ? getSamsungWhyChooseContent(modelName)[repairType as AliMobileEnhancedSamsungRepairType]
     : contentFamily === 'samsung-tablet'
       ? getSamsungTabletWhyChooseConfig(
           getSamsungTabletModelConfigByModelName(modelName)!,
           repairType as AliMobileEnhancedSamsungTabletRepairType
+        )
+    : contentFamily === 'lenovo-tablet'
+      ? getLenovoTabletWhyChooseConfig(
+          getLenovoTabletModelConfigByModelName(modelName)!,
+          repairType as AliMobileEnhancedLenovoTabletRepairType
         )
     : contentFamily === 'ipad'
       ? getIpadWhyChooseConfig(
@@ -64,6 +85,8 @@ export default function WhyChooseUsSection({
     ? getSamsungWhyChooseSharedHighlights(modelName)
     : contentFamily === 'samsung-tablet'
       ? SAMSUNG_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS
+    : contentFamily === 'lenovo-tablet'
+      ? LENOVO_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS
     : contentFamily === 'ipad'
       ? IPAD_WHY_CHOOSE_SHARED_HIGHLIGHTS
     : contentFamily === 'google-pixel'
@@ -113,6 +136,29 @@ export default function WhyChooseUsSection({
             const Icon = card.icon;
             const isOpen = openCardIndex === index;
             const panelId = `why-choose-panel-${repairType}-${index}`;
+
+            if (isLenovoTabletLayout) {
+              return (
+                <article
+                  key={card.title}
+                  className="flex h-auto w-full max-w-sm flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent px-[50px] py-[50px] text-center"
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <h3 className="flex items-center justify-center gap-2 text-center text-[1.02rem] font-black leading-[1.16] tracking-[-0.015em] text-slate-950">
+                      <Icon size={18} strokeWidth={2.2} aria-hidden="true" className="mt-0.5 shrink-0 text-blue-600" />
+                      {card.title}
+                    </h3>
+                    <ul className="mt-4 list-none space-y-4 pl-0 text-center text-[0.96rem] font-medium leading-[1.68] text-slate-500">
+                      {card.points.map((point) => (
+                        <li key={point} className="text-center">
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              );
+            }
 
             return (
               <article
