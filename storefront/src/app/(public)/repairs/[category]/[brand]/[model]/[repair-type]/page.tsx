@@ -245,11 +245,10 @@ function RepairDetailFinalCta({
 }) {
   return (
     <section
-      className="repair-workbench-shell repair-workbench-shell-tablet repair-detail-final-cta"
+      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
       aria-labelledby={headingId}
     >
-      <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
-        <div className={`mx-auto flex w-full max-w-5xl flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 px-6 py-8 shadow-sm shadow-blue-950/5 sm:px-8 lg:px-10 ${isCentered ? 'items-center text-center' : ''}`}>
+      <div className={`mx-auto flex w-full flex-col gap-6 rounded-[28px] border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/5 sm:p-6 lg:p-10 xl:p-12 ${isCentered ? 'items-center text-center' : ''}`}>
           <div className={`repair-workbench-heading ${isCentered ? 'items-center text-center' : ''}`}>
           <span>{section.kicker}</span>
           <h2 id={headingId} className="scroll-mt-32">{section.heading}</h2>
@@ -258,7 +257,7 @@ function RepairDetailFinalCta({
           </p>
         </div>
 
-        <div className={`grid grid-cols-1 gap-3 ${isCentered ? 'md:grid-cols-3' : 'md:grid-cols-3'}`}>
+        <div className="grid w-full grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3">
           {section.bullets.map((bullet) => (
             <article
               key={bullet}
@@ -285,7 +284,6 @@ function RepairDetailFinalCta({
           <ChatNowButton
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-extrabold text-slate-800 transition-colors hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           />
-        </div>
         </div>
       </div>
     </section>
