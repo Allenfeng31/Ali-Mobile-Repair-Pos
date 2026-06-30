@@ -145,7 +145,6 @@ export async function GET(request: Request) {
         .eq('privacy_checked', true)
         .eq('device_category', category)
         .eq('brand_slug', targetBrand)
-        .eq('model_slug', model)
         .neq('before_image_path', '')
         .neq('after_image_path', '')
         .order('featured_on_homepage', { ascending: false })
@@ -154,9 +153,14 @@ export async function GET(request: Request) {
         .order('updated_at', { ascending: false });
 
       if (context === 'detail') {
-        q = q.eq('repair_type_slug', repairType).limit(limit);
+        const exactUrl = `/repairs/${category}/${brand}/${model}/${repairType}`;
+        q = q.or(`model_slug.eq.${model},related_repair_url.eq.${exactUrl}`)
+             .eq('repair_type_slug', repairType)
+             .limit(limit);
       } else {
-        q = q.limit(Math.max(limit * 4, 8));
+        const prefixUrl = `/repairs/${category}/${brand}/${model}/`;
+        q = q.or(`model_slug.eq.${model},related_repair_url.like.${prefixUrl}%`)
+             .limit(Math.max(limit * 4, 8));
       }
 
       return q;
