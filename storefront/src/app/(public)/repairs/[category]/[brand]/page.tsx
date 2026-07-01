@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
-import { fetchRepairCatalog, fetchBrandModels } from "@/lib/api";
+import { fetchRepairCatalog, fetchBrandModels, type BrandEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
@@ -14,6 +14,7 @@ import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
 import AppleWatchModelFinder from "./AppleWatchModelFinder";
 import IPadModelFinder from "./iPadModelFinder";
+import PhoneBrandLinks from "./PhoneBrandLinks";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
@@ -21,6 +22,36 @@ export const dynamicParams = true; // Allow on-demand generation of new brand pa
 
 interface BrandPageProps {
   params: Promise<{ category: string; brand: string }>;
+}
+
+const IPHONE_MAJOR_REPAIR_LINKS = [
+  { href: "/repairs/screen-replacement", label: "Screen Replacement" },
+  { href: "/repairs/battery-replacement", label: "Battery Replacement" },
+  { href: "/repairs/charging-port-replacement", label: "Charging Port Replacement" },
+  { href: "/repairs/back-glass-replacement", label: "Back Glass Replacement" },
+];
+
+const IPHONE_REPAIR_CATEGORY_LINKS = [
+  { href: "/repairs/phone", label: "Phone Repairs" },
+  { href: "/repairs/tablet", label: "Tablet Repairs" },
+  { href: "/repairs/laptop/macbook", label: "MacBook Repairs" },
+  { href: "/repairs/watch", label: "Watch Repairs" },
+];
+
+function buildOtherPhoneBrandLinks(brands: BrandEntry[], currentBrandSlug: string) {
+  const seen = new Set<string>();
+
+  return brands
+    .filter((brand) => brand.category === "phone" && brand.slug !== currentBrandSlug)
+    .map((brand) => ({
+      href: `/repairs/phone/${safeSlugSegment(brand.slug)}`,
+      label: `${brand.brand} Repairs`,
+    }))
+    .filter((link) => {
+      if (seen.has(link.href)) return false;
+      seen.add(link.href);
+      return true;
+    });
 }
 
 function getStartingRepairPrice(
@@ -110,7 +141,10 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
 
 export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const resolvedParams = await params;
-  const { brand: brandEntry } = await fetchBrandModels(resolvedParams.category, resolvedParams.brand);
+  const catalog = await fetchRepairCatalog();
+  const brandEntry = catalog.brands.find(
+    (brand) => brand.category === resolvedParams.category && brand.slug === resolvedParams.brand
+  ) || null;
   if (!brandEntry) {
     notFound();
   }
@@ -123,6 +157,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isAppleWatchHub = categorySlug === "watch" && brandSlug === "apple";
   const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
   const isPhoneHub = categorySlug === "phone";
+  const isIPhoneHub = isPhoneHub && brandSlug === "iphone";
   const floatingJumpLabel =
     categorySlug === "phone" && brandSlug === "iphone"
       ? "Choose Your iPhone"
@@ -140,6 +175,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "Choose Your Apple Watch"
       : "Choose Your Model";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
+  const otherPhoneBrandLinks = isIPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
@@ -230,7 +266,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     : [];
 
   return (
-    <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""}`}>
+    <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""} ${isIPhoneHub ? "iphone-hub-page" : ""}`}>
       <nav className="repair-breadcrumb" aria-label="breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
@@ -774,7 +810,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         </>
       ) : isPhoneHub ? (
         <>
-          <section id="models-list" aria-label={`${brandName} models`}>
+          <section
+            id="models-list"
+            className={isIPhoneHub ? "iphone-hub-section iphone-hub-models-section" : undefined}
+            aria-labelledby={isIPhoneHub ? "iphone-models-heading" : undefined}
+            aria-label={!isIPhoneHub ? `${brandName} models` : undefined}
+          >
+            {isIPhoneHub && (
+              <div className="iphone-hub-section-header">
+                <span className="repair-kicker">Popular models</span>
+                <h2 id="iphone-models-heading">Choose your iPhone model</h2>
+                <p>
+                  Start with the exact iPhone model to view supported repair options, current pricing, and the right booking path.
+                </p>
+              </div>
+            )}
             <BrandModelSearch
               seriesGroups={seriesGroups}
               categorySlug={categorySlug}
@@ -788,39 +838,49 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             scope="brand-hub"
           />
 
-          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
-            <div className="repair-types-showcase-header">
+          <section className={isIPhoneHub ? "iphone-hub-section" : "repair-types-showcase"} aria-labelledby="brand-repair-types-heading">
+            <div className={isIPhoneHub ? "iphone-hub-section-header" : "repair-types-showcase-header"}>
               <div>
-                <span className="repair-kicker repair-kicker-muted">Common services</span>
-                <h2 id="brand-repair-types-heading">Common {brandName} Repair Paths</h2>
+                <span className="repair-kicker repair-kicker-muted">Repair services</span>
+                <h2 id="brand-repair-types-heading">{isIPhoneHub ? "Popular iPhone repair services" : `Common ${brandName} Repair Paths`}</h2>
               </div>
               <p>Choose your exact model first, then compare the repair path that best matches the fault we need to assess.</p>
             </div>
-            <div className="repair-type-card-grid">
-              <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
-                <span>01</span>
-                <strong>Screen Replacement</strong>
-                <small>Cracked glass, display faults and touch issues</small>
-              </Link>
-              <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
-                <span>02</span>
-                <strong>Battery Replacement</strong>
-                <small>Fast drain, shutdowns, or swelling</small>
-              </Link>
-              <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
-                <span>03</span>
-                <strong>Charging Port Repair</strong>
-                <small>Not charging, debris cleaning, or cable fault</small>
-              </Link>
-              <Link href="/repairs/back-glass-replacement" prefetch={false} className="repair-type-mini-card">
-                <span>04</span>
-                <strong>Back Glass & Housing</strong>
-                <small>Rear cover or complete housing replacement</small>
-              </Link>
+            <div className={isIPhoneHub ? "iphone-hub-link-grid iphone-hub-repair-link-grid" : "repair-type-card-grid"}>
+              {isIPhoneHub ? (
+                IPHONE_MAJOR_REPAIR_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} prefetch={false} className="iphone-hub-outline-link">
+                    <strong>{link.label}</strong>
+                  </Link>
+                ))
+              ) : (
+                <>
+                  <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                    <span>01</span>
+                    <strong>Screen Replacement</strong>
+                    <small>Cracked glass, display faults and touch issues</small>
+                  </Link>
+                  <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                    <span>02</span>
+                    <strong>Battery Replacement</strong>
+                    <small>Fast drain, shutdowns, or swelling</small>
+                  </Link>
+                  <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
+                    <span>03</span>
+                    <strong>Charging Port Repair</strong>
+                    <small>Not charging, debris cleaning, or cable fault</small>
+                  </Link>
+                  <Link href="/repairs/back-glass-replacement" prefetch={false} className="repair-type-mini-card">
+                    <span>04</span>
+                    <strong>Back Glass & Housing</strong>
+                    <small>Rear cover or complete housing replacement</small>
+                  </Link>
+                </>
+              )}
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="phone-diagnostic-heading">
+          <section className={`repair-assist-panel${isIPhoneHub ? " iphone-hub-section iphone-hub-panel" : ""}`} aria-labelledby="phone-diagnostic-heading">
             <div className="w-full">
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="phone-diagnostic-heading">How {brandName} diagnosis, parts and timing work</h2>
@@ -845,7 +905,30 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="phone-ringwood-heading">
+          {isIPhoneHub && otherPhoneBrandLinks.length > 0 && (
+            <section className="iphone-hub-section" aria-labelledby="other-phone-brands-heading">
+              <div className="iphone-hub-section-header">
+                <span className="repair-kicker">Explore more</span>
+                <h2 id="other-phone-brands-heading">Other phone brands</h2>
+                <p>
+                  Browse other supported phone repair hubs if you are comparing repair options across devices.
+                </p>
+              </div>
+              <PhoneBrandLinks links={otherPhoneBrandLinks} initialVisibleCount={6} />
+              <div className="iphone-hub-subsection" aria-labelledby="other-repair-categories-heading">
+                <h3 id="other-repair-categories-heading">Other repair categories</h3>
+                <div className="iphone-hub-link-grid iphone-hub-category-link-grid">
+                  {IPHONE_REPAIR_CATEGORY_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} prefetch={false} className="iphone-hub-outline-link">
+                      <strong>{link.label}</strong>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          <section className={`repair-assist-panel${isIPhoneHub ? " iphone-hub-section iphone-hub-panel iphone-hub-centered-panel" : ""}`} aria-labelledby="phone-ringwood-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="phone-ringwood-heading">{brandName} repair support at Ringwood Square</h2>
@@ -858,7 +941,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="faq-section" aria-labelledby="phone-faq-heading">
+          <section className={`faq-section${isIPhoneHub ? " iphone-hub-section iphone-hub-faq-section" : ""}`} aria-labelledby="phone-faq-heading">
+            {isIPhoneHub && <span className="repair-kicker">Common questions</span>}
             <h2 id="phone-faq-heading" className="faq-heading">{brandName} repair FAQs</h2>
             <div className="faq-accordion">
               {phoneContent?.faqs.map((faq) => (
@@ -877,7 +961,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="phone-final-cta-heading">
+          <section className={`repair-assist-panel${isIPhoneHub ? " iphone-hub-section iphone-hub-panel iphone-hub-centered-panel iphone-hub-final-cta" : ""}`} aria-labelledby="phone-final-cta-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Next step</span>
               <h2 id="phone-final-cta-heading">Choose your model to see the right repair options</h2>
