@@ -201,6 +201,39 @@
     padding: 0.85rem;
   }
 
+  .section.iphone15CompactPilot {
+    gap: 0.85rem;
+    margin-top: 1.25rem;
+    border-color: rgba(191, 219, 254, 0.68);
+    border-radius: 20px;
+    padding: 0.75rem;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .section.iphone15CompactPilot::before {
+    opacity: 0.45;
+  }
+
+  .section.iphone15CompactPilot .copy,
+  .section.iphone15CompactPilot .visual {
+    padding: 0;
+  }
+
+  .section.iphone15CompactPilot .copy h2 {
+    margin: 0.55rem 0 0.35rem;
+    font-size: 1.28rem;
+  }
+
+  .section.iphone15CompactPilot .copy p {
+    font-size: 0.86rem;
+    line-height: 1.45;
+  }
+
+  .section.iphone15CompactPilot .resultMeta {
+    margin-top: 0.75rem;
+  }
+
   .copy h2 {
     font-size: 1.85rem;
   }

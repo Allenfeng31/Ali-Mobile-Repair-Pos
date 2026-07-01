@@ -13,6 +13,7 @@ import ServiceAreas from '@/components/seo/ServiceAreas';
 import CommonRepairProblemsSection from '@/components/services/CommonRepairProblemsSection';
 import WhyChooseUsSection from '@/components/services/WhyChooseUsSection';
 import ExploreRepairNetworkSection, { type ExploreRepairLink } from '@/components/services/ExploreRepairNetworkSection';
+import SameModelRepairLinks from '@/components/services/SameModelRepairLinks';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
 import { generateFaqs } from './repairFaqs';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
@@ -4950,6 +4951,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
   const isAliMobileEnhancedGooglePixelPage = isAliMobileEnhancedGooglePixelRepairPage(resolvedParams);
   const isAliMobileEnhancedOppoPage = isAliMobileEnhancedOppoRepairPage(resolvedParams);
+  const isIphone15ScreenMobilePilot =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'iphone' &&
+    resolvedParams.model === 'iphone-15' &&
+    resolvedParams['repair-type'] === 'screen-replacement';
   const isAliMobileEnhancedRepairPage =
     isAliMobileEnhancedLenovoTabletPage ||
     isAliMobileEnhancedSamsungTabletPage ||
@@ -5383,6 +5389,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           model={resolvedParams.model}
           repairType={resolvedParams['repair-type']}
           context="detail"
+          mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
         />
 
         {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket || enhancedMacBookSeoPocket) && (
@@ -5401,13 +5408,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               modelName={seoDisplayModel}
               repairType={enhancedRepairType as any}
               problems={seoPocket.commonProblems}
+              mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
             />
           </ScrollReveal>
         )}
 
         {sameModelLinks.length > 0 && (
           <ScrollReveal>
-            <section className="w-full" aria-labelledby="same-model-repairs-heading">
+            <section className={isIphone15ScreenMobilePilot ? 'w-full max-md:py-8' : 'w-full'} aria-labelledby="same-model-repairs-heading">
               <div className="flex w-full flex-col gap-6">
                 <div className="w-full max-w-none">
                   <span className="repair-kicker repair-kicker-muted">More repair paths</span>
@@ -5421,28 +5429,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     Explore other repair paths confirmed for this model.
                   </p>
                 </div>
-                <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                  {sameModelLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="group flex min-h-[56px] w-full items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm shadow-blue-950/5 transition duration-200 ease-out touch-manipulation hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    >
-                      <span className="flex min-w-0 items-center gap-3">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600 transition group-hover:border-blue-200 group-hover:bg-white">
-                          {getRepairIcon(link.slug, 18)}
-                        </span>
-                        <span className="min-w-0 break-words leading-snug">{link.label}</span>
-                      </span>
-                      <span
-                        className="shrink-0 rounded-full border border-blue-100 bg-white px-2 py-1 text-xs text-blue-600 transition group-hover:translate-x-0.5 group-hover:border-blue-200 group-hover:bg-blue-600 group-hover:text-white"
-                        aria-hidden="true"
-                      >
-                        &rarr;
-                      </span>
-                    </Link>
-                  ))}
-                </div>
+
+                <SameModelRepairLinks
+                  links={sameModelLinks}
+                  mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
+                />
                 {samsungMidPageHubLinks.length > 0 && (
                   <div className="mt-2 text-center">
                     <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
@@ -5752,6 +5743,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             pocket={seoPocket}
             showCommonProblems={!isAliMobileEnhancedRepairPage}
             density={isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
+            mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
           />
         </ScrollReveal>
       )}
@@ -5772,7 +5764,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   ? 'google-pixel'
                   : 'iphone'
             }
-            density={isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
+            density={isIphone15ScreenMobilePilot || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedSamsungTabletPage ? 'comfortable' : 'default'}
           />
         </ScrollReveal>
       )}
@@ -5796,7 +5788,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
       {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
         <ScrollReveal>
-          <ServiceAreas />
+          <ServiceAreas mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined} />
         </ScrollReveal>
       )}
 
@@ -5813,6 +5805,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               modelGroupHeading={exploreRepairNetworkSectionProps.modelGroupHeading}
               modelLinks={exploreRepairNetworkSectionProps.modelLinks}
               categoryLinks={exploreRepairNetworkSectionProps.categoryLinks}
+              mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
             />
           ) : (
             <ExploreRepairNetworkSection
@@ -5820,6 +5813,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               modelGroupHeading={exploreRepairNetworkSectionProps.modelGroupHeading}
               modelLinks={exploreRepairNetworkSectionProps.modelLinks}
               categoryLinks={exploreRepairNetworkSectionProps.categoryLinks}
+              mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
             />
           )}
         </ScrollReveal>

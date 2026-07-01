@@ -15,6 +15,7 @@ interface BeforeAfterSliderProps {
   beforeAlt: string;
   afterAlt: string;
   priority?: boolean;
+  compactMobile?: boolean;
 }
 
 export default function BeforeAfterSlider({
@@ -24,6 +25,7 @@ export default function BeforeAfterSlider({
   beforeAlt,
   afterAlt,
   priority = false,
+  compactMobile = false,
 }: BeforeAfterSliderProps) {
   const frameConfig = getRepairResultFrameConfig(deviceCategory);
   const [position, setPosition] = useState(50);
@@ -36,7 +38,7 @@ export default function BeforeAfterSlider({
 
   return (
     <div
-      className={styles.slider}
+      className={`${styles.slider} ${compactMobile ? styles.compactMobile : ''}`}
       data-device={deviceCategory}
       style={sliderStyle}
     >

@@ -18,6 +18,7 @@ interface CommonRepairProblemsSectionProps {
   modelName: string;
   repairType: CommonRepairProblemsRepairType;
   problems: ReadonlyArray<RepairProblem>;
+  mobileVariant?: 'iphone15-compact-pilot';
 }
 
 const SECTION_COPY: Record<
@@ -65,16 +66,18 @@ export default function CommonRepairProblemsSection({
   modelName,
   repairType,
   problems,
+  mobileVariant,
 }: CommonRepairProblemsSectionProps) {
   const copy = SECTION_COPY[repairType];
   const headingId = `common-repair-problems-${repairType}`;
+  const isIphone15MobilePilot = mobileVariant === 'iphone15-compact-pilot';
 
   return (
     <section
-      className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+      className={`mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 ${isIphone15MobilePilot ? 'max-md:py-8' : ''}`}
       aria-labelledby={headingId}
     >
-      <div className="mx-auto flex w-full flex-col gap-8 lg:gap-10">
+      <div className={`mx-auto flex w-full flex-col gap-8 lg:gap-10 ${isIphone15MobilePilot ? 'max-md:gap-6' : ''}`}>
         <div className="repair-workbench-heading">
           <span>Common problems</span>
           <h2 id={headingId} className="scroll-mt-32">{copy.heading(modelName)}</h2>
@@ -84,19 +87,19 @@ export default function CommonRepairProblemsSection({
         </div>
 
         <div
-          className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3"
+          className={`grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6 xl:grid-cols-3 ${isIphone15MobilePilot ? 'max-md:gap-4' : ''}`}
           aria-label={`${modelName} common repair problems`}
         >
           {problems.map((problem) => (
             <article
               key={problem.title}
-              className="flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6"
+              className={isIphone15MobilePilot ? 'flex h-auto flex-col rounded-[24px] border-[2px] border-slate-800 bg-transparent p-5 md:rounded-[28px] md:p-6' : 'flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6'}
             >
               <div className="flex flex-col items-center text-center">
                 <h3 className="m-0 text-center text-balance text-[1rem] font-black leading-[1.3] tracking-[-0.015em] text-slate-950 md:mx-auto md:max-w-[18rem]">
                   {problem.title}
                 </h3>
-                <p className="mt-4 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:mx-auto md:max-w-[22rem]">
+                <p className={isIphone15MobilePilot ? 'mt-3 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:mx-auto md:mt-4 md:max-w-[22rem]' : 'mt-4 text-center text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500 md:mx-auto md:max-w-[22rem]'}>
                   {problem.description}
                 </p>
               </div>

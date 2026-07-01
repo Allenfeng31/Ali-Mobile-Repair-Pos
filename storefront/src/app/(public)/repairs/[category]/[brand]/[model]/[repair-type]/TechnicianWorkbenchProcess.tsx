@@ -77,12 +77,17 @@ export default function TechnicianWorkbenchProcess({
   pocket,
   showCommonProblems = true,
   density = 'default',
+  mobileVariant,
 }: {
   pocket: RepairTypeSeoPocket;
   showCommonProblems?: boolean;
   density?: 'default' | 'comfortable';
+  mobileVariant?: 'iphone15-compact-pilot';
 }) {
-  const [openPanel, setOpenPanel] = useState<OpenWorkbenchPanel>(null);
+  const isIphone15MobilePilot = mobileVariant === 'iphone15-compact-pilot';
+  const [openPanel, setOpenPanel] = useState<OpenWorkbenchPanel>(
+    isIphone15MobilePilot ? 'diagnostics' : null
+  );
   const splitIndex = Math.max(1, Math.ceil(pocket.commonProblems.length / 2));
   const primaryProblems = pocket.commonProblems.slice(0, splitIndex);
   const secondaryProblems = pocket.commonProblems.slice(splitIndex);
@@ -93,14 +98,13 @@ export default function TechnicianWorkbenchProcess({
     symptoms: "Which symptoms matter most?",
     outcomes: "What can affect the final result?",
   };
-
   function togglePanel(panel: WorkbenchPanel) {
     setOpenPanel((currentPanel) => (currentPanel === panel ? null : panel));
   }
 
   return (
     <section
-      className={`repair-workbench-shell ${density === 'comfortable' ? 'repair-workbench-shell-tablet repair-workbench-shell-compact' : ''}`}
+      className={`repair-workbench-shell ${density === 'comfortable' ? 'repair-workbench-shell-tablet repair-workbench-shell-compact' : ''} ${isIphone15MobilePilot ? 'max-md:my-8 max-md:w-[calc(100vw-2rem)]' : ''}`}
       aria-labelledby="technician-workbench-heading"
     >
       <div className="repair-workbench-heading">

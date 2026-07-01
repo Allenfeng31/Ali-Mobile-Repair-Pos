@@ -18,6 +18,7 @@ interface RepairResultsMatchingSectionProps {
   model: string;
   repairType?: string;
   context: RepairResultsMatchingContext;
+  mobileVariant?: 'iphone15-compact-pilot';
 }
 
 interface MatchingApiResponse {
@@ -120,9 +121,13 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
 
   const activeResult = results[Math.min(activeIndex, results.length - 1)];
   const deviceCategory = isDeviceCategory(activeResult.device_category) ? activeResult.device_category : 'phone';
+  const isIphone15MobilePilot = props.mobileVariant === 'iphone15-compact-pilot';
 
   return (
-    <section className={styles.section} aria-labelledby="matching-repair-results-heading">
+    <section
+      className={`${styles.section} ${isIphone15MobilePilot ? styles.iphone15CompactPilot : ''}`}
+      aria-labelledby="matching-repair-results-heading"
+    >
       <div className={styles.copy}>
         <span className={styles.kicker}>Workshop Proof</span>
         <h2 id="matching-repair-results-heading">Real Repair Results</h2>
@@ -165,6 +170,7 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
           afterSrc={getRepairResultImageSrc(activeResult, 'after')}
           beforeAlt={getRepairResultAltText(activeResult, 'before')}
           afterAlt={getRepairResultAltText(activeResult, 'after')}
+          compactMobile={isIphone15MobilePilot}
         />
       </div>
     </section>

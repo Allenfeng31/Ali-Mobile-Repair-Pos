@@ -212,6 +212,11 @@
       0 10px 24px rgba(37, 99, 235, 0.08);
   }
 
+  .slider.compactMobile[data-device='phone'] {
+    --slider-max-width: 260px;
+    --slider-mobile-max-height: 320px;
+  }
+
   .label {
     top: 0.55rem;
     padding: 0.36rem 0.54rem;
