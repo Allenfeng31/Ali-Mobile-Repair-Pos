@@ -174,20 +174,20 @@ export function groupModelsBySeries(
     else if (lower.includes('pixel')) seriesKey = 'Pixel Series';
 
     // Huawei grouping
-    else if (lower.includes('mate')) seriesKey = 'Mate Series';
-    else if (/p\d+/.test(lower) || lower.match(/\bp\s*(pro|plus|lite|smart)\b/)) seriesKey = 'P Series';
-    else if (lower.includes('nova')) seriesKey = 'Nova Series';
-    else if (lower.includes('y\d+')) seriesKey = 'Y Series';
+    else if (brand.includes('huawei') && lower.includes('mate')) seriesKey = 'Mate Series';
+    else if (brand.includes('huawei') && (/p\d+/.test(lower) || lower.match(/\bp\s*(pro|plus|lite|smart)\b/))) seriesKey = 'P Series';
+    else if (brand.includes('huawei') && lower.includes('nova')) seriesKey = 'Nova Series';
+    else if (brand.includes('huawei') && /\by\d+/.test(lower)) seriesKey = 'Y Series';
 
     // Oppo grouping
-    else if (lower.includes('find')) seriesKey = 'Find Series';
-    else if (lower.includes('reno')) seriesKey = 'Reno Series';
-    else if (/^a\d+/.test(lower) || /\ba\d+/.test(lower)) seriesKey = 'A Series';
+    else if (brand.includes('oppo') && lower.includes('find')) seriesKey = 'Find Series';
+    else if (brand.includes('oppo') && lower.includes('reno')) seriesKey = 'Reno Series';
+    else if (brand.includes('oppo') && (/^a\d+/.test(lower) || /\ba\d+/.test(lower))) seriesKey = 'A Series';
 
     // Xiaomi / Redmi / Poco
-    else if (lower.includes('redmi')) seriesKey = 'Redmi Series';
-    else if (lower.includes('poco')) seriesKey = 'Poco Series';
-    else if (lower.includes('mi ')) seriesKey = 'Mi Series';
+    else if ((brand.includes('xiaomi') || brand.includes('redmi')) && lower.includes('redmi')) seriesKey = 'Redmi Series';
+    else if ((brand.includes('xiaomi') || brand.includes('poco')) && lower.includes('poco')) seriesKey = 'Poco Series';
+    else if (brand.includes('xiaomi') && lower.includes('mi ')) seriesKey = 'Mi Series';
 
     // Fallback
     else if (brandName) {

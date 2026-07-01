@@ -17,7 +17,7 @@ const BRAND_LINKS_ID = "brand-hub-other-phone-brand-links";
 
 export default function BrandHubLinks({
   links,
-  initialVisibleCount = 6,
+  initialVisibleCount = 4,
 }: BrandHubLinksProps) {
   const [expanded, setExpanded] = useState(false);
   const hasHiddenLinks = links.length > initialVisibleCount;

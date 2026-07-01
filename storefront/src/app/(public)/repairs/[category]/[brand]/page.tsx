@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PHONE_BRAND_HUBS, getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
+import { getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -12,8 +12,6 @@ import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { type RepairResultDeviceCategory } from "@/lib/repair-results";
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
-import AppleWatchModelFinder from "./AppleWatchModelFinder";
-import IPadModelFinder from "./iPadModelFinder";
 import BrandHubLinks from "./BrandHubLinks";
 import BrandHubModelSeriesBrowser, { type BrandHubSeriesGroup } from "./BrandHubModelSeriesBrowser";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
@@ -25,22 +23,49 @@ interface BrandPageProps {
   params: Promise<{ category: string; brand: string }>;
 }
 
-const IPHONE_MAJOR_REPAIR_LINKS = [
+const BRAND_HUB_REPAIR_TYPE_LINKS = [
   { href: "/repairs/screen-replacement", label: "Screen Replacement" },
   { href: "/repairs/battery-replacement", label: "Battery Replacement" },
   { href: "/repairs/charging-port-replacement", label: "Charging Port Replacement" },
   { href: "/repairs/back-glass-replacement", label: "Back Glass Replacement" },
 ];
 
-const IPHONE_REPAIR_CATEGORY_LINKS = [
+const BRAND_HUB_REPAIR_CATEGORY_LINKS = [
   { href: "/repairs/phone", label: "Phone Repairs" },
   { href: "/repairs/tablet", label: "Tablet Repairs" },
   { href: "/repairs/laptop/macbook", label: "MacBook Repairs" },
   { href: "/repairs/watch", label: "Watch Repairs" },
 ];
 
-const APPROVED_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
+const MAJOR_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
 const SAMSUNG_SERIES_ORDER = ["s", "a", "note", "z"];
+const SAMSUNG_TABLET_SERIES_ORDER = ["tab-s", "tab-a", "tab-active", "other"];
+const LENOVO_TABLET_SERIES_ORDER = ["tab-p", "tab-m", "tab-e", "yoga", "other"];
+const IPAD_SERIES_ORDER = ["ipad", "air", "mini", "pro", "other"];
+const APPLE_WATCH_SERIES_ORDER = [
+  "series-3",
+  "series-4",
+  "series-5",
+  "series-6",
+  "se-1",
+  "series-7",
+  "series-8",
+  "series-9",
+  "series-10",
+  "se-2",
+  "ultra",
+  "ultra-2",
+  "other",
+];
+const IPAD_BASE_MODEL_SLUGS = new Set([
+  "ipad-5th-generation",
+  "ipad-6th-generation",
+  "ipad-7th-generation",
+  "ipad-8th-generation",
+  "ipad-9th-generation",
+  "ipad-10th-generation",
+  "ipad-11th-generation",
+]);
 
 const SAMSUNG_SERIES_LABELS: Record<string, string> = {
   s: "Galaxy S Series",
@@ -57,6 +82,45 @@ const OPPO_SERIES_LABELS: Record<string, string> = {
   other: "Other Oppo Models",
 };
 
+const IPAD_SERIES_LABELS: Record<string, string> = {
+  ipad: "iPad",
+  air: "iPad Air",
+  mini: "iPad mini",
+  pro: "iPad Pro",
+  other: "Other iPad Models",
+};
+
+const SAMSUNG_TABLET_SERIES_LABELS: Record<string, string> = {
+  "tab-s": "Galaxy Tab S Series",
+  "tab-a": "Galaxy Tab A Series",
+  "tab-active": "Galaxy Tab Active Series",
+  other: "Other Samsung Tablets",
+};
+
+const LENOVO_TABLET_SERIES_LABELS: Record<string, string> = {
+  "tab-p": "Lenovo Tab P Series",
+  "tab-m": "Lenovo Tab M Series",
+  "tab-e": "Lenovo Tab E Series",
+  yoga: "Lenovo Yoga Tab Series",
+  other: "Other Lenovo Tablets",
+};
+
+const APPLE_WATCH_SERIES_LABELS: Record<string, string> = {
+  "series-3": "Apple Watch Series 3",
+  "series-4": "Apple Watch Series 4",
+  "series-5": "Apple Watch Series 5",
+  "series-6": "Apple Watch Series 6",
+  "se-1": "Apple Watch SE (1st generation)",
+  "series-7": "Apple Watch Series 7",
+  "series-8": "Apple Watch Series 8",
+  "series-9": "Apple Watch Series 9",
+  "series-10": "Apple Watch Series 10",
+  "se-2": "Apple Watch SE (2nd generation)",
+  ultra: "Apple Watch Ultra",
+  "ultra-2": "Apple Watch Ultra 2",
+  other: "Other Apple Watch Models",
+};
+
 function buildOtherPhoneBrandLinks(brands: BrandEntry[], currentBrandSlug: string) {
   const seen = new Set<string>();
 
@@ -65,12 +129,65 @@ function buildOtherPhoneBrandLinks(brands: BrandEntry[], currentBrandSlug: strin
       (brand) =>
         brand.category === "phone" &&
         brand.slug !== currentBrandSlug &&
-        APPROVED_PHONE_BRAND_HUB_SLUGS.includes(brand.slug) &&
-        Object.prototype.hasOwnProperty.call(PHONE_BRAND_HUBS, brand.slug)
+        brand.models.length > 0
     )
+    .sort((a, b) => {
+      const aMajorIndex = MAJOR_PHONE_BRAND_HUB_SLUGS.indexOf(a.slug);
+      const bMajorIndex = MAJOR_PHONE_BRAND_HUB_SLUGS.indexOf(b.slug);
+
+      if (aMajorIndex !== -1 || bMajorIndex !== -1) {
+        if (aMajorIndex === -1) return 1;
+        if (bMajorIndex === -1) return -1;
+        return aMajorIndex - bMajorIndex;
+      }
+
+      return brands.indexOf(a) - brands.indexOf(b);
+    })
     .map((brand) => ({
       href: `/repairs/phone/${safeSlugSegment(brand.slug)}`,
       label: `${brand.brand} Repairs`,
+    }))
+    .filter((link) => {
+      if (seen.has(link.href)) return false;
+      seen.add(link.href);
+      return true;
+    });
+}
+
+function buildOtherTabletBrandLinks(brands: BrandEntry[], currentBrandSlug: string) {
+  const seen = new Set<string>();
+
+  return brands
+    .filter(
+      (brand) =>
+        brand.category === "tablet" &&
+        brand.slug !== currentBrandSlug &&
+        brand.models.length > 0
+    )
+    .map((brand) => ({
+      href: `/repairs/tablet/${safeSlugSegment(brand.slug)}`,
+      label: `${brand.brand} Tablet Repairs`,
+    }))
+    .filter((link) => {
+      if (seen.has(link.href)) return false;
+      seen.add(link.href);
+      return true;
+    });
+}
+
+function buildOtherWatchBrandLinks(brands: BrandEntry[], currentBrandSlug: string) {
+  const seen = new Set<string>();
+
+  return brands
+    .filter(
+      (brand) =>
+        brand.category === "watch" &&
+        brand.slug !== currentBrandSlug &&
+        brand.models.length > 0
+    )
+    .map((brand) => ({
+      href: `/repairs/watch/${safeSlugSegment(brand.slug)}`,
+      label: `${brand.brand} Watch Repairs`,
     }))
     .filter((link) => {
       if (seen.has(link.href)) return false;
@@ -100,6 +217,62 @@ function getOppoSeriesKey(model: ModelEntry) {
   return "other";
 }
 
+function getIPadSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (
+    IPAD_BASE_MODEL_SLUGS.has(slug) ||
+    (name.startsWith("ipad ") &&
+      !name.includes("ipad air") &&
+      !name.includes("ipad mini") &&
+      !name.includes("ipad pro"))
+  ) {
+    return "ipad";
+  }
+
+  if (name.includes("ipad air") || slug.includes("ipad-air")) return "air";
+  if (name.includes("ipad mini") || slug.includes("ipad-mini")) return "mini";
+  if (name.includes("ipad pro") || slug.includes("ipad-pro")) return "pro";
+  return "other";
+}
+
+function getSamsungTabletSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (name.includes("active") || slug.includes("active")) return "tab-active";
+  if (/\btab\s+s/i.test(name) || slug.startsWith("galaxy-tab-s")) return "tab-s";
+  if (/\btab\s+a/i.test(name) || slug.startsWith("galaxy-tab-a")) return "tab-a";
+  return "other";
+}
+
+function getLenovoTabletSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (/\btab\s+p/i.test(name) || slug.includes("tab-p")) return "tab-p";
+  if (/\btab\s+m/i.test(name) || slug.includes("tab-m")) return "tab-m";
+  if (/\btab\s+e/i.test(name) || slug.includes("tab-e")) return "tab-e";
+  if (name.includes("yoga") || slug.includes("yoga")) return "yoga";
+  return "other";
+}
+
+function getAppleWatchSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (name.includes("ultra 2") || slug.includes("ultra-2")) return "ultra-2";
+  if (name.includes("ultra") || slug.includes("ultra")) return "ultra";
+  if (name.includes("se") && (name.includes("2nd") || slug.includes("2nd"))) return "se-2";
+  if (name.includes("se") && (name.includes("1st") || slug.includes("1st"))) return "se-1";
+
+  const seriesMatch = name.match(/series\s+(\d+)/);
+  if (seriesMatch) return `series-${seriesMatch[1]}`;
+
+  return "other";
+}
+
 function toBrandHubSeriesModels(models: ModelEntry[]) {
   return models.map((model) => ({
     model: model.model,
@@ -108,8 +281,76 @@ function toBrandHubSeriesModels(models: ModelEntry[]) {
   }));
 }
 
-function buildBrandHubSeriesGroups(brandSlug: string, models: ModelEntry[]): BrandHubSeriesGroup[] {
-  if (brandSlug !== "samsung" && brandSlug !== "oppo") {
+function buildBrandHubSeriesGroups(categorySlug: string, brandSlug: string, models: ModelEntry[]): BrandHubSeriesGroup[] {
+  if (categorySlug === "watch" && brandSlug === "apple") {
+    const groups = new Map<string, ModelEntry[]>();
+
+    for (const model of models) {
+      const key = getAppleWatchSeriesKey(model);
+      const current = groups.get(key) ?? [];
+      current.push(model);
+      groups.set(key, current);
+    }
+
+    return APPLE_WATCH_SERIES_ORDER.flatMap((key) => {
+      const groupedModels = groups.get(key);
+      if (!groupedModels || groupedModels.length === 0) return [];
+      return [{
+        key,
+        label: APPLE_WATCH_SERIES_LABELS[key],
+        models: toBrandHubSeriesModels(groupedModels),
+      }];
+    });
+  }
+
+  if (categorySlug === "tablet" && brandSlug === "ipad") {
+    const sorted = smartSortModels(models);
+    const groups = new Map<string, ModelEntry[]>();
+
+    for (const model of sorted) {
+      const key = getIPadSeriesKey(model);
+      const current = groups.get(key) ?? [];
+      current.push(model);
+      groups.set(key, current);
+    }
+
+    return IPAD_SERIES_ORDER.flatMap((key) => {
+      const groupedModels = groups.get(key);
+      if (!groupedModels || groupedModels.length === 0) return [];
+      return [{
+        key,
+        label: IPAD_SERIES_LABELS[key],
+        models: toBrandHubSeriesModels(groupedModels),
+      }];
+    });
+  }
+
+  if (categorySlug === "tablet" && (brandSlug === "samsung" || brandSlug === "lenovo")) {
+    const sorted = smartSortModels(models);
+    const groups = new Map<string, ModelEntry[]>();
+
+    for (const model of sorted) {
+      const key = brandSlug === "samsung" ? getSamsungTabletSeriesKey(model) : getLenovoTabletSeriesKey(model);
+      const current = groups.get(key) ?? [];
+      current.push(model);
+      groups.set(key, current);
+    }
+
+    const orderedKeys = brandSlug === "samsung" ? SAMSUNG_TABLET_SERIES_ORDER : LENOVO_TABLET_SERIES_ORDER;
+    const labels = brandSlug === "samsung" ? SAMSUNG_TABLET_SERIES_LABELS : LENOVO_TABLET_SERIES_LABELS;
+
+    return orderedKeys.flatMap((key) => {
+      const groupedModels = groups.get(key);
+      if (!groupedModels || groupedModels.length === 0) return [];
+      return [{
+        key,
+        label: labels[key],
+        models: toBrandHubSeriesModels(groupedModels),
+      }];
+    });
+  }
+
+  if (categorySlug !== "phone" || (brandSlug !== "samsung" && brandSlug !== "oppo")) {
     return [];
   }
 
@@ -246,9 +487,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isMacBookHub = categorySlug === "laptop" && brandSlug === "macbook";
   const isAppleWatchHub = categorySlug === "watch" && brandSlug === "apple";
   const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
+  const isSamsungTabletHub = categorySlug === "tablet" && brandSlug === "samsung";
+  const isLenovoTabletHub = categorySlug === "tablet" && brandSlug === "lenovo";
+  const isTabletBrandHub = isIPadHub || isSamsungTabletHub || isLenovoTabletHub;
   const isPhoneHub = categorySlug === "phone";
-  const isIPhoneHub = isPhoneHub && brandSlug === "iphone";
-  const usesBrandHubDesign = isPhoneHub && APPROVED_PHONE_BRAND_HUB_SLUGS.includes(brandSlug);
+  const usesBrandHubDesign = isPhoneHub || isTabletBrandHub || isAppleWatchHub;
+  const usesFlatBrandHubModels = isPhoneHub && usesBrandHubDesign && !MAJOR_PHONE_BRAND_HUB_SLUGS.includes(brandSlug);
   const floatingJumpLabel =
     categorySlug === "phone" && brandSlug === "iphone"
       ? "Choose Your iPhone"
@@ -266,11 +510,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "Choose Your Apple Watch"
       : "Choose Your Model";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
-  const otherPhoneBrandLinks = usesBrandHubDesign ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
+  const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
+  const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
+  const otherWatchBrandLinks = isAppleWatchHub ? buildOtherWatchBrandLinks(catalog.brands, brandSlug) : [];
   const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
-  const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(brandSlug, models) : [];
+  const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
+  const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(categorySlug, brandSlug, models) : [];
   const macbookRepairPaths = [
     {
       name: "Screen and display faults",
@@ -356,9 +603,57 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           },
         ]
     : [];
+  const ipadHeroInsightCards = isIPadHub
+    ? [
+        {
+          title: "Choose exact model",
+          body: "iPad, iPad Air, iPad Pro, iPad mini",
+        },
+        {
+          title: "Exact generation required",
+          body: "Confirm the iPad family, generation, screen size or A-number before choosing the repair path.",
+        },
+        {
+          title: "Screen size or A-number",
+          body: "Use Settings, the rear casing A-number, or screen size details to match the right model.",
+        },
+      ]
+    : [];
+  const tabletHeroInsightCards = isTabletBrandHub && !isIPadHub
+    ? [
+        {
+          title: `${brandName} tablet model support`,
+          body: "Search by model name or code",
+        },
+        {
+          title: "Transparent repair paths before booking",
+          body: "Choose the exact tablet model first so the compatible repair path can be checked before booking.",
+        },
+        {
+          title: "Exact model unlocks service pricing",
+          body: "Model-specific parts, timing and quote information depend on the confirmed tablet model.",
+        },
+      ]
+    : [];
+  const appleWatchHeroInsightCards = isAppleWatchHub
+    ? [
+        {
+          title: "Choose exact model",
+          body: "Apple Watch Series, SE and Ultra",
+        },
+        {
+          title: "Exact generation required",
+          body: "Confirm the exact Apple Watch generation and case size before choosing the repair path.",
+        },
+        {
+          title: "Case size",
+          body: "Use the model selector to match sizes such as 38mm, 40mm, 41mm, 42mm, 44mm, 45mm, 46mm or 49mm.",
+        },
+      ]
+    : [];
 
   return (
-    <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""} ${usesBrandHubDesign ? "brand-hub-page" : ""}`}>
+    <main className={`repair-page-shell ${!usesBrandHubDesign ? "repair-page-shell-narrow" : ""} ${usesBrandHubDesign ? "brand-hub-page" : ""} ${isIPadHub ? "tablet-brand-hub-page" : ""} ${isAppleWatchHub ? "watch-brand-hub-page" : ""}`}>
       <nav className="repair-breadcrumb" aria-label="breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
@@ -433,7 +728,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             ))}
           </div>
         )}
-        {!isPhoneHub && !isMacBookHub && !isAppleWatchHub && !isIPadHub && (
+        {!isPhoneHub && !isMacBookHub && !isAppleWatchHub && !isTabletBrandHub && (
           <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
             <div className="repair-device-card" aria-hidden="true">
               <span className="repair-device-frame">
@@ -459,53 +754,33 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </div>
         )}
         {isAppleWatchHub && (
-          <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
-            <div className="repair-device-card" aria-hidden="true">
-              <span className="repair-device-frame">
-                <span />
-              </span>
-              <div>
-                <strong>Apple Watch</strong>
-                <small>Choose exact model</small>
-              </div>
-            </div>
-            <div>
-              <Search size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Apple Watch Series, SE and Ultra</span>
-            </div>
-            <div>
-              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Exact generation required</span>
-            </div>
-            <div>
-              <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Case size (e.g. 41mm, 45mm, 49mm)</span>
-            </div>
+          <div className="repair-hero-brand-proof" aria-label="Apple Watch model selection support">
+            {appleWatchHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
           </div>
         )}
         {isIPadHub && (
-          <div className="repair-hero-panel repair-hero-insight-panel" aria-label="Model selection support">
-            <div className="repair-device-card" aria-hidden="true">
-              <span className="repair-device-frame">
-                <span />
-              </span>
-              <div>
-                <strong>iPad</strong>
-                <small>Choose exact model</small>
-              </div>
-            </div>
-            <div>
-              <Search size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>iPad, iPad Air, iPad Pro, iPad mini</span>
-            </div>
-            <div>
-              <ShieldCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Exact generation required</span>
-            </div>
-            <div>
-              <ClipboardCheck size={20} strokeWidth={2.4} aria-hidden="true" />
-              <span>Screen size or A-number</span>
-            </div>
+          <div className="repair-hero-brand-proof" aria-label="iPad model selection support">
+            {ipadHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+        )}
+        {isTabletBrandHub && !isIPadHub && (
+          <div className="repair-hero-brand-proof" aria-label={`${brandName} tablet model selection support`}>
+            {tabletHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
           </div>
         )}
       </section>
@@ -639,11 +914,24 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         </>
       ) : isAppleWatchHub ? (
         <>
-          <AppleWatchModelFinder
-            seriesGroups={seriesGroups}
-            categorySlug={categorySlug}
-            brandSlug={brandSlug}
-          />
+          <section
+            id="models-list"
+            className="brand-hub-section brand-hub-models-section"
+            aria-labelledby="apple-watch-model-finder-heading"
+          >
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Model identification</span>
+              <h2 id="apple-watch-model-finder-heading">Find your exact Apple Watch model</h2>
+              <p>
+                Check your watch model and generation in the Watch app or device settings, or search by model code if available.
+              </p>
+            </div>
+            <BrandHubModelSeriesBrowser
+              brandSlug={brandSlug}
+              categorySlug={categorySlug}
+              seriesGroups={brandHubSeriesGroups}
+            />
+          </section>
 
           <HubRepairResultsSection
             category={categorySlug as RepairResultDeviceCategory}
@@ -651,30 +939,30 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             scope="brand-hub"
           />
 
-          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
-            <div className="repair-types-showcase-header">
+          <section className="brand-hub-section" aria-labelledby="brand-repair-types-heading">
+            <div className="brand-hub-section-header">
               <div>
-                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <span className="repair-kicker">Common services</span>
                 <h2 id="brand-repair-types-heading">Common Apple Watch Repair Paths</h2>
               </div>
               <p>Choose your Apple Watch model first, then compare the repair path that best matches the fault we need to assess.</p>
             </div>
-            <div className="repair-type-card-grid">
+            <div className="repair-signal-grid">
               {[
                 { name: "Screen and display replacement", note: "Cracked glass, display faults and touch issues need the exact model and case size before the repair path is confirmed." },
                 { name: "Battery replacement", note: "Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path." },
                 { name: "Charging or no-power assessment", note: "If the watch is not charging or not turning on, we inspect the fault first before confirming the practical repair option." }
               ].map((path, index) => (
-                <article key={path.name} className="repair-type-mini-card">
+                <article key={path.name} className="repair-signal-card">
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{path.name}</strong>
-                  <small>{path.note}</small>
+                  <h3>{path.name}</h3>
+                  <p>{path.note}</p>
                 </article>
               ))}
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="apple-watch-diagnostic-heading">
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel" aria-labelledby="apple-watch-diagnostic-heading">
             <div className="w-full">
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="apple-watch-diagnostic-heading">How Apple Watch diagnosis, parts and quoting work</h2>
@@ -701,7 +989,27 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="apple-watch-ringwood-heading">
+          <section className="brand-hub-section" aria-labelledby="apple-watch-explore-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Explore more</span>
+              <h2 id="apple-watch-explore-heading">More repair categories</h2>
+              <p>
+                Explore the main repair categories if you are comparing repair options across device types.
+              </p>
+            </div>
+            {otherWatchBrandLinks.length > 0 && (
+              <BrandHubLinks links={otherWatchBrandLinks} initialVisibleCount={4} />
+            )}
+            <div className="brand-hub-link-grid brand-hub-category-link-grid">
+              {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                  <strong>{link.label}</strong>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel" aria-labelledby="apple-watch-ringwood-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="apple-watch-ringwood-heading">Apple Watch repair support at Ringwood Square</h2>
@@ -725,7 +1033,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="faq-section" aria-labelledby="apple-watch-faq-heading">
+          <section className="faq-section brand-hub-section brand-hub-faq-section" aria-labelledby="apple-watch-faq-heading">
+            <span className="repair-kicker">Common questions</span>
             <h2 id="apple-watch-faq-heading" className="faq-heading">Apple Watch repair FAQs</h2>
             <div className="faq-accordion">
               {[
@@ -749,7 +1058,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="apple-watch-final-cta-heading">
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel brand-hub-final-cta" aria-labelledby="apple-watch-final-cta-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Next step</span>
               <h2 id="apple-watch-final-cta-heading">Choose your model to see the right repair options</h2>
@@ -770,11 +1079,24 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         </>
       ) : isIPadHub ? (
         <>
-          <IPadModelFinder
-            seriesGroups={seriesGroups}
-            categorySlug={categorySlug}
-            brandSlug={brandSlug}
-          />
+          <section
+            id="models-list"
+            className="brand-hub-section brand-hub-models-section"
+            aria-labelledby="ipad-model-finder-heading"
+          >
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Model identification</span>
+              <h2 id="ipad-model-finder-heading">Find your exact iPad model</h2>
+              <p>
+                Choose iPad, iPad Air, iPad Pro, iPad mini or use the A-number to confirm the exact model.
+              </p>
+            </div>
+            <BrandHubModelSeriesBrowser
+              brandSlug={brandSlug}
+              categorySlug={categorySlug}
+              seriesGroups={brandHubSeriesGroups}
+            />
+          </section>
 
           <HubRepairResultsSection
             category={categorySlug as RepairResultDeviceCategory}
@@ -782,30 +1104,30 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             scope="brand-hub"
           />
 
-          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
-            <div className="repair-types-showcase-header">
+          <section className="brand-hub-section" aria-labelledby="brand-repair-types-heading">
+            <div className="brand-hub-section-header">
               <div>
-                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <span className="repair-kicker">Common services</span>
                 <h2 id="brand-repair-types-heading">Common iPad Repair Paths</h2>
               </div>
               <p>Choose your iPad model first, then compare the repair path that best matches the fault we need to assess.</p>
             </div>
-            <div className="repair-type-card-grid">
+            <div className="repair-signal-grid">
               {[
                 { name: "Screen and display replacement", note: "Cracked glass, display faults and touch issues need the exact model before the repair path is confirmed." },
                 { name: "Battery replacement", note: "Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path." },
                 { name: "Charging or no-power diagnostic assessment", note: "If the iPad is not charging or not turning on, we inspect the fault first before confirming the practical repair option." }
               ].map((path, index) => (
-                <article key={path.name} className="repair-type-mini-card">
+                <article key={path.name} className="repair-signal-card">
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{path.name}</strong>
-                  <small>{path.note}</small>
+                  <h3>{path.name}</h3>
+                  <p>{path.note}</p>
                 </article>
               ))}
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="ipad-diagnostic-heading">
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel" aria-labelledby="ipad-diagnostic-heading">
             <div className="w-full">
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="ipad-diagnostic-heading">How iPad diagnosis, parts and quoting work</h2>
@@ -832,7 +1154,30 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="ipad-ringwood-heading">
+          <section className="brand-hub-section" aria-labelledby="ipad-explore-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Explore more</span>
+              <h2 id="ipad-explore-heading">Other tablet brands</h2>
+              <p>
+                Browse other supported tablet repair hubs if you are comparing repair options across devices.
+              </p>
+            </div>
+            {otherTabletBrandLinks.length > 0 && (
+              <BrandHubLinks links={otherTabletBrandLinks} initialVisibleCount={4} />
+            )}
+            <div className="brand-hub-subsection" aria-labelledby="ipad-other-repair-categories-heading">
+              <h3 id="ipad-other-repair-categories-heading">Other repair categories</h3>
+              <div className="brand-hub-link-grid brand-hub-category-link-grid">
+                {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                    <strong>{link.label}</strong>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel" aria-labelledby="ipad-ringwood-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="ipad-ringwood-heading">iPad repair support at Ringwood Square</h2>
@@ -856,7 +1201,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="faq-section" aria-labelledby="ipad-faq-heading">
+          <section className="faq-section brand-hub-section brand-hub-faq-section" aria-labelledby="ipad-faq-heading">
+            <span className="repair-kicker">Common questions</span>
             <h2 id="ipad-faq-heading" className="faq-heading">iPad repair FAQs</h2>
             <div className="faq-accordion">
               {[
@@ -881,7 +1227,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="ipad-final-cta-heading">
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel brand-hub-final-cta" aria-labelledby="ipad-final-cta-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Next step</span>
               <h2 id="ipad-final-cta-heading">Choose your model to see the right repair options</h2>
@@ -892,6 +1238,145 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div className="repair-hero-actions">
               <a href="#models-list" className="repair-primary-action">
                 Choose Your iPad Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : isSamsungTabletHub || isLenovoTabletHub ? (
+        <>
+          <section
+            id="models-list"
+            className="brand-hub-section brand-hub-models-section"
+            aria-labelledby="tablet-brand-models-heading"
+          >
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Model identification</span>
+              <h2 id="tablet-brand-models-heading">Choose your {brandName} tablet model</h2>
+              <p>
+                Select the exact {brandName} tablet model before checking compatible repair options, quote information and booking paths.
+              </p>
+            </div>
+            <BrandHubModelSeriesBrowser
+              brandSlug={brandSlug}
+              categorySlug={categorySlug}
+              seriesGroups={brandHubSeriesGroups}
+            />
+          </section>
+
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
+            brand={brandSlug}
+            scope="brand-hub"
+          />
+
+          <section className="brand-hub-section" aria-labelledby="tablet-brand-repair-types-heading">
+            <div className="brand-hub-section-header">
+              <div>
+                <span className="repair-kicker">Common services</span>
+                <h2 id="tablet-brand-repair-types-heading">All {brandName} Repair Types</h2>
+              </div>
+              <p>Choose your exact model first, then we show the right repair path, quote range, and booking options.</p>
+            </div>
+            <div className="repair-signal-grid">
+              {REPAIR_TYPES.map((rt, index) => (
+                <article key={rt.slug} className="repair-signal-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{rt.name}</h3>
+                  <p>Model-specific quote</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel" aria-labelledby="tablet-brand-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="tablet-brand-diagnostic-heading">How {brandName} diagnosis, parts and timing work</h2>
+              <p>
+                We confirm the exact model first, then explain the compatible repair options and practical timing.
+              </p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Model-specific diagnosis</h3>
+                  <p>Compatible parts differ by model. The exact model matters before we confirm repair compatibility.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Parts and timing</h3>
+                  <p>Repair timing depends on the exact model and parts availability. We confirm the timeline once diagnosis is complete.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Quote before approval</h3>
+                  <p>Choose your exact tablet model first so we can explain the practical quote path before any work is approved.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="tablet-brand-explore-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Explore more</span>
+              <h2 id="tablet-brand-explore-heading">Other tablet brands</h2>
+              <p>
+                Browse other supported tablet repair hubs if you are comparing repair options across devices.
+              </p>
+            </div>
+            {otherTabletBrandLinks.length > 0 && (
+              <BrandHubLinks links={otherTabletBrandLinks} initialVisibleCount={4} />
+            )}
+            <div className="brand-hub-subsection" aria-labelledby="tablet-brand-other-repair-categories-heading">
+              <h3 id="tablet-brand-other-repair-categories-heading">Other repair categories</h3>
+              <div className="brand-hub-link-grid brand-hub-category-link-grid">
+                {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                    <strong>{link.label}</strong>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel" aria-labelledby="tablet-brand-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="tablet-brand-ringwood-heading">{brandName} repair support at Ringwood Square</h2>
+              <p>
+                Ali Mobile & Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
+              </p>
+            </div>
+            <div className="repair-chip-cloud" aria-label={`${brandName} tablet repair support actions`}>
+              <span>
+                <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+                Ringwood Square Kiosk C1
+              </span>
+              <span>
+                <Clock3 size={15} strokeWidth={2.2} aria-hidden="true" />
+                Clear quote before approval
+              </span>
+              <span>
+                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+                Model-specific repair path
+              </span>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel brand-hub-final-cta" aria-labelledby="tablet-brand-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="tablet-brand-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>
+                Start with the {brandName} tablet model selector above to check compatible repair paths, then book or call once you have the exact model.
+              </p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your {brandName} Model
                 <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
               </a>
               <Link href="/book-repair" className="repair-secondary-action">
@@ -925,7 +1410,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               />
             ) : (
               <BrandModelSearch
-                seriesGroups={seriesGroups}
+                seriesGroups={usesFlatBrandHubModels ? flatModelGroup : seriesGroups}
                 categorySlug={categorySlug}
                 brandSlug={brandSlug}
               />
@@ -948,7 +1433,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
             <div className={usesBrandHubDesign ? "brand-hub-link-grid brand-hub-repair-link-grid" : "repair-type-card-grid"}>
               {usesBrandHubDesign ? (
-                IPHONE_MAJOR_REPAIR_LINKS.map((link) => (
+                BRAND_HUB_REPAIR_TYPE_LINKS.map((link) => (
                   <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
                     <strong>{link.label}</strong>
                   </Link>
@@ -1014,11 +1499,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                   Browse other supported phone repair hubs if you are comparing repair options across devices.
                 </p>
               </div>
-              <BrandHubLinks links={otherPhoneBrandLinks} initialVisibleCount={6} />
+              <BrandHubLinks links={otherPhoneBrandLinks} initialVisibleCount={4} />
               <div className="brand-hub-subsection" aria-labelledby="other-repair-categories-heading">
                 <h3 id="other-repair-categories-heading">Other repair categories</h3>
                 <div className="brand-hub-link-grid brand-hub-category-link-grid">
-                  {IPHONE_REPAIR_CATEGORY_LINKS.map((link) => (
+                  {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
                     <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
                       <strong>{link.label}</strong>
                     </Link>
