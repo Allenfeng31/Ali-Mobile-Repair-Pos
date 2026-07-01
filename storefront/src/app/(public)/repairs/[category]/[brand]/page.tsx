@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
+import { PHONE_BRAND_HUBS, getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
-import { fetchRepairCatalog, fetchBrandModels, type BrandEntry } from "@/lib/api";
+import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
@@ -14,7 +14,8 @@ import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
 import AppleWatchModelFinder from "./AppleWatchModelFinder";
 import IPadModelFinder from "./iPadModelFinder";
-import PhoneBrandLinks from "./PhoneBrandLinks";
+import BrandHubLinks from "./BrandHubLinks";
+import BrandHubModelSeriesBrowser, { type BrandHubSeriesGroup } from "./BrandHubModelSeriesBrowser";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
@@ -38,11 +39,35 @@ const IPHONE_REPAIR_CATEGORY_LINKS = [
   { href: "/repairs/watch", label: "Watch Repairs" },
 ];
 
+const APPROVED_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
+const SAMSUNG_SERIES_ORDER = ["s", "a", "note", "z"];
+
+const SAMSUNG_SERIES_LABELS: Record<string, string> = {
+  s: "Galaxy S Series",
+  a: "Galaxy A Series",
+  note: "Galaxy Note Series",
+  z: "Galaxy Z Series",
+  other: "Other Samsung Models",
+};
+
+const OPPO_SERIES_LABELS: Record<string, string> = {
+  find: "Find Series",
+  reno: "Reno Series",
+  a: "A Series",
+  other: "Other Oppo Models",
+};
+
 function buildOtherPhoneBrandLinks(brands: BrandEntry[], currentBrandSlug: string) {
   const seen = new Set<string>();
 
   return brands
-    .filter((brand) => brand.category === "phone" && brand.slug !== currentBrandSlug)
+    .filter(
+      (brand) =>
+        brand.category === "phone" &&
+        brand.slug !== currentBrandSlug &&
+        APPROVED_PHONE_BRAND_HUB_SLUGS.includes(brand.slug) &&
+        Object.prototype.hasOwnProperty.call(PHONE_BRAND_HUBS, brand.slug)
+    )
     .map((brand) => ({
       href: `/repairs/phone/${safeSlugSegment(brand.slug)}`,
       label: `${brand.brand} Repairs`,
@@ -51,6 +76,71 @@ function buildOtherPhoneBrandLinks(brands: BrandEntry[], currentBrandSlug: strin
       if (seen.has(link.href)) return false;
       seen.add(link.href);
       return true;
+    });
+}
+
+function getSamsungSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (slug.startsWith("galaxy-s") || name.includes("galaxy s")) return "s";
+  if (slug.startsWith("galaxy-a") || name.includes("galaxy a")) return "a";
+  if (slug.startsWith("galaxy-note") || name.includes("galaxy note") || name.includes("note")) return "note";
+  if (slug.startsWith("galaxy-z") || name.includes("galaxy z") || name.includes("fold") || name.includes("flip")) return "z";
+  return "other";
+}
+
+function getOppoSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (name.includes("find") || slug.includes("find")) return "find";
+  if (name.includes("reno") || slug.includes("reno")) return "reno";
+  if (/^a\d+/i.test(name) || /^a\d+/i.test(slug)) return "a";
+  return "other";
+}
+
+function toBrandHubSeriesModels(models: ModelEntry[]) {
+  return models.map((model) => ({
+    model: model.model,
+    slug: model.slug,
+    modelCode: model.modelCode,
+  }));
+}
+
+function buildBrandHubSeriesGroups(brandSlug: string, models: ModelEntry[]): BrandHubSeriesGroup[] {
+  if (brandSlug !== "samsung" && brandSlug !== "oppo") {
+    return [];
+  }
+
+  const sorted = smartSortModels(models);
+  const groups = new Map<string, ModelEntry[]>();
+
+  for (const model of sorted) {
+    const key = brandSlug === "samsung" ? getSamsungSeriesKey(model) : getOppoSeriesKey(model);
+    const current = groups.get(key) ?? [];
+    current.push(model);
+    groups.set(key, current);
+  }
+
+  if (brandSlug === "samsung") {
+    const orderedKeys = [...SAMSUNG_SERIES_ORDER, ...(groups.has("other") ? ["other"] : [])];
+    return orderedKeys.map((key) => ({
+      key,
+      label: SAMSUNG_SERIES_LABELS[key],
+      models: toBrandHubSeriesModels(groups.get(key) ?? []),
+    }));
+  }
+
+  return ["find", "reno", "a", "other"]
+    .flatMap((key) => {
+      const groupedModels = groups.get(key);
+      if (!groupedModels || groupedModels.length === 0) return [];
+      return [{
+        key,
+        label: OPPO_SERIES_LABELS[key],
+        models: toBrandHubSeriesModels(groupedModels),
+      }];
     });
 }
 
@@ -158,6 +248,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isIPadHub = categorySlug === "tablet" && brandSlug === "ipad";
   const isPhoneHub = categorySlug === "phone";
   const isIPhoneHub = isPhoneHub && brandSlug === "iphone";
+  const usesBrandHubDesign = isPhoneHub && APPROVED_PHONE_BRAND_HUB_SLUGS.includes(brandSlug);
   const floatingJumpLabel =
     categorySlug === "phone" && brandSlug === "iphone"
       ? "Choose Your iPhone"
@@ -175,10 +266,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "Choose Your Apple Watch"
       : "Choose Your Model";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
-  const otherPhoneBrandLinks = isIPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
+  const otherPhoneBrandLinks = usesBrandHubDesign ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
+  const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(brandSlug, models) : [];
   const macbookRepairPaths = [
     {
       name: "Screen and display faults",
@@ -266,7 +358,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     : [];
 
   return (
-    <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""} ${isIPhoneHub ? "iphone-hub-page" : ""}`}>
+    <main className={`repair-page-shell ${!isPhoneHub ? "repair-page-shell-narrow" : ""} ${usesBrandHubDesign ? "brand-hub-page" : ""}`}>
       <nav className="repair-breadcrumb" aria-label="breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
@@ -812,24 +904,32 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         <>
           <section
             id="models-list"
-            className={isIPhoneHub ? "iphone-hub-section iphone-hub-models-section" : undefined}
-            aria-labelledby={isIPhoneHub ? "iphone-models-heading" : undefined}
-            aria-label={!isIPhoneHub ? `${brandName} models` : undefined}
+            className={usesBrandHubDesign ? "brand-hub-section brand-hub-models-section" : undefined}
+            aria-labelledby={usesBrandHubDesign ? "brand-models-heading" : undefined}
+            aria-label={!usesBrandHubDesign ? `${brandName} models` : undefined}
           >
-            {isIPhoneHub && (
-              <div className="iphone-hub-section-header">
+            {usesBrandHubDesign && (
+              <div className="brand-hub-section-header">
                 <span className="repair-kicker">Popular models</span>
-                <h2 id="iphone-models-heading">Choose your iPhone model</h2>
+                <h2 id="brand-models-heading">Choose your {brandName} model</h2>
                 <p>
-                  Start with the exact iPhone model to view supported repair options, current pricing, and the right booking path.
+                  Start with the exact {brandName} model to view supported repair options, current pricing, and the right booking path.
                 </p>
               </div>
             )}
-            <BrandModelSearch
-              seriesGroups={seriesGroups}
-              categorySlug={categorySlug}
-              brandSlug={brandSlug}
-            />
+            {usesBrandHubDesign && (brandSlug === "samsung" || brandSlug === "oppo") ? (
+              <BrandHubModelSeriesBrowser
+                brandSlug={brandSlug}
+                categorySlug={categorySlug}
+                seriesGroups={brandHubSeriesGroups}
+              />
+            ) : (
+              <BrandModelSearch
+                seriesGroups={seriesGroups}
+                categorySlug={categorySlug}
+                brandSlug={brandSlug}
+              />
+            )}
           </section>
 
           <HubRepairResultsSection
@@ -838,18 +938,18 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             scope="brand-hub"
           />
 
-          <section className={isIPhoneHub ? "iphone-hub-section" : "repair-types-showcase"} aria-labelledby="brand-repair-types-heading">
-            <div className={isIPhoneHub ? "iphone-hub-section-header" : "repair-types-showcase-header"}>
+          <section className={usesBrandHubDesign ? "brand-hub-section" : "repair-types-showcase"} aria-labelledby="brand-repair-types-heading">
+            <div className={usesBrandHubDesign ? "brand-hub-section-header" : "repair-types-showcase-header"}>
               <div>
                 <span className="repair-kicker repair-kicker-muted">Repair services</span>
-                <h2 id="brand-repair-types-heading">{isIPhoneHub ? "Popular iPhone repair services" : `Common ${brandName} Repair Paths`}</h2>
+                <h2 id="brand-repair-types-heading">{usesBrandHubDesign ? `Popular ${brandName} repair services` : `Common ${brandName} Repair Paths`}</h2>
               </div>
               <p>Choose your exact model first, then compare the repair path that best matches the fault we need to assess.</p>
             </div>
-            <div className={isIPhoneHub ? "iphone-hub-link-grid iphone-hub-repair-link-grid" : "repair-type-card-grid"}>
-              {isIPhoneHub ? (
+            <div className={usesBrandHubDesign ? "brand-hub-link-grid brand-hub-repair-link-grid" : "repair-type-card-grid"}>
+              {usesBrandHubDesign ? (
                 IPHONE_MAJOR_REPAIR_LINKS.map((link) => (
-                  <Link key={link.href} href={link.href} prefetch={false} className="iphone-hub-outline-link">
+                  <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
                     <strong>{link.label}</strong>
                   </Link>
                 ))
@@ -880,7 +980,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className={`repair-assist-panel${isIPhoneHub ? " iphone-hub-section iphone-hub-panel" : ""}`} aria-labelledby="phone-diagnostic-heading">
+          <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel" : ""}`} aria-labelledby="phone-diagnostic-heading">
             <div className="w-full">
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="phone-diagnostic-heading">How {brandName} diagnosis, parts and timing work</h2>
@@ -905,21 +1005,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          {isIPhoneHub && otherPhoneBrandLinks.length > 0 && (
-            <section className="iphone-hub-section" aria-labelledby="other-phone-brands-heading">
-              <div className="iphone-hub-section-header">
+          {usesBrandHubDesign && otherPhoneBrandLinks.length > 0 && (
+            <section className="brand-hub-section" aria-labelledby="other-phone-brands-heading">
+              <div className="brand-hub-section-header">
                 <span className="repair-kicker">Explore more</span>
                 <h2 id="other-phone-brands-heading">Other phone brands</h2>
                 <p>
                   Browse other supported phone repair hubs if you are comparing repair options across devices.
                 </p>
               </div>
-              <PhoneBrandLinks links={otherPhoneBrandLinks} initialVisibleCount={6} />
-              <div className="iphone-hub-subsection" aria-labelledby="other-repair-categories-heading">
+              <BrandHubLinks links={otherPhoneBrandLinks} initialVisibleCount={6} />
+              <div className="brand-hub-subsection" aria-labelledby="other-repair-categories-heading">
                 <h3 id="other-repair-categories-heading">Other repair categories</h3>
-                <div className="iphone-hub-link-grid iphone-hub-category-link-grid">
+                <div className="brand-hub-link-grid brand-hub-category-link-grid">
                   {IPHONE_REPAIR_CATEGORY_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} prefetch={false} className="iphone-hub-outline-link">
+                    <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
                       <strong>{link.label}</strong>
                     </Link>
                   ))}
@@ -928,7 +1028,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </section>
           )}
 
-          <section className={`repair-assist-panel${isIPhoneHub ? " iphone-hub-section iphone-hub-panel iphone-hub-centered-panel" : ""}`} aria-labelledby="phone-ringwood-heading">
+          <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel brand-hub-centered-panel" : ""}`} aria-labelledby="phone-ringwood-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="phone-ringwood-heading">{brandName} repair support at Ringwood Square</h2>
@@ -941,8 +1041,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className={`faq-section${isIPhoneHub ? " iphone-hub-section iphone-hub-faq-section" : ""}`} aria-labelledby="phone-faq-heading">
-            {isIPhoneHub && <span className="repair-kicker">Common questions</span>}
+          <section className={`faq-section${usesBrandHubDesign ? " brand-hub-section brand-hub-faq-section" : ""}`} aria-labelledby="phone-faq-heading">
+            {usesBrandHubDesign && <span className="repair-kicker">Common questions</span>}
             <h2 id="phone-faq-heading" className="faq-heading">{brandName} repair FAQs</h2>
             <div className="faq-accordion">
               {phoneContent?.faqs.map((faq) => (
@@ -961,7 +1061,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          <section className={`repair-assist-panel${isIPhoneHub ? " iphone-hub-section iphone-hub-panel iphone-hub-centered-panel iphone-hub-final-cta" : ""}`} aria-labelledby="phone-final-cta-heading">
+          <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel brand-hub-centered-panel brand-hub-final-cta" : ""}`} aria-labelledby="phone-final-cta-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Next step</span>
               <h2 id="phone-final-cta-heading">Choose your model to see the right repair options</h2>

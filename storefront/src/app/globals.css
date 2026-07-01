@@ -5393,8 +5393,8 @@ input:checked+.toggle-slider:before {
   opacity: 1;
 }
 
-/* ─── iPhone Brand Hub Refinement ───────────────── */
-.iphone-hub-page .iphone-hub-section {
+/* ─── Phone Brand Hub Refinement ───────────────── */
+.brand-hub-page .brand-hub-section {
   width: min(100%, 1000px);
   margin: 0 0 clamp(3.5rem, 7vw, 4.75rem);
   margin-inline: auto;
@@ -5404,7 +5404,7 @@ input:checked+.toggle-slider:before {
   box-shadow: none;
 }
 
-.iphone-hub-section-header {
+.brand-hub-section-header {
   display: grid;
   gap: 0.85rem;
   max-width: 760px;
@@ -5412,14 +5412,14 @@ input:checked+.toggle-slider:before {
   text-align: center;
 }
 
-.iphone-hub-section-header > div {
+.brand-hub-section-header > div {
   display: grid;
   gap: 0.85rem;
   justify-items: center;
 }
 
-.iphone-hub-section-header h2,
-.iphone-hub-faq-section .faq-heading {
+.brand-hub-section-header h2,
+.brand-hub-faq-section .faq-heading {
   margin: 0;
   color: #0f172a;
   font-size: clamp(1.75rem, 4.5vw, 2.65rem);
@@ -5429,7 +5429,7 @@ input:checked+.toggle-slider:before {
   text-wrap: balance;
 }
 
-.iphone-hub-section-header p {
+.brand-hub-section-header p {
   max-width: 62ch;
   margin: 0 auto;
   color: #475569;
@@ -5437,8 +5437,8 @@ input:checked+.toggle-slider:before {
   line-height: 1.65;
 }
 
-.iphone-hub-section .repair-kicker,
-.iphone-hub-faq-section > .repair-kicker {
+.brand-hub-section .repair-kicker,
+.brand-hub-faq-section > .repair-kicker {
   justify-self: center;
   margin: 0 auto;
   border-color: rgba(37, 99, 235, 0.18);
@@ -5447,26 +5447,26 @@ input:checked+.toggle-slider:before {
   box-shadow: none;
 }
 
-.iphone-hub-page .repair-kicker-muted {
+.brand-hub-page .repair-kicker-muted {
   color: #1d4ed8;
 }
 
-.iphone-hub-models-section .search-container {
+.brand-hub-models-section .search-container {
   max-width: 680px;
   margin: 0 auto 1.5rem;
 }
 
-.iphone-hub-models-section .search-input {
+.brand-hub-models-section .search-input {
   border: 2px solid #0f172a;
   background: transparent;
   box-shadow: none;
 }
 
-.iphone-hub-models-section .model-series-section {
+.brand-hub-models-section .model-series-section {
   margin-bottom: 1.5rem;
 }
 
-.iphone-hub-models-section .model-series-title {
+.brand-hub-models-section .model-series-title {
   margin-bottom: 1rem;
   border-bottom: 0;
   color: #0f172a;
@@ -5475,8 +5475,8 @@ input:checked+.toggle-slider:before {
   text-align: center;
 }
 
-.iphone-hub-models-section .model-series-grid,
-.iphone-hub-link-grid {
+.brand-hub-models-section .model-series-grid,
+.brand-hub-link-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
@@ -5485,18 +5485,19 @@ input:checked+.toggle-slider:before {
   padding: 0;
 }
 
-.iphone-hub-models-section .model-card,
-.iphone-hub-outline-link,
-.iphone-hub-page .repair-signal-card,
-.iphone-hub-page .faq-item,
-.iphone-hub-page .repair-chip-cloud span {
+.brand-hub-models-section .model-card,
+.brand-hub-outline-link,
+.brand-hub-page .repair-signal-card,
+.brand-hub-page .faq-item,
+.brand-hub-page .repair-chip-cloud span,
+.brand-hub-series-toggle {
   border: 2px solid #0f172a;
   background: transparent;
   box-shadow: none;
 }
 
-.iphone-hub-models-section .model-card,
-.iphone-hub-outline-link {
+.brand-hub-models-section .model-card,
+.brand-hub-outline-link {
   min-height: 64px;
   border-radius: 20px;
   padding: 1rem 1.25rem;
@@ -5504,7 +5505,7 @@ input:checked+.toggle-slider:before {
   text-decoration: none;
 }
 
-.iphone-hub-outline-link {
+.brand-hub-outline-link {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5516,10 +5517,12 @@ input:checked+.toggle-slider:before {
     color 180ms ease;
 }
 
-.iphone-hub-outline-link:hover,
-.iphone-hub-outline-link:focus-visible,
-.iphone-hub-models-section .model-card:hover,
-.iphone-hub-models-section .model-card:focus-visible {
+.brand-hub-outline-link:hover,
+.brand-hub-outline-link:focus-visible,
+.brand-hub-models-section .model-card:hover,
+.brand-hub-models-section .model-card:focus-visible,
+.brand-hub-series-toggle:hover,
+.brand-hub-series-toggle:focus-visible {
   border-color: #1d4ed8;
   background: rgba(239, 246, 255, 0.48);
   color: #1d4ed8;
@@ -5528,65 +5531,66 @@ input:checked+.toggle-slider:before {
   transform: none;
 }
 
-.iphone-hub-outline-link:focus-visible,
-.iphone-hub-models-section .model-card:focus-visible,
-.iphone-hub-show-more:focus-visible,
-.iphone-hub-page .faq-question:focus-visible {
+.brand-hub-outline-link:focus-visible,
+.brand-hub-models-section .model-card:focus-visible,
+.brand-hub-show-more:focus-visible,
+.brand-hub-page .faq-question:focus-visible,
+.brand-hub-series-toggle:focus-visible {
   outline: 3px solid rgba(37, 99, 235, 0.25);
   outline-offset: 3px;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-panel {
+.brand-hub-page .repair-assist-panel.brand-hub-panel {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   border: 0;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-centered-panel {
+.brand-hub-page .repair-assist-panel.brand-hub-centered-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-centered-panel > div:first-child {
+.brand-hub-page .repair-assist-panel.brand-hub-centered-panel > div:first-child {
   display: grid;
   justify-items: center;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-centered-panel .repair-hero-actions,
-.iphone-hub-page .repair-assist-panel.iphone-hub-centered-panel .repair-chip-cloud {
+.brand-hub-page .repair-assist-panel.brand-hub-centered-panel .repair-hero-actions,
+.brand-hub-page .repair-assist-panel.brand-hub-centered-panel .repair-chip-cloud {
   justify-content: center;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-panel h2 {
+.brand-hub-page .repair-assist-panel.brand-hub-panel h2 {
   margin: 0.8rem 0 0.75rem;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-panel .repair-kicker {
+.brand-hub-page .repair-assist-panel.brand-hub-panel .repair-kicker {
   margin: 0;
 }
 
-.iphone-hub-page .repair-assist-panel.iphone-hub-panel p {
+.brand-hub-page .repair-assist-panel.brand-hub-panel p {
   color: #475569;
 }
 
-.iphone-hub-page .repair-signal-card {
+.brand-hub-page .repair-signal-card {
   padding: 1.25rem;
   border-radius: 22px;
 }
 
-.iphone-hub-page .repair-signal-card > span {
+.brand-hub-page .repair-signal-card > span {
   background: transparent;
   border-color: #0f172a;
   color: #1d4ed8;
 }
 
-.iphone-hub-page .repair-chip-cloud span {
+.brand-hub-page .repair-chip-cloud span {
   color: #334155;
 }
 
-.iphone-hub-faq-section {
+.brand-hub-faq-section {
   width: min(100%, 1000px);
   max-width: 1000px;
   margin-inline: auto;
@@ -5594,30 +5598,30 @@ input:checked+.toggle-slider:before {
   text-align: center;
 }
 
-.iphone-hub-faq-section .repair-kicker {
+.brand-hub-faq-section .repair-kicker {
   margin-bottom: 0.85rem;
 }
 
-.iphone-hub-faq-section .faq-heading {
+.brand-hub-faq-section .faq-heading {
   margin-bottom: 1.5rem;
 }
 
-.iphone-hub-faq-section .faq-accordion {
+.brand-hub-faq-section .faq-accordion {
   text-align: left;
 }
 
-.iphone-hub-faq-section .faq-item {
+.brand-hub-faq-section .faq-item {
   border-radius: 18px;
 }
 
-.iphone-hub-subsection {
+.brand-hub-subsection {
   display: grid;
   gap: 1rem;
   margin-top: 2rem;
   text-align: center;
 }
 
-.iphone-hub-subsection h3 {
+.brand-hub-subsection h3 {
   margin: 0;
   color: #0f172a;
   font-size: clamp(1.35rem, 3vw, 1.8rem);
@@ -5625,11 +5629,106 @@ input:checked+.toggle-slider:before {
   line-height: 1.1;
 }
 
-.iphone-hub-collapsed-link {
+.brand-hub-series-browser {
+  display: grid;
+  gap: 1rem;
+}
+
+.brand-hub-series-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.brand-hub-series-item {
+  display: grid;
+  gap: 0;
+}
+
+.brand-hub-series-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 20px;
+  padding: 1rem 1.25rem;
+  color: #0f172a;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.brand-hub-series-toggle > span:first-child {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.brand-hub-series-toggle strong {
+  font-size: 1rem;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.brand-hub-series-toggle small {
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.brand-hub-series-indicator {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0f172a;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 1.2rem;
+  font-weight: 950;
+  line-height: 1;
+  transition: transform 180ms ease;
+}
+
+.brand-hub-series-toggle[aria-expanded="true"] .brand-hub-series-indicator {
+  transform: rotate(45deg);
+}
+
+.brand-hub-series-panel {
+  max-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    max-height 260ms ease,
+    opacity 180ms ease,
+    visibility 180ms ease;
+}
+
+.brand-hub-series-panel-open {
+  max-height: 2600px;
+  visibility: visible;
+  opacity: 1;
+}
+
+.brand-hub-model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.brand-hub-collapsed-link {
   display: none;
 }
 
-.iphone-hub-show-more {
+.brand-hub-show-more {
   display: flex;
   width: fit-content;
   min-height: 44px;
@@ -5651,29 +5750,37 @@ input:checked+.toggle-slider:before {
     color 180ms ease;
 }
 
-.iphone-hub-show-more:hover {
+.brand-hub-show-more:hover {
   border-color: #1d4ed8;
   background: rgba(239, 246, 255, 0.48);
   color: #1d4ed8;
 }
 
-.iphone-hub-final-cta {
+.brand-hub-final-cta {
   margin-bottom: 0;
 }
 
 @media (max-width: 768px) {
-  .iphone-hub-page .iphone-hub-section {
+  .brand-hub-page .brand-hub-section {
     margin-bottom: 4rem;
   }
 
-  .iphone-hub-models-section .model-series-grid,
-  .iphone-hub-link-grid {
+  .brand-hub-models-section .model-series-grid,
+  .brand-hub-link-grid {
     gap: 1rem;
   }
 
-  .iphone-hub-page .repair-signal-grid,
-  .iphone-hub-page .repair-assist-panel.iphone-hub-panel {
+  .brand-hub-page .repair-signal-grid,
+  .brand-hub-page .repair-assist-panel.brand-hub-panel {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-hub-series-panel,
+  .brand-hub-series-indicator,
+  .brand-hub-series-toggle {
+    transition: none;
   }
 }
 

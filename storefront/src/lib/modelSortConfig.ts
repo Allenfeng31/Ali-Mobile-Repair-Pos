@@ -164,10 +164,10 @@ export function groupModelsBySeries(
       else seriesKey = 'Lenovo Other Series';
     }
     // Generic Samsung phone series
-    else if (lower.includes('galaxy z') || lower.includes('fold') || lower.includes('flip')) seriesKey = 'Galaxy Z Series';
+    else if (lower.includes('galaxy z') || (isSamsungBrand && (lower.includes('fold') || lower.includes('flip')))) seriesKey = 'Galaxy Z Series';
     else if (/galaxy s\d+/.test(lower) || (isSamsungBrand && /\bs\d+/.test(lower))) seriesKey = 'Galaxy S Series';
     else if (/galaxy a\d+/.test(lower) || (isSamsungBrand && /\ba\d+/.test(lower))) seriesKey = 'Galaxy A Series';
-    else if (lower.includes('note')) seriesKey = 'Galaxy Note Series';
+    else if (lower.includes('galaxy note') || (isSamsungBrand && lower.includes('note'))) seriesKey = 'Galaxy Note Series';
     else if (isSamsungBrand && (lower.includes('galaxy j') || /\bj\d+/.test(lower))) seriesKey = 'Galaxy J Series';
 
     // Google grouping

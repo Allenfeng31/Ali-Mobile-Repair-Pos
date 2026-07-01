@@ -3,40 +3,40 @@
 import { useState } from "react";
 import Link from "next/link";
 
-interface PhoneBrandLink {
+interface BrandHubLink {
   href: string;
   label: string;
 }
 
-interface PhoneBrandLinksProps {
-  links: PhoneBrandLink[];
+interface BrandHubLinksProps {
+  links: BrandHubLink[];
   initialVisibleCount?: number;
 }
 
-const BRAND_LINKS_ID = "iphone-other-phone-brand-links";
+const BRAND_LINKS_ID = "brand-hub-other-phone-brand-links";
 
-export default function PhoneBrandLinks({
+export default function BrandHubLinks({
   links,
   initialVisibleCount = 6,
-}: PhoneBrandLinksProps) {
+}: BrandHubLinksProps) {
   const [expanded, setExpanded] = useState(false);
   const hasHiddenLinks = links.length > initialVisibleCount;
 
   return (
     <>
-      <ul id={BRAND_LINKS_ID} className="iphone-hub-link-grid">
+      <ul id={BRAND_LINKS_ID} className="brand-hub-link-grid">
         {links.map((link, index) => {
           const isCollapsed = hasHiddenLinks && !expanded && index >= initialVisibleCount;
 
           return (
             <li
               key={link.href}
-              className={isCollapsed ? "iphone-hub-collapsed-link" : undefined}
+              className={isCollapsed ? "brand-hub-collapsed-link" : undefined}
               aria-hidden={isCollapsed || undefined}
             >
               <Link
                 href={link.href}
-                className="iphone-hub-outline-link"
+                className="brand-hub-outline-link"
                 prefetch={false}
                 tabIndex={isCollapsed ? -1 : undefined}
               >
@@ -50,7 +50,7 @@ export default function PhoneBrandLinks({
       {hasHiddenLinks && (
         <button
           type="button"
-          className="iphone-hub-show-more"
+          className="brand-hub-show-more"
           aria-expanded={expanded}
           aria-controls={BRAND_LINKS_ID}
           onClick={() => setExpanded((current) => !current)}
