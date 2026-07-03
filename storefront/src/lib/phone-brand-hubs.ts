@@ -15,89 +15,211 @@ export interface PhoneBrandHubContent {
   }[];
 }
 
+const BATCH_PHONE_BRAND_NAMES: Record<string, string> = {
+  xiaomi: 'Xiaomi',
+  nokia: 'Nokia',
+  vivo: 'Vivo',
+  lg: 'LG',
+  oneplus: 'OnePlus',
+  huawei: 'Huawei',
+  htc: 'HTC',
+  sony: 'Sony',
+  telstra: 'Telstra',
+  motorola: 'Motorola',
+  microsoft: 'Microsoft',
+  realme: 'Realme',
+  asus: 'Asus',
+  tcl: 'TCL',
+  nothing: 'Nothing',
+};
+
+function buildBatchPhoneBrandFaqs(brandName: string) {
+  return [
+    {
+      question: `Which ${brandName} phone models do you repair?`,
+      answer: `This page lists the currently supported public ${brandName} phone models. If your exact model is not shown, contact the Ringwood Square store and we can confirm whether a repair path is available.`,
+    },
+    {
+      question: `How can I identify my ${brandName} model?`,
+      answer: `If the phone turns on, check Settings and About phone or About device for the model name or model number. If the device is damaged or you are unsure, contact the store or bring it to Ringwood Square and we can help identify it before quoting.`,
+    },
+    {
+      question: `How much does a ${brandName} phone repair cost?`,
+      answer: `Cost depends on the exact ${brandName} model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation.`,
+    },
+    {
+      question: `How long can a ${brandName} repair take?`,
+      answer: `Timing depends on the exact model, the fault, current stock, the repair queue and the device condition found during assessment. We confirm practical timing before the repair is approved.`,
+    },
+    {
+      question: "Do I need to make a booking?",
+      answer: `Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific ${brandName} model.`,
+    },
+    {
+      question: "Will my data normally be affected?",
+      answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in.",
+    },
+    {
+      question: `Do ${brandName} phone repairs include a warranty?`,
+      answer: `Eligible ${brandName} phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.`,
+    },
+    {
+      question: "What happens if the required part is not in stock?",
+      answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed.",
+    },
+    {
+      question: "Is it better to repair or replace my phone?",
+      answer: "That depends on the phone age, overall condition, repair quote, other faults, data needs and replacement cost. After checking the model and fault, we can explain the practical options.",
+    },
+    {
+      question: "Can water resistance be guaranteed after repair?",
+      answer: "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally exposed to water.",
+    },
+  ];
+}
+
+function buildBatchPhoneBrandHubContent(slug: string, brandName: string): PhoneBrandHubContent {
+  return {
+    slug,
+    brandName,
+    metadata: {
+      title: `${brandName} Phone Repair | Screen, Battery & Charging | Ali Mobile`,
+      description: `${brandName} phone repair at Ringwood Square for Melbourne's eastern suburbs. Check available screen, battery, charging and rear-damage repair options by exact model.`,
+    },
+    timing: {
+      screen: '',
+    },
+    faqs: buildBatchPhoneBrandFaqs(brandName),
+  };
+}
+
+export function getPhoneBrandRepairKeyword(slug: string, brandName: string): string {
+  switch (slug) {
+    case 'iphone':
+      return 'iPhone Repair';
+    case 'samsung':
+      return 'Samsung Phone Repair';
+    case 'google-pixel':
+      return 'Google Pixel Repair';
+    case 'oppo':
+      return 'OPPO Phone Repair';
+    default:
+      if (BATCH_PHONE_BRAND_NAMES[slug]) {
+        return `${BATCH_PHONE_BRAND_NAMES[slug]} Phone Repair`;
+      }
+      return `${brandName} Phone Repair`;
+  }
+}
+
 export const PHONE_BRAND_HUBS: Record<string, PhoneBrandHubContent> = {
   iphone: {
     slug: 'iphone',
     brandName: 'iPhone',
     metadata: {
-      title: 'iPhone Repair Services Ringwood | Fast Screen & Battery Fixes',
-      description: 'Expert iPhone repair services in Ringwood. Fast screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.'
+      title: 'iPhone Repair | Screen, Battery & Charging | Ali Mobile',
+      description: "iPhone repair at Ringwood Square for Melbourne's eastern suburbs. Check screen, battery, charging and back glass repair options by exact model."
     },
     timing: {
-      screen: 'Most iPhone screen replacements, including Pro and Pro Max models from iPhone 6 through iPhone 16, can usually be completed in about 30 minutes once the correct part is available.',
+      screen: 'We support a broad range of current and earlier iPhone models. Choose your exact model to check the repair options currently available.',
       battery: 'Most iPhone battery replacements take less than 30 minutes once the correct battery is available.'
     },
     faqs: [
-      { question: "How long does an iPhone screen replacement usually take?", answer: "Most iPhone screen replacements, including Pro and Pro Max models from iPhone 6 through iPhone 16, can usually be completed in about 30 minutes once the correct part is available. If the frame, battery or internal connectors are also damaged, we will confirm any additional time before starting." },
-      { question: "How long does an iPhone battery replacement usually take?", answer: "Most iPhone battery replacements take less than 30 minutes once the correct battery is available." },
-      { question: "Do I need to know my exact iPhone model?", answer: "Yes, compatible parts differ by iPhone generation and variant (e.g. Pro, Pro Max, mini, Plus). If you are unsure, bring it to our Ringwood Square kiosk and we will identify it for you." },
-      { question: "Can a charging problem be caused by something other than the charging port?", answer: "Yes. Cleaning out debris, trying a different charger or cable, or diagnosing a battery fault often resolves charging symptoms. We assess alternatives before confirming a port replacement." },
-      { question: "Is back glass replacement the same as complete housing replacement?", answer: "No. Back glass involves only the rear cover, whereas full housing replacement involves the frame. The method depends on your exact model, camera lens involvement, and frame condition." },
-      { question: "Will my iPhone remain water-resistant after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. While we may reseal the device where appropriate, adhesive replacement does not restore guaranteed factory water-resistance certification." },
-      { question: "Can I walk in, or should I book first?", answer: "Walk-ins are welcome at our Ringwood Square kiosk. However, we recommend booking or calling ahead to confirm part availability for your specific iPhone model." },
-      { question: "What happens if the frame or internal components are also damaged?", answer: "We conduct an inspection before repairing. If the frame or internal connectors are damaged, we will confirm the compatible repair options and any additional timing before work begins." }
+      { question: "Which iPhone models do you repair?", answer: "This page lists the currently supported public iPhone models. If your exact model is not shown, contact the Ringwood Square store and we can confirm whether a repair path is available." },
+      { question: "How can I identify my iPhone model?", answer: "If the phone turns on, check Settings > General > About for the model name or model number. If you are unsure, contact the store or bring the device to Ringwood Square and we can help identify it before quoting." },
+      { question: "How much does an iPhone repair cost?", answer: "Cost depends on the exact iPhone model, repair type, fault and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
+      { question: "How long can an iPhone repair take?", answer: "Timing depends on the exact model, the fault, current stock and the device condition found during assessment. We confirm practical timing before the repair is approved." },
+      { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific iPhone model." },
+      { question: "Will my data normally be affected by an iPhone repair?", answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in." },
+      { question: "Do you provide a repair warranty?", answer: "Eligible screen, battery, charging-port and back-housing repairs include a 6-month warranty on the fitted part and workmanship. Coverage has conditions and does not cover unrelated faults, later physical damage or later liquid exposure where applicable." },
+      { question: "What happens if the required part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed." },
+      { question: "Is it better to repair or replace my iPhone?", answer: "That depends on the iPhone age, overall condition, repair quote, other faults, storage or data needs, and replacement cost. After checking the model and fault, we can explain the practical options." },
+      { question: "Can water resistance be guaranteed after an iPhone repair?", answer: "After the repair, we apply new sealing adhesive when the device is reassembled to provide a level of protection against everyday splashes. However, the original factory water-resistance rating cannot be guaranteed once an iPhone has been opened or damaged. We do not recommend using the repaired device in water or intentionally exposing it to liquid." }
     ]
   },
   samsung: {
     slug: 'samsung',
     brandName: 'Samsung Galaxy',
     metadata: {
-      title: 'Samsung Phone Repair Services Ringwood | Screen & Battery Fixes',
-      description: 'Expert Samsung phone repair services in Ringwood. Screen replacement, battery repair, and diagnostic assessment for Galaxy S, Z, and A series.'
+      title: 'Samsung Phone Repair | Screen, Battery & Charging | Ali Mobile',
+      description: "Samsung phone repair at Ringwood Square for Melbourne's eastern suburbs. Check available screen, battery, charging and rear-cover repair options by exact model."
     },
     timing: {
       screen: 'Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available.'
     },
     faqs: [
-      { question: "How long does a Samsung screen replacement take?", answer: "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available." },
-      { question: "Do you repair Samsung Z Fold and Z Flip phones?", answer: "Yes, we support a range of Samsung models including Galaxy Z Fold and Z Flip. Please choose your exact model to view the compatible repair paths." },
-      { question: "Do I need to know my exact Samsung model?", answer: "Yes, parts differ significantly across Galaxy S, Note, A, J, and Z series. We need the exact model to confirm parts and pricing." },
-      { question: "Why is my Samsung not charging?", answer: "Charging problems can be caused by a faulty battery, debris in the charging port, or board-level faults. We inspect the charging assembly before confirming the repair." },
-      { question: "Will my Samsung remain water-resistant after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. Adhesive resealing does not restore guaranteed factory water-resistance certification." },
-      { question: "Is back glass the same as housing replacement?", answer: "No. The rear cover is separate from the main housing or frame. We assess the frame condition and camera involvement before advising on the repair path." },
-      { question: "Can I walk in, or should I book first?", answer: "Walk-ins are welcome at Kiosk C1 in Ringwood Square. Calling ahead allows us to confirm part availability for your specific Samsung model." }
+      { question: "Which Samsung phone models do you repair?", answer: "This page lists the currently supported public Samsung phone models, including Galaxy S, A, Note and Z series devices. If your exact model is not shown, contact the Ringwood Square store and we can confirm whether a repair path is available." },
+      { question: "How can I identify my Samsung model?", answer: "If the phone turns on, check Settings > About phone for the model name or model number. If the device is damaged or you are unsure, contact the store or bring it to Ringwood Square and we can help identify it before quoting." },
+      { question: "How much does a Samsung phone repair cost?", answer: "Cost depends on the exact Samsung model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
+      { question: "How long can a Samsung repair take?", answer: "Timing depends on the exact model, the fault, current stock, the repair queue and the device condition found during assessment. We confirm practical timing before the repair is approved." },
+      { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific Samsung model." },
+      { question: "Will my data normally be affected by a Samsung repair?", answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in." },
+      { question: "Do Samsung phone repairs include a warranty?", answer: "Eligible Samsung phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair." },
+      { question: "What happens if the required Samsung part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed." },
+      { question: "Is it better to repair or replace my Samsung phone?", answer: "That depends on the phone age, overall condition, repair quote, other faults, data needs and replacement cost. After checking the model and fault, we can explain the practical options." },
+      { question: "Can water resistance be guaranteed after a Samsung repair?", answer: "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally used in water." }
     ]
   },
   'google-pixel': {
     slug: 'google-pixel',
     brandName: 'Google Pixel',
     metadata: {
-      title: 'Google Pixel Repair Services Ringwood | Screen & Battery Fixes',
-      description: 'Expert Google Pixel repair services in Ringwood. Screen replacement, battery repair, and diagnostic assessment for Pixel models.'
+      title: 'Google Pixel Repair | Screen, Battery & Charging | Ali Mobile',
+      description: "Google Pixel repair at Ringwood Square for Melbourne's eastern suburbs. Check screen, battery, charging and rear-glass repair options by exact model."
     },
     timing: {
       screen: 'Most supported Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available.'
     },
     faqs: [
-      { question: "How long does a Google Pixel screen replacement take?", answer: "Most supported Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available." },
-      { question: "Do I need to know my exact Google Pixel model?", answer: "Yes. Repair compatibility varies between standard, Pro, and 'a' series Pixel models. We need the exact model to quote accurately." },
-      { question: "Why is my Pixel battery draining so fast?", answer: "Fast drain can be a sign of battery wear or other board faults. We check charging symptoms versus battery faults to confirm the repair path." },
-      { question: "Does my Pixel charging port need replacing?", answer: "Not always. We first check for debris or cable issues before confirming a charging port component replacement." },
-      { question: "Will my Google Pixel remain water-resistant after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. Adhesive replacement does not restore guaranteed factory water-resistance certification." },
-      { question: "Can I walk in, or should I book first?", answer: "Walk-ins are welcome at Ringwood Square Kiosk C1. We recommend booking to ensure we have the correct part for your Pixel model." },
-      { question: "What happens if there is frame damage?", answer: "If the frame is bent or damaged, a new screen may not sit correctly. We inspect the frame condition before proceeding with a screen replacement." }
+      { question: "Which Google Pixel models do you repair?", answer: "This page lists the currently supported public Google Pixel models, including standard, Pro, Pro XL and Fold models where listed. If your exact model is not shown, contact the Ringwood Square store and we can confirm whether a repair path is available." },
+      { question: "How can I identify my Google Pixel model?", answer: "If the phone turns on, check Settings > About phone for the device or model information. If the device is damaged or you are unsure, contact the store or bring it to Ringwood Square and we can help identify it before quoting." },
+      { question: "How much does a Google Pixel repair cost?", answer: "Cost depends on the exact Pixel model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
+      { question: "How long can a Google Pixel repair take?", answer: "Timing depends on the exact model, the fault, current stock, the repair queue and the device condition found during assessment. We confirm practical timing before the repair is approved." },
+      { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific Pixel model." },
+      { question: "Will my data normally be affected by a Pixel repair?", answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in." },
+      { question: "Do Google Pixel repairs include a warranty?", answer: "Eligible Google Pixel phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair." },
+      { question: "What happens if the required Pixel part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed." },
+      { question: "Is it better to repair or replace my Google Pixel?", answer: "That depends on the device age, overall condition, repair quote, other faults, data needs and replacement cost. After checking the model and fault, we can explain the practical options." },
+      { question: "Can water resistance be guaranteed after a Pixel repair?", answer: "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally used in water." }
     ]
   },
   oppo: {
     slug: 'oppo',
     brandName: 'Oppo',
     metadata: {
-      title: 'Oppo Phone Repair Services Ringwood | Screen & Battery Fixes',
-      description: 'Expert Oppo phone repair services in Ringwood. Screen replacement, battery repair, and diagnostic assessment.'
+      title: 'OPPO Phone Repair | Screen, Battery & Charging | Ali Mobile',
+      description: "OPPO phone repair at Ringwood Square for Melbourne's eastern suburbs. Check screen, battery, charging and rear-damage repair options by exact model."
     },
     timing: {
       screen: 'Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes once the correct part is available.'
     },
     faqs: [
-      { question: "How long does an Oppo screen replacement take?", answer: "Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes once the correct part is available." },
-      { question: "Do I need to know my exact Oppo model?", answer: "Yes, Oppo has many different models (Find, Reno, A series). Parts are specific to each exact model, so we need to identify the device first." },
-      { question: "Why is my Oppo battery dying quickly?", answer: "Rapid drain or shutdowns often indicate a failing battery, but we assess whether the fault is battery wear or a charging issue." },
-      { question: "Can you fix my Oppo charging port?", answer: "Yes, if the charging port is faulty, we can replace it. However, we always assess whether a simple clean or new cable resolves the issue first." },
-      { question: "Is Oppo back glass repairable?", answer: "Yes, depending on the model, we can replace the back cover. The repair method varies based on frame involvement and camera positioning." },
-      { question: "Will my Oppo remain water-resistant after repair?", answer: "Original factory water resistance cannot be guaranteed after opening or repair." },
-      { question: "Can I walk in, or should I book first?", answer: "Walk-ins to our Ringwood Square location are welcome. We recommend calling ahead so we can check stock for your specific Oppo model." }
+      { question: "Which OPPO phone models do you repair?", answer: "The public model browser lists currently supported OPPO Find, Reno and A Series phones. If your exact model is not shown, contact the Ringwood store and we can confirm whether a repair path is available." },
+      { question: "How can I identify my OPPO model?", answer: "If the device works, check Settings, then About device or About phone for the model name or model number. Menu names can vary between OPPO software versions, so contact the store or bring the phone in if you are unsure." },
+      { question: "How much does an OPPO phone repair cost?", answer: "Cost depends on the exact OPPO model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
+      { question: "How long can an OPPO repair take?", answer: "Timing depends on the exact model, fault, parts stock, current repair queue and overall device condition. We confirm practical timing before the repair is approved." },
+      { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your OPPO model." },
+      { question: "Will my data normally be affected by an OPPO repair?", answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in." },
+      { question: "Do OPPO phone repairs include a warranty?", answer: "Eligible OPPO phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair." },
+      { question: "What happens if the required OPPO part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed. We do not promise an exact delivery date before the part path is confirmed." },
+      { question: "Is it better to repair or replace my OPPO phone?", answer: "That depends on the phone age, overall condition, repair quote, other faults, data needs and replacement cost. After checking the model and fault, we can explain the practical options without automatically recommending repair." },
+      { question: "Can water resistance be guaranteed after an OPPO repair?", answer: "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally exposed to water." }
     ]
-  }
+  },
+  xiaomi: buildBatchPhoneBrandHubContent('xiaomi', 'Xiaomi'),
+  nokia: buildBatchPhoneBrandHubContent('nokia', 'Nokia'),
+  vivo: buildBatchPhoneBrandHubContent('vivo', 'Vivo'),
+  lg: buildBatchPhoneBrandHubContent('lg', 'LG'),
+  oneplus: buildBatchPhoneBrandHubContent('oneplus', 'OnePlus'),
+  huawei: buildBatchPhoneBrandHubContent('huawei', 'Huawei'),
+  htc: buildBatchPhoneBrandHubContent('htc', 'HTC'),
+  sony: buildBatchPhoneBrandHubContent('sony', 'Sony'),
+  telstra: buildBatchPhoneBrandHubContent('telstra', 'Telstra'),
+  motorola: buildBatchPhoneBrandHubContent('motorola', 'Motorola'),
+  microsoft: buildBatchPhoneBrandHubContent('microsoft', 'Microsoft'),
+  realme: buildBatchPhoneBrandHubContent('realme', 'Realme'),
+  asus: buildBatchPhoneBrandHubContent('asus', 'Asus'),
+  tcl: buildBatchPhoneBrandHubContent('tcl', 'TCL'),
+  nothing: buildBatchPhoneBrandHubContent('nothing', 'Nothing'),
 };
 
 export function getPhoneBrandHubContent(slug: string, brandName: string): PhoneBrandHubContent {
@@ -109,8 +231,8 @@ export function getPhoneBrandHubContent(slug: string, brandName: string): PhoneB
     slug,
     brandName,
     metadata: {
-      title: `${brandName} Phone Repair Services Ringwood | Screen & Battery Fixes`,
-      description: `Expert ${brandName} phone repair services in Ringwood. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.`
+      title: `${brandName} Phone Repair | Models & Repair Options | Ali Mobile`,
+      description: `${brandName} phone repair at Ringwood Square for Melbourne's eastern suburbs. Select your exact model to view available repair options and pricing.`
     },
     timing: {
       screen: ''

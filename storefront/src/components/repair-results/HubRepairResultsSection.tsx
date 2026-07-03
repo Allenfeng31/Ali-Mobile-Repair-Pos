@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import {
   getRepairResultAltText,
   getRepairResultImageSrc,
@@ -10,10 +10,26 @@ import {
 import BeforeAfterSlider from './BeforeAfterSlider';
 import styles from './HubRepairResultsSection.module.css';
 
+export type HubRepairResultItem = Pick<
+  PublicRepairResult,
+  | 'id'
+  | 'device_category'
+  | 'brand'
+  | 'model'
+  | 'repair_type'
+  | 'repair_type_slug'
+  | 'image_pair_alt_text'
+  | 'title'
+  | 'short_description'
+  | 'related_repair_url'
+>;
+
 interface HubRepairResultsSectionProps {
   category: RepairResultDeviceCategory;
   brand?: string;
   scope: 'repair-hub' | 'brand-hub';
+  initialResults?: HubRepairResultItem[];
+  showResultSummary?: boolean;
 }
 
 type RepairGroup = 'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing';
@@ -25,7 +41,15 @@ const GROUP_LABELS: Record<RepairGroup, string> = {
   'back-glass-or-housing': 'Back Glass / Housing Replacement',
 };
 
+const GROUP_SHORT_LABELS: Record<RepairGroup, string> = {
+  'screen': 'Screen',
+  'battery': 'Battery',
+  'charging-port': 'Charging',
+  'back-glass-or-housing': 'Back Housing',
+};
+
 const GROUPS_IN_ORDER: RepairGroup[] = ['screen', 'battery', 'charging-port', 'back-glass-or-housing'];
+const DESCRIPTION_TOGGLE_LENGTH = 160;
 
 function normalizeRepairGroup(slug: string): RepairGroup | null {
   if (slug === 'screen-replacement' || slug === 'screen-repair' || slug === 'screen') {
@@ -43,14 +67,30 @@ function normalizeRepairGroup(slug: string): RepairGroup | null {
   return null;
 }
 
-export default function HubRepairResultsSection({ category, brand, scope }: HubRepairResultsSectionProps) {
-  const [results, setResults] = useState<PublicRepairResult[]>([]);
-  const [activeGroup, setActiveGroup] = useState<RepairGroup | null>(null);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
+function getInitialRepairGroup(results?: HubRepairResultItem[]) {
+  if (!results?.length) return null;
+  return normalizeRepairGroup(results[0].repair_type_slug);
+}
+
+export default function HubRepairResultsSection({
+  category,
+  brand,
+  scope,
+  initialResults,
+  showResultSummary = false,
+}: HubRepairResultsSectionProps) {
+  const hasServerResultSet = initialResults !== undefined;
+  const [results, setResults] = useState<HubRepairResultItem[]>(initialResults || []);
+  const [activeGroup, setActiveGroup] = useState<RepairGroup | null>(getInitialRepairGroup(initialResults));
+  const [hasLoaded, setHasLoaded] = useState(hasServerResultSet && Boolean(initialResults?.length));
+  const [failed, setFailed] = useState(hasServerResultSet && !initialResults?.length);
+  const [expandedResultId, setExpandedResultId] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const reactId = useId();
+  const stableId = reactId.replace(/:/g, '');
 
   useEffect(() => {
+    if (hasServerResultSet) return;
     if (hasLoaded || failed) return;
 
     const observer = new IntersectionObserver(
@@ -102,7 +142,7 @@ export default function HubRepairResultsSection({ category, brand, scope }: HubR
     }
 
     return () => observer.disconnect();
-  }, [category, brand, hasLoaded, failed]);
+  }, [category, brand, hasLoaded, failed, hasServerResultSet]);
 
   if (failed) return null;
 
@@ -119,6 +159,129 @@ export default function HubRepairResultsSection({ category, brand, scope }: HubR
   const afterSrc = getRepairResultImageSrc(activeResult, 'after');
 
   const availableGroups = results.map(r => normalizeRepairGroup(r.repair_type_slug)).filter(Boolean) as RepairGroup[];
+  const hasMultipleResults = results.length > 1;
+  const activeResultId = String(activeResult.id);
+  const activeDescriptionId = `hub-repair-result-description-${stableId}-${activeResultId}`;
+  const isDescriptionExpanded = expandedResultId === activeResultId;
+
+  const activateResult = (result: HubRepairResultItem) => {
+    const nextGroup = normalizeRepairGroup(result.repair_type_slug);
+    if (!nextGroup) return;
+    setActiveGroup(nextGroup);
+    setExpandedResultId(null);
+  };
+
+  if (showResultSummary) {
+    return (
+      <section ref={sectionRef} className={styles.section} aria-labelledby={`hub-repair-results-heading-${scope}`}>
+        <div className={styles.compactShell}>
+          <div className={styles.compactHeader}>
+            <span className={styles.kicker}>Workshop Proof</span>
+            <h2 id={`hub-repair-results-heading-${scope}`}>Real {activeResult.brand} Repair Results</h2>
+            <p>
+              Before and after repair photos from approved Ali Mobile &amp; Repair jobs, checked for privacy before they appear here.
+            </p>
+          </div>
+
+          <div className={styles.mediaColumn}>
+            <div className={styles.mediaFrame}>
+              <BeforeAfterSlider
+                key={activeResult.id}
+                deviceCategory={activeResult.device_category}
+                beforeSrc={beforeSrc}
+                afterSrc={afterSrc}
+                beforeAlt={getRepairResultAltText(activeResult, 'before')}
+                afterAlt={getRepairResultAltText(activeResult, 'after')}
+                priority={activeResult.id === results[0]?.id}
+              />
+            </div>
+
+            {hasMultipleResults && (
+              <div className={styles.selectorRow} role="tablist" aria-label="Repair result examples">
+                {results.map((result) => {
+                  const group = normalizeRepairGroup(result.repair_type_slug);
+                  if (!group) return null;
+
+                  const selected = result.id === activeResult.id;
+                  const tabId = `hub-repair-result-tab-${stableId}-${result.id}`;
+                  const panelId = `hub-repair-result-panel-${stableId}-${result.id}`;
+
+                  return (
+                    <button
+                      key={result.id}
+                      id={tabId}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      aria-controls={panelId}
+                      className={`${styles.selectorButton} ${selected ? styles.selectorButtonActive : ''}`}
+                      onClick={() => activateResult(result)}
+                    >
+                      <span>{result.model}</span>
+                      <small>{GROUP_SHORT_LABELS[group]}</small>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.panelColumn}>
+            {results.map((result) => {
+              const group = normalizeRepairGroup(result.repair_type_slug);
+              if (!group) return null;
+
+              const selected = result.id === activeResult.id;
+              const resultId = String(result.id);
+              const panelId = `hub-repair-result-panel-${stableId}-${result.id}`;
+              const tabId = `hub-repair-result-tab-${stableId}-${result.id}`;
+              const descriptionId = selected ? activeDescriptionId : `hub-repair-result-description-${stableId}-${result.id}`;
+              const canExpandDescription = Boolean(result.short_description && result.short_description.length > DESCRIPTION_TOGGLE_LENGTH);
+              const expanded = selected && expandedResultId === resultId;
+
+              return (
+                <article
+                  key={result.id}
+                  id={panelId}
+                  role={hasMultipleResults ? 'tabpanel' : undefined}
+                  aria-labelledby={hasMultipleResults ? tabId : undefined}
+                  className={styles.resultPanel}
+                  hidden={!selected}
+                >
+                  <h3>{result.title}</h3>
+                  <p className={styles.resultMeta}>{result.brand} {result.model} - {result.repair_type}</p>
+                  {result.short_description && (
+                    <p
+                      id={descriptionId}
+                      className={`${styles.resultDescription} ${expanded ? styles.resultDescriptionExpanded : ''}`}
+                    >
+                      {result.short_description}
+                    </p>
+                  )}
+                  {selected && canExpandDescription && (
+                    <button
+                      type="button"
+                      className={styles.detailsToggle}
+                      aria-expanded={expanded}
+                      aria-controls={descriptionId}
+                      onClick={() => setExpandedResultId(expanded ? null : resultId)}
+                    >
+                      {expanded ? 'Show less' : 'Show full details'}
+                    </button>
+                  )}
+                  {result.related_repair_url && (
+                    <a className={styles.relatedLink} href={result.related_repair_url}>
+                      View matching repair page
+                    </a>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={sectionRef} className={styles.section} aria-labelledby={`hub-repair-results-heading-${scope}`}>

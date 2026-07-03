@@ -220,6 +220,78 @@ export function isPublicRepairResult(result: Pick<PublicRepairResult, 'status' |
   );
 }
 
+type HubRepairGroup = 'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing';
+
+function normalizeHubRepairGroup(slug: string): HubRepairGroup | null {
+  if (slug === 'screen-replacement' || slug === 'screen-repair' || slug === 'screen') {
+    return 'screen';
+  }
+  if (slug === 'battery-replacement' || slug === 'battery-service' || slug === 'battery-repair' || slug === 'battery') {
+    return 'battery';
+  }
+  if (slug === 'charging-port-replacement' || slug === 'charging-port-repair' || slug === 'charging-port') {
+    return 'charging-port';
+  }
+  if (slug === 'back-glass-replacement' || slug === 'back-housing-replacement' || slug === 'back-glass' || slug === 'back-housing') {
+    return 'back-glass-or-housing';
+  }
+  return null;
+}
+
+export async function fetchHubRepairResults(
+  category: RepairResultDeviceCategory,
+  brand?: string
+): Promise<PublicRepairResult[]> {
+  const supabase = createPublicRepairResultsClient();
+  if (!supabase) return [];
+
+  try {
+    let query = supabase
+      .from('repair_results')
+      .select(PUBLIC_REPAIR_RESULT_SELECT)
+      .eq('status', 'published')
+      .eq('privacy_checked', true)
+      .neq('before_image_path', '')
+      .neq('after_image_path', '')
+      .eq('device_category', category);
+
+    if (brand) {
+      const aliases = brand === 'iphone' || brand === 'ipad' ? [brand, 'apple'] : [brand];
+      query = query.in('brand_slug', aliases).eq('featured_on_brand_hub', true);
+    } else {
+      query = query.eq('featured_on_repair_hub', true);
+    }
+
+    const { data, error } = await query
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error('[repair-results] Failed to fetch hub repair results:', error);
+      return [];
+    }
+
+    const groups: Partial<Record<HubRepairGroup, PublicRepairResult>> = {};
+
+    for (const result of (data || []) as unknown as PublicRepairResult[]) {
+      if (!isPublicRepairResult(result)) continue;
+      const group = normalizeHubRepairGroup(result.repair_type_slug);
+      if (group && !groups[group]) {
+        groups[group] = result;
+        if (Object.keys(groups).length === 4) break;
+      }
+    }
+
+    const groupOrder: HubRepairGroup[] = ['screen', 'battery', 'charging-port', 'back-glass-or-housing'];
+    return groupOrder.map(group => groups[group]).filter(Boolean) as PublicRepairResult[];
+  } catch (error) {
+    console.error('[repair-results] Unexpected hub repair result failure:', error);
+    return [];
+  }
+}
+
 export async function fetchFeaturedRepairResultsByCategory(): Promise<Partial<Record<RepairResultDeviceCategory, PublicRepairResult>>> {
   const supabase = createPublicRepairResultsClient();
   if (!supabase) return {};

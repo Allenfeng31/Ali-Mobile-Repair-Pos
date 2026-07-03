@@ -1,19 +1,22 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPhoneBrandHubContent } from "@/lib/phone-brand-hubs";
+import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
+import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
 import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
 import BrandModelSearch from "@/components/BrandModelSearch";
-import HubRepairResultsSection from "@/components/repair-results/HubRepairResultsSection";
+import HubRepairResultsSection, { type HubRepairResultItem } from "@/components/repair-results/HubRepairResultsSection";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { type RepairResultDeviceCategory } from "@/lib/repair-results";
+import { fetchHubRepairResults } from "@/lib/repair-results";
 import BackButton from "@/components/BackButton";
 import MacBookModelFinder from "./MacBookModelFinder";
 import BrandHubLinks from "./BrandHubLinks";
 import BrandHubModelSeriesBrowser, { type BrandHubSeriesGroup } from "./BrandHubModelSeriesBrowser";
+import IPhoneServiceAreaLinks, { type IPhoneServiceAreaLinkCard } from "./IPhoneServiceAreaLinks";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
@@ -30,12 +33,349 @@ const BRAND_HUB_REPAIR_TYPE_LINKS = [
   { href: "/repairs/back-glass-replacement", label: "Back Glass Replacement" },
 ];
 
+const IPHONE_REPAIR_TYPE_LINKS = [
+  { href: "/repairs/screen-replacement", label: "iPhone screen repair options" },
+  { href: "/repairs/battery-replacement", label: "Battery replacement options" },
+  { href: "/repairs/charging-port-replacement", label: "Charging port repair" },
+  { href: "/repairs/back-glass-replacement", label: "Back glass repair" },
+];
+
+const SAMSUNG_REPAIR_TYPE_LINKS = [
+  { href: "/repairs/screen-replacement", label: "Samsung screen repair options" },
+  { href: "/repairs/battery-replacement", label: "Battery replacement options" },
+  { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
+  { href: "/repairs/back-glass-replacement", label: "Rear glass and back-cover repair options" },
+];
+
+const GOOGLE_PIXEL_REPAIR_TYPE_LINKS = [
+  { href: "/repairs/screen-replacement", label: "Google Pixel screen repair options" },
+  { href: "/repairs/battery-replacement", label: "Battery replacement options" },
+  { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
+  { href: "/repairs/back-glass-replacement", label: "Rear glass and housing repair options" },
+];
+
+const OPPO_REPAIR_TYPE_LINKS = [
+  { href: "/repairs/screen-replacement", label: "OPPO screen repair options" },
+  { href: "/repairs/battery-replacement", label: "Battery replacement options" },
+  { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
+  { href: "/repairs/back-glass-replacement", label: "Rear glass and back-cover repair options" },
+];
+
 const BRAND_HUB_REPAIR_CATEGORY_LINKS = [
   { href: "/repairs/phone", label: "Phone Repairs" },
   { href: "/repairs/tablet", label: "Tablet Repairs" },
   { href: "/repairs/laptop/macbook", label: "MacBook Repairs" },
   { href: "/repairs/watch", label: "Watch Repairs" },
 ];
+
+const IPHONE_COMMON_PROBLEMS = [
+  {
+    title: "Screen and touch problems",
+    body: "Cracked glass, a black display, coloured lines or touch that stops responding can point to different screen faults. Select the exact model so the suitable display option can be checked.",
+  },
+  {
+    title: "Battery and shutdown problems",
+    body: "Fast battery drain, unexpected shutdowns or a screen beginning to lift may require a battery and device-condition assessment before a quote is confirmed.",
+  },
+  {
+    title: "Charging problems",
+    body: "A phone that charges intermittently or not at all may have debris, cable, battery, port or board-related issues. The charging path should be checked before a port replacement is recommended.",
+  },
+  {
+    title: "Back glass damage",
+    body: "Cracked rear glass or housing damage can affect handling and expose internal areas. The available repair path depends on the model and the condition of the frame.",
+  },
+  {
+    title: "Camera problems",
+    body: "Blurred images, failed focus, shaking or a blank camera preview may come from the camera module, lens damage or another device fault.",
+  },
+  {
+    title: "Liquid exposure or no power",
+    body: "Liquid exposure and no-power faults require inspection before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+  },
+];
+
+const SAMSUNG_COMMON_PROBLEMS = [
+  {
+    title: "Screen, touch and display lines",
+    body: "Cracked glass, a black display, flickering, coloured lines or touch that stops responding can come from different screen faults. Select the exact Galaxy model so the suitable repair path can be checked.",
+  },
+  {
+    title: "Battery, shutdown and swelling",
+    body: "Fast battery drain, unexpected shutdowns, overheating or a back cover beginning to lift may require a battery and device-condition assessment before a quote is confirmed.",
+  },
+  {
+    title: "Charging problems",
+    body: "Intermittent or failed charging may relate to debris, the cable, battery, charging port or another internal fault. The charging path should be checked before a port replacement is recommended.",
+  },
+  {
+    title: "Rear glass or back-cover damage",
+    body: "Cracked rear glass, a loose back cover or frame damage can affect handling and expose internal areas. The available repair option depends on the model and device condition.",
+  },
+  {
+    title: "Camera problems",
+    body: "Blurred images, failed focus, shaking or a blank camera preview may come from lens damage, the camera module or another device fault.",
+  },
+  {
+    title: "Fold, Flip, liquid or no-power faults",
+    body: "Fold and Flip display faults, liquid exposure and no-power problems require assessment before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+  },
+];
+
+const GOOGLE_PIXEL_COMMON_PROBLEMS = [
+  {
+    title: "Screen and touch problems",
+    body: "Cracked glass, a black display, coloured lines, flickering or touch that stops responding can come from different screen faults. Select the exact Pixel model so the suitable repair path can be checked.",
+  },
+  {
+    title: "Battery, shutdown and heat problems",
+    body: "Fast battery drain, unexpected shutdowns, overheating or a screen beginning to lift may require a battery and device-condition assessment before a quote is confirmed.",
+  },
+  {
+    title: "Charging problems",
+    body: "Intermittent or failed charging may relate to debris, the cable, battery, charging port or another internal fault. The charging path should be checked before a port replacement is recommended.",
+  },
+  {
+    title: "Rear glass or housing damage",
+    body: "Cracked rear glass, housing damage or a loose rear panel can affect handling and expose internal areas. The available repair option depends on the Pixel model and device condition.",
+  },
+  {
+    title: "Camera problems",
+    body: "Blurred images, failed focus, shaking, damaged lenses or a blank camera preview may come from the camera module, lens damage or another device fault.",
+  },
+  {
+    title: "Pixel Fold, liquid or no-power faults",
+    body: "Pixel Fold display faults, liquid exposure and no-power problems require assessment before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+  },
+];
+
+const OPPO_COMMON_PROBLEMS = [
+  {
+    title: "Screen, touch and display problems",
+    body: "Cracked glass, a black display, coloured lines, flickering or touch that stops responding can come from different screen faults. Select the exact OPPO model so the suitable repair path can be checked.",
+  },
+  {
+    title: "Battery, shutdown and heat problems",
+    body: "Fast battery drain, unexpected shutdowns, overheating or a rear panel beginning to lift may require a battery and device-condition assessment before a quote is confirmed.",
+  },
+  {
+    title: "Charging problems",
+    body: "Intermittent or failed charging may relate to debris, the cable, battery, charging port or another internal fault. The charging path should be assessed before a port replacement is recommended.",
+  },
+  {
+    title: "Rear glass or back-cover damage",
+    body: "Cracked rear glass, a loose back cover or housing damage can affect handling and expose internal areas. The available repair option depends on the OPPO model and overall device condition.",
+  },
+  {
+    title: "Camera problems",
+    body: "Blurred images, failed focus, shaking, damaged lenses or a blank camera preview may come from lens damage, the camera module or another device fault.",
+  },
+  {
+    title: "Liquid exposure or no-power faults",
+    body: "Liquid exposure and no-power problems require assessment before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+  },
+];
+
+type BatchPhoneBrandSlug =
+  | "xiaomi"
+  | "nokia"
+  | "vivo"
+  | "lg"
+  | "oneplus"
+  | "huawei"
+  | "htc"
+  | "sony"
+  | "telstra"
+  | "motorola"
+  | "microsoft"
+  | "realme"
+  | "asus"
+  | "tcl"
+  | "nothing";
+
+interface BatchPhoneBrandHubConfig {
+  displayName: string;
+  heroDescription: string;
+  repairLinks: typeof BRAND_HUB_REPAIR_TYPE_LINKS;
+  commonRepairsIntro: string;
+  commonProblems: typeof OPPO_COMMON_PROBLEMS;
+  diagnosisIntro: string;
+  modelFaultCopy: string;
+  serviceAreaDescriptions: string[];
+}
+
+const BATCH_PHONE_BRAND_NAMES: Record<BatchPhoneBrandSlug, string> = {
+  xiaomi: "Xiaomi",
+  nokia: "Nokia",
+  vivo: "Vivo",
+  lg: "LG",
+  oneplus: "OnePlus",
+  huawei: "Huawei",
+  htc: "HTC",
+  sony: "Sony",
+  telstra: "Telstra",
+  motorola: "Motorola",
+  microsoft: "Microsoft",
+  realme: "Realme",
+  asus: "Asus",
+  tcl: "TCL",
+  nothing: "Nothing",
+};
+
+const BATCH_PHONE_BRAND_SLUGS = Object.keys(BATCH_PHONE_BRAND_NAMES) as BatchPhoneBrandSlug[];
+const COMPACT_PHONE_BRAND_SLUGS = new Set<BatchPhoneBrandSlug>([
+  "huawei",
+  "htc",
+  "sony",
+  "telstra",
+  "motorola",
+  "microsoft",
+  "realme",
+  "asus",
+  "tcl",
+  "nothing",
+]);
+
+function isBatchPhoneBrandSlug(slug: string): slug is BatchPhoneBrandSlug {
+  return BATCH_PHONE_BRAND_SLUGS.includes(slug as BatchPhoneBrandSlug);
+}
+
+function buildBatchPhoneRepairLinks(brandName: string) {
+  return [
+    { href: "/repairs/screen-replacement", label: `${brandName} screen repair options` },
+    { href: "/repairs/battery-replacement", label: "Battery replacement options" },
+    { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
+    { href: "/repairs/back-glass-replacement", label: "Rear glass and back-cover repair options" },
+  ];
+}
+
+function buildBatchPhoneCommonProblems(brandName: string, isCompact: boolean) {
+  return [
+    {
+      title: "Screen, touch and display problems",
+      body: `Cracked glass, a black display, display lines, flickering or touch that stops responding can come from different screen faults. Select the exact ${brandName} model so the suitable repair path can be checked.`,
+    },
+    {
+      title: "Battery, shutdown and heat problems",
+      body: `Fast battery drain, unexpected shutdowns, overheating or a rear panel beginning to lift may require a battery and device-condition assessment before a quote is confirmed.`,
+    },
+    {
+      title: "Charging problems",
+      body: `Intermittent or failed charging may relate to debris, the cable, battery, charging port or another internal fault. The charging path should be assessed before a port replacement is recommended.`,
+    },
+    {
+      title: isCompact ? "Rear glass, cover or housing damage" : "Rear glass or back-cover damage",
+      body: `Cracked rear glass, a loose back cover or housing damage can affect handling and expose internal areas. The available repair option depends on the ${brandName} model and overall device condition.`,
+    },
+    {
+      title: "Camera problems",
+      body: "Blurred images, failed focus, shaking, damaged lenses or a blank camera preview may come from lens damage, the camera module or another device fault.",
+    },
+    {
+      title: "Liquid exposure or no-power faults",
+      body: "Liquid exposure and no-power problems require assessment before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+    },
+  ];
+}
+
+function buildBatchPhoneServiceAreaDescriptions(brandName: string) {
+  return [
+    `${brandName} customers in AREA can choose their exact phone model before visiting our Ringwood Square repair desk.`,
+    `Travelling from AREA? Check ${brandName} screen, battery, charging and rear-damage options by model, then call ahead about parts availability.`,
+    `Customers near AREA can use the ${brandName} model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `AREA customers can review ${brandName} repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from AREA, choose the exact ${brandName} model and contact the store if you want likely timing checked first.`,
+    `AREA customers can compare ${brandName} repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+}
+
+const BATCH_PHONE_BRAND_HUB_CONFIG: Record<BatchPhoneBrandSlug, BatchPhoneBrandHubConfig> = BATCH_PHONE_BRAND_SLUGS.reduce((config, slug) => {
+  const displayName = BATCH_PHONE_BRAND_NAMES[slug];
+  const isCompact = COMPACT_PHONE_BRAND_SLUGS.has(slug);
+  config[slug] = {
+    displayName,
+    heroDescription: isCompact
+      ? `Choose your exact ${displayName} model to view available screen, battery, charging and rear-damage repair options. Our Ringwood Square repair desk can confirm quotes, parts availability and practical timing before work begins.`
+      : `Choose your exact ${displayName} model to view available screen, battery, charging and rear-damage repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.`,
+    repairLinks: buildBatchPhoneRepairLinks(displayName),
+    commonRepairsIntro: isCompact
+      ? `Select your exact ${displayName} model first, then review the available repair path. Repair availability can vary by model, fault, device condition and current parts stock.`
+      : `Start with your ${displayName} model, then choose the repair path that best matches the fault. Available screen, battery, charging and rear-damage options can vary by model, device condition and current parts availability.`,
+    commonProblems: buildBatchPhoneCommonProblems(displayName, isCompact),
+    diagnosisIntro: isCompact
+      ? `We confirm the exact ${displayName} model and fault before discussing the repair path. Pricing, Quote status, parts availability and likely timing are explained before any work is approved.`
+      : `We confirm the exact ${displayName} model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved.`,
+    modelFaultCopy: `We check the exact ${displayName} model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone.`,
+    serviceAreaDescriptions: buildBatchPhoneServiceAreaDescriptions(displayName),
+  };
+  return config;
+}, {} as Record<BatchPhoneBrandSlug, BatchPhoneBrandHubConfig>);
+
+function getBatchPhoneBrandConfig(categorySlug: string, brandSlug: string) {
+  if (categorySlug !== "phone" || !isBatchPhoneBrandSlug(brandSlug)) {
+    return null;
+  }
+
+  return BATCH_PHONE_BRAND_HUB_CONFIG[brandSlug];
+}
+
+function getBatchPhoneServiceAreaDescription(config: BatchPhoneBrandHubConfig, areaName: string, index: number) {
+  return config.serviceAreaDescriptions[index % config.serviceAreaDescriptions.length].replace("AREA", areaName);
+}
+
+const PHONE_FEATURED_SERVICE_AREA_SLUGS = ["ringwood-east", "heathmont", "mitcham", "croydon"];
+
+function getIPhoneServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact iPhone model and check available repair options before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Review the repair options for your iPhone, then call ahead to confirm parts or likely timing.`,
+    `Customers near ${areaName} can use the model selector first, then visit the Ringwood Square kiosk for assessment and confirmed pricing.`,
+    `${areaName} customers can request a quote after choosing the iPhone model that matches their device.`,
+    `Before travelling from ${areaName}, check the supported iPhone repairs and contact our Ringwood Square team about parts availability.`,
+    `${areaName} customers can compare iPhone repair paths online, then book or call the Ringwood desk for the next step.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
+function getSamsungServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact Samsung Galaxy model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check Samsung screen, battery, charging and rear-cover options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the Samsung model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `${areaName} customers can review Samsung repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from ${areaName}, choose the exact Galaxy model and contact the store if you want likely timing checked first.`,
+    `${areaName} customers can compare Samsung repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
+function getGooglePixelServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact Google Pixel model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check Pixel screen, battery, charging and rear-damage options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the Pixel model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `${areaName} customers can review Google Pixel repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from ${areaName}, choose the exact Pixel model and contact the store if you want likely timing checked first.`,
+    `${areaName} customers can compare Pixel repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
+function getOppoServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact OPPO model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check OPPO screen, battery, charging and rear-damage options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the OPPO model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `${areaName} customers can review OPPO repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from ${areaName}, choose the exact OPPO model and contact the store if you want likely timing checked first.`,
+    `${areaName} customers can compare OPPO repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
 
 const MAJOR_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
 const SAMSUNG_SERIES_ORDER = ["s", "a", "note", "z"];
@@ -406,6 +746,49 @@ function formatStartingRepairPrice(price: number): string {
   }).format(price);
 }
 
+function getBrandHubHeroDescription(
+  categorySlug: string,
+  brandSlug: string,
+  brandName: string,
+  modelCount: number
+): string {
+  if (categorySlug === "phone") {
+    switch (brandSlug) {
+      case "iphone":
+        return "Choose your exact iPhone model to view screen, battery, charging and back glass repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+      case "samsung":
+        return "Choose your exact Samsung Galaxy model to view available screen, battery, charging and rear-cover repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+      case "google-pixel":
+        return "Choose your exact Google Pixel model to view available screen, battery, charging and rear-damage repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+      case "oppo":
+        return "Choose your exact OPPO model to view available screen, battery, charging and rear-damage repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+      default:
+        if (isBatchPhoneBrandSlug(brandSlug)) {
+          return BATCH_PHONE_BRAND_HUB_CONFIG[brandSlug].heroDescription;
+        }
+        return `Explore ${brandName} phone repair options for ${modelCount} supported models. Visit our Ringwood Square repair desk or choose your exact model to check available services and pricing.`;
+    }
+  }
+
+  if (categorySlug === "watch" && brandSlug === "apple") {
+    return "Explore Apple Watch repair options for supported Series, SE and Ultra models, including screen, battery and no-power diagnostics. Visit Ringwood Square or choose your exact watch model to check pricing.";
+  }
+
+  if (categorySlug === "tablet" && brandSlug === "ipad") {
+    return "Explore iPad repair options for supported iPad, iPad Air, iPad mini and iPad Pro models. Visit Ringwood Square or choose your exact model to check services and pricing.";
+  }
+
+  if (categorySlug === "tablet" && brandSlug === "samsung") {
+    return "Explore Samsung Tablet repair options for supported Galaxy Tab models, including screen, battery and charging-related repairs. Visit Ringwood Square or choose your exact model to check pricing.";
+  }
+
+  if (categorySlug === "tablet" && brandSlug === "lenovo") {
+    return "Explore Lenovo Tablet repair options for supported Tab, Yoga and other Lenovo tablet models. Visit Ringwood Square or choose your exact model to check available services and pricing.";
+  }
+
+  return `Select your exact ${brandName} model below to view repair options and pricing at Ringwood Square.`;
+}
+
 export async function generateStaticParams() {
   const catalog = await fetchRepairCatalog();
   return catalog.brands.map((b) => ({
@@ -425,6 +808,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const isAppleWatch = resolvedParams.category === "watch" && resolvedParams.brand === "apple";
   const isIPad = resolvedParams.category === "tablet" && resolvedParams.brand === "ipad";
   const isSamsungTablet = resolvedParams.category === "tablet" && resolvedParams.brand === "samsung";
+  const isLenovoTablet = resolvedParams.category === "tablet" && resolvedParams.brand === "lenovo";
   const isPhone = resolvedParams.category === "phone";
 
   const isMacBookHub = resolvedParams.category === "laptop" && resolvedParams.brand === "macbook";
@@ -436,14 +820,17 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     title = phoneContent.metadata.title;
     description = phoneContent.metadata.description;
   } else if (isAppleWatch) {
-    title = 'Apple Watch Repair Services in Ringwood | Models & Repair Options | Ali Mobile';
-    description = 'Expert Apple Watch repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact model for compatible repair options.';
+    title = 'Apple Watch Repair | Screen, Battery & Diagnostics | Ali Mobile';
+    description = "Apple Watch repair at Ringwood Square for Melbourne's eastern suburbs. Choose your model for screen, battery and diagnostic quote options.";
   } else if (isIPad) {
-    title = 'iPad Repair Services in Ringwood | Models & Repair Options | Ali Mobile';
-    description = 'Expert iPad repair services in Ringwood, Melbourne. Screen replacement, battery repair, and diagnostic assessment. Confirm your exact iPad family, generation, screen size or A-number for compatible repair options and current pricing.';
+    title = 'iPad Repair | Screen, Battery & Charging | Ali Mobile';
+    description = "iPad repair at Ringwood Square for Melbourne's eastern suburbs. Choose your exact model for screen, battery, charging and quote options.";
   } else if (isSamsungTablet) {
-    title = 'Samsung Galaxy Tab Repair Services | Models & Repair Options | Ali Mobile';
-    description = 'Explore repair options for supported Samsung Galaxy Tab models, including screen, battery, charging and diagnostic services. Confirm the exact model, parts availability, pricing and repair timing with Ali Mobile & Repair in Ringwood.';
+    title = 'Samsung Tablet Repair | Screen, Battery & Charging | Ali Mobile';
+    description = "Samsung Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Choose your Galaxy Tab model for screen, battery and charging options.";
+  } else if (isLenovoTablet) {
+    title = 'Lenovo Tablet Repair | Models & Repair Options | Ali Mobile';
+    description = "Lenovo Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Select your exact model to view available repair options and pricing.";
   } else if (isMacBookHub) {
     title = 'MacBook Repair in Ringwood | Ali Mobile & Repair';
     description = 'MacBook repair services in Ringwood for supported screen, battery, keyboard or top case, charging and diagnostic issues. Visit Ali Mobile & Repair at Ringwood Square to confirm the model, parts availability and suitable repair options.';
@@ -491,6 +878,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isLenovoTabletHub = categorySlug === "tablet" && brandSlug === "lenovo";
   const isTabletBrandHub = isIPadHub || isSamsungTabletHub || isLenovoTabletHub;
   const isPhoneHub = categorySlug === "phone";
+  const isIPhoneHub = categorySlug === "phone" && brandSlug === "iphone";
+  const isSamsungPhoneHub = categorySlug === "phone" && brandSlug === "samsung";
+  const isGooglePixelHub = categorySlug === "phone" && brandSlug === "google-pixel";
+  const isOppoPhoneHub = categorySlug === "phone" && brandSlug === "oppo";
+  const batchPhoneBrandConfig = getBatchPhoneBrandConfig(categorySlug, brandSlug);
+  const isEnhancedPhoneHub = isIPhoneHub || isSamsungPhoneHub || isGooglePixelHub || isOppoPhoneHub || Boolean(batchPhoneBrandConfig);
   const usesBrandHubDesign = isPhoneHub || isTabletBrandHub || isAppleWatchHub;
   const usesFlatBrandHubModels = isPhoneHub && usesBrandHubDesign && !MAJOR_PHONE_BRAND_HUB_SLUGS.includes(brandSlug);
   const floatingJumpLabel =
@@ -510,6 +903,18 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "Choose Your Apple Watch"
       : "Choose Your Model";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
+  const brandHubHeading = isPhoneHub
+    ? getPhoneBrandRepairKeyword(brandSlug, brandName)
+    : isAppleWatchHub
+    ? "Apple Watch Repair"
+    : isIPadHub
+    ? "iPad Repair"
+    : isSamsungTabletHub
+    ? "Samsung Tablet Repair"
+    : isLenovoTabletHub
+    ? "Lenovo Tablet Repair"
+    : `${brandName} Repair Services`;
+  const brandHubHeroDescription = getBrandHubHeroDescription(categorySlug, brandSlug, brandName, models.length);
   const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
   const otherWatchBrandLinks = isAppleWatchHub ? buildOtherWatchBrandLinks(catalog.brands, brandSlug) : [];
@@ -518,6 +923,135 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const seriesGroups = groupModelsBySeries(sortedModels, brandName);
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(categorySlug, brandSlug, models) : [];
+  const phoneServiceAreaSource = isEnhancedPhoneHub
+    ? [
+        ...PHONE_FEATURED_SERVICE_AREA_SLUGS.map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
+          .filter((area): area is (typeof SERVICE_AREAS)[number] => Boolean(area)),
+        ...SERVICE_AREAS.filter(
+          (area) =>
+            area.slug !== "ringwood" &&
+            !PHONE_FEATURED_SERVICE_AREA_SLUGS.includes(area.slug)
+        ),
+      ]
+    : [];
+  const iphoneServiceAreas: IPhoneServiceAreaLinkCard[] = isIPhoneHub
+    ? phoneServiceAreaSource.map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getIPhoneServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const samsungServiceAreas: IPhoneServiceAreaLinkCard[] = isSamsungPhoneHub
+    ? phoneServiceAreaSource.map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getSamsungServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const googlePixelServiceAreas: IPhoneServiceAreaLinkCard[] = isGooglePixelHub
+    ? phoneServiceAreaSource.map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getGooglePixelServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const oppoServiceAreas: IPhoneServiceAreaLinkCard[] = isOppoPhoneHub
+    ? phoneServiceAreaSource.map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getOppoServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const batchPhoneServiceAreas: IPhoneServiceAreaLinkCard[] = batchPhoneBrandConfig
+    ? phoneServiceAreaSource.map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getBatchPhoneServiceAreaDescription(batchPhoneBrandConfig, area.name, index),
+      }))
+    : [];
+  const serverRepairResultsBrand = isIPhoneHub
+    ? "iphone"
+    : isSamsungPhoneHub
+    ? "samsung"
+    : isGooglePixelHub
+    ? "google-pixel"
+    : isOppoPhoneHub
+    ? "oppo"
+    : batchPhoneBrandConfig
+    ? brandSlug
+    : null;
+  const serverRepairResults: HubRepairResultItem[] | undefined = serverRepairResultsBrand
+    ? (await fetchHubRepairResults("phone", serverRepairResultsBrand)).map((result) => ({
+        id: result.id,
+        device_category: result.device_category,
+        brand: result.brand,
+        model: result.model,
+        repair_type: result.repair_type,
+        repair_type_slug: result.repair_type_slug,
+        image_pair_alt_text: result.image_pair_alt_text,
+        title: result.title,
+        short_description: result.short_description,
+        related_repair_url: result.related_repair_url,
+      }))
+    : undefined;
+  const phoneCommonProblems = isIPhoneHub
+    ? {
+        headingId: "iphone-common-problems-heading",
+        kicker: "COMMON IPHONE PROBLEMS",
+        heading: "Common iPhone problems we assess",
+        items: IPHONE_COMMON_PROBLEMS,
+      }
+    : isSamsungPhoneHub
+    ? {
+        headingId: "samsung-common-problems-heading",
+        kicker: "COMMON SAMSUNG PHONE PROBLEMS",
+        heading: "Common Samsung phone problems we assess",
+        items: SAMSUNG_COMMON_PROBLEMS,
+      }
+    : isGooglePixelHub
+    ? {
+        headingId: "google-pixel-common-problems-heading",
+        kicker: "COMMON GOOGLE PIXEL PROBLEMS",
+        heading: "Common Google Pixel problems we assess",
+        items: GOOGLE_PIXEL_COMMON_PROBLEMS,
+      }
+    : isOppoPhoneHub
+    ? {
+        headingId: "oppo-common-problems-heading",
+        kicker: "COMMON OPPO PHONE PROBLEMS",
+        heading: "Common OPPO phone problems we assess",
+        items: OPPO_COMMON_PROBLEMS,
+      }
+    : batchPhoneBrandConfig
+    ? {
+        headingId: `${brandSlug}-common-problems-heading`,
+        kicker: `COMMON ${batchPhoneBrandConfig.displayName.toUpperCase()} PHONE PROBLEMS`,
+        heading: `Common ${batchPhoneBrandConfig.displayName} phone problems we assess`,
+        items: batchPhoneBrandConfig.commonProblems,
+      }
+    : null;
+  const phoneRepairTypeLinks = isIPhoneHub
+    ? IPHONE_REPAIR_TYPE_LINKS
+    : isSamsungPhoneHub
+    ? SAMSUNG_REPAIR_TYPE_LINKS
+    : isGooglePixelHub
+    ? GOOGLE_PIXEL_REPAIR_TYPE_LINKS
+    : isOppoPhoneHub
+    ? OPPO_REPAIR_TYPE_LINKS
+    : batchPhoneBrandConfig
+    ? batchPhoneBrandConfig.repairLinks
+    : BRAND_HUB_REPAIR_TYPE_LINKS;
+  const phoneCommonRepairsIntro = isIPhoneHub
+    ? "Start with your iPhone model, then choose the repair path that best matches the fault. Screen, battery, charging and back glass options can vary by model and current parts availability."
+    : isSamsungPhoneHub
+    ? "Start with your Samsung model, then choose the repair path that best matches the fault. Available screen, battery, charging and rear-damage options can vary by model, device condition and current parts availability."
+    : isGooglePixelHub
+    ? "Start with your Google Pixel model, then choose the repair path that best matches the fault. Available screen, battery, charging and rear-damage options can vary by model, device condition and current parts availability."
+    : isOppoPhoneHub
+    ? "Start with your OPPO model, then choose the repair path that best matches the fault. Available screen, battery, charging and rear-damage options can vary by model, device condition and current parts availability."
+    : batchPhoneBrandConfig
+    ? batchPhoneBrandConfig.commonRepairsIntro
+    : "Choose your exact model first, then compare the repair path that best matches the fault we need to assess.";
   const macbookRepairPaths = [
     {
       name: "Screen and display faults",
@@ -693,27 +1227,19 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           <h1 id="category-repair-heading">
             {isMacBookHub
               ? "MacBook Repair in Ringwood"
-              : isAppleWatchHub
-              ? "Apple Watch Repair Services in Ringwood"
-              : isIPadHub
-              ? "iPad Repair Services in Ringwood"
-              : `${brandName} Repair Services`}
+              : brandHubHeading}
           </h1>
           <p>
             {isMacBookHub
               ? 'Professional MacBook repair in Ringwood Square. We support screen, battery, keyboard/top case, charging, and diagnostic services. Use your model name or A-number below to find your MacBook and view repair options. Timing depends on parts availability and exact model confirmation.'
-              : isAppleWatchHub
-              ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.'
-              : isIPadHub
-              ? 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre. We confirm your exact iPad family, generation, screen size or A-number before confirming the repair path.'
-              : 'Select your exact model below to view repair options and pricing at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.'}
+              : brandHubHeroDescription}
           </p>
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
-              View model option
+              {isIPhoneHub ? "Choose your iPhone model" : "View model option"}
             </a>
             <Link href="/book-repair" className="repair-secondary-action">
-              Live Quote
+              {isIPhoneHub ? "Get a repair quote" : "Live Quote"}
               <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
             </Link>
           </div>
@@ -1398,7 +1924,9 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 <span className="repair-kicker">Popular models</span>
                 <h2 id="brand-models-heading">Choose your {brandName} model</h2>
                 <p>
-                  Start with the exact {brandName} model to view supported repair options, current pricing, and the right booking path.
+                  {isIPhoneHub
+                    ? "We support a broad range of current and earlier iPhone models. Choose your exact model to check the repair options currently available."
+                    : `Start with the exact ${brandName} model to view supported repair options, current pricing, and the right booking path.`}
                 </p>
               </div>
             )}
@@ -1421,6 +1949,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             category={categorySlug as RepairResultDeviceCategory}
             brand={brandSlug}
             scope="brand-hub"
+            initialResults={serverRepairResults}
+            showResultSummary={isEnhancedPhoneHub}
           />
 
           <section className={usesBrandHubDesign ? "brand-hub-section" : "repair-types-showcase"} aria-labelledby="brand-repair-types-heading">
@@ -1429,11 +1959,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 <span className="repair-kicker repair-kicker-muted">Repair services</span>
                 <h2 id="brand-repair-types-heading">{usesBrandHubDesign ? `Popular ${brandName} repair services` : `Common ${brandName} Repair Paths`}</h2>
               </div>
-              <p>Choose your exact model first, then compare the repair path that best matches the fault we need to assess.</p>
+              <p>{phoneCommonRepairsIntro}</p>
             </div>
             <div className={usesBrandHubDesign ? "brand-hub-link-grid brand-hub-repair-link-grid" : "repair-type-card-grid"}>
               {usesBrandHubDesign ? (
-                BRAND_HUB_REPAIR_TYPE_LINKS.map((link) => (
+                phoneRepairTypeLinks.map((link) => (
                   <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
                     <strong>{link.label}</strong>
                   </Link>
@@ -1465,26 +1995,76 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
+          {phoneCommonProblems && (
+            <section className="brand-hub-section" aria-labelledby={phoneCommonProblems.headingId}>
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">{phoneCommonProblems.kicker}</span>
+                <h2 id={phoneCommonProblems.headingId}>{phoneCommonProblems.heading}</h2>
+              </div>
+              <div className="repair-signal-grid">
+                {phoneCommonProblems.items.map((problem, index) => (
+                  <article key={problem.title} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h3>{problem.title}</h3>
+                    <p>{problem.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel" : ""}`} aria-labelledby="phone-diagnostic-heading">
             <div className="w-full">
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="phone-diagnostic-heading">How {brandName} diagnosis, parts and timing work</h2>
-              <p>We confirm the exact model first, then explain the compatible repair options and practical timing.</p>
+              <p>
+                {isIPhoneHub
+                  ? "We confirm the exact iPhone model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : isSamsungPhoneHub
+                  ? "We confirm the exact Samsung model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : isGooglePixelHub
+                  ? "We confirm the exact Google Pixel model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : isOppoPhoneHub
+                  ? "We confirm the exact OPPO model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : batchPhoneBrandConfig
+                  ? batchPhoneBrandConfig.diagnosisIntro
+                  : "We confirm the exact model first, then explain the compatible repair options and practical timing."}
+              </p>
               <div className="repair-signal-grid mt-5">
                 <article className="repair-signal-card">
                   <span>01</span>
-                  <h3>Model-specific diagnosis</h3>
-                  <p>Compatible parts differ by model. The exact model matters before we confirm repair compatibility.</p>
+                  <h3>{isEnhancedPhoneHub ? "Confirm the model and fault" : "Model-specific diagnosis"}</h3>
+                  <p>
+                    {isIPhoneHub
+                      ? "We check the exact iPhone model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
+                      : isSamsungPhoneHub
+                      ? "We check the exact Samsung model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
+                      : isGooglePixelHub
+                      ? "We check the exact Pixel model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
+                      : isOppoPhoneHub
+                      ? "We check the exact OPPO model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
+                      : batchPhoneBrandConfig
+                      ? batchPhoneBrandConfig.modelFaultCopy
+                      : "Compatible parts differ by model. The exact model matters before we confirm repair compatibility."}
+                  </p>
                 </article>
                 <article className="repair-signal-card">
                   <span>02</span>
-                  <h3>Screen replacement timing</h3>
-                  <p>{phoneContent?.timing.screen || 'Repair timing depends on the exact model and parts availability. We confirm the timeline once diagnosis is complete.'}</p>
+                  <h3>{isEnhancedPhoneHub ? "Review the quote and parts" : "Screen replacement timing"}</h3>
+                  <p>
+                    {isEnhancedPhoneHub
+                      ? "You will be shown the available repair option, price or Quote status before work begins. If a part needs to be ordered, we will explain the expected availability and likely timing before you approve the repair."
+                      : phoneContent?.timing.screen || 'Repair timing depends on the exact model and parts availability. We confirm the timeline once diagnosis is complete.'}
+                  </p>
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Battery replacement timing</h3>
-                  <p>{phoneContent?.timing.battery || 'Many common battery replacements can be completed quickly when the correct part is in stock.'}</p>
+                  <h3>{isEnhancedPhoneHub ? "Repair, testing and collection" : "Battery replacement timing"}</h3>
+                  <p>
+                    {isEnhancedPhoneHub
+                      ? "After approval, the repair is completed and relevant device functions are checked. We will let you know when the device is ready for collection and explain any important aftercare or warranty information."
+                      : phoneContent?.timing.battery || 'Many common battery replacements can be completed quickly when the correct part is in stock.'}
+                  </p>
                 </article>
               </div>
             </div>
@@ -1517,14 +2097,119 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="phone-ringwood-heading">{brandName} repair support at Ringwood Square</h2>
-              <p>Ali Mobile & Repair works from Ringwood Square Shopping Centre Kiosk C1. Walk-ins are welcome, and we offer free underground and outdoor parking. Our team provides English, 中文, and 粤语 support. Call 0481 058 514 to confirm parts or timing before travelling.</p>
+              {isEnhancedPhoneHub ? (
+                <>
+                  <p>Ali Mobile & Repair operates from Kiosk C1 at Ringwood Square Shopping Centre and supports customers across Melbourne's eastern suburbs. Walk-ins are welcome, with free underground and outdoor parking available. You can call ahead to confirm parts or likely timing before travelling.</p>
+                  <p>Our team provides support in English, 中文, and 粤语.</p>
+                  <p>
+                    <Link href="/locations/ringwood" prefetch={false}>Ringwood store information and directions</Link>
+                  </p>
+                </>
+              ) : (
+                <p>Ali Mobile & Repair works from Ringwood Square Shopping Centre Kiosk C1. Walk-ins are welcome, and we offer free underground and outdoor parking. Our team provides English, 中文, and 粤语 support. Call 0481 058 514 to confirm parts or timing before travelling.</p>
+              )}
             </div>
             <div className="repair-chip-cloud" aria-label="Phone repair support actions">
               <span><MapPin size={15} strokeWidth={2.2} aria-hidden="true" /> Ringwood Square Kiosk C1</span>
               <span><Clock3 size={15} strokeWidth={2.2} aria-hidden="true" /> Walk-ins welcome</span>
               <span><ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" /> Clear quote before approval</span>
             </div>
+            {isEnhancedPhoneHub && (
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Before you visit</h3>
+                  <ul>
+                    <li>{isSamsungPhoneHub ? "Choose or note your exact Samsung model where possible." : isGooglePixelHub ? "Choose or note your exact Google Pixel model where possible." : isOppoPhoneHub ? "Choose or note your exact OPPO model where possible." : batchPhoneBrandConfig ? `Choose or note your exact ${batchPhoneBrandConfig.displayName} model where possible.` : "Choose or note your exact iPhone model where possible."}</li>
+                    <li>Back up important data before hardware service when the device allows it.</li>
+                    <li>Bring the charging cable or accessory involved if the fault is intermittent.</li>
+                    <li>Call ahead when you want to confirm parts availability or likely timing before travelling.</li>
+                  </ul>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Repair support and aftercare</h3>
+                  <div>
+                    <p><strong>Six-month phone repair warranty</strong></p>
+                    <p>Phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.</p>
+                    <p><strong>Data and functional testing</strong></p>
+                    <p>Important data should be backed up where possible. After the repair, the relevant device functions are checked, but a data outcome cannot be guaranteed.</p>
+                    <p><strong>Resealing after repair</strong></p>
+                    <p>
+                      {isSamsungPhoneHub || isGooglePixelHub || isOppoPhoneHub || batchPhoneBrandConfig
+                        ? "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally used in water."
+                        : "New sealing adhesive is applied during reassembly to provide some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired iPhone should not be submerged or intentionally used in water."}
+                    </p>
+                  </div>
+                </article>
+              </div>
+            )}
           </section>
+
+          {isIPhoneHub && (
+            <section className="brand-hub-section" aria-labelledby="iphone-service-areas-heading">
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">LOCAL IPHONE REPAIR SUPPORT</span>
+                <h2 id="iphone-service-areas-heading">iPhone repair for Ringwood and nearby suburbs</h2>
+                <p>
+                  Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact iPhone model online, then contact the store to confirm available repairs, parts and likely timing before travelling.
+                </p>
+              </div>
+              <IPhoneServiceAreaLinks cards={iphoneServiceAreas} />
+            </section>
+          )}
+
+          {isSamsungPhoneHub && (
+            <section className="brand-hub-section" aria-labelledby="samsung-service-areas-heading">
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">LOCAL SAMSUNG REPAIR SUPPORT</span>
+                <h2 id="samsung-service-areas-heading">Samsung phone repair for Ringwood and nearby suburbs</h2>
+                <p>
+                  Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact Samsung Galaxy model online, then contact the store to confirm repair options, parts and likely timing before travelling.
+                </p>
+              </div>
+              <IPhoneServiceAreaLinks cards={samsungServiceAreas} />
+            </section>
+          )}
+
+          {isGooglePixelHub && (
+            <section className="brand-hub-section" aria-labelledby="google-pixel-service-areas-heading">
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">LOCAL GOOGLE PIXEL REPAIR SUPPORT</span>
+                <h2 id="google-pixel-service-areas-heading">Google Pixel repair for Ringwood and nearby suburbs</h2>
+                <p>
+                  Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact Google Pixel model online, then contact the store to confirm repair options, parts and likely timing before travelling.
+                </p>
+              </div>
+              <IPhoneServiceAreaLinks cards={googlePixelServiceAreas} />
+            </section>
+          )}
+
+          {isOppoPhoneHub && (
+            <section className="brand-hub-section" aria-labelledby="oppo-service-areas-heading">
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">LOCAL OPPO REPAIR SUPPORT</span>
+                <h2 id="oppo-service-areas-heading">OPPO phone repair for Ringwood and nearby suburbs</h2>
+                <p>
+                  Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact OPPO model online, then contact the store to confirm repair options, parts and likely timing before travelling.
+                </p>
+              </div>
+              <IPhoneServiceAreaLinks cards={oppoServiceAreas} />
+            </section>
+          )}
+
+          {batchPhoneBrandConfig && (
+            <section className="brand-hub-section" aria-labelledby={`${brandSlug}-service-areas-heading`}>
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">LOCAL {batchPhoneBrandConfig.displayName.toUpperCase()} REPAIR SUPPORT</span>
+                <h2 id={`${brandSlug}-service-areas-heading`}>{batchPhoneBrandConfig.displayName} phone repair for Ringwood and nearby suburbs</h2>
+                <p>
+                  Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact {batchPhoneBrandConfig.displayName} model online, then contact the store to confirm repair options, parts and likely timing before travelling.
+                </p>
+              </div>
+              <IPhoneServiceAreaLinks cards={batchPhoneServiceAreas} />
+            </section>
+          )}
 
           <section className={`faq-section${usesBrandHubDesign ? " brand-hub-section brand-hub-faq-section" : ""}`} aria-labelledby="phone-faq-heading">
             {usesBrandHubDesign && <span className="repair-kicker">Common questions</span>}
@@ -1550,7 +2235,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Next step</span>
               <h2 id="phone-final-cta-heading">Choose your model to see the right repair options</h2>
-              <p>Start with the {brandName} model selector above to check compatible repair paths, then book or call once you have the exact model.</p>
+              <p>
+                {isIPhoneHub
+                  ? "Choose your iPhone model to see the repair options available for your device, then book online or contact the Ringwood repair desk for the next step."
+                  : <>Start with the {brandName} model selector above to check compatible repair paths, then book or call once you have the exact model.</>}
+              </p>
             </div>
             <div className="repair-hero-actions">
               <a href="#models-list" className="repair-primary-action">

@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, Battery, Camera, CheckCircle2, Clock, MapPin, Navigation, PhoneCall, PlugZap, ShieldCheck, Smartphone, TabletSmartphone, Wrench } from "lucide-react";
+import { ArrowRight, Battery, CheckCircle2, Clock, MapPin, Navigation, PhoneCall, PlugZap, ShieldCheck, Smartphone, Wrench } from "lucide-react";
 import { SERVICE_AREAS, getServiceAreaBySlug } from "@/data/serviceAreas";
+import { fetchRepairCatalog, type BrandEntry } from "@/lib/api";
+import { safeSlugSegment } from "@/lib/inventoryUtils";
 import LocationAnalyticsTracker from "@/components/analytics/LocationAnalyticsTracker";
 import ChineseServiceCta from "@/components/locations/ChineseServiceCta";
+import LocationBrandRepairLinks, { type LocationBrandRepairCard } from "./LocationBrandRepairLinks";
 
 type LocationPageProps = {
   params: Promise<{
@@ -15,55 +18,50 @@ type LocationPageProps = {
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.alimobile.com.au";
 
-const popularRepairLinks: Array<{
+const repairServiceLinks: Array<{
   title: string;
   description: string;
   href: string;
-  timing: string;
+  action: string;
   Icon: LucideIcon;
 }> = [
   {
-    title: "Screen Replacement Services",
-    description: "Cracked glass, display lines, touch faults, and frame-fit checks before quoting.",
+    title: "Screen Repair Services",
+    description: "Cracked screens, display faults, touch problems, and model-specific screen options.",
     href: "/repairs/screen-replacement",
-    timing: "Quote and parts check first",
+    action: "Check screen repair pathways",
     Icon: Smartphone,
   },
   {
-    title: "Phone Battery Replacement",
-    description: "Battery health, swelling risk, shutdown symptoms, and charging behaviour checked in-store.",
+    title: "Battery Replacement Services",
+    description: "Fast battery drain, unexpected shutdown, charging behaviour, and battery assessment.",
     href: "/repairs/battery-replacement",
-    timing: "Common same-visit repair",
+    action: "Review battery options",
     Icon: Battery,
   },
   {
     title: "Charging Port Repair",
-    description: "USB-C or Lightning port wear, lint, cable seating, microphone routing, and charge draw checks.",
+    description: "Intermittent charging, no charging, cable or port assessment, and model-specific scope.",
     href: "/repairs/charging-port-replacement",
-    timing: "Inspection confirms scope",
+    action: "Check charging repair scope",
     Icon: PlugZap,
   },
   {
-    title: "Back Glass Repair",
-    description: "Rear glass, frame condition, camera ring fit, and wireless charging alignment reviewed first.",
+    title: "Back Glass Repair Services",
+    description: "Cracked rear glass, housing condition, camera-ring fit, and model-dependent options.",
     href: "/repairs/back-glass-replacement",
-    timing: "Model-dependent quote",
+    action: "Review back glass options",
     Icon: ShieldCheck,
   },
-  {
-    title: "Phone Repair",
-    description: "Select your brand and model to view current repair options, pricing, and available services.",
-    href: "/repairs/phone",
-    timing: "Model-specific options",
-    Icon: Wrench,
-  },
-  {
-    title: "iPad Repair",
-    description: "Screen, charging, battery, and model-specific iPad repair options from the Ringwood bench.",
-    href: "/repairs/tablet/ipad",
-    timing: "Parts availability checked",
-    Icon: TabletSmartphone,
-  },
+];
+
+const FEATURED_BRAND_HUB_ORDER = [
+  "phone:iphone",
+  "phone:samsung",
+  "phone:google-pixel",
+  "phone:oppo",
+  "tablet:ipad",
+  "laptop:macbook",
 ];
 
 const popularModelLinks = [
@@ -90,6 +88,102 @@ function getNearbyServiceAreas(currentSlug: string) {
   );
 
   return [...nearby, ...fill].slice(0, 6);
+}
+
+function getBrandHubSortKey(brand: BrandEntry) {
+  return `${brand.category}:${brand.slug}`;
+}
+
+function getLocationBrandLabel(brand: BrandEntry) {
+  if (brand.category === "phone") {
+    if (brand.slug === "iphone") return "iPhone Repair";
+    if (brand.slug === "samsung") return "Samsung Phone Repair";
+    if (brand.slug === "google-pixel") return "Google Pixel Repair";
+    if (brand.slug === "oppo") return "OPPO Phone Repair";
+    return `${brand.brand} Phone Repair`;
+  }
+
+  if (brand.category === "tablet") {
+    if (brand.slug === "ipad") return "iPad Repair";
+    return `${brand.brand} Tablet Repair`;
+  }
+
+  if (brand.category === "laptop") {
+    return `${brand.brand} Repair`;
+  }
+
+  if (brand.category === "watch") {
+    return brand.brand.toLowerCase().includes("watch") ? `${brand.brand} Repair` : "Apple Watch Repair";
+  }
+
+  return `${brand.brand} Repair`;
+}
+
+function getBrandAction(index: number) {
+  const actions = [
+    "Choose supported models",
+    "Check available repairs",
+    "Review quote status",
+    "Confirm parts first",
+    "Check likely timing",
+    "Book before travelling",
+  ];
+
+  return actions[index % actions.length];
+}
+
+function getLocationBrandDescription(brand: BrandEntry, suburbName: string, index: number) {
+  const isRingwood = suburbName === "Ringwood";
+  const brandLabel = getLocationBrandLabel(brand).replace(" Repair", "");
+  const nonRingwoodCopy = [
+    `${suburbName} customers can choose the exact ${brandLabel} model and check available repair options before visiting our Ringwood Square repair desk.`,
+    `${suburbName} customers can review supported ${brandLabel} repairs and confirm whether the repair path matches the device before travelling.`,
+    `${suburbName} customers can check quote context for ${brandLabel} repairs, then call the Ringwood Square desk to confirm details.`,
+    `${suburbName} customers can confirm ${brandLabel} parts availability with the Ringwood Square team before making the trip.`,
+    `${suburbName} customers can check likely timing for ${brandLabel} repair options before booking or walking in.`,
+    `${suburbName} customers can choose a ${brandLabel} model page first, then book before travelling to Ringwood Square.`,
+  ];
+  const ringwoodCopy = [
+    `Choose the exact ${brandLabel} model and check available repair options for service at our Ringwood Square repair desk.`,
+    `Review supported ${brandLabel} repairs before visiting Kiosk C1 inside Ringwood Square Shopping Centre.`,
+    `Check quote context for ${brandLabel} repairs, then speak with the Ringwood Square team before work begins.`,
+    `Confirm ${brandLabel} parts availability with our local Ringwood Square desk before booking or walking in.`,
+    `Check likely timing for ${brandLabel} repair options handled from Kiosk C1 at Ringwood Square.`,
+    `Choose a ${brandLabel} model page first, then book with the Ringwood Square repair desk if needed.`,
+  ];
+
+  return (isRingwood ? ringwoodCopy : nonRingwoodCopy)[index % nonRingwoodCopy.length];
+}
+
+function buildLocationBrandRepairCards(brands: BrandEntry[], suburbName: string): LocationBrandRepairCard[] {
+  const validBrandHubs = brands.filter(
+    (brand) =>
+      brand.brand &&
+      brand.slug &&
+      brand.category &&
+      Array.isArray(brand.models) &&
+      brand.models.length > 0
+  );
+  const seen = new Set<string>();
+  const orderedBrands = [
+    ...FEATURED_BRAND_HUB_ORDER
+      .map((key) => validBrandHubs.find((brand) => getBrandHubSortKey(brand) === key))
+      .filter((brand): brand is BrandEntry => Boolean(brand)),
+    ...validBrandHubs.filter((brand) => !FEATURED_BRAND_HUB_ORDER.includes(getBrandHubSortKey(brand))),
+  ];
+
+  return orderedBrands
+    .map((brand, index) => ({
+      href: `/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}`,
+      label: getLocationBrandLabel(brand),
+      description: getLocationBrandDescription(brand, suburbName, index),
+      action: getBrandAction(index),
+    }))
+    .filter((card) => {
+      if (seen.has(card.href)) return false;
+      seen.add(card.href);
+      return true;
+    });
 }
 
 const suburbTransitGuide: Record<string, string[]> = {
@@ -268,6 +362,8 @@ export default async function LocationPage({ params }: LocationPageProps) {
     : `https://www.google.com/maps?output=embed&saddr=${encodedOrigin}&daddr=${encodedDestination}&dirflg=r`;
   const directionsHref = `https://www.google.com/maps/dir/?api=1&origin=${encodedOrigin}&destination=${encodedDestination}`;
   const nearbyAreas = getNearbyServiceAreas(area.slug);
+  const catalog = await fetchRepairCatalog();
+  const brandRepairCards = buildLocationBrandRepairCards(catalog.brands, area.name);
   const locationTrustPoints = [
     {
       title: `Short trip from ${area.name}`,
@@ -515,26 +611,40 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
         <section className="location-repair-section" aria-labelledby="location-popular-repairs-heading">
           <div className="location-section-heading">
-            <span className="location-kicker location-kicker-muted">Popular repair paths</span>
-            <h2 id="location-popular-repairs-heading">Common repairs customers ask about near {area.name}</h2>
+            <span className="location-kicker location-kicker-muted">POPULAR REPAIR SERVICES</span>
+            <h2 id="location-popular-repairs-heading">Common repair services for {area.name} customers</h2>
             <p>
-              These are the repair categories customers often check before visiting from {area.name}.
-              Each page explains symptoms, quote context, and booking options.
+              {area.name === "Ringwood"
+                ? "Ringwood customers can review the most common repair pathways before visiting our Ringwood Square repair desk. Select a service to check supported devices, symptoms, quote information and available repair options."
+                : `Customers travelling from ${area.name} can review the most common repair pathways before visiting our Ringwood Square repair desk. Select a service to check supported devices, symptoms, quote information and available repair options.`}
             </p>
           </div>
           <div className="location-popular-grid">
-            {popularRepairLinks.map(({ title, description, href, timing, Icon }) => (
+            {repairServiceLinks.map(({ title, description, href, action, Icon }) => (
               <Link key={title} href={href} className="location-popular-card">
                 <Icon size={21} strokeWidth={2.5} aria-hidden="true" />
                 <strong>{title}</strong>
                 <span>{description}</span>
                 <small>
-                  {timing}
+                  {action}
                   <ArrowRight size={14} strokeWidth={2.7} aria-hidden="true" />
                 </small>
               </Link>
             ))}
           </div>
+        </section>
+
+        <section className="location-repair-section" aria-labelledby="location-brand-repairs-heading">
+          <div className="location-section-heading">
+            <span className="location-kicker location-kicker-muted">POPULAR BRAND REPAIRS</span>
+            <h2 id="location-brand-repairs-heading">Brand repair options for {area.name} customers</h2>
+            <p>
+              {area.name === "Ringwood"
+                ? "Choose the device brand first to view supported models and available repair options at our Ringwood Square repair desk. Customers can call ahead to confirm parts, quotes and likely timing."
+                : "Choose the device brand first to view supported models and available repair options. All repairs are completed through our Ringwood Square repair desk, and customers can call ahead to confirm parts, quotes and likely timing."}
+            </p>
+          </div>
+          <LocationBrandRepairLinks cards={brandRepairCards} />
         </section>
 
         <section className="location-model-section" aria-labelledby="location-models-heading">
