@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
+import { LAPTOP_BRAND_STARTING_PRICES, WATCH_BRAND_STARTING_PRICES } from "@/lib/repairStartingPrices";
 import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -188,6 +189,113 @@ const OPPO_COMMON_PROBLEMS = [
   },
 ];
 
+const APPLE_WATCH_COMMON_REPAIR_PATHS: Array<{ href?: string; name: string; note: string }> = [
+  {
+    href: "/repairs/screen-replacement",
+    name: "Apple Watch screen repair",
+    note: "Cracked glass, display faults and touch issues need the exact Series, SE or Ultra model and case size before the repair path is confirmed.",
+  },
+  {
+    href: "/repairs/battery-replacement",
+    name: "Apple Watch battery replacement",
+    note: "Short runtime, shutdowns and battery wear are checked against the compatible model-specific battery option.",
+  },
+  {
+    name: "Charging / power assessment",
+    note: "If the Apple Watch is not charging or not turning on, we inspect the fault first before confirming the practical quote path.",
+  },
+  {
+    name: "Touch or display assessment",
+    note: "Failed touch, black screens, display lines and flickering can have different causes, so the watch is assessed before parts are ordered.",
+  },
+  {
+    name: "Water damage assessment",
+    note: "Water exposure symptoms need diagnosis first. We explain the likely risks and do not guarantee recovery before assessment.",
+  },
+  {
+    name: "Logic board assessment",
+    note: "Power, charging, pairing and board-related symptoms are handled as assessment and quote work before any repair is approved.",
+  },
+];
+
+const APPLE_WATCH_COMMON_PROBLEMS = [
+  {
+    title: "Cracked glass or damaged display",
+    body: "Cracked Apple Watch glass, a damaged display or lifted screen can require different parts depending on the Series, SE or Ultra model and case size.",
+  },
+  {
+    title: "Touch not responding",
+    body: "Touch faults may come from the display assembly, connection issues or other internal faults, so the watch should be assessed before a repair path is confirmed.",
+  },
+  {
+    title: "Battery draining quickly",
+    body: "Short runtime, shutdowns or battery health warnings should be checked against the exact model before battery replacement is quoted.",
+  },
+  {
+    title: "Not charging or not powering on",
+    body: "Charging and no-power symptoms can come from the cable, charger, battery, internal connection or board fault. Diagnosis comes before parts ordering.",
+  },
+  {
+    title: "Display lines or black screen",
+    body: "Lines, flickering or a black screen can have different repair paths across Apple Watch generations and case sizes.",
+  },
+  {
+    title: "Speaker, microphone or button issues",
+    body: "Audio, microphone, Digital Crown or side-button symptoms need model-specific diagnosis before a practical quote can be confirmed.",
+  },
+  {
+    title: "Water exposure symptoms",
+    body: "Water exposure can affect multiple internal areas. Assessment is required first, and recovery cannot be guaranteed before inspection.",
+  },
+  {
+    title: "Series, SE and Ultra differences",
+    body: "Parts can vary by series, case size, GPS or cellular version, SE design and Ultra design, so exact model identification matters.",
+  },
+];
+
+const APPLE_WATCH_FAQS = [
+  {
+    question: "Do you repair Apple Watches in Ringwood?",
+    answer: "Yes. Ali Mobile & Repair can assess supported Apple Watch repairs at Ringwood Square Shopping Centre. Choose the exact Apple Watch model first so the practical repair path can be checked.",
+  },
+  {
+    question: "How much does Apple Watch repair cost?",
+    answer: "Price depends on the exact Apple Watch model, fault, repair type, parts availability and device condition. The final quote is confirmed after the model and repair option are checked.",
+  },
+  {
+    question: "How long does Apple Watch repair take?",
+    answer: "Timing depends on the exact model, fault, repair queue and part availability. If the required part is not in stock, we usually need 1-2 days to order parts.",
+  },
+  {
+    question: "What if the Apple Watch part is not in stock?",
+    answer: "We explain the quote status and ordering path before work is approved. Parts availability can vary by series, size, GPS or cellular version, SE design and Ultra design.",
+  },
+  {
+    question: "Do Apple Watch repairs include warranty?",
+    answer: "Supported Apple Watch repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
+  },
+  {
+    question: "Can you replace a cracked Apple Watch screen?",
+    answer: "We can assess cracked glass, damaged displays, display lines and touch faults. The repair option depends on the exact Apple Watch model, case size and current part availability.",
+  },
+  {
+    question: "Can you replace an Apple Watch battery?",
+    answer: "Supported Apple Watch battery replacements are quoted after the exact model and battery symptoms are checked.",
+  },
+  {
+    question: "Can you fix an Apple Watch that is not charging?",
+    answer: "We assess charging and no-power symptoms first because the issue may involve the charger, battery, internal connection or board fault rather than a single part.",
+  },
+  {
+    question: "Do you repair Apple Watch Series, SE and Ultra models?",
+    answer: "We support selected Apple Watch Series, SE and Ultra models where compatible parts and repair paths are available. Use the model finder to choose the exact watch before checking options.",
+  },
+  {
+    question: "Do you repair water damaged Apple Watches?",
+    answer: "Water exposure requires diagnosis before repair options, risks and likely outcomes can be discussed. Recovery cannot be guaranteed, and water resistance is not guaranteed after opening or repair.",
+  },
+];
+
 const IPAD_COMMON_REPAIR_LINKS = [
   {
     href: "/repairs/screen-replacement",
@@ -275,6 +383,176 @@ const IPAD_FAQS = [
   {
     question: "Can water resistance be guaranteed after an iPad repair?",
     answer: "No. Waterproof protection cannot be guaranteed after opening or repair, and the repaired iPad should be kept away from liquids.",
+  },
+];
+
+const SAMSUNG_TABLET_COMMON_REPAIR_LINKS = [
+  {
+    href: "/repairs/screen-replacement",
+    label: "Samsung tablet screen repair options",
+  },
+  {
+    href: "/repairs/battery-replacement",
+    label: "battery replacement options",
+  },
+  {
+    href: "/repairs/charging-port-replacement",
+    label: "charging port repair options",
+  },
+];
+
+const SAMSUNG_TABLET_COMMON_PROBLEMS = [
+  {
+    title: "Screen, glass and touch problems",
+    body: "Cracked glass, display lines, black screen, flickering or failed touch can come from different Samsung Galaxy Tab faults. The exact Tab S, Tab A, Tab Active or model code should be confirmed before selecting a repair path.",
+  },
+  {
+    title: "Battery drain, shutdown and swelling",
+    body: "Fast battery drain, unexpected shutdowns, heat or a lifting back cover can require battery and device-condition assessment before parts and timing are confirmed.",
+  },
+  {
+    title: "Charging and USB-C port problems",
+    body: "Intermittent charging may involve debris, cable condition, battery health, the USB-C port or another internal fault. We check the charging path before recommending a port repair.",
+  },
+  {
+    title: "Back cover, frame or button damage",
+    body: "Back-cover lift, frame damage or button faults can affect fit, sealing and repair outcome. The tablet should be assessed before a quote is approved.",
+  },
+  {
+    title: "Camera, speaker or microphone faults",
+    body: "Video call, speaker, microphone or camera symptoms may come from the affected part, connector damage or a broader device fault.",
+  },
+  {
+    title: "Liquid exposure or no-power faults",
+    body: "Liquid exposure and no-power faults need inspection before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+  },
+];
+
+const SAMSUNG_TABLET_FAQS = [
+  {
+    question: "Which Samsung tablet models do you repair?",
+    answer: "We support selected Galaxy Tab S, Galaxy Tab A, Galaxy Tab Active and other Samsung tablet models where compatible parts and repair paths are available. Use the model browser above to choose the exact Samsung tablet before checking repair options.",
+  },
+  {
+    question: "How can I identify my Samsung tablet model?",
+    answer: "Check Settings -> About tablet for the model name or model number where the tablet still works. If the tablet does not power on, bring it to Ringwood Square and we can help identify the model before quoting.",
+  },
+  {
+    question: "How much does Samsung tablet repair cost?",
+    answer: "Price depends on the exact Samsung tablet model, fault, parts availability and device condition. Choose your model first to view available price or Quote status.",
+  },
+  {
+    question: "How long can a Samsung tablet repair take?",
+    answer: "Timing depends on the model, repair type, stock availability and repair queue. If a Samsung tablet part needs to be ordered, availability and likely timing are explained before approval.",
+  },
+  {
+    question: "Can you replace a Samsung tablet charging port?",
+    answer: "Charging faults are checked first because symptoms can also involve debris, cables, battery condition or board-level faults. If the charging port is the practical repair path, we explain the quote before work begins.",
+  },
+  {
+    question: "Will my data normally be affected by Samsung tablet repair?",
+    answer: "Hardware repairs do not normally require access to personal content, but important data should be backed up where possible because a data outcome cannot be guaranteed.",
+  },
+  {
+    question: "What warranty applies to Samsung tablet repair?",
+    answer: "Eligible Samsung tablet repairs include a six-month repair warranty, subject to the warranty conditions and exclusions explained with the repair.",
+  },
+  {
+    question: "What happens if the Samsung tablet part is not in stock?",
+    answer: "We explain the available repair option, Quote status and expected ordering path before work is approved.",
+  },
+  {
+    question: "Is it better to repair or replace a Samsung tablet?",
+    answer: "That depends on the model, fault, condition, repair quote, parts availability and replacement-device value. Once the model and fault are confirmed, we can explain the practical repair path.",
+  },
+  {
+    question: "Can water resistance be guaranteed after Samsung tablet repair?",
+    answer: "No. Waterproof protection cannot be guaranteed after opening or repair, and the repaired tablet should be kept away from liquids.",
+  },
+];
+
+const LENOVO_TABLET_COMMON_REPAIR_LINKS = [
+  {
+    href: "/repairs/screen-replacement",
+    label: "Lenovo tablet screen repair options",
+  },
+  {
+    href: "/repairs/battery-replacement",
+    label: "battery replacement options",
+  },
+  {
+    href: "/repairs/charging-port-replacement",
+    label: "charging port repair options",
+  },
+];
+
+const LENOVO_TABLET_COMMON_PROBLEMS = [
+  {
+    title: "Screen, glass and touch problems",
+    body: "Cracked glass, display lines, black screen, flickering or touch that stops responding can come from different Lenovo tablet faults. The exact Tab, Yoga Tab or model code should be confirmed before selecting a repair path.",
+  },
+  {
+    title: "Battery drain, shutdown and swelling",
+    body: "Fast battery drain, unexpected shutdowns, heat or casing lift can require battery and device-condition assessment before parts and timing are confirmed.",
+  },
+  {
+    title: "Charging and USB-C port problems",
+    body: "Intermittent charging may involve debris, cable condition, battery health, the USB-C port or another internal fault. We check the charging path before recommending a port repair.",
+  },
+  {
+    title: "Bent frame, casing or button damage",
+    body: "Frame and casing condition can affect screen fit, adhesive hold and the final repair result. The tablet should be assessed before a quote is approved.",
+  },
+  {
+    title: "Camera, speaker or microphone faults",
+    body: "Video call, speaker, microphone or camera symptoms may come from the affected part, connector damage or a broader device fault.",
+  },
+  {
+    title: "Liquid exposure or no-power faults",
+    body: "Liquid exposure and no-power faults need inspection before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before diagnosis.",
+  },
+];
+
+const LENOVO_TABLET_FAQS = [
+  {
+    question: "Which Lenovo tablet models do you repair?",
+    answer: "We support selected Lenovo Tab, Lenovo Tab M, Lenovo Tab P and Yoga Tab models where compatible parts and repair paths are available. Use the model browser above to choose the exact Lenovo tablet before checking repair options.",
+  },
+  {
+    question: "How can I identify my Lenovo tablet model?",
+    answer: "Check Settings for the model name or model number where the tablet still works. If the tablet does not power on, bring it to Ringwood Square and we can help identify the model before quoting.",
+  },
+  {
+    question: "How much does Lenovo tablet repair cost?",
+    answer: "Price depends on the exact Lenovo tablet model, fault, parts availability and device condition. Choose your model first to view available price or Quote status.",
+  },
+  {
+    question: "How long can a Lenovo tablet repair take?",
+    answer: "Timing depends on the model, repair type, stock availability and repair queue. If a Lenovo tablet part needs to be ordered, availability and likely timing are explained before approval.",
+  },
+  {
+    question: "Can you replace a Lenovo tablet charging port?",
+    answer: "Charging faults are checked first because symptoms can also involve debris, cables, battery condition or board-level faults. If the charging port is the practical repair path, we explain the quote before work begins.",
+  },
+  {
+    question: "Will my data normally be affected by Lenovo tablet repair?",
+    answer: "Hardware repairs do not normally require access to personal content, but important data should be backed up where possible because a data outcome cannot be guaranteed.",
+  },
+  {
+    question: "What warranty applies to Lenovo tablet repair?",
+    answer: "Eligible Lenovo tablet repairs include a six-month repair warranty, subject to the warranty conditions and exclusions explained with the repair.",
+  },
+  {
+    question: "What happens if the Lenovo tablet part is not in stock?",
+    answer: "We explain the available repair option, Quote status and expected ordering path before work is approved.",
+  },
+  {
+    question: "Is it better to repair or replace a Lenovo tablet?",
+    answer: "That depends on the model, fault, condition, repair quote, parts availability and replacement-device value. Once the model and fault are confirmed, we can explain the practical repair path.",
+  },
+  {
+    question: "Can water resistance be guaranteed after Lenovo tablet repair?",
+    answer: "No. Waterproof protection cannot be guaranteed after opening or repair, and the repaired tablet should be kept away from liquids.",
   },
 ];
 
@@ -465,6 +743,19 @@ function getSamsungServiceAreaDescription(areaName: string, index: number) {
   return descriptions[index % descriptions.length];
 }
 
+function getSamsungTabletServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact Samsung tablet model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check Samsung tablet screen, battery and charging options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the Galaxy Tab model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `${areaName} customers can review Samsung tablet repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from ${areaName}, choose the exact Samsung tablet model and contact the store if you want likely timing checked first.`,
+    `${areaName} customers can compare Samsung tablet repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
 function getGooglePixelServiceAreaDescription(areaName: string, index: number) {
   const descriptions = [
     `${areaName} customers can choose their exact Google Pixel model before visiting our Ringwood Square repair desk.`,
@@ -499,6 +790,41 @@ function getIPadServiceAreaDescription(areaName: string, index: number) {
     `${areaName} customers can review iPad repair paths online before contacting the Ringwood Square team for the next step.`,
     `Before travelling from ${areaName}, choose the exact iPad model and contact the store if you want likely timing checked first.`,
     `${areaName} customers can compare iPad repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
+function getLenovoTabletServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact Lenovo tablet model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check Lenovo tablet screen, battery and charging options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the Lenovo tablet model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `${areaName} customers can review Lenovo tablet repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from ${areaName}, choose the exact Lenovo tablet model and contact the store if you want likely timing checked first.`,
+    `${areaName} customers can compare Lenovo tablet repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
+function getMacBookServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact MacBook model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check MacBook screen repair, battery replacement and charging options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the MacBook model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `Before travelling from ${areaName}, choose the exact MacBook Air or MacBook Pro model and contact the store if you want likely timing checked first.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
+function getAppleWatchServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact Apple Watch model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check Apple Watch screen repair, battery replacement and charging assessment options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the Apple Watch model finder first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `Before travelling from ${areaName}, choose the exact Apple Watch Series, SE or Ultra model and contact the store if you want likely timing checked first.`,
   ];
 
   return descriptions[index % descriptions.length];
@@ -598,27 +924,6 @@ function buildOtherTabletBrandLinks(brands: BrandEntry[], currentBrandSlug: stri
     .map((brand) => ({
       href: `/repairs/tablet/${safeSlugSegment(brand.slug)}`,
       label: `${brand.brand} Tablet Repairs`,
-    }))
-    .filter((link) => {
-      if (seen.has(link.href)) return false;
-      seen.add(link.href);
-      return true;
-    });
-}
-
-function buildOtherWatchBrandLinks(brands: BrandEntry[], currentBrandSlug: string) {
-  const seen = new Set<string>();
-
-  return brands
-    .filter(
-      (brand) =>
-        brand.category === "watch" &&
-        brand.slug !== currentBrandSlug &&
-        brand.models.length > 0
-    )
-    .map((brand) => ({
-      href: `/repairs/watch/${safeSlugSegment(brand.slug)}`,
-      label: `${brand.brand} Watch Repairs`,
     }))
     .filter((link) => {
       if (seen.has(link.href)) return false;
@@ -813,6 +1118,11 @@ function getStartingRepairPrice(
   return Math.min(...prices);
 }
 
+function getLowestStartingPrice(prices: Partial<Record<string, number>>): number | null {
+  const validPrices = Object.values(prices).filter((price): price is number => typeof price === "number" && Number.isFinite(price) && price > 0);
+  return validPrices.length > 0 ? Math.min(...validPrices) : null;
+}
+
 function formatStartingRepairPrice(price: number): string {
   return new Intl.NumberFormat('en-AU', {
     maximumFractionDigits: 0,
@@ -844,7 +1154,7 @@ function getBrandHubHeroDescription(
   }
 
   if (categorySlug === "watch" && brandSlug === "apple") {
-    return "Explore Apple Watch repair options for supported Series, SE and Ultra models, including screen, battery and no-power diagnostics. Visit Ringwood Square or choose your exact watch model to check pricing.";
+    return "Ali Mobile & Repair provides Apple Watch repair in Ringwood at Ringwood Square Shopping Centre. Choose your exact Series, SE or Ultra model to check Apple Watch screen repair, battery replacement, charging issue assessment and quote options before work begins.";
   }
 
   if (categorySlug === "tablet" && brandSlug === "ipad") {
@@ -852,11 +1162,11 @@ function getBrandHubHeroDescription(
   }
 
   if (categorySlug === "tablet" && brandSlug === "samsung") {
-    return "Explore Samsung Tablet repair options for supported Galaxy Tab models, including screen, battery and charging-related repairs. Visit Ringwood Square or choose your exact model to check pricing.";
+    return "Choose your exact Samsung tablet model to view available screen, battery and charging repair options. Our Ringwood Square repair desk supports Galaxy Tab S, Tab A and Tab Active customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
   }
 
   if (categorySlug === "tablet" && brandSlug === "lenovo") {
-    return "Explore Lenovo Tablet repair options for supported Tab, Yoga and other Lenovo tablet models. Visit Ringwood Square or choose your exact model to check available services and pricing.";
+    return "Choose your exact Lenovo tablet model to view available screen, battery and charging repair options. Our Ringwood Square repair desk supports Lenovo Tab, Tab M, Tab P and Yoga Tab customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
   }
 
   return `Select your exact ${brandName} model below to view repair options and pricing at Ringwood Square.`;
@@ -902,8 +1212,8 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     title = 'Samsung Tablet Repair | Screen, Battery & Charging | Ali Mobile';
     description = "Samsung Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Choose your Galaxy Tab model for screen, battery and charging options.";
   } else if (isLenovoTablet) {
-    title = 'Lenovo Tablet Repair | Models & Repair Options | Ali Mobile';
-    description = "Lenovo Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Select your exact model to view available repair options and pricing.";
+    title = 'Lenovo Tablet Repair | Screen, Battery & Charging | Ali Mobile';
+    description = "Lenovo Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Choose your Lenovo Tab, Tab M, Tab P or Yoga Tab model for screen, battery and charging options.";
   } else if (isMacBookHub) {
     title = 'MacBook Repair in Ringwood | Ali Mobile & Repair';
     description = 'MacBook repair services in Ringwood for supported screen, battery, keyboard or top case, charging and diagnostic issues. Visit Ali Mobile & Repair at Ringwood Square to confirm the model, parts availability and suitable repair options.';
@@ -957,7 +1267,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isOppoPhoneHub = categorySlug === "phone" && brandSlug === "oppo";
   const batchPhoneBrandConfig = getBatchPhoneBrandConfig(categorySlug, brandSlug);
   const isEnhancedPhoneHub = isIPhoneHub || isSamsungPhoneHub || isGooglePixelHub || isOppoPhoneHub || Boolean(batchPhoneBrandConfig);
-  const usesBrandHubDesign = isPhoneHub || isTabletBrandHub || isAppleWatchHub;
+  const usesBrandHubDesign = isPhoneHub || isTabletBrandHub || isAppleWatchHub || isMacBookHub;
   const usesFlatBrandHubModels = isPhoneHub && usesBrandHubDesign && !MAJOR_PHONE_BRAND_HUB_SLUGS.includes(brandSlug);
   const floatingJumpLabel =
     categorySlug === "phone" && brandSlug === "iphone"
@@ -970,6 +1280,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "Choose Your Oppo"
       : categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug)
       ? "Choose Your iPad"
+      : categorySlug === "tablet" && brandSlug === "lenovo"
+      ? "Choose Your Lenovo Tablet"
       : categorySlug === "laptop" && brandSlug === "macbook"
       ? "Choose Your MacBook"
       : categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug)
@@ -990,11 +1302,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandHubHeroDescription = getBrandHubHeroDescription(categorySlug, brandSlug, brandName, models.length);
   const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
-  const otherWatchBrandLinks = isAppleWatchHub ? buildOtherWatchBrandLinks(catalog.brands, brandSlug) : [];
   const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
-  const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : [];
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
+  const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : flatModelGroup;
   const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(categorySlug, brandSlug, models) : [];
   const phoneServiceAreaSource = isEnhancedPhoneHub ? buildFeaturedServiceAreaSource() : [];
   const ipadServiceAreas: IPhoneServiceAreaLinkCard[] = isIPadHub
@@ -1002,6 +1313,34 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         href: `/locations/${area.slug}`,
         name: area.name,
         description: getIPadServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const samsungTabletServiceAreas: IPhoneServiceAreaLinkCard[] = isSamsungTabletHub
+    ? buildFeaturedServiceAreaSource().map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getSamsungTabletServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const lenovoTabletServiceAreas: IPhoneServiceAreaLinkCard[] = isLenovoTabletHub
+    ? buildFeaturedServiceAreaSource().map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getLenovoTabletServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const macbookServiceAreas: IPhoneServiceAreaLinkCard[] = isMacBookHub
+    ? buildFeaturedServiceAreaSource().slice(0, 4).map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getMacBookServiceAreaDescription(area.name, index),
+      }))
+    : [];
+  const appleWatchServiceAreas: IPhoneServiceAreaLinkCard[] = isAppleWatchHub
+    ? buildFeaturedServiceAreaSource().slice(0, 4).map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getAppleWatchServiceAreaDescription(area.name, index),
       }))
     : [];
   const iphoneServiceAreas: IPhoneServiceAreaLinkCard[] = isIPhoneHub
@@ -1053,6 +1392,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     ? { category: "phone", brand: brandSlug }
     : isIPadHub
     ? { category: "tablet", brand: "ipad" }
+    : isSamsungTabletHub
+    ? { category: "tablet", brand: "samsung" }
+    : isLenovoTabletHub
+    ? { category: "tablet", brand: "lenovo" }
+    : isMacBookHub
+    ? { category: "laptop", brand: "macbook" }
+    : isAppleWatchHub
+    ? { category: "watch", brand: "apple" }
     : null;
   const serverRepairResults: HubRepairResultItem[] | undefined = serverRepairResultsTarget
     ? (await fetchHubRepairResults(serverRepairResultsTarget.category, serverRepairResultsTarget.brand)).map((result) => ({
@@ -1126,54 +1473,141 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     : batchPhoneBrandConfig
     ? batchPhoneBrandConfig.commonRepairsIntro
     : "Choose your exact model first, then compare the repair path that best matches the fault we need to assess.";
-  const macbookRepairPaths = [
+  const macbookRepairPaths: Array<{ href?: string; name: string; note: string }> = [
     {
-      name: "Screen and display faults",
-      note: "Cracked panels, image issues, backlight faults and display assemblies matched to the exact model.",
+      href: "/repairs/screen-replacement",
+      name: "MacBook screen repair",
+      note: "Cracked panels, display lines, image faults and lid assembly options matched to the exact MacBook model.",
     },
     {
+      href: "/repairs/battery-replacement",
       name: "Battery replacement",
-      note: "Battery wear, charging drop-off and shutdown symptoms checked against the correct MacBook generation.",
+      note: "Battery wear, short runtime, shutdowns and charging drop-off checked against the correct MacBook generation.",
     },
     {
-      name: "Keyboard and top case path",
-      note: "Keyboard issues often use a top case assembly, and the replacement top case does not include the battery.",
+      name: "Keyboard / top case assessment",
+      note: "Keyboard repair options can depend on top case design, model year and part availability before a quote is confirmed.",
     },
     {
-      name: "Charging and power faults",
-      note: "USB-C, MagSafe and power-delivery issues are assessed after confirming the model and the likely fault path.",
+      href: "/repairs/charging-port-replacement",
+      name: "Charging port / USB-C repair",
+      note: "USB-C, MagSafe and power-delivery faults are assessed after confirming the model and likely repair path.",
     },
     {
-      name: "Liquid damage assessment",
-      note: "We inspect spill-related damage first and explain the practical repair path before extra work is approved.",
+      name: "Trackpad / flex cable assessment",
+      note: "Trackpad, click, pointer or flex-related symptoms are checked as model-specific assessment work.",
     },
     {
-      name: "Trackpad and speaker issues",
-      note: "Input and audio faults are checked as model-specific repair paths after diagnosis.",
+      name: "Water damage assessment",
+      note: "Liquid exposure and no-power faults require inspection before practical options, risks and quote limits are discussed.",
+    },
+    {
+      name: "Logic board assessment",
+      note: "Startup, charging, fan, overheating and board-related symptoms are diagnosed before any repair path is approved.",
+    },
+  ];
+  const macbookCommonProblems = [
+    {
+      title: "Cracked screen or display lines",
+      body: "A cracked display, coloured lines, black screen or backlight fault can require different parts depending on the exact MacBook Air or MacBook Pro model.",
+    },
+    {
+      title: "Battery not holding charge",
+      body: "Short runtime, shutdowns, charging drop-off or battery service warnings should be checked against the model year and battery option before quote approval.",
+    },
+    {
+      title: "Keyboard keys not responding",
+      body: "Sticky, failed or repeating keys may involve keyboard or top case assessment. The available path depends on the model, part option and device condition.",
+    },
+    {
+      title: "USB-C or charging faults",
+      body: "Intermittent charging, no charging or MagSafe and USB-C symptoms can come from the port, cable, battery or board, so diagnosis comes before parts ordering.",
+    },
+    {
+      title: "Trackpad and flex symptoms",
+      body: "Click, cursor, flex cable or input faults can look similar from the outside. We check the model-specific path before recommending repair work.",
+    },
+    {
+      title: "Liquid, no power or startup issues",
+      body: "Liquid exposure, no-power faults, fan noise, heat or startup loops need assessment before likely outcomes and repair limits can be discussed.",
     },
   ];
   const macbookFaqs = [
     {
-      question: "Why do I need the exact MacBook model before repair?",
+      question: "Do I need the exact MacBook model before repair?",
       answer:
-        "MacBook repair compatibility, parts selection and quote accuracy all depend on the exact model and A-number.",
+        "Yes. MacBook repair compatibility, quote accuracy and parts selection depend on the exact model, year, screen size, chip generation and A-number.",
     },
     {
-      question: "Can you quote a MacBook keyboard repair straight away?",
+      question: "Do you repair MacBook Air and MacBook Pro models?",
       answer:
-        "We can outline the likely repair path, but the exact model still needs to be confirmed because keyboard work commonly uses a top case assembly and parts availability varies by model.",
+        "We list supported MacBook Air and MacBook Pro models in the model finder. Choose the exact model first so the available screen, battery, keyboard, charging or diagnostic path can be checked.",
     },
     {
-      question: "How long do MacBook parts usually take to arrive?",
+      question: "Can you repair a cracked MacBook screen?",
       answer:
-        "Many MacBook parts commonly take around one to two days to obtain, then installation is often about one hour once the correct part arrives.",
+        "We can assess cracked MacBook screens, display lines and black-screen faults. The repair option and quote depend on the exact model and current part availability.",
+    },
+    {
+      question: "Can you replace a MacBook battery?",
+      answer:
+        "Supported MacBook battery replacements are quoted after the model and battery condition are checked. Availability and timing can vary between MacBook generations.",
+    },
+    {
+      question: "Can you quote a MacBook keyboard repair immediately?",
+      answer:
+        "We can explain the likely repair path, but the exact quote usually needs model confirmation because keyboard work can involve top case parts and model-specific availability.",
+    },
+    {
+      question: "Do MacBook parts need to be ordered?",
+      answer:
+        "Many MacBook repairs depend on the exact model and part availability. If the required part is not in stock, we usually need one to two days to order parts before completing the repair.",
+    },
+    {
+      question: "Can you fix MacBook charging port or USB-C problems?",
+      answer:
+        "We assess charging, USB-C, MagSafe and power-delivery symptoms first because the issue may involve the cable, battery, port or board rather than the port alone.",
+    },
+    {
+      question: "Can you assess liquid damage or no-power MacBook faults?",
+      answer:
+        "Yes, but liquid exposure and no-power faults require diagnosis before repair options, data risk and likely outcomes can be discussed. A successful repair cannot be guaranteed before assessment.",
+    },
+    {
+      question: "Is the MacBook repair covered by warranty?",
+      answer:
+        "Supported MacBook repairs include a 6-month repair warranty, subject to the warranty conditions and exclusions explained with the repair.",
     },
     {
       question: "What if my MacBook model is not listed yet?",
       answer:
-        "If your MacBook is not shown in the selector, contact Ali Mobile & Repair for an assessment before you travel and we can confirm the next step.",
+        "If your MacBook is not shown in the selector, contact Ali Mobile & Repair before you travel so we can check the model, likely repair path and parts availability.",
+    },
+    {
+      question: "Where is Ali Mobile & Repair for MacBook repair?",
+      answer:
+        "Visit Ali Mobile & Repair at Ringwood Square Shopping Centre, Kiosk C1, Seymour Street, Ringwood VIC 3134. Walk-ins are welcome, and calling ahead helps confirm parts and timing.",
     },
   ];
+  const macbookStartingRepairPrice = isMacBookHub ? getLowestStartingPrice(LAPTOP_BRAND_STARTING_PRICES.macbook) : null;
+  const macbookHeroInsightCards = isMacBookHub
+    ? [
+        {
+          title: macbookStartingRepairPrice
+            ? `MacBook Repairs from $${formatStartingRepairPrice(macbookStartingRepairPrice)}`
+            : "MacBook Repair Quote First",
+          body: "We check the exact MacBook model, fault and part option before confirming the repair quote.",
+        },
+        {
+          title: "6-Month Repair Warranty",
+          body: "Supported MacBook repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
+        },
+        {
+          title: "Parts Checked Before Repair",
+          body: "Many MacBook repairs depend on the exact model and part availability. If the required part is not in stock, we usually need 1-2 days to order parts before completing the repair.",
+        },
+      ]
+    : [];
   const phoneHeroInsightCards = isPhoneHub
     ? brandSlug === "iphone"
       ? [
@@ -1227,6 +1661,38 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
       ]
     : [];
+  const lenovoTabletHeroInsightCards = isLenovoTabletHub
+    ? [
+        {
+          title: "Lenovo Tablet Repairs from $50",
+          body: "Selected Lenovo tablet repair services start from $50. Choose your exact model to view current repair options and pricing.",
+        },
+        {
+          title: "6-Month Repair Warranty",
+          body: "Eligible Lenovo tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.",
+        },
+        {
+          title: "Timing Depends on Parts Availability",
+          body: "Many common Lenovo tablet repairs can be completed the same day when parts are available. Less common parts usually take around 1-2 days to arrive.",
+        },
+      ]
+    : [];
+  const samsungTabletHeroInsightCards = isSamsungTabletHub
+    ? [
+        {
+          title: "Samsung Tablet Repairs from $50",
+          body: "Selected Samsung tablet repair services start from $50. Choose your exact model to view current repair options and pricing.",
+        },
+        {
+          title: "6-Month Repair Warranty",
+          body: "Eligible Samsung tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.",
+        },
+        {
+          title: "Around 45 Minutes Once Parts Are In Stock",
+          body: "Many Samsung tablet repairs can take around 45 minutes once the required part is in stock. If the required part is not in stock, parts usually need 1-2 days to order.",
+        },
+      ]
+    : [];
   const tabletHeroInsightCards = isTabletBrandHub && !isIPadHub
     ? [
         {
@@ -1243,19 +1709,22 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
       ]
     : [];
+  const appleWatchStartingRepairPrice = isAppleWatchHub ? getLowestStartingPrice(WATCH_BRAND_STARTING_PRICES.apple) : null;
   const appleWatchHeroInsightCards = isAppleWatchHub
     ? [
         {
-          title: "Choose exact model",
-          body: "Apple Watch Series, SE and Ultra",
+          title: appleWatchStartingRepairPrice
+            ? `Apple Watch Repairs from $${formatStartingRepairPrice(appleWatchStartingRepairPrice)}`
+            : "Apple Watch Repair Quote First",
+          body: "We check the exact Apple Watch model, fault and part option before confirming the repair quote.",
         },
         {
-          title: "Exact generation required",
-          body: "Confirm the exact Apple Watch generation and case size before choosing the repair path.",
+          title: "6-Month Repair Warranty",
+          body: "Supported Apple Watch repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
         },
         {
-          title: "Case size",
-          body: "Use the model selector to match sizes such as 38mm, 40mm, 41mm, 42mm, 44mm, 45mm, 46mm or 49mm.",
+          title: "Parts Checked Before Repair",
+          body: "Apple Watch repair timing depends on the exact model, fault and part availability. If the required part is not in stock, we usually need 1-2 days to order parts.",
         },
       ]
     : [];
@@ -1290,13 +1759,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       <section
         className="repair-tech-hero repair-tech-hero-compact"
         aria-labelledby="brand-repair-heading"
-        style={isMacBookHub ? { gridTemplateColumns: "minmax(0, 1fr)" } : undefined}
       >
         <div className="repair-tech-hero-copy">
           <BackButton fallbackHref={`/repairs/${categorySlug}`} />
           <span className="repair-hero-badge">
             <Smartphone size={16} strokeWidth={2.4} aria-hidden="true" />
-            {isMacBookHub ? "MacBook Model Hub" : isAppleWatchHub ? "Apple Watch Model Hub" : isIPadHub ? "iPad Model Hub" : `${brandName} Model Hub`}
+            {isMacBookHub ? "MacBook Model Hub" : isAppleWatchHub ? "Apple Watch Model Hub" : isIPadHub ? "iPad Model Hub" : isSamsungTabletHub ? "Samsung Tablet Model Hub" : isLenovoTabletHub ? "Lenovo Tablet Model Hub" : `${brandName} Model Hub`}
           </span>
           <h1 id="category-repair-heading">
             {isMacBookHub
@@ -1305,12 +1773,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </h1>
           <p>
             {isMacBookHub
-              ? 'Professional MacBook repair in Ringwood Square. We support screen, battery, keyboard/top case, charging, and diagnostic services. Use your model name or A-number below to find your MacBook and view repair options. Timing depends on parts availability and exact model confirmation.'
+              ? "Ali Mobile & Repair provides MacBook repair in Ringwood at Ringwood Square Shopping Centre. Choose your exact MacBook Air or MacBook Pro model to check screen repair, battery replacement, keyboard or top case, charging port and USB-C assessment options before we confirm the quote and parts path."
               : brandHubHeroDescription}
           </p>
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
-              {isIPhoneHub ? "Choose your iPhone model" : "View model option"}
+              {isIPhoneHub ? "Choose your iPhone model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
             </a>
             <Link href="/book-repair" className="repair-secondary-action">
               {isIPhoneHub ? "Get a repair quote" : "Live Quote"}
@@ -1321,6 +1789,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         {isPhoneHub && (
           <div className="repair-hero-brand-proof" aria-label={`${brandName} repair pricing and timing highlights`}>
             {phoneHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+        )}
+        {isMacBookHub && (
+          <div className="repair-hero-brand-proof" aria-label="MacBook repair pricing, warranty and parts highlights">
+            {macbookHeroInsightCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
                 <p>{card.body}</p>
@@ -1373,7 +1851,27 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             ))}
           </div>
         )}
-        {isTabletBrandHub && !isIPadHub && (
+        {isSamsungTabletHub && (
+          <div className="repair-hero-brand-proof" aria-label="Samsung tablet model selection support">
+            {samsungTabletHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+        )}
+        {isLenovoTabletHub && (
+          <div className="repair-hero-brand-proof" aria-label="Lenovo tablet model selection support">
+            {lenovoTabletHeroInsightCards.map((card) => (
+              <article key={card.title} className="repair-hero-brand-proof-card">
+                <h2>{card.title}</h2>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+        )}
+        {isTabletBrandHub && !isIPadHub && !isSamsungTabletHub && !isLenovoTabletHub && (
           <div className="repair-hero-brand-proof" aria-label={`${brandName} tablet model selection support`}>
             {tabletHeroInsightCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
@@ -1397,65 +1895,106 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             category={categorySlug as RepairResultDeviceCategory}
             brand={brandSlug}
             scope="brand-hub"
+            initialResults={serverRepairResults}
+            showResultSummary
           />
 
-          <section className="repair-types-showcase" aria-labelledby="brand-repair-types-heading">
-            <div className="repair-types-showcase-header">
+          <section className="brand-hub-section" aria-labelledby="brand-repair-types-heading">
+            <div className="brand-hub-section-header">
               <div>
-                <span className="repair-kicker repair-kicker-muted">Common services</span>
+                <span className="repair-kicker">Common services</span>
                 <h2 id="brand-repair-types-heading">Common MacBook repair paths</h2>
               </div>
-              <p>Choose your MacBook model first, then compare the repair path that best matches the fault we need to assess.</p>
+              <p>
+                Choose your exact MacBook model first, then compare the repair path that best matches the fault we need to assess.
+              </p>
             </div>
-            <div className="repair-type-card-grid">
+            <div className="repair-signal-grid">
               {macbookRepairPaths.map((path, index) => (
-                <article key={path.name} className="repair-type-mini-card">
+                path.href ? (
+                  <Link key={path.name} href={path.href} prefetch={false} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h3>{path.name}</h3>
+                    <p>{path.note}</p>
+                  </Link>
+                ) : (
+                  <article key={path.name} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h3>{path.name}</h3>
+                    <p>{path.note}</p>
+                  </article>
+                )
+              ))}
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="macbook-common-problems-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Common MacBook problems</span>
+              <h2 id="macbook-common-problems-heading">MacBook problems we assess</h2>
+              <p>
+                Similar MacBook symptoms can have different causes, so the exact model and device condition guide the repair recommendation.
+              </p>
+            </div>
+            <div className="repair-signal-grid">
+              {macbookCommonProblems.map((problem, index) => (
+                <article key={problem.title} className="repair-signal-card">
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{path.name}</strong>
-                  <small>{path.note}</small>
+                  <h3>{problem.title}</h3>
+                  <p>{problem.body}</p>
                 </article>
               ))}
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="macbook-diagnostic-heading">
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel" aria-labelledby="macbook-diagnostic-heading">
             <div className="w-full">
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="macbook-diagnostic-heading">How MacBook diagnosis, parts and quoting work</h2>
               <p>
-                We confirm the exact model first, then explain the compatible repair options, parts availability and practical quote path before any work is approved.
+                We confirm the exact model and fault first, then explain the compatible repair options, parts availability and practical quote path before any work is approved.
               </p>
               <div className="repair-signal-grid mt-5">
                 <article className="repair-signal-card">
                   <span>01</span>
-                  <h3>Model-specific diagnosis</h3>
-                  <p>The exact model matters before we confirm repair compatibility, quote accuracy or the likely part path.</p>
+                  <h3>Confirm exact model</h3>
+                  <p>We check the MacBook model, year, screen size, chip generation and A-number before confirming compatibility.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>02</span>
-                  <h3>Parts and timing</h3>
-                  <p>Parts commonly require around one to two days to obtain, and installation is generally about one hour after the correct part arrives.</p>
+                  <h3>Confirm the fault</h3>
+                  <p>Screen, battery, keyboard, USB-C, liquid and no-power symptoms are assessed before a repair path is recommended.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Keyboard and top case notes</h3>
-                  <p>MacBook keyboard work commonly uses a top case assembly, and the replacement top case does not include the battery.</p>
+                  <h3>Check part availability</h3>
+                  <p>Parts vary by model year and design. If the required part is not in stock, we usually need 1-2 days to order it.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>04</span>
-                  <h3>Warranty and limits</h3>
-                  <p>Keyboard repair warranty is six months, and we do not promise exact completion timing before the model and parts are confirmed.</p>
+                  <h3>Approve quote first</h3>
+                  <p>We explain quote status, parts path, timing and warranty conditions before repair work begins.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>05</span>
+                  <h3>Complete repair when ready</h3>
+                  <p>Once the correct part and repair path are confirmed, the technician completes the agreed work.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>06</span>
+                  <h3>Test key functions</h3>
+                  <p>We test charging, keyboard, trackpad, display, speakers, camera and basic functions where the repair path allows.</p>
                 </article>
               </div>
             </div>
           </section>
 
-          <section className="repair-assist-panel" aria-labelledby="macbook-ringwood-heading">
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel" aria-labelledby="macbook-ringwood-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="macbook-ringwood-heading">MacBook repair support at Ringwood Square</h2>
               <p>
-                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. If your model is not listed or the fault needs assessment first, contact us before you travel.
+                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. Walk-ins are welcome, and calling ahead helps confirm MacBook parts and likely timing before you travel.
               </p>
             </div>
             <div className="repair-chip-cloud" aria-label="MacBook repair support actions">
@@ -1469,8 +2008,36 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               </span>
               <span>
                 <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
-                Privacy-checked repair workflow
+                English, 中文 and 粤语 support
               </span>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="macbook-service-area-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Nearby support</span>
+              <h2 id="macbook-service-area-heading">MacBook repair support near Ringwood</h2>
+              <p>
+                Choose the exact MacBook model first, then contact or visit our Ringwood Square repair desk to confirm the quote and parts path.
+              </p>
+            </div>
+            <IPhoneServiceAreaLinks cards={macbookServiceAreas} />
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="macbook-explore-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Explore more</span>
+              <h2 id="macbook-explore-heading">Other repair categories</h2>
+              <p>
+                Browse other supported repair categories if you are comparing repair options across devices.
+              </p>
+            </div>
+            <div className="brand-hub-link-grid brand-hub-category-link-grid">
+              {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                  <strong>{link.label}</strong>
+                </Link>
+              ))}
             </div>
           </section>
 
@@ -1537,6 +2104,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             category={categorySlug as RepairResultDeviceCategory}
             brand={brandSlug}
             scope="brand-hub"
+            initialResults={serverRepairResults}
+            showResultSummary
           />
 
           <section className="brand-hub-section" aria-labelledby="brand-repair-types-heading">
@@ -1548,15 +2117,38 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <p>Choose your Apple Watch model first, then compare the repair path that best matches the fault we need to assess.</p>
             </div>
             <div className="repair-signal-grid">
-              {[
-                { name: "Screen and display replacement", note: "Cracked glass, display faults and touch issues need the exact model and case size before the repair path is confirmed." },
-                { name: "Battery replacement", note: "Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path." },
-                { name: "Charging or no-power assessment", note: "If the watch is not charging or not turning on, we inspect the fault first before confirming the practical repair option." }
-              ].map((path, index) => (
-                <article key={path.name} className="repair-signal-card">
+              {APPLE_WATCH_COMMON_REPAIR_PATHS.map((path, index) => (
+                path.href ? (
+                  <Link key={path.name} href={path.href} prefetch={false} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h3>{path.name}</h3>
+                    <p>{path.note}</p>
+                  </Link>
+                ) : (
+                  <article key={path.name} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h3>{path.name}</h3>
+                    <p>{path.note}</p>
+                  </article>
+                )
+              ))}
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="apple-watch-common-problems-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Common Apple Watch problems</span>
+              <h2 id="apple-watch-common-problems-heading">Apple Watch problems we assess</h2>
+              <p>
+                Similar Apple Watch symptoms can have different causes, so the exact model, case size and condition guide the repair recommendation.
+              </p>
+            </div>
+            <div className="repair-signal-grid">
+              {APPLE_WATCH_COMMON_PROBLEMS.map((problem, index) => (
+                <article key={problem.title} className="repair-signal-card">
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <h3>{path.name}</h3>
-                  <p>{path.note}</p>
+                  <h3>{problem.title}</h3>
+                  <p>{problem.body}</p>
                 </article>
               ))}
             </div>
@@ -1567,23 +2159,38 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="apple-watch-diagnostic-heading">How Apple Watch diagnosis, parts and quoting work</h2>
               <p>
-                We confirm the exact model and condition first, then explain the compatible repair options, parts availability and practical quote path before any work is approved.
+                We confirm the exact model, case size and condition first, then explain the compatible repair options, parts availability and practical quote path before any work is approved.
               </p>
               <div className="repair-signal-grid mt-5">
                 <article className="repair-signal-card">
                   <span>01</span>
-                  <h3>Why generation and case size matter</h3>
-                  <p>Parts and repair compatibility vary across Series, SE, Ultra, exact generation, and case size.</p>
+                  <h3>Check exact model and size</h3>
+                  <p>Parts can vary by series, case size, GPS or cellular version, SE design and Ultra design.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>02</span>
-                  <h3>Parts and timing</h3>
-                  <p>Parts availability varies. Timing depends on the exact model, inspection, stock, and repair complexity.</p>
+                  <h3>Confirm the fault</h3>
+                  <p>We assess screen, battery, touch, charging, power and water exposure symptoms before recommending a repair option.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Water resistance limits</h3>
-                  <p>Original Apple factory water resistance cannot be guaranteed after opening or repair. Adhesive resealing does not restore guaranteed factory water-resistance certification.</p>
+                  <h3>Check quote and parts</h3>
+                  <p>We confirm the practical quote path and whether the required part is available before work begins.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>04</span>
+                  <h3>Order parts if needed</h3>
+                  <p>If the required part is not in stock, we usually need 1-2 days to order parts before completing the repair.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>05</span>
+                  <h3>Complete approved repair</h3>
+                  <p>Once the correct part and repair path are confirmed, the technician completes the agreed work.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>06</span>
+                  <h3>Test key functions</h3>
+                  <p>We test display, touch, charging, pairing and basic functions where the repair path allows.</p>
                 </article>
               </div>
             </div>
@@ -1597,9 +2204,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 Explore the main repair categories if you are comparing repair options across device types.
               </p>
             </div>
-            {otherWatchBrandLinks.length > 0 && (
-              <BrandHubLinks links={otherWatchBrandLinks} initialVisibleCount={4} />
-            )}
             <div className="brand-hub-link-grid brand-hub-category-link-grid">
               {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
                 <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
@@ -1614,7 +2218,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="apple-watch-ringwood-heading">Apple Watch repair support at Ringwood Square</h2>
               <p>
-                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
+                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. Walk-ins are welcome, and calling ahead helps confirm Apple Watch parts and likely timing before you travel.
               </p>
             </div>
             <div className="repair-chip-cloud" aria-label="Apple Watch repair support actions">
@@ -1628,21 +2232,27 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               </span>
               <span>
                 <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
-                Privacy-checked repair workflow
+                English, 中文 and 粤语 support
               </span>
             </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="apple-watch-service-area-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Nearby support</span>
+              <h2 id="apple-watch-service-area-heading">Apple Watch repair support near Ringwood</h2>
+              <p>
+                Choose the exact Apple Watch model first, then contact or visit our Ringwood Square repair desk to confirm the quote and parts path.
+              </p>
+            </div>
+            <IPhoneServiceAreaLinks cards={appleWatchServiceAreas} />
           </section>
 
           <section className="faq-section brand-hub-section brand-hub-faq-section" aria-labelledby="apple-watch-faq-heading">
             <span className="repair-kicker">Common questions</span>
             <h2 id="apple-watch-faq-heading" className="faq-heading">Apple Watch repair FAQs</h2>
             <div className="faq-accordion">
-              {[
-                { question: "Do you offer same-day Apple Watch repairs?", answer: "We do not promise same-day completion. Timing depends on the exact model, condition, parts availability, and the repair queue." },
-                { question: "Are you an Apple-authorised service provider?", answer: "No, we are an independent repair service provider offering high-quality repairs." },
-                { question: "Will my Apple Watch remain water resistant?", answer: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
-                { question: "Is an Apple Watch repair worth it?", answer: "That depends on the exact model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
-              ].map((faq) => (
+              {APPLE_WATCH_FAQS.map((faq) => (
                 <details key={faq.question} className="faq-item">
                   <summary className="faq-question">
                     <span>{faq.question}</span>
@@ -1905,7 +2515,431 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
         </>
-      ) : isSamsungTabletHub || isLenovoTabletHub ? (
+      ) : isSamsungTabletHub ? (
+        <>
+          <section
+            id="models-list"
+            className="brand-hub-section brand-hub-models-section"
+            aria-labelledby="samsung-tablet-model-finder-heading"
+          >
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Model identification</span>
+              <h2 id="samsung-tablet-model-finder-heading">Find your exact Samsung tablet model</h2>
+              <p>
+                Choose Galaxy Tab S, Galaxy Tab A, Galaxy Tab Active or use the model name to confirm the exact tablet before checking compatible repair options.
+              </p>
+            </div>
+            <BrandHubModelSeriesBrowser
+              brandSlug={brandSlug}
+              categorySlug={categorySlug}
+              seriesGroups={brandHubSeriesGroups}
+            />
+          </section>
+
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
+            brand={brandSlug}
+            scope="brand-hub"
+            initialResults={serverRepairResults}
+            showResultSummary
+          />
+
+          <section className="brand-hub-section" aria-labelledby="samsung-tablet-repair-types-heading">
+            <div className="brand-hub-section-header">
+              <div>
+                <span className="repair-kicker">Common services</span>
+                <h2 id="samsung-tablet-repair-types-heading">Common Samsung Tablet Repair Paths</h2>
+              </div>
+              <p>Start with your exact Samsung tablet model, then choose the repair path that best matches the fault. Available screen, battery and charging options can vary by model, device condition and current parts availability.</p>
+            </div>
+            <div className="brand-hub-link-grid brand-hub-repair-link-grid">
+              {SAMSUNG_TABLET_COMMON_REPAIR_LINKS.map((link) => (
+                <Link key={link.label} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                  <strong>{link.label}</strong>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="samsung-tablet-common-problems-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">COMMON SAMSUNG TABLET PROBLEMS</span>
+              <h2 id="samsung-tablet-common-problems-heading">Common Samsung tablet problems we assess</h2>
+            </div>
+            <div className="repair-signal-grid">
+              {SAMSUNG_TABLET_COMMON_PROBLEMS.map((problem, index) => (
+                <article key={problem.title} className="repair-signal-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{problem.title}</h3>
+                  <p>{problem.body}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel" aria-labelledby="samsung-tablet-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="samsung-tablet-diagnostic-heading">How Samsung tablet diagnosis, parts and quoting work</h2>
+              <p>
+                We confirm the exact Samsung tablet model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved.
+              </p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Confirm the model and fault</h3>
+                  <p>We check the Galaxy Tab family, model name, symptoms and overall device condition. Similar symptoms can have different causes, so diagnosis comes before parts approval.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Review the quote and parts</h3>
+                  <p>You will be shown the available repair option, price or Quote status before work begins. If a Samsung tablet part needs to be ordered, expected availability and likely timing will be explained before approval.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Repair, testing and collection</h3>
+                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the Samsung tablet is ready for collection and explain any important aftercare or warranty information.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="samsung-tablet-explore-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Explore more</span>
+              <h2 id="samsung-tablet-explore-heading">Other tablet brands</h2>
+              <p>
+                Browse other supported tablet repair hubs if you are comparing repair options across devices.
+              </p>
+            </div>
+            {otherTabletBrandLinks.length > 0 && (
+              <BrandHubLinks links={otherTabletBrandLinks} initialVisibleCount={4} />
+            )}
+            <div className="brand-hub-subsection" aria-labelledby="samsung-tablet-other-repair-categories-heading">
+              <h3 id="samsung-tablet-other-repair-categories-heading">Other repair categories</h3>
+              <div className="brand-hub-link-grid brand-hub-category-link-grid">
+                {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                    <strong>{link.label}</strong>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel" aria-labelledby="samsung-tablet-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="samsung-tablet-ringwood-heading">Samsung tablet repair support at Ringwood Square</h2>
+              <p>Ali Mobile &amp; Repair operates from Kiosk C1 at Ringwood Square Shopping Centre and supports Samsung tablet customers across Melbourne's eastern suburbs. Walk-ins are welcome, with free underground and outdoor parking available. You can call ahead to confirm parts availability or likely timing before travelling.</p>
+              <p>Our team provides support in English, 中文, and 粤语.</p>
+              <p>
+                <Link href="/locations/ringwood" prefetch={false}>Ringwood store information and directions</Link>
+              </p>
+            </div>
+            <div className="repair-chip-cloud" aria-label="Samsung tablet repair support actions">
+              <span>
+                <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+                Ringwood Square Kiosk C1
+              </span>
+              <span>
+                <Clock3 size={15} strokeWidth={2.2} aria-hidden="true" />
+                Clear quote before approval
+              </span>
+              <span>
+                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+                Model-specific repair path
+              </span>
+            </div>
+            <div className="repair-signal-grid mt-5">
+              <article className="repair-signal-card">
+                <span>01</span>
+                <h3>Before you visit</h3>
+                <ul>
+                  <li>Choose or note the exact Samsung tablet model.</li>
+                  <li>Bring the charger and cable for charging or battery symptoms.</li>
+                  <li>Back up important data when the tablet allows it.</li>
+                  <li>Call ahead to confirm parts availability or likely timing.</li>
+                </ul>
+              </article>
+              <article className="repair-signal-card">
+                <span>02</span>
+                <h3>Repair support and aftercare</h3>
+                <div>
+                  <p><strong>Six-month repair warranty</strong></p>
+                  <p>Eligible Samsung tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.</p>
+                  <p><strong>Data and functional testing</strong></p>
+                  <p>Important data should be backed up where possible. After the repair, relevant functions are checked, but a data outcome cannot be guaranteed.</p>
+                  <p><strong>Frame, adhesive and liquid limitations</strong></p>
+                  <p>Replacement adhesive is applied where required during reassembly. Frame or back-cover damage can affect fit and repair result. Waterproof protection cannot be guaranteed, and the repaired tablet should be kept away from liquids.</p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="samsung-tablet-service-areas-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">LOCAL SAMSUNG TABLET REPAIR SUPPORT</span>
+              <h2 id="samsung-tablet-service-areas-heading">Samsung tablet repair for Ringwood and nearby suburbs</h2>
+              <p>
+                Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact Samsung tablet model online, then contact the store to confirm available repairs, parts and likely timing before travelling.
+              </p>
+            </div>
+            <IPhoneServiceAreaLinks cards={samsungTabletServiceAreas} />
+          </section>
+
+          <section className="faq-section brand-hub-section brand-hub-faq-section" aria-labelledby="samsung-tablet-faq-heading">
+            <span className="repair-kicker">Common questions</span>
+            <h2 id="samsung-tablet-faq-heading" className="faq-heading">Samsung tablet repair FAQs</h2>
+            <div className="faq-accordion">
+              {SAMSUNG_TABLET_FAQS.map((faq) => (
+                <details key={faq.question} className="faq-item">
+                  <summary className="faq-question">
+                    <span>{faq.question}</span>
+                    <svg className="faq-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </summary>
+                  <div className="faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel brand-hub-final-cta" aria-labelledby="samsung-tablet-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="samsung-tablet-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>
+                Start with the Samsung tablet model selector above to check compatible repair paths, then book or call once you have the exact model.
+              </p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your Samsung Tablet Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : isLenovoTabletHub ? (
+        <>
+          <section
+            id="models-list"
+            className="brand-hub-section brand-hub-models-section"
+            aria-labelledby="lenovo-tablet-model-finder-heading"
+          >
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Model identification</span>
+              <h2 id="lenovo-tablet-model-finder-heading">Find your exact Lenovo tablet model</h2>
+              <p>
+                Choose Lenovo Tab, Tab M, Tab P, Yoga Tab or use the model name to confirm the exact tablet before checking compatible repair options.
+              </p>
+            </div>
+            <BrandHubModelSeriesBrowser
+              brandSlug={brandSlug}
+              categorySlug={categorySlug}
+              seriesGroups={brandHubSeriesGroups}
+            />
+          </section>
+
+          <HubRepairResultsSection
+            category={categorySlug as RepairResultDeviceCategory}
+            brand={brandSlug}
+            scope="brand-hub"
+            initialResults={serverRepairResults}
+            showResultSummary
+          />
+
+          <section className="brand-hub-section" aria-labelledby="lenovo-tablet-repair-types-heading">
+            <div className="brand-hub-section-header">
+              <div>
+                <span className="repair-kicker">Common services</span>
+                <h2 id="lenovo-tablet-repair-types-heading">Common Lenovo Tablet Repair Paths</h2>
+              </div>
+              <p>Start with your exact Lenovo tablet model, then choose the repair path that best matches the fault. Available screen, battery and charging options can vary by model, device condition and current parts availability.</p>
+            </div>
+            <div className="brand-hub-link-grid brand-hub-repair-link-grid">
+              {LENOVO_TABLET_COMMON_REPAIR_LINKS.map((link) => (
+                <Link key={link.label} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                  <strong>{link.label}</strong>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="lenovo-tablet-common-problems-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">COMMON LENOVO TABLET PROBLEMS</span>
+              <h2 id="lenovo-tablet-common-problems-heading">Common Lenovo tablet problems we assess</h2>
+            </div>
+            <div className="repair-signal-grid">
+              {LENOVO_TABLET_COMMON_PROBLEMS.map((problem, index) => (
+                <article key={problem.title} className="repair-signal-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{problem.title}</h3>
+                  <p>{problem.body}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel" aria-labelledby="lenovo-tablet-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="lenovo-tablet-diagnostic-heading">How Lenovo tablet diagnosis, parts and quoting work</h2>
+              <p>
+                We confirm the exact Lenovo tablet model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved.
+              </p>
+              <div className="repair-signal-grid mt-5">
+                <article className="repair-signal-card">
+                  <span>01</span>
+                  <h3>Confirm the model and fault</h3>
+                  <p>We check the Lenovo tablet family, model name, symptoms and overall device condition. Similar symptoms can have different causes, so diagnosis comes before parts approval.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>02</span>
+                  <h3>Review the quote and parts</h3>
+                  <p>You will be shown the available repair option, price or Quote status before work begins. If a Lenovo tablet part needs to be ordered, expected availability and likely timing will be explained before approval.</p>
+                </article>
+                <article className="repair-signal-card">
+                  <span>03</span>
+                  <h3>Repair, testing and collection</h3>
+                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the Lenovo tablet is ready for collection and explain any important aftercare or warranty information.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="lenovo-tablet-explore-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Explore more</span>
+              <h2 id="lenovo-tablet-explore-heading">Other tablet brands</h2>
+              <p>
+                Browse other supported tablet repair hubs if you are comparing repair options across devices.
+              </p>
+            </div>
+            {otherTabletBrandLinks.length > 0 && (
+              <BrandHubLinks links={otherTabletBrandLinks} initialVisibleCount={4} />
+            )}
+            <div className="brand-hub-subsection" aria-labelledby="lenovo-tablet-other-repair-categories-heading">
+              <h3 id="lenovo-tablet-other-repair-categories-heading">Other repair categories</h3>
+              <div className="brand-hub-link-grid brand-hub-category-link-grid">
+                {BRAND_HUB_REPAIR_CATEGORY_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                    <strong>{link.label}</strong>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel" aria-labelledby="lenovo-tablet-ringwood-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
+              <h2 id="lenovo-tablet-ringwood-heading">Lenovo tablet repair support at Ringwood Square</h2>
+              <p>Ali Mobile &amp; Repair operates from Kiosk C1 at Ringwood Square Shopping Centre and supports Lenovo tablet customers across Melbourne's eastern suburbs. Walk-ins are welcome, with free underground and outdoor parking available. You can call ahead to confirm parts availability or likely timing before travelling.</p>
+              <p>Our team provides support in English, 中文, and 粤语.</p>
+              <p>
+                <Link href="/locations/ringwood" prefetch={false}>Ringwood store information and directions</Link>
+              </p>
+            </div>
+            <div className="repair-chip-cloud" aria-label="Lenovo tablet repair support actions">
+              <span>
+                <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+                Ringwood Square Kiosk C1
+              </span>
+              <span>
+                <Clock3 size={15} strokeWidth={2.2} aria-hidden="true" />
+                Clear quote before approval
+              </span>
+              <span>
+                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+                Model-specific repair path
+              </span>
+            </div>
+            <div className="repair-signal-grid mt-5">
+              <article className="repair-signal-card">
+                <span>01</span>
+                <h3>Before you visit</h3>
+                <ul>
+                  <li>Choose or note the exact Lenovo tablet model.</li>
+                  <li>Bring the charger and cable for charging or battery symptoms.</li>
+                  <li>Back up important data when the tablet allows it.</li>
+                  <li>Call ahead to confirm parts availability or likely timing.</li>
+                </ul>
+              </article>
+              <article className="repair-signal-card">
+                <span>02</span>
+                <h3>Repair support and aftercare</h3>
+                <div>
+                  <p><strong>Six-month repair warranty</strong></p>
+                  <p>Eligible Lenovo tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.</p>
+                  <p><strong>Data and functional testing</strong></p>
+                  <p>Important data should be backed up where possible. After the repair, relevant functions are checked, but a data outcome cannot be guaranteed.</p>
+                  <p><strong>Frame, adhesive and liquid limitations</strong></p>
+                  <p>Replacement adhesive is applied where required during reassembly. Frame or casing damage can affect fit and repair result. Waterproof protection cannot be guaranteed, and the repaired tablet should be kept away from liquids.</p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="lenovo-tablet-service-areas-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">LOCAL LENOVO TABLET REPAIR SUPPORT</span>
+              <h2 id="lenovo-tablet-service-areas-heading">Lenovo tablet repair for Ringwood and nearby suburbs</h2>
+              <p>
+                Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact Lenovo tablet model online, then contact the store to confirm available repairs, parts and likely timing before travelling.
+              </p>
+            </div>
+            <IPhoneServiceAreaLinks cards={lenovoTabletServiceAreas} />
+          </section>
+
+          <section className="faq-section brand-hub-section brand-hub-faq-section" aria-labelledby="lenovo-tablet-faq-heading">
+            <span className="repair-kicker">Common questions</span>
+            <h2 id="lenovo-tablet-faq-heading" className="faq-heading">Lenovo tablet repair FAQs</h2>
+            <div className="faq-accordion">
+              {LENOVO_TABLET_FAQS.map((faq) => (
+                <details key={faq.question} className="faq-item">
+                  <summary className="faq-question">
+                    <span>{faq.question}</span>
+                    <svg className="faq-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </summary>
+                  <div className="faq-answer">
+                    <p>{faq.answer}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section className="repair-assist-panel brand-hub-section brand-hub-panel brand-hub-centered-panel brand-hub-final-cta" aria-labelledby="lenovo-tablet-final-cta-heading">
+            <div className="w-full max-w-2xl">
+              <span className="repair-kicker repair-kicker-muted">Next step</span>
+              <h2 id="lenovo-tablet-final-cta-heading">Choose your model to see the right repair options</h2>
+              <p>
+                Start with the Lenovo tablet model selector above to check compatible repair paths, then book or call once you have the exact model.
+              </p>
+            </div>
+            <div className="repair-hero-actions">
+              <a href="#models-list" className="repair-primary-action">
+                Choose Your Lenovo Tablet Model
+                <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
+              </a>
+              <Link href="/book-repair" className="repair-secondary-action">
+                Book a Repair
+              </Link>
+            </div>
+          </section>
+        </>
+      ) : isSamsungTabletHub ? (
         <>
           <section
             id="models-list"
