@@ -6,7 +6,19 @@ import { REPAIR_TYPES } from "@/data/seo-data";
 import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
-import { smartSortModels, groupModelsBySeries } from "@/lib/modelSortConfig";
+import { smartSortModels } from "@/lib/modelSortConfig";
+import { getMacBookFamilyKey, MACBOOK_FAMILY_LABELS, MACBOOK_FAMILY_ORDER } from "@/lib/macbookModelFamilies";
+import {
+  getIPadSeriesKey,
+  getLenovoTabletSeriesKey,
+  getSamsungTabletSeriesKey,
+  IPAD_BRAND_HUB_SERIES_ORDER,
+  IPAD_SERIES_LABELS,
+  LENOVO_TABLET_BRAND_HUB_SERIES_ORDER,
+  LENOVO_TABLET_SERIES_LABELS,
+  SAMSUNG_TABLET_BRAND_HUB_SERIES_ORDER,
+  SAMSUNG_TABLET_SERIES_LABELS,
+} from "@/lib/tabletModelFamilies";
 import BrandModelSearch from "@/components/BrandModelSearch";
 import HubRepairResultsSection, { type HubRepairResultItem } from "@/components/repair-results/HubRepairResultsSection";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
@@ -176,6 +188,96 @@ const OPPO_COMMON_PROBLEMS = [
   },
 ];
 
+const IPAD_COMMON_REPAIR_LINKS = [
+  {
+    href: "/repairs/screen-replacement",
+    label: "iPad screen repair options",
+  },
+  {
+    href: "/repairs/battery-replacement",
+    label: "battery replacement options",
+  },
+  {
+    href: "/repairs/charging-port-replacement",
+    label: "charging port repair options",
+  },
+];
+
+const IPAD_STATIC_REPAIR_OPTIONS = [
+  { label: "back camera repair options", hiddenBehindMore: false },
+  { label: "front camera repair options", hiddenBehindMore: true },
+];
+
+const IPAD_COMMON_PROBLEMS = [
+  {
+    title: "Screen, glass and touch problems",
+    body: "Cracked glass, black display, coloured lines, flickering or failed touch can come from different screen faults. The exact iPad model must be confirmed before the repair path is selected.",
+  },
+  {
+    title: "Battery, shutdown and swelling",
+    body: "Fast battery drain, shutdowns, overheating or a lifting screen may require a battery and device-condition assessment.",
+  },
+  {
+    title: "Charging problems",
+    body: "Charging faults may involve the cable, adapter, debris, battery, charging port or another internal issue. Do not automatically recommend port replacement.",
+  },
+  {
+    title: "Bent frame or casing damage",
+    body: "Bent frames and casing damage can affect screen fit and repair outcome. The device condition must be assessed first.",
+  },
+  {
+    title: "Camera, speaker or microphone problems",
+    body: "Camera, sound and microphone symptoms may come from the affected component, connected parts or another device fault.",
+  },
+  {
+    title: "Liquid exposure or no-power faults",
+    body: "Assessment is required before repair options, data risks and likely outcomes can be discussed. Do not guarantee successful repair.",
+  },
+];
+
+const IPAD_FAQS = [
+  {
+    question: "Which iPad models do you repair?",
+    answer: "We support selected iPad, iPad Air, iPad mini and iPad Pro models. Use the model browser above to choose your exact iPad before checking available repair options.",
+  },
+  {
+    question: "How can I identify my exact iPad model?",
+    answer: "Check Settings -> General -> About for the model name, or use the A-number printed on the iPad casing to help identify the exact version.",
+  },
+  {
+    question: "How much does an iPad repair cost?",
+    answer: "Price depends on the exact iPad model, fault, device condition and current parts availability. Choose your model in the browser to view the available price or Quote status.",
+  },
+  {
+    question: "How long can an iPad repair take?",
+    answer: "Timing depends on the model, repair type, parts stock, device condition and repair queue. If a part needs to be ordered, likely timing is explained before approval.",
+  },
+  {
+    question: "Do I need to make a booking?",
+    answer: "Walk-ins are welcome at Ringwood Square, and calling ahead is useful when you want to confirm parts availability or likely timing before travelling.",
+  },
+  {
+    question: "Will my data normally be affected by an iPad repair?",
+    answer: "Hardware repairs do not normally require access to personal content, but important data should be backed up where possible because a data outcome cannot be guaranteed.",
+  },
+  {
+    question: "What warranty applies to an iPad repair?",
+    answer: "iPad repairs include a six-month repair warranty, subject to the warranty conditions and exclusions explained with the repair.",
+  },
+  {
+    question: "What happens if the required iPad part is not in stock?",
+    answer: "We explain the available repair option, Quote status and expected parts ordering path before work is approved.",
+  },
+  {
+    question: "Is it better to repair or replace my iPad?",
+    answer: "That depends on the iPad model, fault, condition, repair quote, parts availability and replacement-device value. Once the model and fault are confirmed, we can explain the practical repair path.",
+  },
+  {
+    question: "Can water resistance be guaranteed after an iPad repair?",
+    answer: "No. Waterproof protection cannot be guaranteed after opening or repair, and the repaired iPad should be kept away from liquids.",
+  },
+];
+
 type BatchPhoneBrandSlug =
   | "xiaomi"
   | "nokia"
@@ -325,6 +427,18 @@ function getBatchPhoneServiceAreaDescription(config: BatchPhoneBrandHubConfig, a
 
 const PHONE_FEATURED_SERVICE_AREA_SLUGS = ["ringwood-east", "heathmont", "mitcham", "croydon"];
 
+function buildFeaturedServiceAreaSource() {
+  return [
+    ...PHONE_FEATURED_SERVICE_AREA_SLUGS.map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
+      .filter((area): area is (typeof SERVICE_AREAS)[number] => Boolean(area)),
+    ...SERVICE_AREAS.filter(
+      (area) =>
+        area.slug !== "ringwood" &&
+        !PHONE_FEATURED_SERVICE_AREA_SLUGS.includes(area.slug)
+    ),
+  ];
+}
+
 function getIPhoneServiceAreaDescription(areaName: string, index: number) {
   const descriptions = [
     `${areaName} customers can choose their exact iPhone model and check available repair options before visiting our Ringwood Square repair desk.`,
@@ -377,11 +491,21 @@ function getOppoServiceAreaDescription(areaName: string, index: number) {
   return descriptions[index % descriptions.length];
 }
 
+function getIPadServiceAreaDescription(areaName: string, index: number) {
+  const descriptions = [
+    `${areaName} customers can choose their exact iPad model before visiting our Ringwood Square repair desk.`,
+    `Travelling from ${areaName}? Check iPad screen, LCD, battery, charging and camera options by model, then call ahead about parts availability.`,
+    `Customers near ${areaName} can use the iPad model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
+    `${areaName} customers can review iPad repair paths online before contacting the Ringwood Square team for the next step.`,
+    `Before travelling from ${areaName}, choose the exact iPad model and contact the store if you want likely timing checked first.`,
+    `${areaName} customers can compare iPad repair options online, then visit Ringwood Square for model-specific assessment.`,
+  ];
+
+  return descriptions[index % descriptions.length];
+}
+
 const MAJOR_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
 const SAMSUNG_SERIES_ORDER = ["s", "a", "note", "z"];
-const SAMSUNG_TABLET_SERIES_ORDER = ["tab-s", "tab-a", "tab-active", "other"];
-const LENOVO_TABLET_SERIES_ORDER = ["tab-p", "tab-m", "tab-e", "yoga", "other"];
-const IPAD_SERIES_ORDER = ["ipad", "air", "mini", "pro", "other"];
 const APPLE_WATCH_SERIES_ORDER = [
   "series-3",
   "series-4",
@@ -397,16 +521,6 @@ const APPLE_WATCH_SERIES_ORDER = [
   "ultra-2",
   "other",
 ];
-const IPAD_BASE_MODEL_SLUGS = new Set([
-  "ipad-5th-generation",
-  "ipad-6th-generation",
-  "ipad-7th-generation",
-  "ipad-8th-generation",
-  "ipad-9th-generation",
-  "ipad-10th-generation",
-  "ipad-11th-generation",
-]);
-
 const SAMSUNG_SERIES_LABELS: Record<string, string> = {
   s: "Galaxy S Series",
   a: "Galaxy A Series",
@@ -420,29 +534,6 @@ const OPPO_SERIES_LABELS: Record<string, string> = {
   reno: "Reno Series",
   a: "A Series",
   other: "Other Oppo Models",
-};
-
-const IPAD_SERIES_LABELS: Record<string, string> = {
-  ipad: "iPad",
-  air: "iPad Air",
-  mini: "iPad mini",
-  pro: "iPad Pro",
-  other: "Other iPad Models",
-};
-
-const SAMSUNG_TABLET_SERIES_LABELS: Record<string, string> = {
-  "tab-s": "Galaxy Tab S Series",
-  "tab-a": "Galaxy Tab A Series",
-  "tab-active": "Galaxy Tab Active Series",
-  other: "Other Samsung Tablets",
-};
-
-const LENOVO_TABLET_SERIES_LABELS: Record<string, string> = {
-  "tab-p": "Lenovo Tab P Series",
-  "tab-m": "Lenovo Tab M Series",
-  "tab-e": "Lenovo Tab E Series",
-  yoga: "Lenovo Yoga Tab Series",
-  other: "Other Lenovo Tablets",
 };
 
 const APPLE_WATCH_SERIES_LABELS: Record<string, string> = {
@@ -557,47 +648,6 @@ function getOppoSeriesKey(model: ModelEntry) {
   return "other";
 }
 
-function getIPadSeriesKey(model: ModelEntry) {
-  const name = model.model.toLowerCase();
-  const slug = model.slug.toLowerCase();
-
-  if (
-    IPAD_BASE_MODEL_SLUGS.has(slug) ||
-    (name.startsWith("ipad ") &&
-      !name.includes("ipad air") &&
-      !name.includes("ipad mini") &&
-      !name.includes("ipad pro"))
-  ) {
-    return "ipad";
-  }
-
-  if (name.includes("ipad air") || slug.includes("ipad-air")) return "air";
-  if (name.includes("ipad mini") || slug.includes("ipad-mini")) return "mini";
-  if (name.includes("ipad pro") || slug.includes("ipad-pro")) return "pro";
-  return "other";
-}
-
-function getSamsungTabletSeriesKey(model: ModelEntry) {
-  const name = model.model.toLowerCase();
-  const slug = model.slug.toLowerCase();
-
-  if (name.includes("active") || slug.includes("active")) return "tab-active";
-  if (/\btab\s+s/i.test(name) || slug.startsWith("galaxy-tab-s")) return "tab-s";
-  if (/\btab\s+a/i.test(name) || slug.startsWith("galaxy-tab-a")) return "tab-a";
-  return "other";
-}
-
-function getLenovoTabletSeriesKey(model: ModelEntry) {
-  const name = model.model.toLowerCase();
-  const slug = model.slug.toLowerCase();
-
-  if (/\btab\s+p/i.test(name) || slug.includes("tab-p")) return "tab-p";
-  if (/\btab\s+m/i.test(name) || slug.includes("tab-m")) return "tab-m";
-  if (/\btab\s+e/i.test(name) || slug.includes("tab-e")) return "tab-e";
-  if (name.includes("yoga") || slug.includes("yoga")) return "yoga";
-  return "other";
-}
-
 function getAppleWatchSeriesKey(model: ModelEntry) {
   const name = model.model.toLowerCase();
   const slug = model.slug.toLowerCase();
@@ -619,6 +669,27 @@ function toBrandHubSeriesModels(models: ModelEntry[]) {
     slug: model.slug,
     modelCode: model.modelCode,
   }));
+}
+
+function buildMacBookFamilyGroups(models: ModelEntry[]) {
+  const sorted = smartSortModels(models);
+  const groups = new Map<string, ModelEntry[]>();
+
+  for (const model of sorted) {
+    const key = getMacBookFamilyKey(model.model, model.slug);
+    const current = groups.get(key) ?? [];
+    current.push(model);
+    groups.set(key, current);
+  }
+
+  return MACBOOK_FAMILY_ORDER.flatMap((key) => {
+    const groupedModels = groups.get(key);
+    if (!groupedModels || groupedModels.length === 0) return [];
+    return [{
+      series: MACBOOK_FAMILY_LABELS[key],
+      models: groupedModels,
+    }];
+  });
 }
 
 function buildBrandHubSeriesGroups(categorySlug: string, brandSlug: string, models: ModelEntry[]): BrandHubSeriesGroup[] {
@@ -648,13 +719,13 @@ function buildBrandHubSeriesGroups(categorySlug: string, brandSlug: string, mode
     const groups = new Map<string, ModelEntry[]>();
 
     for (const model of sorted) {
-      const key = getIPadSeriesKey(model);
+      const key = getIPadSeriesKey(model.model, model.slug);
       const current = groups.get(key) ?? [];
       current.push(model);
       groups.set(key, current);
     }
 
-    return IPAD_SERIES_ORDER.flatMap((key) => {
+    return IPAD_BRAND_HUB_SERIES_ORDER.flatMap((key) => {
       const groupedModels = groups.get(key);
       if (!groupedModels || groupedModels.length === 0) return [];
       return [{
@@ -670,13 +741,15 @@ function buildBrandHubSeriesGroups(categorySlug: string, brandSlug: string, mode
     const groups = new Map<string, ModelEntry[]>();
 
     for (const model of sorted) {
-      const key = brandSlug === "samsung" ? getSamsungTabletSeriesKey(model) : getLenovoTabletSeriesKey(model);
+      const key = brandSlug === "samsung"
+        ? getSamsungTabletSeriesKey(model.model, model.slug)
+        : getLenovoTabletSeriesKey(model.model, model.slug);
       const current = groups.get(key) ?? [];
       current.push(model);
       groups.set(key, current);
     }
 
-    const orderedKeys = brandSlug === "samsung" ? SAMSUNG_TABLET_SERIES_ORDER : LENOVO_TABLET_SERIES_ORDER;
+    const orderedKeys = brandSlug === "samsung" ? SAMSUNG_TABLET_BRAND_HUB_SERIES_ORDER : LENOVO_TABLET_BRAND_HUB_SERIES_ORDER;
     const labels = brandSlug === "samsung" ? SAMSUNG_TABLET_SERIES_LABELS : LENOVO_TABLET_SERIES_LABELS;
 
     return orderedKeys.flatMap((key) => {
@@ -775,7 +848,7 @@ function getBrandHubHeroDescription(
   }
 
   if (categorySlug === "tablet" && brandSlug === "ipad") {
-    return "Explore iPad repair options for supported iPad, iPad Air, iPad mini and iPad Pro models. Visit Ringwood Square or choose your exact model to check services and pricing.";
+    return "Choose your exact iPad model to view available screen, LCD, battery, charging, front camera and back camera repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
   }
 
   if (categorySlug === "tablet" && brandSlug === "samsung") {
@@ -824,7 +897,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     description = "Apple Watch repair at Ringwood Square for Melbourne's eastern suburbs. Choose your model for screen, battery and diagnostic quote options.";
   } else if (isIPad) {
     title = 'iPad Repair | Screen, Battery & Charging | Ali Mobile';
-    description = "iPad repair at Ringwood Square for Melbourne's eastern suburbs. Choose your exact model for screen, battery, charging and quote options.";
+    description = "iPad repair at Ringwood Square for Melbourne's eastern suburbs. Check screen, LCD, battery, charging and camera repair options by exact model.";
   } else if (isSamsungTablet) {
     title = 'Samsung Tablet Repair | Screen, Battery & Charging | Ali Mobile';
     description = "Samsung Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Choose your Galaxy Tab model for screen, battery and charging options.";
@@ -843,12 +916,12 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     title,
     description,
     alternates: {
-      canonical: canonicalPath,
+      canonical: isIPad ? "https://www.alimobile.com.au/repairs/tablet/ipad" : canonicalPath,
     },
     openGraph: {
       title,
       description,
-      url: canonicalPath,
+      url: isIPad ? "https://www.alimobile.com.au/repairs/tablet/ipad" : canonicalPath,
       type: "website",
       locale: "en_AU",
       siteName: "Ali Mobile & Repair",
@@ -920,19 +993,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const otherWatchBrandLinks = isAppleWatchHub ? buildOtherWatchBrandLinks(catalog.brands, brandSlug) : [];
   const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
-  const seriesGroups = groupModelsBySeries(sortedModels, brandName);
+  const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : [];
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(categorySlug, brandSlug, models) : [];
-  const phoneServiceAreaSource = isEnhancedPhoneHub
-    ? [
-        ...PHONE_FEATURED_SERVICE_AREA_SLUGS.map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
-          .filter((area): area is (typeof SERVICE_AREAS)[number] => Boolean(area)),
-        ...SERVICE_AREAS.filter(
-          (area) =>
-            area.slug !== "ringwood" &&
-            !PHONE_FEATURED_SERVICE_AREA_SLUGS.includes(area.slug)
-        ),
-      ]
+  const phoneServiceAreaSource = isEnhancedPhoneHub ? buildFeaturedServiceAreaSource() : [];
+  const ipadServiceAreas: IPhoneServiceAreaLinkCard[] = isIPadHub
+    ? buildFeaturedServiceAreaSource().map((area, index) => ({
+        href: `/locations/${area.slug}`,
+        name: area.name,
+        description: getIPadServiceAreaDescription(area.name, index),
+      }))
     : [];
   const iphoneServiceAreas: IPhoneServiceAreaLinkCard[] = isIPhoneHub
     ? phoneServiceAreaSource.map((area, index) => ({
@@ -969,19 +1039,23 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         description: getBatchPhoneServiceAreaDescription(batchPhoneBrandConfig, area.name, index),
       }))
     : [];
-  const serverRepairResultsBrand = isIPhoneHub
-    ? "iphone"
+  const serverRepairResultsTarget:
+    | { category: RepairResultDeviceCategory; brand: string }
+    | null = isIPhoneHub
+    ? { category: "phone", brand: "iphone" }
     : isSamsungPhoneHub
-    ? "samsung"
+    ? { category: "phone", brand: "samsung" }
     : isGooglePixelHub
-    ? "google-pixel"
+    ? { category: "phone", brand: "google-pixel" }
     : isOppoPhoneHub
-    ? "oppo"
+    ? { category: "phone", brand: "oppo" }
     : batchPhoneBrandConfig
-    ? brandSlug
+    ? { category: "phone", brand: brandSlug }
+    : isIPadHub
+    ? { category: "tablet", brand: "ipad" }
     : null;
-  const serverRepairResults: HubRepairResultItem[] | undefined = serverRepairResultsBrand
-    ? (await fetchHubRepairResults("phone", serverRepairResultsBrand)).map((result) => ({
+  const serverRepairResults: HubRepairResultItem[] | undefined = serverRepairResultsTarget
+    ? (await fetchHubRepairResults(serverRepairResultsTarget.category, serverRepairResultsTarget.brand)).map((result) => ({
         id: result.id,
         device_category: result.device_category,
         brand: result.brand,
@@ -1140,16 +1214,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const ipadHeroInsightCards = isIPadHub
     ? [
         {
-          title: "Choose exact model",
-          body: "iPad, iPad Air, iPad Pro, iPad mini",
+          title: "iPad Repairs from $50",
+          body: "Selected iPad repair services start from $50. Choose your exact model to view current repair options and pricing.",
         },
         {
-          title: "Exact generation required",
-          body: "Confirm the iPad family, generation, screen size or A-number before choosing the repair path.",
+          title: "Fast Screen & Battery Repairs",
+          body: "Most iPad screen and battery repairs take about 45 minutes once the correct part is available.",
         },
         {
-          title: "Screen size or A-number",
-          body: "Use Settings, the rear casing A-number, or screen size details to match the right model.",
+          title: "Same-Day Repairs for Common Models",
+          body: "Many common iPad repairs can be completed the same day when parts are available. Less common parts usually take around 1-2 days to arrive.",
         },
       ]
     : [];
@@ -1628,6 +1702,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             category={categorySlug as RepairResultDeviceCategory}
             brand={brandSlug}
             scope="brand-hub"
+            initialResults={serverRepairResults}
+            showResultSummary
           />
 
           <section className="brand-hub-section" aria-labelledby="brand-repair-types-heading">
@@ -1636,18 +1712,43 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 <span className="repair-kicker">Common services</span>
                 <h2 id="brand-repair-types-heading">Common iPad Repair Paths</h2>
               </div>
-              <p>Choose your iPad model first, then compare the repair path that best matches the fault we need to assess.</p>
+              <p>Start with your exact iPad model, then choose the repair path that best matches the fault. Available screen, LCD, battery, charging, front camera and back camera options can vary by model, device condition and current parts availability.</p>
+            </div>
+            <div className="brand-hub-link-grid brand-hub-repair-link-grid">
+              {IPAD_COMMON_REPAIR_LINKS.map((link) => (
+                <Link key={link.label} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                  <strong>{link.label}</strong>
+                </Link>
+              ))}
+              {IPAD_STATIC_REPAIR_OPTIONS.filter((option) => !option.hiddenBehindMore).map((option) => (
+                <span key={option.label} className="brand-hub-outline-link brand-hub-outline-link-static">
+                  <strong>{option.label}</strong>
+                </span>
+              ))}
+            </div>
+            <details className="ipad-common-repair-more">
+              <summary className="brand-hub-show-more">More options</summary>
+              <div className="brand-hub-link-grid brand-hub-repair-link-grid">
+                {IPAD_STATIC_REPAIR_OPTIONS.filter((option) => option.hiddenBehindMore).map((option) => (
+                  <span key={option.label} className="brand-hub-outline-link brand-hub-outline-link-static">
+                    <strong>{option.label}</strong>
+                  </span>
+                ))}
+              </div>
+            </details>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="ipad-common-problems-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">COMMON IPAD PROBLEMS</span>
+              <h2 id="ipad-common-problems-heading">Common iPad problems we assess</h2>
             </div>
             <div className="repair-signal-grid">
-              {[
-                { name: "Screen and display replacement", note: "Cracked glass, display faults and touch issues need the exact model before the repair path is confirmed." },
-                { name: "Battery replacement", note: "Battery wear, short runtime and shutdown symptoms are checked against the compatible model-specific battery path." },
-                { name: "Charging or no-power diagnostic assessment", note: "If the iPad is not charging or not turning on, we inspect the fault first before confirming the practical repair option." }
-              ].map((path, index) => (
-                <article key={path.name} className="repair-signal-card">
+              {IPAD_COMMON_PROBLEMS.map((problem, index) => (
+                <article key={problem.title} className="repair-signal-card">
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <h3>{path.name}</h3>
-                  <p>{path.note}</p>
+                  <h3>{problem.title}</h3>
+                  <p>{problem.body}</p>
                 </article>
               ))}
             </div>
@@ -1658,23 +1759,23 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
               <h2 id="ipad-diagnostic-heading">How iPad diagnosis, parts and quoting work</h2>
               <p>
-                We confirm the exact model, device condition, frame condition, fault and parts availability first. Then we explain the compatible repair options and practical quote path before any work is approved.
+                We confirm the exact iPad model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved.
               </p>
               <div className="repair-signal-grid mt-5">
                 <article className="repair-signal-card">
                   <span>01</span>
-                  <h3>Why the exact model matters</h3>
-                  <p>Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.</p>
+                  <h3>Confirm the model and fault</h3>
+                  <p>We check the exact iPad model, the symptoms and the overall device condition. Similar symptoms can have different causes, and frame condition can affect the suitable repair path.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>02</span>
-                  <h3>Parts, timing and adhesive</h3>
-                  <p>Parts availability varies. Timing depends on model, stock, queue and device condition. Some repairs require adhesive fitting and curing time, so we do not promise same-day completion before checking the device and part.</p>
+                  <h3>Review the quote and parts</h3>
+                  <p>You will be shown the available repair option, price or Quote status before work begins. If a part needs to be ordered, expected availability and likely timing will be explained before approval.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Data and backup guidance</h3>
-                  <p>Standard hardware repairs normally do not require access to personal content. However, we recommend backing up the iPad where possible before repair, as data preservation cannot be guaranteed.</p>
+                  <h3>Repair, testing and collection</h3>
+                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the iPad is ready for collection and explain any important aftercare or warranty information.</p>
                 </article>
               </div>
             </div>
@@ -1707,8 +1808,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
               <h2 id="ipad-ringwood-heading">iPad repair support at Ringwood Square</h2>
+              <p>Ali Mobile &amp; Repair operates from Kiosk C1 at Ringwood Square Shopping Centre and supports iPad customers across Melbourne's eastern suburbs. Walk-ins are welcome, with free underground and outdoor parking available. You can call ahead to confirm parts availability or likely timing before travelling.</p>
+              <p>Our team provides support in English, 中文, and 粤语.</p>
               <p>
-                Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1.
+                <Link href="/locations/ringwood" prefetch={false}>Ringwood store information and directions</Link>
               </p>
             </div>
             <div className="repair-chip-cloud" aria-label="iPad repair support actions">
@@ -1725,19 +1828,49 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 Privacy-checked repair workflow
               </span>
             </div>
+            <div className="repair-signal-grid mt-5">
+              <article className="repair-signal-card">
+                <span>01</span>
+                <h3>Before you visit</h3>
+                <ul>
+                  <li>Choose or note the exact iPad model.</li>
+                  <li>The model number beginning with A can help identify the version.</li>
+                  <li>Back up important data when the iPad allows it.</li>
+                  <li>Bring the relevant charging cable or adapter for intermittent faults.</li>
+                  <li>Call ahead to confirm parts availability or likely timing.</li>
+                </ul>
+              </article>
+              <article className="repair-signal-card">
+                <span>02</span>
+                <h3>Repair support and aftercare</h3>
+                <div>
+                  <p><strong>Six-month repair warranty</strong></p>
+                  <p>iPad repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.</p>
+                  <p><strong>Data and functional testing</strong></p>
+                  <p>Important data should be backed up where possible. After the repair, relevant functions are checked, but a data outcome cannot be guaranteed.</p>
+                  <p><strong>Frame, adhesive and liquid limitations</strong></p>
+                  <p>Replacement adhesive is applied where required during reassembly. A bent or damaged frame can affect fit and the repair result. Waterproof protection cannot be guaranteed, and the repaired iPad should be kept away from liquids.</p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="ipad-service-areas-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">LOCAL IPAD REPAIR SUPPORT</span>
+              <h2 id="ipad-service-areas-heading">iPad repair for Ringwood and nearby suburbs</h2>
+              <p>
+                Our repair desk is located inside Ringwood Square Shopping Centre. Customers from nearby eastern suburbs can choose their exact iPad model online, then contact the store to confirm available repairs, parts and likely timing before travelling.
+              </p>
+            </div>
+            <IPhoneServiceAreaLinks cards={ipadServiceAreas} />
           </section>
 
           <section className="faq-section brand-hub-section brand-hub-faq-section" aria-labelledby="ipad-faq-heading">
             <span className="repair-kicker">Common questions</span>
             <h2 id="ipad-faq-heading" className="faq-heading">iPad repair FAQs</h2>
             <div className="faq-accordion">
-              {[
-                { question: "How do I identify the exact iPad model?", answer: "Check Settings → General → About, or look for the A-number printed on the rear casing of your iPad." },
-                { question: "Can you confirm screen or battery repair timing immediately?", answer: "We do not promise same-day completion before checking the device and part. Timing depends on the exact model, condition, parts availability, and the repair queue." },
-                { question: "Is my data safe during an iPad repair?", answer: "Standard hardware repairs normally do not require access to personal content. However, we recommend backing up the iPad where possible before repair, as we cannot guarantee data preservation." },
-                { question: "Do bent frames affect iPad screen replacement?", answer: "Yes, bent frames can prevent a new screen from sitting flush and sealing correctly. We inspect the frame condition before confirming the repair option." },
-                { question: "Is an iPad repair worth it?", answer: "That depends on the exact model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
-              ].map((faq) => (
+              {IPAD_FAQS.map((faq) => (
                 <details key={faq.question} className="faq-item">
                   <summary className="faq-question">
                     <span>{faq.question}</span>

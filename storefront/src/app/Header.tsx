@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { analytics } from '@/lib/analytics';
 import { ChevronDown, Menu, X } from 'lucide-react';
@@ -25,14 +26,54 @@ function getInitialTheme(): ThemeMode {
 
 export default function Header() {
   const { devices } = useCart();
+  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openMobileGroup, setOpenMobileGroup] = useState<'service' | 'repair-categories' | null>(null);
+  const [isServiceRepairsMenuOpen, setIsServiceRepairsMenuOpen] = useState(false);
+  const [isRepairCategoriesMenuOpen, setIsRepairCategoriesMenuOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+  const serviceRepairsMenuRef = useRef<HTMLDivElement | null>(null);
+  const repairCategoriesMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (!isServiceRepairsMenuOpen && !isRepairCategoriesMenuOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: MouseEvent) {
+      const target = event.target as Node;
+
+      if (
+        serviceRepairsMenuRef.current?.contains(target) ||
+        repairCategoriesMenuRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setIsServiceRepairsMenuOpen(false);
+      setIsRepairCategoriesMenuOpen(false);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsServiceRepairsMenuOpen(false);
+        setIsRepairCategoriesMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isServiceRepairsMenuOpen, isRepairCategoriesMenuOpen]);
 
   // Lock to light mode, ignore toggles
   const toggleTheme = () => {
@@ -44,9 +85,71 @@ export default function Header() {
     setOpenMobileGroup(null);
   };
 
+  const closeServiceRepairsMenu = () => {
+    setIsServiceRepairsMenuOpen(false);
+  };
+
+  const closeRepairCategoriesMenu = () => {
+    setIsRepairCategoriesMenuOpen(false);
+  };
+
+  const closeAllNavigationMenus = () => {
+    closeServiceRepairsMenu();
+    closeRepairCategoriesMenu();
+    closeMobileMenu();
+  };
+
+  const openServiceRepairsMenu = () => {
+    setIsRepairCategoriesMenuOpen(false);
+    setIsServiceRepairsMenuOpen(true);
+  };
+
+  const openRepairCategoriesMenu = () => {
+    setIsServiceRepairsMenuOpen(false);
+    setIsRepairCategoriesMenuOpen(true);
+  };
+
+  const toggleRepairCategoriesMenu = () => {
+    setIsRepairCategoriesMenuOpen((current) => {
+      const nextValue = !current;
+      if (nextValue) {
+        setIsServiceRepairsMenuOpen(false);
+      }
+      return nextValue;
+    });
+  };
+
+  const handleServiceRepairSelection = () => {
+    closeAllNavigationMenus();
+  };
+
+  const handleRepairCategorySelection = () => {
+    closeAllNavigationMenus();
+  };
+
+  const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    closeAllNavigationMenus();
+
+    if (pathname !== '/') {
+      return;
+    }
+
+    event.preventDefault();
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  };
+
   const toggleMobileGroup = (group: 'service' | 'repair-categories') => {
     setOpenMobileGroup((current) => (current === group ? null : group));
   };
+
+  useEffect(() => {
+    closeAllNavigationMenus();
+  }, [pathname]);
 
   return (
     <>
@@ -68,7 +171,7 @@ export default function Header() {
         <div className="flex items-center justify-between relative w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-[0.35rem]">
           {/* Left: Logo */}
           <div className="flex items-center">
-            <Link href="/" className="nav-logo">
+            <Link href="/" onClick={handleLogoClick} aria-label="Ali Mobile home" className="nav-logo">
               <Image 
                 src="/images/logo.png" 
                 alt="Ali Mobile & Repair Ringwood" 
@@ -83,28 +186,64 @@ export default function Header() {
           {/* Center: Desktop nav links (Absolute Center) */}
           <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <nav className="nav-links nav-links--desktop">
-              <div className="nav-dropdown">
-                <Link href="/repairs" prefetch={true} className="nav-dropdown-trigger">
+              <div
+                ref={serviceRepairsMenuRef}
+                className={`nav-dropdown nav-dropdown--controlled ${isServiceRepairsMenuOpen ? 'nav-dropdown--open' : ''}`}
+                onMouseEnter={openServiceRepairsMenu}
+                onMouseLeave={closeServiceRepairsMenu}
+                onFocusCapture={openServiceRepairsMenu}
+                onBlurCapture={(event) => {
+                  if (!serviceRepairsMenuRef.current?.contains(event.relatedTarget as Node | null)) {
+                    closeServiceRepairsMenu();
+                  }
+                }}
+              >
+                <Link href="/repairs" prefetch={true} className="nav-dropdown-trigger" onClick={closeAllNavigationMenus}>
                   Service &amp; Repairs
                 </Link>
                 <div className="nav-dropdown-menu" aria-label="Service and repair categories">
                   {repairMenuItems.map((item) => (
-                    <Link key={item.href} href={item.href} prefetch={true}>
+                    <Link key={item.href} href={item.href} prefetch={true} onClick={handleServiceRepairSelection}>
                       {item.label}
                     </Link>
                   ))}
                 </div>
               </div>
-              <div className="nav-dropdown">
-                <button type="button" className="nav-dropdown-trigger nav-dropdown-trigger--button">
+              <div
+                ref={repairCategoriesMenuRef}
+                className={`nav-dropdown nav-dropdown--controlled ${isRepairCategoriesMenuOpen ? 'nav-dropdown--open' : ''}`}
+                onMouseEnter={openRepairCategoriesMenu}
+                onMouseLeave={closeRepairCategoriesMenu}
+                onFocusCapture={openRepairCategoriesMenu}
+                onBlurCapture={(event) => {
+                  if (!repairCategoriesMenuRef.current?.contains(event.relatedTarget as Node | null)) {
+                    closeRepairCategoriesMenu();
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  className="nav-dropdown-trigger nav-dropdown-trigger--button"
+                  aria-expanded={isRepairCategoriesMenuOpen}
+                  aria-controls="desktop-repair-categories-menu"
+                  onClick={toggleRepairCategoriesMenu}
+                >
                   Repair Categories
                 </button>
                 <div
+                  id="desktop-repair-categories-menu"
                   className="nav-dropdown-menu nav-dropdown-menu--repair-categories"
                   aria-label="Repair categories"
+                  aria-hidden={!isRepairCategoriesMenuOpen}
                 >
                   {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
-                    <Link key={item.href} href={item.href} prefetch={true} className="nav-dropdown-card">
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      prefetch={true}
+                      className="nav-dropdown-card"
+                      onClick={handleRepairCategorySelection}
+                    >
                       <span className="nav-dropdown-card-label">{item.label}</span>
                       <span className="nav-dropdown-card-note">{item.description}</span>
                     </Link>
@@ -157,7 +296,7 @@ export default function Header() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white/95 backdrop-blur-sm flex flex-col">
           <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200/50">
-            <Link href="/" onClick={closeMobileMenu} className="flex items-center h-10">
+            <Link href="/" onClick={handleLogoClick} aria-label="Ali Mobile home" className="flex items-center h-10">
               <Image 
                 src="/images/logo.png" 
                 alt="Ali Mobile & Repair Ringwood" 
@@ -192,12 +331,12 @@ export default function Header() {
                 id="mobile-service-repairs-panel"
                 className={openMobileGroup === 'service' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
               >
-                <Link href="/repairs" onClick={closeMobileMenu} className="mobile-nav-group-link mobile-nav-group-link--overview">
+                <Link href="/repairs" onClick={closeAllNavigationMenus} className="mobile-nav-group-link mobile-nav-group-link--overview">
                   All Service &amp; Repairs
                 </Link>
                 <div className="mobile-repair-links" aria-label="Service and repair categories">
                   {repairMenuItems.map((item) => (
-                    <Link key={item.href} href={item.href} onClick={closeMobileMenu}>
+                    <Link key={item.href} href={item.href} onClick={handleServiceRepairSelection}>
                       {item.label}
                     </Link>
                   ))}
@@ -221,19 +360,19 @@ export default function Header() {
               >
                 <div className="mobile-repair-links" aria-label="Repair category hubs">
                   {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
-                    <Link key={item.href} href={item.href} onClick={closeMobileMenu}>
+                    <Link key={item.href} href={item.href} onClick={handleRepairCategorySelection}>
                       {item.label}
                     </Link>
                   ))}
                 </div>
               </div>
             </div>
-            <Link href="/about-us" onClick={closeMobileMenu} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
-            <Link href="/blog" onClick={closeMobileMenu} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
-            <Link href="/track-status" onClick={closeMobileMenu} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
+            <Link href="/about-us" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
+            <Link href="/blog" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
+            <Link href="/track-status" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
             
             <div className="pt-6 mt-4 border-t border-slate-200/50">
-              <Link href="/book-repair" onClick={closeMobileMenu} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md" style={{ color: '#ffffff' }}>
+              <Link href="/book-repair" onClick={closeAllNavigationMenus} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md" style={{ color: '#ffffff' }}>
                 Book Repair Now {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>{devices.length}</span>}
               </Link>
             </div>

@@ -236,8 +236,9 @@ a {
     visibility 0s linear 0.36s;
 }
 
-.nav-dropdown:hover .nav-dropdown-menu,
-.nav-dropdown:focus-within .nav-dropdown-menu {
+.nav-dropdown:not(.nav-dropdown--controlled):hover .nav-dropdown-menu,
+.nav-dropdown:not(.nav-dropdown--controlled):focus-within .nav-dropdown-menu,
+.nav-dropdown--controlled.nav-dropdown--open .nav-dropdown-menu {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
@@ -5537,6 +5538,27 @@ input:checked+.toggle-slider:before {
   box-shadow: none;
   outline: none;
   transform: none;
+}
+
+.brand-hub-outline-link-static,
+.brand-hub-outline-link-static:hover,
+.brand-hub-outline-link-static:focus-visible {
+  border-color: #0f172a;
+  background: transparent;
+  color: #0f172a;
+  cursor: default;
+}
+
+.ipad-common-repair-more summary {
+  list-style: none;
+}
+
+.ipad-common-repair-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.ipad-common-repair-more .brand-hub-link-grid {
+  margin-top: 1rem;
 }
 
 .brand-hub-outline-link:focus-visible,

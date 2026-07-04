@@ -6,7 +6,23 @@ import type {
   RepairTypeHubCategoryGroup,
   RepairTypeHubModelLink,
 } from '@/lib/repair-type-hubs';
+import {
+  getMacBookFamilyKey,
+  MACBOOK_FAMILY_LABELS,
+  MACBOOK_FAMILY_ORDER,
+} from '@/lib/macbookModelFamilies';
 import { smartSortModels } from '@/lib/modelSortConfig';
+import {
+  getIPadSeriesKey,
+  getLenovoTabletSeriesKey,
+  getSamsungTabletSeriesKey,
+  IPAD_REPAIR_TYPE_HUB_SERIES_ORDER,
+  IPAD_SERIES_LABELS,
+  LENOVO_TABLET_REPAIR_TYPE_HUB_SERIES_ORDER,
+  LENOVO_TABLET_SERIES_LABELS,
+  SAMSUNG_TABLET_REPAIR_TYPE_HUB_SERIES_ORDER,
+  SAMSUNG_TABLET_SERIES_LABELS,
+} from '@/lib/tabletModelFamilies';
 import styles from './RepairTypeHub.module.css';
 
 interface RepairTypeModelGridProps {
@@ -27,6 +43,32 @@ interface SeriesGroup {
 }
 
 const SEARCH_RESULT_LIMIT = 20;
+
+const CATEGORY_MOBILE_LABELS: Record<string, string> = {
+  phone: 'Phone Repair',
+  tablet: 'Tablet Repair',
+  laptop: 'Laptop Repair',
+  watch: 'Watch Repair',
+};
+
+const CATEGORY_DESKTOP_HEADINGS: Record<string, string> = {
+  phone: 'Phone',
+  tablet: 'Tablet',
+  laptop: 'Laptop',
+  watch: 'Smart Watch',
+};
+
+function getCategoryButtonLabel(category: RepairTypeHubCategoryGroup) {
+  return CATEGORY_MOBILE_LABELS[category.category] ?? `${category.categoryLabel} Repair`;
+}
+
+function getCategoryDesktopHeading(category: RepairTypeHubCategoryGroup) {
+  return CATEGORY_DESKTOP_HEADINGS[category.category] ?? category.categoryLabel;
+}
+
+function getBrandKey(category: string, brandSlug: string) {
+  return `${category}:${brandSlug}`;
+}
 
 function sortModelLinks<T extends RepairTypeHubModelLink>(models: T[]): T[] {
   const sortable = models.map((model) => ({
@@ -50,7 +92,7 @@ function sortSearchResults(results: SearchResultLink[]) {
   return sortModelLinks(results);
 }
 
-function getSamsungSeriesKey(model: RepairTypeHubModelLink) {
+function getSamsungPhoneSeriesKey(model: RepairTypeHubModelLink) {
   const slug = model.modelSlug.toLowerCase();
   const name = model.model.toLowerCase();
 
@@ -105,10 +147,109 @@ function getSeriesOrder(brandSlug: string) {
     : ['a', 'reno', 'find', 'other'];
 }
 
+function buildTabletSeriesGroups(
+  brandSlug: 'ipad' | 'samsung' | 'lenovo',
+  models: RepairTypeHubModelLink[],
+): SeriesGroup[] {
+  const groups = new Map<string, RepairTypeHubModelLink[]>();
+  const order = brandSlug === 'ipad'
+    ? IPAD_REPAIR_TYPE_HUB_SERIES_ORDER
+    : brandSlug === 'samsung'
+      ? SAMSUNG_TABLET_REPAIR_TYPE_HUB_SERIES_ORDER
+      : LENOVO_TABLET_REPAIR_TYPE_HUB_SERIES_ORDER;
+  const labels = brandSlug === 'ipad'
+    ? IPAD_SERIES_LABELS
+    : brandSlug === 'samsung'
+      ? SAMSUNG_TABLET_SERIES_LABELS
+      : LENOVO_TABLET_SERIES_LABELS;
+  const supportedKeys = new Set<string>(order);
+  const unsupportedModels: string[] = [];
+
+  for (const model of models) {
+    const key = brandSlug === 'ipad'
+      ? getIPadSeriesKey(model.model, model.modelSlug)
+      : brandSlug === 'samsung'
+        ? getSamsungTabletSeriesKey(model.model, model.modelSlug)
+        : getLenovoTabletSeriesKey(model.model, model.modelSlug);
+
+    if (!supportedKeys.has(key)) {
+      unsupportedModels.push(model.model);
+      continue;
+    }
+
+    const bucket = groups.get(key) ?? [];
+    bucket.push(model);
+    groups.set(key, bucket);
+  }
+
+  if (unsupportedModels.length > 0) {
+    const familyName = brandSlug === 'ipad'
+      ? 'iPad'
+      : brandSlug === 'samsung'
+        ? 'Samsung Tablet'
+        : 'Lenovo Tablet';
+    throw new Error(`Unsupported ${familyName} models found in Repair Type Hub family grouping: ${unsupportedModels.join(', ')}`);
+  }
+
+  return order.flatMap((key) => {
+    const seriesModels = groups.get(key);
+    if (!seriesModels || seriesModels.length === 0) {
+      return [];
+    }
+
+    return [{
+      key,
+      label: labels[key],
+      models: seriesModels,
+    }];
+  });
+}
+
+function buildMacBookSeriesGroups(models: RepairTypeHubModelLink[]): SeriesGroup[] {
+  const groups = new Map<string, RepairTypeHubModelLink[]>();
+
+  for (const model of models) {
+    const key = getMacBookFamilyKey(model.model, model.modelSlug);
+    const bucket = groups.get(key) ?? [];
+    bucket.push(model);
+    groups.set(key, bucket);
+  }
+
+  return MACBOOK_FAMILY_ORDER.flatMap((key) => {
+    const seriesModels = groups.get(key);
+    if (!seriesModels || seriesModels.length === 0) {
+      return [];
+    }
+
+    return [{
+      key,
+      label: MACBOOK_FAMILY_LABELS[key],
+      models: seriesModels,
+    }];
+  });
+}
+
 function getBrandSeriesGroups(
+  category: string,
   brandSlug: string,
   models: RepairTypeHubModelLink[],
 ): SeriesGroup[] | null {
+  if (category === 'tablet' && brandSlug === 'ipad') {
+    return buildTabletSeriesGroups('ipad', models);
+  }
+
+  if (category === 'tablet' && brandSlug === 'samsung') {
+    return buildTabletSeriesGroups('samsung', models);
+  }
+
+  if (category === 'tablet' && brandSlug === 'lenovo') {
+    return buildTabletSeriesGroups('lenovo', models);
+  }
+
+  if (category === 'laptop' && brandSlug === 'macbook') {
+    return buildMacBookSeriesGroups(models);
+  }
+
   if (brandSlug !== 'samsung' && brandSlug !== 'oppo') {
     return null;
   }
@@ -118,7 +259,7 @@ function getBrandSeriesGroups(
   for (const model of models) {
     const seriesKey =
       brandSlug === 'samsung'
-        ? getSamsungSeriesKey(model)
+        ? getSamsungPhoneSeriesKey(model)
         : getOppoSeriesKey(model);
     const bucket = groups.get(seriesKey) ?? [];
     bucket.push(model);
@@ -148,53 +289,65 @@ export default function RepairTypeModelGrid({
   description,
 }: RepairTypeModelGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState(categories[0]?.category ?? '');
-  const [expandedBrandSlug, setExpandedBrandSlug] = useState('');
+  const [activeCategory, setActiveCategory] = useState('');
+  const [expandedBrandKey, setExpandedBrandKey] = useState('');
   const [expandedSeriesKey, setExpandedSeriesKey] = useState('');
+  const [isMobileLayout, setIsMobileLayout] = useState(true);
   const searchId = useId();
   const expandedRegionRef = useRef<HTMLDivElement | null>(null);
+  const categorySectionRefs = useRef(new Map<string, HTMLElement>());
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const availableCategories = categories.filter((categoryGroup) => categoryGroup.brands.length > 0);
-  const currentCategory =
-    availableCategories.find((categoryGroup) => categoryGroup.category === activeCategory) ??
-    availableCategories[0] ??
-    null;
-  const searchResults = currentCategory
-    ? sortSearchResults(
-        currentCategory.brands.flatMap((brandGroup) =>
-          brandGroup.models
-            .filter((model) => {
-              if (!normalizedSearch) return false;
-              return (
-                model.model.toLowerCase().includes(normalizedSearch) ||
-                model.modelCode?.toLowerCase().includes(normalizedSearch) === true
-              );
-            })
-            .map((model) => ({
-              ...model,
-              brand: brandGroup.brand,
-            }))
-        )
+  const categoryResetKey = availableCategories
+    .map((categoryGroup) => `${categoryGroup.category}:${categoryGroup.brands.map((brand) => brand.brandSlug).join(',')}`)
+    .join('|');
+  const searchResults = sortSearchResults(
+    availableCategories.flatMap((categoryGroup) =>
+      categoryGroup.brands.flatMap((brandGroup) =>
+        brandGroup.models
+          .filter((model) => {
+            if (!normalizedSearch) return false;
+            return (
+              model.model.toLowerCase().includes(normalizedSearch) ||
+              model.modelCode?.toLowerCase().includes(normalizedSearch) === true
+            );
+          })
+          .map((model) => ({
+            ...model,
+            brand: brandGroup.brand,
+          }))
       )
-    : [];
+    )
+  );
   const visibleSearchResults = searchResults.slice(0, SEARCH_RESULT_LIMIT);
   const hasMoreSearchResults = searchResults.length > SEARCH_RESULT_LIMIT;
 
   useEffect(() => {
-    if (!currentCategory) return;
-    if (currentCategory.category !== activeCategory) {
-      setActiveCategory(currentCategory.category);
-    }
-  }, [activeCategory, currentCategory]);
+    const mediaQuery = window.matchMedia('(max-width: 640px)');
+    const updateLayoutMode = () => setIsMobileLayout(mediaQuery.matches);
+
+    updateLayoutMode();
+    mediaQuery.addEventListener('change', updateLayoutMode);
+
+    return () => mediaQuery.removeEventListener('change', updateLayoutMode);
+  }, []);
+
+  useEffect(() => {
+    setSearchTerm('');
+    setActiveCategory('');
+    setExpandedBrandKey('');
+    setExpandedSeriesKey('');
+  }, [hubLabel, categoryResetKey]);
 
   useEffect(() => {
     if (!normalizedSearch) return;
-    setExpandedBrandSlug('');
+    setActiveCategory('');
+    setExpandedBrandKey('');
     setExpandedSeriesKey('');
   }, [normalizedSearch]);
 
   useEffect(() => {
-    if (!expandedBrandSlug) return;
+    if (!expandedBrandKey) return;
 
     window.requestAnimationFrame(() => {
       expandedRegionRef.current?.scrollIntoView({
@@ -202,11 +355,36 @@ export default function RepairTypeModelGrid({
         block: 'start',
       });
     });
-  }, [expandedBrandSlug]);
+  }, [expandedBrandKey]);
 
-  function handleBrandToggle(nextBrandSlug: string) {
-    setExpandedBrandSlug((current) => {
-      const nextValue = current === nextBrandSlug ? '' : nextBrandSlug;
+  function handleCategoryToggle(nextCategory: string) {
+    if (!isMobileLayout) return;
+
+    const willOpenCategory = activeCategory !== nextCategory;
+
+    setActiveCategory((current) => {
+      const nextValue = current === nextCategory ? '' : nextCategory;
+      setExpandedBrandKey('');
+      setExpandedSeriesKey('');
+      return nextValue;
+    });
+
+    if (willOpenCategory) {
+      window.requestAnimationFrame(() => {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        categorySectionRefs.current.get(nextCategory)?.scrollIntoView({
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      });
+    }
+  }
+
+  function handleBrandToggle(category: string, nextBrandSlug: string) {
+    const nextBrandKey = getBrandKey(category, nextBrandSlug);
+
+    setExpandedBrandKey((current) => {
+      const nextValue = current === nextBrandKey ? '' : nextBrandKey;
       setExpandedSeriesKey('');
       return nextValue;
     });
@@ -229,27 +407,6 @@ export default function RepairTypeModelGrid({
           {description ?? `Search by model name or code, then expand one brand at a time. Every link goes directly to the existing repair detail page.`}
         </p>
       </div>
-
-      {availableCategories.length > 1 && (
-        <div className={styles.categoryPicker} role="tablist" aria-label="Device category">
-          {availableCategories.map((categoryGroup) => (
-            <button
-              key={categoryGroup.category}
-              type="button"
-              role="tab"
-              aria-selected={categoryGroup.category === currentCategory?.category}
-              className={`${styles.categoryTab} ${categoryGroup.category === currentCategory?.category ? styles.categoryTabActive : ''}`}
-              onClick={() => {
-                setActiveCategory(categoryGroup.category);
-                setExpandedBrandSlug('');
-                setExpandedSeriesKey('');
-              }}
-            >
-              {categoryGroup.categoryLabel}
-            </button>
-          ))}
-        </div>
-      )}
 
       <div className={styles.searchBlock}>
         <label htmlFor={searchId} className={styles.searchLabel}>
@@ -286,7 +443,7 @@ export default function RepairTypeModelGrid({
         )}
       </div>
 
-      {!currentCategory ? (
+      {availableCategories.length === 0 ? (
         <p className={styles.emptyState}>No supported models are available right now.</p>
       ) : normalizedSearch ? (
         visibleSearchResults.length === 0 ? (
@@ -340,160 +497,220 @@ export default function RepairTypeModelGrid({
                 Pick one brand to open its supported models. Only the expanded brand list is loaded into the page at once.
               </p>
             </div>
-            <div className={styles.brandAccordion}>
-              {currentCategory.brands.map((brandGroup) => {
-                const isExpanded = expandedBrandSlug === brandGroup.brandSlug;
-                const buttonId = `${searchId}-${brandGroup.brandSlug}-button`;
-                const regionId = `${searchId}-${brandGroup.brandSlug}-panel`;
-                const sortedBrandModels = sortModelLinks(brandGroup.models);
-                const groupedSeries = getBrandSeriesGroups(brandGroup.brandSlug, sortedBrandModels);
+            <div className={styles.categoryBrowser}>
+              {availableCategories.map((categoryGroup) => {
+                const categoryIsExpanded = !isMobileLayout || activeCategory === categoryGroup.category;
+                const categoryButtonId = `${searchId}-${categoryGroup.category}-category-button`;
+                const categoryRegionId = `${searchId}-${categoryGroup.category}-category-panel`;
 
                 return (
-                  <div
-                    key={`${currentCategory.category}-${brandGroup.brandSlug}`}
-                    className={`${styles.brandAccordionItem} ${isExpanded ? styles.brandAccordionItemOpen : ''}`}
+                  <section
+                    key={categoryGroup.category}
+                    ref={(element) => {
+                      if (element) {
+                        categorySectionRefs.current.set(categoryGroup.category, element);
+                      } else {
+                        categorySectionRefs.current.delete(categoryGroup.category);
+                      }
+                    }}
+                    className={`${styles.deviceCategorySection} ${categoryIsExpanded ? styles.deviceCategorySectionOpen : ''}`}
+                    data-category={categoryGroup.category}
+                    data-expanded={categoryIsExpanded}
+                    aria-labelledby={categoryButtonId}
                   >
                     <button
-                      id={buttonId}
+                      id={categoryButtonId}
                       type="button"
-                      className={styles.brandToggle}
-                      aria-expanded={isExpanded}
-                      aria-controls={regionId}
-                      onClick={() => handleBrandToggle(brandGroup.brandSlug)}
+                      className={styles.categoryToggle}
+                      role={isMobileLayout ? undefined : 'heading'}
+                      aria-level={isMobileLayout ? undefined : 4}
+                      aria-expanded={isMobileLayout ? categoryIsExpanded : undefined}
+                      aria-controls={isMobileLayout ? categoryRegionId : undefined}
+                      tabIndex={isMobileLayout ? undefined : -1}
+                      onClick={() => handleCategoryToggle(categoryGroup.category)}
                     >
-                      <div className={styles.brandToggleCopy}>
-                        <span className={styles.brandHeading}>{brandGroup.brand}</span>
-                        <span className={styles.brandCount}>
-                          {brandGroup.models.length} model{brandGroup.models.length === 1 ? '' : 's'}
-                        </span>
-                      </div>
+                      <span className={styles.categoryDesktopHeading}>{getCategoryDesktopHeading(categoryGroup)}</span>
+                      <span className={styles.categoryMobileHeading}>{getCategoryButtonLabel(categoryGroup)}</span>
                       <span
-                        className={`${styles.brandToggleIndicator} ${isExpanded ? styles.brandToggleIndicatorOpen : ''}`}
+                        className={`${styles.categoryToggleIndicator} ${categoryIsExpanded ? styles.categoryToggleIndicatorOpen : ''}`}
                         aria-hidden="true"
                       >
                         +
                       </span>
                     </button>
 
-                    {isExpanded ? (
-                      <div
-                        id={regionId}
-                        className={styles.brandPanel}
-                        role="region"
-                        aria-labelledby={buttonId}
-                        ref={expandedRegionRef}
-                      >
-                        <div className={styles.brandPanelHeader}>
-                          <h4 className={styles.brandPanelTitle}>{brandGroup.brand} models</h4>
-                          <p className={styles.brandPanelBody}>
-                            Select your exact model to go straight to the current {hubLabel.toLowerCase()} detail page.
-                          </p>
-                        </div>
-                        {groupedSeries ? (
-                          <div className={styles.seriesBrowser}>
-                            <div className={styles.seriesGrid}>
-                              {groupedSeries.map((seriesGroup) => {
-                                const seriesPanelKey = `${brandGroup.brandSlug}:${seriesGroup.key}`;
-                                const isSeriesExpanded = expandedSeriesKey === seriesPanelKey;
-                                const seriesButtonId = `${buttonId}-${seriesGroup.key}-button`;
-                                const seriesRegionId = `${regionId}-${seriesGroup.key}-panel`;
+                    <div
+                      id={categoryRegionId}
+                      className={styles.deviceCategoryPanel}
+                      role="region"
+                      aria-labelledby={categoryButtonId}
+                      data-expanded={categoryIsExpanded}
+                    >
+                      <div className={styles.brandAccordion}>
+                        {categoryGroup.brands.map((brandGroup) => {
+                          const brandKey = getBrandKey(categoryGroup.category, brandGroup.brandSlug);
+                          const isExpanded = expandedBrandKey === brandKey;
+                          const buttonId = `${searchId}-${categoryGroup.category}-${brandGroup.brandSlug}-button`;
+                          const regionId = `${searchId}-${categoryGroup.category}-${brandGroup.brandSlug}-panel`;
+                          const sortedBrandModels = sortModelLinks(brandGroup.models);
+                          const groupedSeries = getBrandSeriesGroups(categoryGroup.category, brandGroup.brandSlug, sortedBrandModels);
 
-                                return (
-                                  <button
-                                    key={seriesPanelKey}
-                                    id={seriesButtonId}
-                                    type="button"
-                                    className={`${styles.seriesCard} ${isSeriesExpanded ? styles.seriesCardActive : ''}`}
-                                    aria-expanded={isSeriesExpanded}
-                                    aria-controls={seriesRegionId}
-                                    onClick={() => handleSeriesToggle(seriesPanelKey)}
-                                  >
-                                    <div className={styles.seriesCardCopy}>
-                                      <span className={styles.seriesHeading}>{seriesGroup.label}</span>
-                                      <span className={styles.seriesCount}>
-                                        {seriesGroup.models.length} model{seriesGroup.models.length === 1 ? '' : 's'}
-                                      </span>
-                                    </div>
-                                    <span
-                                      className={`${styles.seriesToggleIndicator} ${isSeriesExpanded ? styles.seriesToggleIndicatorOpen : ''}`}
-                                      aria-hidden="true"
-                                    >
-                                      +
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-
-                            {groupedSeries.map((seriesGroup) => {
-                              const seriesPanelKey = `${brandGroup.brandSlug}:${seriesGroup.key}`;
-                              const isSeriesExpanded = expandedSeriesKey === seriesPanelKey;
-                              const seriesButtonId = `${buttonId}-${seriesGroup.key}-button`;
-                              const seriesRegionId = `${regionId}-${seriesGroup.key}-panel`;
-
-                              if (!isSeriesExpanded) {
-                                return null;
-                              }
-
-                              return (
-                                <div
-                                  key={seriesPanelKey}
-                                  id={seriesRegionId}
-                                  className={styles.seriesPanel}
-                                  role="region"
-                                  aria-labelledby={seriesButtonId}
+                          return (
+                            <div
+                              key={brandKey}
+                              className={`${styles.brandAccordionItem} ${isExpanded ? styles.brandAccordionItemOpen : ''}`}
+                            >
+                              <button
+                                id={buttonId}
+                                type="button"
+                                className={styles.brandToggle}
+                                aria-expanded={isExpanded}
+                                aria-controls={regionId}
+                                onClick={() => handleBrandToggle(categoryGroup.category, brandGroup.brandSlug)}
+                              >
+                                <div className={styles.brandToggleCopy}>
+                                  <span className={styles.brandHeading}>{brandGroup.brand}</span>
+                                  <span className={styles.brandCount}>
+                                    {brandGroup.models.length > 0
+                                      ? `${brandGroup.models.length} model${brandGroup.models.length === 1 ? '' : 's'}`
+                                      : 'Check exact model options'}
+                                  </span>
+                                </div>
+                                <span
+                                  className={`${styles.brandToggleIndicator} ${isExpanded ? styles.brandToggleIndicatorOpen : ''}`}
+                                  aria-hidden="true"
                                 >
-                                  <div className={styles.seriesPanelHeader}>
-                                    <h5 className={styles.seriesPanelTitle}>{seriesGroup.label}</h5>
-                                    <p className={styles.seriesPanelBody}>
-                                      Choose your exact {seriesGroup.label.toLowerCase()} model to open the current {hubLabel.toLowerCase()} page directly.
+                                  +
+                                </span>
+                              </button>
+
+                              {isExpanded ? (
+                                <div
+                                  id={regionId}
+                                  className={styles.brandPanel}
+                                  role="region"
+                                  aria-labelledby={buttonId}
+                                  ref={expandedRegionRef}
+                                >
+                                  <div className={styles.brandPanelHeader}>
+                                    <h4 className={styles.brandPanelTitle}>{brandGroup.brand} models</h4>
+                                    <p className={styles.brandPanelBody}>
+                                      {brandGroup.models.length > 0
+                                        ? `Select your exact model to go straight to the current ${hubLabel.toLowerCase()} detail page.`
+                                        : brandGroup.fallbackMessage ?? `Check available ${brandGroup.brand} repair options by exact model before choosing a repair path.`}
                                     </p>
                                   </div>
-                                  <div className={styles.modelGrid}>
-                                    {seriesGroup.models.map((model) => (
-                                      <Link
-                                        key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
-                                        href={model.href}
-                                        prefetch={false}
-                                        className={styles.modelCard}
-                                      >
-                                        <div className={styles.modelCardInfo}>
-                                          <span className={styles.modelName}>{model.model}</span>
-                                          {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
-                                        </div>
-                                        <span className={styles.modelCardArrow} aria-hidden="true">
-                                          →
-                                        </span>
-                                      </Link>
-                                    ))}
-                                  </div>
+
+                                  {brandGroup.models.length === 0 ? (
+                                    brandGroup.brandHubHref ? (
+                                      <div className={styles.supportingLinks}>
+                                        <Link href={brandGroup.brandHubHref} prefetch={false} className={styles.supportingLink}>
+                                          View {brandGroup.brand} repair options
+                                        </Link>
+                                      </div>
+                                    ) : null
+                                  ) : groupedSeries ? (
+                                    <div className={styles.seriesBrowser}>
+                                      <div className={styles.seriesGrid}>
+                                        {groupedSeries.map((seriesGroup) => {
+                                          const seriesPanelKey = `${brandKey}:${seriesGroup.key}`;
+                                          const isSeriesExpanded = expandedSeriesKey === seriesPanelKey;
+                                          const seriesButtonId = `${buttonId}-${seriesGroup.key}-button`;
+                                          const seriesRegionId = `${regionId}-${seriesGroup.key}-panel`;
+
+                                          return (
+                                              <div
+                                                key={seriesPanelKey}
+                                                className={`${styles.seriesItem} ${isSeriesExpanded ? styles.seriesItemActive : ''}`}
+                                              >
+                                                <button
+                                                  id={seriesButtonId}
+                                                  type="button"
+                                                  className={`${styles.seriesCard} ${isSeriesExpanded ? styles.seriesCardActive : ''}`}
+                                                  aria-expanded={isSeriesExpanded}
+                                                  aria-controls={seriesRegionId}
+                                                  onClick={() => handleSeriesToggle(seriesPanelKey)}
+                                                >
+                                                  <div className={styles.seriesCardCopy}>
+                                                    <span className={styles.seriesHeading}>{seriesGroup.label}</span>
+                                                    <span className={styles.seriesCount}>
+                                                      {seriesGroup.models.length} model{seriesGroup.models.length === 1 ? '' : 's'}
+                                                    </span>
+                                                  </div>
+                                                  <span
+                                                    className={`${styles.seriesToggleIndicator} ${isSeriesExpanded ? styles.seriesToggleIndicatorOpen : ''}`}
+                                                    aria-hidden="true"
+                                                  >
+                                                    +
+                                                  </span>
+                                                </button>
+
+                                                {isSeriesExpanded ? (
+                                                  <div
+                                                    id={seriesRegionId}
+                                                    className={styles.seriesPanel}
+                                                    role="region"
+                                                    aria-labelledby={seriesButtonId}
+                                                  >
+                                                    <div className={styles.seriesPanelHeader}>
+                                                      <h5 className={styles.seriesPanelTitle}>{seriesGroup.label}</h5>
+                                                      <p className={styles.seriesPanelBody}>
+                                                        Choose your exact {seriesGroup.label.toLowerCase()} model to open the current {hubLabel.toLowerCase()} page directly.
+                                                      </p>
+                                                    </div>
+                                                    <div className={styles.modelGrid}>
+                                                      {seriesGroup.models.map((model) => (
+                                                        <Link
+                                                          key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
+                                                          href={model.href}
+                                                          prefetch={false}
+                                                          className={styles.modelCard}
+                                                        >
+                                                          <div className={styles.modelCardInfo}>
+                                                            <span className={styles.modelName}>{model.model}</span>
+                                                            {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
+                                                          </div>
+                                                          <span className={styles.modelCardArrow} aria-hidden="true">
+                                                            →
+                                                          </span>
+                                                        </Link>
+                                                      ))}
+                                                    </div>
+                                                  </div>
+                                                ) : null}
+                                              </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className={styles.modelGrid}>
+                                      {sortedBrandModels.map((model) => (
+                                        <Link
+                                          key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
+                                          href={model.href}
+                                          prefetch={false}
+                                          className={styles.modelCard}
+                                        >
+                                          <div className={styles.modelCardInfo}>
+                                            <span className={styles.modelName}>{model.model}</span>
+                                            {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
+                                          </div>
+                                          <span className={styles.modelCardArrow} aria-hidden="true">
+                                            →
+                                          </span>
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className={styles.modelGrid}>
-                            {sortedBrandModels.map((model) => (
-                              <Link
-                                key={`${model.brandSlug}-${model.modelSlug}-${model.repairSlug}`}
-                                href={model.href}
-                                prefetch={false}
-                                className={styles.modelCard}
-                              >
-                                <div className={styles.modelCardInfo}>
-                                  <span className={styles.modelName}>{model.model}</span>
-                                  {model.modelCode ? <span className={styles.modelCode}>({model.modelCode})</span> : null}
-                                </div>
-                                <span className={styles.modelCardArrow} aria-hidden="true">
-                                  →
-                                </span>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
+                              ) : null}
+                            </div>
+                          );
+                        })}
                       </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  </section>
                 );
               })}
             </div>

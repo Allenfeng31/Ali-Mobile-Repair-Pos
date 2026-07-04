@@ -547,7 +547,7 @@
 }
 
 .searchInput:focus-visible,
-.categoryTab:focus-visible,
+.categoryToggle:focus-visible,
 .brandToggle:focus-visible,
 .modelCard:focus-visible,
 .resultCard:focus-visible,
@@ -570,14 +570,18 @@
   text-align: center;
 }
 
-.categoryPicker {
+.categoryBrowser {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
-  margin-bottom: 22px;
+  gap: 16px;
 }
 
-.categoryTab,
+.deviceCategorySection {
+  display: grid;
+  gap: 12px;
+  scroll-margin-top: 112px;
+}
+
+.categoryToggle,
 .brandToggle {
   width: 100%;
   border: 1px solid transparent;
@@ -588,17 +592,55 @@
   font: inherit;
 }
 
-.categoryTab {
+.categoryToggle {
+  display: flex;
   min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   border-radius: 16px;
   padding: 0 16px;
-  font-weight: 700;
+  cursor: pointer;
+  font-weight: 900;
+  text-align: left;
 }
 
-.categoryTabActive,
-.categoryTab:hover {
+.categoryToggle:hover,
+.deviceCategorySectionOpen .categoryToggle {
   border-color: rgba(37, 99, 235, 0.3);
   background: rgba(239, 246, 255, 0.34);
+}
+
+.categoryDesktopHeading,
+.categoryMobileHeading {
+  min-width: 0;
+  color: #020617;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.categoryMobileHeading {
+  display: none;
+}
+
+.categoryToggleIndicator {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 2px solid rgba(15, 23, 42, 0.88);
+  color: var(--primary);
+  font-size: 1.2rem;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.72);
+  transition: transform 160ms ease;
+}
+
+.categoryToggleIndicatorOpen {
+  transform: rotate(45deg);
 }
 
 .resultCard,
@@ -732,6 +774,7 @@
   color: rgba(15, 23, 42, 0.58);
   font-size: 0.82rem;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .brandToggleIndicator {
@@ -785,6 +828,15 @@
 .seriesGrid {
   display: grid;
   gap: 12px;
+}
+
+.seriesItem {
+  display: grid;
+  gap: 12px;
+}
+
+.seriesItemActive {
+  grid-column: 1 / -1;
 }
 
 .seriesCard {
@@ -1087,7 +1139,7 @@
 .infoCard,
 .reasonCalloutInner,
 .searchInput,
-.categoryTab,
+.categoryToggle,
 .brandAccordionItem,
 .brandAccordionItemOpen,
 .brandToggle,
@@ -1116,7 +1168,7 @@
 .infoCard,
 .reasonCalloutInner,
 .searchInput,
-.categoryTab,
+.categoryToggle,
 .brandAccordionItem,
 .resultCard,
 .modelCard,
@@ -1141,8 +1193,8 @@
   background: transparent;
 }
 
-.categoryTabActive,
-.categoryTab:hover {
+.categoryToggle:hover,
+.deviceCategorySectionOpen .categoryToggle {
   background: transparent;
 }
 
@@ -1184,6 +1236,34 @@
 
   .brandAccordion {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .categoryBrowser {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .deviceCategorySection {
+    gap: 16px;
+  }
+
+  .deviceCategorySection .categoryToggle {
+    justify-content: center;
+    min-height: auto;
+    padding: 4px 0 2px;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+    font-size: 1.18rem;
+    text-align: center;
+  }
+
+  .deviceCategorySection .categoryToggleIndicator {
+    display: none;
+  }
+
+  .deviceCategorySection .categoryDesktopHeading {
+    font-weight: 950;
   }
 
   .workbenchGrid {
@@ -1257,6 +1337,22 @@
     grid-template-columns: 1fr;
   }
 
+  .categoryBrowser {
+    gap: 12px;
+  }
+
+  .categoryDesktopHeading {
+    display: none;
+  }
+
+  .categoryMobileHeading {
+    display: inline;
+  }
+
+  .deviceCategoryPanel[data-expanded="false"] {
+    display: none;
+  }
+
   .brandToggle,
   .modelCard,
   .resultCard {
@@ -1297,6 +1393,7 @@
 @media (prefers-reduced-motion: reduce) {
   .resultCard,
   .reasonCard,
+  .categoryToggle,
   .brandToggle,
   .modelCard,
   .workbenchChevron,
@@ -1307,6 +1404,7 @@
 
   .resultCard:hover,
   .reasonCard:hover,
+  .categoryToggle:hover,
   .brandToggle:hover,
   .modelCard:hover,
   .heroActions :global(.repair-primary-action):hover,
