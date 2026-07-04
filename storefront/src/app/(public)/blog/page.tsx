@@ -32,6 +32,39 @@ interface BlogPostSummary {
   image?: string;
 }
 
+const deviceGuideLinks = [
+  {
+    title: "iPhone Repair Guides",
+    href: "/repairs/phone/iphone",
+    description: "Screen, battery, back glass and charging articles for supported iPhone models.",
+  },
+  {
+    title: "Samsung Repair Guides",
+    href: "/repairs/phone/samsung",
+    description: "Galaxy phone repair notes for screen, battery, charging and assessment topics.",
+  },
+  {
+    title: "Google Pixel Repair Guides",
+    href: "/repairs/phone/google-pixel",
+    description: "Pixel repair guides covering screen, battery, fingerprint and charging issues.",
+  },
+  {
+    title: "iPad & Tablet Repair Guides",
+    href: "/repairs/tablet",
+    description: "iPad, Samsung Tablet and Lenovo Tablet repair advice and model guidance.",
+  },
+  {
+    title: "MacBook Repair Guides",
+    href: "/repairs/laptop/macbook",
+    description: "MacBook screen, battery, keyboard/top case and charging repair notes.",
+  },
+  {
+    title: "Apple Watch Repair Guides",
+    href: "/repairs/watch/apple",
+    description: "Apple Watch screen, battery, charging and water-exposure assessment notes.",
+  },
+];
+
 function formatPostDate(date: string) {
   return new Date(date).toLocaleDateString("en-AU", {
     month: "short",
@@ -97,6 +130,23 @@ export default async function BlogPage() {
         </div>
       </section>
 
+      <section className={styles.deviceSection} aria-labelledby="device-guides-heading">
+        <div className={styles.sectionHeader}>
+          <span className={styles.kicker}>Repair Guides</span>
+          <h2 id="device-guides-heading">Browse repair guides by device</h2>
+        </div>
+
+        <div className={styles.deviceGrid}>
+          {deviceGuideLinks.map((guide) => (
+            <Link href={guide.href} key={guide.href} className={styles.deviceCard}>
+              <span className={styles.deviceTitle}>{guide.title}</span>
+              <p>{guide.description}</p>
+              <span className={styles.deviceLink}>View Guides</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {remainingPosts.length > 0 && (
         <section className={styles.gridSection} aria-labelledby="latest-guides-heading">
           <div className={styles.sectionHeader}>
@@ -122,6 +172,26 @@ export default async function BlogPage() {
           </div>
         </section>
       )}
+
+      <section className={styles.ctaSection} aria-labelledby="blog-cta-heading">
+        <div className={styles.ctaPanel}>
+          <div>
+            <h2 id="blog-cta-heading">Need help with a repair question?</h2>
+            <p>
+              If a guide matches your issue, bring the device to Ali Mobile & Repair in Ringwood
+              Square or book a repair so we can confirm the exact model, part availability and quote.
+            </p>
+          </div>
+          <div className={styles.ctaActions}>
+            <Link href="/book-repair" className={styles.ctaPrimary}>
+              Book Repair
+            </Link>
+            <Link href="/repairs" className={styles.ctaSecondary}>
+              Browse Repairs
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
