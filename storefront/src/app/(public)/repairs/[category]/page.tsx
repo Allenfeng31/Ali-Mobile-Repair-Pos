@@ -13,7 +13,7 @@ import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Spark
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
 import { type RepairResultDeviceCategory } from '@/lib/repair-results';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 export const dynamicParams = true;
 
 const CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'];
@@ -116,6 +116,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { question: "What happens when a part is not in stock?", answer: "If your model requires a part to be ordered, it usually takes around 1–2 days to arrive. We will confirm part availability and the expected timeline before any repair begins." },
       { question: "Do I need to know the exact model?", answer: "Knowing your exact model helps us confirm part availability and pricing immediately. However, if you are unsure, you can bring the device to our Ringwood Square location and we will identify it for you." },
       { question: "Does every charging problem require port replacement?", answer: "No. Many charging issues are caused by debris buildup, battery wear, or a faulty charging cable. We will inspect the port and diagnose the root cause before confirming if a replacement is needed." },
+      { question: "What if my phone has a black screen or won't turn on?", answer: "A phone that won't turn on could be caused by a degraded battery, damaged display, charging port issue, liquid exposure, or board-level fault. We need to physically inspect the device first so we can diagnose the symptom and quote the right repair path." },
       { question: "Is back glass the same as complete housing replacement?", answer: "Not always. Some phone models support replacing only the rear glass pane, while others require a full housing replacement that includes the frame and camera lens. The repair method depends on your exact model and the extent of the damage." },
       { question: "Will water resistance remain after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. While we may reseal the device where appropriate, adhesive replacement does not restore guaranteed factory water-resistance certification." },
       { question: "Can I walk in without an appointment?", answer: "Yes, walk-ins are welcome at our Kiosk C1 in Ringwood Square Shopping Centre. However, we recommend booking or calling ahead to confirm part availability for your specific model." },
