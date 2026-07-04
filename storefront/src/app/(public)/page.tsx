@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
@@ -116,7 +117,15 @@ export default function Home() {
         <section className="servicesGrid homepage-services-motion !mt-24 md:!mt-32" aria-labelledby="services-heading">
           <h2 className="sr-only" id="services-heading">Our Repair Services</h2>
           <Link href="/repairs/phone" className="serviceCard">
-            <div className="card-bg" style={{ backgroundImage: "url('/images/services/phone-repair.jpg')" }} />
+            <div className="card-bg">
+              <Image
+                src="/images/services/phone-repair.jpg"
+                alt="Phone repair service at Ali Mobile"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
             <div className="card-gradient" />
             <div className="card-content">
               <h3>Phone Repair</h3>
@@ -125,7 +134,15 @@ export default function Home() {
             </div>
           </Link>
           <Link href="/repairs/tablet" className="serviceCard">
-            <div className="card-bg" style={{ backgroundImage: "url('/images/services/tablet-repair.jpg')" }} />
+            <div className="card-bg">
+              <Image
+                src="/images/services/tablet-repair.jpg"
+                alt="Tablet repair service at Ali Mobile"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
             <div className="card-gradient" />
             <div className="card-content">
               <h3>Tablet & iPad Repair</h3>
@@ -134,7 +151,15 @@ export default function Home() {
             </div>
           </Link>
           <Link href="/repairs/laptop" className="serviceCard">
-            <div className="card-bg" style={{ backgroundImage: "url('/images/services/laptop-repair.jpg')" }} />
+            <div className="card-bg">
+              <Image
+                src="/images/services/laptop-repair.jpg"
+                alt="MacBook repair service at Ali Mobile"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
             <div className="card-gradient" />
             <div className="card-content">
               <h3>Laptop & MacBook Repair</h3>
@@ -143,7 +168,15 @@ export default function Home() {
             </div>
           </Link>
           <Link href="/repairs/watch" className="serviceCard">
-            <div className="card-bg" style={{ backgroundImage: "url('/images/services/watch-repair.jpg')" }} />
+            <div className="card-bg">
+              <Image
+                src="/images/services/watch-repair.jpg"
+                alt="Apple Watch repair service at Ali Mobile"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
             <div className="card-gradient" />
             <div className="card-content">
               <h3>Smart Watch Repair</h3>

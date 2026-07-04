@@ -34,7 +34,7 @@ function GoogleLogo() {
 
 function StarRating() {
   return (
-    <span className={styles.stars} aria-label="5 out of 5 stars">
+    <span className={styles.stars} role="img" aria-label="5 out of 5 stars">
       {Array.from({ length: 5 }).map((_, index) => (
         <svg key={index} aria-hidden="true" viewBox="0 0 20 20">
           <path d="M10 1.55l2.52 5.11 5.64.82-4.08 3.98.96 5.62L10 14.43l-5.04 2.65.96-5.62-4.08-3.98 5.64-.82L10 1.55z" />

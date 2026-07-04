@@ -255,12 +255,10 @@
 @keyframes heroDiagnosticSweep {
   0%,
   100% {
-    background-position: -34rem 0, 0 0, 0 0;
     opacity: 0.48;
   }
 
   50% {
-    background-position: 42rem 0, 1.25rem 0, 0 1rem;
     opacity: 0.82;
   }
 }

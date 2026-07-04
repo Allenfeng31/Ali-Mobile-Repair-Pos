@@ -98,7 +98,7 @@ export function TopAnnouncementBar() {
           className="absolute right-4 p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
           aria-label="Dismiss announcement"
         >
-          <X className="w-4 h-4 text-black/40 dark:text-white/60 hover:text-black dark:hover:text-white" />
+          <X className="w-4 h-4 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" />
         </button>
       </div>
     </div>
