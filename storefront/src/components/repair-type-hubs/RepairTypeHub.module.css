@@ -962,6 +962,40 @@
   color: var(--primary);
 }
 
+.supportingLinkDesktopMore {
+  display: none;
+}
+
+.supportingLinksExpanded .supportingLinkDesktopMore {
+  display: inline-flex;
+}
+
+.supportingLinksToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(37, 99, 235, 0.28);
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--primary);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.supportingLinksToggle:hover {
+  border-color: rgba(37, 99, 235, 0.55);
+}
+
+.supportingLinksToggle:focus-visible,
+.supportingLink:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.32);
+  outline-offset: 3px;
+}
+
 .faqStack {
   gap: 12px;
 }
@@ -1146,6 +1180,7 @@
 .resultCard,
 .modelCard,
 .supportingLink,
+.supportingLinksToggle,
 .faqItem,
 .faqItem[open],
 .workbenchSection,
@@ -1173,6 +1208,7 @@
 .resultCard,
 .modelCard,
 .supportingLink,
+.supportingLinksToggle,
 .faqItem,
 .workbenchBox {
   border-color: rgba(15, 23, 42, 0.88);
@@ -1347,6 +1383,19 @@
 
   .categoryMobileHeading {
     display: inline;
+  }
+
+  .supportingLinkMobileMore {
+    display: none;
+  }
+
+  .supportingLinkMobilePriority {
+    order: 6;
+  }
+
+  .supportingLinksExpanded .supportingLinkMobileMore,
+  .supportingLinksExpanded .supportingLinkDesktopMore {
+    display: inline-flex;
   }
 
   .deviceCategoryPanel[data-expanded="false"] {

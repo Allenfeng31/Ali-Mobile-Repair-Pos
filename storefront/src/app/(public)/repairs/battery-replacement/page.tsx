@@ -3,12 +3,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
-import {
-  buildRepairTypeHubCatalog,
-  type RepairTypeHubBrandGroup,
-} from '@/lib/repair-type-hubs';
+import { buildRepairTypeHubCatalog } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
+import RepairTypeSupportingBrandHubLinks from '@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks';
 import RepairTypeRepairResultsSection from '@/components/repair-results/RepairTypeRepairResultsSection';
 import styles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 
@@ -87,17 +85,6 @@ export const metadata: Metadata = {
   },
 };
 
-function buildBrandHubLinks(brands: RepairTypeHubBrandGroup[]) {
-  const preferred = ['iphone', 'samsung', 'google', 'oppo'];
-  return preferred
-    .map((slug) => brands.find((brand) => brand.brandSlug === slug))
-    .filter((brand): brand is RepairTypeHubBrandGroup => Boolean(brand))
-    .map((brand) => ({
-      href: `/repairs/phone/${brand.brandSlug}`,
-      label: `${brand.brand} Repairs`,
-    }));
-}
-
 function buildHeroHighlights() {
   return [
     {
@@ -123,12 +110,6 @@ export default async function BatteryReplacementPage() {
     notFound();
   }
 
-  const phoneCategory = data.categories.find((category) => category.category === 'phone');
-  if (!phoneCategory || phoneCategory.brands.length === 0) {
-    notFound();
-  }
-
-  const brandHubLinks = buildBrandHubLinks(phoneCategory.brands);
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -323,30 +304,7 @@ export default async function BatteryReplacementPage() {
               </div>
             </section>
 
-            <section className={`repair-content-band ${styles.sectionCard}`}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <p className={styles.sectionEyebrow}>Explore More</p>
-                  <h2 className={styles.sectionTitle}>Browse related repair hubs</h2>
-                </div>
-                <p className={styles.sectionBody}>
-                  If you want to compare more phone repair options before choosing a battery repair page, you can browse the main phone hub, supported brand hubs, or our approved Screen Replacement hub.
-                </p>
-              </div>
-              <div className={styles.supportingLinks}>
-                <Link href="/repairs/phone" className={styles.supportingLink}>
-                  Phone Repairs
-                </Link>
-                {brandHubLinks.map((link) => (
-                  <Link key={link.href} href={link.href} className={styles.supportingLink}>
-                    {link.label}
-                  </Link>
-                ))}
-                <Link href="/repairs/screen-replacement" className={styles.supportingLink}>
-                  Screen Replacement
-                </Link>
-              </div>
-            </section>
+            <RepairTypeSupportingBrandHubLinks />
 
           </>
         }

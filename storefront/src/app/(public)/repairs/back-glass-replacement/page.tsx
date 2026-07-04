@@ -3,12 +3,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
-import {
-  buildRepairTypeHubCatalog,
-  type RepairTypeHubBrandGroup,
-} from '@/lib/repair-type-hubs';
+import { buildRepairTypeHubCatalog } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
+import RepairTypeSupportingBrandHubLinks from '@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks';
 import RepairTypeRepairResultsSection from '@/components/repair-results/RepairTypeRepairResultsSection';
 import styles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 
@@ -94,17 +92,6 @@ function buildHeroHighlights() {
   ];
 }
 
-function buildBrandHubLinks(brands: RepairTypeHubBrandGroup[]) {
-  const preferred = ['iphone', 'samsung', 'google', 'oppo'];
-  return preferred
-    .map((slug) => brands.find((brand) => brand.brandSlug === slug))
-    .filter((brand): brand is RepairTypeHubBrandGroup => Boolean(brand))
-    .map((brand) => ({
-      href: `/repairs/phone/${brand.brandSlug}`,
-      label: `${brand.brand} Repairs`,
-    }));
-}
-
 export default async function BackGlassReplacementPage() {
   const catalog = await fetchRepairCatalog();
   const data = buildRepairTypeHubCatalog(catalog, 'back-glass-replacement');
@@ -113,12 +100,6 @@ export default async function BackGlassReplacementPage() {
     notFound();
   }
 
-  const phoneCategory = data.categories.find((category) => category.category === 'phone');
-  if (!phoneCategory || phoneCategory.brands.length === 0) {
-    notFound();
-  }
-
-  const brandHubLinks = buildBrandHubLinks(phoneCategory.brands);
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -332,39 +313,7 @@ export default async function BackGlassReplacementPage() {
               </div>
             </section>
 
-            <section className={`repair-content-band ${styles.sectionCard}`}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <p className={styles.sectionEyebrow}>Explore More</p>
-                  <h2 className={styles.sectionTitle}>Related repair paths</h2>
-                </div>
-                <p className={styles.sectionBody}>
-                  If you want to compare a broader phone repair path before booking, you can browse the main phone hub, a supported brand hub, or related Screen, Battery, and Charging Port repair hubs.
-                </p>
-              </div>
-              <div className={styles.supportingLinks}>
-                <Link href="/repairs/phone" className={styles.supportingLink}>
-                  Phone Repairs
-                </Link>
-                <Link href="/repairs/screen-replacement" className={styles.supportingLink}>
-                  Screen Replacement
-                </Link>
-                <Link href="/repairs/battery-replacement" className={styles.supportingLink}>
-                  Battery Replacement
-                </Link>
-                <Link href="/repairs/charging-port-replacement" className={styles.supportingLink}>
-                  Charging Port Repair
-                </Link>
-                {brandHubLinks.map((link) => (
-                  <Link key={link.href} href={link.href} className={styles.supportingLink}>
-                    {link.label}
-                  </Link>
-                ))}
-                <Link href="/book-repair" className={styles.supportingLink}>
-                  Book Repair
-                </Link>
-              </div>
-            </section>
+            <RepairTypeSupportingBrandHubLinks />
 
             <section className={`repair-content-band ${styles.sectionCard}`}>
               <div className={styles.sectionHeader}>
