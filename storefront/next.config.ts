@@ -46,7 +46,8 @@ const nextConfig: NextConfig = {
       { source: '/hobart-detail-p01', destination: '/', permanent: true },
       
       // 2. LEGACY BLOG POSTS
-      { source: '/blog/reliable-phone-repair-ringwood', destination: '/locations/ringwood', permanent: true },
+      { source: '/blog/categories/shop-news', destination: '/blog', permanent: true },
+      { source: '/blog/reliable-phone-repair-ringwood', destination: '/blog', permanent: true },
       { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/apple/iphone-13', permanent: true },
       { source: '/post/full-privacy-screen-protect-available-now', destination: '/repairs/phone', permanent: true },
       { source: '/post/put-a-new-light-box', destination: '/', permanent: true },
@@ -154,6 +155,7 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       // 7. SAFE LEGACY REDIRECTS (Google Pixel)
+      { source: '/repairs/phone/google/:path*', destination: '/repairs/phone/google-pixel/:path*', permanent: true },
       { source: '/repairs/phones/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
       { source: '/repairs/phones/google-pixel/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
       { source: '/repairs/phone/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
@@ -267,7 +269,15 @@ const nextConfig: NextConfig = {
       { source: '/repairs/phone/iphone/iphone-16-plus/logic-board', destination: '/repairs/phone/iphone/iphone-16-plus/logic-board-repair', permanent: true },
       { source: '/repairs/phone/iphone/iphone-14-plus/logic-board', destination: '/repairs/phone/iphone/iphone-14-plus/logic-board-repair', permanent: true },
       { source: '/repairs/tablet/ipad/ipad-10th-generation/logic-board', destination: '/repairs/tablet/ipad/ipad-10th-generation/logic-board-repair', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-s23-fe/logic-board', destination: '/repairs/phone/samsung/galaxy-s23-fe/logic-board-repair', permanent: true },
+      { source: '/repairs/phone/samsung/galaxy-z-fold-5/logic-board', destination: '/repairs/phone/samsung/galaxy-z-fold-5/logic-board-repair', permanent: true },
+      { source: '/repairs/tablet/ipad/ipad-pro-129-inch-4th-generation/logic-board', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-4th-generation/logic-board-repair', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/lenovo-tab-m8-gen-4-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835/galaxy-tab-s4-water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830-sm-t835/water-damage-repair', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/galaxy-tab-a-97-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820--sm-t825/galaxy-tab-s3-water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825/water-damage-repair', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930--sm-x936/galaxy-tab-s11-ultra-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936/galaxy-tab-s11-ultra-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825/galaxy-tab-s3-water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825/water-damage-repair', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/galaxy-tab-a7-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/battery-replacement', permanent: true },
