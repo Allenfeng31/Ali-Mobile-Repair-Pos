@@ -272,7 +272,11 @@ export default function ChatWidget() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: text, customerName, customerPhone }),
-        }).catch(err => console.error('Chat alert failed', err));
+        }).catch((err) => {
+          if (process.env.NODE_ENV !== 'production') {
+            console.debug('Chat alert failed', err);
+          }
+        });
         
         localStorage.setItem('ali_chat_alert_sent', '1');
       }

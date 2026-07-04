@@ -173,7 +173,7 @@ export default function PublicLayout({
             <div className="footer-bottom">
               <p>
                 &copy; 2026 Ali Mobile & Repair. All rights reserved.{" "}
-                <Link href="/disclaimer" className="text-gray-400 hover:text-gray-600 text-xs ml-2">
+                <Link href="/disclaimer" className="text-slate-500 hover:text-gray-600 text-xs ml-2">
                   [Disclaimer]
                 </Link>
               </p>
