@@ -575,6 +575,88 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </ScrollReveal>
         )}
 
+        {isTablet && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="tablet-repair-types-heading">
+              <div className="repair-section-header">
+                <span>Repair by issue</span>
+                <h2 id="tablet-repair-types-heading">Common Tablet Repair Services</h2>
+                <p>Choose the repair path that best matches your tablet issue, then we can confirm the exact model, part availability and quote in store.</p>
+              </div>
+              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
+                <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>01</span>
+                  <strong>Tablet Screen Repair</strong>
+                  <small>For cracked glass, display lines, black screen or touch issues on supported iPad, Samsung Tablet and Lenovo Tablet models.</small>
+                </Link>
+                <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>02</span>
+                  <strong>Tablet Battery Replacement</strong>
+                  <small>For fast battery drain, swelling concerns or tablets that shut down unexpectedly after diagnosis.</small>
+                </Link>
+                <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>03</span>
+                  <strong>Tablet Charging Port Repair</strong>
+                  <small>For tablets that will not charge, charge intermittently, or need charging/no-power diagnosis.</small>
+                </Link>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
+        {isLaptop && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="laptop-repair-types-heading">
+              <div className="repair-section-header">
+                <span>Repair by issue</span>
+                <h2 id="laptop-repair-types-heading">Common Laptop Repair Services</h2>
+                <p>Start with the closest laptop repair issue, then we can inspect the device and confirm whether it needs parts, cleaning, board-level assessment or a quote-first repair path.</p>
+              </div>
+              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
+                <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>01</span>
+                  <strong>Laptop Screen Repair</strong>
+                  <small>For cracked panels, display lines, no backlight or screen damage on supported laptop and MacBook models.</small>
+                </Link>
+                <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>02</span>
+                  <strong>Laptop Battery Replacement</strong>
+                  <small>For poor battery life, swelling concerns, unexpected shutdowns or battery health issues after inspection.</small>
+                </Link>
+                <Link href="/repairs/charging-port-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>03</span>
+                  <strong>Laptop Charging Repair</strong>
+                  <small>For laptops that do not charge, USB-C charging issues, loose ports or power-related diagnosis.</small>
+                </Link>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
+        {isWatch && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="watch-repair-types-heading">
+              <div className="repair-section-header">
+                <span>Repair by issue</span>
+                <h2 id="watch-repair-types-heading">Common Watch Repair Services</h2>
+                <p>Select the closest watch issue so we can confirm the model, size, part availability and repair path before quoting.</p>
+              </div>
+              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
+                <Link href="/repairs/screen-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>01</span>
+                  <strong>Watch Screen Repair</strong>
+                  <small>For cracked glass, damaged display, touch issues or black-screen symptoms on supported Apple Watch models.</small>
+                </Link>
+                <Link href="/repairs/battery-replacement" prefetch={false} className="repair-type-mini-card">
+                  <span>02</span>
+                  <strong>Watch Battery Replacement</strong>
+                  <small>For fast battery drain, sudden shutdowns or battery health concerns after model confirmation.</small>
+                </Link>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
         {isPhone && (
           <ScrollReveal>
             <section className="repair-assist-panel" aria-labelledby="phone-timing-heading">
