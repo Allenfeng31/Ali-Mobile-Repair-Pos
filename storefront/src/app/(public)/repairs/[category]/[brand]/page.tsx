@@ -32,7 +32,7 @@ import BrandHubModelSeriesBrowser, { type BrandHubSeriesGroup } from "./BrandHub
 import IPhoneServiceAreaLinks, { type IPhoneServiceAreaLinkCard } from "./IPhoneServiceAreaLinks";
 import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
 
-export const dynamic = 'force-dynamic'; // Enforce absolute fresh data for model lists
+export const revalidate = 86400;
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
 
 interface BrandPageProps {
@@ -831,6 +831,13 @@ function getAppleWatchServiceAreaDescription(areaName: string, index: number) {
 }
 
 const MAJOR_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
+const PRIORITY_PHONE_BRAND_HUB_SLUGS = new Set(["iphone", "samsung", "google-pixel", "oppo"]);
+const HIGH_VALUE_PHONE_REPAIR_SHORTCUTS = [
+  { slug: "screen-replacement", label: "screen repair", detail: "Cracked glass, display lines, black screens and touch faults." },
+  { slug: "battery-replacement", label: "battery replacement", detail: "Fast drain, shutdowns, swelling and battery-health symptoms." },
+  { slug: "charging-port-replacement", label: "charging repair", detail: "Intermittent charging, cable fit, debris checks and port faults." },
+  { slug: "back-glass-replacement", label: "back glass repair", detail: "Rear glass, back-cover or housing damage where supported." },
+];
 const SAMSUNG_SERIES_ORDER = ["s", "a", "note", "z"];
 const APPLE_WATCH_SERIES_ORDER = [
   "series-3",
@@ -1129,6 +1136,72 @@ function formatStartingRepairPrice(price: number): string {
   }).format(price);
 }
 
+function buildModelUrl(categorySlug: string, brandSlug: string, modelSlug: string) {
+  return `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${safeSlugSegment(modelSlug)}`;
+}
+
+function buildRepairUrl(categorySlug: string, brandSlug: string, modelSlug: string, repairSlug: string) {
+  return `${buildModelUrl(categorySlug, brandSlug, modelSlug)}/${safeSlugSegment(repairSlug)}`;
+}
+
+function buildExactPhoneRepairShortcuts(categorySlug: string, brandSlug: string, models: ModelEntry[]) {
+  const shortcuts: Array<{ href: string; label: string; description: string }> = [];
+
+  for (const model of smartSortModels(models).slice(0, 6)) {
+    for (const repair of HIGH_VALUE_PHONE_REPAIR_SHORTCUTS) {
+      if (!model.repairTypes.some((option) => option.slug === repair.slug)) continue;
+      shortcuts.push({
+        href: buildRepairUrl(categorySlug, brandSlug, model.slug, repair.slug),
+        label: `${model.model} ${repair.label}`,
+        description: repair.detail,
+      });
+      if (shortcuts.length >= 8) return shortcuts;
+    }
+  }
+
+  return shortcuts;
+}
+
+function buildPhoneDiagnosticSteps(brandName: string, brandSlug: string) {
+  const modelLabel =
+    brandSlug === "iphone"
+      ? "iPhone"
+      : brandSlug === "samsung"
+      ? "Samsung Galaxy"
+      : brandSlug === "google-pixel"
+      ? "Google Pixel"
+      : brandSlug === "oppo"
+      ? "OPPO"
+      : brandName;
+
+  return [
+    {
+      title: "Confirm exact model and condition",
+      body: `We confirm the exact ${modelLabel} model, storage or variant where relevant, visible damage, frame condition and whether the phone powers on before quoting.`,
+    },
+    {
+      title: "Check the symptom path",
+      body: "Screen, touch, battery, charging, camera, speaker, button, no-power and liquid-exposure symptoms are checked before a single part is recommended.",
+    },
+    {
+      title: "Match compatible parts",
+      body: "Parts and repair paths can differ by model generation. We check compatibility, current stock and whether ordering is needed before work begins.",
+    },
+    {
+      title: "Explain quote, timing and risk",
+      body: "You see the available repair option, price or Quote status, practical timing and any data, frame, liquid exposure or aftercare limitations before approval.",
+    },
+    {
+      title: "Complete approved repair",
+      body: "The technician completes only the approved repair path once the correct part, device condition and quote have been confirmed.",
+    },
+    {
+      title: "Test functions and aftercare",
+      body: "Relevant functions are checked after repair where the device condition allows, then warranty conditions and safe aftercare are explained at collection.",
+    },
+  ];
+}
+
 function getBrandHubHeroDescription(
   categorySlug: string,
   brandSlug: string,
@@ -1265,6 +1338,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isSamsungPhoneHub = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelHub = categorySlug === "phone" && brandSlug === "google-pixel";
   const isOppoPhoneHub = categorySlug === "phone" && brandSlug === "oppo";
+  const isPriorityPhoneHub = categorySlug === "phone" && PRIORITY_PHONE_BRAND_HUB_SLUGS.has(brandSlug);
+  const phoneHubDisplayName = isSamsungPhoneHub ? "Samsung Galaxy" : isOppoPhoneHub ? "OPPO" : brandName;
   const batchPhoneBrandConfig = getBatchPhoneBrandConfig(categorySlug, brandSlug);
   const isEnhancedPhoneHub = isIPhoneHub || isSamsungPhoneHub || isGooglePixelHub || isOppoPhoneHub || Boolean(batchPhoneBrandConfig);
   const usesBrandHubDesign = isPhoneHub || isTabletBrandHub || isAppleWatchHub || isMacBookHub;
@@ -1426,7 +1501,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     ? {
         headingId: "samsung-common-problems-heading",
         kicker: "COMMON SAMSUNG PHONE PROBLEMS",
-        heading: "Common Samsung phone problems we assess",
+        heading: "Common Samsung Galaxy problems we assess",
         items: SAMSUNG_COMMON_PROBLEMS,
       }
     : isGooglePixelHub
@@ -1462,6 +1537,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     : batchPhoneBrandConfig
     ? batchPhoneBrandConfig.repairLinks
     : BRAND_HUB_REPAIR_TYPE_LINKS;
+  const exactPhoneRepairShortcuts = isPriorityPhoneHub
+    ? buildExactPhoneRepairShortcuts(categorySlug, brandSlug, models)
+    : [];
+  const phoneDiagnosticSteps = isPriorityPhoneHub ? buildPhoneDiagnosticSteps(brandName, brandSlug) : [];
   const phoneCommonRepairsIntro = isIPhoneHub
     ? "Start with your iPhone model, then choose the repair path that best matches the fault. Screen, battery, charging and back glass options can vary by model and current parts availability."
     : isSamsungPhoneHub
@@ -1728,6 +1807,54 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
       ]
     : [];
+  const canonicalUrl = `https://www.alimobile.com.au/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}`;
+  const serviceSchemaAreaSource = buildFeaturedServiceAreaSource().slice(0, 6);
+  const brandHubServiceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${canonicalUrl}#service`,
+    name: `${brandHubHeading} at Ali Mobile & Repair`,
+    serviceType: brandHubHeading,
+    url: canonicalUrl,
+    description: isMacBookHub
+      ? "MacBook repair support at Ringwood Square Shopping Centre, with model confirmation, quote approval and parts availability checked before work begins."
+      : brandHubHeroDescription,
+    provider: {
+      "@type": "LocalBusiness",
+      name: "Ali Mobile & Repair",
+      url: "https://www.alimobile.com.au/",
+      telephone: "0481 058 514",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Ringwood Square Shopping Centre, Kiosk C1, Seymour Street",
+        addressLocality: "Ringwood",
+        addressRegion: "VIC",
+        postalCode: "3134",
+        addressCountry: "AU",
+      },
+    },
+    areaServed: serviceSchemaAreaSource.map((area) => ({
+      "@type": "Place",
+      name: `${area.name}, VIC`,
+    })),
+    ...(isPhoneHub
+      ? {
+          hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            name: `${phoneHubDisplayName} repair services`,
+            itemListElement: phoneRepairTypeLinks.map((link, index) => ({
+              "@type": "Offer",
+              position: index + 1,
+              itemOffered: {
+                "@type": "Service",
+                name: link.label,
+                url: `https://www.alimobile.com.au${link.href}`,
+              },
+            })),
+          },
+        }
+      : {}),
+  };
 
   return (
     <main className={`repair-page-shell ${!usesBrandHubDesign ? "repair-page-shell-narrow" : ""} ${usesBrandHubDesign ? "brand-hub-page" : ""} ${isIPadHub ? "tablet-brand-hub-page" : ""} ${isAppleWatchHub ? "watch-brand-hub-page" : ""}`}>
@@ -1753,6 +1880,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               { "@type": "ListItem", "position": 4, "name": `${brandName} Repair`, "item": `https://www.alimobile.com.au/repairs/${categorySlug}/${brandSlug}` }
             ]
           })
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(brandHubServiceSchema)
         }}
       />
 
@@ -3088,12 +3221,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           >
             {usesBrandHubDesign && (
               <div className="brand-hub-section-header">
-                <span className="repair-kicker">Popular models</span>
-                <h2 id="brand-models-heading">Choose your {brandName} model</h2>
+                <span className="repair-kicker">Browse all models</span>
+                <h2 id="brand-models-heading">Find your {phoneHubDisplayName} model</h2>
                 <p>
                   {isIPhoneHub
                     ? "We support a broad range of current and earlier iPhone models. Choose your exact model to check the repair options currently available."
-                    : `Start with the exact ${brandName} model to view supported repair options, current pricing, and the right booking path.`}
+                    : `Start with the exact ${phoneHubDisplayName} model to view supported repair options, current pricing, and the right booking path.`}
                 </p>
               </div>
             )}
@@ -3120,11 +3253,111 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             showResultSummary={isEnhancedPhoneHub}
           />
 
+          {phoneCommonProblems && (
+            <section className="brand-hub-section" aria-labelledby={phoneCommonProblems.headingId}>
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker">{phoneCommonProblems.kicker}</span>
+                <h2 id={phoneCommonProblems.headingId}>{phoneCommonProblems.heading}</h2>
+              </div>
+              <div className="repair-signal-grid">
+                {phoneCommonProblems.items.map((problem, index) => (
+                  <article key={problem.title} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h3>{problem.title}</h3>
+                    <p>{problem.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel" : ""}`} aria-labelledby="phone-diagnostic-heading">
+            <div className="w-full">
+              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
+              <h2 id="phone-diagnostic-heading">How {phoneHubDisplayName} diagnosis, parts and timing work</h2>
+              <p>
+                {isIPhoneHub
+                  ? "We confirm the exact iPhone model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : isSamsungPhoneHub
+                  ? "We confirm the exact Samsung model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : isGooglePixelHub
+                  ? "We confirm the exact Google Pixel model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : isOppoPhoneHub
+                  ? "We confirm the exact OPPO model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
+                  : batchPhoneBrandConfig
+                  ? batchPhoneBrandConfig.diagnosisIntro
+                  : "We confirm the exact model first, then explain the compatible repair options and practical timing."}
+              </p>
+              <div className="repair-signal-grid mt-5">
+                {phoneDiagnosticSteps.length > 0 ? (
+                  phoneDiagnosticSteps.map((step, index) => (
+                    <article key={step.title} className="repair-signal-card">
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <h3>{step.title}</h3>
+                      <p>{step.body}</p>
+                    </article>
+                  ))
+                ) : (
+                  <>
+                    <article className="repair-signal-card">
+                      <span>01</span>
+                      <h3>{isEnhancedPhoneHub ? "Confirm the model and fault" : "Model-specific diagnosis"}</h3>
+                      <p>
+                        {batchPhoneBrandConfig
+                          ? batchPhoneBrandConfig.modelFaultCopy
+                          : "Compatible parts differ by model. The exact model matters before we confirm repair compatibility."}
+                      </p>
+                    </article>
+                    <article className="repair-signal-card">
+                      <span>02</span>
+                      <h3>{isEnhancedPhoneHub ? "Review the quote and parts" : "Screen replacement timing"}</h3>
+                      <p>
+                        {isEnhancedPhoneHub
+                          ? "You will be shown the available repair option, price or Quote status before work begins. If a part needs to be ordered, we will explain the expected availability and likely timing before you approve the repair."
+                          : phoneContent?.timing.screen || 'Repair timing depends on the exact model and parts availability. We confirm the timeline once diagnosis is complete.'}
+                      </p>
+                    </article>
+                    <article className="repair-signal-card">
+                      <span>03</span>
+                      <h3>{isEnhancedPhoneHub ? "Repair, testing and collection" : "Battery replacement timing"}</h3>
+                      <p>
+                        {isEnhancedPhoneHub
+                          ? "After approval, the repair is completed and relevant device functions are checked. We will let you know when the device is ready for collection and explain any important aftercare or warranty information."
+                          : phoneContent?.timing.battery || 'Many common battery replacements can be completed quickly when the correct part is in stock.'}
+                      </p>
+                    </article>
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {exactPhoneRepairShortcuts.length > 0 && (
+            <section className="brand-hub-section" aria-labelledby="exact-phone-repair-shortcuts-heading">
+              <div className="brand-hub-section-header">
+                <div>
+                  <span className="repair-kicker">Common combinations</span>
+                  <h2 id="exact-phone-repair-shortcuts-heading">Common {phoneHubDisplayName} model and repair combinations</h2>
+                </div>
+                <p>
+                  A few common model-and-repair paths customers ask about. If you are unsure, choose your exact model above first.
+                </p>
+              </div>
+              <div className="brand-hub-link-grid brand-hub-repair-link-grid">
+                {exactPhoneRepairShortcuts.map((link) => (
+                  <Link key={link.href} href={link.href} prefetch={false} className="brand-hub-outline-link">
+                    <strong>{link.label}</strong>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className={usesBrandHubDesign ? "brand-hub-section" : "repair-types-showcase"} aria-labelledby="brand-repair-types-heading">
             <div className={usesBrandHubDesign ? "brand-hub-section-header" : "repair-types-showcase-header"}>
               <div>
                 <span className="repair-kicker repair-kicker-muted">Repair services</span>
-                <h2 id="brand-repair-types-heading">{usesBrandHubDesign ? `Popular ${brandName} repair services` : `Common ${brandName} Repair Paths`}</h2>
+                <h2 id="brand-repair-types-heading">{usesBrandHubDesign ? `Popular ${phoneHubDisplayName} repair services` : `Common ${brandName} Repair Paths`}</h2>
               </div>
               <p>{phoneCommonRepairsIntro}</p>
             </div>
@@ -3162,81 +3395,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
           </section>
 
-          {phoneCommonProblems && (
-            <section className="brand-hub-section" aria-labelledby={phoneCommonProblems.headingId}>
-              <div className="brand-hub-section-header">
-                <span className="repair-kicker">{phoneCommonProblems.kicker}</span>
-                <h2 id={phoneCommonProblems.headingId}>{phoneCommonProblems.heading}</h2>
-              </div>
-              <div className="repair-signal-grid">
-                {phoneCommonProblems.items.map((problem, index) => (
-                  <article key={problem.title} className="repair-signal-card">
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <h3>{problem.title}</h3>
-                    <p>{problem.body}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel" : ""}`} aria-labelledby="phone-diagnostic-heading">
-            <div className="w-full">
-              <span className="repair-kicker repair-kicker-muted">Diagnosis and quoting</span>
-              <h2 id="phone-diagnostic-heading">How {brandName} diagnosis, parts and timing work</h2>
-              <p>
-                {isIPhoneHub
-                  ? "We confirm the exact iPhone model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
-                  : isSamsungPhoneHub
-                  ? "We confirm the exact Samsung model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
-                  : isGooglePixelHub
-                  ? "We confirm the exact Google Pixel model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
-                  : isOppoPhoneHub
-                  ? "We confirm the exact OPPO model and fault before discussing the suitable repair path. Pricing, Quote status, parts availability and practical timing are explained before any work is approved."
-                  : batchPhoneBrandConfig
-                  ? batchPhoneBrandConfig.diagnosisIntro
-                  : "We confirm the exact model first, then explain the compatible repair options and practical timing."}
-              </p>
-              <div className="repair-signal-grid mt-5">
-                <article className="repair-signal-card">
-                  <span>01</span>
-                  <h3>{isEnhancedPhoneHub ? "Confirm the model and fault" : "Model-specific diagnosis"}</h3>
-                  <p>
-                    {isIPhoneHub
-                      ? "We check the exact iPhone model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
-                      : isSamsungPhoneHub
-                      ? "We check the exact Samsung model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
-                      : isGooglePixelHub
-                      ? "We check the exact Pixel model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
-                      : isOppoPhoneHub
-                      ? "We check the exact OPPO model, the symptoms and the device condition. Similar symptoms can have different causes, so the recommended repair is based on the assessment rather than the symptom alone."
-                      : batchPhoneBrandConfig
-                      ? batchPhoneBrandConfig.modelFaultCopy
-                      : "Compatible parts differ by model. The exact model matters before we confirm repair compatibility."}
-                  </p>
-                </article>
-                <article className="repair-signal-card">
-                  <span>02</span>
-                  <h3>{isEnhancedPhoneHub ? "Review the quote and parts" : "Screen replacement timing"}</h3>
-                  <p>
-                    {isEnhancedPhoneHub
-                      ? "You will be shown the available repair option, price or Quote status before work begins. If a part needs to be ordered, we will explain the expected availability and likely timing before you approve the repair."
-                      : phoneContent?.timing.screen || 'Repair timing depends on the exact model and parts availability. We confirm the timeline once diagnosis is complete.'}
-                  </p>
-                </article>
-                <article className="repair-signal-card">
-                  <span>03</span>
-                  <h3>{isEnhancedPhoneHub ? "Repair, testing and collection" : "Battery replacement timing"}</h3>
-                  <p>
-                    {isEnhancedPhoneHub
-                      ? "After approval, the repair is completed and relevant device functions are checked. We will let you know when the device is ready for collection and explain any important aftercare or warranty information."
-                      : phoneContent?.timing.battery || 'Many common battery replacements can be completed quickly when the correct part is in stock.'}
-                  </p>
-                </article>
-              </div>
-            </div>
-          </section>
-
           {usesBrandHubDesign && otherPhoneBrandLinks.length > 0 && (
             <section className="brand-hub-section" aria-labelledby="other-phone-brands-heading">
               <div className="brand-hub-section-header">
@@ -3263,7 +3421,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           <section className={`repair-assist-panel${usesBrandHubDesign ? " brand-hub-section brand-hub-panel brand-hub-centered-panel" : ""}`} aria-labelledby="phone-ringwood-heading">
             <div className="w-full max-w-2xl">
               <span className="repair-kicker repair-kicker-muted">Ringwood service</span>
-              <h2 id="phone-ringwood-heading">{brandName} repair support at Ringwood Square</h2>
+              <h2 id="phone-ringwood-heading">{phoneHubDisplayName} repair support at Ringwood Square</h2>
               {isEnhancedPhoneHub ? (
                 <>
                   <p>Ali Mobile & Repair operates from Kiosk C1 at Ringwood Square Shopping Centre and supports customers across Melbourne's eastern suburbs. Walk-ins are welcome, with free underground and outdoor parking available. You can call ahead to confirm parts or likely timing before travelling.</p>
@@ -3380,7 +3538,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
 
           <section className={`faq-section${usesBrandHubDesign ? " brand-hub-section brand-hub-faq-section" : ""}`} aria-labelledby="phone-faq-heading">
             {usesBrandHubDesign && <span className="repair-kicker">Common questions</span>}
-            <h2 id="phone-faq-heading" className="faq-heading">{brandName} repair FAQs</h2>
+            <h2 id="phone-faq-heading" className="faq-heading">{phoneHubDisplayName} repair FAQs</h2>
             <div className="faq-accordion">
               {phoneContent?.faqs.map((faq) => (
                 <details key={faq.question} className="faq-item">
@@ -3410,7 +3568,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             </div>
             <div className="repair-hero-actions">
               <a href="#models-list" className="repair-primary-action">
-                Choose Your {brandName} Model
+                Choose Your {phoneHubDisplayName} Model
                 <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
               </a>
               <Link href="/book-repair" className="repair-secondary-action">
