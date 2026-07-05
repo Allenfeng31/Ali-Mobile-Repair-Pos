@@ -43,6 +43,7 @@ export default function RepairOptionsGrid({
       case "charging-port-replacement": return <Plug size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "water-damage-repair": return <Droplet size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "back-glass-repair":
+      case "back-glass-replacement":
       case "back-housing-replacement": return <Smartphone size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "camera-repair":
       case "front-camera-replacement":
@@ -69,7 +70,10 @@ export default function RepairOptionsGrid({
   };
 
   const getRepairDisplayName = (rt: RepairOption) => {
-    if (categorySlug === "phone" && rt.slug === "back-housing-replacement") {
+    if (
+      categorySlug === "phone" &&
+      (rt.slug === "back-housing-replacement" || rt.slug === "back-glass-replacement")
+    ) {
       return brandSlug === "iphone" ? "Back Glass / Back Housing Replacement" : "Back Glass Replacement";
     }
 
@@ -78,7 +82,8 @@ export default function RepairOptionsGrid({
 
   const getRepairHref = (rt: RepairOption) => {
     const publicRepairSlug =
-      categorySlug === "phone" && rt.slug === "back-housing-replacement"
+      categorySlug === "phone" &&
+      (rt.slug === "back-housing-replacement" || rt.slug === "back-glass-replacement")
         ? "back-glass-replacement"
         : rt.slug;
 

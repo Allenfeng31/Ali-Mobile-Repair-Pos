@@ -127,6 +127,8 @@ const REPAIR_NAME_MAP: Record<string, string> = {
   "Front Camera": "Front Camera Replacement",
   "Back Camera": "Back Camera Replacement",
   "Back Glass": "Back Glass Replacement",
+  "Back Glass/Housing": "Back Glass Replacement",
+  "Back Glass / Housing": "Back Glass Replacement",
   "Back Housing": "Back Glass Replacement",
   "Back Housing Replacement": "Back Glass Replacement",
   "Logic Board": "Logic Board Repair",
@@ -140,7 +142,7 @@ const REPAIR_NAME_MAP: Record<string, string> = {
 const COMMON_SERVICES = [
   "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
   "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement",
-  "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Housing", "Back Housing Replacement",
+  "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Glass/Housing", "Back Glass / Housing", "Back Housing", "Back Housing Replacement",
   "Flex Cable", "Power Button", "Volume Button", "Power Flex", "Volume Flex", "Flash Flex", "Back Glass Replacement"
 ];
 
