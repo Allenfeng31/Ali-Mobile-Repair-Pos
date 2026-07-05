@@ -107,12 +107,14 @@ export function ChatInbox() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [messageLoadError, setMessageLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [apptStatusCache, setApptStatusCache] = useState<Record<string, string>>({});
   const [bookingsOpen, setBookingsOpen] = useState(false);
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
+  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [sendingReminderId, setSendingReminderId] = useState<string | null>(null);
@@ -282,6 +284,7 @@ export function ChatInbox() {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !deleting) {
         setDeleteConfirmOpen(false);
+        setDeleteConfirmText('');
       }
     };
 
@@ -293,6 +296,7 @@ export function ChatInbox() {
     setDeleteError(null);
     setMessageLoadError(null);
     setDeleteConfirmOpen(false);
+    setDeleteConfirmText('');
     setActiveSession(session);
     loadMessages(session.id);
   };
@@ -335,16 +339,18 @@ export function ChatInbox() {
 
   const deleteSession = async () => {
     if (!activeSession) return;
+    setDeleteConfirmText('');
     setDeleteConfirmOpen(true);
   };
 
   const confirmDeleteSession = async () => {
-    if (!activeSession) return;
+    if (!activeSession || deleteConfirmText !== 'DELETE') return;
     setDeleteError(null);
     const headers = await getStaffAuthHeaders();
     if (!headers.Authorization) {
       setChatAuthError('expired');
       setDeleteConfirmOpen(false);
+      setDeleteConfirmText('');
       return;
     }
 
@@ -357,11 +363,13 @@ export function ChatInbox() {
       if (res.status === 401) {
         setChatAuthError('expired');
         setDeleteConfirmOpen(false);
+        setDeleteConfirmText('');
         return;
       }
       if (res.status === 403) {
         setChatAuthError('forbidden');
         setDeleteConfirmOpen(false);
+        setDeleteConfirmText('');
         return;
       }
       if (!res.ok) {
@@ -376,6 +384,7 @@ export function ChatInbox() {
       setMessages([]);
       setMessageLoadError(null);
       setDeleteConfirmOpen(false);
+      setDeleteConfirmText('');
       await loadSessions();
     } catch (_) {
       const message = 'Could not delete this conversation. Please refresh and try again.';
@@ -509,7 +518,10 @@ export function ChatInbox() {
             aria-modal="true"
             aria-labelledby="delete-chat-confirm-title"
             onClick={() => {
-              if (!deleting) setDeleteConfirmOpen(false);
+              if (!deleting) {
+                setDeleteConfirmOpen(false);
+                setDeleteConfirmText('');
+              }
             }}
           >
             <div
@@ -522,17 +534,37 @@ export function ChatInbox() {
                 </div>
                 <div>
                   <h3 id="delete-chat-confirm-title" className="text-xl font-black tracking-tight text-black">
-                    Delete this conversation?
+                    Permanently delete this conversation?
                   </h3>
                   <p className="mt-2 text-sm font-bold leading-relaxed text-gray-500">
-                    This removes the chat session after the backend confirms deletion. Customer messages are not hidden unless the delete succeeds.
+                    This is not an archive or inbox cleanup action.
                   </p>
                 </div>
               </div>
+              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-black leading-relaxed text-red-700">
+                WARNING: This permanently deletes the conversation from the database. It cannot be recovered. Booking request context and chat history may be lost.
+              </div>
+              <label className="mb-5 block">
+                <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-500">
+                  Type DELETE to confirm
+                </span>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(event) => setDeleteConfirmText(event.target.value)}
+                  disabled={deleting}
+                  autoComplete="off"
+                  className="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-black tracking-widest text-black outline-none shadow-[var(--shadow-neu-sm)] focus:border-red-300 disabled:opacity-50"
+                  aria-label="Type DELETE to confirm permanent deletion"
+                />
+              </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setDeleteConfirmOpen(false)}
+                  onClick={() => {
+                    setDeleteConfirmOpen(false);
+                    setDeleteConfirmText('');
+                  }}
                   disabled={deleting}
                   className="rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-gray-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
                 >
@@ -541,10 +573,10 @@ export function ChatInbox() {
                 <button
                   type="button"
                   onClick={confirmDeleteSession}
-                  disabled={deleting}
+                  disabled={deleting || deleteConfirmText !== 'DELETE'}
                   className="rounded-2xl bg-red-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_12px_26px_rgba(239,68,68,0.28)] transition-all active:scale-95 disabled:opacity-50"
                 >
-                  {deleting ? 'Deleting...' : 'Delete Chat'}
+                  {deleting ? 'Deleting...' : 'Permanently Delete'}
                 </button>
               </div>
             </div>
@@ -814,6 +846,9 @@ export function ChatInbox() {
                   {bookings.map((booking) => {
                     const isPending = booking.status === 'pending';
                     const isUpdating = updatingBookingId === booking.id;
+                    const cleanBookingNote = booking.notes?.replace('[MULTI-DEVICE]', '').trim() || '';
+                    const isNoteExpanded = Boolean(expandedNotes[booking.id]);
+                    const canToggleNote = cleanBookingNote.length > 120;
 
                     return (
                       <article
@@ -844,10 +879,34 @@ export function ChatInbox() {
                                 {booking.brand} {booking.model} · {booking.service}
                               </p>
                             </div>
-                            {booking.notes && (
-                              <p className="mt-3 line-clamp-2 text-xs font-semibold leading-relaxed text-gray-500">
-                                {booking.notes.replace('[MULTI-DEVICE]', '').trim()}
-                              </p>
+                            {cleanBookingNote && (
+                              <div className="mt-3">
+                                <p
+                                  id={`booking-note-${booking.id}`}
+                                  className={cn(
+                                    "break-words text-xs font-semibold leading-relaxed text-gray-500",
+                                    canToggleNote && !isNoteExpanded && "line-clamp-2"
+                                  )}
+                                >
+                                  {cleanBookingNote}
+                                </p>
+                                {canToggleNote && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setExpandedNotes(prev => ({
+                                        ...prev,
+                                        [booking.id]: !prev[booking.id],
+                                      }));
+                                    }}
+                                    aria-expanded={isNoteExpanded}
+                                    aria-controls={`booking-note-${booking.id}`}
+                                    className="mt-2 text-[10px] font-black uppercase tracking-widest text-blue-600 active:scale-95"
+                                  >
+                                    {isNoteExpanded ? 'Read less' : 'Read more'}
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </div>
 

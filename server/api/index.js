@@ -2072,7 +2072,7 @@ app.get('/api/chat/unread-summary', requireStaffAuth, async (req, res) => {
 
 // Staff: get all sessions (conversation list)
 app.get('/api/chat/sessions', requireStaffAuth, async (req, res) => {
-  // 1. Fetch top 40 sessions with their latest 5 messages
+  // 1. Fetch top 150 sessions with their latest messages
   const { data: sessions, error } = await supabase
     .from('chat_sessions')
     .select(`
@@ -2080,7 +2080,7 @@ app.get('/api/chat/sessions', requireStaffAuth, async (req, res) => {
       chat_messages (id, sender, content, created_at, is_read)
     `)
     .order('last_message_at', { ascending: false })
-    .limit(40)
+    .limit(150)
     .order('created_at', { foreignTable: 'chat_messages', ascending: false })
     .limit(20, { foreignTable: 'chat_messages' });
 
