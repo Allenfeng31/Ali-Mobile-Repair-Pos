@@ -80,19 +80,19 @@ interface CategoryPageProps {
 const CATEGORY_SEO_DATA: Record<string, any> = {
   phone: {
     metadata: {
-      title: 'Mobile Phone Repair Services Ringwood | Brands & Models | Ali Mobile',
-      description: 'Explore mobile phone repair services for supported iPhone, Samsung Galaxy, Google Pixel, Oppo and other models. Compare screen, battery, charging, camera and back housing repair options, then confirm pricing and parts availability with Ali Mobile & Repair in Ringwood.',
+      title: 'Mobile Phone Repair Services by Brand & Model | Ali Mobile',
+      description: 'Browse mobile phone repair pathways by brand, model and issue, including screen, battery, charging, camera and housing repairs. Choose your phone model to see supported repair options.',
     },
     hero: {
       pillType: 'primary',
       pillText: 'Phone Specialist',
-      title: 'Mobile Phone Repair Services in Ringwood',
-      intro1: 'Select your mobile phone brand and exact model to view our supported repair pathways. We handle screen, battery, charging port, camera, and back housing repairs for supported devices.',
-      intro2: 'Check available service options and pricing for your specific phone model, then confirm parts availability with Ali Mobile & Repair in Ringwood before your visit.',
+      title: 'Mobile Phone Repair Services by Brand & Model',
+      intro1: 'Select your mobile phone brand and exact model to view supported smartphone repair pathways for screen, battery, charging, camera and housing issues.',
+      intro2: 'Check available service options and pricing for your specific phone model, then confirm parts availability and practical timing before your visit.',
     },
     schema: {
-      serviceName: 'Phone Repair Services Ringwood',
-      description: "Expert phone repair services for iPhone, Samsung, Pixel, and Oppo serving Melbourne's Eastern Suburbs. Same-day options may be available for common screen and battery repairs when parts are in stock.",
+      serviceName: 'Mobile Phone Repair Services by Brand and Model',
+      description: "Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Same-day options may be available for common screen and battery repairs when parts are in stock.",
     },
     features: [
       { t: "Same-day options when parts are in stock", d: "We confirm timing after checking the model and repair queue." },
@@ -126,19 +126,19 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   },
   tablet: {
     metadata: {
-      title: 'iPad & Tablet Repair Ringwood | Battery & Screen Fixes | Ali Mobile & Repair',
-      description: 'Tablet repair services in Ringwood for supported iPad and Samsung Galaxy Tab models. Explore screen, battery, charging and diagnostic options, then confirm the exact model, pricing, parts availability and repair timing with Ali Mobile & Repair.',
+      title: 'Tablet Repair Services by Brand & Model | Ali Mobile',
+      description: 'Browse tablet and iPad repair pathways by brand, model and issue, including screen, battery, charging port, camera and housing repairs. Choose your tablet model to see supported repair options.',
     },
     hero: {
       pillType: 'primary',
       pillText: 'Tablet Specialist',
-      title: 'Professional Tablet & iPad Repairs in Ringwood',
-      intro1: 'From shattered iPad touch glasses to unresponsive Samsung Tabs batteries, we provide expert hardware repairs for the Eastern Suburbs including Croydon, Mitcham, and Wantirna.',
+      title: 'Tablet Repair Services by Brand & Model',
+      intro1: 'Select your tablet brand and exact model to view supported tablet repair pathways for screen, battery, charging, camera and housing issues.',
       intro2: 'We confirm repair timing after checking the exact tablet model, part availability, repair queue, and device condition.',
     },
     schema: {
-      serviceName: 'Tablet & iPad Repair Services Ringwood',
-      description: "Professional iPad and tablet repair services in Ringwood, Melbourne. Expert screen and battery replacements for supported models.",
+      serviceName: 'Tablet Repair Services by Brand and Model',
+      description: "Tablet and iPad repair pathways for supported models, including screen, battery, charging and diagnostic options where available.",
     },
     features: [
       { t: "Parts availability & timing checks", d: "Timing is confirmed after model, part, and repair queue checks." },
@@ -155,25 +155,26 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { question: "Do you repair cracked iPad screens in Ringwood?", answer: "Yes, we specialize in iPad screen repairs right here in Ringwood. Whether you only need the top glass or the entire LCD assembly replaced, same-day options may be available when parts are in stock." },
       { question: "What kind of replacement batteries do you use for tablets?", answer: "We use compatible replacement batteries selected for the model and confirm the available option before repair." },
       { question: "How long does an iPad repair take?", answer: "Many common iPad repairs can be completed the same day when parts are in stock, but timing depends on adhesive curing, model, repair queue, and device condition." },
+      { question: "What if my tablet will not turn on or only shows a black screen?", answer: "A no-power or black-screen tablet can be related to the display, battery, charging port, liquid exposure, connector damage or board-level faults. We inspect the device first so we can confirm the likely cause and quote the right repair path." },
       { question: "What is your warranty policy for tablet repairs?", answer: "Tablet screen and battery replacements are backed by our 180-day warranty. Warranty support depends on the fault confirmed at inspection and whether it relates to the completed repair." },
       { question: "Is my tablet data safe during the repair?", answer: "Data is normally not affected during standard screen or battery repairs, but we recommend backing up first whenever possible." }
     ]
   },
   laptop: {
     metadata: {
-      title: 'Laptop Repair Ringwood | Screen, Battery & Keyboard Service',
-      description: 'Ali Mobile & Repair at Ringwood Square provides laptop screen, battery, keyboard, charging and diagnostic support for Windows laptops and MacBooks. Choose your brand or request an assessment before you travel.',
+      title: 'Laptop Repair Services by Brand & Model | Ali Mobile',
+      description: 'Browse laptop and MacBook repair pathways by brand, model and issue, including screen, battery, charging, keyboard, housing and diagnostic services where supported.',
     },
     hero: {
       pillType: 'warning',
       pillText: 'Laptop Repair Hub',
-      title: 'Laptop Repair in Ringwood',
-      intro1: 'Need help with a Windows laptop or MacBook? We inspect the fault first, explain the repair path, and help you choose the right brand, model or assessment before any work begins.',
+      title: 'Laptop Repair Services by Brand & Model',
+      intro1: 'Select your laptop brand and exact model to view supported laptop repair pathways for screen, battery, charging, keyboard, housing and diagnostic issues.',
       intro2: 'Common laptop screen and battery jobs may move faster when parts are in stock, but timing always depends on the exact model, the fault, parts availability and final testing.',
     },
     schema: {
-      serviceName: 'Laptop Repair Services Ringwood',
-      description: 'Broad laptop repair services in Ringwood for Windows laptops and MacBooks. Screen, battery, keyboard, charging, power and diagnostic support.',
+      serviceName: 'Laptop Repair Services by Brand and Model',
+      description: 'Laptop and MacBook repair pathways for supported models, including screen, battery, keyboard, charging, power and diagnostic support where available.',
     },
     features: [
       { t: "Windows and MacBook repair pathways", d: "Choose the laptop family that matches your device, or ask us to identify it at the counter." },
@@ -205,19 +206,19 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   },
   watch: {
     metadata: {
-      title: 'Smart Watch Repair Ringwood | Screen, Battery & Diagnostic Service | Ali Mobile',
-      description: 'Smart watch repairs in Ringwood. Select your smartwatch brand and exact model to view compatible repair options and pricing. Apple Watch models are currently available, with additional supported brands added after service review.',
+      title: 'Apple Watch Repair Services by Model | Ali Mobile',
+      description: 'Browse supported smart watch repair pathways by model and issue, including screen, battery and diagnostic services where available. Choose your watch model to see supported repair options.',
     },
     hero: {
       pillType: 'accent',
       pillText: 'Watch Specialist',
-      title: 'Smart Watch Repair Services in Ringwood',
-      intro1: 'Select your smartwatch brand and exact model to view compatible repair options and pricing. Apple Watch models are currently available on the public repair path, with additional supported brands added after service review.',
+      title: 'Apple Watch Repair Services by Model',
+      intro1: 'Select your watch model to view supported repair pathways for screen, battery and diagnostic issues where available.',
       intro2: 'Repair timing depends on the exact model, device condition, parts availability and inspection. We confirm the practical repair path and quote after checking the watch first.',
     },
     schema: {
-      serviceName: 'Smart Watch Repair Services Ringwood',
-      description: "Smart watch repair services in Ringwood, Melbourne. Select your smartwatch brand and exact model to view compatible repair options and pricing, with Apple Watch models currently available on the public repair path.",
+      serviceName: 'Apple Watch Repair Services by Model',
+      description: "Smart watch repair pathways for supported Apple Watch models, including screen, battery and diagnostic options where available.",
     },
     features: [
       { t: "Parts availability varies by brand and model", d: "Replacement parts are model-specific and we confirm availability before quoting." },
@@ -233,6 +234,41 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { question: "Is a smart watch repair worth it?", answer: "That depends on the brand, model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
     ]
   }
+};
+
+const CATEGORY_COMMON_PROBLEMS: Record<string, Array<{ title: string; body: string }>> = {
+  phone: [
+    { title: 'Black screen or no display', body: 'Display faults, impact damage or internal connection issues can cause a phone to show nothing on screen.' },
+    { title: "Phone won't turn on", body: 'No-power symptoms may relate to the battery, charging path, liquid exposure or board-level faults.' },
+    { title: 'Not charging or loose charging connection', body: 'We check cable fit, charging port condition, debris, battery condition and charging behaviour.' },
+    { title: 'Touch screen not responding', body: 'Touch faults may come from screen damage, display connectors, software issues or internal damage.' },
+    { title: 'Battery drains fast or shuts down', body: 'Fast drain, swelling, shutdowns or poor battery health can point to a battery or power-management issue.' },
+    { title: 'Camera, speaker or microphone issues', body: 'We can assess camera focus, sound, microphone and related flex or connector symptoms.' },
+    { title: 'Water exposure or no-power symptoms', body: 'Liquid exposure needs diagnosis-first assessment. Repair and data outcomes cannot be guaranteed.' },
+  ],
+  tablet: [
+    { title: 'Cracked tablet screen or glass', body: 'Impact damage can affect the front glass, LCD/display, touch response or frame condition.' },
+    { title: 'Tablet not charging', body: 'We check the charging port, cable fit, debris, battery behaviour and charging path.' },
+    { title: 'Battery drains quickly', body: 'Short battery life, shutdowns or swelling can point to battery or power-management issues.' },
+    { title: 'Touch screen not responding', body: 'Touch faults can come from screen damage, connector issues or internal damage.' },
+    { title: "Tablet won't turn on", body: 'No-power symptoms may involve battery, charging, liquid exposure or board-level faults.' },
+    { title: 'Camera or button issues', body: 'We can assess camera, button, flex cable and related connector symptoms where supported.' },
+  ],
+  laptop: [
+    { title: 'Cracked screen or display fault', body: 'Display damage, lines, flickering or no-image symptoms may require screen or diagnostic assessment.' },
+    { title: 'Battery not holding charge', body: 'Fast drain, swelling or sudden shutdowns can point to battery or power-management issues.' },
+    { title: 'Charging or USB-C power issue', body: 'We check charger fit, charging behaviour, port condition and related power symptoms.' },
+    { title: 'Keyboard or top case issues', body: 'Sticky, failed or damaged keyboard symptoms may require model-specific part assessment.' },
+    { title: "Laptop won't turn on", body: 'No-power symptoms may involve charging, battery, liquid exposure or board-level faults.' },
+    { title: 'Trackpad, camera or speaker issues', body: 'We can assess common internal flex, connector and component symptoms where supported.' },
+  ],
+  watch: [
+    { title: 'Cracked watch screen or glass', body: 'Impact damage can affect the display, touch response or watch housing condition.' },
+    { title: 'Watch battery drains quickly', body: 'Fast battery drain, shutdowns or charging issues may require battery or diagnostic assessment.' },
+    { title: 'Watch not charging', body: 'We check charging behaviour, charging contacts and visible damage where applicable.' },
+    { title: 'Touch not responding', body: 'Touch faults may come from screen damage, impact, moisture exposure or internal issues.' },
+    { title: 'Water exposure or no-power symptoms', body: 'Liquid exposure needs diagnosis-first assessment. Repair outcomes cannot be guaranteed.' },
+  ],
 };
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
@@ -312,9 +348,10 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const isWatch = category === 'watch';
   const isTablet = category === 'tablet';
   const isPhone = category === 'phone';
+  const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
-  const watchBrandSectionCopy = 'Select your brand and exact model to view compatible repair options and current pricing. Apple Watch repair options are currently available, with additional supported smartwatch brands added after service review.';
+  const watchBrandSectionCopy = 'Select your exact Apple Watch model to view compatible repair options and current pricing where available.';
   const ringwoodSupportCopy = isWatch
     ? 'We confirm the exact model, device condition, parts availability and practical repair path before quoting timing or starting work. Ali Mobile & Repair operates from Ringwood Square Shopping Centre Kiosk C1, and you can call ahead or book before visiting.'
     : isPhone
@@ -411,8 +448,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <p>Screen, battery, keyboard, charging and power faults are checked before work begins.</p>
                 </div>
                 <div>
-                  <span>Ringwood Square location</span>
-                  <p>Kiosk C1, Seymour Street, Ringwood VIC 3134, opposite the Bunnings entrance.</p>
+                  <span>Model-first support</span>
+                  <p>Exact model details help us confirm compatible parts, practical timing and the right quote path.</p>
                 </div>
               </div>
             </div>
@@ -657,6 +694,27 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </ScrollReveal>
         )}
 
+        {commonProblems.length > 0 && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby={`${category}-common-problems-heading`}>
+              <div className="repair-section-header">
+                <span>Common symptoms</span>
+                <h2 id={`${category}-common-problems-heading`}>Common {category} problems we assess</h2>
+                <p>These symptoms can have more than one cause, so we confirm the model, condition and likely repair path before work begins.</p>
+              </div>
+              <div className="repair-signal-grid">
+                {commonProblems.map((problem, index) => (
+                  <article key={problem.title} className="repair-signal-card">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <h3>{problem.title}</h3>
+                    <p>{problem.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
         {isPhone && (
           <ScrollReveal>
             <section className="repair-assist-panel" aria-labelledby="phone-timing-heading">
@@ -698,8 +756,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <div className="repair-signal-grid">
                   <article className="repair-signal-card">
                     <span>01</span>
-                    <h3>Brand and generation first</h3>
-                    <p>Select the smartwatch brand first, then the exact generation or family before comparing repair options.</p>
+                    <h3>Apple Watch generation first</h3>
+                    <p>Select the available Apple Watch path, then the exact generation or family before comparing repair options.</p>
                   </article>
                   <article className="repair-signal-card">
                     <span>02</span>
@@ -709,7 +767,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <article className="repair-signal-card">
                     <span>03</span>
                     <h3>Apple Watch public path</h3>
-                    <p>Apple Watch repair options are currently available, with additional supported smartwatch brands added only after service review.</p>
+                    <p>Apple Watch repair options are currently available on the public repair path, with compatibility confirmed by model and case size.</p>
                   </article>
                 </div>
               </section>
@@ -969,7 +1027,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <article key={idx} className="repair-signal-card">
                   <span>{String(idx + 1).padStart(2, '0')}</span>
                   <h3>{f.t}</h3>
-                  <p>{f.d ? f.d : 'Included standard with our service.'}</p>
+                  <p>{f.d ? f.d : 'We confirm repair options after checking your model, symptoms and part availability.'}</p>
                 </article>
               ))}
             </div>
@@ -981,7 +1039,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <section className="repair-content-band" aria-labelledby="pricing-guidance-heading">
               <div className="repair-section-header">
                 <span>Model-first pricing</span>
-                <h2 id="pricing-guidance-heading">Select your brand and model to view current pricing</h2>
+                <h2 id="pricing-guidance-heading">{isWatch ? 'Select your Apple Watch model to view current pricing' : 'Select your brand and model to view current pricing'}</h2>
                 <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.'}</p>
               </div>
             </section>
