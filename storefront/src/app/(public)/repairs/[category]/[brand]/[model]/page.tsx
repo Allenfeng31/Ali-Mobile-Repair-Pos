@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchRepairCatalog, fetchModelRepairTypes } from "@/lib/api";
+import { fetchRepairCatalog, fetchModelRepairTypes, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, preserveRouteSegment, safeSlugSegment } from "@/lib/inventoryUtils";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
@@ -25,6 +25,14 @@ type RepairTypeEntry = {
   price: number;
   variants?: Array<{ quality_grade: string; price: number; is_recommended?: boolean }>;
 };
+
+const IPHONE_RELATED_MODEL_NAMES = [
+  "iPhone 13 Pro",
+  "iPhone 13 Pro Max",
+  "iPhone 13 mini",
+  "iPhone 12",
+  "iPhone 14",
+];
 
 function getRepairBySlugs(repairTypes: RepairTypeEntry[], slugs: string[]) {
   return repairTypes.find((repair) => slugs.includes(repair.slug));
@@ -80,8 +88,8 @@ function getIPhoneScreenOptions(
 
   if (normalizedGrades.some((grade) => grade.includes("genuine") || grade.includes("oem"))) {
     options.push({
-      title: "Genuine",
-      body: "A genuine Apple screen option for customers who prefer original Apple display hardware, subject to availability for the selected model.",
+      title: "Service history notes",
+      body: "Some iPhone repairs may show parts and service history messages in Settings. We explain available screen options and limitations before proceeding.",
     });
   }
 
@@ -228,6 +236,18 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
   const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage;
+  const brandCatalogEntry = isIPhoneModelPage
+    ? (await fetchRepairCatalog()).brands.find((brand) => brand.category === categorySlug && brand.slug === brandSlug)
+    : null;
+  const relatedIPhoneModels = isIPhoneModelPage
+    ? IPHONE_RELATED_MODEL_NAMES.map((relatedName) =>
+        brandCatalogEntry?.models.find(
+          (candidate) =>
+            candidate.slug !== modelSlug &&
+            candidate.model.toLowerCase() === relatedName.toLowerCase()
+        )
+      ).filter((candidate): candidate is ModelEntry => Boolean(candidate))
+    : [];
   const screenRepair = getRepairBySlugs(repairTypes, ["screen-replacement", "screen-repair"]);
   const batteryRepair = getRepairBySlugs(repairTypes, ["battery-replacement", "battery-service", "battery-repair"]);
   const chargingRepair = getRepairBySlugs(repairTypes, ["charging-port-replacement", "charging-port-repair", "charging-port"]);
@@ -242,7 +262,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? getPublishedScreenOptions(screenRepair?.variants || [])
     : [];
   const activeScreenOptions = isIPhoneModelPage ? screenOptions : nonIPhoneScreenOptions;
-  const hasGenuineScreenOption = screenOptions.some((option) => option.title === "Genuine");
+  const hasServiceHistoryScreenOption = screenOptions.some((option) => option.title === "Service history notes");
   const commonIssues = [
     {
       icon: Smartphone,
@@ -418,10 +438,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           answer: "We test the relevant functions before repair where the phone’s condition allows, then repeat the related checks after repair. If the phone arrives with no display, no power, severe liquid damage or existing sensor faults, not every function can always be confirmed at the initial stage.",
         }
       : null,
-    hasGenuineScreenOption
+    hasServiceHistoryScreenOption
       ? {
-          question: "Can you complete diagnostics or calibration after fitting a genuine screen?",
-          answer: "For supported iPhone models, we can complete the available diagnostic and calibration process after fitting a genuine screen.",
+          question: "Can you explain diagnostics or calibration after a screen repair?",
+          answer: "For supported iPhone models, we explain available screen options, diagnostic or calibration steps, and any expected device messages before proceeding.",
         }
       : null,
     {
@@ -1573,7 +1593,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
       <section
         id="repair-options"
-        className="repair-content-band rounded-[28px] border border-blue-100 bg-white/80 px-5 py-6 shadow-[0_18px_60px_rgba(15,23,42,0.055)] sm:px-6"
+        className="repair-content-band rounded-[24px] border border-slate-200 bg-white px-6 py-7 shadow-sm sm:px-7 lg:px-8"
         aria-labelledby="repair-options-heading"
       >
         <div className="mb-3">
@@ -1612,13 +1632,13 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           />
 
           <ScrollReveal>
-            <section className="mt-14" aria-labelledby="model-quick-answers-heading">
-              <div className="mx-auto mb-8 max-w-4xl text-center">
+            <section className="repair-content-band" aria-labelledby="model-quick-answers-heading">
+              <div className="repair-section-header">
                 <span className="repair-kicker repair-kicker-muted">Quick answers</span>
-                <h2 id="model-quick-answers-heading" className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                <h2 id="model-quick-answers-heading">
                   What customers usually ask about {modelName}
                 </h2>
-                <p className="mt-4 text-[1.02rem] leading-7 text-slate-600">
+                <p>
                   Tap a question to expand the short answer. This page stays focused on the model-level decisions that matter before booking.
                 </p>
               </div>
@@ -1626,12 +1646,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 {enhancedQuickAnswers.map((answer) => (
                   <details
                     key={answer.number}
-                    className="group rounded-[24px] border border-slate-200/90 bg-[linear-gradient(165deg,rgba(255,255,255,0.96),rgba(248,250,252,0.88))] px-5 py-5 shadow-[0_16px_36px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.95)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_52px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.95)]"
+                    className="group rounded-[20px] border border-slate-200 bg-white px-6 py-6 shadow-sm transition-colors duration-200 hover:border-blue-200 hover:bg-blue-50/20"
                   >
                     <summary className="list-none cursor-pointer [&::-webkit-details-marker]:hidden">
-                      <div className="flex min-h-[132px] flex-col">
+                      <div className="flex min-h-[118px] flex-col">
                         <div className="flex items-start justify-between gap-4">
-                          <span className="grid h-9 w-9 place-items-center rounded-full border border-blue-100 bg-blue-50/90 text-xs font-black text-blue-700 shadow-[0_10px_24px_rgba(59,130,246,0.12)]">
+                          <span className="grid h-9 w-9 place-items-center rounded-full border border-blue-100 bg-blue-50 text-xs font-black text-blue-700">
                             {answer.number}
                           </span>
                           <span className="shrink-0 pt-1 text-lg font-black leading-none text-blue-600 transition group-open:rotate-45">
@@ -1654,6 +1674,37 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </section>
           </ScrollReveal>
 
+          {relatedIPhoneModels.length > 0 && (
+            <ScrollReveal>
+              <section className="repair-content-band rounded-[24px] border border-slate-200 bg-white px-6 py-7 shadow-sm sm:px-7" aria-labelledby="related-iphone-models-heading">
+                <div className="repair-section-header">
+                  <span>Model check</span>
+                  <h2 id="related-iphone-models-heading">Not your iPhone model?</h2>
+                  <p>Compare nearby iPhone models or return to the iPhone repair hub if you are unsure which model you have.</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {relatedIPhoneModels.map((relatedModel) => (
+                    <Link
+                      key={relatedModel.slug}
+                      href={`/repairs/${categorySlug}/${brandSlug}/${relatedModel.slug}`}
+                      prefetch={false}
+                      className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-black text-slate-700 transition-colors duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      {relatedModel.model}
+                    </Link>
+                  ))}
+                  <Link
+                    href={`/repairs/${categorySlug}/${brandSlug}`}
+                    prefetch={false}
+                    className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700 transition-colors duration-200 hover:border-blue-300 hover:bg-blue-100"
+                  >
+                    All iPhone models
+                  </Link>
+                </div>
+              </section>
+            </ScrollReveal>
+          )}
+
           {activeScreenOptions.length > 0 && (
             <ScrollReveal>
               <section className="repair-content-band" aria-labelledby="model-screen-options-heading">
@@ -1674,8 +1725,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                   ))}
                 </div>
                 {isIPhoneModelPage ? (
-                  <article className="mt-8 grid gap-6 rounded-[30px] border border-blue-100/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(248,250,252,0.84))] px-6 py-6 shadow-[0_20px_54px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.92)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-                    <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.96),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_40px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.95)]">
+                  <article className="mt-8 grid gap-5 rounded-[24px] border border-slate-200 bg-white px-6 py-6 shadow-sm lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+                    <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-6">
                       <span className="repair-kicker repair-kicker-muted">Apple service notes</span>
                       <h3 className="mt-4 text-[1.45rem] font-black leading-tight tracking-tight text-slate-950">
                         Parts and Service History, diagnostics and calibration
@@ -1685,17 +1736,17 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                       </p>
                     </div>
                     <div className="grid gap-5 md:grid-cols-2">
-                      {hasGenuineScreenOption && (
-                        <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.97),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.96)] md:col-span-2">
+                      {hasServiceHistoryScreenOption && (
+                        <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-5 md:col-span-2">
                           <h4 className="text-[1rem] font-black tracking-tight text-slate-950">
-                            Genuine screen support
+                            Screen option notes
                           </h4>
                           <p className="mt-2 text-[0.96rem] leading-7 text-slate-600">
-                            For supported iPhone models, we can complete the available diagnostic and calibration process after fitting a genuine screen.
+                            For supported iPhone models, we explain available screen options, diagnostic or calibration steps, and any expected device messages before proceeding.
                           </p>
                         </div>
                       )}
-                      <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.97),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.96)]">
+                      <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-5">
                         <h4 className="text-[1rem] font-black tracking-tight text-slate-950">
                           What may appear after repair
                         </h4>
@@ -1703,7 +1754,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                           The phone may display Parts and Service History or a related system message depending on the model and selected part.
                         </p>
                       </div>
-                      <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.97),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.96)]">
+                      <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-5">
                         <h4 className="text-[1rem] font-black tracking-tight text-slate-950">
                           Explained before handover
                         </h4>
@@ -1714,8 +1765,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                     </div>
                   </article>
                 ) : (
-                  <article className="mt-8 grid gap-6 rounded-[30px] border border-blue-100/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(248,250,252,0.84))] px-6 py-6 shadow-[0_20px_54px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.92)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-                    <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.96),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_40px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.95)]">
+                  <article className="mt-8 grid gap-5 rounded-[24px] border border-slate-200 bg-white px-6 py-6 shadow-sm lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+                    <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-6">
                       <span className="repair-kicker repair-kicker-muted">{nonIPhoneScreenNote.kicker}</span>
                       <h3 className="mt-4 text-[1.45rem] font-black leading-tight tracking-tight text-slate-950">
                         {nonIPhoneScreenNote.title}
@@ -1725,7 +1776,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                       </p>
                     </div>
                     <div className="grid gap-5 md:grid-cols-2">
-                      <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.97),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.96)]">
+                      <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-5">
                         <h4 className="text-[1rem] font-black tracking-tight text-slate-950">
                           {nonIPhoneScreenNote.firstTitle}
                         </h4>
@@ -1733,7 +1784,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                           {nonIPhoneScreenNote.firstBody}
                         </p>
                       </div>
-                      <div className="rounded-[24px] border border-slate-200/90 bg-[linear-gradient(160deg,rgba(255,255,255,0.97),rgba(248,250,252,0.9))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.96)]">
+                      <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-6 py-5">
                         <h4 className="text-[1rem] font-black tracking-tight text-slate-950">
                           {nonIPhoneScreenNote.secondTitle}
                         </h4>
@@ -1800,7 +1851,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 </p>
               </div>
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
-                <article className="rounded-[28px] border-2 border-slate-800/80 bg-white/25 px-5 py-5 shadow-[0_18px_34px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-sm transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(15,23,42,0.11),inset_0_1px_0_rgba(255,255,255,0.82)]">
+                <article className="rounded-[22px] border border-slate-200 bg-white px-6 py-6 shadow-sm">
                   <h3 className="text-[1.08rem] font-black tracking-tight text-slate-950">
                     Local support and walk-in service
                   </h3>
@@ -1808,18 +1859,18 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                     Ali Mobile &amp; Repair works from Ringwood Square Shopping Centre Kiosk C1. Walk-ins are welcome, free underground and outdoor parking is available, and our team can assist in English, 中文 and 粤语.
                   </p>
                   <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                    <span className="rounded-full border border-slate-800/45 bg-white/35 px-3 py-2 text-center text-[0.78rem] font-black text-slate-800 shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-center text-[0.78rem] font-black text-slate-700">
                       English
                     </span>
-                    <span className="rounded-full border border-slate-800/45 bg-white/35 px-3 py-2 text-center text-[0.78rem] font-black text-slate-800 shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-center text-[0.78rem] font-black text-slate-700">
                       中文
                     </span>
-                    <span className="rounded-full border border-slate-800/45 bg-white/35 px-3 py-2 text-center text-[0.78rem] font-black text-slate-800 shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-center text-[0.78rem] font-black text-slate-700">
                       粤语
                     </span>
                   </div>
                 </article>
-                <article className="rounded-[28px] border-2 border-slate-800/80 bg-white/25 px-5 py-5 shadow-[0_18px_34px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.78)] backdrop-blur-sm transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(15,23,42,0.11),inset_0_1px_0_rgba(255,255,255,0.82)]">
+                <article className="rounded-[22px] border border-slate-200 bg-white px-6 py-6 shadow-sm">
                   <h3 className="text-[1.08rem] font-black tracking-tight text-slate-950">
                     Before you travel
                   </h3>
@@ -1838,7 +1889,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                       return (
                         <span
                           key={item.label}
-                          className="flex min-h-12 items-center gap-2 rounded-2xl border border-slate-800/55 bg-white/35 px-3 py-2 text-[0.84rem] font-black leading-snug text-slate-800 shadow-[0_12px_24px_rgba(15,23,42,0.07),inset_0_1px_0_rgba(255,255,255,0.78)]"
+                          className="flex min-h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-[0.84rem] font-black leading-snug text-slate-700"
                         >
                           <Icon size={15} strokeWidth={2.35} aria-hidden="true" />
                           {item.label}
@@ -1852,7 +1903,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </ScrollReveal>
 
           <ScrollReveal>
-            <section className="faq-section" aria-labelledby="model-faq-heading">
+            <section className="faq-section repair-content-band rounded-[24px] border border-slate-200 bg-white px-6 py-7 shadow-sm sm:px-7" aria-labelledby="model-faq-heading">
               <h2 id="model-faq-heading" className="faq-heading">{modelName} repair FAQs</h2>
               <div className="faq-accordion">
                 {enhancedFaqs.map((faq) => (
