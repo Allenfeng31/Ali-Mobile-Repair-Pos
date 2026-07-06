@@ -27,7 +27,6 @@ type RepairTypeEntry = {
 };
 
 const RELATED_MODEL_LIMIT = 5;
-const MODEL_REPAIR_PATH_LIMIT = 7;
 
 function getRepairBySlugs(repairTypes: RepairTypeEntry[], slugs: string[]) {
   return repairTypes.find((repair) => slugs.includes(repair.slug));
@@ -125,63 +124,6 @@ function getOrderedSameBrandModels(
     }))
     .sort((left, right) => right.score - left.score || left.index - right.index)
     .map((candidate) => candidate.model);
-}
-
-function getPublicRepairSlug(categorySlug: string, repairSlug: string) {
-  return categorySlug === "phone" && (repairSlug === "back-housing-replacement" || repairSlug === "back-glass-replacement")
-    ? "back-glass-replacement"
-    : repairSlug;
-}
-
-function getRepairPathLabel(repair: RepairTypeEntry, categorySlug: string, brandSlug: string) {
-  const publicRepairSlug = getPublicRepairSlug(categorySlug, repair.slug);
-
-  if (publicRepairSlug === "back-glass-replacement") {
-    return brandSlug === "iphone" ? "Back Glass / Back Housing Replacement" : "Back Glass Replacement";
-  }
-
-  if (publicRepairSlug === "charging-port-replacement") {
-    return "Charging Port Repair";
-  }
-
-  if (publicRepairSlug === "water-damage-repair") {
-    return "Water Damage Assessment";
-  }
-
-  if (publicRepairSlug === "logic-board-repair") {
-    return "Logic Board Assessment";
-  }
-
-  return repair.name;
-}
-
-function getModelRepairPathLinks(
-  repairTypes: RepairTypeEntry[],
-  categorySlug: string,
-  brandSlug: string,
-  modelSlug: string
-) {
-  const seenRepairSlugs = new Set<string>();
-
-  return repairTypes
-    .map((repair) => {
-      const publicRepairSlug = getPublicRepairSlug(categorySlug, repair.slug);
-
-      return {
-        href: `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${publicRepairSlug}`,
-        label: getRepairPathLabel(repair, categorySlug, brandSlug),
-        slug: publicRepairSlug,
-      };
-    })
-    .filter((link) => {
-      if (seenRepairSlugs.has(link.slug)) {
-        return false;
-      }
-
-      seenRepairSlugs.add(link.slug);
-      return true;
-    })
-    .slice(0, MODEL_REPAIR_PATH_LIMIT);
 }
 
 function getIPhoneScreenOptions(
@@ -345,7 +287,6 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const brandName = data?.brand || formatDynamicParam(brandSlug);
   const introBrandPrefix = brandName && modelName.toLowerCase().startsWith(brandName.toLowerCase()) ? "" : `${brandName} `;
   const repairTypes = data?.repairTypes || [];
-  const modelRepairPathLinks = getModelRepairPathLinks(repairTypes, categorySlug, brandSlug, modelSlug);
   const isPhoneModelPage = categorySlug === "phone";
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
@@ -362,7 +303,6 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     : null;
   const sameBrandModels = getOrderedSameBrandModels(modelName, modelSlug, brandCatalogEntry?.models);
   const visibleRelatedModels = sameBrandModels.slice(0, RELATED_MODEL_LIMIT);
-  const hiddenRelatedModels = sameBrandModels.slice(RELATED_MODEL_LIMIT);
   const relatedModelHubLabel = isIPhoneModelPage
     ? "iPhone"
     : isSamsungModelPage
@@ -378,37 +318,6 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     : isAppleWatchModelPage
     ? "Apple Watch"
     : brandName;
-  const allRelatedModelsLabel = isIPhoneModelPage
-    ? "All iPhone models"
-    : isSamsungModelPage
-    ? "All Samsung Galaxy models"
-    : isGooglePixelModelPage
-    ? "All Google Pixel models"
-    : isOppoModelPage
-    ? "All OPPO models"
-    : isTabletModelPage
-    ? "All tablet models"
-    : isLaptopModelPage
-    ? "All laptop models"
-    : isAppleWatchModelPage
-    ? "All Apple Watch models"
-    : `All ${brandName} models`;
-  const parentBrandHubCtaLabel = `View ${relatedModelHubLabel} repair hub`;
-  const repairPathHeading = isIPhoneModelPage
-    ? "Popular repair options for this iPhone model"
-    : isSamsungModelPage
-    ? "Popular repair options for this Samsung Galaxy model"
-    : isGooglePixelModelPage
-    ? "Popular repair options for this Google Pixel model"
-    : isOppoModelPage
-    ? "Popular repair options for this OPPO model"
-    : isTabletModelPage
-    ? "Popular repair options for this tablet model"
-    : isLaptopModelPage
-    ? "Popular repair options for this laptop model"
-    : isAppleWatchModelPage
-    ? "Popular repair options for this Apple Watch model"
-    : `Popular repair options for this ${brandName} model`;
   const relatedModelHeading = isIPhoneModelPage
     ? "Not your iPhone model?"
     : isSamsungModelPage
@@ -424,6 +333,29 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     : isAppleWatchModelPage
     ? "Not your Apple Watch model?"
     : `Not your ${brandName} model?`;
+  const categoryHubLabel = categorySlug === "phone"
+    ? "phone repair services"
+    : categorySlug === "tablet"
+    ? "tablet repair services"
+    : categorySlug === "laptop"
+    ? "laptop repair services"
+    : categorySlug === "watch"
+    ? "watch repair services"
+    : `${formatDynamicParam(categorySlug)} repair services`;
+  const supportingRepairLinks = [
+    ...(brandCatalogEntry
+      ? [
+          {
+            href: `/repairs/${categorySlug}/${brandSlug}`,
+            label: `View ${relatedModelHubLabel} repair hub`,
+          },
+        ]
+      : []),
+    {
+      href: `/repairs/${categorySlug}`,
+      label: `Browse ${categoryHubLabel}`,
+    },
+  ];
   const screenRepair = getRepairBySlugs(repairTypes, ["screen-replacement", "screen-repair"]);
   const batteryRepair = getRepairBySlugs(repairTypes, ["battery-replacement", "battery-service", "battery-repair"]);
   const chargingRepair = getRepairBySlugs(repairTypes, ["charging-port-replacement", "charging-port-repair", "charging-port"]);
@@ -1787,28 +1719,6 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           modelSlug={modelSlug}
           modelName={modelName}
         />
-        {isEnhancedPhoneModelPage && modelRepairPathLinks.length > 0 && (
-          <div className="mt-7 border-t-2 border-slate-950 pt-5" aria-labelledby="model-repair-pathways-heading">
-            <div className="mx-auto mb-4 max-w-2xl text-center">
-              <span className="repair-kicker repair-kicker-muted">Repair shortcuts</span>
-              <h3 id="model-repair-pathways-heading" className="mt-3 text-[1.25rem] font-black leading-tight tracking-tight text-slate-950 sm:text-[1.45rem]">
-                {repairPathHeading}
-              </h3>
-            </div>
-            <div className="flex flex-wrap justify-center gap-3">
-              {modelRepairPathLinks.map((link) => (
-                <Link
-                  key={link.slug}
-                  href={link.href}
-                  prefetch={false}
-                  className="rounded-full border-2 border-slate-950 bg-transparent px-4 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
         {isMacBookModelPage && (
           <div className="mt-8 text-center">
             <Link
@@ -1880,48 +1790,19 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 <div className="brand-hub-section-header">
                   <span className="repair-kicker repair-kicker-muted">Model check</span>
                   <h2 id="related-models-heading">{relatedModelHeading}</h2>
-                  <p>Compare nearby {relatedModelHubLabel} models, expand the same-brand model list, or return to the {relatedModelHubLabel} repair hub if you are unsure which model you have.</p>
+                  <p>Compare a few nearby {relatedModelHubLabel} models if this is not the exact device in front of you.</p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-3">
+                <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-4 sm:gap-5">
                   {visibleRelatedModels.map((relatedModel) => (
                     <Link
                       key={relatedModel.slug}
                       href={`/repairs/${categorySlug}/${brandSlug}/${relatedModel.slug}`}
                       prefetch={false}
-                      className="rounded-full border-2 border-slate-950 bg-transparent px-4 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-slate-950 bg-transparent px-5 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
                     >
                       {relatedModel.model}
                     </Link>
                   ))}
-                </div>
-                <div className="mt-4 flex flex-wrap items-start justify-center gap-3">
-                  {hiddenRelatedModels.length > 0 && (
-                    <details className="group w-full sm:w-auto open:w-full">
-                      <summary className="mx-auto flex w-fit cursor-pointer list-none rounded-full border-2 border-slate-950 bg-transparent px-4 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700 [&::-webkit-details-marker]:hidden">
-                        <span className="group-open:hidden">{allRelatedModelsLabel}</span>
-                        <span className="hidden group-open:inline">Hide {relatedModelHubLabel} models</span>
-                      </summary>
-                      <div className="mt-4 flex flex-wrap justify-center gap-3 border-t-2 border-slate-950 pt-4">
-                        {hiddenRelatedModels.map((relatedModel) => (
-                          <Link
-                            key={relatedModel.slug}
-                            href={`/repairs/${categorySlug}/${brandSlug}/${relatedModel.slug}`}
-                            prefetch={false}
-                            className="rounded-full border-2 border-slate-950 bg-transparent px-4 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
-                          >
-                            {relatedModel.model}
-                          </Link>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-                  <Link
-                    href={`/repairs/${categorySlug}/${brandSlug}`}
-                    prefetch={false}
-                    className="rounded-full border-2 border-blue-700 bg-blue-50/70 px-4 py-2 text-sm font-black text-blue-700 transition-colors duration-200 hover:bg-blue-100"
-                  >
-                    {parentBrandHubCtaLabel}
-                  </Link>
                 </div>
               </section>
             </ScrollReveal>
@@ -2058,6 +1939,28 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                     <h3>{note.title}</h3>
                     <p>{note.body}</p>
                   </article>
+                ))}
+              </div>
+            </section>
+          </ScrollReveal>
+
+          <ScrollReveal>
+            <section className="brand-hub-section py-7" aria-labelledby="model-helpful-links-heading">
+              <div className="brand-hub-section-header">
+                <span className="repair-kicker repair-kicker-muted">Helpful links</span>
+                <h2 id="model-helpful-links-heading">Helpful repair links</h2>
+                <p>Use these links if you want to compare the full brand hub or return to the main repair category.</p>
+              </div>
+              <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-4">
+                {supportingRepairLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    prefetch={false}
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-slate-950 bg-transparent px-5 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
+                  >
+                    {link.label}
+                  </Link>
                 ))}
               </div>
             </section>
