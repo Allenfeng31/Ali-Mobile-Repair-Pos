@@ -773,6 +773,12 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                     <p>Less common models may require a part to be ordered, which usually takes around 1–2 days.</p>
                   </article>
                 </div>
+                <p className="mt-4">
+                  Dealing with liquid damage?{' '}
+                  <Link href="/repairs/water-damage" prefetch={false} className="text-blue-700 font-extrabold underline-offset-4 hover:underline">
+                    Read our water damage assessment advice.
+                  </Link>
+                </p>
               </div>
             </section>
           </ScrollReveal>
