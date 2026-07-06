@@ -98,11 +98,11 @@ export default function RepairOptionsGrid({
             <div key={rt.slug} className="flex h-full flex-col">
               <Link
                 href={getRepairHref(rt)}
-                className="repair-option-card h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="repair-option-card h-full !border-2 !border-slate-950 !bg-transparent !px-5 !py-5 !shadow-none hover:!border-blue-700 hover:!bg-blue-50/50 hover:!shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 onClick={(e) => handleOptionClick(e, rt)}
                 style={{ minHeight: "108px" }}
               >
-                <span className="repair-option-icon shrink-0">{getRepairIcon(rt.slug)}</span>
+                <span className="repair-option-icon shrink-0 !border-2 !border-slate-950 !bg-transparent">{getRepairIcon(rt.slug)}</span>
                 <div className="repair-option-info min-w-0">
                   <span className="repair-option-name break-words leading-snug">{getRepairDisplayName(rt)}</span>
                   <span className="repair-option-price">
