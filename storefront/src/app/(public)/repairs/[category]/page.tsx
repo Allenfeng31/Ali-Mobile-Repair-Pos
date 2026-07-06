@@ -111,17 +111,14 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "How long does a common phone screen repair take?", answer: "Most supported iPhone, Samsung, and Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes." },
-      { question: "Can my phone usually be repaired the same day?", answer: "Around 70% of common phone models are supported by parts that are regularly kept in stock, so many repairs can be completed the same day. Less common models may require a part to be ordered, which usually takes around 1–2 days." },
-      { question: "What happens when a part is not in stock?", answer: "If your model requires a part to be ordered, it usually takes around 1–2 days to arrive. We will confirm part availability and the expected timeline before any repair begins." },
-      { question: "Do I need to know the exact model?", answer: "Knowing your exact model helps us confirm part availability and pricing immediately. However, if you are unsure, you can bring the device to our Ringwood Square location and we will identify it for you." },
-      { question: "Does every charging problem require port replacement?", answer: "No. Many charging issues are caused by debris buildup, battery wear, or a faulty charging cable. We will inspect the port and diagnose the root cause before confirming if a replacement is needed." },
-      { question: "What if my phone has a black screen or won't turn on?", answer: "A phone that won't turn on could be caused by a degraded battery, damaged display, charging port issue, liquid exposure, or board-level fault. We need to physically inspect the device first so we can diagnose the symptom and quote the right repair path." },
-      { question: "Is back glass the same as complete housing replacement?", answer: "Not always. Some phone models support replacing only the rear glass pane, while others require a full housing replacement that includes the frame and camera lens. The repair method depends on your exact model and the extent of the damage." },
-      { question: "Will water resistance remain after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. While we may reseal the device where appropriate, adhesive replacement does not restore guaranteed factory water-resistance certification." },
-      { question: "Can I walk in without an appointment?", answer: "Yes, walk-ins are welcome at our Kiosk C1 in Ringwood Square Shopping Centre. However, we recommend booking or calling ahead to confirm part availability for your specific model." },
-      { question: "Will data normally remain on the phone?", answer: "Data is normally not affected during standard screen or battery repairs. However, we always recommend backing up your phone before any repair, as data preservation cannot be guaranteed." },
-      { question: "What happens if there is frame or board damage?", answer: "If we discover internal frame, connector, or logic board damage during our pre-repair assessment, we will explain the implications and confirm any revised timing or quote with you before proceeding." }
+      { question: "How long does a phone repair take?", answer: "Common phone repairs can often be completed the same day when the correct part is available. Timing depends on the exact model, current stock, repair queue and final testing, so please call first if timing is important." },
+      { question: "Will I lose my data during phone repair?", answer: "Most screen, battery and charging port repairs do not require a data wipe. We still recommend backing up where possible, especially if the phone has liquid exposure, logic board symptoms or severe damage that may carry higher data risk." },
+      { question: "What should I do if my phone gets wet?", answer: "Turn the phone off if possible, do not charge it, and avoid repeatedly testing it. Bring it in for assessment early so corrosion and internal damage can be checked. Liquid exposure outcomes depend on the damage found during inspection." },
+      { question: "What if my phone will not charge?", answer: "Charging faults can be caused by the cable, charger, charging port, battery, liquid exposure or a board-level issue. We start with diagnosis before replacing parts and confirm the quote before proceeding." },
+      { question: "What if my phone screen is black but still makes sounds?", answer: "A black screen with sound can point to a damaged display, an internal display connection issue or a board fault. Diagnosis confirms whether screen replacement is appropriate or whether another repair path is needed." },
+      { question: "Do phone repair shops look at your photos?", answer: "Normal screen, battery and charging repairs focus on hardware testing, and Ali Mobile does not need to browse personal photos for those services. Some functional tests may require customer participation or unlocking only when needed." },
+      { question: "Is it worth repairing an old phone or buying a new one?", answer: "It depends on the repair cost, device condition, battery health, storage needs and how long you want to keep the phone. For older phones, a quote-first approach helps compare repair value against replacement." },
+      { question: "Do I need to know the exact phone model?", answer: "Knowing the exact model helps us confirm part compatibility, pricing and timing faster. If you are unsure, bring the device to Ringwood Square or contact us and we can help identify it before quoting." }
     ]
   },
   tablet: {
@@ -271,6 +268,34 @@ const CATEGORY_COMMON_PROBLEMS: Record<string, Array<{ title: string; body: stri
   ],
 };
 
+type CategoryFaq = {
+  question: string;
+  answer: string;
+};
+
+function buildFaqPageSchema(faqs?: CategoryFaq[]) {
+  const mainEntity = (faqs ?? [])
+    .filter((faq) => faq.question.trim() && faq.answer.trim())
+    .map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    }));
+
+  if (!mainEntity.length) {
+    return null;
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity,
+  };
+}
+
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { category: catRaw } = await params;
   const category = formatDynamicParam(catRaw).toLowerCase();
@@ -349,6 +374,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const isTablet = category === 'tablet';
   const isPhone = category === 'phone';
   const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
+  const faqPageSchema = buildFaqPageSchema(data.faqs);
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
   const watchBrandSectionCopy = 'Select your exact Apple Watch model to view compatible repair options and current pricing where available.';
@@ -388,6 +414,14 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             })
           }}
         />
+        {faqPageSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(faqPageSchema)
+            }}
+          />
+        )}
         <section
           className={`repair-tech-hero repair-tech-hero-${category}`}
           aria-labelledby="category-repair-heading"
