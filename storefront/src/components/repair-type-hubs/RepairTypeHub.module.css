@@ -25,6 +25,23 @@
   margin: 0 auto;
 }
 
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: #1d4ed8;
+  font-size: 0.9rem;
+  font-weight: 850;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.backLink:hover,
+.backLink:focus-visible {
+  color: #1e40af;
+}
+
 .breadcrumbs {
   margin-bottom: 10px;
 }

@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import type { RepairTypeHubCatalogResult } from '@/lib/repair-type-hubs';
 import RepairTypeHubBreadcrumbs from './RepairTypeHubBreadcrumbs';
 import RepairTypeModelGrid from './RepairTypeModelGrid';
@@ -82,6 +84,11 @@ export default function RepairTypeHubPage({
   return (
     <div className={styles.pageShell}>
       <div className={styles.pageContainer}>
+        <Link href="/repairs" className={styles.backLink}>
+          <ArrowLeft size={16} strokeWidth={2.6} aria-hidden="true" />
+          Back to Repair Categories
+        </Link>
+
         <RepairTypeHubBreadcrumbs label={data.hub.label} />
 
         <section className={`repair-tech-hero repair-tech-hero-compact ${styles.heroCard}`}>
