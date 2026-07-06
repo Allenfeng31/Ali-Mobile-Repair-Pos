@@ -294,10 +294,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
   const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
   const isTabletModelPage = categorySlug === "tablet";
+  const isSamsungTabletModelPage = categorySlug === "tablet" && brandSlug === "samsung";
+  const isLenovoTabletModelPage = categorySlug === "tablet" && brandSlug === "lenovo";
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
   const isLaptopModelPage = categorySlug === "laptop";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
-  const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage;
+  const isEnhancedPhoneModelPage = isPhoneModelPage || isTabletModelPage || isMacBookModelPage || isAppleWatchModelPage;
   const brandCatalogEntry = isEnhancedPhoneModelPage
     ? (await fetchRepairCatalog()).brands.find((brand) => brand.category === categorySlug && brand.slug === brandSlug)
     : null;
@@ -313,6 +315,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "OPPO"
     : isIPadModelPage
     ? "iPad"
+    : isSamsungTabletModelPage
+    ? "Samsung tablet"
+    : isLenovoTabletModelPage
+    ? "Lenovo tablet"
     : isMacBookModelPage
     ? "MacBook"
     : isAppleWatchModelPage
@@ -327,7 +333,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     : isOppoModelPage
     ? "Not your OPPO model?"
     : isTabletModelPage
-    ? "Not your tablet model?"
+    ? `Not your ${relatedModelHubLabel} model?`
     : isLaptopModelPage
     ? "Not your laptop model?"
     : isAppleWatchModelPage
@@ -1255,12 +1261,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         : `Choose the available iPad repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
     {
-      title: "Exact iPad generation matters",
-      body: "Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
+      title: "iPad screen & battery timing",
+      body: "Common iPad screen and battery repairs can often be completed in about 45 minutes once the correct part is available. Call first to confirm current stock, queue and timing.",
     },
     {
-      title: "Frame and charging checks first",
-      body: "We inspect frame bend, touch response, charging behaviour and visible impact signs before confirming the practical iPad repair path.",
+      title: "Exact iPad generation matters",
+      body: "Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
     },
   ];
   const iPadQuickAnswers = [
@@ -1335,6 +1341,119 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { question: "Do bent frames affect iPad screen replacement?", answer: "Yes. Bent frames can prevent a new screen from sitting flush and sealing correctly. We inspect the frame condition before confirming the repair option." },
     hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and our workmanship. It does not cover new physical damage, liquid damage, bending, misuse or unrelated faults." } : null,
     { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm iPad part availability before you travel." },
+  ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const tabletBrandRepairLabel = isSamsungTabletModelPage
+    ? "Samsung tablet"
+    : isLenovoTabletModelPage
+    ? "Lenovo tablet"
+    : `${brandName} tablet`;
+  const tabletExactModelTitle = isSamsungTabletModelPage
+    ? "Exact Samsung tablet model matters"
+    : isLenovoTabletModelPage
+    ? "Exact Lenovo tablet model matters"
+    : `Exact ${brandName} tablet model matters`;
+  const tabletExactModelBody = isSamsungTabletModelPage
+    ? "Compatible parts can differ between Galaxy Tab series, screen size, model code, Wi-Fi and Cellular variants."
+    : isLenovoTabletModelPage
+    ? "Compatible parts can differ by Lenovo Tab series, model name, TB code, screen size and charging configuration."
+    : "Compatible parts can differ by tablet series, model name, model code, screen size and charging configuration.";
+  const tabletHeroCards = [
+    {
+      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
+      body: startingPrice
+        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the available ${tabletBrandRepairLabel} repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+    },
+    {
+      title: isSamsungTabletModelPage
+        ? "Samsung tablet parts and timing"
+        : isLenovoTabletModelPage
+        ? "Lenovo tablet parts and timing"
+        : "Tablet parts and timing",
+      body: isSamsungTabletModelPage
+        ? "Samsung tablet parts can vary by model number and screen size. Call first so we can confirm current stock, repair queue and expected timing before you visit."
+        : isLenovoTabletModelPage
+        ? "Lenovo tablet parts can vary by exact model and TB code. Call first so we can confirm current stock, repair queue and expected timing before you visit."
+        : "Tablet parts can vary by exact model, screen size and model code. Call first so we can confirm current stock, repair queue and expected timing before you visit.",
+    },
+    {
+      title: tabletExactModelTitle,
+      body: tabletExactModelBody,
+    },
+  ];
+  const tabletQuickAnswers = [
+    {
+      number: "01",
+      title: "How much does the repair cost?",
+      body: startingPrice
+        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+        : `Choose the repair option for this exact ${tabletBrandRepairLabel} model to see the current price or quote requirement.`,
+    },
+    hasScreenRepair
+      ? {
+          number: "02",
+          title: "What affects tablet screen repair?",
+          body: `${tabletBrandRepairLabel} screen repair depends on the exact model, screen size, touch response, frame condition, visible impact damage and whether the correct part is available.`,
+        }
+      : null,
+    hasBatteryRepair
+      ? {
+          number: "03",
+          title: "How is battery service confirmed?",
+          body: `${tabletBrandRepairLabel} battery service depends on the exact model, battery availability, charging behaviour and device condition. We confirm the likely repair path before work begins.`,
+        }
+      : null,
+    {
+      number: "04",
+      title: "Why does the exact model matter?",
+      body: `${tabletExactModelBody} We confirm the model before quoting so the repair path matches the tablet you have.`,
+    },
+    {
+      number: "05",
+      title: "What symptoms do you check?",
+      body: "We check cracked glass, display faults, battery drain, shutdowns, charging-port fit, touch response, camera behaviour, frame bend and liquid exposure signs where practical.",
+    },
+    hasWarrantyRepair
+      ? {
+          number: "06",
+          title: "What warranty is included?",
+          body: "Eligible tablet repairs include a 6-month warranty on the fitted part and workmanship. It does not cover new physical damage, bending, liquid damage, misuse or unrelated faults.",
+        }
+      : null,
+    {
+      number: "07",
+      title: "Can charging symptoms be another fault?",
+      body: "Yes. Tablet charging issues can come from the cable, charger, USB-C port, battery, board-level fault, case pressure or impact damage.",
+    },
+    {
+      number: "08",
+      title: "Should I back up first?",
+      body: "Standard hardware repairs normally do not require access to personal content, but backing up important data before repair is recommended because damaged devices carry data risk.",
+    },
+  ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const tabletProcessSteps = [
+    { number: "01", title: "Confirm exact tablet model", body: `We confirm the ${tabletBrandRepairLabel} model, screen size and model code where possible so the repair path matches the correct part.` },
+    { number: "02", title: "Inspect symptoms and damage", body: "We check glass, display, touch response, charging behaviour, cameras, frame pressure and liquid or impact signs where practical." },
+    { number: "03", title: "Check part availability", body: "Current stock, part ordering, price and expected timing are explained before work begins." },
+    { number: "04", title: "Complete the approved repair", body: "The selected tablet repair is completed using the appropriate part and method for that exact model." },
+    { number: "05", title: "Retest before handover", body: "Relevant display, touch, charging, camera, speaker, microphone, button and Wi-Fi or Cellular checks are repeated where practical." },
+  ];
+  const tabletServiceNotes = [
+    { title: "Model code and part matching", body: `${tabletBrandRepairLabel} compatibility can change by series, model code, screen size and variant. We match the part path before confirming the quote.` },
+    { title: "Screen, touch and frame diagnosis", body: "Cracked glass, display faults, touch issues, bent corners, case pressure and camera-area impact signs can change the practical repair scope." },
+    { title: "Battery, charging and board symptoms", body: "Fast drain, shutdowns, no charging or intermittent charging can involve the battery, charging port, cable, connector or board-level fault." },
+    { title: "Quote and limitations before repair", body: "If liquid exposure, severe impact or an additional fault changes the expected repair path, we explain the limitation and obtain approval before extra work." },
+  ];
+  const tabletFaqs = [
+    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : `Choose the repair option for this exact ${tabletBrandRepairLabel} model to see the current price or quote requirement.` },
+    { question: `Why do you need the exact ${tabletBrandRepairLabel} model?`, answer: tabletExactModelBody },
+    hasScreenRepair ? { question: `What affects ${modelName} screen replacement?`, answer: "Frame bend, touch response, display construction, camera-area damage, liquid exposure signs and part availability can all affect the final repair path." } : null,
+    hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We confirm availability and condition before repair." } : null,
+    { question: "How long will the tablet repair take?", answer: "Timing depends on the exact model, fault, current stock, repair queue and whether part ordering is required. Call first so we can confirm the likely timing before you visit." },
+    { question: "Can charging issues be caused by something else?", answer: "Yes. A charging issue can come from the cable, charger, port debris, charging-port damage, battery wear, internal connectors or a board-level fault." },
+    { question: "Is my data safe during tablet repair?", answer: "Standard hardware repairs normally do not require access to personal content. However, backing up the tablet where possible is recommended because damaged devices carry data risk." },
+    hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and our workmanship. It does not cover new physical damage, liquid damage, bending, misuse or unrelated faults." } : null,
+    { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm tablet part availability before you travel." },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const macBookHeroCards = [
     {
@@ -1442,6 +1561,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoHeroCards
     : isIPadModelPage
     ? iPadHeroCards
+    : isTabletModelPage
+    ? tabletHeroCards
     : isMacBookModelPage
     ? macBookHeroCards
     : isAppleWatchModelPage
@@ -1457,6 +1578,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoQuickAnswers
     : isIPadModelPage
     ? iPadQuickAnswers
+    : isTabletModelPage
+    ? tabletQuickAnswers
     : isMacBookModelPage
     ? macBookQuickAnswers
     : isAppleWatchModelPage
@@ -1472,6 +1595,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoProcessSteps
     : isIPadModelPage
     ? iPadProcessSteps
+    : isTabletModelPage
+    ? tabletProcessSteps
     : isMacBookModelPage
     ? macBookProcessSteps
     : isAppleWatchModelPage
@@ -1487,6 +1612,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoServiceNotes
     : isIPadModelPage
     ? iPadServiceNotes
+    : isTabletModelPage
+    ? tabletServiceNotes
     : isMacBookModelPage
     ? macBookServiceNotes
     : isAppleWatchModelPage
@@ -1502,6 +1629,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoFaqs
     : isIPadModelPage
     ? iPadFaqs
+    : isTabletModelPage
+    ? tabletFaqs
     : isMacBookModelPage
     ? macBookFaqs
     : isAppleWatchModelPage
@@ -1517,6 +1646,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "Oppo"
     : isIPadModelPage
     ? "iPad"
+    : isSamsungTabletModelPage
+    ? "Samsung tablet"
+    : isLenovoTabletModelPage
+    ? "Lenovo tablet"
+    : isTabletModelPage
+    ? `${brandName} tablet`
     : isMacBookModelPage
     ? "MacBook"
     : isAppleWatchModelPage
@@ -1532,6 +1667,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "Oppo Repair Menu"
     : isIPadModelPage
     ? "iPad Repair Menu"
+    : isSamsungTabletModelPage
+    ? "Samsung Tablet Repair Menu"
+    : isLenovoTabletModelPage
+    ? "Lenovo Tablet Repair Menu"
+    : isTabletModelPage
+    ? `${brandName} Tablet Repair Menu`
     : isMacBookModelPage
     ? "MacBook Repair Menu"
     : isAppleWatchModelPage
@@ -1547,6 +1688,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "Oppo repair"
     : isIPadModelPage
     ? "iPad repair"
+    : isSamsungTabletModelPage
+    ? "Samsung tablet repair"
+    : isLenovoTabletModelPage
+    ? "Lenovo tablet repair"
+    : isTabletModelPage
+    ? `${brandName} tablet repair`
     : isMacBookModelPage
     ? "MacBook repair"
     : isAppleWatchModelPage
@@ -1556,10 +1703,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     : `${brandName} repair`;
   const enhancedRepairPhrase = isIPhoneModelPage || isOppoModelPage || isIPadModelPage || isAppleWatchModelPage
     ? `an ${enhancedRepairNoun}`
-    : isSamsungModelPage || isGooglePixelModelPage || isMacBookModelPage
+    : isSamsungModelPage || isGooglePixelModelPage || isMacBookModelPage || isTabletModelPage
     ? `a ${enhancedRepairNoun}`
     : `your ${modelName} repair`;
-  const EnhancedBadgeIcon = isIPadModelPage
+  const EnhancedBadgeIcon = isTabletModelPage
     ? Tablet
     : isMacBookModelPage
     ? Laptop
@@ -1596,6 +1743,36 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         firstBody: "iPad, iPad Air, iPad Pro and iPad mini models can use different glass, digitiser and display assemblies.",
         secondTitle: "Confirmed before repair",
         secondBody: "We explain the available repair option, likely fit, price and timing before work begins.",
+      }
+    : isSamsungTabletModelPage
+    ? {
+        kicker: "Samsung tablet service notes",
+        title: "Display assembly, frame and model-code checks",
+        body: "Samsung tablet screen repairs vary by Galaxy Tab series, model code, screen size and frame condition. Touch response, charging behaviour and impact signs can affect the correct repair path.",
+        firstTitle: "Exact Samsung tablet model matters",
+        firstBody: "Galaxy Tab models can use different display assemblies across series, screen sizes, model codes, Wi-Fi and Cellular variants.",
+        secondTitle: "Confirmed before repair",
+        secondBody: "We explain the available screen option, likely fit, price and timing before work begins.",
+      }
+    : isLenovoTabletModelPage
+    ? {
+        kicker: "Lenovo tablet service notes",
+        title: "Display assembly, frame and TB-code checks",
+        body: "Lenovo tablet screen repairs vary by Tab series, TB code, screen size, charging configuration and frame condition. Touch response and impact signs can affect the correct repair path.",
+        firstTitle: "Exact Lenovo tablet model matters",
+        firstBody: "Lenovo Tab models can use different display assemblies by model name, TB code, screen size and charging configuration.",
+        secondTitle: "Confirmed before repair",
+        secondBody: "We explain the available screen option, likely fit, price and timing before work begins.",
+      }
+    : isTabletModelPage
+    ? {
+        kicker: `${brandName} tablet service notes`,
+        title: "Display assembly, frame and model-code checks",
+        body: `${brandName} tablet screen repairs vary by exact model, model code, screen size and frame condition. Touch response, charging behaviour and impact signs can affect the correct repair path.`,
+        firstTitle: `Exact ${brandName} tablet model matters`,
+        firstBody: `${brandName} tablet models can use different display assemblies across series, model codes, screen sizes and variants.`,
+        secondTitle: "Confirmed before repair",
+        secondBody: "We explain the available screen option, likely fit, price and timing before work begins.",
       }
     : isMacBookModelPage
     ? {
@@ -1645,7 +1822,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </span>
             <h1 id="model-repair-heading">{modelName} repair options</h1>
             <p>
-              Choose the available repair for your exact {modelName} to view current pricing, screen options where published, and the repair path that best matches the phone in front of you.
+              Choose the available repair for your exact {modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.
             </p>
             <div className="repair-hero-actions">
               <a href="#repair-options" className="repair-primary-action">
