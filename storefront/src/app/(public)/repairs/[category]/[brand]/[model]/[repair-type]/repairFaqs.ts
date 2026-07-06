@@ -69,10 +69,10 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
     };
   } else {
     q2 = {
-      question: `Do you use OEM parts for ${model} ${repairName.toLowerCase()}?`,
+      question: `What part option will be used for ${model} ${repairName.toLowerCase()}?`,
       answer: isWaterDamage
-        ? `For water damage, our first priority is to rescue your original high-quality boards and components using specialized cleaning. If a component like the screen is beyond saving, we replace it with premium parts that meet or exceed OEM standards.`
-        : `We use premium-quality ${component} parts that meet or exceed OEM specifications. All parts come with our 6-month warranty, so you can be confident in the quality of the ${altComponent} replacement.`
+        ? `For water damage, our first priority is to assess and clean the original boards and components where practical. If a component like the screen is beyond saving, any replacement part is selected to match the repair option confirmed in your quote before the repair begins.`
+        : `We confirm the available ${component} option, model compatibility, price and repair requirements before work begins. The quote explains which part option is being used, and eligible fitted parts include our 6-month warranty.`
     };
   }
 
@@ -99,11 +99,11 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
 
   if ((brand?.toLowerCase() === 'apple' || brand?.toLowerCase() === 'iphone') && repairSlug.includes('screen')) {
     baseFaqs.splice(1, 0, {
-      question: "What is the difference between Standard, Premium, and Genuine screens?",
-      answer: `We offer three tiers to suit your budget: <br/><br/> 
-<b>1. Standard (In-cell LCD):</b> A budget-friendly aftermarket option. It works reliably, but uses LCD technology instead of OLED, meaning colors are slightly cooler and it consumes a bit more battery. Best for a quick, cost-effective fix. <br/><br/>
-<b>2. Premium (Soft OLED) - ⭐ Highly Recommended:</b> This is our most popular option and the sweet spot for value. It uses the exact same Soft OLED technology as your original Apple screen. You get the deep blacks, vibrant colors, perfect edge-to-edge touch sensitivity, and original battery efficiency, all at a significantly better price than the Genuine part. <br/><br/>
-<b>3. Genuine (OEM):</b> The uncompromised original factory display. It offers maximum quality for purists, but comes with the highest price tag.`
+      question: "What is the difference between Standard, Premium, and Genuine screen options?",
+      answer: `Screen options can vary by model and current availability. We explain which option your quote is based on before proceeding.<br/><br/>
+<b>1. Standard aftermarket:</b> A budget-friendly aftermarket screen option. It may differ from the original display in colour, brightness, thickness, touch feel or power use depending on the model.<br/><br/>
+<b>2. Premium aftermarket / Soft OLED:</b> A higher-grade option where available. Soft OLED options can provide display behaviour closer to the original OLED style than basic LCD options, but the exact result depends on the model and selected part.<br/><br/>
+<b>3. Genuine or pulled genuine option where available:</b> Some models may have genuine, pulled genuine, refurbished genuine or service pack options depending on stock and quote confirmation. If available, we explain the condition, price and expected display behaviour before repair. Lower starting prices may refer to selected aftermarket options unless a genuine or pulled genuine option is clearly confirmed in the quote.`
     });
   }
 

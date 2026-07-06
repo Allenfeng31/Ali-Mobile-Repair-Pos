@@ -19,36 +19,39 @@ const DIRECTIONS_URL =
 
 const FAQS = [
   {
-    question: 'Does every charging issue require port replacement?',
+    question: 'Why won’t my phone charge?',
     answer:
-      'No. Some charging faults are caused by lint buildup, a worn cable, adapter issues, battery problems, connector faults, liquid damage, or board-level damage rather than the charging-port assembly itself.',
+      'Charging problems can be caused by the cable, charger, charging port, battery, liquid exposure or board-level faults. We first check the charging behaviour, port condition and device symptoms before recommending a repair.',
   },
   {
-    question: 'Can the charging port sometimes be cleaned instead?',
+    question: 'Is it the cable, battery or charging port?',
     answer:
-      'Yes. Packed lint or debris can stop the cable from seating properly, so the technician checks whether cleaning is appropriate before recommending a part replacement.',
+      'A loose cable fit, intermittent charging, debris in the port or charging only at certain angles can point to a port issue. Fast battery drain or shutdowns may point to the battery. We test the phone first so the repair path is clear.',
   },
   {
-    question: 'Why does the cable only charge at an angle?',
+    question: 'What does liquid detected in the charging port mean?',
     answer:
-      'That can happen when debris blocks the port, when the internal port contacts are damaged, or when the cable end is worn. Inspection helps confirm which part of the charging path is actually failing.',
+      'A liquid warning means the phone has detected moisture or a possible connection issue around the charging area. Avoid charging the phone while the warning is present and bring it in for assessment if the issue continues.',
   },
   {
-    question: 'Could the battery cause a charging problem?',
+    question: 'How much does charging port repair cost?',
     answer:
-      'Yes. A weak battery can sometimes look like a charging fault, which is why we assess charging behaviour and overall power condition before confirming the repair path.',
-  },
-  {
-    question: 'Can liquid damage affect charging?',
-    answer:
-      'Yes. Liquid exposure can corrode the port, connector, or board-level charging circuit. If liquid damage is involved, the recommended repair may be broader than port replacement alone.',
-  },
-  {
-    question: 'Will the technician confirm the fault before replacing parts?',
-    answer:
-      'Yes. We test the device and explain whether cleaning, charging-port replacement, another component repair, or deeper diagnosis is the appropriate next step before work begins.',
+      'Charging port repair cost depends on the phone model, part availability and whether the issue is limited to the port or connected to another fault. We confirm the model and symptoms before giving the final quote.',
   },
 ];
+
+const FAQ_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -125,7 +128,11 @@ export default async function ChargingPortReplacementPage() {
       <ServiceSchema
         serviceName="Charging Port Repair Services in Ringwood"
         description={PAGE_DESCRIPTION}
-        faqs={FAQS}
+      />
+      <script
+        id="faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
       />
       <script
         type="application/ld+json"
@@ -333,6 +340,7 @@ export default async function ChargingPortReplacementPage() {
           </>
         }
         faqs={FAQS}
+        faqHeading="Common questions about this repair"
       />
     </>
   );

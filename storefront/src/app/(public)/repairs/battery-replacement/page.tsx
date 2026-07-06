@@ -19,51 +19,39 @@ const DIRECTIONS_URL =
 
 const FAQS = [
   {
-    question: 'Does fast battery drain always mean I need a battery replacement?',
+    question: 'Why is my phone battery draining so fast?',
     answer:
-      'Not always. Fast drain can also be affected by charging accessories, charging-port condition, software activity, display faults, or board-level issues. We inspect the phone before confirming that battery replacement is the right fix.',
+      'Fast battery drain can come from battery age, background apps, system updates, charging habits or hardware faults. We check battery health, charging behaviour and device symptoms before confirming whether battery replacement is suitable.',
   },
   {
-    question: 'What if the battery is swollen or the screen is lifting?',
+    question: 'How do I know if my phone needs a new battery?',
     answer:
-      'A swollen battery can place pressure on the display and frame. Do not press a lifted screen back into place, and arrange an assessment promptly so we can check the safest repair path.',
+      'Common signs include fast battery drain, unexpected shutdowns, slow charging, overheating or a battery health warning. We check the phone first so we can confirm whether the battery is the likely cause.',
   },
   {
-    question: 'Can a worn battery cause unexpected shutdowns or restarts?',
+    question: 'How long does battery replacement take?',
     answer:
-      'Yes, a weakened battery can contribute to shutdowns or restarting under load, but we still test the charging path and overall power behaviour because those symptoms can overlap with other faults.',
+      'Many common battery replacements can be completed the same day when the correct battery is in stock and the phone has no extra damage. Timing depends on the model, part availability, repair queue and device condition.',
   },
   {
-    question: 'Could a charging problem be something other than the battery?',
+    question: 'Will battery replacement delete my data?',
     answer:
-      'Yes. Slow or unstable charging can also involve the cable, charger, charging port, software behaviour, or board-level issues. We test first so the repair recommendation matches the actual fault.',
-  },
-  {
-    question: 'How useful is Battery Health when diagnosing the phone?',
-    answer:
-      'Battery Health can be a helpful indicator, but it is not the only diagnostic evidence. We also look at shutdown behaviour, heat, swelling signs, charging response, and the overall condition of the device before confirming the repair.',
-  },
-  {
-    question: 'Do I need to unlock my phone or worry about data?',
-    answer:
-      'Your data is normally not affected by battery replacement, but we still recommend backing up important data before repair. We only request passcode access when testing requires it, and we explain that at the counter.',
-  },
-  {
-    question: 'How long does battery replacement usually take?',
-    answer:
-      'Timing depends on the exact model, current stock, and whether inspection finds swelling, liquid exposure, charging faults, or other damage. We confirm expected timing after checking the phone at our Ringwood repair desk.',
-  },
-  {
-    question: 'Is there warranty support for battery replacement?',
-    answer:
-      'Warranty support is available on eligible battery repairs. It does not cover new physical damage, pressure damage, or liquid damage after the repair. We explain the applicable warranty terms before you proceed.',
-  },
-  {
-    question: 'Will the phone still be water resistant after battery replacement?',
-    answer:
-      'We clean old adhesive and reseal carefully after opening the phone, but factory water resistance cannot be guaranteed after any opened phone repair.',
+      'A standard battery replacement normally does not erase phone data, but it is always best to back up important information before any repair. We do not access personal photos, messages or apps as part of a standard battery repair.',
   },
 ];
+
+const FAQ_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -140,7 +128,11 @@ export default async function BatteryReplacementPage() {
       <ServiceSchema
         serviceName="Battery Replacement Services in Ringwood"
         description={PAGE_DESCRIPTION}
-        faqs={FAQS}
+      />
+      <script
+        id="faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
       />
       <script
         type="application/ld+json"
@@ -309,6 +301,7 @@ export default async function BatteryReplacementPage() {
           </>
         }
         faqs={FAQS}
+        faqHeading="Common questions about this repair"
       />
     </>
   );

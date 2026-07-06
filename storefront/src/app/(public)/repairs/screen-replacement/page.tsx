@@ -19,46 +19,44 @@ const DIRECTIONS_URL =
 
 const FAQS = [
   {
-    question: 'How long does screen replacement usually take?',
+    question: 'How much does phone screen repair cost?',
     answer:
-      'Repair time depends on the exact model, current stock, screen option, and whether inspection finds frame, battery, connector, or board damage. We confirm timing after checking the phone at our Ringwood repair desk.',
+      'Screen repair cost depends on the phone model, screen option, part availability and the condition of the device. Some repairs have published starting prices, while others need a quote after we confirm the exact model and damage.',
   },
   {
-    question: 'Can cracked glass be replaced without changing the full display?',
+    question: 'What is the difference between phone screen options?',
     answer:
-      'Some devices need the full display assembly replaced rather than only the outer glass. The correct repair path depends on the model, the type of panel, and the condition of the damaged screen.',
+      'Screen options can differ in display quality, brightness, colour, touch feel, durability and price. Options may include aftermarket, premium aftermarket, Soft OLED, or genuine/pulled genuine options depending on the model and current availability. We explain which option your quote is based on before proceeding, so you can choose the repair that best suits your budget and expectations.',
   },
   {
-    question: 'What if the frame is bent or damaged?',
+    question: 'What if my phone screen is black but the phone still vibrates or makes sounds?',
     answer:
-      'We inspect the frame before installation because a bent frame can affect fit, sealing, and long-term durability. If frame damage changes the repair path, we explain that before proceeding.',
+      'If the phone vibrates, rings or makes sounds but the screen stays black, the display may be damaged even though the phone is still running. A technician can check the screen, connectors and internal condition before confirming the repair path.',
   },
   {
-    question: 'What screen quality options are available?',
+    question: 'Will screen replacement affect my data?',
     answer:
-      'Available screen options vary by model and stock. Depending on the phone, options may include LCD, OLED, Soft OLED, or other premium-quality assemblies with different brightness, colour, touch feel, durability, and price.',
+      'A standard screen replacement normally does not require access to personal photos, messages or apps. If a function test requires the phone to be unlocked, we explain why and can ask you to unlock it or test it with us at the counter.',
   },
   {
-    question: 'Does a blank display always mean the screen is faulty?',
+    question: 'How long does screen replacement take?',
     answer:
-      'Not always. A black or blank display can also involve connector damage, battery issues, or board-level faults after impact. Inspection helps confirm whether a screen replacement is the correct repair.',
-  },
-  {
-    question: 'Is there warranty support for screen replacement?',
-    answer:
-      'Warranty support is available on eligible screen repairs. It does not cover new physical damage, pressure damage, or liquid damage after the repair. We explain the applicable warranty terms before you proceed.',
-  },
-  {
-    question: 'Do I need to unlock my phone or worry about data?',
-    answer:
-      'Your data is normally not affected by screen replacement, but we still recommend backing up important data before repair. We only request passcode access when testing requires it, and we explain that at the counter.',
-  },
-  {
-    question: 'Will the phone still be water resistant after repair?',
-    answer:
-      'We clean old adhesive and reseal carefully after opening the phone, but factory water resistance cannot be guaranteed after any opened phone repair.',
+      'Many common screen replacements can be completed the same day when the correct part is in stock and there is no extra damage. Timing depends on the model, part availability, repair queue and the condition of the device, so we recommend calling first.',
   },
 ];
+
+const FAQ_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -135,7 +133,11 @@ export default async function ScreenReplacementPage() {
       <ServiceSchema
         serviceName="Screen Replacement Services in Ringwood"
         description={PAGE_DESCRIPTION}
-        faqs={FAQS}
+      />
+      <script
+        id="faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
       />
       <script
         type="application/ld+json"
@@ -292,6 +294,7 @@ export default async function ScreenReplacementPage() {
           </>
         }
         faqs={FAQS}
+        faqHeading="Common questions about this repair"
       />
     </>
   );

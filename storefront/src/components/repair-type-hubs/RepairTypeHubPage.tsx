@@ -43,6 +43,7 @@ interface RepairTypeHubPageProps {
   processSteps?: RepairTypeHubProcessStep[];
   additionalSections?: ReactNode;
   faqs?: RepairTypeHubFaq[];
+  faqHeading?: string;
   repairResultsSlot?: ReactNode;
 }
 
@@ -65,6 +66,7 @@ export default function RepairTypeHubPage({
   processSteps,
   additionalSections,
   faqs,
+  faqHeading,
   repairResultsSlot,
 }: RepairTypeHubPageProps) {
   const pageTitle = title ?? `${data.hub.label} Repair`;
@@ -182,7 +184,7 @@ export default function RepairTypeHubPage({
             <div className={styles.sectionHeader}>
               <div>
                 <p className={styles.sectionEyebrow}>FAQs</p>
-                <h2 className={styles.sectionTitle}>{data.hub.label} questions we answer every day</h2>
+                <h2 className={styles.sectionTitle}>{faqHeading || `${data.hub.label} questions we answer every day`}</h2>
               </div>
             </div>
             <div className={styles.faqStack}>
