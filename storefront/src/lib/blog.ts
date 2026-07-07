@@ -38,6 +38,10 @@ export interface BlogPost {
   description: string;
   image?: string;
   contentHtml: string;
+  faqs?: Array<{
+    question: string;
+    answer: string;
+  }>;
   source?: 'markdown' | 'supabase';
   seo_title?: string | null;
   cover_image_alt?: string | null;
@@ -56,6 +60,7 @@ function capitalizeTitle(title: string): string {
   const capitalizedWords = words.map((word, index) => {
     if (word === 'iphone') return 'iPhone';
     if (word === 'ipad') return 'iPad';
+    if (word === 'faq' || word.startsWith('faq:')) return `FAQ${word.slice(3)}`;
     if (word === 'samsung') return 'Samsung';
     if (word === 'google') return 'Google';
     if (word === 'pixel') return 'Pixel';
@@ -137,6 +142,7 @@ export async function getSortedPostsData() {
         date,
         description,
         image: matterResult.data.image,
+        faqs: Array.isArray(matterResult.data.faqs) ? matterResult.data.faqs : undefined,
         content: matterResult.content,
         source: 'markdown',
         seo_title: matterResult.data.seo_title || null,
@@ -236,6 +242,7 @@ export async function getPostData(slug: string): Promise<BlogPost> {
     date: matterResult.data.date || '',
     description: matterResult.data.description || '',
     image: matterResult.data.image,
+    faqs: Array.isArray(matterResult.data.faqs) ? matterResult.data.faqs : undefined,
     source: 'markdown',
     seo_title: matterResult.data.seo_title || null,
     cover_image_alt: matterResult.data.cover_image_alt || null,

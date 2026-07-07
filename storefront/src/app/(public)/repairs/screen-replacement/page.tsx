@@ -277,6 +277,13 @@ export default async function ScreenReplacementPage() {
                   <p>
                     We can explain model-specific screen options, likely turnaround, and practical limitations in English, 中文, and 粤语 support where needed.
                   </p>
+                  <p>
+                    Need help choosing a repair option?{' '}
+                    <Link href="/blog/phone-repair-faq" prefetch={false}>
+                      Read our Phone Repair FAQ
+                    </Link>{' '}
+                    for screen options, timing and data questions.
+                  </p>
                   <div className={`repair-hero-actions ${styles.heroActions}`}>
                     <a href={DIRECTIONS_URL} className="repair-secondary-action">
                       <MapPin size={18} strokeWidth={2.4} aria-hidden="true" />

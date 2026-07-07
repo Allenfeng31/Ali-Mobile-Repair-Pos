@@ -283,6 +283,12 @@ export default async function BatteryReplacementPage() {
                   <p>
                     We can explain model-specific battery options, likely turnaround, and practical limitations in English, 中文, and 粤语 support where needed.
                   </p>
+                  <p>
+                    Not sure whether to repair or replace your phone?{' '}
+                    <Link href="/blog/phone-repair-faq" prefetch={false}>
+                      Read our Phone Repair FAQ
+                    </Link>.
+                  </p>
                   <div className={`repair-hero-actions ${styles.heroActions}`}>
                     <a href={DIRECTIONS_URL} className="repair-secondary-action">
                       <MapPin size={18} strokeWidth={2.4} aria-hidden="true" />

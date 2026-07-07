@@ -1104,6 +1104,14 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <div className="repair-section-header">
               <span>FAQ</span>
               <h2 id="category-faq-heading">Frequently Asked Questions</h2>
+              {isPhone && (
+                <p>
+                  Have general questions about price, time or privacy?{' '}
+                  <Link href="/blog/phone-repair-faq" prefetch={false}>
+                    Read our Phone Repair FAQ
+                  </Link>.
+                </p>
+              )}
             </div>
             <div className="repair-faq-grid">
               {data.faqs.map((faq: any, index: number) => (
