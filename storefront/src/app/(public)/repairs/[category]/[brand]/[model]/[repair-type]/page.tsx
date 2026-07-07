@@ -4690,6 +4690,13 @@ function WaterDamagePolicySection() {
             water damage rescue. <em>Exception:</em> If a specific part (e.g., a screen) is replaced, that part will carry 
             our standard warranty.
           </p>
+          <p style={{ margin: '0.9rem 0 0', fontSize: '0.98rem' }}>
+            Need urgent advice after liquid exposure?{' '}
+            <Link href="/repairs/water-damage" prefetch={false} style={{ fontWeight: 800, textDecoration: 'underline' }}>
+              Read our phone water damage assessment guide
+            </Link>{' '}
+            before charging or testing the device.
+          </p>
         </div>
       </div>
     </div>

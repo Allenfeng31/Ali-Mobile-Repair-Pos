@@ -3497,6 +3497,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                         ? "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally used in water."
                         : "New sealing adhesive is applied during reassembly to provide some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired iPhone should not be submerged or intentionally used in water."}
                     </p>
+                    {isIPhoneHub && (
+                      <p>
+                        Phone got wet?{' '}
+                        <Link href="/repairs/water-damage" prefetch={false}>
+                          See what to do before charging or testing it.
+                        </Link>
+                      </p>
+                    )}
                   </div>
                 </article>
               </div>

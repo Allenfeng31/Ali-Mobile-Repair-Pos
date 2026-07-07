@@ -183,6 +183,14 @@
   background: rgba(255, 255, 255, 0.78);
 }
 
+.stepCard,
+.warningCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 100%;
+}
+
 .stepCard span {
   display: inline-flex;
   align-items: center;
@@ -196,6 +204,15 @@
   font-weight: 950;
 }
 
+.stepCard h3,
+.warningCard h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
 .warningBand {
   border-color: rgba(202, 138, 4, 0.18);
   background:
@@ -205,6 +222,10 @@
 
 .warningCard {
   border-color: rgba(202, 138, 4, 0.16);
+}
+
+.warningCard h3 {
+  color: #92400e;
 }
 
 .assessmentList {

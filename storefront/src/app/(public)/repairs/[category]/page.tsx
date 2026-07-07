@@ -774,9 +774,9 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   </article>
                 </div>
                 <p className="mt-4">
-                  Dealing with liquid damage?{' '}
+                  Phone got wet?{' '}
                   <Link href="/repairs/water-damage" prefetch={false} className="text-blue-700 font-extrabold underline-offset-4 hover:underline">
-                    Read our water damage assessment advice.
+                    See what to do before charging or testing it.
                   </Link>
                 </p>
               </div>

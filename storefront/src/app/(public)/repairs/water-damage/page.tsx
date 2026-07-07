@@ -10,19 +10,59 @@ const PAGE_DESCRIPTION =
   'Dropped your phone in water? Ali Mobile & Repair in Ringwood provides quote-first liquid damage assessment and cleaning advice. Do not charge the phone; bring it in early for diagnosis.';
 
 const immediateSteps = [
-  'Power off the phone if possible.',
-  'Remove the case, SIM tray and accessories if safe.',
-  'Do not charge the phone or connect it to a computer.',
-  'Do not keep pressing buttons or repeatedly testing it.',
-  'Bring it in early for liquid damage assessment.',
+  {
+    title: 'Power off the phone if possible',
+    explanation:
+      'Keeping a wet phone powered on can allow current to pass through moisture, which may short components on the board.',
+  },
+  {
+    title: 'Remove the case, SIM tray and accessories if safe',
+    explanation:
+      'This can help trapped moisture escape and lets the technician inspect signs of liquid exposure more clearly.',
+  },
+  {
+    title: 'Do not charge it or connect it to a computer',
+    explanation:
+      'Charging a wet phone can send power through liquid-affected areas and may cause further board damage.',
+  },
+  {
+    title: 'Do not keep pressing buttons or repeatedly testing it',
+    explanation:
+      'Repeated testing can keep the device powered and increase the chance of short circuits or corrosion spreading.',
+  },
+  {
+    title: 'Bring it in early for assessment',
+    explanation:
+      'Early assessment can reduce the time moisture and corrosion stay inside the device, but repair outcomes still cannot be guaranteed.',
+  },
 ];
 
 const avoidSteps = [
-  'Do not charge the phone.',
-  'Do not use a hair dryer, heat gun or direct heat.',
-  'Do not rely on rice as a repair method.',
-  'Do not keep turning it on to check whether it works.',
-  'Do not assume it is safe because the phone still works now.',
+  {
+    title: 'Do not charge the phone',
+    explanation:
+      'Power and liquid together can cause short circuits and make board-level damage worse.',
+  },
+  {
+    title: 'Do not use a hair dryer, heat gun or direct heat',
+    explanation:
+      'Heat can push moisture deeper, damage seals, deform parts or worsen corrosion.',
+  },
+  {
+    title: 'Do not rely on rice as a repair method',
+    explanation:
+      'Rice may absorb some surface moisture, but it does not clean corrosion or liquid residue from connectors and board areas.',
+  },
+  {
+    title: 'Do not keep turning it on to check whether it works',
+    explanation:
+      'A phone may turn on briefly while liquid is still inside, but repeated power cycles can increase damage.',
+  },
+  {
+    title: 'Do not assume it is safe because the phone still works now',
+    explanation:
+      'Liquid corrosion can develop later, causing delayed problems with charging, display, battery, cameras, speakers or the logic board.',
+  },
 ];
 
 const assessmentSteps = [
@@ -250,9 +290,10 @@ export default function WaterDamagePage() {
         </div>
         <div className={styles.cardGrid}>
           {immediateSteps.map((step, index) => (
-            <article key={step} className={styles.stepCard}>
+            <article key={step.title} className={styles.stepCard}>
               <span>{String(index + 1).padStart(2, '0')}</span>
-              <p>{step}</p>
+              <h3>{step.title}</h3>
+              <p>{step.explanation}</p>
             </article>
           ))}
         </div>
@@ -268,8 +309,9 @@ export default function WaterDamagePage() {
         </div>
         <div className={styles.cardGrid}>
           {avoidSteps.map((step) => (
-            <article key={step} className={styles.warningCard}>
-              <p>{step}</p>
+            <article key={step.title} className={styles.warningCard}>
+              <h3>{step.title}</h3>
+              <p>{step.explanation}</p>
             </article>
           ))}
         </div>

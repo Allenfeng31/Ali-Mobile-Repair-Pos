@@ -273,6 +273,12 @@ export default async function ChargingPortReplacementPage() {
                   <p>
                     If testing suggests debris cleaning, a charging-port assembly, a battery issue, or a board-level fault, we explain that before confirming the quote.
                   </p>
+                  <p>
+                    Not sure if it is a charging port fault or liquid damage?{' '}
+                    <Link href="/repairs/water-damage">
+                      Read our liquid damage assessment advice.
+                    </Link>
+                  </p>
                 </div>
               </div>
             </section>
