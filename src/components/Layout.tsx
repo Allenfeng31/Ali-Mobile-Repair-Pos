@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { 
   LayoutDashboard, 
   Package, 
@@ -643,8 +644,49 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
     }
   }, [currentView, markChatSeen]);
 
+  const mobileNavBottomPadding = 'calc(0.75rem + env(safe-area-inset-bottom, 0px))';
+  const mobileNavOffset = 'calc(6.75rem + env(safe-area-inset-bottom, 0px))';
+  const mobileBottomNav = (
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t border-transparent bg-neu-bg/95 px-4 pt-2 backdrop-blur-lg md:hidden"
+      style={{ paddingBottom: mobileNavBottomPadding }}
+    >
+      {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
+        const Icon = item.icon;
+        const isActive = currentView === item.id || (item.id === 'admin' && adminViews.has(currentView));
+        const showBadge = item.id === 'chat' && unreadChats > 0;
+        return (
+          <button
+            key={item.id}
+            onClick={() => item.id === 'chat' ? openChatAndMarkSeen() : onViewChange(item.id)}
+            className={cn(
+              "relative flex flex-col items-center justify-center rounded-2xl px-3 py-1.5 transition-all",
+              isActive
+                ? "bg-neu-bg text-neu-accent shadow-neu-pressed scale-110"
+                : "text-neu-text-secondary shadow-neu-flat",
+              showBadge && "bg-red-50 text-red-600 shadow-[0_0_0_5px_rgba(239,68,68,0.12)] animate-pulse"
+            )}
+          >
+            <div className="relative">
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+              {showBadge && (
+                <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-600 px-1 text-[9px] font-black text-white shadow-lg">
+                  {unreadChats > 9 ? '9+' : unreadChats}
+                </span>
+              )}
+            </div>
+            <span className="mt-1 text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div
+      className="min-h-screen min-h-[100dvh] flex flex-col md:flex-row"
+      style={{ '--mobile-nav-offset': mobileNavOffset } as React.CSSProperties}
+    >
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-neu-bg flex-col items-center pt-10 pb-6 z-30 shadow-neu-flat">
         {/* Settings button top-left (desktop) */}
@@ -695,7 +737,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       </aside>
 
       {/* ── Main Content ─────────────────────────────────────────────── */}
-      <div className="flex-1 md:ml-20 flex flex-col min-h-screen">
+      <div className="flex-1 md:ml-20 flex flex-col min-h-screen min-h-[100dvh]">
         {/* Top Bar */}
         <header className="bg-neu-bg sticky top-0 z-40 px-6 py-4 flex justify-between items-center shadow-neu-sm">
           <div className="flex items-center gap-4">
@@ -811,7 +853,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         )}
 
         {/* View Content */}
-        <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
+        <main className="flex-1 p-4 pb-[var(--mobile-nav-offset)] md:p-8 md:pb-8">
           <motion.div
             key={currentView}
             initial={{ opacity: 0, y: 12, scale: 0.995 }}
@@ -824,38 +866,9 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           </motion.div>
         </main>
 
-        {/* Bottom Nav - Mobile */}
-        <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-neu-bg backdrop-blur-lg border-t border-transparent z-50">
-          {navItems.filter(item => !item.adminOnly || permissions?.is_super_admin).map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id || (item.id === 'admin' && adminViews.has(currentView));
-            const showBadge = item.id === 'chat' && unreadChats > 0;
-            return (
-              <button
-                key={item.id}
-                onClick={() => item.id === 'chat' ? openChatAndMarkSeen() : onViewChange(item.id)}
-                className={cn(
-                  "flex flex-col items-center justify-center px-3 py-1.5 transition-all rounded-2xl relative",
-                  isActive
-                    ? "bg-neu-bg shadow-neu-pressed text-neu-accent scale-110"
-                    : "text-neu-text-secondary shadow-neu-flat",
-                  showBadge && "bg-red-50 text-red-600 shadow-[0_0_0_5px_rgba(239,68,68,0.12)] animate-pulse"
-                )}
-              >
-                <div className="relative">
-                  <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  {showBadge && (
-                    <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-600 border-2 border-white text-[9px] font-black text-white shadow-lg flex items-center justify-center">
-                      {unreadChats > 9 ? '9+' : unreadChats}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider mt-1">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
       </div>
+
+      {createPortal(mobileBottomNav, document.body)}
 
       {/* Settings slide-out panel (shared between mobile & desktop) */}
       <SettingsPanel

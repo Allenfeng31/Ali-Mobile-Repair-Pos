@@ -1166,7 +1166,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
         </div>
 
         {/* Floating Scanner */}
-        <button className="fixed right-10 bottom-10 bg-[var(--color-neu-bg)] text-blue-600 w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-[var(--shadow-neu-floating)] hover:scale-110 active:shadow-[var(--shadow-neu-pressed)] transition-all z-40 border-4 border-white/40">
+        <button className="fixed right-10 bottom-28 md:bottom-10 bg-[var(--color-neu-bg)] text-blue-600 w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-[var(--shadow-neu-floating)] hover:scale-110 active:shadow-[var(--shadow-neu-pressed)] transition-all z-40 border-4 border-white/40">
           <QrCode size={32} strokeWidth={3} />
         </button>
       </div>
