@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 
 import styles from "./AboutUs.module.css";
 
+const baseUrl = "https://www.alimobile.com.au";
+
 export const metadata: Metadata = {
   title: "About Ali Mobile & Repair | Ringwood Repair Team",
   description:
@@ -49,9 +51,124 @@ const principles = [
   },
 ];
 
+const trustDetails = [
+  {
+    label: "Quote-first repairs",
+    text: "We inspect the device, explain the likely fault, and confirm the repair quote before work proceeds. If damage points to a different repair path, we talk it through first.",
+  },
+  {
+    label: "Practical data privacy",
+    text: "Most hardware repairs do not require browsing personal photos or files. When functional testing needs access, we explain what needs checking and can involve the customer where possible.",
+  },
+  {
+    label: "Parts explained clearly",
+    text: "Screen, battery, charging and device repairs can have different part options depending on model and stock. The quoted option is explained so customers know what they are approving.",
+  },
+  {
+    label: "Warranty boundaries",
+    text: "Repair warranty support is explained before handover, including what is covered and what may fall outside normal warranty, such as liquid damage, severe impact or unrelated faults.",
+  },
+];
+
+const repairLinks = [
+  {
+    href: "/repairs/phone",
+    label: "Phone repair",
+    text: "Find brand and model-specific repair paths for iPhone, Samsung, Google Pixel, OPPO and more.",
+  },
+  {
+    href: "/repairs/screen-replacement",
+    label: "Screen replacement",
+    text: "Compare common cracked screen and display repair options before booking.",
+  },
+  {
+    href: "/repairs/battery-replacement",
+    label: "Battery replacement",
+    text: "Check battery service guidance for weak battery life, swelling or shutdown issues.",
+  },
+  {
+    href: "/repairs/charging-port-replacement",
+    label: "Charging port repair",
+    text: "Understand charging faults, port issues and when diagnosis is needed first.",
+  },
+];
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "MobilePhoneStore",
+  "@id": `${baseUrl}/#localbusiness`,
+  name: "Ali Mobile & Repair",
+  url: baseUrl,
+  image: `${baseUrl}/images/about-us-new.jpg`,
+  telephone: "+61481058514",
+  priceRange: "$$",
+  description:
+    "Ali Mobile & Repair is a local electronics repair kiosk at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134, helping customers with phone, tablet, laptop and smart watch repair assessments.",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
+    addressLocality: "Ringwood",
+    addressRegion: "VIC",
+    postalCode: "3134",
+    addressCountry: "AU",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: -37.81534,
+    longitude: 145.22851,
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      opens: "10:00",
+      closes: "17:00",
+    },
+  ],
+  areaServed: [
+    { "@type": "City", name: "Ringwood" },
+    { "@type": "AdministrativeArea", name: "Melbourne eastern suburbs" },
+  ],
+  makesOffer: repairLinks.map((link) => ({
+    "@type": "Offer",
+    itemOffered: {
+      "@type": "Service",
+      name: link.label,
+      url: `${baseUrl}${link.href}`,
+    },
+  })),
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: `${baseUrl}/`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "About Us",
+      item: `${baseUrl}/about-us`,
+    },
+  ],
+};
+
 export default function AboutUsPage() {
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
@@ -116,11 +233,30 @@ export default function AboutUsPage() {
               batteries, plus trickier issues like charging faults, water damage, and laptop repairs.
             </p>
             <p>
-              The promise is simple: careful diagnosis, fair pricing, high-quality parts, and a result you
-              can trust. Our No Fix, No Charge policy keeps the incentives clean, so customers only pay
-              when the repair actually solves the problem.
+              The promise is simple: careful diagnosis, fair pricing, clearly explained part options,
+              and repair advice you can trust. Our No Fix, No Charge policy keeps the incentives clean,
+              so customers only pay when the repair actually solves the problem.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className={styles.trustSection} aria-labelledby="trust-heading">
+        <div className={styles.trustHeader}>
+          <span className={styles.kicker}>Customer Trust</span>
+          <h2 id="trust-heading">Clear expectations before the device goes on the bench.</h2>
+          <p>
+            Local repair trust comes from the details: what we test, what we quote, how we treat customer
+            data, and where warranty support begins and ends.
+          </p>
+        </div>
+        <div className={styles.trustDetailGrid}>
+          {trustDetails.map((detail) => (
+            <article className={styles.trustDetailCard} key={detail.label}>
+              <h3>{detail.label}</h3>
+              <p>{detail.text}</p>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -140,13 +276,28 @@ export default function AboutUsPage() {
         </div>
       </section>
 
+      <section className={styles.repairPathSection} aria-labelledby="repair-path-heading">
+        <div className={styles.repairPathHeader}>
+          <span className={styles.kicker}>Repair Pathways</span>
+          <h2 id="repair-path-heading">Start with the repair path that matches the problem.</h2>
+        </div>
+        <div className={styles.repairPathGrid}>
+          {repairLinks.map((link) => (
+            <Link href={link.href} className={styles.repairPathCard} key={link.href}>
+              <strong>{link.label}</strong>
+              <span>{link.text}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
           <span className={styles.kicker}>Free Quote</span>
           <h2>Bring the device in. We will tell you what is worth fixing.</h2>
           <p>
             Visit Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 or book online for priority service. Most common screen and battery
-            repairs can be handled the same day.
+            repairs can often be handled the same day when parts and queue timing allow.
           </p>
           <Link href="/book-repair" className={styles.primaryAction}>
             Book Repair Now
