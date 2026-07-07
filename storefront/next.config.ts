@@ -186,6 +186,8 @@ const nextConfig: NextConfig = {
       { source: '/repairs/watch/apple-watch/apple-watch-ultra-2', destination: '/repairs/watch/apple/apple-watch-ultra-2-49mm', permanent: true },
       { source: '/repairs/watch/apple-watch/apple-watch-ultra-2/:repairType', destination: '/repairs/watch/apple/apple-watch-ultra-2-49mm/:repairType', permanent: true },
       // 11. SAFE LEGACY REDIRECTS (Laptop / MacBook)
+      { source: '/repairs/laptop/apple', destination: '/repairs/laptop/macbook', permanent: true },
+      { source: '/repairs/laptop/apple/:model', destination: '/repairs/laptop/macbook/:model', permanent: true },
       { source: '/repairs/laptops/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
       { source: '/repairs/laptop/apple/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
       { source: '/repairs/laptops/macbook/:model/:repairType', destination: '/repairs/laptop/macbook/:model/:repairType', permanent: true },
