@@ -5253,6 +5253,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams.model,
     resolvedParams['repair-type']
   );
+  const isWaterDamageRepairPage = resolvedParams['repair-type'] === 'water-damage-repair';
   const finalRepairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
@@ -5286,6 +5287,115 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     model: displayModel,
     service: bookingRepairName || finalRepairName,
   }).toString()}`;
+  const sameModelRepairSection = sameModelLinks.length > 0 ? (
+    <ScrollReveal>
+      <section className={isIphone15ScreenMobilePilot ? 'w-full max-md:py-8' : 'w-full'} aria-labelledby="same-model-repairs-heading">
+        <div className="flex w-full flex-col gap-6">
+          <div className="w-full max-w-none">
+            <span className="repair-kicker repair-kicker-muted">More repair paths</span>
+            <h2
+              id="same-model-repairs-heading"
+              className="mt-3 break-words text-[1.35rem] font-black leading-[1.15] tracking-[-0.02em] text-slate-950 sm:text-[1.5rem] md:text-[1.9rem] md:leading-tight"
+            >
+              Other {seoDisplayModel} repairs
+            </h2>
+            <p className="mt-2 max-w-[34rem] text-[1rem] font-semibold leading-6 text-slate-700 md:text-[1.05rem] md:font-medium md:text-slate-600">
+              Explore other repair paths confirmed for this model.
+            </p>
+          </div>
+
+          <SameModelRepairLinks
+            links={sameModelLinks}
+            mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
+          />
+          {samsungMidPageHubLinks.length > 0 && (
+            <div className="mt-2 text-center">
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                {samsungMidPageHubLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 transition-colors hover:text-blue-700 hover:underline"
+                  >
+                    {link.label} &rarr;
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    </ScrollReveal>
+  ) : null;
+  const crossModelRepairSection = !isAliMobileEnhancedLenovoTabletPage && displayCrossModelLinks.length > 0 ? (
+    <ScrollReveal>
+      <section className="mt-8 w-full" aria-labelledby="cross-model-repairs-heading">
+        <div className="flex w-full flex-col gap-6">
+          <div className="w-full max-w-none">
+            <span className="repair-kicker repair-kicker-muted">More options</span>
+            <h2
+              id="cross-model-repairs-heading"
+              className="mt-3 break-words text-[1.3rem] font-black leading-[1.2] tracking-[-0.015em] text-slate-950 sm:text-[1.45rem] md:text-[1.9rem] md:leading-tight"
+            >
+              {isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
+                ? `Same ${getSamsungTabletRepairLabel(samsungTabletEnhancedRepairType)} on other Samsung Tablet models`
+                : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
+                ? `Same ${getIpadRepairLabel(ipadEnhancedRepairType)} on other iPad models`
+                : isGalaxyAEnhancedPage
+                ? `More Galaxy A models for ${crossModelSectionRepairName}`
+                : isGalaxyNoteEnhancedPage
+                  ? `More Galaxy Note models for ${crossModelSectionRepairName}`
+                  : `More ${displayBrand} models for ${finalRepairName}`}
+            </h2>
+          </div>
+          <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+            {displayCrossModelLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group flex min-h-[56px] w-full items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm shadow-blue-950/5 transition duration-200 ease-out touch-manipulation hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600 transition group-hover:border-blue-200 group-hover:bg-white">
+                    {getRepairIcon(link.slug, 18)}
+                  </span>
+                  <span className="min-w-0 break-words leading-snug">{link.label}</span>
+                </span>
+                <span
+                  className="shrink-0 rounded-full border border-blue-100 bg-white px-2 py-1 text-xs text-blue-600 transition group-hover:translate-x-0.5 group-hover:border-blue-200 group-hover:bg-blue-600 group-hover:text-white"
+                  aria-hidden="true"
+                >
+                  &rarr;
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {!isGalaxyAEnhancedPage && (
+            <div className="mt-2 text-center">
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                <Link
+                  href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
+                  className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                >
+                  {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
+                </Link>
+
+                {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT] && (
+                  <Link
+                    href={`/repairs/${repairTypeHub.slug}`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                  >
+                    {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT]} &rarr;
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    </ScrollReveal>
+  ) : null;
 
 
   return (
@@ -5390,6 +5500,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
+        {isWaterDamageRepairPage && (
+          <ScrollReveal>
+            <WaterDamagePolicySection />
+          </ScrollReveal>
+        )}
+
         <RepairResultsMatchingSection
           category={resolvedParams.category}
           brand={resolvedParams.brand}
@@ -5420,116 +5536,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </ScrollReveal>
         )}
 
-        {sameModelLinks.length > 0 && (
-          <ScrollReveal>
-            <section className={isIphone15ScreenMobilePilot ? 'w-full max-md:py-8' : 'w-full'} aria-labelledby="same-model-repairs-heading">
-              <div className="flex w-full flex-col gap-6">
-                <div className="w-full max-w-none">
-                  <span className="repair-kicker repair-kicker-muted">More repair paths</span>
-                  <h2
-                    id="same-model-repairs-heading"
-                    className="mt-3 break-words text-[1.35rem] font-black leading-[1.15] tracking-[-0.02em] text-slate-950 sm:text-[1.5rem] md:text-[1.9rem] md:leading-tight"
-                  >
-                    Other {seoDisplayModel} repairs
-                  </h2>
-                  <p className="mt-2 max-w-[34rem] text-[1rem] font-semibold leading-6 text-slate-700 md:text-[1.05rem] md:font-medium md:text-slate-600">
-                    Explore other repair paths confirmed for this model.
-                  </p>
-                </div>
+        {!isWaterDamageRepairPage && sameModelRepairSection}
 
-                <SameModelRepairLinks
-                  links={sameModelLinks}
-                  mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
-                />
-                {samsungMidPageHubLinks.length > 0 && (
-                  <div className="mt-2 text-center">
-                    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-                      {samsungMidPageHubLinks.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 transition-colors hover:text-blue-700 hover:underline"
-                        >
-                          {link.label} &rarr;
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-          </ScrollReveal>
-        )}
-
-        {!isAliMobileEnhancedLenovoTabletPage && displayCrossModelLinks.length > 0 && (
-          <ScrollReveal>
-            <section className="mt-8 w-full" aria-labelledby="cross-model-repairs-heading">
-              <div className="flex w-full flex-col gap-6">
-                <div className="w-full max-w-none">
-                  <span className="repair-kicker repair-kicker-muted">More options</span>
-                  <h2
-                    id="cross-model-repairs-heading"
-                    className="mt-3 break-words text-[1.3rem] font-black leading-[1.2] tracking-[-0.015em] text-slate-950 sm:text-[1.45rem] md:text-[1.9rem] md:leading-tight"
-                  >
-                    {isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
-                      ? `Same ${getSamsungTabletRepairLabel(samsungTabletEnhancedRepairType)} on other Samsung Tablet models`
-                      : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
-                      ? `Same ${getIpadRepairLabel(ipadEnhancedRepairType)} on other iPad models`
-                      : isGalaxyAEnhancedPage
-                      ? `More Galaxy A models for ${crossModelSectionRepairName}`
-                      : isGalaxyNoteEnhancedPage
-                        ? `More Galaxy Note models for ${crossModelSectionRepairName}`
-                        : `More ${displayBrand} models for ${finalRepairName}`}
-                  </h2>
-                </div>
-                <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                  {displayCrossModelLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="group flex min-h-[56px] w-full items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white/90 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm shadow-blue-950/5 transition duration-200 ease-out touch-manipulation hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    >
-                      <span className="flex min-w-0 items-center gap-3">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50/80 text-blue-600 transition group-hover:border-blue-200 group-hover:bg-white">
-                          {getRepairIcon(link.slug, 18)}
-                        </span>
-                        <span className="min-w-0 break-words leading-snug">{link.label}</span>
-                      </span>
-                      <span
-                        className="shrink-0 rounded-full border border-blue-100 bg-white px-2 py-1 text-xs text-blue-600 transition group-hover:translate-x-0.5 group-hover:border-blue-200 group-hover:bg-blue-600 group-hover:text-white"
-                        aria-hidden="true"
-                      >
-                        &rarr;
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-
-                {!isGalaxyAEnhancedPage && (
-                  <div className="mt-2 text-center">
-                    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-                      <Link
-                        href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
-                        className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                      >
-                        {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
-                      </Link>
-
-                      {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT] && (
-                        <Link
-                          href={`/repairs/${repairTypeHub.slug}`}
-                          className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                        >
-                          {ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT]} &rarr;
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-          </ScrollReveal>
-        )}
+        {!isWaterDamageRepairPage && crossModelRepairSection}
 
         {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket) && (
           <ScrollReveal>
@@ -5731,16 +5740,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       </main>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
-      {!isAliMobileEnhancedRepairPage && (
+      {!isAliMobileEnhancedRepairPage && !isWaterDamageRepairPage && (
         <ScrollReveal>
           <ReviewsSection />
-        </ScrollReveal>
-      )}
-
-      {/* ─── WATER DAMAGE POLICY ──────────────────────── */}
-      {resolvedParams['repair-type'] === 'water-damage-repair' && (
-        <ScrollReveal>
-          <WaterDamagePolicySection />
         </ScrollReveal>
       )}
 
@@ -5787,7 +5789,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         </ScrollReveal>
       )}
 
-      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && (
+      {isWaterDamageRepairPage && sameModelRepairSection}
+
+      {isWaterDamageRepairPage && crossModelRepairSection}
+
+      {isAliMobileEnhancedRepairPage && !isAliMobileEnhancedMacBookPage && !isAliMobileEnhancedAppleWatchPage && !isWaterDamageRepairPage && (
         <ScrollReveal>
           <ReviewsSection />
         </ScrollReveal>
@@ -5823,6 +5829,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
             />
           )}
+        </ScrollReveal>
+      )}
+
+      {isWaterDamageRepairPage && (
+        <ScrollReveal>
+          <ReviewsSection />
         </ScrollReveal>
       )}
 
