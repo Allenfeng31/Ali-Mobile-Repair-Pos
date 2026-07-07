@@ -1,9 +1,12 @@
 ---
 title: 'Phone Repair FAQ: Price, Time, Data & Trust'
 date: '2026-07-07'
+updated_at: '2026-07-07'
 description: 'Clear answers to common phone repair questions about pricing, timing, data privacy, liquid damage, screen options, Apple warranty, and iPhone Parts and Service History.'
 excerpt: 'Clear answers to common phone repair questions about pricing, timing, data privacy, liquid damage, screen options, Apple warranty, and iPhone Parts and Service History.'
 author: 'Ali Mobile Expert'
+image: '/images/blog/iphone-17-pro-screen-replacement-before.jpg'
+cover_image_alt: 'Cracked iPhone 17 Pro front screen and rear view before repair assessment'
 tags: ['Phone Repair', 'FAQ', 'Repair Guide']
 faqs:
   - question: 'How much does phone repair cost?'
@@ -35,6 +38,9 @@ faqs:
 Phone repair questions usually fall into a few practical buckets: price, timing, data, privacy, parts, liquid damage and warranty. The right answer often depends on the exact model and the fault, so this guide is designed to help you ask better questions before you book or visit a repair shop.
 
 Ali Mobile & Repair in Ringwood sees these questions every day at the counter. The short version: identify the phone model, explain the symptom clearly, ask which part option is being quoted, and make sure the quote is confirmed before work starts.
+
+![Cracked iPhone 17 Pro front screen and rear view before repair assessment](/images/blog/iphone-17-pro-screen-replacement-before.jpg)
+*Example repair case: iPhone 17 Pro with severe screen damage brought in for assessment.*
 
 ## Pricing & Quotes
 
