@@ -307,90 +307,99 @@ export default function Header() {
           .navbar's backdrop-filter creates a containing block that traps
           position:fixed children to the header's box instead of the viewport. */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[9999] bg-white/95 backdrop-blur-sm flex flex-col">
-          <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200/50">
-            <Link href="/" onClick={handleLogoClick} aria-label="Ali Mobile home" className="flex items-center h-10">
-              <Image 
-                src="/images/logo.png" 
-                alt="Ali Mobile & Repair Ringwood" 
-                width={120} 
-                height={40} 
-                priority
-                style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
-              />
-            </Link>
-            <button 
-              onClick={closeMobileMenu}
-              className="p-2 text-slate-800 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors"
-              aria-label="Close menu"
-            >
-              <X size={26} />
-            </button>
-          </div>
-          
-          <nav className="flex flex-col pt-8 px-8 overflow-y-auto gap-8">
-            <div className="mobile-nav-group">
+        <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
+          <div className="mobile-menu-panel" onClick={(event) => event.stopPropagation()}>
+            <div className="mobile-menu-header">
+              <Link href="/" onClick={handleLogoClick} aria-label="Ali Mobile home" className="mobile-menu-logo">
+                <Image
+                  src="/images/logo.png"
+                  alt="Ali Mobile & Repair Ringwood"
+                  width={120}
+                  height={40}
+                  priority
+                  style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
+                />
+              </Link>
               <button
-                type="button"
-                className="mobile-nav-group-trigger"
-                aria-expanded={openMobileGroup === 'service'}
-                aria-controls="mobile-service-repairs-panel"
-                onClick={() => toggleMobileGroup('service')}
+                onClick={closeMobileMenu}
+                className="mobile-menu-close"
+                aria-label="Close menu"
               >
-                <span>Service &amp; Repairs</span>
-                <ChevronDown size={18} className={openMobileGroup === 'service' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
+                <X size={24} />
               </button>
-              <div
-                id="mobile-service-repairs-panel"
-                className={openMobileGroup === 'service' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
-              >
-                <Link href="/repairs" onClick={closeAllNavigationMenus} className="mobile-nav-group-link mobile-nav-group-link--overview">
-                  All Service &amp; Repairs
-                </Link>
-                <div className="mobile-repair-links" aria-label="Service and repair categories">
-                  {repairMenuItems.map((item) => (
-                    <Link key={item.href} href={item.href} onClick={handleServiceRepairSelection}>
-                      {item.label}
+            </div>
+
+            <nav className="mobile-menu-nav" aria-label="Mobile navigation">
+              <div className="mobile-nav-group">
+                <button
+                  type="button"
+                  className="mobile-nav-group-trigger"
+                  aria-expanded={openMobileGroup === 'service'}
+                  aria-controls="mobile-service-repairs-panel"
+                  onClick={() => toggleMobileGroup('service')}
+                >
+                  <span>Service &amp; Repairs</span>
+                  <ChevronDown size={18} className={openMobileGroup === 'service' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
+                </button>
+                <div
+                  id="mobile-service-repairs-panel"
+                  className={openMobileGroup === 'service' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
+                >
+                  <div className="mobile-nav-group-panel-inner">
+                    <Link href="/repairs" onClick={closeAllNavigationMenus} className="mobile-nav-group-link mobile-nav-group-link--overview">
+                      All Service &amp; Repairs
                     </Link>
-                  ))}
+                    <div className="mobile-repair-links" aria-label="Service and repair categories">
+                      {repairMenuItems.map((item) => (
+                        <Link key={item.href} href={item.href} onClick={handleServiceRepairSelection}>
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="mobile-nav-group">
-              <button
-                type="button"
-                className="mobile-nav-group-trigger"
-                aria-expanded={openMobileGroup === 'repair-categories'}
-                aria-controls="mobile-repair-categories-panel"
-                onClick={() => toggleMobileGroup('repair-categories')}
-              >
-                <span>Repair Categories</span>
-                <ChevronDown size={18} className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
-              </button>
-              <div
-                id="mobile-repair-categories-panel"
-                className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
-              >
-                <div className="mobile-repair-links" aria-label="Repair category hubs">
-                  {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
-                    <Link key={item.href} href={item.href} onClick={handleRepairCategorySelection}>
-                      {item.label}
-                    </Link>
-                  ))}
+              <div className="mobile-nav-group">
+                <button
+                  type="button"
+                  className="mobile-nav-group-trigger"
+                  aria-expanded={openMobileGroup === 'repair-categories'}
+                  aria-controls="mobile-repair-categories-panel"
+                  onClick={() => toggleMobileGroup('repair-categories')}
+                >
+                  <span>Repair Categories</span>
+                  <ChevronDown size={18} className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
+                </button>
+                <div
+                  id="mobile-repair-categories-panel"
+                  className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
+                >
+                  <div className="mobile-nav-group-panel-inner">
+                    <div className="mobile-repair-links" aria-label="Repair category hubs">
+                      {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
+                        <Link key={item.href} href={item.href} onClick={handleRepairCategorySelection}>
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <Link href="/book-repair" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Get a Quote</Link>
-            <Link href="/about-us" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
-            <Link href="/blog" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
-            <Link href="/track-status" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
-            
-            <div className="pt-6 mt-4 border-t border-slate-200/50">
-              <Link href="/book-repair" onClick={closeAllNavigationMenus} className="flex justify-center items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-semibold tracking-wide hover:bg-blue-700 transition-all shadow-md" style={{ color: '#ffffff' }}>
-                Book Repair Now {devices.length > 0 && <span style={{ background: '#fff', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>{devices.length}</span>}
+
+              <div className="mobile-menu-link-grid">
+                <Link href="/book-repair" onClick={closeAllNavigationMenus} className="mobile-menu-link">Get a Quote</Link>
+                <Link href="/about-us" onClick={closeAllNavigationMenus} className="mobile-menu-link">About Us</Link>
+                <Link href="/blog" onClick={closeAllNavigationMenus} className="mobile-menu-link">Blog</Link>
+                <Link href="/track-status" onClick={closeAllNavigationMenus} className="mobile-menu-link">Track Status</Link>
+              </div>
+            </nav>
+
+            <div className="mobile-menu-cta">
+              <Link href="/book-repair" onClick={closeAllNavigationMenus} className="mobile-menu-primary-action">
+                Book Repair Now {devices.length > 0 && <span>{devices.length}</span>}
               </Link>
             </div>
-          </nav>
+          </div>
         </div>
       )}
     </>
