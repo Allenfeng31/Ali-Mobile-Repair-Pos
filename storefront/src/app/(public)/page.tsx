@@ -83,11 +83,13 @@ export default function Home() {
             Expert Phone, Tablet &amp; MacBook Repair
           </h1>
           <p className={heroStyles.heroLocation}>in Ringwood Square</p>
+          <p className="text-[#334155] font-bold text-sm sm:text-base mt-2 mb-6">
+            Find us at Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC.
+          </p>
 
           <div className="hero-contact-pill gap-6">
             <span className="contact-item">Walk-ins welcome</span>
             <span className="contact-item">Call ahead for parts and timing</span>
-            <span className="contact-item">Find us at Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC.</span>
           </div>
 
           <div className={heroStyles.repairIssueBlock}>
