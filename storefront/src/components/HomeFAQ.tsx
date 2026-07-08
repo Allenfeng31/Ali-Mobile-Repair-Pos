@@ -35,8 +35,8 @@ const faqs = [
     answer: "That’s okay. Bring the device in for a practical check and we’ll help identify the issue before confirming the repair."
   },
   {
-    question: "Where is Ali Mobile & Repair located?",
-    answer: "We’re located at Kiosk C1 inside Ringwood Square Shopping Centre, Seymour St, Ringwood VIC 3134."
+    question: "Do you offer phone repair near me in Ringwood?",
+    answer: "Yes. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre. If you are searching for phone repair near me around Ringwood, Ringwood East, Heathmont, Mitcham or Croydon, you can walk in or book online before visiting."
   }
 ];
 

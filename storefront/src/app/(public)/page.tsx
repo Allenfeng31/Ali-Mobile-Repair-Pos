@@ -87,6 +87,7 @@ export default function Home() {
           <div className="hero-contact-pill gap-6">
             <span className="contact-item">Walk-ins welcome</span>
             <span className="contact-item">Call ahead for parts and timing</span>
+            <span className="contact-item">Find us at Kiosk C1, Ringwood Square Shopping Centre, Ringwood VIC.</span>
           </div>
 
           <div className={heroStyles.repairIssueBlock}>
