@@ -1704,9 +1704,9 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         "If your MacBook is not shown in the selector, contact Ali Mobile & Repair before you travel so we can check the model, likely repair path and parts availability.",
     },
     {
-      question: "Where is Ali Mobile & Repair for MacBook repair?",
+      question: "Do you offer MacBook repair near me in Ringwood?",
       answer:
-        "Visit Ali Mobile & Repair at Ringwood Square Shopping Centre, Kiosk C1, Seymour Street, Ringwood VIC 3134. Walk-ins are welcome, and calling ahead helps confirm parts and timing.",
+        "Yes. Ali Mobile & Repair provides MacBook repair support at Kiosk C1 inside Ringwood Square Shopping Centre. If you are searching for MacBook repair near me around Ringwood, Ringwood East, Heathmont, Mitcham or Croydon, choose your MacBook model first, then walk in or contact us before visiting.",
     },
   ];
   const macbookStartingRepairPrice = isMacBookHub ? getLowestStartingPrice(LAPTOP_BRAND_STARTING_PRICES.macbook) : null;

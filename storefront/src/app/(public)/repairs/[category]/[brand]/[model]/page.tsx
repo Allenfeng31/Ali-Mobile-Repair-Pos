@@ -379,8 +379,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const hasServiceHistoryScreenOption = screenOptions.some((option) => option.title === "Service history notes");
   const commonIssues = [
     {
-      icon: Smartphone,
-      text: "Cracked front glass or display faults",
+      icon: isLaptopModelPage ? Laptop : isTabletModelPage ? Tablet : isAppleWatchModelPage ? Watch : Smartphone,
+      text: isLaptopModelPage ? "Screen damage or display faults" : "Cracked front glass or display faults",
     },
     {
       icon: Battery,
@@ -392,7 +392,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     {
       icon: Camera,
-      text: "Camera focus faults or cracked rear lenses",
+      text: isLaptopModelPage ? "FaceTime camera, speaker, keyboard, trackpad or other logic faults" : "Camera focus faults or cracked rear lenses",
     },
   ];
   const diagnosticSteps = ["Quick test", "Honest quote", "Repair options"];

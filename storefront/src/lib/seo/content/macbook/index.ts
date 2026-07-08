@@ -2189,7 +2189,7 @@ description: "Startup, charging response, and the reported fault are checked aga
     quickAnswer: "A newer 13-inch Air with a damaged screen gets a careful look around the camera area, lid marks, and display output before repair starts.",
     repairOptions: [
       { name: "Display and lid assessment",
-shortDescription: "Start with the symptom, not the part. We test brightness, lines, flicker, external output, and thin lid marks, camera area, and display output on this newer M3 Air platform.",
+shortDescription: "Start with the symptom, not the part. We test brightness, lines, flicker, and external output on this newer M3 Air platform.",
 bestFor: "Cracked displays, black image, line faults, flicker, or faults that change when the lid moves.",
 notes: "Quote, part path, and fit risk are confirmed before approved repair work starts." },
       { name: "Handover screen checks",
@@ -2201,14 +2201,14 @@ notes: "Any unrelated housing, battery, or board concern is explained separately
       { title: "Cracked display or dark image",
 description: "A hit to the lid can leave the MacBook Air M3 13-inch 2024 with black sections, lines, or unstable image even when it still powers on." },
       { title: "Fault changes when the lid moves",
-description: "We pay attention to lid angle because thin lid marks, camera area, and display output can affect the final repair scope." },
+description: "We pay attention to lid angle because hinge alignment and display cable behaviour can affect the final repair scope." },
       { title: "Housing pressure near the hinge",
 description: "Corner dents, hinge stiffness, or lid pressure on this newer Apple-silicon Air platform can change how cleanly a replacement display sits." }
     ],
     diagnosticSteps: [
       { step: "01",
 title: "Inspect the lid and panel",
-description: "We check visible damage, hinge movement, lid alignment, camera area, and thin lid marks, camera area, and display output." },
+description: "We check visible damage, hinge movement, lid alignment, camera area, and display output." },
       { step: "02",
 title: "Confirm display symptoms",
 description: "We test brightness, lines, flicker, external display behaviour, and sleep/wake response where they apply." },
@@ -2219,7 +2219,7 @@ description: "After approved work, we check display output, hinge travel, startu
     faq: [
       {
         question: "What does Ali Mobile check when the MacBook Air M3 13-inch 2024 screen changes as the lid moves?",
-        answer: "We test the MacBook Air M3 13-inch 2024 panel output, lid angle, hinge feel, and thin lid marks, camera area, and display output. Any housing risk is explained before quoting."
+        answer: "We test the MacBook Air M3 13-inch 2024 panel output, lid angle, and hinge feel. Any housing risk is explained before quoting."
       },
       {
         question: "Could MacBook Air M3 13-inch 2024 screen repair uncover another fault?",
@@ -2231,7 +2231,7 @@ description: "After approved work, we check display output, hinge travel, startu
       },
       {
         question: "Will you check the MacBook Air M3 13-inch 2024 lid, hinge, frame, and camera area?",
-        answer: "Yes. The newer Apple-silicon Air is checked for thin lid marks, camera area, and display output, because fit issues can affect the repair scope."
+        answer: "Yes. The newer Apple-silicon Air is checked for lid alignment and display output, because fit issues can affect the repair scope."
       },
       {
         question: "Should I back up the MacBook Air M3 13-inch 2024 before screen work?",
@@ -2245,12 +2245,12 @@ description: "After approved work, we check display output, hinge travel, startu
     serviceSection: {
       eyebrow: "Model-aware MacBook repair",
       heading: "MacBook Air M3 13-inch 2024 screen replacement in Ringwood",
-      intro: "MacBook Air M3 13-inch 2024 screen assessment starts with the customer-visible symptom, then checks thin lid marks, camera area, and display output before a quote is confirmed.",
+      intro: "MacBook Air M3 13-inch 2024 screen assessment starts with the customer-visible symptom, then checks lid condition and display output before a quote is confirmed.",
       cards: [
         { title: "Exact MacBook identified",
 description: "We confirm the exact Air family and visible condition before quoting." },
         { title: "Repair risk explained",
-description: "We explain how thin lid marks, camera area, and display output can affect the scope before any approved work starts." },
+description: "We explain how lid condition and display output can affect the scope before any approved work starts." },
         { title: "Practical handover checks",
 description: "Startup, charging response, and the reported fault are checked again before the MacBook Air M3 13-inch 2024 is handed back." },
       ],
