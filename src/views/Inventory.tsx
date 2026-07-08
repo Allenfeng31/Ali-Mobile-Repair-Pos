@@ -90,9 +90,19 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   // ── Bulk Generate Repair Suite ──────────────────────────────────────
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkGenerating, setBulkGenerating] = useState(false);
-  const [bulkBrand, setBulkBrand] = useState('Samsung');
+  const [bulkBrand, setBulkBrand] = useState('P Samsung'); // Will be overridden by user selection
+  const [bulkDeviceCategory, setBulkDeviceCategory] = useState('Phone Repair');
   const [bulkModel, setBulkModel] = useState('');
   const [bulkDeviceModel, setBulkDeviceModel] = useState('');
+  const [bulkRepairs, setBulkRepairs] = useState<Record<string, { selected: boolean; price: string; costPrice: string }>>({
+    'Screen Replacement': { selected: true, price: '', costPrice: '' },
+    'Battery Replacement': { selected: true, price: '', costPrice: '' },
+    'Charging Port Replacement': { selected: true, price: '', costPrice: '' },
+    'Back Camera Replacement': { selected: true, price: '', costPrice: '' },
+    'Front Camera Replacement': { selected: true, price: '', costPrice: '' },
+    'Back Housing Replacement': { selected: true, price: '', costPrice: '' },
+    'Logic Board Repair': { selected: false, price: '', costPrice: '' },
+  });
 
   const REPAIR_TEMPLATES = [
     { label: 'Screen Replacement', iconName: 'Smartphone' },
@@ -115,36 +125,53 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     if (!bulkModel.trim()) return;
 
     const targetModel = bulkModel.trim();
-    const existingConflicts = inventory.filter(i => 
-      (i.model === targetModel || i.model === `${bulkBrand}||${targetModel}`) && 
-      REPAIR_TEMPLATES.some(tmpl => i.name.includes(tmpl.label))
-    );
+    const itemsToCreate: any[] = [];
+    let duplicateCount = 0;
 
-    if (existingConflicts.length > 0) {
-      setSuccessMessage(`Error: ${existingConflicts.length} templates already exist for ${targetModel}. Generation aborted to prevent duplicates.`);
+    for (const tmpl of REPAIR_TEMPLATES) {
+      const config = bulkRepairs[tmpl.label];
+      if (!config || !config.selected) continue;
+
+      const itemName = `${bulkModel.trim()} ${tmpl.label}`;
+      const itemModel = `${bulkBrand}||${bulkModel.trim()}`;
+
+      // Duplicate check for this specific row
+      const isDuplicate = inventory.some(i => 
+        (i.model === itemModel || i.model === targetModel) &&
+        i.name === itemName
+      );
+
+      if (isDuplicate) {
+        duplicateCount++;
+        continue;
+      }
+
+      itemsToCreate.push({
+        name: itemName,
+        model: itemModel,
+        device_model: bulkDeviceModel.trim() || null,
+        stock: 0,
+        minStock: 0,
+        costPrice: config.costPrice ? parseFloat(config.costPrice) : 0,
+        price: config.price ? parseFloat(config.price) : 0,
+        margin: 0,
+        iconName: tmpl.iconName,
+        status: 'in-stock',
+        category: tmpl.label, // THIS MUST BE THE REPAIR TYPE
+        is_pinned: false,
+        pin_order: 0,
+      });
+    }
+
+    if (itemsToCreate.length === 0) {
+      setSuccessMessage(duplicateCount > 0 ? 'All selected repair items already exist.' : 'No items selected to generate.');
       setTimeout(() => setSuccessMessage(null), 5000);
       return;
     }
 
     setBulkGenerating(true);
     try {
-      const items = REPAIR_TEMPLATES.map(tmpl => ({
-        name: `${bulkModel.trim()} ${tmpl.label}`,
-        model: `${bulkBrand}||${bulkModel.trim()}`,
-        device_model: bulkDeviceModel.trim() || null,
-        stock: 0,
-        minStock: 0,
-        costPrice: 0,
-        price: 0,
-        margin: 0,
-        iconName: tmpl.iconName,
-        status: 'in-stock',
-        category: 'Phone Repair',
-        is_pinned: false,
-        pin_order: 0,
-      }));
-
-      const created: any[] = await api.bulkCreateInventoryItems(items);
+      const created: any[] = await api.bulkCreateInventoryItems(itemsToCreate);
 
       const normalizedItems = created.map((raw: any) => {
         let b = 'Other', m = raw.model;
@@ -157,11 +184,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       });
 
       setInventory(prev => [...prev, ...normalizedItems]);
-      setSuccessMessage(`⚡️ Bulk generated ${created.length} repair items for ${bulkModel.trim()}!`);
+      setSuccessMessage(`⚡️ Created ${created.length} repair items for ${bulkModel.trim()}! ${duplicateCount > 0 ? `(Skipped ${duplicateCount} duplicates)` : ''}`);
       setTimeout(() => setSuccessMessage(null), 4000);
 
-      setBulkModel('');
-      setBulkDeviceModel('');
+      // Keep user on the page, don't necessarily clear to allow quick adjustments
     } catch (err: any) {
       console.error('Bulk generate failed:', err);
       setSuccessMessage(`Error: ${err?.message || 'Bulk generate failed'}`);
@@ -770,30 +796,43 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
             </button>
 
             {/* Bulk Panel */}
-            <motion.div
-              initial={false}
-              animate={{ height: bulkMode ? 'auto' : 0, opacity: bulkMode ? 1 : 0 }}
-              className="overflow-hidden"
-            >
-              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-8 space-y-8">
-                <h2 className="text-2xl font-black text-black flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-orange-500">
-                    <Zap size={24} strokeWidth={3} />
-                  </div>
-                  Bulk Generate
-                </h2>
+            {bulkMode && (
+              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-8 space-y-8 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black text-black flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-orange-500">
+                      <Zap size={24} strokeWidth={3} />
+                    </div>
+                    Bulk Generate Repairs
+                  </h2>
+                  <p className="text-sm font-bold text-gray-500 px-2">Create multiple repair inventory items for a new device model.</p>
+                </div>
 
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Brand</label>
-                    <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
-                      <select
-                        className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
-                        value={bulkBrand}
-                        onChange={e => setBulkBrand(e.target.value)}
-                      >
-                        {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
-                      </select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Brand</label>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                        <select
+                          className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
+                          value={bulkBrand}
+                          onChange={e => setBulkBrand(e.target.value)}
+                        >
+                          {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Device Category</label>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                        <select
+                          className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
+                          value={bulkDeviceCategory}
+                          onChange={e => setBulkDeviceCategory(e.target.value)}
+                        >
+                          {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
                     </div>
                   </div>
 
@@ -802,7 +841,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                     <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
                       <input
                         className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none placeholder:text-black/20"
-                        placeholder="e.g. Galaxy S24 Ultra"
+                        placeholder="e.g. Galaxy A57 5G"
                         value={bulkModel}
                         onChange={e => setBulkModel(e.target.value)}
                       />
@@ -810,44 +849,104 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">AU Model Code</label>
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">AU Model Code (Device Model)</label>
                     <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
                       <input
                         className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none placeholder:text-black/20"
-                        placeholder="e.g. SM-A566B"
+                        placeholder="e.g. SM-A576B"
                         value={bulkDeviceModel}
                         onChange={e => setBulkDeviceModel(e.target.value)}
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Will Generate:</label>
-                    <div className="flex flex-wrap gap-2">
-                      {REPAIR_TEMPLATES.map((tmpl, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 px-3 py-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-xl text-xs font-bold text-gray-600"
-                        >
-                          <div className="text-orange-500">
-                            {React.createElement(getIconComponent(tmpl.iconName), { size: 14, strokeWidth: 3 })}
+                  <div className="space-y-4 pt-4 border-t border-gray-100/10">
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Repair Types</label>
+                    <div className="space-y-3">
+                      {REPAIR_TEMPLATES.map((tmpl) => {
+                        const config = bulkRepairs[tmpl.label] || { selected: false, price: '', costPrice: '' };
+                        const itemName = bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label;
+                        
+                        const isDuplicate = bulkModel.trim() ? inventory.some(i => 
+                          (i.model === `${bulkBrand}||${bulkModel.trim()}` || i.model === bulkModel.trim()) &&
+                          i.name === itemName
+                        ) : false;
+
+                        return (
+                          <div key={tmpl.label} className={cn("p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl space-y-3 transition-opacity", !config.selected && "opacity-60")}>
+                            <div className="flex items-center justify-between">
+                              <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="w-5 h-5 rounded-md text-orange-500 focus:ring-orange-500 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none"
+                                  checked={config.selected}
+                                  onChange={e => setBulkRepairs({
+                                    ...bulkRepairs,
+                                    [tmpl.label]: { ...config, selected: e.target.checked }
+                                  })}
+                                />
+                                <div className="text-orange-500">
+                                  {React.createElement(getIconComponent(tmpl.iconName), { size: 18, strokeWidth: 3 })}
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-gray-800">{itemName}</div>
+                                  {isDuplicate && config.selected && (
+                                    <div className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-1">Already exists</div>
+                                  )}
+                                </div>
+                              </label>
+                            </div>
+                            
+                            {config.selected && (
+                              <div className="grid grid-cols-2 gap-3 pl-8 mt-2">
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Price ($)</label>
+                                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-xl p-1">
+                                    <input
+                                      type="number"
+                                      className="w-full px-3 py-2 bg-transparent border-none text-black text-sm font-bold focus:ring-0 outline-none placeholder:text-gray-400"
+                                      placeholder="Quote/0"
+                                      value={config.price}
+                                      onChange={e => setBulkRepairs({
+                                        ...bulkRepairs,
+                                        [tmpl.label]: { ...config, price: e.target.value }
+                                      })}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cost ($)</label>
+                                  <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-xl p-1">
+                                    <input
+                                      type="number"
+                                      className="w-full px-3 py-2 bg-transparent border-none text-black text-sm font-bold focus:ring-0 outline-none placeholder:text-gray-400"
+                                      placeholder="0"
+                                      value={config.costPrice}
+                                      onChange={e => setBulkRepairs({
+                                        ...bulkRepairs,
+                                        [tmpl.label]: { ...config, costPrice: e.target.value }
+                                      })}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          {bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
                   <button
                     onClick={handleBulkGenerate}
-                    disabled={bulkGenerating || !bulkModel.trim()}
+                    disabled={bulkGenerating || !bulkModel.trim() || Object.values(bulkRepairs).filter(r => r.selected).length === 0}
                     className="w-full py-5 bg-[var(--color-neu-bg)] text-orange-600 rounded-3xl font-black text-lg shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all disabled:opacity-40"
                   >
-                    {bulkGenerating ? 'Generating...' : 'CREATE 7 ITEMS'}
+                    {bulkGenerating ? 'Generating...' : `CREATE ${Object.values(bulkRepairs).filter(r => r.selected).length} ITEMS`}
                   </button>
                 </div>
               </div>
-            </motion.div>
+            )}
 
             {/* Manual Form */}
             <div className={cn(
