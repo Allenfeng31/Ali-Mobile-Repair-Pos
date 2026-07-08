@@ -7,6 +7,11 @@ import {
   normalizeSamsungCatalogModelName,
 } from './inventoryUtils';
 import { OPPO_ENHANCED_CONFIG } from './seo/content/oppo/config';
+import { SAMSUNG_HARDWARE_CONFIG } from './seo/content/samsung/config';
+import type {
+  AliMobileEnhancedSamsungRepairType,
+  SamsungHardwareConfig,
+} from './seo/content/samsung/types';
 import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -156,6 +161,68 @@ const BACK_GLASS_REPAIR: RepairOption = {
   name: 'Back Glass Replacement',
   price: 0,
 };
+
+const SAMSUNG_CATALOG_BACKFILL_MODEL_SLUGS = ['galaxy-a37-5g', 'galaxy-a57-5g'] as const;
+
+const SAMSUNG_REPAIR_TYPE_NAMES: Record<AliMobileEnhancedSamsungRepairType, string> = {
+  'screen-replacement': 'Screen Replacement',
+  'battery-replacement': 'Battery Replacement',
+  'charging-port-replacement': 'Charging Port Replacement',
+  'back-glass-replacement': 'Back Glass Replacement',
+  'back-housing-replacement': 'Back Housing Replacement',
+  'front-camera-replacement': 'Front Camera Replacement',
+  'back-camera-replacement': 'Back Camera Replacement',
+  'logic-board-repair': 'Logic Board Repair',
+};
+
+function buildSamsungBackfillRepairs(config: SamsungHardwareConfig): RepairOption[] {
+  return config.supportedRepairTypes.map((slug) => ({
+    slug: slug === 'back-housing-replacement' ? 'back-glass-replacement' : slug,
+    name:
+      slug === 'back-housing-replacement'
+        ? SAMSUNG_REPAIR_TYPE_NAMES['back-glass-replacement']
+        : SAMSUNG_REPAIR_TYPE_NAMES[slug],
+    price: 0,
+  }));
+}
+
+function backfillSamsungCatalogModels(brands: BrandEntry[]): BrandEntry[] {
+  const updatedBrands = brands.map((brand) => ({
+    ...brand,
+    models: [...brand.models],
+  }));
+
+  let samsungBrand = updatedBrands.find(
+    (brand) => brand.category === 'phone' && brand.slug === 'samsung'
+  );
+
+  if (!samsungBrand) {
+    samsungBrand = {
+      category: 'phone',
+      brand: 'Samsung',
+      slug: 'samsung',
+      icon: getCategoryIcon('phone'),
+      models: [],
+    };
+    updatedBrands.push(samsungBrand);
+  }
+
+  for (const modelSlug of SAMSUNG_CATALOG_BACKFILL_MODEL_SLUGS) {
+    const config = SAMSUNG_HARDWARE_CONFIG[modelSlug];
+    if (!config || samsungBrand.models.some((model) => model.slug === config.modelSlug)) {
+      continue;
+    }
+
+    samsungBrand.models.push({
+      model: config.modelName,
+      slug: config.modelSlug,
+      modelCode: config.modelCodes?.join(', '),
+      repairTypes: buildSamsungBackfillRepairs(config),
+    });
+  }
+
+  return updatedBrands;
+}
 
 /**
  * Check if a model qualifies for back-glass-repair.
@@ -435,7 +502,7 @@ export async function fetchRepairCatalog(): Promise<RepairCatalog> {
   }
 
   // Fallback to hardcoded data
-  return { brands: buildFallbackCatalog(), source: 'fallback' };
+  return { brands: backfillSamsungCatalogModels(buildFallbackCatalog()), source: 'fallback' };
 }
 
 /**

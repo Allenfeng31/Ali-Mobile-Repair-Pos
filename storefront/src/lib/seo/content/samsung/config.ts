@@ -415,6 +415,13 @@ const SAMSUNG_GALAXY_S_CONFIGS = SAMSUNG_GALAXY_S_MODEL_SPECS.flatMap((spec) =>
 
 
 
+const SAMSUNG_GALAXY_A_MODEL_CODES: Partial<
+  Record<AliMobileEnhancedSamsungModelSlug, ReadonlyArray<string>>
+> = {
+  'galaxy-a37-5g': ['SM-A376B'],
+  'galaxy-a57-5g': ['SM-A576B'],
+};
+
 function defineSamsungGalaxyAConfig(modelName: string): SamsungHardwareConfig {
   const modelSlug = slugify(modelName) as AliMobileEnhancedSamsungModelSlug;
   const isLbSupported = ["galaxy-a20","galaxy-a21","galaxy-a30","galaxy-a31","galaxy-a32","galaxy-a40","galaxy-a50","galaxy-a51","galaxy-a52","galaxy-a53","galaxy-a54","galaxy-a55","galaxy-a70","galaxy-a71","galaxy-a72","galaxy-a73"].includes(modelSlug);
@@ -437,6 +444,7 @@ function defineSamsungGalaxyAConfig(modelName: string): SamsungHardwareConfig {
   return defineSamsungHardwareConfig({
     modelSlug,
     modelName,
+    modelCodes: SAMSUNG_GALAXY_A_MODEL_CODES[modelSlug],
     seriesFamily: 'galaxy-a',
     deviceFamily: 'galaxy-a',
     generation: Number.parseInt(modelSlug.match(/(\d+)/)?.[1] ?? '0', 10),
@@ -472,6 +480,7 @@ const SAMSUNG_GALAXY_A_CONFIGS = [
   'Galaxy A34 5G',
   'Galaxy A35 5G',
   'Galaxy A36 5G',
+  'Galaxy A37 5G',
   'Galaxy A40',
   'Galaxy A50',
   'Galaxy A51',
@@ -480,6 +489,7 @@ const SAMSUNG_GALAXY_A_CONFIGS = [
   'Galaxy A54',
   'Galaxy A55',
   'Galaxy A56 5G',
+  'Galaxy A57 5G',
   'Galaxy A70',
   'Galaxy A71',
   'Galaxy A72',
@@ -488,9 +498,9 @@ const SAMSUNG_GALAXY_A_CONFIGS = [
 
 export const GALAXY_A_MODEL_ORDER = [
   'galaxy-a73', 'galaxy-a72', 'galaxy-a71', 'galaxy-a70',
-  'galaxy-a56-5g', 'galaxy-a55', 'galaxy-a54', 'galaxy-a53', 'galaxy-a52', 'galaxy-a51', 'galaxy-a50',
+  'galaxy-a57-5g', 'galaxy-a56-5g', 'galaxy-a55', 'galaxy-a54', 'galaxy-a53', 'galaxy-a52', 'galaxy-a51', 'galaxy-a50',
   'galaxy-a40',
-  'galaxy-a36-5g', 'galaxy-a35-5g', 'galaxy-a34-5g', 'galaxy-a32', 'galaxy-a31', 'galaxy-a30',
+  'galaxy-a37-5g', 'galaxy-a36-5g', 'galaxy-a35-5g', 'galaxy-a34-5g', 'galaxy-a32', 'galaxy-a31', 'galaxy-a30',
   'galaxy-a21s', 'galaxy-a21', 'galaxy-a20',
   'galaxy-a17', 'galaxy-a16', 'galaxy-a15', 'galaxy-a14', 'galaxy-a13', 'galaxy-a12', 'galaxy-a11'
 ];

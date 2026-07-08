@@ -20,6 +20,7 @@ import {
   SAMSUNG_TABLET_BRAND_HUB_SERIES_ORDER,
   SAMSUNG_TABLET_SERIES_LABELS,
 } from "@/lib/tabletModelFamilies";
+import { getSamsungHardwareConfig } from "@/lib/seo/content/samsung/config";
 import BrandModelSearch from "@/components/BrandModelSearch";
 import HubRepairResultsSection, { type HubRepairResultItem } from "@/components/repair-results/HubRepairResultsSection";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
@@ -998,11 +999,15 @@ function getAppleWatchSeriesKey(model: ModelEntry) {
   return "other";
 }
 
+function getBrandHubModelCode(model: ModelEntry) {
+  return model.modelCode ?? getSamsungHardwareConfig(model.slug)?.modelCodes?.join(", ");
+}
+
 function toBrandHubSeriesModels(models: ModelEntry[]) {
   return models.map((model) => ({
     model: model.model,
     slug: model.slug,
-    modelCode: model.modelCode,
+    modelCode: getBrandHubModelCode(model),
   }));
 }
 

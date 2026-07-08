@@ -92,6 +92,8 @@ export type AliMobileEnhancedSamsungModelSlug =
   | 'galaxy-a34-5g'
   | 'galaxy-a35-5g'
   | 'galaxy-a36-5g'
+  | 'galaxy-a37-5g'
+  | 'galaxy-a57-5g'
   | 'galaxy-a56-5g';
 
 export type SamsungSeriesFamily = 'galaxy-z' | 'galaxy-s' | 'galaxy-a' | 'galaxy-note';
