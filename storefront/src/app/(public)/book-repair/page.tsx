@@ -304,11 +304,11 @@ export default function BookRepairPage() {
           <div className="booking-hero-copy">
             <span className="booking-kicker">
               <Sparkles size={15} strokeWidth={2.5} aria-hidden="true" />
-              Quick repair booking
+              Live quotes & booking
             </span>
-            <h1>Book your repair in minutes.</h1>
+            <h1>Get a Quote or Book a Repair</h1>
             <p>
-              Choose the repair, add your details, and pick a visit time. Clear pricing, short form, and payment only in store.
+              Choose your device and repair type to view available repair options before sending a booking request.
             </p>
             <div className="booking-trust-row" aria-label="Booking trust points">
               <span>

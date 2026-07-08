@@ -151,6 +151,19 @@ export default function Header() {
     closeAllNavigationMenus();
   }, [pathname]);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <>
       <header className="navbar">
@@ -367,6 +380,7 @@ export default function Header() {
                 </div>
               </div>
             </div>
+            <Link href="/book-repair" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Get a Quote</Link>
             <Link href="/about-us" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">About Us</Link>
             <Link href="/blog" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Blog</Link>
             <Link href="/track-status" onClick={closeAllNavigationMenus} className="text-[1.35rem] font-medium tracking-tight text-slate-800 hover:text-blue-600 transition-colors">Track Status</Link>
