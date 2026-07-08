@@ -11,14 +11,14 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Professional Device Repair Services in Ringwood | Ali Mobile",
   description:
-    "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day options for common repairs and most common repairs under 1 hour when parts are in stock.",
+    "Choose your device category to check repair options, compare repair turnaround time, and follow a clear quote path for device repair services in Ringwood before visiting.",
   alternates: {
     canonical: "/repairs",
   },
   openGraph: {
     title: "Professional Device Repair Services in Ringwood | Ali Mobile",
     description:
-      "Choose your device category to find expert repair services in Ringwood. Phone, Tablet, Laptop, and Smart Watch repairs with same-day options for common repairs and most common repairs under 1 hour when parts are in stock.",
+      "Choose your device category to check repair options, compare repair turnaround time, and follow a clear quote path for device repair services in Ringwood before visiting.",
     url: "/repairs",
     type: "website",
     locale: "en_AU",
@@ -74,15 +74,52 @@ const trustSignals = [
 const processSteps = [
   {
     title: "Choose Device Type",
-    text: "Start with the category that matches your device so we can guide you to the right brand, model, and repair type.",
+    text: "Start with the category that matches your device so you can check repair options, compare repair categories, and move to the right brand, model, and repair type.",
   },
   {
     title: "Check Live Pricing",
-    text: "Most common repairs show a clear price path before you book, with options for part grade when available.",
+    text: "Many common repairs show a clear price path before you book, helping you check the repair price before visiting and understand likely repair turnaround time.",
   },
   {
     title: "Drop Off or Book",
-    text: "Book online for priority service or bring the device to Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a fast assessment.",
+    text: "Book online for priority service or use our walk-in repair options at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a fast assessment.",
+  },
+];
+
+const faqs = [
+  {
+    question: "Can I check the repair price before booking?",
+    answer:
+      "Yes. Start by choosing your device category, brand and model to view available repair options. Some repairs show starting prices, while quote-only repairs are confirmed after a physical assessment.",
+  },
+  {
+    question: "How long does a phone repair usually take?",
+    answer:
+      "Many common phone repairs are fast. Around 80% of common phone models can usually be handled same day when parts are in stock. Timing depends on the exact model, repair queue, parts availability and fault condition.",
+  },
+  {
+    question: "What repair types can I choose from?",
+    answer:
+      "You can choose from common repair types such as screen replacement, battery replacement, charging port repair, water damage assessment, back glass and housing repair, and camera repair options across supported devices.",
+    relatedLink: {
+      href: "/repairs/water-damage",
+      label: "water damage assessment",
+    },
+  },
+  {
+    question: "What if I do not know my exact device model?",
+    answer:
+      "Start with the closest device category. Our team can help identify the exact model at the store or when you submit a quote request.",
+  },
+  {
+    question: "Do I need to book, or can I walk in?",
+    answer:
+      "Walk-ins are welcome at our Ringwood Square kiosk. An online booking or quote request helps us prepare the repair path and gives you priority in the queue.",
+  },
+  {
+    question: "Do repairs include a warranty?",
+    answer:
+      "Eligible repairs include a warranty on the fitted part and workmanship. Warranty does not cover new impact damage, liquid damage, misuse or unrelated faults.",
   },
 ];
 
@@ -97,8 +134,8 @@ export default function RepairsHubPage() {
             <span>Get a clean repair path.</span>
           </h1>
           <p>
-            Select a category below to see repair services, live pricing, and model-specific options
-            for phones, tablets, laptops, and smart watches in Ringwood.
+            Choose your device category, check repair options, and follow a clear quote path before
+            visiting our Ringwood Square kiosk.
           </p>
 
           <div className={styles.trustGrid} aria-label="Repair guarantees">
@@ -155,6 +192,53 @@ export default function RepairsHubPage() {
         </div>
       </section>
 
+      <section className={styles.processSection} aria-labelledby="repairs-faq-heading">
+        <div className={styles.processHeader}>
+          <span className={styles.kicker}>Before You Visit</span>
+          <h2 id="repairs-faq-heading">Popular repair questions</h2>
+          <p>
+            Common questions customers ask before choosing a repair category or requesting a quote
+            for device repair services in Ringwood.
+          </p>
+        </div>
+        <div className="faq-accordion">
+          {faqs.map((faq) => (
+            <details key={faq.question} className="faq-item">
+              <summary className="faq-question">
+                <span>{faq.question}</span>
+                <svg
+                  className="faq-chevron"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M5 7.5L10 12.5L15 7.5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </summary>
+              <div className="faq-answer">
+                <p>
+                  {faq.answer}
+                  {faq.relatedLink ? (
+                    <>
+                      {" "}
+                      If liquid exposure is involved, start with our{" "}
+                      <Link href={faq.relatedLink.href}>{faq.relatedLink.label}</Link> page.
+                    </>
+                  ) : null}
+                </p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <ServiceAreas />
 
       <section className={styles.ctaSection}>
@@ -162,8 +246,8 @@ export default function RepairsHubPage() {
           <span className={styles.kicker}>Need Help Choosing?</span>
           <h2>Not sure which model or repair type you need?</h2>
           <p>
-            Use the live quote flow, call the store, or open chat. We will identify the device and
-            give you the fastest realistic repair option.
+            Not sure whether it is screen, battery, charging port or water damage? Start with your
+            device category and we can help identify the right repair path.
           </p>
           <div className={styles.ctaActions}>
             <Link href="/book-repair" className={styles.primaryAction}>
