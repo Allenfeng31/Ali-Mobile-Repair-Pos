@@ -1609,6 +1609,18 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       note: "Startup, charging, fan, overheating and board-related symptoms are diagnosed before any repair path is approved.",
     },
   ];
+  const macbookRelatedGuides = [
+    {
+      href: "/blog/the-hidden-reality-of-macbook-pro-keyboard-repairs-in-melbourne-why-saving-70-mi",
+      title: "MacBook keyboard and top case guide",
+      description: "Why keyboard repair often depends on top case design, model confirmation and quote-first assessment.",
+    },
+    {
+      href: "/blog/macbook-screen-repair-ringwood",
+      title: "MacBook screen assessment guide",
+      description: "What to check before replacing a cracked, flickering, lined or black MacBook display.",
+    },
+  ];
   const macbookCommonProblems = [
     {
       title: "Cracked screen or display lines",
@@ -2089,6 +2101,25 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                     <p>{path.note}</p>
                   </article>
                 )
+              ))}
+            </div>
+          </section>
+
+          <section className="brand-hub-section" aria-labelledby="macbook-guides-heading">
+            <div className="brand-hub-section-header">
+              <span className="repair-kicker">Repair guides</span>
+              <h2 id="macbook-guides-heading">Related MacBook guides</h2>
+              <p>
+                Read these short guides if you are comparing MacBook screen, keyboard or top case repair options before choosing a model.
+              </p>
+            </div>
+            <div className="repair-signal-grid">
+              {macbookRelatedGuides.map((guide, index) => (
+                <Link key={guide.href} href={guide.href} prefetch={false} className="repair-signal-card">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{guide.title}</h3>
+                  <p>{guide.description}</p>
+                </Link>
               ))}
             </div>
           </section>
