@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
       { source: '/iphone-x', destination: '/repairs/phone/iphone', permanent: true },
       { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/iphone/iphone-13', permanent: true },
       { source: '/repairs/phone/apple', destination: '/repairs/phone/iphone', permanent: true },
+      { source: '/repairs/phone/apple/:path*', destination: '/repairs/phone/iphone/:path*', permanent: true },
       { source: '/samsung-price', destination: '/repairs/phone/samsung', permanent: true },
       { source: '/copy-of-lg', destination: '/repairs/phone', permanent: true },
       { source: '/lg', destination: '/repairs/phone', permanent: true },
@@ -43,13 +44,13 @@ const nextConfig: NextConfig = {
       { source: '/shop-accessories-tempered-glass', destination: '/', permanent: true },
       { source: '/shop-accessories', destination: '/', permanent: true },
       { source: '/shop-case-ipad-mini', destination: '/repairs/tablet/apple', permanent: true },
-      { source: '/shop-case-iphone-6-6s', destination: '/repairs/phone/apple', permanent: true },
+      { source: '/shop-case-iphone-6-6s', destination: '/repairs/phone/iphone', permanent: true },
       { source: '/hobart-detail-p01', destination: '/', permanent: true },
       
       // 2. LEGACY BLOG POSTS
       { source: '/blog/categories/shop-news', destination: '/blog', permanent: true },
       { source: '/blog/reliable-phone-repair-ringwood', destination: '/blog', permanent: true },
-      { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/apple/iphone-13', permanent: true },
+      { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/iphone/iphone-13', permanent: true },
       { source: '/post/full-privacy-screen-protect-available-now', destination: '/repairs/phone', permanent: true },
       { source: '/post/put-a-new-light-box', destination: '/', permanent: true },
       { source: '/post/new-setup-new-look', destination: '/', permanent: true },

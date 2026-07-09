@@ -388,6 +388,7 @@ export default function Header() {
 
               <div className="mobile-menu-link-grid">
                 <Link href="/book-repair" onClick={closeAllNavigationMenus} className="mobile-menu-link">Get a Quote</Link>
+                <Link href="/locations/ringwood" onClick={closeAllNavigationMenus} className="mobile-menu-link">Visit Ringwood Square</Link>
                 <Link href="/about-us" onClick={closeAllNavigationMenus} className="mobile-menu-link">About Us</Link>
                 <Link href="/blog" onClick={closeAllNavigationMenus} className="mobile-menu-link">Blog</Link>
                 <Link href="/track-status" onClick={closeAllNavigationMenus} className="mobile-menu-link">Track Status</Link>

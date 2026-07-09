@@ -145,7 +145,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       { href: "/", label: "Ali Mobile & Repair homepage and store overview" },
       { href: "/repairs", label: "All repair categories" },
       { href: "/repairs/phone", label: "Phone repair options" },
-      { href: "/repairs/phone/apple", label: "iPhone repair hub" },
+      { href: "/repairs/phone/iphone", label: "iPhone repair hub" },
       { href: "/repairs/phone/samsung", label: "Samsung repair hub" },
       { href: "/repairs/tablet", label: "iPad and tablet repair hub" },
       { href: "/repairs/laptop/macbook", label: "MacBook assessment and repair options" },

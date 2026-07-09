@@ -403,7 +403,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
   const locationServiceCards = isRingwood
     ? [
         { href: "/repairs/phone", title: "Phone Repair", detail: "Broad phone repair categories and quote paths", Icon: Wrench },
-        { href: "/repairs/phone/apple", title: "iPhone Repair", detail: "Check supported iPhone repair options first", Icon: Smartphone },
+        { href: "/repairs/phone/iphone", title: "iPhone Repair", detail: "Check supported iPhone repair options first", Icon: Smartphone },
         { href: "/repairs/phone/samsung", title: "Samsung Repair", detail: "Browse Samsung models and repair categories", Icon: Smartphone },
         { href: "/repairs/tablet", title: "iPad & Tablet Repair", detail: "Tablet and iPad repair hubs before visiting", Icon: Wrench },
         { href: "/repairs/watch/apple", title: "Apple Watch Repair", detail: "Screen and battery support for Apple Watch", Icon: ShieldCheck },
