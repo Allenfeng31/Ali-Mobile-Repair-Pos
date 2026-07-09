@@ -53,13 +53,14 @@ export const SERVICE_AREAS: ServiceArea[] = [
       "Walk-ins welcome",
       "Book online or call ahead",
       "Free parking available",
+      "Close to Eastland and Ringwood Station",
       "Near Ringwood East, Heathmont, Mitcham and Croydon",
     ],
     customLocalSection: {
-      title: "How to find us at Ringwood Square",
+      title: "Near Eastland and Ringwood Station",
       paragraphs: [
-        "Find us at Kiosk C1 inside Ringwood Square Shopping Centre. If you are visiting for a quick repair check, bring the device to the kiosk and our team can help confirm the model, issue and quote path before repair.",
-        "If you are coming from nearby Ringwood East, Heathmont, Mitcham or Croydon, Ringwood Square is an easy local stop for a walk-in assessment or a pre-booked repair visit."
+        "Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, close to Ringwood's main shopping and transport area. If you are visiting Eastland, Ringwood Square or the nearby Ringwood area, you can bring your phone, tablet, Apple Watch or MacBook to our kiosk for a repair check, quote path or booking support.",
+        "If you are coming from nearby Ringwood East, Heathmont, Mitcham or Croydon, or you are already close to Eastland and Ringwood Station, Ringwood Square is an easy local stop for a walk-in assessment or a pre-booked repair visit."
       ]
     },
     customScenarioSection: {
@@ -118,6 +119,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       {
         question: "Is parking available at Ringwood Square?",
         answer: "Yes. Free parking is available at Ringwood Square Shopping Centre, which makes quick repair visits easier."
+      },
+      {
+        question: "Are you near Eastland Shopping Centre?",
+        answer: "Yes. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, close to Ringwood's main shopping area including Eastland and Ringwood Station. If you are nearby, you can walk in with your device or book online before visiting."
       },
       {
         question: "What should I bring to the kiosk?",
