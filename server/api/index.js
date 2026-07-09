@@ -241,7 +241,7 @@ const buildBookingConfirmationSMS = ({ customerName, deviceModel, bookingTime })
   const time = trimForSMS(bookingTime, 12, 'TBC');
 
   const build = () =>
-    `Hi ${name}, your repair for ${device} is CONFIRMED! Time: ${time}. Loc: Kiosk C1, Ringwood Square. Any concern? Call 0485058514.`;
+    `Hi ${name}, your repair for ${device} is CONFIRMED! Time: ${time}. Loc: Kiosk C1, Ringwood Square. Call 0481058514. Do not reply.`;
 
   let body = build();
   if (body.length > SMS_SEGMENT_LIMIT) {
@@ -259,7 +259,7 @@ const buildBookingConfirmationSMS = ({ customerName, deviceModel, bookingTime })
 const buildRepairReminderSMS = (bookingTime) => {
   const time = trimForSMS(bookingTime, 18, 'TBC');
   return cleanSMS(
-    `Reminder: Your Ali Mobile repair booking is TOMORROW at ${time}! Loc: Kiosk C1, Ringwood Square Shopping Centre. Need to change? Call 0485058514.`
+    `Reminder: Your Ali Mobile repair booking is TOMORROW at ${time}! Loc: Kiosk C1, Ringwood Square. Call 0481058514. Do not reply.`
   );
 };
 
@@ -341,16 +341,16 @@ const appendReminderSentNote = (notes, sentAt, sid) => {
 
 const SMS_MESSAGES = {
   dropoff: (name) =>
-    `Hi ${name}, your device is checked in at Ali Mobile Repair. We'll text you when complete. Thank you!`,
+    `Hi ${name}, your device is checked in at Ali Mobile Repair. We'll text you when complete. Do not reply.`,
 
   completed: (name, device) =>
-    `Hi ${name}, your ${device} repair at Ali Mobile Repair is complete. Ready for pickup!`,
+    `Hi ${name}, your ${device} repair at Ali Mobile Repair is complete. Ready for pickup! Do not reply.`,
 
   review: (name) =>
-    `Hi ${name}, thanks for choosing Ali Mobile Repair! If you loved our service, a quick review helps us out a lot: https://pos.alimobile.com.au/feedback`,
+    `Hi ${name}, thanks for choosing Ali Mobile Repair! A quick review helps us out a lot: https://pos.alimobile.com.au/feedback Do not reply.`,
 
   partArrived: (name, device) =>
-    `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon!`,
+    `Hi ${name}, parts for your ${device} have arrived at Ali Mobile Repair. Visit us soon! Do not reply.`,
 
   booking: (name, deviceModel, bookingTime) =>
     buildBookingConfirmationSMS({ customerName: name, deviceModel, bookingTime }),
