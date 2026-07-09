@@ -373,7 +373,7 @@
 
 @media (max-width: 640px) {
   .page {
-    padding-top: 7rem;
+    padding-top: calc(var(--announcement-bar-height, 40px) + 6.85rem);
   }
 
   .articleCard {

@@ -5,7 +5,7 @@ date: '2026-07-07'
 description: 'Looking for MacBook screen repair in Ringwood? Learn about cracked displays, lines, black screens, model identification and why assessment matters before replacement.'
 excerpt: 'Looking for MacBook screen repair in Ringwood? Learn about cracked displays, lines, black screens, model identification and why assessment matters before replacement.'
 author: 'Ali Mobile Expert'
-image: '/images/blog/macbook-air-m3-screen-replacement-before.jpg'
+image: '/images/blog/macbook-air-m3-screen-replacement-before.webp'
 cover_image_alt: 'MacBook Air M3 screen showing display lines before screen replacement assessment'
 tags: ['MacBook Repair', 'Screen Repair', 'Repair Guide']
 faqs:
@@ -25,7 +25,7 @@ A cracked MacBook screen is obvious, but not every display fault is simple. Line
 
 Ali Mobile & Repair in Ringwood checks the exact MacBook model and symptom before recommending screen replacement. That helps avoid ordering the wrong assembly or replacing a display when another fault needs diagnosis first.
 
-![MacBook Air M3 screen showing display lines before screen replacement assessment](/images/blog/macbook-air-m3-screen-replacement-before.jpg)
+![MacBook Air M3 screen showing display lines before screen replacement assessment](/images/blog/macbook-air-m3-screen-replacement-before.webp)
 *Example repair case: MacBook Air M3 with display lines before screen replacement assessment.*
 
 ## Why exact model identification matters
