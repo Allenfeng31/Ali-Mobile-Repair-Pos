@@ -227,6 +227,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .heroSection::after {
+    animation: none;
+  }
+}
+
 @media (max-width: 900px) {
   .repairIssueGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
