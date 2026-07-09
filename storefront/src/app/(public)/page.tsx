@@ -214,7 +214,7 @@ export default function Home() {
               <h3>Repairs available at our Ringwood Square kiosk</h3>
               <p>
                 We help with iPhone, Samsung, Google Pixel, Oppo, iPad, MacBook and Apple Watch repairs.
-                Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square. Walk-ins are welcome,
+                Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square, opposite Bunnings Warehouse Ringwood. Walk-ins are welcome,
                 and quotes are confirmed before repair.
               </p>
             </div>
