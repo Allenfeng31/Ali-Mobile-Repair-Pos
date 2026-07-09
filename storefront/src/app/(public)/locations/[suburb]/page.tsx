@@ -347,6 +347,14 @@ export default async function LocationPage({ params }: LocationPageProps) {
   const area = getServiceAreaBySlug(suburb);
 
   if (!area) notFound();
+  const isRingwood = area.slug === "ringwood";
+  const pageHeading = area.customH1 || `Expert Device Repair for ${area.name} Residents`;
+  const heroDescription =
+    area.customIntro ||
+    `A practical ${area.driveTime.toLowerCase()} trip to Ringwood Square for careful diagnostics, transparent quotes, and warranty-backed repairs from a specialist local bench.`;
+  const metaDescription =
+    area.metaDescription ||
+    `Phone, tablet, laptop, and watch repairs for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for expert diagnostics, No Fix No Charge, and warranty-backed repairs.`;
 
   const currentSuburb = suburb.toLowerCase().replace(/-/g, "");
   const transitSteps = suburbTransitGuide[currentSuburb] ?? [
@@ -364,7 +372,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
   const nearbyAreas = getNearbyServiceAreas(area.slug);
   const catalog = await fetchRepairCatalog();
   const brandRepairCards = buildLocationBrandRepairCards(catalog.brands, area.name);
-  const locationTrustPoints = [
+  const locationTrustPoints = area.customTrustPoints || [
     {
       title: `Short trip from ${area.name}`,
       description: area.driveTime === "Local store"
@@ -392,44 +400,64 @@ export default async function LocationPage({ params }: LocationPageProps) {
       description: "Customers from nearby suburbs get the same Ringwood pricing, quoting process, and repair desk support.",
     },
   ];
+  const locationServiceCards = isRingwood
+    ? [
+        { href: "/repairs/phone", title: "Phone Repair", detail: "Broad phone repair categories and quote paths", Icon: Wrench },
+        { href: "/repairs/phone/apple", title: "iPhone Repair", detail: "Check supported iPhone repair options first", Icon: Smartphone },
+        { href: "/repairs/phone/samsung", title: "Samsung Repair", detail: "Browse Samsung models and repair categories", Icon: Smartphone },
+        { href: "/repairs/tablet", title: "iPad & Tablet Repair", detail: "Tablet and iPad repair hubs before visiting", Icon: Wrench },
+        { href: "/repairs/watch/apple", title: "Apple Watch Repair", detail: "Screen and battery support for Apple Watch", Icon: ShieldCheck },
+        { href: "/repairs/laptop/macbook", title: "MacBook Assessment", detail: "MacBook repair options and assessment paths", Icon: Wrench },
+        { href: "/repairs/water-damage", title: "Water Damage Assessment", detail: "Assessment-first support for liquid-damaged devices", Icon: ShieldCheck },
+      ]
+    : [
+        { href: "/repairs/phone", title: "Phone Repair", detail: "Screen, battery, charging, camera", Icon: Wrench },
+        { href: "/repairs/tablet", title: "Tablet Repair", detail: "iPad and Samsung Tab support", Icon: Wrench },
+        { href: "/repairs/laptop", title: "Laptop Repair", detail: "MacBook and Windows diagnostics", Icon: Wrench },
+        { href: "/repairs/watch", title: "Watch Repair", detail: "Screen and battery options", Icon: ShieldCheck },
+      ];
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": `${baseUrl}/#localbusiness`,
-    name: "Ali Mobile & Repair",
-    url: baseUrl,
-    telephone: "+61481058514",
-    priceRange: "$$",
-    image: `${baseUrl}/images/logo.png`,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
-      addressLocality: "Ringwood",
-      addressRegion: "VIC",
-      postalCode: "3134",
-      addressCountry: "AU",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: -37.81534,
-      longitude: 145.22851,
-    },
-    areaServed: {
-      "@type": "Place",
-      name: `${area.name}, Victoria`,
-    },
-    makesOffer: [
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: `Phone and device repair for ${area.name} residents`,
-          areaServed: area.name,
-        },
+  const schema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": `${baseUrl}/locations/${area.slug}#webpage`,
+      url: `${baseUrl}/locations/${area.slug}`,
+      name: pageHeading,
+      description: metaDescription,
+      about: {
+        "@id": `${baseUrl}/#localbusiness`,
       },
-    ],
-  };
+      breadcrumb: {
+        "@id": `${baseUrl}/locations/${area.slug}#breadcrumb`,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `${baseUrl}/locations/${area.slug}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${baseUrl}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Locations",
+          item: `${baseUrl}/locations`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: area.name,
+          item: `${baseUrl}/locations/${area.slug}`,
+        },
+      ],
+    },
+  ];
 
   return (
     <>
@@ -444,12 +472,17 @@ export default async function LocationPage({ params }: LocationPageProps) {
           <div className="location-hero-copy">
             <span className="location-kicker">
               <MapPin size={16} strokeWidth={2.5} aria-hidden="true" />
-              Service area
+              {area.customHeroKicker || "Service area"}
             </span>
-            <h1 id="location-heading">{area.customH1 || `Expert Device Repair for ${area.name} Residents`}</h1>
-            <p>
-              {area.customIntro || `A practical ${area.driveTime.toLowerCase()} trip to Ringwood Square for careful diagnostics, transparent quotes, and warranty-backed repairs from a specialist local bench.`}
-            </p>
+            <h1 id="location-heading">{pageHeading}</h1>
+            <p>{heroDescription}</p>
+            {area.heroHighlights ? (
+              <div className="location-landmarks">
+                {area.heroHighlights.map((highlight) => (
+                  <span key={highlight}>{highlight}</span>
+                ))}
+              </div>
+            ) : null}
 
             <div className="location-hero-actions">
               <Link href="/book-repair" className="repair-primary-action">
@@ -461,6 +494,23 @@ export default async function LocationPage({ params }: LocationPageProps) {
                 Call Now
               </a>
             </div>
+            {isRingwood ? (
+              <p style={{ marginTop: "1rem" }}>
+                For the full store overview, visit our{" "}
+                <Link href="/" style={{ color: "#1d4ed8", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>
+                  homepage
+                </Link>
+                , browse{" "}
+                <Link href="/repairs" style={{ color: "#1d4ed8", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>
+                  all repair categories
+                </Link>
+                , or{" "}
+                <Link href="/book-repair" style={{ color: "#1d4ed8", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>
+                  book online
+                </Link>{" "}
+                before you visit.
+              </p>
+            ) : null}
           </div>
 
           <aside className="location-route-card location-map-card" aria-label={`Transit route from ${area.name} to Ringwood Square`}>
@@ -566,11 +616,14 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
         <section className="location-trust-panel" aria-labelledby="location-trust-heading">
           <div className="location-section-heading">
-            <span className="location-kicker location-kicker-muted">Local repair support</span>
-            <h2 id="location-trust-heading">Why {area.name} residents choose our Ringwood repair desk</h2>
+            <span className="location-kicker location-kicker-muted">{isRingwood ? "Quick visit info" : "Local repair support"}</span>
+            <h2 id="location-trust-heading">
+              {isRingwood ? "Useful visit information before you come in" : `Why ${area.name} residents choose our Ringwood repair desk`}
+            </h2>
             <p>
-              We keep the visit practical: check the model, confirm the fault, explain parts availability,
-              and quote before repair. That matters when you are travelling from {area.name}.
+              {isRingwood
+                ? "Use this page to find Kiosk C1, parking, walk-in guidance, nearby suburb context, and the safest quote-first repair path before you arrive at Ringwood Square."
+                : `We keep the visit practical: check the model, confirm the fault, explain parts availability, and quote before repair. That matters when you are travelling from ${area.name}.`}
             </p>
           </div>
           <div className="location-reason-grid">
@@ -587,26 +640,13 @@ export default async function LocationPage({ params }: LocationPageProps) {
         </section>
 
         <section className="location-service-grid" aria-label="Repair services available from Ringwood Square">
-          <Link href="/repairs/phone" className="location-service-card">
-            <Wrench size={22} strokeWidth={2.5} aria-hidden="true" />
-            <strong>Phone Repair</strong>
-            <span>Screen, battery, charging, camera</span>
-          </Link>
-          <Link href="/repairs/tablet" className="location-service-card">
-            <Wrench size={22} strokeWidth={2.5} aria-hidden="true" />
-            <strong>Tablet Repair</strong>
-            <span>iPad and Samsung Tab support</span>
-          </Link>
-          <Link href="/repairs/laptop" className="location-service-card">
-            <Wrench size={22} strokeWidth={2.5} aria-hidden="true" />
-            <strong>Laptop Repair</strong>
-            <span>MacBook and Windows diagnostics</span>
-          </Link>
-          <Link href="/repairs/watch" className="location-service-card">
-            <ShieldCheck size={22} strokeWidth={2.5} aria-hidden="true" />
-            <strong>Watch Repair</strong>
-            <span>Screen and battery options</span>
-          </Link>
+          {locationServiceCards.map(({ href, title, detail, Icon }) => (
+            <Link key={href} href={href} className="location-service-card">
+              <Icon size={22} strokeWidth={2.5} aria-hidden="true" />
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </Link>
+          ))}
         </section>
 
         <section className="location-repair-section" aria-labelledby="location-popular-repairs-heading">
@@ -669,10 +709,11 @@ export default async function LocationPage({ params }: LocationPageProps) {
         <section className="location-content-grid" aria-label={`Common repair pages for ${area.name} customers`}>
           <article className="location-story-card">
             <span className="location-kicker location-kicker-muted">Common repair pages</span>
-            <h2>Popular repairs customers ask about near {area.name}</h2>
+            <h2>{isRingwood ? "Useful links before you visit our Ringwood Square kiosk" : `Popular repairs customers ask about near ${area.name}`}</h2>
             <p>
-              Customers often ask about these repair pages before they visit. You can check symptoms,
-              quote context, and booking details on each model-specific page.
+              {isRingwood
+                ? "Use these links to move from general store information into the correct repair hub, device category, or booking path before you come in."
+                : "Customers often ask about these repair pages before they visit. You can check symptoms, quote context, and booking details on each model-specific page."}
             </p>
             <div className="location-transit-guide">
               <ul>
@@ -730,7 +771,9 @@ export default async function LocationPage({ params }: LocationPageProps) {
         <section className="location-faq-section" aria-labelledby="location-faq-heading">
           <div className="location-section-heading">
             <span className="location-kicker location-kicker-muted">Local questions</span>
-            <h2 id="location-faq-heading">Frequently asked questions for {area.name} customers</h2>
+            <h2 id="location-faq-heading">
+              {isRingwood ? "Frequently asked questions before visiting Ringwood Square" : `Frequently asked questions for ${area.name} customers`}
+            </h2>
           </div>
           <div className="location-faq-list">
             {area.customFaqs ? (
@@ -828,12 +871,22 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
         <section className="location-final-cta">
           <div>
-            <span className="location-kicker location-kicker-muted">Before you drive</span>
-            <h2>Device repair near {area.name}, handled from Ringwood Square</h2>
+            <span className="location-kicker location-kicker-muted">{area.customChecklistSection ? "Before you visit" : "Before you drive"}</span>
+            <h2>{area.customChecklistSection ? area.customChecklistSection.title : `Device repair near ${area.name}, handled from Ringwood Square`}</h2>
             <p>
-              Tell us your device model and symptom before you leave {area.name}. We can check the
-              likely repair path, parts availability, and whether booking or walking in makes more sense.
+              {area.customChecklistSection
+                ? area.customChecklistSection.intro
+                : `Tell us your device model and symptom before you leave ${area.name}. We can check the likely repair path, parts availability, and whether booking or walking in makes more sense.`}
             </p>
+            {area.customChecklistSection ? (
+              <div className="location-transit-guide">
+                <ul>
+                  {area.customChecklistSection.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
           <div className="location-final-actions">
             <a href="tel:0481058514" className="repair-primary-action">

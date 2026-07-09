@@ -8,8 +8,10 @@ export type ServiceArea = {
   localReason: string;
   metaTitle?: string;
   metaDescription?: string;
+  customHeroKicker?: string;
   customH1?: string;
   customIntro?: string;
+  heroHighlights?: string[];
   customLocalSection?: {
     title: string;
     paragraphs: string[];
@@ -18,6 +20,15 @@ export type ServiceArea = {
     title: string;
     paragraphs: string[];
   };
+  customChecklistSection?: {
+    title: string;
+    intro: string;
+    items: string[];
+  };
+  customTrustPoints?: Array<{
+    title: string;
+    description: string;
+  }>;
   customFaqs?: Array<{ question: string; answer: string }>;
   customLinks?: Array<{ href: string; label: string }>;
   showChineseServiceCta?: boolean;
@@ -32,6 +43,109 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Ringwood Square", "Eastland", "Ringwood Station"],
     route: "We are based at Kiosk C1 inside Ringwood Square Shopping Centre.",
     localReason: "Ringwood customers can usually combine a repair quote with shopping or errands nearby.",
+    metaTitle: "Visit Ali Mobile & Repair in Ringwood Square",
+    metaDescription: "Find Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre. Walk-ins are welcome for phone, tablet, Apple Watch and MacBook repair support, or book online before visiting.",
+    customHeroKicker: "Visit info",
+    customH1: "Visit Ali Mobile & Repair in Ringwood Square",
+    customIntro: "Find Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre. Walk-ins are welcome for phone, tablet, Apple Watch and MacBook repair support. You can book online before visiting or call ahead if you want us to check likely timing or parts availability first. Free parking is available, and many visitors come from nearby Ringwood East, Heathmont, Mitcham and Croydon.",
+    heroHighlights: [
+      "Kiosk C1",
+      "Walk-ins welcome",
+      "Book online or call ahead",
+      "Free parking available",
+      "Near Ringwood East, Heathmont, Mitcham and Croydon",
+    ],
+    customLocalSection: {
+      title: "How to find us at Ringwood Square",
+      paragraphs: [
+        "Find us at Kiosk C1 inside Ringwood Square Shopping Centre. If you are visiting for a quick repair check, bring the device to the kiosk and our team can help confirm the model, issue and quote path before repair.",
+        "If you are coming from nearby Ringwood East, Heathmont, Mitcham or Croydon, Ringwood Square is an easy local stop for a walk-in assessment or a pre-booked repair visit."
+      ]
+    },
+    customScenarioSection: {
+      title: "Walk-in support at Ringwood Square",
+      paragraphs: [
+        "If you are already in Ringwood Square, bring the device to Kiosk C1 for a practical assessment-first repair check. We can help confirm the model, inspect the issue, and explain the quote path before repair.",
+        "Walk-ins are welcome for phone, tablet, Apple Watch and MacBook support. Booking online or calling ahead is still useful if you want us to check less common models, likely timing or parts availability before you arrive."
+      ]
+    },
+    customChecklistSection: {
+      title: "Before you visit",
+      intro: "Back up important data if possible before visiting. We can inspect the device and explain the repair path, but repair timing and parts availability depend on the model and fault.",
+      items: [
+        "Bring the device itself, and any charger or cable if the issue involves power or charging.",
+        "Know the device model if possible, or bring any details that help us identify it quickly.",
+        "Bring the passcode if testing is needed after inspection or repair.",
+        "Back up important data if possible before visiting.",
+        "Call ahead for less common models or if you want us to check likely parts availability first."
+      ]
+    },
+    customTrustPoints: [
+      {
+        title: "Kiosk C1 inside Ringwood Square",
+        description: "Visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre for a face-to-face repair check."
+      },
+      {
+        title: "Walk-ins are welcome",
+        description: "You can bring the device straight to the kiosk for a quick assessment-first repair conversation."
+      },
+      {
+        title: "Book online or call ahead",
+        description: "Booking helps with queue priority, and calling ahead helps us check likely model notes, timing or parts availability."
+      },
+      {
+        title: "Free parking available",
+        description: "Ringwood Square offers free parking, which makes it easy to combine a repair visit with shopping or errands."
+      },
+      {
+        title: "Nearby suburb support",
+        description: "Many visitors come from Ringwood East, Heathmont, Mitcham and Croydon for the same Ringwood Square repair desk support."
+      },
+      {
+        title: "Assessment-first repair path",
+        description: "We inspect the device, explain the quote path, and confirm likely timing before repair. Timing depends on the model, fault and parts availability."
+      }
+    ],
+    customFaqs: [
+      {
+        question: "Where is Ali Mobile & Repair located in Ringwood?",
+        answer: "We are located at Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood."
+      },
+      {
+        question: "Can I walk in, or should I book before visiting?",
+        answer: "Walk-ins are welcome. Booking online or calling ahead is still helpful if you want us to check likely timing, queue context or parts availability before you arrive."
+      },
+      {
+        question: "Is parking available at Ringwood Square?",
+        answer: "Yes. Free parking is available at Ringwood Square Shopping Centre, which makes quick repair visits easier."
+      },
+      {
+        question: "What should I bring to the kiosk?",
+        answer: "Bring the device, and if possible bring the charger or cable for charging issues. If post-repair testing is needed, it also helps to have the passcode available."
+      },
+      {
+        question: "What if I do not know my exact device model?",
+        answer: "That is okay. Bring the device to Kiosk C1 and our team can help identify the model before confirming the repair path or quote."
+      },
+      {
+        question: "What repairs can be checked at this location?",
+        answer: "We can assess common phone, iPhone, Samsung, iPad and tablet, Apple Watch, MacBook and water damage repair enquiries from the Ringwood Square kiosk."
+      },
+      {
+        question: "Can I call ahead for less common models or parts availability?",
+        answer: "Yes. Calling ahead is recommended if the model is less common or if you want us to check likely parts availability before you come in."
+      }
+    ],
+    customLinks: [
+      { href: "/", label: "Ali Mobile & Repair homepage and store overview" },
+      { href: "/repairs", label: "All repair categories" },
+      { href: "/repairs/phone", label: "Phone repair options" },
+      { href: "/repairs/phone/apple", label: "iPhone repair hub" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair hub" },
+      { href: "/repairs/tablet", label: "iPad and tablet repair hub" },
+      { href: "/repairs/laptop/macbook", label: "MacBook assessment and repair options" },
+      { href: "/book-repair", label: "Book online before visiting" }
+    ]
   },
   {
     name: "Ringwood East",

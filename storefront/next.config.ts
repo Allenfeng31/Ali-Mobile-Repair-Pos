@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       { source: '/online-shopping', destination: '/', permanent: true },
       { source: '/copy-of-online-shopping', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
+      { source: '/location/:path*', destination: '/locations/:path*', permanent: true },
       { source: '/apple-price', destination: '/repairs/phone/iphone', permanent: true },
       { source: '/iphone-x', destination: '/repairs/phone/iphone', permanent: true },
       { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/iphone/iphone-13', permanent: true },
