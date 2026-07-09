@@ -1,10 +1,5 @@
 import React from 'react';
 
-export interface FAQ {
-  question: string;
-  answer: string;
-}
-
 interface StoreData {
   name: string;
   image: string;
@@ -51,11 +46,7 @@ const MAIN_STORE_CONFIG: StoreData = {
   priceRange: '$$',
 };
 
-interface StructuredDataProps {
-  faqs?: FAQ[];
-}
-
-export function StructuredData({ faqs }: StructuredDataProps) {
+export function StructuredData() {
   const getLocalBusinessSchema = (data: StoreData) => ({
     '@context': 'https://schema.org',
     '@type': 'MobilePhoneStore',
@@ -83,32 +74,12 @@ export function StructuredData({ faqs }: StructuredDataProps) {
     ]
   });
 
-  const getFAQSchema = (faqsList: FAQ[]) => ({
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqsList.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  });
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(getLocalBusinessSchema(MAIN_STORE_CONFIG)) }}
       />
-      
-      {faqs && faqs.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(getFAQSchema(faqs)) }}
-        />
-      )}
     </>
   );
 }

@@ -40,29 +40,6 @@ interface BrandPageProps {
   params: Promise<{ category: string; brand: string }>;
 }
 
-function buildFaqPageSchema(faqs?: Array<{ question: string; answer: string }> | null) {
-  const mainEntity = (faqs ?? [])
-    .filter((faq) => faq.question.trim() && faq.answer.trim())
-    .map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    }));
-
-  if (!mainEntity.length) {
-    return null;
-  }
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity,
-  };
-}
-
 const BRAND_HUB_REPAIR_TYPE_LINKS = [
   { href: "/repairs/screen-replacement", label: "Screen Replacement" },
   { href: "/repairs/battery-replacement", label: "Battery Replacement" },
@@ -1391,7 +1368,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "Choose Your Apple Watch"
       : "Choose Your Model";
   const phoneContent = isPhoneHub ? getPhoneBrandHubContent(brandSlug, brandName) : null;
-  const phoneFaqPageSchema = buildFaqPageSchema(phoneContent?.faqs);
   const brandHubHeading = isPhoneHub
     ? getPhoneBrandRepairKeyword(brandSlug, brandName)
     : isAppleWatchHub
@@ -1929,15 +1905,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           __html: JSON.stringify(brandHubServiceSchema)
         }}
       />
-      {phoneFaqPageSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(phoneFaqPageSchema)
-          }}
-        />
-      )}
-
       <section
         className="repair-tech-hero repair-tech-hero-compact"
         aria-labelledby="brand-repair-heading"

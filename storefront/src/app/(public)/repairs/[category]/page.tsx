@@ -268,34 +268,6 @@ const CATEGORY_COMMON_PROBLEMS: Record<string, Array<{ title: string; body: stri
   ],
 };
 
-type CategoryFaq = {
-  question: string;
-  answer: string;
-};
-
-function buildFaqPageSchema(faqs?: CategoryFaq[]) {
-  const mainEntity = (faqs ?? [])
-    .filter((faq) => faq.question.trim() && faq.answer.trim())
-    .map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    }));
-
-  if (!mainEntity.length) {
-    return null;
-  }
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity,
-  };
-}
-
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { category: catRaw } = await params;
   const category = formatDynamicParam(catRaw).toLowerCase();
@@ -374,7 +346,6 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const isTablet = category === 'tablet';
   const isPhone = category === 'phone';
   const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
-  const faqPageSchema = buildFaqPageSchema(data.faqs);
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
   const watchBrandSectionCopy = 'Select your exact Apple Watch model to view compatible repair options and current pricing where available.';
@@ -414,14 +385,6 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             })
           }}
         />
-        {faqPageSchema && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(faqPageSchema)
-            }}
-          />
-        )}
         <section
           className={`repair-tech-hero repair-tech-hero-${category}`}
           aria-labelledby="category-repair-heading"

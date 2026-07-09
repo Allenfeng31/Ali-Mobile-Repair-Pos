@@ -86,34 +86,12 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     jsonLd.image = [postData.image];
   }
 
-  const faqJsonLd =
-    postData.source === "markdown" && Array.isArray(postData.faqs) && postData.faqs.length > 0
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: postData.faqs.map((faq) => ({
-            "@type": "Question",
-            name: faq.question,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: faq.answer,
-            },
-          })),
-        }
-      : null;
-
   return (
     <main className={styles.page}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {faqJsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-        />
-      )}
       <div className={styles.shell}>
         <Link href="/blog" className={styles.backLink}>
           Back to Blog

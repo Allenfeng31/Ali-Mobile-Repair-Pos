@@ -1,17 +1,11 @@
 import Script from "next/script";
 
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
 interface ServiceSchemaProps {
   serviceName: string;
   description: string;
-  faqs?: FAQItem[];
 }
 
-export function ServiceSchema({ serviceName, description, faqs }: ServiceSchemaProps) {
+export function ServiceSchema({ serviceName, description }: ServiceSchemaProps) {
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "MobilePhoneStore",
@@ -44,19 +38,6 @@ export function ServiceSchema({ serviceName, description, faqs }: ServiceSchemaP
     ]
   };
 
-  const faqSchema = faqs && faqs.length > 0 ? {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  } : null;
-
   return (
     <>
       <Script
@@ -64,13 +45,6 @@ export function ServiceSchema({ serviceName, description, faqs }: ServiceSchemaP
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
-      {faqSchema && (
-        <Script
-          id="faq-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
-      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Script from "next/script";
 
 interface SchemaOrgProps {
-  type: 'LocalBusiness' | 'Service' | 'FAQPage';
+  type: 'LocalBusiness' | 'Service';
   data: any;
 }
 
@@ -94,21 +94,6 @@ export function LocalBusinessSchema() {
   };
 
   return <SchemaOrg type="LocalBusiness" data={businessData} />;
-}
-
-export function FAQSchema({ faqs }: { faqs: { question: string; answer: string }[] }) {
-  const faqData = {
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-
-  return <SchemaOrg type="FAQPage" data={faqData} />;
 }
 
 export function RepairServiceSchema({

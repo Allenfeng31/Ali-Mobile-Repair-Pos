@@ -40,19 +40,6 @@ const FAQS = [
   },
 ];
 
-const FAQ_SCHEMA = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQS.map((faq) => ({
-    '@type': 'Question',
-    name: faq.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.answer,
-    },
-  })),
-};
-
 export const metadata: Metadata = {
   title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
@@ -128,11 +115,6 @@ export default async function ChargingPortReplacementPage() {
       <ServiceSchema
         serviceName="Charging Port Repair Services in Ringwood"
         description={PAGE_DESCRIPTION}
-      />
-      <script
-        id="faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
       />
       <script
         type="application/ld+json"

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Script from 'next/script';
 import { ChevronDown } from 'lucide-react';
 import styles from './HomeFAQ.module.css';
 
@@ -43,31 +42,12 @@ const faqs = [
 export default function HomeFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
     <section className={styles.section}>
-      <Script
-        id="faq-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-
       <div className={styles.inner}>
         <div className={styles.header}>
           <span className={styles.kicker}>Repair clarity</span>
