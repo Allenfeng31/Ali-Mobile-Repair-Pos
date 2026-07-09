@@ -59,7 +59,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Near Eastland and Ringwood Station",
       paragraphs: [
-        "Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, close to Ringwood's main shopping and transport area. If you are visiting Eastland, Ringwood Square or the nearby Ringwood area, you can bring your phone, tablet, Apple Watch or MacBook to our kiosk for a repair check, quote path or booking support.",
+        "Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, close to Ringwood's main shopping and transport area. We are not inside Eastland. You can find us at Kiosk C1 inside Ringwood Square Shopping Centre, close to Eastland and Ringwood Station. If you are visiting Eastland, Ringwood Square or the nearby Ringwood area, you can bring your phone, tablet, Apple Watch or MacBook to our kiosk for a repair check, quote path or booking support.",
         "If you are coming from nearby Ringwood East, Heathmont, Mitcham or Croydon, or you are already close to Eastland and Ringwood Station, Ringwood Square is an easy local stop for a walk-in assessment or a pre-booked repair visit."
       ]
     },
