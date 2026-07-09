@@ -506,6 +506,7 @@ export function CustomersView() {
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [reviewSent, setReviewSent] = useState(false);
   const [partNotifiedId, setPartNotifiedId] = useState<string | null>(null);
+  const [completedNotifiedId, setCompletedNotifiedId] = useState<string | null>(null);
   const [sendingReviewId, setSendingReviewId] = useState<string | null>(null);
   const [scannerTarget, setScannerTarget] = useState<{ mode: 'add'; deviceIndex: number } | { mode: 'repair' } | null>(null);
   const [upsells, setUpsells] = useState<any[]>([]);
@@ -707,6 +708,21 @@ export function CustomersView() {
     } catch (err) {
       console.error('Failed to send review SMS:', err);
       setSendingReviewId(null);
+    }
+  };
+
+  const handleNotifyCompleted = async (repair: any, customer: Customer) => {
+    if (!repair || !customer || !customer.phone) return;
+    setCompletedNotifiedId(repair.id);
+    try {
+      await api.sendSms(customer.phone, 'completed', {
+        customerName: customer.name,
+        deviceModel: repair.modelNumber || repair.repairItem
+      });
+      setTimeout(() => setCompletedNotifiedId(null), 3000);
+    } catch (err) {
+      console.error('Failed to send completed SMS:', err);
+      setCompletedNotifiedId(null);
     }
   };
 
@@ -972,11 +988,6 @@ export function CustomersView() {
         return c;
       });
 
-      if (smsCustomer?.phone) {
-        api.sendSms(smsCustomer.phone, 'completed', {
-          customerName: smsCustomer.name, deviceModel: smsRepairItem
-        }).catch(() => { });
-      }
       setCustomers(updatedCustomers);
     } catch (err) {
       console.error(err);
@@ -1923,6 +1934,23 @@ export function CustomersView() {
                           Dismiss
                         </button>
                       </div>
+
+                      <button
+                        onClick={() => handleNotifyCompleted(selectedRepair, selectedCustomer!)}
+                        disabled={completedNotifiedId === selectedRepair.id}
+                        className={cn(
+                          "w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-[0.98] transition-all border border-emerald-200/20",
+                          completedNotifiedId === selectedRepair.id
+                            ? "bg-emerald-600 text-white"
+                            : "bg-emerald-50 text-emerald-600 shadow-[var(--shadow-neu-flat)]"
+                        )}
+                      >
+                        {completedNotifiedId === selectedRepair.id ? (
+                          <><Check size={18} strokeWidth={4} /> COMPLETION SMS SENT</>
+                        ) : (
+                          <><MessageSquare size={18} strokeWidth={3} /> SEND COMPLETION SMS</>
+                        )}
+                      </button>
 
                       <button
                         onClick={() => handleNotifyPart(selectedRepair, selectedCustomer!)}
