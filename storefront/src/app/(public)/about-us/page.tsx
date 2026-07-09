@@ -297,7 +297,8 @@ export default function AboutUsPage() {
           <h2>Bring the device in. We will tell you what is worth fixing.</h2>
           <p>
             Visit Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 or book online for priority service. Most common screen and battery
-            repairs can often be handled the same day when parts and queue timing allow.
+            same-day repair may be available for many common phone models when parts are in stock
+            and queue timing allows.
           </p>
           <Link href="/book-repair" className={styles.primaryAction}>
             Book Repair Now

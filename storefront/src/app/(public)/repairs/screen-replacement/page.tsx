@@ -41,7 +41,7 @@ const FAQS = [
   {
     question: 'How long does screen replacement take?',
     answer:
-      'Many common screen replacements can be completed the same day when the correct part is in stock and there is no extra damage. Timing depends on the model, part availability, repair queue and the condition of the device, so we recommend calling first.',
+      'Same-day screen replacement may be available for many common phone models when the correct part is in stock and there is no extra damage. Timing depends on the model, part availability, repair queue and the condition of the device, so we recommend calling first.',
   },
 ];
 

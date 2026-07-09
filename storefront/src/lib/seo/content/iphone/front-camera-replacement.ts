@@ -247,7 +247,7 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
             return {
               question: `Can ${modelName} front camera replacement be done the same day in Ringwood?`,
               answer:
-                "Many front camera repairs can be handled the same day when the correct part is available and no hidden top-assembly or board-level issue changes the scope.",
+                "Same-day front camera repair may be available when the correct part is in stock and no hidden top-assembly or board-level issue changes the scope.",
             };
           default:
             return item;

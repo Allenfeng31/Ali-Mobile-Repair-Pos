@@ -1381,7 +1381,7 @@ const IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "Can Ali Mobile replace my iPhone 13 battery the same day in Ringwood?",
       answer:
-        "Yes, most iPhone 13 battery replacements are completed the same day at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 when the correct battery is in stock and there is no hidden liquid, charging-port, or board damage.",
+        "Same-day battery replacement may be available at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 when the correct battery is in stock and there is no hidden liquid, charging-port, or board damage.",
     },
     {
       question: "What battery symptoms should I check before visiting?",
@@ -1496,7 +1496,7 @@ const IPHONE_13_CHARGING_PORT_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "Can you replace an iPhone 13 charging port the same day in Ringwood?",
       answer:
-        "Most iPhone 13 charging port repairs can be completed the same day when the part is available and the fault is limited to the lower port assembly.",
+        "Same-day charging port repair may be available when the correct part is in stock and the fault is limited to the lower port assembly.",
     },
     {
       question: "Do you test data connection after iPhone 13 charging port repair?",
@@ -1746,7 +1746,7 @@ const IPHONE_13_CAMERA_REPAIR_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "Can iPhone 13 camera repair be done same day in Ringwood?",
       answer:
-        "Many iPhone 13 camera repairs can be handled the same day when the correct part is available and no hidden board or liquid damage is found.",
+        "Same-day camera repair may be available when the correct part is in stock and no hidden board or liquid damage is found.",
     },
   ],
 };
@@ -2749,7 +2749,7 @@ function buildSamsungS23ScreenPocket(
       {
         question: `How long does ${modelName} screen replacement take in Ringwood?`,
         answer:
-          `Most ${context.brandName} screen repairs can be handled same day when the correct display assembly is available and there is no hidden frame, liquid, or board damage.`,
+          `Same-day screen repair may be available when the correct display assembly is in stock and there is no hidden frame, liquid, or board damage.`,
       },
       {
         question: `Do you test fingerprint and touch after ${modelName} screen repair?`,
@@ -2839,7 +2839,7 @@ function buildSamsungS23BatteryPocket(
       { step: "04", title: "Handover validation", description: wirelessHandover },
     ],
     faq: [
-      { question: `Can Ali Mobile replace my ${modelName} battery same day?`, answer: "Usually yes when the correct battery is available and no hidden liquid, charging, or board fault is found." },
+      { question: `Can Ali Mobile replace my ${modelName} battery same day?`, answer: "Same-day battery repair may be available when the correct battery is in stock and no hidden liquid, charging, or board fault is found." },
       { question: `Do you test charging after ${modelName} battery service?`, answer: wirelessFaq },
       { question: `What if my ${modelName} still drains quickly after battery replacement?`, answer: "If drain continues after a known-good battery, we explain the next diagnostic path, such as app load, charging-port faults, or board-level current draw." },
     ],
@@ -4426,7 +4426,7 @@ const META_DESCRIPTION_TEMPLATES = [
   (m: string, r: string) =>
     `Need a ${m} ${r.toLowerCase()}? Our Ringwood experts offer fast turnaround for many common repairs with premium-quality parts and warranty support on eligible repairs.`,
   (m: string, r: string) =>
-    `Walk-in ${m} ${r.toLowerCase()} at Ali Mobile Ringwood. Same-day options for common repairs when parts are available, transparent pricing, and free diagnostics.`,
+    `Walk-in ${m} ${r.toLowerCase()} at Ali Mobile Ringwood. Same-day options may be available for common repairs when parts are in stock, with transparent pricing and free diagnostics.`,
   (m: string, r: string) =>
     `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Fast quote and repair options, warranty support on eligible parts, and free diagnostics. Get started today.`,
 ];

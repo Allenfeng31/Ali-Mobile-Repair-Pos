@@ -1320,7 +1320,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     description = 'MacBook repair services in Ringwood for supported screen, battery, keyboard or top case, charging and diagnostic issues. Visit Ali Mobile & Repair at Ringwood Square to confirm the model, parts availability and suitable repair options.';
   } else {
     title = `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
-    description = `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Most common repairs under 1 hour when parts are in stock, with warranty support on eligible repairs.`;
+    description = `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Fast repair may be available for common jobs when parts are in stock, with warranty support on eligible repairs.`;
   }
 
   const metadata: Metadata = {
@@ -1742,8 +1742,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             body: "Most iPhone screen replacements take about 30 minutes, while most iPhone battery replacements take less than 30 minutes once the correct part is available.",
           },
           {
-            title: "Same-Day Repairs for Common Models",
-            body: "Many common iPhone repairs can be completed the same day when parts are available. Less common parts usually take around 1–2 days to arrive.",
+            title: "Same-day may be available",
+            body: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
           },
         ]
       : [
@@ -1760,8 +1760,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               : phoneContent?.timing.screen || `Many supported ${brandName} repairs can be completed quickly once the exact model and correct part are confirmed.`,
           },
           {
-            title: "Same-Day Repairs for Common Models",
-            body: `Many common ${brandName} repairs can be completed the same day when parts are available. Less common parts usually take around 1–2 days to arrive.`,
+            title: "Same-day may be available",
+            body: `Same-day repair may be available for many common ${brandName} models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.`,
           },
         ]
     : [];
@@ -1776,8 +1776,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           body: "Most iPad screen and battery repairs take about 45 minutes once the correct part is available.",
         },
         {
-          title: "Same-Day Repairs for Common Models",
-          body: "Many common iPad repairs can be completed the same day when parts are available. Less common parts usually take around 1-2 days to arrive.",
+          title: "Timing depends on parts availability",
+          body: "Some iPad repairs may be completed the same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
         },
       ]
     : [];
@@ -1793,7 +1793,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
         {
           title: "Timing Depends on Parts Availability",
-          body: "Many common Lenovo tablet repairs can be completed the same day when parts are available. Less common parts usually take around 1-2 days to arrive.",
+          body: "Some Lenovo tablet repairs may be completed the same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
         },
       ]
     : [];

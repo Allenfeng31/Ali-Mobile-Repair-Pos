@@ -52,7 +52,7 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
         ? `Water damage recovery typically takes around 1 hour for the initial assessment and cleaning. If the damage is extensive, our technicians will inform you beforehand.`
         : isBackGlass
         ? `Time depends on the specific ${model} variant and parts availability. Many back glass repairs need more time than simple screen or battery repairs, usually taking longer to ensure a safe, clean removal and precise bonding. We confirm the timeframe after checking the device at our Ringwood location.`
-        : `Most ${model} ${repairName.toLowerCase()} jobs are completed quickly at Ringwood Square Shopping Centre, often in under 1 hour for common parts. Walk-ins are welcome on weekdays for fast service.`
+        : `Many ${model} ${repairName.toLowerCase()} jobs are completed quickly at Ringwood Square Shopping Centre when the correct part is in stock. Walk-ins are welcome on weekdays, and we confirm timing after checking the model, fault and queue.`
     };
   }
 

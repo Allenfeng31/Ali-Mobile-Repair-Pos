@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     question: "How long does a repair usually take?",
-    answer: "Repair time depends on the model, issue, and parts availability. Many common repairs can often be completed the same day, but we confirm timing after checking the device."
+    answer: "Repair time depends on the model, issue, queue and parts availability. Same-day repair may be available for many common phone models when parts are in stock, but we confirm timing after checking the device."
   },
   {
     question: "What devices do you repair?",

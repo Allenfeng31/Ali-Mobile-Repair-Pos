@@ -31,7 +31,7 @@ const FAQS = [
   {
     question: 'How long does battery replacement take?',
     answer:
-      'Many common battery replacements can be completed the same day when the correct battery is in stock and the phone has no extra damage. Timing depends on the model, part availability, repair queue and device condition.',
+      'Same-day battery replacement may be available for many common phone models when the correct battery is in stock and the phone has no extra damage. Timing depends on the model, part availability, repair queue and device condition.',
   },
   {
     question: 'Will battery replacement delete my data?',

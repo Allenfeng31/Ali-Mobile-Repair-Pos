@@ -78,7 +78,7 @@ function buildSamsungNoteTimingCards(
 ): WhyChooseConfig['cards'] {
   return [
     {
-      title: 'Under 1 Hour',
+      title: 'Fast Repair Timing',
       icon: ClipboardCheck,
       points: underHourPoints,
     },
@@ -759,10 +759,10 @@ export function getSamsungWhyChooseContent(
           `We test the display output, touch response, and ${biometricLabel} to ensure your ${modelName} functions as expected after screen repair. Screen damage, frame condition, and calibration requirements can overlap, so we confirm the repair path before promising the outcome.`,
         cards: [
           {
-            title: 'Under 1 Hour',
+            title: 'Fast Repair Timing',
             icon: ClipboardCheck,
             points: [
-              `Many straightforward ${modelName} screen repairs can be completed in under an hour once the correct part and repair path are confirmed.`,
+              `Many straightforward ${modelName} screen repairs can be completed quickly once the correct part and repair path are confirmed.`,
               `We still inspect the ${displayLabel}, frame fit, and ${biometricLabel} before giving a timing estimate, so the quote stays realistic.`,
             ],
           },
@@ -807,10 +807,10 @@ export function getSamsungWhyChooseContent(
           `We clear debris and test cables before quoting a full port replacement for your ${modelName}. USB-C faults can overlap with battery or board issues, so we check the full charging path first.`,
         cards: [
           {
-            title: 'Under 1 Hour',
+            title: 'Fast Repair Timing',
             icon: ClipboardCheck,
             points: [
-              `Many straightforward ${chargingPortLabel} repairs can be completed in under an hour once the fault is confirmed.`,
+              `Many straightforward ${chargingPortLabel} repairs can be completed quickly once the fault and part availability are confirmed.`,
               `We still test cable fit, debris, and charge draw first so timing matches the actual repair path.`,
             ],
           },

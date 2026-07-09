@@ -249,7 +249,7 @@ export default function Home() {
               <h2 id="map-heading">Find us inside Ringwood Square</h2>
               <p>
                 Drop in at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check, quote confirmation, or same-day
-                repair path when parts are available.
+                repair path when parts are in stock and timing allows.
               </p>
 
               <div className="map-info-grid">

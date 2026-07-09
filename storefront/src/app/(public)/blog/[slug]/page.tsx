@@ -155,7 +155,8 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           <h2>Need a hands-on diagnosis?</h2>
           <p>
             Bring your phone, tablet, or laptop to Ali Mobile & Repair for a practical quote and
-            same-day help on common screen and battery repairs.
+            same-day repair may be available for many common phone models when parts are in stock.
+            Contact us first to confirm your model, issue and timing.
           </p>
           <Link href="/book-repair" className={styles.ctaButton}>
             Book Repair Now

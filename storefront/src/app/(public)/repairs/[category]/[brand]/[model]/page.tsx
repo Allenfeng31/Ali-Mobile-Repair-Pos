@@ -236,7 +236,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
       : isPhoneModelPage
       ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
-      : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
+      : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — fast repair may be available in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
     alternates: {
       canonical: canonicalPath,
     },
@@ -266,7 +266,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
         : isPhoneModelPage
         ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
-        : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — most common repairs under 1 hour in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
+        : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — fast repair may be available in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
       url: canonicalPath,
       type: "website",
       locale: "en_AU",
@@ -410,8 +410,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         : "Most iPhone screen replacements are usually completed in about 30 minutes once the correct part is available.",
     },
     {
-      title: "Same-day repairs for common models",
-      body: "Parts are normally available for most common iPhone models, allowing many repairs to be completed the same day. Less common or specific parts usually take around 1–2 days to arrive.",
+      title: "Same-day may be available",
+      body: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
   ];
   const iPhoneQuickAnswers = [
@@ -439,7 +439,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "04",
       title: "Can it normally be repaired today?",
-      body: "Parts are normally available for most common iPhone models, allowing many repairs to be completed the same day. Less common or specific parts usually take around 1–2 days to arrive.",
+      body: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     {
       number: "05",
@@ -530,7 +530,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Parts are normally available for most common iPhone models, allowing many repairs to be completed the same day. Less common or specific parts usually take around 1–2 days to arrive.",
+      answer: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     hasPublishedScreenOptions && screenOptions.length > 0
       ? {
@@ -632,7 +632,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "04",
       title: "Can it normally be repaired today?",
-      body: "Many common Samsung repairs can be completed the same day when parts are available. Less common or specific Samsung parts usually take around 1-2 days to arrive.",
+      body: "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     {
       number: "05",
@@ -723,7 +723,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Many common Samsung repairs can be completed the same day when parts are available. Less common or specific Samsung parts usually take around 1-2 days to arrive.",
+      answer: "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     activeScreenOptions.length > 0
       ? {
@@ -805,7 +805,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "04",
       title: "Can it normally be repaired today?",
-      body: "Many common Google Pixel repairs can be completed the same day when parts are available. Less common or specific Pixel parts usually take around 1–2 days to arrive.",
+      body: "Same-day repair may be available for many common Google Pixel models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     {
       number: "05",
@@ -896,7 +896,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Many common Google Pixel repairs can be completed the same day when parts are available. Less common or specific Pixel parts usually take around 1–2 days to arrive.",
+      answer: "Same-day repair may be available for many common Google Pixel models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     activeScreenOptions.length > 0
       ? {
@@ -970,7 +970,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "04",
       title: "Can it normally be repaired today?",
-      body: "Many common Oppo repairs can be completed the same day when parts are available. Less common or specific Oppo parts usually take around 1–2 days to arrive.",
+      body: "Same-day repair may be available for many common OPPO models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     {
       number: "05",
@@ -1061,7 +1061,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Many common Oppo repairs can be completed the same day when parts are available. Less common or specific Oppo parts usually take around 1–2 days to arrive.",
+      answer: "Same-day repair may be available for many common OPPO models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     activeScreenOptions.length > 0
       ? {
@@ -1103,7 +1103,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     {
       title: "Parts and timing confirmed first",
-      body: "Some common repairs can be completed the same day when parts are available. Less common or specific parts usually take around 1–2 days to arrive.",
+      body: "Same-day repair may be available for some common repairs when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
   ];
   const genericPhoneQuickAnswers = [
@@ -1131,7 +1131,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "04",
       title: "Can it normally be repaired today?",
-      body: "Some common phone repairs can be completed the same day when parts are available. Less common or specific parts usually take around 1–2 days to arrive.",
+      body: "Same-day repair may be available for some common phone repairs when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     {
       number: "05",
@@ -1222,7 +1222,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Some common phone repairs can be completed the same day when parts are available. Less common or specific parts usually take around 1–2 days to arrive.",
+      answer: "Same-day repair may be available for some common phone repairs when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     activeScreenOptions.length > 0
       ? {

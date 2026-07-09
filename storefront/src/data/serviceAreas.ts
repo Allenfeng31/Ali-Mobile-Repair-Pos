@@ -159,7 +159,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     transitAdvice: "A simple trip along Maroondah Highway or through Ringwood East Village.",
     landmarks: ["Ringwood East Station", "Maroondah Highway", "Ringwood Lake"],
     route: "Head west toward Ringwood Square and use the centre parking near Maroondah Highway.",
-    localReason: "Close enough for quick diagnostics, model checks, and same-day collection on common repairs.",
+    localReason: "Close enough for quick diagnostics, model checks, and same-day collection may be available on common repairs when parts are in stock.",
     metaTitle: "Ringwood East Phone & Device Repairs | Ringwood Square Kiosk C1",
     metaDescription: "Need phone, screen, or iPad repairs in Ringwood East? Drop by Kiosk C1 at Ringwood Square for face-to-face checks before any work begins. Read route guides.",
     customH1: "Quick Phone and Device Assessments for Ringwood East Locals",

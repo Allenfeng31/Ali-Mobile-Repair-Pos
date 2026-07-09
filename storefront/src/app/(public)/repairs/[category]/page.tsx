@@ -95,7 +95,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       description: "Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Same-day options may be available for common screen and battery repairs when parts are in stock.",
     },
     features: [
-      { t: "Same-day options when parts are in stock", d: "We confirm timing after checking the model and repair queue." },
+      { t: "Same-day may be available", d: "Contact us before visiting to confirm your model, issue, queue and parts availability." },
       { t: "Premium Quality Screens & Parts Available", d: "" },
       { t: "Fast repair options for common screens and batteries", d: "" },
       { t: "No Fix, No Charge Policy", d: "" },
@@ -111,7 +111,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       ]
     },
     faqs: [
-      { question: "How long does a phone repair take?", answer: "Common phone repairs can often be completed the same day when the correct part is available. Timing depends on the exact model, current stock, repair queue and final testing, so please call first if timing is important." },
+      { question: "How long does a phone repair take?", answer: "Around 80% of common phone models can usually be handled same day when parts are in stock. Contact us before visiting if you want to confirm your model, issue, queue and parts availability." },
       { question: "Will I lose my data during phone repair?", answer: "Most screen, battery and charging port repairs do not require a data wipe. We still recommend backing up where possible, especially if the phone has liquid exposure, logic board symptoms or severe damage that may carry higher data risk." },
       { question: "What should I do if my phone gets wet?", answer: "Turn the phone off if possible, do not charge it, and avoid repeatedly testing it. Bring it in for assessment early so corrosion and internal damage can be checked. Liquid exposure outcomes depend on the damage found during inspection." },
       { question: "What if my phone will not charge?", answer: "Charging faults can be caused by the cable, charger, charging port, battery, liquid exposure or a board-level issue. We start with diagnosis before replacing parts and confirm the quote before proceeding." },
@@ -151,7 +151,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
     faqs: [
       { question: "Do you repair cracked iPad screens in Ringwood?", answer: "Yes, we specialize in iPad screen repairs right here in Ringwood. Whether you only need the top glass or the entire LCD assembly replaced, same-day options may be available when parts are in stock." },
       { question: "What kind of replacement batteries do you use for tablets?", answer: "We use compatible replacement batteries selected for the model and confirm the available option before repair." },
-      { question: "How long does an iPad repair take?", answer: "Many common iPad repairs can be completed the same day when parts are in stock, but timing depends on adhesive curing, model, repair queue, and device condition." },
+      { question: "How long does an iPad repair take?", answer: "Some iPad repairs may be completed the same day when parts are in stock, but timing depends on adhesive curing, model, repair queue, and device condition." },
       { question: "What if my tablet will not turn on or only shows a black screen?", answer: "A no-power or black-screen tablet can be related to the display, battery, charging port, liquid exposure, connector damage or board-level faults. We inspect the device first so we can confirm the likely cause and quote the right repair path." },
       { question: "What is your warranty policy for tablet repairs?", answer: "Tablet screen and battery replacements are backed by our 180-day warranty. Warranty support depends on the fault confirmed at inspection and whether it relates to the completed repair." },
       { question: "Is my tablet data safe during the repair?", answer: "Data is normally not affected during standard screen or battery repairs, but we recommend backing up first whenever possible." }
@@ -764,8 +764,8 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   </article>
                   <article className="repair-signal-card">
                     <span>02</span>
-                    <h3>Same-day repairs</h3>
-                    <p>Around 70% of common phone models are supported by parts that are regularly kept in stock, so many repairs can be completed the same day.</p>
+                    <h3>Same-day may be available</h3>
+                    <p>Around 80% of common phone models can usually be handled same day when parts are in stock. Contact us before visiting if you want to confirm your model, issue, queue and parts availability.</p>
                   </article>
                   <article className="repair-signal-card">
                     <span>03</span>

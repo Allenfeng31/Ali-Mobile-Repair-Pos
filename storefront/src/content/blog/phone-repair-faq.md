@@ -12,7 +12,7 @@ faqs:
   - question: 'How much does phone repair cost?'
     answer: 'Phone repair cost depends on the model, repair type, part option and current availability. A quote should be confirmed before repair work proceeds.'
   - question: 'How long does phone repair take?'
-    answer: 'Common repairs can often be completed same day when parts are available, but timing depends on the model, stock, repair queue and testing. Call first to confirm.'
+    answer: 'Same-day repair may be available for many common phone models when parts are in stock, but timing depends on the model, stock, repair queue and testing. Call first to confirm.'
   - question: 'Will I lose my data during phone repair?'
     answer: 'Most screen, battery and charging port repairs do not require wiping data. Back up where possible because severe damage, liquid exposure or board faults can carry data risk.'
   - question: 'Do phone repair shops look at your photos?'
@@ -74,7 +74,7 @@ Before approving a [screen replacement](/repairs/screen-replacement), ask which 
 
 ### How long does phone repair take?
 
-Common repairs can often be completed same day when parts are available. Timing still depends on the exact model, current stock, repair queue, device condition and final testing.
+Same-day repair may be available for many common phone models when parts are in stock. Timing still depends on the exact model, current stock, repair queue, device condition and final testing.
 
 A cracked screen on a common model may move quickly if the correct part is in stock. A charging fault, liquid-damaged phone or no-power issue may need more diagnosis before a time estimate is useful. Call first if timing matters, especially before travelling.
 

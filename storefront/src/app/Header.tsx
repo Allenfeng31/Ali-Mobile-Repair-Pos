@@ -20,6 +20,24 @@ const repairMenuItems = [
   { label: 'Apple Watch Repairs', href: '/repairs/watch/apple' },
 ];
 
+const mobileDeviceMenuItems = [
+  { label: 'Phone Repair', href: '/repairs/phone' },
+  { label: 'iPhone Repair', href: '/repairs/phone/iphone' },
+  { label: 'Samsung Repair', href: '/repairs/phone/samsung' },
+  { label: 'Tablet Repair', href: '/repairs/tablet' },
+  { label: 'MacBook Repair', href: '/repairs/laptop/macbook' },
+  { label: 'Apple Watch Repair', href: '/repairs/watch/apple' },
+  { label: 'More Brand Repairs', href: '/repairs/phone' },
+];
+
+const mobileProblemMenuItems = [
+  { label: 'Screen Replacement', href: '/repairs/screen-replacement' },
+  { label: 'Battery Replacement', href: '/repairs/battery-replacement' },
+  { label: 'Charging Port Repair', href: '/repairs/charging-port-replacement' },
+  { label: 'Back Glass / Back Housing', href: '/repairs/back-glass-replacement' },
+  { label: 'Water Damage Assessment', href: '/repairs/water-damage' },
+];
+
 function getInitialTheme(): ThemeMode {
   return 'light'; // Forced light mode MVP
 }
@@ -338,7 +356,7 @@ export default function Header() {
                   aria-controls="mobile-service-repairs-panel"
                   onClick={() => toggleMobileGroup('service')}
                 >
-                  <span>Service &amp; Repairs</span>
+                  <span>By Device</span>
                   <ChevronDown size={18} className={openMobileGroup === 'service' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
                 </button>
                 <div
@@ -349,9 +367,9 @@ export default function Header() {
                     <Link href="/repairs" onClick={closeAllNavigationMenus} className="mobile-nav-group-link mobile-nav-group-link--overview">
                       All Service &amp; Repairs
                     </Link>
-                    <div className="mobile-repair-links" aria-label="Service and repair categories">
-                      {repairMenuItems.map((item) => (
-                        <Link key={item.href} href={item.href} onClick={handleServiceRepairSelection}>
+                    <div className="mobile-repair-links" aria-label="Device repair categories">
+                      {mobileDeviceMenuItems.map((item) => (
+                        <Link key={`${item.label}-${item.href}`} href={item.href} onClick={handleServiceRepairSelection}>
                           {item.label}
                         </Link>
                       ))}
@@ -367,7 +385,7 @@ export default function Header() {
                   aria-controls="mobile-repair-categories-panel"
                   onClick={() => toggleMobileGroup('repair-categories')}
                 >
-                  <span>Repair Categories</span>
+                  <span>By Problem</span>
                   <ChevronDown size={18} className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
                 </button>
                 <div
@@ -375,8 +393,8 @@ export default function Header() {
                   className={openMobileGroup === 'repair-categories' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
                 >
                   <div className="mobile-nav-group-panel-inner">
-                    <div className="mobile-repair-links" aria-label="Repair category hubs">
-                      {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
+                    <div className="mobile-repair-links" aria-label="Repair problem categories">
+                      {mobileProblemMenuItems.map((item) => (
                         <Link key={item.href} href={item.href} onClick={handleRepairCategorySelection}>
                           {item.label}
                         </Link>
