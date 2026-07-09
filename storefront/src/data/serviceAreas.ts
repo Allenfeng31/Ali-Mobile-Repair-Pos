@@ -47,11 +47,12 @@ export const SERVICE_AREAS: ServiceArea[] = [
     metaDescription: "Find Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre. Walk-ins are welcome for phone, tablet, Apple Watch and MacBook repair support, or book online before visiting.",
     customHeroKicker: "Visit info",
     customH1: "Visit Ali Mobile & Repair in Ringwood Square",
-    customIntro: "Find Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre. Walk-ins are welcome for phone, tablet, Apple Watch and MacBook repair support. You can book online before visiting or call ahead if you want us to check likely timing or parts availability first. Free parking is available, and many visitors come from nearby Ringwood East, Heathmont, Mitcham and Croydon.",
+    customIntro: "Find Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Walk-ins are welcome for phone, tablet, Apple Watch and MacBook repair support. You can book online before visiting or call ahead if you want us to check likely timing or parts availability first.",
     heroHighlights: [
       "Kiosk C1",
       "Walk-ins welcome",
       "Book online or call ahead",
+      "Opposite Bunnings Warehouse",
       "Free parking available",
       "Close to Eastland and Ringwood Station",
       "Near Ringwood East, Heathmont, Mitcham and Croydon",
