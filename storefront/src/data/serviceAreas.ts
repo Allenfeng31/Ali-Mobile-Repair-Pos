@@ -223,19 +223,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Warrandyte Road", "Ringwood North Shopping Centre", "EastLink"],
     route: "Come down Warrandyte Road, then enter Ringwood Square from the Maroondah Highway side.",
     localReason: "A practical nearby option when you want specialist device repair without heading into the CBD.",
-    metaTitle: "Ringwood North Phone & Tablet Checks | Kiosk C1 Ringwood Square",
+    metaTitle: "Phone Repair Near Ringwood North | Ali Mobile Ringwood",
     metaDescription: "Need phone screen, touch fault, or battery checks near Ringwood North? Drive south along Warrandyte Road to Kiosk C1, Ringwood Square for hands-on diagnostics.",
-    customH1: "Phone, Tablet and Battery Checks near Ringwood North",
-    customIntro: "Located just a short drive south along Warrandyte Road, our Ringwood Square kiosk offers hands-on diagnostics and troubleshooting for Ringwood North residents. We specialize in face-to-face counter checks for screen lines, touch faults, unexpected battery drain, and charging port issues, ensuring a clear diagnostic review before any parts are reserved.",
+    customH1: "Phone Repair Near Ringwood North",
+    customIntro: "Ringwood North customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit & Drive Guide from Ringwood North",
+      title: "Travelling for Repair from Ringwood North",
       paragraphs: [
         "Driving from Ringwood North is very straightforward. Head directly south along Warrandyte Road, which typically takes about 7 minutes depending on traffic. You can park in the main Ringwood Square Shopping Centre lot for easy counter access.",
         "If you are taking public transport, catch a local bus along the Warrandyte Road corridor towards Ringwood Station, then walk a few minutes into the shopping centre near Coles."
       ]
     },
     customScenarioSection: {
-      title: "Ringwood North Device Inspection Scenarios",
+      title: "Phone and Device Repairs near Ringwood North",
       paragraphs: [
         "We frequently help Ringwood North residents whose devices are displaying vertical screen lines or failing to respond to touch inputs. Instead of booking a blind repair, you can walk in or schedule a check so we can open the housing and test the display panel's connections.",
         "If your device experiences unexpected shutdowns, we inspect the battery's health and system logs to identify if the battery is failing or if a background software loop is causing the drain, explaining the options clearly at the counter."
@@ -533,6 +533,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Box Hill Central", "Box Hill Station", "Maroondah Highway"],
     route: "Take the Lilydale or Belgrave line to Ringwood Station, then walk to Ringwood Square Shopping Centre.",
     localReason: "Box Hill customers can use a direct train corridor to reach our Ringwood Square repair bench for clear quotes and warranty-backed service.",
+    metaTitle: "Phone, iPhone & Apple Repair Near Box Hill | Ali Mobile Ringwood",
     showChineseServiceCta: true,
   },
   {
@@ -633,6 +634,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Westfield Doncaster", "Doncaster Road", "Eastern Freeway"],
     route: "Drive through Springvale Road and Maroondah Highway or use EastLink toward Ringwood Square.",
     localReason: "Doncaster customers often compare repair options before travelling, so a quick phone check can confirm parts, price range, and timing.",
+    metaTitle: "Phone & iPhone Repair Near Doncaster | Ali Mobile Ringwood",
     showChineseServiceCta: true,
   },
   {
@@ -643,19 +645,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Bayswater Station", "Mountain Highway", "Bayswater Village"],
     route: "Travel west along Mountain Highway and continue toward Ringwood Square.",
     localReason: "A short drive for battery, screen, charging port, and tablet repairs with clear quote options.",
-    metaTitle: "Bayswater Phone, Tablet & Work Device Repairs | Ringwood Square",
+    metaTitle: "Phone & iPhone Repair Near Bayswater | Ali Mobile Ringwood",
     metaDescription: "Professional device repairs for Bayswater trades and local small businesses. Get charging, battery, and screen checks at Kiosk C1, Ringwood Square.",
-    customH1: "Phone, Tablet and Work-Device Assessments for Bayswater Customers",
-    customIntro: "For Bayswater trade workers, commercial businesses, and local families, our Ringwood Square kiosk provides face-to-face assessments for all your work and personal devices. We inspect charging ports, batteries, cracked screens, and USB-C issues directly at our counter, confirming quotes before any parts are ordered.",
+    customH1: "Phone & iPhone Repair Near Bayswater",
+    customIntro: "Bayswater customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Travelling from Bayswater to Ringwood Square",
+      title: "Travelling for Repair from Bayswater",
       paragraphs: [
         "Bayswater residents can easily access our Ringwood shop. Driving west along Mountain Highway or Bayswater Road typically takes about 12 minutes depending on traffic. You can park in the main centre lot near Coles for easy entry.",
         "If using public transport, the bus connections or a short train trip via Ringwood Station provide direct access, followed by a brief walk across the street into the shopping centre."
       ]
     },
     customScenarioSection: {
-      title: "Work-Device and Commercial Repair Scenarios",
+      title: "Phone and Device Repairs near Bayswater",
       paragraphs: [
         "We regularly support Bayswater tradespeople and local business owners who rely on their phones and tablets for daily operations. If your device has stopped charging or suffers from a rapidly draining battery, we run power draw tests at our bench.",
         "Instead of recommending an immediate port replacement, we inspect the port for dirt or structural damage. If it is clogged, we can clean it to restore function; otherwise, we quote the exact replacement part required."
@@ -705,19 +707,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Boronia Station", "Dorset Square", "Mountain Highway"],
     route: "Head north-west through Dorset Road or Mountain Highway toward Ringwood Square.",
     localReason: "Boronia customers can reach our bench without mailing a device away or waiting for a vague remote quote.",
-    metaTitle: "Boronia Phone Screen, Battery & Charging Checks | Kiosk C1",
+    metaTitle: "Phone & iPhone Repair Near Boronia | Ali Mobile Ringwood",
     metaDescription: "Need phone repairs near Boronia? Visit Kiosk C1 at Ringwood Square for face-to-face screen, battery, and charging checks. Direct Belgrave train line route.",
-    customH1: "Phone Screen, Battery and Charging Checks near Boronia",
-    customIntro: "For commuters and residents in Boronia, our repair bench at Ringwood Square Shopping Centre offers hands-on diagnostics just a short trip away. We specialize in face-to-face checks for cracked displays, battery degradation, charging port failures, and liquid exposure, ensuring we outline all repair options before any work begins.",
+    customH1: "Phone & iPhone Repair Near Boronia",
+    customIntro: "Boronia customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit Options from Boronia to Ringwood Square",
+      title: "Travelling for Repair from Boronia",
       paragraphs: [
         "Boronia locals can reach our kiosk easily by road or rail. Driving north-west via Boronia Road and Dorset Road typically takes about 16 minutes depending on traffic. Ringwood Square offers spacious free parking near Coles.",
         "If you are commuting, taking the Belgrave line train from Boronia Station to Ringwood Station is a short train connection of around 11 minutes. Our shop is just across the street from the station exit."
       ]
     },
     customScenarioSection: {
-      title: "Boronia Commuter & Daily Use Repair Scenarios",
+      title: "Phone and Device Repairs near Boronia",
       paragraphs: [
         "We often assist Boronia commuters who experience screen cracks or charging instability during their daily travels. If your phone drops or starts draining battery unexpectedly, we open the unit to check for internal wear and confirm the battery's cycle count.",
         "In liquid exposure cases, we run diagnostic checks to see if corrosion has affected the motherboard or charging ports, outlining a realistic assessment of whether the device can be saved before you spend money on replacement parts."
@@ -767,6 +769,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Burwood Highway", "Deakin University", "Vermont South"],
     route: "Drive east along Burwood Highway, then connect through Vermont South and Wantirna toward Ringwood.",
     localReason: "Burwood customers can phone ahead for repair pricing, model checks, and pickup timing before making the trip.",
+    metaTitle: "Phone, iPhone & Laptop Repair Near Burwood | Ali Mobile Ringwood",
     showChineseServiceCta: true,
   },
   {
@@ -778,19 +781,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Drive east via Whitehorse Road and Maroondah Highway toward Ringwood Square.",
     localReason: "Balwyn customers can use the direct eastern corridor for careful diagnostics and a clear quote before repair.",
     showChineseServiceCta: true,
-    metaTitle: "Balwyn Phone, Tablet & MacBook Repair Advice | Ringwood Square",
+    metaTitle: "Phone & iPhone Repair Near Balwyn | Ali Mobile Ringwood",
     metaDescription: "Premium phone, tablet, and MacBook diagnostics for Balwyn residents. Visit Kiosk C1 at Ringwood Square for face-to-face assessments and repair choices.",
-    customH1: "Phone, Tablet and MacBook Repair Advice for Balwyn Customers",
-    customIntro: "For Balwyn residents seeking clear explanations and transparent repair choices, our kiosk at Ringwood Square provides premium device diagnostics. We check screens, batteries, keyboards, and charging faults on iPhones, Samsung Galaxy models, iPads, and MacBooks, confirming parts availability before any work starts.",
+    customH1: "Phone & iPhone Repair Near Balwyn",
+    customIntro: "Balwyn customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit Connections from Balwyn to Ringwood Square",
+      title: "Travelling for Repair from Balwyn",
       paragraphs: [
         "Driving from Balwyn is direct via the Eastern Freeway corridor or Whitehorse Road/Maroondah Highway, which typically takes about 25 minutes depending on traffic. Ringwood Square has a large open-air free parking lot.",
         "If using public transport, catch a local bus to Box Hill Station, then take the Lilydale or Belgrave line train directly to Ringwood Station."
       ]
     },
     customScenarioSection: {
-      title: "Balwyn Premium Device Inspection Scenarios",
+      title: "iPhone and Apple Repairs near Balwyn",
       paragraphs: [
         "Many Balwyn clients travel to our kiosk for hands-on, face-to-face assessments of premium devices like MacBooks or higher-end iPhones. If a laptop keyboard fails or a phone screen flickers, we inspect the internal ribbon cables at our bench.",
         "We explain the difference between replacement tiers, check our inventory for immediate parts availability, and verify if same-visit servicing is practical before you authorize the repair."
@@ -840,19 +843,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Vermont South Shopping Centre", "Canterbury Road", "Terrara Park"],
     route: "Follow Canterbury Road east, then connect toward Ringwood Square.",
     localReason: "Customers from Vermont can phone ahead for a model check and avoid unnecessary travel if parts are unavailable.",
-    metaTitle: "Vermont Phone & iPad Repair Assessments | Ringwood Square Kiosk",
+    metaTitle: "Phone & iPhone Repair Near Vermont | Ali Mobile Ringwood",
     metaDescription: "Professional phone and iPad repair checks for Vermont families. Visit Kiosk C1 at Ringwood Square for hands-on battery and screen diagnostics.",
-    customH1: "Phone and iPad Repair Assessments for Vermont Families",
-    customIntro: "Located close to Mitcham and Nunawading, our Ringwood Square kiosk is the primary destination for Vermont families looking for practical, face-to-face device triage. We inspect personal phones and school iPads, helping you determine if a touch, screen, or battery repair is worthwhile before you commit to any costs.",
+    customH1: "Phone & iPhone Repair Near Vermont",
+    customIntro: "Vermont customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit & Drive Guide from Vermont",
+      title: "Travelling for Repair from Vermont",
       paragraphs: [
         "Vermont residents have a very quick commute to our kiosk. Driving north-east via Canterbury Road and Wantirna Road typically takes about 12 minutes depending on traffic. You can park in the free Ringwood Square lot close to Coles.",
         "If you are taking public transport, catch Bus 742 from Vermont directly to Ringwood Station, then walk across the road into the shopping centre."
       ]
     },
     customScenarioSection: {
-      title: "Vermont Family & School Device Scenarios",
+      title: "Phone and Device Repairs near Vermont",
       paragraphs: [
         "We frequently help parents whose children have dropped their school iPads or personal phones. Touch faults, display cracks, or bent frame shapes need careful checking; we assess the frame and digitizer layers at our bench to explain the repair choices.",
         "If a family phone is no longer holding a charge, we check the battery health and power draw. We confirm if a new battery will extend its life or if the charging port is the primary issue, keeping our quote transparent."
@@ -903,19 +906,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Drive north via Springvale Road and EastLink toward Ringwood Square.",
     localReason: "Springvale customers can call first for a practical quote and decide whether repair, pickup, or another timing option makes sense.",
     showChineseServiceCta: true,
-    metaTitle: "Springvale Phone & Tablet Repair Assessments | Ringwood Square",
+    metaTitle: "Phone & Mobile Repair Near Springvale | Ali Mobile Ringwood",
     metaDescription: "Need phone or tablet repair options near Springvale? Contact us before travelling to confirm the device model, likely repair options and parts availability.",
-    customH1: "Phone and Tablet Repair Advice for Springvale Customers",
-    customIntro: "For Springvale customers travelling from a busy commercial and multicultural precinct, our kiosk in Ringwood Square provides transparent, face-to-face advice, helping you plan the trip with clearer information about parts, repair options and expected timing before you travel.",
+    customH1: "Phone & Mobile Repair Near Springvale",
+    customIntro: "Springvale customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Driving & Public Transport from Springvale",
+      title: "Travelling for Repair from Springvale",
       paragraphs: [
         "Driving north via Springvale Road and EastLink typically takes about 28 minutes depending on traffic. Ringwood Square Shopping Centre offers spacious open-air parking near Coles.",
         "Alternatively, public transport users can take the SmartBus 902 toward Nunawading, then transfer to the Lilydale or Belgrave train line to reach Ringwood Station, which is directly opposite the shopping centre."
       ]
     },
     customScenarioSection: {
-      title: "Confirming Repair Scope Before Travelling from Springvale",
+      title: "Phone and Device Repairs near Springvale",
       paragraphs: [
         "Because of the travel distance, we advise customers from Springvale to call or message us before making the trip. We can verify your device model and confirm likely parts availability to help you plan your visit.",
         "At the kiosk, we perform a direct bench inspection of your phone or tablet, explaining the work and cost options in plain language before any repair begins."
@@ -965,19 +968,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mt Dandenong Road", "Kilsyth Shopping Centre", "Croydon Station"],
     route: "Drive west along Mt Dandenong Road and Maroondah Highway toward Ringwood Square.",
     localReason: "Kilsyth customers get a nearby specialist option for screen, battery, charging, and water-damage inspections.",
-    metaTitle: "Kilsyth Phone, Tablet & Device Checks | Ringwood Square C1",
+    metaTitle: "Phone & iPhone Repair Near Kilsyth | Ali Mobile Ringwood",
     metaDescription: "Professional phone, tablet, and work device checks for Kilsyth trades and families. Visit Kiosk C1 at Ringwood Square for hands-on diagnostics.",
-    customH1: "Phone, Tablet and Work-Device Checks for Kilsyth Customers",
-    customIntro: "For Kilsyth residents, trade workers, and families, our Ringwood Square kiosk is located just a short trip away via the Croydon corridor. We provide hands-on assessments for screen cracks, charging faults, and battery wear on personal and business devices, inspecting every device in your presence before any parts are ordered.",
+    customH1: "Phone & iPhone Repair Near Kilsyth",
+    customIntro: "Kilsyth customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Getting to Ringwood Square from Kilsyth",
+      title: "Travelling for Repair from Kilsyth",
       paragraphs: [
         "Travelling from Kilsyth is very convenient. Driving west via Mt Dandenong Road or Maroondah Highway typically takes about 18 minutes depending on traffic. You can park in the free Ringwood Square lot close to Coles.",
         "If you prefer public transport, local bus routes connect Kilsyth to Croydon Station, where you can take a brief train trip to Ringwood Station."
       ]
     },
     customScenarioSection: {
-      title: "Kilsyth Trade & Family Device Scenarios",
+      title: "Phone and Device Repairs near Kilsyth",
       paragraphs: [
         "We frequently assist Kilsyth tradespeople and families who want a direct counter inspection for charging port instability or screen cracks. We test the charging current draw and inspect the port under magnification to see if a repair is required.",
         "By opening the housing and testing the battery or display connections, we confirm the exact issue and explain the repair scope face-to-face, avoiding any surprise costs."
@@ -1027,19 +1030,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mooroolbark Station", "Manchester Road", "Brice Avenue"],
     route: "Head toward Ringwood via Manchester Road and use Ringwood Square parking.",
     localReason: "Helpful when you want a specialist repair bench close by without sending the device away.",
-    metaTitle: "Mooroolbark Phone Screen, Battery & Tablet Assessments | Ringwood",
+    metaTitle: "Phone & iPhone Repair Near Mooroolbark | Ali Mobile Ringwood",
     metaDescription: "Need phone repairs near Mooroolbark? Visit Kiosk C1 at Ringwood Square for commuter phone screen, battery, and tablet assessments. Lilydale line route.",
-    customH1: "Phone Screen, Battery and Tablet Assessments near Mooroolbark",
-    customIntro: "For Mooroolbark commuters, parents, and students, our repair kiosk at Ringwood Square Shopping Centre offers straightforward, face-to-face diagnostics. We inspect cracked displays, touch responsiveness issues, battery wear, and charging faults on phones and school iPads, providing a clear assessment before you make any decisions.",
+    customH1: "Phone & iPhone Repair Near Mooroolbark",
+    customIntro: "Mooroolbark customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit Guides from Mooroolbark to Kiosk C1",
+      title: "Travelling for Repair from Mooroolbark",
       paragraphs: [
         "Mooroolbark residents have direct rail and road connections to our kiosk. Driving south-west via Manchester Road and Maroondah Highway typically takes about 15 minutes depending on traffic. Free parking is available at Ringwood Square.",
         "If you are taking public transport, catch a train directly from Mooroolbark Station to Ringwood Station on the Lilydale line, which is a direct train connection. Our kiosk is a brief walk across the street from the station."
       ]
     },
     customScenarioSection: {
-      title: "Mooroolbark Commuter & Family Device Scenarios",
+      title: "Phone and Device Repairs near Mooroolbark",
       paragraphs: [
         "We often see Mooroolbark commuters drop off a phone showing touch failures, vertical lines, or rapid battery drain. We open the housing, test the display assembly, and run diagnostics to confirm if a component swap is needed.",
         "For parents with school iPads, we check if a cracked screen is a simple outer glass issue or if the underlying display panel has failed, explaining the most economical option before starting any work."
@@ -1090,19 +1093,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Drive via Ferntree Gully Road and EastLink toward Ringwood Square.",
     localReason: "Clayton customers can call ahead to confirm whether repair, quote, or pickup support is the smartest next step.",
     showChineseServiceCta: true,
-    metaTitle: "Clayton Phone, Laptop & Tablet Repair | Ringwood Square C1",
+    metaTitle: "Phone, Apple & Laptop Repair Near Clayton | Ali Mobile Ringwood",
     metaDescription: "Phone, tablet, and MacBook repair diagnostics for Clayton students, professionals, and residents. Visit Kiosk C1 at Ringwood Square for hands-on quotes.",
-    customH1: "Phone, Laptop and Tablet Repair Assessments for Clayton Customers",
-    customIntro: "For students, researchers, healthcare workers and local professionals around Clayton, our Ringwood Square kiosk offers straightforward, face-to-face diagnostics. We focus on phones, tablets, laptops and MacBooks with display, keyboard, battery, charging and USB-C faults, verifying repair viability before you approve any work.",
+    customH1: "Phone, Apple & Laptop Repair Near Clayton",
+    customIntro: "Clayton customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit & Travel Options from Clayton",
+      title: "Travelling for Repair from Clayton",
       paragraphs: [
         "Driving from Clayton typically takes about 30 minutes depending on traffic, via Ferntree Gully Road and EastLink. Ringwood Square has a spacious free parking lot.",
         "By train, you can catch the Cranbourne or Pakenham line to Richmond Station, then transfer to a Lilydale or Belgrave line train bound for Ringwood. The kiosk is a short walk from Ringwood Station."
       ]
     },
     customScenarioSection: {
-      title: "Clayton Tech Assessment & Diagnostics",
+      title: "Phone and Device Repairs near Clayton",
       paragraphs: [
         "If your laptop keyboard is sticking, your iPad screen is cracked, or your phone refuses to charge, we run a counter assessment to identify the exact fault.",
         "We discuss the available replacement components and expected timeframe, helping you confirm if a repair is worthwhile before approving the work."
@@ -1152,19 +1155,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Lilydale Station", "Maroondah Highway", "Lilydale Marketplace"],
     route: "Drive west along Maroondah Highway through Chirnside Park and Croydon into Ringwood.",
     localReason: "Lilydale customers can reach us on the same rail and road corridor for model checks and warranty-backed repair work.",
-    metaTitle: "Lilydale Device Repair Advice | Ringwood Square Kiosk C1",
+    metaTitle: "Phone & MacBook Repair Near Lilydale | Ali Mobile Ringwood",
     metaDescription: "Professional device repair advice for Lilydale customers. Get transparent phone, tablet, and MacBook diagnostics at Kiosk C1, Ringwood Square before you buy a new one.",
-    customH1: "Device Repair Advice for Lilydale Customers Travelling to Ringwood",
-    customIntro: "For Lilydale residents looking to save their devices and avoid costly new replacements, our Ringwood Square kiosk offers professional, face-to-face diagnostics. We examine screens, batteries, keyboards, and charging inputs on iPhones, Samsung Galaxy models, iPads, and MacBooks, checking parts availability and expected timing before work begins.",
+    customH1: "Phone & MacBook Repair Near Lilydale",
+    customIntro: "Lilydale customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit & Driving Corridor from Lilydale",
+      title: "Travelling for Repair from Lilydale",
       paragraphs: [
         "Driving from Lilydale is very direct. Head west along Maroondah Highway through Croydon, which typically takes about 18 minutes depending on traffic. Ringwood Square Shopping Centre has free open-air parking near Coles.",
         "If taking public transport, you can take a direct train connection from Lilydale Station to Ringwood Station. The train ride is approximately 15 minutes. Walk across the street to find our kiosk inside the centre."
       ]
     },
     customScenarioSection: {
-      title: "Lilydale Long-Distance Transit Scenarios",
+      title: "MacBook and Phone Repairs near Lilydale",
       paragraphs: [
         "Because Lilydale is located further out, many customers call us before making the trip to confirm parts availability and coordinate their visit. We walk you through the model numbers and verify if the display or battery is in stock.",
         "At the counter, we inspect the hardware, explain if a cracked screen is cosmetic or structural, and confirm the repair path so you don't make an unnecessary device replacement."
@@ -1214,19 +1217,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Chirnside Park Shopping Centre", "Maroondah Highway", "Lilydale Road"],
     route: "Drive west on Maroondah Highway through Croydon toward Ringwood Square.",
     localReason: "Chirnside Park customers can avoid sending devices away by visiting a nearby specialist bench in Ringwood.",
-    metaTitle: "Chirnside Park Phone & iPad Repair Options | Ringwood Square C1",
+    metaTitle: "Phone & iPhone Repair Near Chirnside Park | Ali Mobile Ringwood",
     metaDescription: "Need phone screen, iPad, or battery repairs near Chirnside Park? Visit Kiosk C1 at Ringwood Square for hands-on diagnostics. Read route details.",
-    customH1: "Phone, iPad and Battery Repair Options for Chirnside Park Families",
-    customIntro: "For families and residents in Chirnside Park, our repair desk inside Ringwood Square Shopping Centre is located just a short trip away down Maroondah Highway. We specialize in face-to-face inspections to diagnose phone screen damage, iPad touch responsiveness faults, and battery wear, helping you confirm if a repair is economical before work begins.",
+    customH1: "Phone & iPhone Repair Near Chirnside Park",
+    customIntro: "Chirnside Park customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Travelling from Chirnside Park to Kiosk C1",
+      title: "Travelling for Repair from Chirnside Park",
       paragraphs: [
         "Driving from Chirnside Park is direct. Follow Maroondah Highway south-west through Croydon into Ringwood, which typically takes about 16 minutes depending on traffic. Ringwood Square has a spacious free parking lot.",
         "If you are taking public transport, catch Bus 670 directly from Chirnside Park Shopping Centre to Ringwood Station, then walk across the street into Ringwood Square."
       ]
     },
     customScenarioSection: {
-      title: "Chirnside Park Family & School Device Scenarios",
+      title: "Phone and Device Repairs near Chirnside Park",
       paragraphs: [
         "We often see Chirnside Park parents drop off iPads used for school or personal phones that have been dropped. We inspect the glass digitizer, LCD panel, and frame alignment at our counter to verify the exact scope of the damage.",
         "We explain the repair options clearly, check parts availability, and confirm quotes before starting work so you can decide if the repair fits your budget."
@@ -1276,19 +1279,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Ferntree Gully Station", "Burwood Highway", "Dorset Road"],
     route: "Drive north via Burwood Highway, Dorset Road, or Mountain Highway toward Ringwood Square.",
     localReason: "Ferntree Gully customers can combine a direct train trip with transparent quotes and practical repair advice.",
-    metaTitle: "Ferntree Gully Screen, Battery & Charging Checks | Ringwood",
+    metaTitle: "Phone & iPhone Repair Near Ferntree Gully | Ali Mobile Ringwood",
     metaDescription: "Phone and tablet screen, battery, and charging assessments near Ferntree Gully. Visit Kiosk C1 at Ringwood Square for direct hands-on diagnostics.",
-    customH1: "Screen, Battery and Charging Assessments near Ferntree Gully",
-    customIntro: "For Ferntree Gully commuters and families, our kiosk inside Ringwood Square Shopping Centre provides hands-on assessments. If your device has suffered a drop, moisture exposure, or charging instability, we inspect the hardware to identify corrosion or component damage before you make a repair decision.",
+    customH1: "Phone & iPhone Repair Near Ferntree Gully",
+    customIntro: "Ferntree Gully customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Corridor Routes from Ferntree Gully to Kiosk C1",
+      title: "Travelling for Repair from Ferntree Gully",
       paragraphs: [
         "Driving north via Burwood Highway, Dorset Road, or Mountain Highway typically takes about 22 minutes depending on traffic. Ringwood Square has plenty of free parking.",
         "If using public transport, the Belgrave train line connects Ferntree Gully Station directly to Ringwood Station, making the trip highly convenient. We are located just across the street inside the centre."
       ]
     },
     customScenarioSection: {
-      title: "Ferntree Gully Hardware & Liquid Diagnostics",
+      title: "Phone and Device Repairs near Ferntree Gully",
       paragraphs: [
         "When a phone or tablet is dropped or exposed to damp conditions, internal issues can develop. We perform physical bench inspections to assess screen damage, battery wear, or charging port faults.",
         "If liquid exposure has occurred, we check for corrosion. We will explain what parts need replacement, so you can decide if the repair is practical."
@@ -1338,19 +1341,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Stud Road", "Knox Park", "Burwood Highway"],
     route: "Drive north via Stud Road and Boronia Road or use EastLink toward Ringwood Square.",
     localReason: "Knoxfield customers can phone ahead for symptom checks and avoid unnecessary travel if parts need to be ordered.",
-    metaTitle: "Knoxfield Phone, Tablet & Work-Device Diagnostics | Ringwood",
+    metaTitle: "Phone & iPhone Repair Near Knoxfield | Ali Mobile Ringwood",
     metaDescription: "Phone, tablet, and work-device diagnostics for Knoxfield trade and residential customers. Kiosk C1 at Ringwood Square provides upfront checks. Call first.",
-    customH1: "Phone, Tablet and Work-Device Diagnostics for Knoxfield Customers",
-    customIntro: "For Knoxfield trade workers, businesses, and residential customers, our Ringwood Square bench offers upfront device diagnostics. We inspect charging port problems, USB-C faults, battery drain, and damaged screens on work phones, Samsung devices, tablets, and laptops, verifying the repair scope before any components are ordered.",
+    customH1: "Phone & iPhone Repair Near Knoxfield",
+    customIntro: "Knoxfield customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Driving & Transit Routes from Knoxfield",
+      title: "Travelling for Repair from Knoxfield",
       paragraphs: [
         "Driving north from Knoxfield via Stud Road and Boronia Road, or connecting via Ferntree Gully Road and EastLink typically takes about 18 minutes depending on traffic. Ringwood Square Shopping Centre has free parking in front.",
         "If using public transport, the SmartBus 901 runs from the Stud Road or Burwood Highway corridor toward Ringwood Station."
       ]
     },
     customScenarioSection: {
-      title: "Knoxfield Work & Trade Device Diagnostics",
+      title: "Phone and Device Repairs near Knoxfield",
       paragraphs: [
         "A tradesperson, local worker or family customer brings in a device with a loose charging connection, damaged screen, battery drain or USB-C problem and wants a clear diagnosis first.",
         "We welcome enquiries about multiple business or work devices. Timing, pricing and parts availability are assessed based on the number of devices and the work required."
@@ -1400,19 +1403,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Stud Park Shopping Centre", "Stud Road", "Wellington Road"],
     route: "Drive via Stud Road, Ferntree Gully Road, or EastLink toward Ringwood Square.",
     localReason: "Rowville customers can get a clear repair path before travelling, including quote guidance and availability checks.",
-    metaTitle: "Rowville Phone, iPad & Family Device Repair | Ringwood",
+    metaTitle: "Phone & iPhone Repair Near Rowville | Ali Mobile Ringwood",
     metaDescription: "Phone, iPad, and family device repair options for Rowville. Visit Kiosk C1 at Ringwood Square for screen, battery, and charging checks.",
-    customH1: "Phone, iPad and Family Device Repair Options for Rowville",
-    customIntro: "For Rowville families, parents, and students, our repair bench inside Ringwood Square Shopping Centre offers hands-on diagnostics. We inspect cracked screens, touch display faults, and charging problems on family phones, laptops, and iPads used for school or study, helping you check costs and value before you travel.",
+    customH1: "Phone & iPhone Repair Near Rowville",
+    customIntro: "Rowville customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Local Travel Options from Rowville",
+      title: "Travelling for Repair from Rowville",
       paragraphs: [
         "Driving north via Stud Road, Ferntree Gully Road, or EastLink typically takes about 24 minutes depending on traffic. Free parking is available in the Ringwood Square Shopping Centre lot.",
         "For public transport, you can catch local bus connections from the Stud Park area to connect to Ringwood Station. Our kiosk is located just across the road inside the centre."
       ]
     },
     customScenarioSection: {
-      title: "Rowville Family Device Scenarios",
+      title: "Phone and Device Repairs near Rowville",
       paragraphs: [
         "We regularly help parents and students drop off iPads used for school or study that have shattered glass or touch responsiveness issues. We run checks at our counter to assess if the LCD is intact.",
         "We explain the repair steps and quote upfront, helping you decide if repairing is a practical alternative to buying a new device."
@@ -1462,19 +1465,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Springvale Road", "Mullum Mullum Creek Trail", "EastLink"],
     route: "Drive via Springvale Road, Maroondah Highway, or EastLink toward Ringwood Square.",
     localReason: "Donvale customers are close enough for fast diagnostics while still getting specialist phone, tablet, laptop, and watch support.",
-    metaTitle: "Donvale Phone, Tablet & Laptop Repair | Ringwood Square",
+    metaTitle: "Phone & iPhone Repair Near Donvale | Ali Mobile Ringwood",
     metaDescription: "Transparent phone, tablet, and laptop repair assessments for Donvale residents. Visit Kiosk C1 at Ringwood Square for hardware checks.",
-    customH1: "Phone, Tablet and Laptop Repair Assessments for Donvale Customers",
-    customIntro: "For Donvale families and professionals, our kiosk in Ringwood Square provides transparent, face-to-face advice. Whether your device has display lines, a worn battery, or charging issues, we explain our hardware assessment and part choices clearly before you approve any repair work.",
+    customH1: "Phone & iPhone Repair Near Donvale",
+    customIntro: "Donvale customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Transit and Driving Connections from Donvale",
+      title: "Travelling for Repair from Donvale",
       paragraphs: [
         "Driving from Donvale is direct. Head east via Doncaster Road, Mitcham Road, or connect via EastLink, which typically takes about 14 minutes depending on traffic. Ringwood Square provides a spacious parking lot.",
         "If you are taking public transport, you can use local bus connections toward Ringwood and nearby train services, such as catching the SmartBus 902 toward Nunawading Station and transferring to the Lilydale or Belgrave train line."
       ]
     },
     customScenarioSection: {
-      title: "Donvale Professional & Family Device Scenarios",
+      title: "Phone and Device Repairs near Donvale",
       paragraphs: [
         "We frequently assess work laptops, personal phones, or family iPads brought in by Donvale residents. We run diagnostic tests on the charging port draw, battery depletion rate, or touch panel responsiveness.",
         "We explain the repair options and provide a detailed quote before ordering any components or beginning the repair, ensuring you understand the practical value of the work."
@@ -1524,19 +1527,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Park Orchards Village", "Ringwood-Warrandyte Road", "Stintons Reserve"],
     route: "Drive south via Park Road or Ringwood-Warrandyte Road into Ringwood Square.",
     localReason: "Park Orchards customers can reach Ringwood quickly for local repair assessment without travelling into the CBD.",
-    metaTitle: "Phone, Tablet and Laptop Repair Advice for Park Orchards",
+    metaTitle: "Phone & iPhone Repair Near Park Orchards | Ali Mobile Ringwood",
     metaDescription: "Device repair advice for Park Orchards residents. Visit Kiosk C1 at Ringwood Square for screen, battery, and charging checks. Call first.",
-    customH1: "Device Repair Advice for Park Orchards Residents",
-    customIntro: "For Park Orchards families and residents, we offer clear advice on phone, tablet, and laptop hardware issues. We help you check parts availability and timing options before you travel so you can plan your visit to Ringwood Square efficiently.",
+    customH1: "Phone & iPhone Repair Near Park Orchards",
+    customIntro: "Park Orchards customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Driving Routes from Park Orchards",
+      title: "Travelling for Repair from Park Orchards",
       paragraphs: [
         "Travelling from Park Orchards is straightforward. Driving south via Park Road, Warrandyte Road, or connecting through Ringwood North routes typically takes about 12 minutes depending on traffic.",
         "Ringwood Square Shopping Centre has free open-air parking near Coles, making it easy to drop off your device at our kiosk."
       ]
     },
     customScenarioSection: {
-      title: "Park Orchards Device Visit Planning",
+      title: "Phone and Device Repairs near Park Orchards",
       paragraphs: [
         "We recommend that Park Orchards residents call us before visiting to confirm their device's model and likely fault description. This helps us check whether parts may need ordering and explain expected repair timing.",
         "At our kiosk, we run counter checks on power draw or display lines, providing a detailed quote first to help you decide if a repair is worthwhile."
@@ -1586,19 +1589,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Warrandyte Village", "Yarra Street", "Ringwood-Warrandyte Road"],
     route: "Drive via Ringwood-Warrandyte Road directly into Ringwood Square.",
     localReason: "Warrandyte customers can call first, confirm the likely repair path, and visit Ringwood only when it is worth the trip.",
-    metaTitle: "Warrandyte Phone, Battery & Charging Assessments | Ringwood",
+    metaTitle: "Phone & iPhone Repair Near Warrandyte | Ali Mobile Ringwood",
     metaDescription: "Professional phone, camera, and charging port checks for Warrandyte residents. Visit Kiosk C1 at Ringwood Square to clear dust, debris, and resolve charging instability.",
-    customH1: "Phone, Battery and Charging Assessments for Warrandyte Customers",
-    customIntro: "For Warrandyte residents travelling via the Warrandyte Road corridor, our kiosk inside Ringwood Square Shopping Centre provides direct hardware assessments. We focus on diagnosing camera lens damage, charging port instability from dust or pocket lint, and screen wear on devices exposed to rugged outdoor use along the Yarra River.",
+    customH1: "Phone & iPhone Repair Near Warrandyte",
+    customIntro: "Warrandyte customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Corridor Travel from Warrandyte",
+      title: "Travelling for Repair from Warrandyte",
       paragraphs: [
         "Driving south from the Yarra River along the Ringwood-Warrandyte Road corridor typically takes about 18 minutes depending on traffic. Ringwood Square has a spacious free parking lot.",
         "If you are taking public transport, you can use Bus 364 to Ringwood Station or other local bus connections along the Warrandyte Road corridor."
       ]
     },
     customScenarioSection: {
-      title: "Warrandyte Outdoor Use & Charging Diagnostics",
+      title: "Phone and Device Repairs near Warrandyte",
       paragraphs: [
         "We frequently assist Warrandyte residents whose phones are exposed to dirt, sand, and moisture from river walks or outdoor recreation. If a camera lens gets scratched, or the charging port becomes unstable, we perform a bench check to see if a simple cleaning or a replacement component is required.",
         "We test charging current draw and inspect the port contacts under magnification. If dust or debris is blocking the connection, we clear it at the counter, explaining the options clearly before any parts are replaced."
@@ -1648,6 +1651,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Blackburn Station", "Whitehorse Road", "Blackburn Square"],
     route: "Drive east via Whitehorse Road and Maroondah Highway through Nunawading and Mitcham.",
     localReason: "Blackburn customers have a direct train and road link to Ringwood Square for transparent quotes and warranty-backed repairs.",
+    metaTitle: "Phone & iPhone Repair Near Blackburn | Ali Mobile Ringwood",
     showChineseServiceCta: true,
   },
   {
@@ -1658,19 +1662,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Wonga Road", "Warranwood Reserve", "Yarra Valley Grammar"],
     route: "Drive south along Wonga Road and connect into Ringwood Square via Maroondah Highway.",
     localReason: "A nearby option for families and commuters who want quick assessment, honest pricing, and warranty support.",
-    metaTitle: "Warranwood Phone & iPad Repair Checks | Ringwood Square",
+    metaTitle: "Phone & iPhone Repair Near Warranwood | Ali Mobile Ringwood",
     metaDescription: "Phone and iPad repair assessments near Warranwood. Kiosk C1 at Ringwood Square provides hands-on display and battery checks for local residents.",
-    customH1: "Phone and iPad Repair Checks near Warranwood",
-    customIntro: "For Warranwood residents, our kiosk inside Ringwood Square Shopping Centre is a very short drive down Wonga Road or Plymouth Road. We provide convenient walk-in assessments for single-device issues, specializing in touch faults, cracked displays, and rapid battery wear before you plan your day's errands.",
+    customH1: "Phone & iPhone Repair Near Warranwood",
+    customIntro: "Warranwood customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
     customLocalSection: {
-      title: "Getting to Ringwood Square from Warranwood",
+      title: "Travelling for Repair from Warranwood",
       paragraphs: [
         "Warranwood is located close to our Ringwood bench. Driving south via Wonga Road or Plymouth Road typically takes about 10 minutes depending on traffic. Free parking is available in the Ringwood Square Shopping Centre car park.",
         "Our kiosk is situated inside the shopping centre, making it convenient to drop off your device while running errands in Ringwood."
       ]
     },
     customScenarioSection: {
-      title: "Warranwood Local Errands & Diagnostic Visit",
+      title: "Phone and Device Repairs near Warranwood",
       paragraphs: [
         "A customer drops in with a single device, such as a phone showing a flickering screen, touch unresponsiveness, or quick battery depletion, wanting a fast physical check while they shop.",
         "We perform a bench inspection under magnification at our counter, confirming if it is a simple connection issue or requires a replacement part, so you can decide how to proceed without delaying your day."
