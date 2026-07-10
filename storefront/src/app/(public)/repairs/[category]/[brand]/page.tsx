@@ -705,7 +705,7 @@ function getBatchPhoneServiceAreaDescription(config: BatchPhoneBrandHubConfig, a
 }
 
 const PHONE_FEATURED_SERVICE_AREA_SLUGS = ["ringwood-east", "heathmont", "mitcham", "croydon"];
-const MACBOOK_NEARBY_SERVICE_AREA_SLUGS = ["heathmont", "nunawading", "glenwaverley", "wantirna", "croydon"];
+const MACBOOK_NEARBY_SERVICE_AREA_SLUGS = ["heathmont", "nunawading", "glenwaverley", "wantirna", "clayton", "lilydale"];
 const APPLE_WATCH_NEARBY_SERVICE_AREA_SLUGS = ["croydon"];
 
 function buildFeaturedServiceAreaSource() {
@@ -823,7 +823,8 @@ function getMacBookServiceAreaDescription(areaName: string, index: number) {
     Nunawading: "MacBook repair near Nunawading is handled from our Ringwood Square repair desk after we confirm the exact MacBook Air or MacBook Pro model.",
     "Glen Waverley": "MacBook repair near Glen Waverley and Syndal customers can start online, then visit Kiosk C1 for assessment and quote support.",
     Wantirna: "MacBook repair near Wantirna and Studfield customers is assessment-led, with parts availability and timing confirmed before work begins.",
-    Croydon: "MacBook repair near Croydon customers can be checked at Ringwood Square for screen, battery, keyboard, charging and diagnostic pathways.",
+    Clayton: "MacBook repair near Clayton customers can call ahead before travelling to Ringwood Square for model, fault and parts-path checks.",
+    Lilydale: "MacBook repair near Lilydale customers can start with a model check, then visit Kiosk C1 for quote-first assessment support.",
   };
 
   return descriptions[areaName] || `${areaName} customers can choose their exact MacBook model before visiting our Ringwood Square repair desk.`;
@@ -2192,7 +2193,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <span className="repair-kicker">Nearby support</span>
               <h2 id="macbook-service-area-heading">Nearby MacBook repair service areas</h2>
               <p>
-                Customers also visit Ali Mobile & Repair at Ringwood Square from Heathmont, Nunawading, Glen Waverley, Wantirna and Croydon for MacBook repair assessment and quote support.
+                Customers also visit Ali Mobile & Repair at Ringwood Square from Heathmont, Nunawading, Glen Waverley, Wantirna, Clayton and Lilydale for MacBook repair assessment and quote support.
               </p>
             </div>
             <IPhoneServiceAreaLinks cards={macbookServiceAreas} />
