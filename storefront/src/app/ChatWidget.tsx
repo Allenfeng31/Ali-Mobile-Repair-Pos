@@ -55,6 +55,7 @@ export default function ChatWidget() {
   const [sending, setSending] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
 
   // "Intro" step: collect name & phone before chat
@@ -81,8 +82,10 @@ export default function ChatWidget() {
 
     if (savedName && introSent) {
       setStep('chat');
+      setSessionReady(true);
     } else {
       setStep('intro');
+      setSessionReady(false);
     }
     setMounted(true);
     setInitialized(true);
@@ -197,11 +200,11 @@ export default function ChatWidget() {
   }, [isOpen, ensureSession]);
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!initialized || !sessionReady) return;
     fetchMessages();
     pollRef.current = setInterval(fetchMessages, POLL_INTERVAL_MS);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [initialized, fetchMessages]);
+  }, [initialized, sessionReady, fetchMessages]);
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
@@ -241,6 +244,7 @@ export default function ChatWidget() {
         body: JSON.stringify({ content: introContent }),
       }).catch(() => {});
       localStorage.setItem(CUSTOMER_INTRO_SENT_KEY, '1');
+      setSessionReady(true);
       await fetchMessages();
     }
 
