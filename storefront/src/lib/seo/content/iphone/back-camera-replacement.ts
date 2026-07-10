@@ -117,7 +117,7 @@ export function applyIphoneBackCameraReplacementSeoPocket(
           name: "Final rear-camera mode retesting",
           shortDescription: copy.finalRetestingDescription,
           bestFor:
-            "Customers who want the rear camera path checked again before pickup rather than only having the module fitted.",
+            "Customers who want the rear camera path checked again before handover rather than only having the module fitted.",
           notes:
             "If another lens-glass, housing, or board-level issue remains, we explain that separately instead of assuming the module alone resolves it.",
         },

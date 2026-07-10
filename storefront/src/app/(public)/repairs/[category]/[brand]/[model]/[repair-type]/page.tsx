@@ -1294,7 +1294,7 @@ const IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
       shortDescription:
         "After fitting, we confirm boot stability, cable charging, charging draw, percentage reporting, and practical calibration guidance.",
       bestFor:
-        "Customers who want the phone tested before pickup rather than just having a part installed.",
+        "Customers who want the phone tested before handover rather than just having a part installed.",
       notes:
         "Battery percentage and health reporting can settle over the next few charge cycles after service.",
     },
@@ -1328,7 +1328,7 @@ const IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
     {
       title: "Capacity reading settle time",
       description:
-        "Battery percentage and health reporting can take a few charge cycles to settle after service, so we explain what to expect at pickup.",
+        "Battery percentage and health reporting can take a few charge cycles to settle after service, so we explain what to expect at handover.",
     },
     {
       title: "Heat or board-level power draw",
@@ -1371,7 +1371,7 @@ const IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "How does Ali Mobile handle the iPhone 13 battery health percentage calibration?",
       answer:
-        "We test charge draw, boot stability, and battery reporting after fitting. Battery percentage and health readings can settle over the next few charge cycles, so we give clear pickup guidance for charging, draining, and rechecking the reading.",
+        "We test charge draw, boot stability, and battery reporting after fitting. Battery percentage and health readings can settle over the next few charge cycles, so we give clear handover guidance for charging, draining, and rechecking the reading.",
     },
     {
       question: "Do you use high-capacity cells for iPhone 13 battery service in Ringwood?",
@@ -1501,7 +1501,7 @@ const IPHONE_13_CHARGING_PORT_SEO_POCKET: RepairTypeSeoPocket = {
     {
       question: "Do you test data connection after iPhone 13 charging port repair?",
       answer:
-        "Yes. We test wired charging, cable fit, USB data connection, microphone behaviour, speaker output, and compatible Lightning accessory detection before pickup.",
+        "Yes. We test wired charging, cable fit, USB data connection, microphone behaviour, speaker output, and compatible Lightning accessory detection before handover.",
     },
     {
       question: "What if the iPhone 13 charging fault is board-level?",
@@ -2755,8 +2755,8 @@ function buildSamsungS23ScreenPocket(
         question: `Do you test fingerprint and touch after ${modelName} screen repair?`,
         answer:
           profile.hasSPen
-            ? "Yes. We test touch, S Pen input, in-display fingerprint behaviour, brightness, cameras, charging, and normal phone functions before pickup."
-            : `Yes. We test touch response, ${profile.fingerprintSummary}, brightness, cameras, charging, and normal phone functions before pickup.`,
+            ? "Yes. We test touch, S Pen input, in-display fingerprint behaviour, brightness, cameras, charging, and normal phone functions before handover."
+            : `Yes. We test touch response, ${profile.fingerprintSummary}, brightness, cameras, charging, and normal phone functions before handover.`,
       },
       {
         question: `Will my ${modelName} stay water resistant after screen replacement?`,
@@ -2781,8 +2781,8 @@ function buildSamsungS23BatteryPocket(
     ? "Charging, wireless charging behaviour, boot stability, heat, and runtime expectations are checked before return."
     : "Charging, boot stability, heat, and runtime expectations are checked before return.";
   const wirelessFaq = profile.supportsWirelessCharging
-    ? "Yes. We test USB-C charging, wireless charging response, charge draw, boot stability, and heat before pickup."
-    : "Yes. We test USB-C charging, charge draw, boot stability, and heat before pickup.";
+    ? "Yes. We test USB-C charging, wireless charging response, charge draw, boot stability, and heat before handover."
+    : "Yes. We test USB-C charging, charge draw, boot stability, and heat before handover.";
 
   return {
     quickAnswer:
@@ -2808,7 +2808,7 @@ function buildSamsungS23BatteryPocket(
       {
         name: "Model-matched battery replacement",
         shortDescription:
-          `We fit a battery matched to the ${modelName} power requirements and check stable charging before pickup.`,
+          `We fit a battery matched to the ${modelName} power requirements and check stable charging before handover.`,
         bestFor:
           "Customers who want practical daily runtime restored with clear expectations.",
         notes:
@@ -2918,7 +2918,7 @@ function buildSamsungS23BackHousingPocket(
     repairOptions: [
       { name: "Rear glass replacement path", shortDescription: "For cracked back glass with a usable frame, we focus on controlled removal, cleanup, and clean rear panel bonding.", bestFor: "Cracked rear glass, lifted corners, or cosmetic damage without severe frame bend.", notes: coilNotes },
       { name: "Housing condition assessment", shortDescription: "If the side frame is bent or crushed, we check whether rear glass alone will sit correctly.", bestFor: "Corner dents, camera ring gaps, lifted back glass, or frame distortion after impact.", notes: "A bent frame can cause lifting or uneven bonding if ignored." },
-      { name: profile.supportsWirelessCharging ? "Wireless charging and camera validation" : "Rear function and camera validation", shortDescription: profile.supportsWirelessCharging ? "After repair, we check rear camera fit, wireless charging, NFC/payment awareness, buttons, and frame edges." : "After repair, we check rear camera fit, NFC/payment awareness, buttons, and frame edges.", bestFor: "Customers who want cosmetic repair plus functional checks before pickup.", notes: "Existing coil or camera-area impact damage is explained before final approval." },
+      { name: profile.supportsWirelessCharging ? "Wireless charging and camera validation" : "Rear function and camera validation", shortDescription: profile.supportsWirelessCharging ? "After repair, we check rear camera fit, wireless charging, NFC/payment awareness, buttons, and frame edges." : "After repair, we check rear camera fit, NFC/payment awareness, buttons, and frame edges.", bestFor: "Customers who want cosmetic repair plus functional checks before handover.", notes: "Existing coil or camera-area impact damage is explained before final approval." },
     ],
     commonProblems: [
       { title: "Cracked rear glass", description: "Broken glass can shed sharp flakes and allow dust or moisture into the rear housing area." },
@@ -3436,7 +3436,7 @@ function buildTabletRepairPocket(
       repairOptions: [
         { name: "Display assembly diagnosis", shortDescription: "We inspect glass cracks, touch response, display output, and frame shape before opening.", bestFor: "Cracked glass, no image, touch dead zones, or flicker.", notes: "If the frame is bent, we explain fit risk before starting." },
         { name: "Model-matched screen replacement", shortDescription: "We fit a model-matched display assembly and confirm clean bonding.", bestFor: "Tablets with clear display assembly damage and stable board behavior.", notes: "Quote and turnaround are confirmed before repair begins." },
-        { name: "Post-fit function checks", shortDescription: "After fitting, we test touch, brightness, front camera area, buttons, and charging response.", bestFor: "Customers who want practical handover checks before pickup.", notes: "Any additional fault found during testing is reported before extra work." },
+        { name: "Post-fit function checks", shortDescription: "After fitting, we test touch, brightness, front camera area, buttons, and charging response.", bestFor: "Customers who want practical handover checks before handover.", notes: "Any additional fault found during testing is reported before extra work." },
       ],
       commonProblems: [
         { title: "Cracked glass with unstable touch", description: "Touch can worsen over time even when the display still lights up." },
@@ -3452,7 +3452,7 @@ function buildTabletRepairPocket(
       ],
       faq: [
         { question: `Can you replace the screen on ${modelName} the same day?`, answer: "Same-day service depends on part availability and device condition. We confirm timing after bench inspection." },
-        { question: `Do you test touch response after ${modelName} screen repair?`, answer: "Yes. We test touch coverage, display output, buttons, and charging behavior before pickup." },
+        { question: `Do you test touch response after ${modelName} screen repair?`, answer: "Yes. We test touch coverage, display output, buttons, and charging behavior before handover." },
       ],
     };
   }
@@ -3470,7 +3470,7 @@ function buildTabletRepairPocket(
       repairOptions: [
         { name: "Battery health diagnosis", shortDescription: "We test charge hold, heat behavior, swelling signs, and charging response first.", bestFor: "Fast drain, short runtime, random shutdowns, or swelling concern.", notes: "Charging-port faults can mimic battery issues, so both are checked." },
         { name: "Battery replacement path", shortDescription: "We remove the old cell safely and fit a model-matched replacement battery.", bestFor: "Tablets with confirmed battery wear and stable main board behavior.", notes: "Adhesive cleanup and safe cable handling are part of the repair path." },
-        { name: "Handover charging checks", shortDescription: "We verify charging draw, boot behavior, and practical usage checks before pickup.", bestFor: "Customers who want confirmed power stability before return.", notes: "Quote and scope are always confirmed before opening the tablet." },
+        { name: "Handover charging checks", shortDescription: "We verify charging draw, boot behavior, and practical usage checks before handover.", bestFor: "Customers who want confirmed power stability before return.", notes: "Quote and scope are always confirmed before opening the tablet." },
       ],
       commonProblems: [
         { title: "Fast drain or short runtime", description: "Battery wear can reduce daily usage time and create unstable percentage drops." },
@@ -3504,7 +3504,7 @@ function buildTabletRepairPocket(
       repairOptions: [
         { name: "Port inspection and clean", shortDescription: "We inspect debris, corrosion, and cable seating before recommending replacement.", bestFor: "Loose cable fit, intermittent charging, or no-charge reports.", notes: "If cleaning solves the issue, we avoid unnecessary part replacement." },
         { name: "Port replacement path", shortDescription: "If port pins or sub-board paths fail, we quote the correct replacement path.", bestFor: "No charge response, worn pins, or unstable connection behavior.", notes: "Frame and housing condition are checked to avoid connector stress." },
-        { name: "Post-repair power checks", shortDescription: "After repair, we test charging draw, cable fit, and practical use behavior.", bestFor: "Customers who want charging stability confirmed before pickup.", notes: "Quote confirmation is completed before opening the device." },
+        { name: "Post-repair power checks", shortDescription: "After repair, we test charging draw, cable fit, and practical use behavior.", bestFor: "Customers who want charging stability confirmed before handover.", notes: "Quote confirmation is completed before opening the device." },
       ],
       commonProblems: [
         { title: "Cable only charges at one angle", description: "Debris or pin wear can interrupt normal cable seating." },
@@ -3537,7 +3537,7 @@ function buildTabletRepairPocket(
     repairOptions: [
       { name: "General fault diagnosis", shortDescription: "We isolate the visible issue and test related functions before repair.", bestFor: "Unclear faults or multiple symptoms on one device.", notes: "Quote and scope are confirmed before work starts." },
       { name: "Part-level repair path", shortDescription: "When a module-level fault is confirmed, we quote the matching repair path.", bestFor: "Display, battery, charging, or button-related hardware issues.", notes: "We keep the repair scope practical and model-specific." },
-      { name: "Final function validation", shortDescription: "Before handover, we retest core functions related to the original fault.", bestFor: "Customers who want clear post-repair checks before pickup.", notes: "Any extra issue found is explained before additional work." },
+      { name: "Final function validation", shortDescription: "Before handover, we retest core functions related to the original fault.", bestFor: "Customers who want clear post-repair checks before handover.", notes: "Any extra issue found is explained before additional work." },
     ],
     commonProblems: [
       { title: "Visible physical damage", description: "Glass cracks, housing bends, or impact marks can affect more than one function." },
@@ -3574,7 +3574,7 @@ function buildLaptopRepairPocket(modelName: string, repairType: string): RepairT
       repairOptions: [
         { name: "Display fault diagnosis", shortDescription: "We test panel output, lines, flicker, backlight behavior, and external display response.", bestFor: "Cracked panel, black screen, flicker, or partial image faults.", notes: "Hinge pressure and cable movement are checked before quote confirmation." },
         { name: "Screen assembly replacement", shortDescription: "We fit the matched display assembly and align hinges and top-case seating.", bestFor: "Confirmed panel damage with stable board-level display output.", notes: "We confirm parts and quote before opening the unit." },
-        { name: "Post-repair validation", shortDescription: "After fitting, we test brightness control, camera area, hinge travel, and normal boot behavior.", bestFor: "Customers who want practical handover checks before pickup.", notes: "Any additional issue is reported before extra work." },
+        { name: "Post-repair validation", shortDescription: "After fitting, we test brightness control, camera area, hinge travel, and normal boot behavior.", bestFor: "Customers who want practical handover checks before handover.", notes: "Any additional issue is reported before extra work." },
       ],
       commonProblems: [
         { title: "Cracked panel with usable image", description: "A cracked panel can worsen and stress hinge-side cables with continued use." },
@@ -3607,7 +3607,7 @@ function buildLaptopRepairPocket(modelName: string, repairType: string): RepairT
       repairOptions: [
         { name: "Battery condition diagnosis", shortDescription: "We test charge hold, adapter response, shutdown behavior, and battery health indicators.", bestFor: "Fast drain, shutdowns, or poor runtime on battery power.", notes: "Power-path checks are done before confirming replacement." },
         { name: "Battery replacement path", shortDescription: "We replace the battery with careful cable handling and top-case inspection where required.", bestFor: "Confirmed battery wear with stable charging-path behavior.", notes: "Quote and scope are confirmed before opening the device." },
-        { name: "Post-repair power checks", shortDescription: "We test charging, boot stability, and practical runtime behavior before handover.", bestFor: "Customers who want confirmed power behavior before pickup.", notes: "If extra faults appear, we explain them before additional work." },
+        { name: "Post-repair power checks", shortDescription: "We test charging, boot stability, and practical runtime behavior before handover.", bestFor: "Customers who want confirmed power behavior before handover.", notes: "If extra faults appear, we explain them before additional work." },
       ],
       commonProblems: [
         { title: "Fast drain off charger", description: "Battery wear can shorten runtime and cause unstable percentage drops." },
@@ -3640,7 +3640,7 @@ function buildLaptopRepairPocket(modelName: string, repairType: string): RepairT
       repairOptions: [
         { name: "Key response diagnosis", shortDescription: "We test key registration, repeating keys, stuck keys, and backlight behavior.", bestFor: "Missing key input, sticky keys, or inconsistent typing response.", notes: "Top-case condition is checked before confirming repair path." },
         { name: "Keyboard or top-case replacement path", shortDescription: "We quote the correct keyboard-level or top-case-level replacement based on the model.", bestFor: "Failed keyboard matrix, liquid-damaged keys, or structural top-case issues.", notes: "Trackpad and cable routing checks are included before handover." },
-        { name: "Post-repair typing validation", shortDescription: "After repair, we test full-keyboard input, trackpad click/gesture response, and charging behavior.", bestFor: "Customers wanting full practical checks before pickup.", notes: "Quote confirmation happens before opening the laptop." },
+        { name: "Post-repair typing validation", shortDescription: "After repair, we test full-keyboard input, trackpad click/gesture response, and charging behavior.", bestFor: "Customers wanting full practical checks before handover.", notes: "Quote confirmation happens before opening the laptop." },
       ],
       commonProblems: [
         { title: "Missing or repeated key input", description: "Key matrix faults can cause dropped letters or repeated presses." },
@@ -3705,7 +3705,7 @@ function buildLaptopRepairPocket(modelName: string, repairType: string): RepairT
     repairOptions: [
       { name: "Fault diagnosis first", shortDescription: "We isolate the main fault and test related hardware before quoting.", bestFor: "Unclear or mixed symptoms that need a practical diagnosis.", notes: "Quote confirmation happens before disassembly." },
       { name: "Part-level repair path", shortDescription: "Where applicable, we quote module-level repair options matched to the model.", bestFor: "Display, battery, keyboard, or charging-path issues.", notes: "Any extra issue is explained before additional work." },
-      { name: "Final handover checks", shortDescription: "After repair, we test startup, input devices, ports, and core functions.", bestFor: "Customers wanting verified operation before pickup.", notes: "We keep the checks practical and repair-specific." },
+      { name: "Final handover checks", shortDescription: "After repair, we test startup, input devices, ports, and core functions.", bestFor: "Customers wanting verified operation before handover.", notes: "We keep the checks practical and repair-specific." },
     ],
     commonProblems: [
       { title: "Visible hardware damage", description: "Impact, pressure, or spill events can affect more than one subsystem." },
@@ -3741,7 +3741,7 @@ function buildWatchRepairPocket(modelName: string, repairType: string): RepairTy
       repairOptions: [
         { name: "Glass and display diagnosis", shortDescription: "We inspect cracks, display output, touch response, and housing fit before opening.", bestFor: "Cracked glass, no image, flicker, or weak touch response.", notes: "We confirm quote and scope before repair begins." },
         { name: "Display repair path", shortDescription: "We perform model-matched display repair with careful cable and housing handling.", bestFor: "Watches with confirmed display assembly damage.", notes: "Frame/housing condition is checked before final part commitment." },
-        { name: "Post-repair function checks", shortDescription: "After repair, we test touch response, display stability, charging, and button/crown behavior.", bestFor: "Customers wanting practical checks before pickup.", notes: "Seal condition is rebuilt carefully, with limitations explained at handover." },
+        { name: "Post-repair function checks", shortDescription: "After repair, we test touch response, display stability, charging, and button/crown behavior.", bestFor: "Customers wanting practical checks before handover.", notes: "Seal condition is rebuilt carefully, with limitations explained at handover." },
       ],
       commonProblems: [
         { title: "Cracked glass with partial touch", description: "Touch may still work in spots but usually degrades with continued use." },
@@ -3774,7 +3774,7 @@ function buildWatchRepairPocket(modelName: string, repairType: string): RepairTy
       repairOptions: [
         { name: "Battery behavior diagnosis", shortDescription: "We check runtime, charging response, and shutdown pattern before opening.", bestFor: "Fast drain, short runtime, or no-power watch symptoms.", notes: "Quote and scope are confirmed before service starts." },
         { name: "Battery replacement path", shortDescription: "We replace the battery with careful connector and housing handling.", bestFor: "Watches with confirmed battery wear or swelling risk.", notes: "Housing and seal condition are assessed during repair." },
-        { name: "Post-repair charging checks", shortDescription: "We test charging response, startup stability, and core operation before pickup.", bestFor: "Customers wanting confirmed power behavior at handover.", notes: "Water-resistance limitations are explained after repair." },
+        { name: "Post-repair charging checks", shortDescription: "We test charging response, startup stability, and core operation before handover.", bestFor: "Customers wanting confirmed power behavior at handover.", notes: "Water-resistance limitations are explained after repair." },
       ],
       commonProblems: [
         { title: "Fast battery drain", description: "Battery wear can reduce daily usage time and charging stability." },
@@ -3806,7 +3806,7 @@ function buildWatchRepairPocket(modelName: string, repairType: string): RepairTy
     repairOptions: [
       { name: "General watch diagnosis", shortDescription: "We inspect the main fault and test related functions before quote confirmation.", bestFor: "Unclear faults across display, touch, battery, or charging behavior.", notes: "Repair scope is always confirmed before opening." },
       { name: "Part-level repair path", shortDescription: "When the fault is confirmed, we quote the matching part-level repair path.", bestFor: "Known display, battery, charging, or housing faults.", notes: "Any extra fault found is explained before additional work." },
-      { name: "Final handover checks", shortDescription: "After repair, we retest key watch functions before pickup.", bestFor: "Customers who want practical function checks at handover.", notes: "Water-resistance limitations are explained after opening." },
+      { name: "Final handover checks", shortDescription: "After repair, we retest key watch functions before handover.", bestFor: "Customers who want practical function checks at handover.", notes: "Water-resistance limitations are explained after opening." },
     ],
     commonProblems: [
       { title: "Display or touch instability", description: "Cracks or impact can cause image faults and weak touch response." },
@@ -3881,7 +3881,7 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { step: "01", title: "Test known-good accessories", description: "We test with reliable cable and charger before replacing parts." },
       { step: "02", title: "Inspect the USB-C port", description: "We check fit, debris, corrosion, and signs of liquid exposure." },
       { step: "03", title: "Confirm charging path", description: "We verify whether the fault matches a port or charging board repair path." },
-      { step: "04", title: "Retest charging before pickup", description: "After repair, we confirm stable cable fit and charging response." },
+      { step: "04", title: "Retest charging before handover", description: "After repair, we confirm stable cable fit and charging response." },
     ],
     faq: [
       { question: "Can you check my Galaxy S22 cable before replacing the charging port?", answer: "Yes. Bring the cable or charger that causes the issue and we will test it before confirming the charging port repair." },
@@ -4070,7 +4070,7 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       { step: "01", title: "Display and touch test", description: "We confirm OLED output condition, brightness behaviour, and touch coverage." },
       { step: "02", title: "Inspect frame impact points", description: "We check corners and edge fit risks before confirming screen replacement." },
       { step: "03", title: "Confirm quote and repair scope", description: "We confirm the display path and quote before fitting the replacement screen." },
-      { step: "04", title: "Final handover checks", description: "We retest display, touch, camera, speaker, and charging behaviour before pickup." },
+      { step: "04", title: "Final handover checks", description: "We retest display, touch, camera, speaker, and charging behaviour before handover." },
     ],
     faq: [
       { question: "Do you check frame damage before Galaxy S24 Ultra screen replacement?", answer: "Yes. We inspect frame and corner condition first because impact points can affect display fit and repair stability." },
@@ -4191,7 +4191,7 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
       options: "What do we check before replacing this S23 Ultra screen?",
       diagnostics: "How do we confirm the display fault?",
       symptoms: "Which screen symptoms matter most?",
-      outcomes: "What do we retest before pickup?",
+      outcomes: "What do we retest before handover?",
     },
     repairOptions: [
       { name: "AMOLED and touch diagnosis", shortDescription: "We test image output, black-screen symptoms, line or flicker faults, and touch coverage across the full panel.", bestFor: "Cracked glass, no image, partial touch, or unstable display output.", notes: "The screen path and quote are confirmed before parts are fitted." },
@@ -4226,7 +4226,7 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
     repairOptions: [
       { name: "Curved OLED diagnosis", shortDescription: "We test black-screen faults, green lines, flicker, brightness behaviour, and curved-edge touch response before quoting.", bestFor: "Cracked glass, no image, display lines, or touch loss.", notes: "We confirm the repair path before fitting the replacement screen." },
       { name: "Fingerprint and frame pressure review", shortDescription: "We inspect lower-screen behaviour, frame pressure, and edge damage that can affect display fit.", bestFor: "Phones with corner drops, lower-screen faults, or visible housing stress.", notes: "Fit risks are explained before repair begins." },
-      { name: "Final daily-use function check", shortDescription: "After fitting, we retest touch, brightness, fingerprint-area behaviour, calls, charging response, and camera-area function.", bestFor: "Customers who want the main day-to-day functions checked before pickup.", notes: "Back up important data before repair when possible." },
+      { name: "Final daily-use function check", shortDescription: "After fitting, we retest touch, brightness, fingerprint-area behaviour, calls, charging response, and camera-area function.", bestFor: "Customers who want the main day-to-day functions checked before handover.", notes: "Back up important data before repair when possible." },
     ],
     commonProblems: [
       { title: "Green line, black screen, or flicker", description: "Curved OLED panels can show line artefacts, dark image loss, or flicker after impact." },

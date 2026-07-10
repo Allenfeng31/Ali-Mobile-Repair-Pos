@@ -68,7 +68,7 @@ export function buildIpadChargingPortReplacementPocket(config: IpadHardwareConfi
         shortDescription:
           `${getIpadSchoolUseSentence(config)} After repair we retest charging response, cable fit, and ${biometricTestLabel.toLowerCase()} before handover.`,
         bestFor:
-          'Customers who want the connector path and related functions rechecked before pickup.',
+          'Customers who want the connector path and related functions rechecked before handover.',
         notes:
           'Existing impact or liquid exposure can expand the scope and is explained before extra work is suggested.',
       },

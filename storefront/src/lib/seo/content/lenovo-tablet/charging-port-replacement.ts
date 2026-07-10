@@ -52,7 +52,7 @@ export function buildLenovoTabletChargingPortReplacementPocket(
     {
       step: '07',
       title: 'Perform post-repair function checks',
-      description: `Before pickup, we retest ${getLenovoTabletPostRepairChecks('charging-port-replacement')}.`,
+      description: `Before handover, we retest ${getLenovoTabletPostRepairChecks('charging-port-replacement')}.`,
     },
   ] as const;
 
@@ -87,7 +87,7 @@ export function buildLenovoTabletChargingPortReplacementPocket(
       },
       {
         name: 'Post-repair connection checks',
-        shortDescription: `After repair we retest ${getLenovoTabletPostRepairChecks('charging-port-replacement')} before pickup.`,
+        shortDescription: `After repair we retest ${getLenovoTabletPostRepairChecks('charging-port-replacement')} before handover.`,
         bestFor: 'Customers who want the main charging and connection behaviour checked before they collect the tablet.',
         notes: 'Booking, quote, and store-visit options stay available through the current system.',
       },
@@ -116,7 +116,7 @@ export function buildLenovoTabletChargingPortReplacementPocket(
       },
       {
         question: `Is charging and data connection tested after ${config.modelName} charging-port replacement?`,
-        answer: 'Yes. We retest cable fit, charging connection, charging response, and data or accessory connection where applicable before pickup.',
+        answer: 'Yes. We retest cable fit, charging connection, charging response, and data or accessory connection where applicable before handover.',
       },
       {
         question: `How do I confirm my exact Lenovo tablet model before booking?`,

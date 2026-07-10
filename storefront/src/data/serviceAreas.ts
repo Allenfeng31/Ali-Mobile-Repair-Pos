@@ -160,7 +160,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     transitAdvice: "A simple trip along Maroondah Highway or through Ringwood East Village.",
     landmarks: ["Ringwood East Station", "Maroondah Highway", "Ringwood Lake"],
     route: "Head west toward Ringwood Square and use the centre parking near Maroondah Highway.",
-    localReason: "Close enough for quick diagnostics, model checks, and same-day collection may be available on common repairs when parts are in stock.",
+    localReason: "Close enough for quick diagnostics, model checks, and same-day repair may be available on common repairs when parts are in stock.",
     metaTitle: "Phone & iPhone Repair Near Ringwood East | Ali Mobile Ringwood Square",
     metaDescription: "Need phone, iPhone, Samsung, iPad or MacBook repair near Ringwood East? Visit Kiosk C1 inside Ringwood Square Shopping Centre for face-to-face checks.",
     customH1: "Phone Repair Near Ringwood East",
@@ -785,7 +785,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     transitAdvice: "Use Tram 75 toward Vermont South, then connect to Ringwood by bus.",
     landmarks: ["Burwood Highway", "Deakin University", "Vermont South"],
     route: "Drive east along Burwood Highway, then connect through Vermont South and Wantirna toward Ringwood.",
-    localReason: "Burwood customers can phone ahead for repair pricing, model checks, and pickup timing before making the trip.",
+    localReason: "Burwood customers can phone ahead for repair pricing, model checks, and repair timing before making the trip.",
     metaTitle: "Phone, iPhone & Laptop Repair Near Burwood | Ali Mobile Ringwood",
     showChineseServiceCta: true,
   },
@@ -921,7 +921,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     transitAdvice: "Use SmartBus 902 toward Nunawading, then transfer to the Lilydale or Belgrave line.",
     landmarks: ["Springvale Station", "Springvale Road", "EastLink"],
     route: "Drive north via Springvale Road and EastLink toward Ringwood Square.",
-    localReason: "Springvale customers can call first for a practical quote and decide whether repair, pickup, or another timing option makes sense.",
+    localReason: "Springvale customers can call first for a practical quote and decide on a repair timing option that makes sense.",
     showChineseServiceCta: true,
     metaTitle: "Phone & Mobile Repair Near Springvale | Ali Mobile Ringwood",
     metaDescription: "Need phone or tablet repair options near Springvale? Contact us before travelling to confirm the device model, likely repair options and parts availability.",
@@ -1061,7 +1061,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customScenarioSection: {
       title: "Phone and Device Repairs near Mooroolbark",
       paragraphs: [
-        "We often see Mooroolbark commuters drop off a phone showing touch failures, vertical lines, or rapid battery drain. We open the housing, test the display assembly, and run diagnostics to confirm if a component swap is needed.",
+        "We often see Mooroolbark commuters bring in a phone showing touch failures, vertical lines, or rapid battery drain. We open the housing, test the display assembly, and run diagnostics to confirm if a component swap is needed.",
         "For parents with school iPads, we check if a cracked screen is a simple outer glass issue or if the underlying display panel has failed, explaining the most economical option before starting any work."
       ]
     },
@@ -1071,8 +1071,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "No, our physical store is Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Mooroolbark is typically a 15-minute drive or a short direct train ride away."
       },
       {
-        question: "Can Mooroolbark commuters drop off devices on their way to work?",
-        answer: "Yes. You can drop off your device in the morning near Ringwood Station and pick it up on your return commute in the afternoon."
+        question: "Can Mooroolbark commuters leave devices on their way to work?",
+        answer: "Yes. You can leave your device in the morning near Ringwood Station and collect it on your return commute in the afternoon."
       },
       {
         question: "How fast do you swap batteries or screens?",
@@ -1248,7 +1248,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customScenarioSection: {
       title: "Phone and Device Repairs near Chirnside Park",
       paragraphs: [
-        "We often see Chirnside Park parents drop off iPads used for school or personal phones that have been dropped. We inspect the glass digitizer, LCD panel, and frame alignment at our counter to verify the exact scope of the damage.",
+        "We often see Chirnside Park parents bring in iPads used for school or personal phones that have been dropped. We inspect the glass digitizer, LCD panel, and frame alignment at our counter to verify the exact scope of the damage.",
         "We explain the repair options clearly, check parts availability, and confirm quotes before starting work so you can decide if the repair fits your budget."
       ]
     },
@@ -1434,7 +1434,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customScenarioSection: {
       title: "Phone and Device Repairs near Rowville",
       paragraphs: [
-        "We regularly help parents and students drop off iPads used for school or study that have shattered glass or touch responsiveness issues. We run checks at our counter to assess if the LCD is intact.",
+        "We regularly help parents and students bring in iPads used for school or study that have shattered glass or touch responsiveness issues. We run checks at our counter to assess if the LCD is intact.",
         "We explain the repair steps and quote upfront, helping you decide if repairing is a practical alternative to buying a new device."
       ]
     },
@@ -1552,7 +1552,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Travelling for Repair from Park Orchards",
       paragraphs: [
         "Travelling from Park Orchards is straightforward. Driving south via Park Road, Warrandyte Road, or connecting through Ringwood North routes typically takes about 12 minutes depending on traffic.",
-        "Ringwood Square Shopping Centre has free open-air parking near Coles, making it easy to drop off your device at our kiosk."
+        "Ringwood Square Shopping Centre has free open-air parking near Coles, making it easy to bring in your device to our kiosk."
       ]
     },
     customScenarioSection: {
@@ -1564,8 +1564,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     },
     customFaqs: [
       {
-        question: "Do you offer a pickup or mobile repair service in Park Orchards?",
-        answer: "No. We do not provide a mobile home-call repair service or a collection or pickup service in Park Orchards. All assessments and repairs are performed in-person at our kiosk."
+        question: "Do you offer a mobile repair service in Park Orchards?",
+        answer: "No. We do not provide a mobile repair service in Park Orchards. All assessments and repairs are performed in-person at our kiosk."
       },
       {
         question: "Is there an Ali Mobile store inside Park Orchards?",
@@ -1687,7 +1687,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Travelling for Repair from Warranwood",
       paragraphs: [
         "Warranwood is located close to our Ringwood bench. Driving south via Wonga Road or Plymouth Road typically takes about 10 minutes depending on traffic. Free parking is available in the Ringwood Square Shopping Centre car park.",
-        "Our kiosk is situated inside the shopping centre, making it convenient to drop off your device while running errands in Ringwood."
+        "Our kiosk is situated inside the shopping centre, making it convenient to leave your device while running errands in Ringwood."
       ]
     },
     customScenarioSection: {

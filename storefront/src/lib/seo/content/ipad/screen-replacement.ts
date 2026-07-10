@@ -85,7 +85,7 @@ export function buildIpadScreenReplacementPocket(config: IpadHardwareConfig): Ip
         shortDescription:
           `After repair we retest touch coverage, brightness, display output, cameras, ${biometricTestLabel.toLowerCase()}, charging response, screen alignment, and edge fit.`,
         bestFor:
-          'Customers who want the key day-to-day functions rechecked before pickup.',
+          'Customers who want the key day-to-day functions rechecked before handover.',
         notes:
           'Any unrelated issue found during testing is explained before extra work is suggested.',
       },

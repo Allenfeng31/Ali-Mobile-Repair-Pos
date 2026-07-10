@@ -52,7 +52,7 @@ export function buildSamsungTabletFrontCameraReplacementPocket(
     {
       step: '07',
       title: 'Perform post-repair function checks',
-      description: `Before pickup, we retest ${getSamsungTabletPostRepairChecks('front-camera-replacement')}.`,
+      description: `Before handover, we retest ${getSamsungTabletPostRepairChecks('front-camera-replacement')}.`,
     },
   ] as const;
 
@@ -87,7 +87,7 @@ export function buildSamsungTabletFrontCameraReplacementPocket(
       },
       {
         name: 'Post-repair camera checks',
-        shortDescription: `After repair we retest ${getSamsungTabletPostRepairChecks('front-camera-replacement')} before pickup.`,
+        shortDescription: `After repair we retest ${getSamsungTabletPostRepairChecks('front-camera-replacement')} before handover.`,
         bestFor: 'Customers who want the main camera and video-call behaviour checked before they collect the tablet.',
         notes: 'Booking, quote, and store-visit options stay available through the current system.',
       },
@@ -116,7 +116,7 @@ export function buildSamsungTabletFrontCameraReplacementPocket(
       },
       {
         question: `What camera and video-call functions are tested after ${config.modelName} front-camera replacement?`,
-        answer: 'We retest camera preview, video-call behaviour, camera switching, and microphone basics before the tablet is ready for pickup.',
+        answer: 'We retest camera preview, video-call behaviour, camera switching, and microphone basics before the tablet is ready for return.',
       },
       {
         question: `How do I confirm my exact Galaxy Tab model before booking?`,

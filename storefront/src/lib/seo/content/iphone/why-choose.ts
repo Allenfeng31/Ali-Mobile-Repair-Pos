@@ -167,7 +167,7 @@ export function getIphoneWhyChooseContent(
           title: "Clear limitations before handover",
           icon: ClipboardCheck,
           points: [
-            "We explain the existing back-glass or back-housing repair notice and retest the main related functions before pickup.",
+            "We explain the existing back-glass or back-housing repair notice and retest the main related functions before handover.",
           ],
         },
       ],

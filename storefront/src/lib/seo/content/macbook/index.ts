@@ -484,7 +484,7 @@ bestFor: "Cracked displays, black image, line faults, flicker, or faults that ch
 notes: "Quote, part path, and fit risk are confirmed before approved repair work starts." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Air 11-inch 2014-2015.",
-bestFor: "Customers who want the main screen-related functions checked before pickup.",
+bestFor: "Customers who want the main screen-related functions checked before handover.",
 notes: "Any unrelated housing, battery, or board concern is explained separately before extra work." }
     ],
     commonProblems: [
@@ -503,7 +503,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We test brightness, lines, flicker, external display behaviour, and sleep/wake response where they apply." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air 11-inch 2014-2015." }
     ],
     faq: [
@@ -599,7 +599,7 @@ title: "Check charging and swelling",
 description: "We test MagSafe-era charging, inspect for pressure signs, and confirm battery replacement is the right path." },
       { step: "03",
 title: "Run handover power checks",
-description: "Before collection, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
+description: "Before handover, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
     ],
     faq: [
       {
@@ -769,7 +769,7 @@ bestFor: "Screens with cracks, dark sections, display lines, flicker, or lid-ang
 notes: "We confirm the quote, suitable part path, and any fit concern before work begins." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Air 13-inch 2014-2017.",
-bestFor: "Useful when you want display, camera-area, and lid behaviour checked before collection.",
+bestFor: "Useful when you want display, camera-area, and lid behaviour checked before handover.",
 notes: "If another housing, battery, or board issue appears, we explain it before extra work is considered." }
     ],
     commonProblems: [
@@ -788,7 +788,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Display output, brightness control, flicker, lines, external monitor behaviour, and sleep/wake response are checked." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air 13-inch 2014-2017." }
     ],
     faq: [
@@ -1073,7 +1073,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We compare the built-in screen with external output, then check brightness, lines, flicker, and sleep/wake behaviour." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air 13-inch 2018-2020." }
     ],
     faq: [
@@ -1169,7 +1169,7 @@ title: "Check charging and swelling",
 description: "We test USB-C charging, inspect for pressure signs, and confirm battery replacement is the right path." },
       { step: "03",
 title: "Run handover power checks",
-description: "We retest startup, charging response, trackpad feel, and normal battery behaviour before pickup." }
+description: "We retest startup, charging response, trackpad feel, and normal battery behaviour before handover." }
     ],
     faq: [
       {
@@ -1358,7 +1358,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "The display check covers image output, brightness changes, line faults, flicker, and lid-related sleep or wake response." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air 13-inch M1 2020." }
     ],
     faq: [
@@ -1643,7 +1643,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We look at screen image, backlight behaviour, flicker, external display output, and whether sleep/wake acts normally." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air M2 13-inch 2022." }
     ],
     faq: [
@@ -1909,7 +1909,7 @@ bestFor: "Visible screen damage, black display, line faults, or intermittent ima
 notes: "We separate the screen quote from any housing fit risk before proceeding." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Air M2 15-inch 2023.",
-bestFor: "For customers who want practical screen and startup checks before collection.",
+bestFor: "For customers who want practical screen and startup checks before handover.",
 notes: "Extra housing, power, or board concerns are discussed before any added work." }
     ],
     commonProblems: [
@@ -1928,7 +1928,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Brightness, line faults, flicker, external display response, and sleep/wake behaviour are tested before quoting." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air M2 15-inch 2023." }
     ],
     faq: [
@@ -2024,7 +2024,7 @@ title: "Check charging and swelling",
 description: "MagSafe 3 and USB-C response are checked with pressure signs before battery repair is approved." },
       { step: "03",
 title: "Run handover power checks",
-description: "We finish with charging, startup, trackpad, and battery behaviour checks before collection." }
+description: "We finish with charging, startup, trackpad, and battery behaviour checks before handover." }
     ],
     faq: [
       {
@@ -2194,7 +2194,7 @@ bestFor: "Cracked displays, black image, line faults, flicker, or faults that ch
 notes: "Quote, part path, and fit risk are confirmed before approved repair work starts." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Air M3 13-inch 2024.",
-bestFor: "Customers who want the main screen-related functions checked before pickup.",
+bestFor: "Customers who want the main screen-related functions checked before handover.",
 notes: "Any unrelated housing, battery, or board concern is explained separately before extra work." }
     ],
     commonProblems: [
@@ -2213,7 +2213,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We test brightness, lines, flicker, external display behaviour, and sleep/wake response where they apply." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air M3 13-inch 2024." }
     ],
     faq: [
@@ -2309,7 +2309,7 @@ title: "Check charging and swelling",
 description: "We compare both charging paths with swelling signs before confirming battery replacement." },
       { step: "03",
 title: "Run handover power checks",
-description: "Before collection, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
+description: "Before handover, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
     ],
     faq: [
       {
@@ -2479,7 +2479,7 @@ bestFor: "Screens with cracks, dark sections, display lines, flicker, or lid-ang
 notes: "We confirm the quote, suitable part path, and any fit concern before work begins." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Air M3 15-inch 2024.",
-bestFor: "Useful when you want display, camera-area, and lid behaviour checked before collection.",
+bestFor: "Useful when you want display, camera-area, and lid behaviour checked before handover.",
 notes: "If another housing, battery, or board issue appears, we explain it before extra work is considered." }
     ],
     commonProblems: [
@@ -2498,7 +2498,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Display output, brightness control, flicker, lines, external monitor behaviour, and sleep/wake response are checked." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Air M3 15-inch 2024." }
     ],
     faq: [
@@ -2783,7 +2783,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We compare the built-in screen with external output, then check brightness, lines, flicker, and sleep/wake behaviour." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 13-inch 2014-2015." }
     ],
     faq: [
@@ -2879,7 +2879,7 @@ title: "Check charging and swelling",
 description: "We test MagSafe-era charging, inspect for pressure signs, and confirm battery replacement is the right path." },
       { step: "03",
 title: "Run handover power checks",
-description: "We retest startup, charging response, trackpad feel, and normal battery behaviour before pickup." }
+description: "We retest startup, charging response, trackpad feel, and normal battery behaviour before handover." }
     ],
     faq: [
       {
@@ -3068,7 +3068,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "The display check covers image output, brightness changes, line faults, flicker, and lid-related sleep or wake response." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 15-inch 2014-2015." }
     ],
     faq: [
@@ -3353,7 +3353,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We look at screen image, backlight behaviour, flicker, external display output, and whether sleep/wake acts normally." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 13-inch 2016-2017." }
     ],
     faq: [
@@ -3619,7 +3619,7 @@ bestFor: "Visible screen damage, black display, line faults, or intermittent ima
 notes: "We separate the screen quote from any housing fit risk before proceeding." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Pro 15-inch 2016-2017.",
-bestFor: "For customers who want practical screen and startup checks before collection.",
+bestFor: "For customers who want practical screen and startup checks before handover.",
 notes: "Extra housing, power, or board concerns are discussed before any added work." }
     ],
     commonProblems: [
@@ -3638,7 +3638,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Brightness, line faults, flicker, external display response, and sleep/wake behaviour are tested before quoting." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 15-inch 2016-2017." }
     ],
     faq: [
@@ -3734,7 +3734,7 @@ title: "Check charging and swelling",
 description: "The USB-C charger response is checked alongside pressure signs before quoting battery work." },
       { step: "03",
 title: "Run handover power checks",
-description: "We finish with charging, startup, trackpad, and battery behaviour checks before collection." }
+description: "We finish with charging, startup, trackpad, and battery behaviour checks before handover." }
     ],
     faq: [
       {
@@ -3904,7 +3904,7 @@ bestFor: "Cracked displays, black image, line faults, flicker, or faults that ch
 notes: "Quote, part path, and fit risk are confirmed before approved repair work starts." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Pro 13-inch 2018-2020.",
-bestFor: "Customers who want the main screen-related functions checked before pickup.",
+bestFor: "Customers who want the main screen-related functions checked before handover.",
 notes: "Any unrelated housing, battery, or board concern is explained separately before extra work." }
     ],
     commonProblems: [
@@ -3923,7 +3923,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We test brightness, lines, flicker, external display behaviour, and sleep/wake response where they apply." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 13-inch 2018-2020." }
     ],
     faq: [
@@ -4019,7 +4019,7 @@ title: "Check charging and swelling",
 description: "We test USB-C charging, inspect for pressure signs, and confirm battery replacement is the right path." },
       { step: "03",
 title: "Run handover power checks",
-description: "Before collection, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
+description: "Before handover, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
     ],
     faq: [
       {
@@ -4189,7 +4189,7 @@ bestFor: "Screens with cracks, dark sections, display lines, flicker, or lid-ang
 notes: "We confirm the quote, suitable part path, and any fit concern before work begins." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Pro 16-inch 2019.",
-bestFor: "Useful when you want display, camera-area, and lid behaviour checked before collection.",
+bestFor: "Useful when you want display, camera-area, and lid behaviour checked before handover.",
 notes: "If another housing, battery, or board issue appears, we explain it before extra work is considered." }
     ],
     commonProblems: [
@@ -4208,7 +4208,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Display output, brightness control, flicker, lines, external monitor behaviour, and sleep/wake response are checked." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 16-inch 2019." }
     ],
     faq: [
@@ -4493,7 +4493,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We compare the built-in screen with external output, then check brightness, lines, flicker, and sleep/wake behaviour." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 13-inch M1 2020." }
     ],
     faq: [
@@ -4589,7 +4589,7 @@ title: "Check charging and swelling",
 description: "We compare USB-C charging behaviour with swelling signs before confirming the battery path." },
       { step: "03",
 title: "Run handover power checks",
-description: "We retest startup, charging response, trackpad feel, and normal battery behaviour before pickup." }
+description: "We retest startup, charging response, trackpad feel, and normal battery behaviour before handover." }
     ],
     faq: [
       {
@@ -4778,7 +4778,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "The display check covers image output, brightness changes, line faults, flicker, and lid-related sleep or wake response." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 14/16-inch M1 Pro/Max 2021." }
     ],
     faq: [
@@ -5063,7 +5063,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We look at screen image, backlight behaviour, flicker, external display output, and whether sleep/wake acts normally." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 13-inch M2 2022." }
     ],
     faq: [
@@ -5329,7 +5329,7 @@ bestFor: "Visible screen damage, black display, line faults, or intermittent ima
 notes: "We separate the screen quote from any housing fit risk before proceeding." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Pro 14/16-inch M2 Pro/Max 2023.",
-bestFor: "For customers who want practical screen and startup checks before collection.",
+bestFor: "For customers who want practical screen and startup checks before handover.",
 notes: "Extra housing, power, or board concerns are discussed before any added work." }
     ],
     commonProblems: [
@@ -5348,7 +5348,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Brightness, line faults, flicker, external display response, and sleep/wake behaviour are tested before quoting." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 14/16-inch M2 Pro/Max 2023." }
     ],
     faq: [
@@ -5444,7 +5444,7 @@ title: "Check charging and swelling",
 description: "MagSafe 3 and USB-C response are checked with pressure signs before battery repair is approved." },
       { step: "03",
 title: "Run handover power checks",
-description: "We finish with charging, startup, trackpad, and battery behaviour checks before collection." }
+description: "We finish with charging, startup, trackpad, and battery behaviour checks before handover." }
     ],
     faq: [
       {
@@ -5614,7 +5614,7 @@ bestFor: "Cracked displays, black image, line faults, flicker, or faults that ch
 notes: "Quote, part path, and fit risk are confirmed before approved repair work starts." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook Pro 14/16-inch M3 Pro/Max 2024.",
-bestFor: "Customers who want the main screen-related functions checked before pickup.",
+bestFor: "Customers who want the main screen-related functions checked before handover.",
 notes: "Any unrelated housing, battery, or board concern is explained separately before extra work." }
     ],
     commonProblems: [
@@ -5633,7 +5633,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "We test brightness, lines, flicker, external display behaviour, and sleep/wake response where they apply." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook Pro 14/16-inch M3 Pro/Max 2024." }
     ],
     faq: [
@@ -5729,7 +5729,7 @@ title: "Check charging and swelling",
 description: "We compare both charging paths with swelling signs before confirming battery replacement." },
       { step: "03",
 title: "Run handover power checks",
-description: "Before collection, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
+description: "Before handover, we check charging response, startup stability, trackpad feel, and practical battery behaviour." }
     ],
     faq: [
       {
@@ -5899,7 +5899,7 @@ bestFor: "Screens with cracks, dark sections, display lines, flicker, or lid-ang
 notes: "We confirm the quote, suitable part path, and any fit concern before work begins." },
       { name: "Handover screen checks",
 shortDescription: "After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the MacBook 12-inch 2015-2019.",
-bestFor: "Useful when you want display, camera-area, and lid behaviour checked before collection.",
+bestFor: "Useful when you want display, camera-area, and lid behaviour checked before handover.",
 notes: "If another housing, battery, or board issue appears, we explain it before extra work is considered." }
     ],
     commonProblems: [
@@ -5918,7 +5918,7 @@ description: "We check visible damage, hinge movement, lid alignment, camera are
 title: "Confirm display symptoms",
 description: "Display output, brightness control, flicker, lines, external monitor behaviour, and sleep/wake response are checked." },
       { step: "03",
-title: "Retest before pickup",
+title: "Retest before handover",
 description: "After approved work, we check display output, hinge travel, startup, and normal use on the MacBook 12-inch 2015-2019." }
     ],
     faq: [

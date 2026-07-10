@@ -1209,7 +1209,7 @@ function buildPhoneDiagnosticSteps(brandName: string, brandSlug: string) {
     },
     {
       title: "Test functions and aftercare",
-      body: "Relevant functions are checked after repair where the device condition allows, then warranty conditions and safe aftercare are explained at collection.",
+      body: "Relevant functions are checked after repair where the device condition allows, then warranty conditions and safe aftercare are explained at handover.",
     },
   ];
 }
@@ -1573,7 +1573,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     {
       href: "/repairs/battery-replacement",
       name: "Battery replacement",
-      note: "Battery wear, short runtime, shutdowns and charging drop-off checked against the correct MacBook generation.",
+      note: "Battery wear, short runtime, shutdowns and sudden charge loss checked against the correct MacBook generation.",
     },
     {
       name: "Keyboard / top case assessment",
@@ -1616,7 +1616,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     },
     {
       title: "Battery not holding charge",
-      body: "Short runtime, shutdowns, charging drop-off or battery service warnings should be checked against the model year and battery option before quote approval.",
+      body: "Short runtime, shutdowns, sudden charge loss or battery service warnings should be checked against the model year and battery option before quote approval.",
     },
     {
       title: "Keyboard keys not responding",
@@ -2559,8 +2559,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Repair, testing and collection</h3>
-                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the iPad is ready for collection and explain any important aftercare or warranty information.</p>
+                  <h3>Repair, testing and handover</h3>
+                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the iPad is ready for handover and explain any important aftercare or warranty information.</p>
                 </article>
               </div>
             </div>
@@ -2772,8 +2772,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Repair, testing and collection</h3>
-                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the Samsung tablet is ready for collection and explain any important aftercare or warranty information.</p>
+                  <h3>Repair, testing and handover</h3>
+                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the Samsung tablet is ready for handover and explain any important aftercare or warranty information.</p>
                 </article>
               </div>
             </div>
@@ -2984,8 +2984,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 </article>
                 <article className="repair-signal-card">
                   <span>03</span>
-                  <h3>Repair, testing and collection</h3>
-                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the Lenovo tablet is ready for collection and explain any important aftercare or warranty information.</p>
+                  <h3>Repair, testing and handover</h3>
+                  <p>After approval, the repair is completed and relevant functions are checked. We will let you know when the Lenovo tablet is ready for handover and explain any important aftercare or warranty information.</p>
                 </article>
               </div>
             </div>
@@ -3361,10 +3361,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                     </article>
                     <article className="repair-signal-card">
                       <span>03</span>
-                      <h3>{isEnhancedPhoneHub ? "Repair, testing and collection" : "Battery replacement timing"}</h3>
+                      <h3>{isEnhancedPhoneHub ? "Repair, testing and handover" : "Battery replacement timing"}</h3>
                       <p>
                         {isEnhancedPhoneHub
-                          ? "After approval, the repair is completed and relevant device functions are checked. We will let you know when the device is ready for collection and explain any important aftercare or warranty information."
+                          ? "After approval, the repair is completed and relevant device functions are checked. We will let you know when the device is ready for handover and explain any important aftercare or warranty information."
                           : phoneContent?.timing.battery || 'Many common battery replacements can be completed quickly when the correct part is in stock.'}
                       </p>
                     </article>

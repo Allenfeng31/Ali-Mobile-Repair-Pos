@@ -163,7 +163,7 @@ export function getIpadWhyChooseConfig(
           ],
         },
         {
-          title: 'Clear explanation before pickup',
+          title: 'Clear explanation before handover',
           icon: ClipboardCheck,
           points: [
             'We explain what was confirmed as camera-related, what was software-related, and what still needs separate attention before the iPad leaves the bench.',

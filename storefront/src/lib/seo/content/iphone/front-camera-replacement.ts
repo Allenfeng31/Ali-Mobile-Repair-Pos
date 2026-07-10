@@ -121,7 +121,7 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
           shortDescription:
             "After repair, we retest selfie image quality, portrait-camera response, and the main front-facing functions linked to the repair area.",
           bestFor:
-            "Customers who want the front camera path checked again before pickup rather than only having the module fitted.",
+            "Customers who want the front camera path checked again before handover rather than only having the module fitted.",
           notes:
             copy.finalRetestNotes,
         },

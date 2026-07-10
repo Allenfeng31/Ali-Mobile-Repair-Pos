@@ -93,7 +93,7 @@ export function buildIpadBackCameraReplacementPocket(config: IpadHardwareConfig)
         shortDescription:
           `After repair we retest the repaired camera path, image clarity, focus behavior, video capture, switching behavior, and ${biometricTestLabel.toLowerCase()} where relevant before handover.`,
         bestFor:
-          'Customers who want the main photo and video functions rechecked before pickup.',
+          'Customers who want the main photo and video functions rechecked before handover.',
         notes:
           'Any separate LiDAR, Ultra Wide, software, or board-related limitation is explained clearly before the iPad leaves the bench.',
       },

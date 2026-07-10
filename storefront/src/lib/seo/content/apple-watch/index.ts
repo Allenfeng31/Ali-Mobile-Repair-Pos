@@ -457,7 +457,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal basic notification watch behaviour are checked after approved work."
       }
     ],
@@ -588,7 +588,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday basic notification watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday basic notification watch use are checked before handover."
       }
     ],
     "faq": [
@@ -847,7 +847,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal daily walking watch behaviour are checked after approved work."
       }
     ],
@@ -978,7 +978,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday daily walking watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday daily walking watch use are checked before handover."
       }
     ],
     "faq": [
@@ -1237,7 +1237,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal health-check watch behaviour are checked after approved work."
       }
     ],
@@ -1368,7 +1368,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday health-check watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday health-check watch use are checked before handover."
       }
     ],
     "faq": [
@@ -1627,7 +1627,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal calls and workout watch behaviour are checked after approved work."
       }
     ],
@@ -1758,7 +1758,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday calls and workout watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday calls and workout watch use are checked before handover."
       }
     ],
     "faq": [
@@ -2017,7 +2017,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal busy watch-face model behaviour are checked after approved work."
       }
     ],
@@ -2148,7 +2148,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday busy watch-face model use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday busy watch-face model use are checked before handover."
       }
     ],
     "faq": [
@@ -2407,7 +2407,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal heavy notification watch behaviour are checked after approved work."
       }
     ],
@@ -2538,7 +2538,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday heavy notification watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday heavy notification watch use are checked before handover."
       }
     ],
     "faq": [
@@ -2797,7 +2797,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal sleep and fitness watch behaviour are checked after approved work."
       }
     ],
@@ -2928,7 +2928,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday sleep and fitness watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday sleep and fitness watch use are checked before handover."
       }
     ],
     "faq": [
@@ -3187,7 +3187,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal calls and training watch behaviour are checked after approved work."
       }
     ],
@@ -3318,7 +3318,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday calls and training watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday calls and training watch use are checked before handover."
       }
     ],
     "faq": [
@@ -3577,7 +3577,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal school or family watch behaviour are checked after approved work."
       }
     ],
@@ -3708,7 +3708,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday school or family watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday school or family watch use are checked before handover."
       }
     ],
     "faq": [
@@ -3967,7 +3967,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal activity and messages watch behaviour are checked after approved work."
       }
     ],
@@ -4098,7 +4098,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday activity and messages watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday activity and messages watch use are checked before handover."
       }
     ],
     "faq": [
@@ -4357,7 +4357,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal quick-charge daily watch behaviour are checked after approved work."
       }
     ],
@@ -4488,7 +4488,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday quick-charge daily watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday quick-charge daily watch use are checked before handover."
       }
     ],
     "faq": [
@@ -4747,7 +4747,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal work and training watch behaviour are checked after approved work."
       }
     ],
@@ -4878,7 +4878,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday work and training watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday work and training watch use are checked before handover."
       }
     ],
     "faq": [
@@ -5137,7 +5137,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal sleep and fitness watch behaviour are checked after approved work."
       }
     ],
@@ -5268,7 +5268,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday sleep and fitness watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday sleep and fitness watch use are checked before handover."
       }
     ],
     "faq": [
@@ -5527,7 +5527,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal workout and sleep watch behaviour are checked after approved work."
       }
     ],
@@ -5658,7 +5658,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday workout and sleep watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday workout and sleep watch use are checked before handover."
       }
     ],
     "faq": [
@@ -5917,7 +5917,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal current daily watch behaviour are checked after approved work."
       }
     ],
@@ -6048,7 +6048,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday current daily watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday current daily watch use are checked before handover."
       }
     ],
     "faq": [
@@ -6307,7 +6307,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal main work and fitness watch behaviour are checked after approved work."
       }
     ],
@@ -6438,7 +6438,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday main work and fitness watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday main work and fitness watch use are checked before handover."
       }
     ],
     "faq": [
@@ -6697,7 +6697,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal newer daily model behaviour are checked after approved work."
       }
     ],
@@ -6828,7 +6828,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday newer daily model use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday newer daily model use are checked before handover."
       }
     ],
     "faq": [
@@ -7087,7 +7087,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal large notification watch behaviour are checked after approved work."
       }
     ],
@@ -7218,7 +7218,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday large notification watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday large notification watch use are checked before handover."
       }
     ],
     "faq": [
@@ -7477,7 +7477,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal family and gym watch behaviour are checked after approved work."
       }
     ],
@@ -7608,7 +7608,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday family and gym watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday family and gym watch use are checked before handover."
       }
     ],
     "faq": [
@@ -7867,7 +7867,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal fitness and calls watch behaviour are checked after approved work."
       }
     ],
@@ -7998,7 +7998,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday fitness and calls watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday fitness and calls watch use are checked before handover."
       }
     ],
     "faq": [
@@ -8257,7 +8257,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal outdoor training watch behaviour are checked after approved work."
       }
     ],
@@ -8388,7 +8388,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday outdoor training watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday outdoor training watch use are checked before handover."
       }
     ],
     "faq": [
@@ -8647,7 +8647,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       },
       {
         "step": "04",
-        "title": "Retest before pickup",
+        "title": "Retest before handover",
         "description": "Display, touch, charging response and normal travel and navigation watch behaviour are checked after approved work."
       }
     ],
@@ -8778,7 +8778,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       {
         "step": "04",
         "title": "Run handover checks",
-        "description": "Startup, charging hold, display seating and everyday travel and navigation watch use are checked before collection."
+        "description": "Startup, charging hold, display seating and everyday travel and navigation watch use are checked before handover."
       }
     ],
     "faq": [

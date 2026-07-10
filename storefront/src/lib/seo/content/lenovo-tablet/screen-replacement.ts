@@ -52,7 +52,7 @@ export function buildLenovoTabletScreenReplacementPocket(
     {
       step: '07',
       title: 'Perform post-repair function checks',
-      description: `Before pickup, we retest ${getLenovoTabletPostRepairChecks('screen-replacement')}.`,
+      description: `Before handover, we retest ${getLenovoTabletPostRepairChecks('screen-replacement')}.`,
     },
   ] as const;
 
@@ -87,7 +87,7 @@ export function buildLenovoTabletScreenReplacementPocket(
       },
       {
         name: 'Post-repair function testing',
-        shortDescription: `After repair we retest ${getLenovoTabletPostRepairChecks('screen-replacement')} before pickup.`,
+        shortDescription: `After repair we retest ${getLenovoTabletPostRepairChecks('screen-replacement')} before handover.`,
         bestFor: 'Customers who want the main daily-use functions checked before they collect the tablet.',
         notes: 'Booking, quote, and store-visit options stay available through the current system.',
       },
@@ -118,7 +118,7 @@ export function buildLenovoTabletScreenReplacementPocket(
       },
       {
         question: `What display and touch functions are tested after ${config.modelName} screen replacement?`,
-        answer: 'We retest the display image, touch response, brightness, cameras, and charging response before the tablet is ready for pickup.',
+        answer: 'We retest the display image, touch response, brightness, cameras, and charging response before the tablet is ready for return.',
       },
       {
         question: `How do I confirm my exact Lenovo tablet model before booking?`,

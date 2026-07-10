@@ -155,7 +155,7 @@ function buildSamsungNoteWhyChooseContent(
       cards: buildSamsungNoteTimingCards(
         [
           'Many straightforward battery jobs are completed quickly once the correct battery and repair path are confirmed.',
-          'We still inspect runtime, charging, and swelling risks before pickup so the handover remains practical.',
+          'We still inspect runtime, charging, and swelling risks before handover so the handover remains practical.',
         ],
         [
           'We test the charging port and board before assuming the battery is the only fault.',
@@ -387,7 +387,7 @@ export function getSamsungWhyChooseContent(
             title: 'Function retesting before handover',
             icon: ClipboardCheck,
             points: [
-              'Charging and related connection behaviour are retested before pickup so the handover reflects the confirmed repair path.',
+              'Charging and related connection behaviour are retested before handover so the handover reflects the confirmed repair path.',
             ],
           },
         ],
@@ -612,7 +612,7 @@ export function getSamsungWhyChooseContent(
             title: 'Function retesting before handover',
             icon: ClipboardCheck,
             points: [
-              'Charging and related connection behaviour are retested before pickup so the handover reflects the confirmed repair path.',
+              'Charging and related connection behaviour are retested before handover so the handover reflects the confirmed repair path.',
             ],
           },
         ],
@@ -787,7 +787,7 @@ export function getSamsungWhyChooseContent(
             icon: ClipboardCheck,
             points: [
               `Many straightforward battery jobs are completed quickly once the correct battery and repair path are confirmed.`,
-              `We keep the handover practical by checking runtime, charging, and swelling risks before pickup.`,
+              `We keep the handover practical by checking runtime, charging, and swelling risks before handover.`,
             ],
           },
           {
@@ -1013,7 +1013,7 @@ export function getSamsungWhyChooseContent(
           title: 'Function retesting before handover',
           icon: ClipboardCheck,
           points: [
-            'Wired charging and related connection behaviour are retested before pickup.',
+            'Wired charging and related connection behaviour are retested before handover.',
           ],
         },
       ],

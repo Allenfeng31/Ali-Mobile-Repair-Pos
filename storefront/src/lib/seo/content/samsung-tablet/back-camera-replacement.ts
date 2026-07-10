@@ -52,7 +52,7 @@ export function buildSamsungTabletBackCameraReplacementPocket(
     {
       step: '07',
       title: 'Perform post-repair function checks',
-      description: `Before pickup, we retest ${getSamsungTabletPostRepairChecks('back-camera-replacement')}.`,
+      description: `Before handover, we retest ${getSamsungTabletPostRepairChecks('back-camera-replacement')}.`,
     },
   ] as const;
 
@@ -87,7 +87,7 @@ export function buildSamsungTabletBackCameraReplacementPocket(
       },
       {
         name: 'Post-repair camera checks',
-        shortDescription: `After repair we retest ${getSamsungTabletPostRepairChecks('back-camera-replacement')} before pickup.`,
+        shortDescription: `After repair we retest ${getSamsungTabletPostRepairChecks('back-camera-replacement')} before handover.`,
         bestFor: 'Customers who want the main rear-camera behaviour checked before they collect the tablet.',
         notes: 'Booking, quote, and store-visit options stay available through the current system.',
       },
@@ -117,7 +117,7 @@ export function buildSamsungTabletBackCameraReplacementPocket(
       },
       {
         question: `What photo, focus, and video functions are tested after ${config.modelName} back-camera replacement?`,
-        answer: 'We retest image quality, focus, video capture, and camera switching before the tablet is ready for pickup.',
+        answer: 'We retest image quality, focus, video capture, and camera switching before the tablet is ready for return.',
       },
       {
         question: `How do I confirm my exact Galaxy Tab model before booking?`,

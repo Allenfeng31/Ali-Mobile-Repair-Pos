@@ -90,7 +90,7 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
         shortDescription:
           `After repair we retest front-camera preview, image clarity, camera switching, video-call use, and ${biometricTestLabel.toLowerCase()} before handover.`,
         bestFor:
-          'Customers who want the main camera and nearby functions rechecked before pickup.',
+          'Customers who want the main camera and nearby functions rechecked before handover.',
         notes:
           'Any remaining software or board-related limitation is explained clearly before the iPad is handed back.',
       },

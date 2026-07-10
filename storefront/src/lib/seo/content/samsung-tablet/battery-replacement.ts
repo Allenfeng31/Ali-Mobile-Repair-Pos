@@ -52,7 +52,7 @@ export function buildSamsungTabletBatteryReplacementPocket(
     {
       step: '07',
       title: 'Perform post-repair function checks',
-      description: `Before pickup, we retest ${getSamsungTabletPostRepairChecks('battery-replacement')}.`,
+      description: `Before handover, we retest ${getSamsungTabletPostRepairChecks('battery-replacement')}.`,
     },
   ] as const;
 
@@ -87,7 +87,7 @@ export function buildSamsungTabletBatteryReplacementPocket(
       },
       {
         name: 'Post-repair power checks',
-        shortDescription: `After repair we retest ${getSamsungTabletPostRepairChecks('battery-replacement')} before pickup.`,
+        shortDescription: `After repair we retest ${getSamsungTabletPostRepairChecks('battery-replacement')} before handover.`,
         bestFor: 'Customers who want the main battery and charging behaviour checked before they collect the tablet.',
         notes: 'Booking, quote, and store-visit options stay available through the current system.',
       },
@@ -117,7 +117,7 @@ export function buildSamsungTabletBatteryReplacementPocket(
       },
       {
         question: `What is tested after ${config.modelName} battery replacement?`,
-        answer: 'We retest charging response, battery behaviour, power stability, and related tablet functions before the device is ready for pickup.',
+        answer: 'We retest charging response, battery behaviour, power stability, and related tablet functions before the device is ready for return.',
       },
       {
         question: `How do I confirm my exact Galaxy Tab model before booking?`,

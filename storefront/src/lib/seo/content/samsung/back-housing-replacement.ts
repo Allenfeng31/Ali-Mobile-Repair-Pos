@@ -153,7 +153,7 @@ export function buildSamsungBackHousingReplacementPocket(
         {
           name: 'Quote-only housing handover',
           shortDescription:
-            'We confirm the replacement path before work and retest the final fit and function before pickup.',
+            'We confirm the replacement path before work and retest the final fit and function before handover.',
           bestFor:
             'Customers who need the housing checked in context rather than assuming every rear-panel crack needs the same fix.',
           notes:

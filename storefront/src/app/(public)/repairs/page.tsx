@@ -81,7 +81,7 @@ const processSteps = [
     text: "Many common repairs show a clear price path before you book, helping you check the repair price before visiting and understand likely repair turnaround time.",
   },
   {
-    title: "Drop Off or Book",
+    title: "Bring In or Book",
     text: "Book online for priority service or use our walk-in repair options at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a fast assessment.",
   },
 ];

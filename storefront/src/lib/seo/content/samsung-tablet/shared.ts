@@ -177,7 +177,7 @@ export function buildSamsungTabletServiceSection(
       },
       {
         title: 'Related functions tested after repair',
-        description: `After the ${repairLabel}, we retest ${postRepairChecks} so the main day-to-day functions are checked before pickup.`,
+        description: `After the ${repairLabel}, we retest ${postRepairChecks} so the main day-to-day functions are checked before handover.`,
       },
       {
         title: 'Convenient Ringwood Square service',

@@ -39,9 +39,9 @@ export function applyIphoneBatteryReplacementSeoPocket(
         shortDescription:
           "After fitting, we confirm charging response, startup behaviour, and practical power stability before handover.",
         bestFor:
-          "Customers who want the phone rechecked before pickup rather than only having the battery fitted.",
+          "Customers who want the phone rechecked before handover rather than only having the battery fitted.",
         notes:
-          "Battery percentage reporting can settle over the next few charge cycles, so we explain what to watch after collection.",
+          "Battery percentage reporting can settle over the next few charge cycles, so we explain what to watch after handover.",
       },
     ]),
     commonProblems: appendUniqueCommonProblems(pocket.commonProblems, [

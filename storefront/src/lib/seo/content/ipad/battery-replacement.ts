@@ -73,7 +73,7 @@ export function buildIpadBatteryReplacementPocket(config: IpadHardwareConfig): I
       {
         name: 'Post-repair power checks',
         shortDescription:
-          `${connectorSpecificWorkbench} We also check startup stability and the main day-to-day power functions before pickup.`,
+          `${connectorSpecificWorkbench} We also check startup stability and the main day-to-day power functions before handover.`,
         bestFor:
           'Customers who want the charging and basic power path rechecked before handover.',
         notes:

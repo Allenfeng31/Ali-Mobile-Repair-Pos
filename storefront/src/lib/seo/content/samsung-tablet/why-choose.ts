@@ -62,10 +62,10 @@ export function getSamsungTabletWhyChooseConfig(
         ],
       },
       {
-        title: 'Post-repair checks before pickup',
+        title: 'Post-repair checks before handover',
         icon: Wrench,
         points: [
-          `After the repair, we retest ${postRepairChecks} so the main day-to-day functions are checked before pickup.`,
+          `After the repair, we retest ${postRepairChecks} so the main day-to-day functions are checked before handover.`,
           `Customers can book online, call ${ALI_MOBILE_SAMSUNG_TABLET_BUSINESS.phone}, or visit our Ringwood Square store for in-person support.`,
         ],
       },
