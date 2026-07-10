@@ -747,6 +747,42 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           </ScrollReveal>
         )}
 
+        {isPhone && (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="nearby-phone-service-areas-heading">
+              <div className="repair-section-header">
+                <span>Nearby service areas</span>
+                <h2 id="nearby-phone-service-areas-heading">Nearby phone repair service areas</h2>
+                <p>
+                  Customers also visit Ali Mobile & Repair at Ringwood Square from Mitcham, Ringwood East, Heathmont and Croydon for phone repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.
+                </p>
+              </div>
+              <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
+                <Link href="/locations/mitcham" prefetch={false} className="repair-type-mini-card">
+                  <span>01</span>
+                  <strong>phone repair near Mitcham</strong>
+                  <small>Route and visit details for Mitcham customers.</small>
+                </Link>
+                <Link href="/locations/ringwood-east" prefetch={false} className="repair-type-mini-card">
+                  <span>02</span>
+                  <strong>phone repair near Ringwood East</strong>
+                  <small>Quick trip details for Ringwood East customers.</small>
+                </Link>
+                <Link href="/locations/heathmont" prefetch={false} className="repair-type-mini-card">
+                  <span>03</span>
+                  <strong>phone repair near Heathmont</strong>
+                  <small>Nearby route and repair support information.</small>
+                </Link>
+                <Link href="/locations/croydon" prefetch={false} className="repair-type-mini-card">
+                  <span>04</span>
+                  <strong>phone repair near Croydon</strong>
+                  <small>Service-area details for Croydon customers.</small>
+                </Link>
+              </div>
+            </section>
+          </ScrollReveal>
+        )}
+
         {isWatch && (
           <>
             <ScrollReveal>

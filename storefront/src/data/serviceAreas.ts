@@ -161,19 +161,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Ringwood East Station", "Maroondah Highway", "Ringwood Lake"],
     route: "Head west toward Ringwood Square and use the centre parking near Maroondah Highway.",
     localReason: "Close enough for quick diagnostics, model checks, and same-day collection may be available on common repairs when parts are in stock.",
-    metaTitle: "Ringwood East Phone & Device Repairs | Ringwood Square Kiosk C1",
-    metaDescription: "Need phone, screen, or iPad repairs in Ringwood East? Drop by Kiosk C1 at Ringwood Square for face-to-face checks before any work begins. Read route guides.",
-    customH1: "Quick Phone and Device Assessments for Ringwood East Locals",
-    customIntro: "For Ringwood East residents, our specialist kiosk inside Ringwood Square Shopping Centre provides prompt, face-to-face device assessments just a short distance away. Instead of guessing the fault or waiting on remote quotes, you can visit our counter for a physical inspection of screen, battery, charging, and iPad issues before any repair begins.",
+    metaTitle: "Phone & iPhone Repair Near Ringwood East | Ali Mobile Ringwood Square",
+    metaDescription: "Need phone, iPhone, Samsung, iPad or MacBook repair near Ringwood East? Visit Kiosk C1 inside Ringwood Square Shopping Centre for face-to-face checks.",
+    customH1: "Phone Repair Near Ringwood East",
+    customIntro: "Ringwood East customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre for phone, iPhone, Samsung, iPad and MacBook repair support. We are opposite Bunnings Warehouse Ringwood and close to Eastland and Ringwood Station.",
     customLocalSection: {
-      title: "Travelling from Ringwood East to Kiosk C1",
+      title: "Travelling for Phone Repair from Ringwood East",
       paragraphs: [
         "Getting here from Ringwood East is extremely simple and direct. You can drive west via Dublin Road or Maroondah Highway, which typically takes about 5 minutes depending on traffic. Ample parking is available right at Ringwood Square near the entrance.",
         "If you prefer public transport, take the Lilydale line train from Ringwood East Station to Ringwood Station. The train ride is only around 3 minutes. From the station exit, it is just a brief walk across the street past Coles to our kiosk."
       ]
     },
     customScenarioSection: {
-      title: "Ringwood East Customer Repair Scenarios",
+      title: "iPhone and Samsung Repairs near Ringwood East",
       paragraphs: [
         "Many Ringwood East locals drop in to combine a device assessment with their weekly shopping or errands at Ringwood Square. Whether it is a cracked phone screen or an iPad that will not turn on, we perform bench diagnostics in your presence.",
         "We inspect the display connectors, test the charging current, and check the battery cycle count. Once we find the cause, we confirm the price, parts path, and expected timing so you can make an informed choice before any work begins."
@@ -409,19 +409,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mitcham Station", "EastLink", "Mitcham Shopping Centre"],
     route: "Follow Maroondah Highway east toward Ringwood Square.",
     localReason: "Mitcham residents can reach us quickly for priority booking, phone checks, and warranty-backed repair work.",
-    metaTitle: "Mitcham Device Repairs | Quick Trip to Ringwood Square",
+    metaTitle: "Phone & iPhone Repair Near Mitcham | Ali Mobile Ringwood",
     metaDescription: "Need phone, Samsung, or iPad repairs near Mitcham? Get reliable screen, battery, and charging checks just 6 minutes away at Kiosk C1, Ringwood Square.",
-    customH1: "Direct Screen & Battery Diagnostics for Mitcham Residents",
-    customIntro: "Located only a few minutes down the road, our repair kiosk at Ringwood Square is the primary destination for Mitcham locals seeking face-to-face device assessments. Rather than mailing your phone away, you can visit us for hands-on diagnostics and immediate clarity on parts availability for iPhones, Samsung models, and iPads.",
+    customH1: "Phone Repair Near Mitcham",
+    customIntro: "Mitcham customers can visit Ali Mobile & Repair for phone, iPhone, Samsung, MacBook and iPad repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, a short trip from Mitcham.",
     customLocalSection: {
-      title: "Travelling from Mitcham to our Ringwood Repair Bench",
+      title: "Travelling for Phone Repair from Mitcham",
       paragraphs: [
         "Getting to Ringwood Square from Mitcham is incredibly direct. Commuters can catch the Lilydale or Belgrave line from Mitcham Station and arrive at Ringwood Station in approximately 5 minutes. From the station, walk across the road past Coles into the main shopping corridor.",
         "If you are driving from Mitcham, follow Maroondah Highway east for about 4 kilometers. Ringwood Square is on your left just before the major intersection, offering ample centre parking close to the kiosk entrance. This makes it easy to drop in during your weekly shopping run."
       ]
     },
     customScenarioSection: {
-      title: "Common Mitcham Repair Scenarios We Handle",
+      title: "iPhone and Samsung Repairs near Mitcham",
       paragraphs: [
         "Many Mitcham clients stop by with cracked screens or battery degradation issues that they want checked in person. Instead of accepting an online estimate, we open the device at our counter, inspect the screen connectors, check the battery cycle count, and check for any internal dust or liquid contact.",
         "For Samsung Galaxy phones or iPads, we help verify if the touch digitizer or charging port is the source of the fault. By explaining the repair process beforehand, we make sure you have a clear choice before any parts are replaced or work begins."
