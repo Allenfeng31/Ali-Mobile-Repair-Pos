@@ -754,7 +754,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <span>Nearby service areas</span>
                 <h2 id="nearby-phone-service-areas-heading">Nearby phone repair service areas</h2>
                 <p>
-                  Customers also visit Ali Mobile & Repair at Ringwood Square from Mitcham, Ringwood East, Heathmont and Croydon for phone repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.
+                  Customers also visit Ali Mobile & Repair at Ringwood Square from nearby eastern suburbs for phone repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.
                 </p>
               </div>
               <div className="repair-type-card-grid" style={{ marginTop: '2rem' }}>
@@ -777,6 +777,21 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <span>04</span>
                   <strong>phone repair near Croydon</strong>
                   <small>Service-area details for Croydon customers.</small>
+                </Link>
+                <Link href="/locations/nunawading" prefetch={false} className="repair-type-mini-card">
+                  <span>05</span>
+                  <strong>phone repair near Nunawading</strong>
+                  <small>Quote-first support for Nunawading customers.</small>
+                </Link>
+                <Link href="/locations/glenwaverley" prefetch={false} className="repair-type-mini-card">
+                  <span>06</span>
+                  <strong>phone repair near Glen Waverley</strong>
+                  <small>Mobile repair support for Glen Waverley and Syndal customers.</small>
+                </Link>
+                <Link href="/locations/wantirna" prefetch={false} className="repair-type-mini-card">
+                  <span>07</span>
+                  <strong>phone repair near Wantirna</strong>
+                  <small>Phone screen and Apple repair support for Wantirna and Studfield customers.</small>
                 </Link>
               </div>
             </section>

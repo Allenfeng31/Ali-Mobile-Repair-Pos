@@ -705,6 +705,8 @@ function getBatchPhoneServiceAreaDescription(config: BatchPhoneBrandHubConfig, a
 }
 
 const PHONE_FEATURED_SERVICE_AREA_SLUGS = ["ringwood-east", "heathmont", "mitcham", "croydon"];
+const MACBOOK_NEARBY_SERVICE_AREA_SLUGS = ["heathmont", "nunawading", "glenwaverley", "wantirna", "croydon"];
+const APPLE_WATCH_NEARBY_SERVICE_AREA_SLUGS = ["croydon"];
 
 function buildFeaturedServiceAreaSource() {
   return [
@@ -716,6 +718,12 @@ function buildFeaturedServiceAreaSource() {
         !PHONE_FEATURED_SERVICE_AREA_SLUGS.includes(area.slug)
     ),
   ];
+}
+
+function buildServiceAreaSourceFromSlugs(slugs: string[]) {
+  return slugs
+    .map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
+    .filter((area): area is (typeof SERVICE_AREAS)[number] => Boolean(area));
 }
 
 function getIPhoneServiceAreaDescription(areaName: string, index: number) {
@@ -810,25 +818,23 @@ function getLenovoTabletServiceAreaDescription(areaName: string, index: number) 
 }
 
 function getMacBookServiceAreaDescription(areaName: string, index: number) {
-  const descriptions = [
-    `${areaName} customers can choose their exact MacBook model before visiting our Ringwood Square repair desk.`,
-    `Travelling from ${areaName}? Check MacBook screen repair, battery replacement and charging options by model, then call ahead about parts availability.`,
-    `Customers near ${areaName} can use the MacBook model selector first, then visit Kiosk C1 for assessment and confirmed quote details.`,
-    `Before travelling from ${areaName}, choose the exact MacBook Air or MacBook Pro model and contact the store if you want likely timing checked first.`,
-  ];
+  const descriptions: Record<string, string> = {
+    Heathmont: "MacBook repair near Heathmont starts with model confirmation, fault assessment and a quote-first parts path at Ringwood Square.",
+    Nunawading: "MacBook repair near Nunawading is handled from our Ringwood Square repair desk after we confirm the exact MacBook Air or MacBook Pro model.",
+    "Glen Waverley": "MacBook repair near Glen Waverley and Syndal customers can start online, then visit Kiosk C1 for assessment and quote support.",
+    Wantirna: "MacBook repair near Wantirna and Studfield customers is assessment-led, with parts availability and timing confirmed before work begins.",
+    Croydon: "MacBook repair near Croydon customers can be checked at Ringwood Square for screen, battery, keyboard, charging and diagnostic pathways.",
+  };
 
-  return descriptions[index % descriptions.length];
+  return descriptions[areaName] || `${areaName} customers can choose their exact MacBook model before visiting our Ringwood Square repair desk.`;
 }
 
 function getAppleWatchServiceAreaDescription(areaName: string, index: number) {
-  const descriptions = [
-    `${areaName} customers can choose their exact Apple Watch model before visiting our Ringwood Square repair desk.`,
-    `Travelling from ${areaName}? Check Apple Watch screen repair, battery replacement and charging assessment options by model, then call ahead about parts availability.`,
-    `Customers near ${areaName} can use the Apple Watch model finder first, then visit Kiosk C1 for assessment and confirmed quote details.`,
-    `Before travelling from ${areaName}, choose the exact Apple Watch Series, SE or Ultra model and contact the store if you want likely timing checked first.`,
-  ];
+  if (areaName === "Croydon") {
+    return "Apple Watch repair near Croydon customers can be assessed at Ringwood Square after we confirm the exact model, fault and quote path.";
+  }
 
-  return descriptions[index % descriptions.length];
+  return `${areaName} customers can choose their exact Apple Watch model before visiting our Ringwood Square repair desk.`;
 }
 
 const MAJOR_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
@@ -1410,14 +1416,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       }))
     : [];
   const macbookServiceAreas: IPhoneServiceAreaLinkCard[] = isMacBookHub
-    ? buildFeaturedServiceAreaSource().slice(0, 4).map((area, index) => ({
+    ? buildServiceAreaSourceFromSlugs(MACBOOK_NEARBY_SERVICE_AREA_SLUGS).map((area, index) => ({
         href: `/locations/${area.slug}`,
         name: area.name,
         description: getMacBookServiceAreaDescription(area.name, index),
       }))
     : [];
   const appleWatchServiceAreas: IPhoneServiceAreaLinkCard[] = isAppleWatchHub
-    ? buildFeaturedServiceAreaSource().slice(0, 4).map((area, index) => ({
+    ? buildServiceAreaSourceFromSlugs(APPLE_WATCH_NEARBY_SERVICE_AREA_SLUGS).map((area, index) => ({
         href: `/locations/${area.slug}`,
         name: area.name,
         description: getAppleWatchServiceAreaDescription(area.name, index),
@@ -2184,9 +2190,9 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           <section className="brand-hub-section" aria-labelledby="macbook-service-area-heading">
             <div className="brand-hub-section-header">
               <span className="repair-kicker">Nearby support</span>
-              <h2 id="macbook-service-area-heading">MacBook repair support near Ringwood</h2>
+              <h2 id="macbook-service-area-heading">Nearby MacBook repair service areas</h2>
               <p>
-                Choose the exact MacBook model first, then contact or visit our Ringwood Square repair desk to confirm the quote and parts path.
+                Customers also visit Ali Mobile & Repair at Ringwood Square from Heathmont, Nunawading, Glen Waverley, Wantirna and Croydon for MacBook repair assessment and quote support.
               </p>
             </div>
             <IPhoneServiceAreaLinks cards={macbookServiceAreas} />
@@ -2410,7 +2416,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <span className="repair-kicker">Nearby support</span>
               <h2 id="apple-watch-service-area-heading">Apple Watch repair support near Ringwood</h2>
               <p>
-                Choose the exact Apple Watch model first, then contact or visit our Ringwood Square repair desk to confirm the quote and parts path.
+                Croydon and nearby eastern suburbs customers can visit Ali Mobile & Repair at Ringwood Square for Apple Watch repair support and quote-first assessment.
               </p>
             </div>
             <IPhoneServiceAreaLinks cards={appleWatchServiceAreas} />

@@ -285,22 +285,22 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Heathmont Station", "Canterbury Road", "Dandenong Creek Trail"],
     route: "Drive north toward Maroondah Highway and park at Ringwood Square Shopping Centre.",
     localReason: "Heathmont customers can get a quick quote before committing to screen, battery, or charging repairs.",
-    metaTitle: "Heathmont Device Repairs & Battery Checks | Ringwood Square C1",
-    metaDescription: "Need phone, battery, or charging checks in Heathmont? Visit Kiosk C1 at Ringwood Square for diagnostics, battery replacements, and iPad assessments.",
-    customH1: "Screen, Battery and Charging Checks for Heathmont Customers",
-    customIntro: "For Heathmont residents, our Kiosk C1 repair desk inside Ringwood Square Shopping Centre is located just a short drive north. We offer professional diagnostics to distinguish simple charging port debris from actual hardware failure, along with battery-health checks, battery replacement options, and iPad touch or display assessments.",
+    metaTitle: "Phone, Apple & MacBook Repair Near Heathmont | Ali Mobile Ringwood",
+    metaDescription: "Need phone, iPhone, Apple, MacBook or screen repair near Heathmont? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
+    customH1: "Phone, Apple & MacBook Repair Near Heathmont",
+    customIntro: "Heathmont customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. We can help with screen, battery, charging and MacBook assessment pathways before confirming a quote.",
     customLocalSection: {
-      title: "Getting to Ringwood Square from Heathmont",
+      title: "Travelling for Phone and MacBook Repair from Heathmont",
       paragraphs: [
         "Travel from Heathmont is very convenient. Driving north via Canterbury Road and Great Ryrie Street typically takes about 5 minutes depending on traffic. Ringwood Square has a spacious free parking lot near Coles.",
         "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (typically around a 4-minute trip), then walk across the road directly into Ringwood Square."
       ]
     },
     customScenarioSection: {
-      title: "Heathmont Charging & Battery Triage Scenarios",
+      title: "Apple, MacBook and Phone Repairs near Heathmont",
       paragraphs: [
-        "Many Heathmont customers bring in devices that refuse to charge. Rather than automatically quoting a port replacement, we inspect the port under magnification. If it is simply packed with lint or dust, we perform a professional cleaning, which solves the issue for a cleaning fee instead of a parts fee.",
-        "For older phones, we run battery-health diagnostics. We measure the charge capacity and explain replacement options so you can choose between premium battery tiers with clear quote information."
+        "Many Heathmont customers bring in phones, iPhones and Samsung models for screen replacement, glass replacement, battery or charging checks. Rather than automatically quoting a port replacement, we inspect the port under magnification and explain the practical repair path first.",
+        "For Apple repairs, MacBook repair and computer-style repair enquiries near Heathmont, we confirm the exact model, check the likely fault, and explain whether the next step is assessment, parts ordering or a quote-first repair."
       ]
     },
     customFaqs: [
@@ -347,22 +347,22 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Croydon Central", "Croydon Station", "Mt Dandenong Road"],
     route: "Head west toward Ringwood, then turn into Ringwood Square for easy centre parking.",
     localReason: "Worth the short trip for careful diagnostics, transparent quoting, and No Fix No Charge on eligible jobs.",
-    metaTitle: "Croydon Phone & Device Repairs | Visit Kiosk C1 Ringwood",
-    metaDescription: "Need phone, battery, or back-glass repairs in Croydon? We inspect your device face-to-face at Ringwood Square before any parts are ordered. Read route guides.",
-    customH1: "Pre-Repair Inspection and Diagnostics for Croydon Clients",
-    customIntro: "For Croydon residents, our Ringwood Square desk provides a reliable, transparent service just a 10-minute trip away. We prioritize physical inspection over guessing, ensuring we check screen, battery, back-glass, and charging port faults at our counter before confirming any quote or reserving parts.",
+    metaTitle: "Phone & iPhone Repair Near Croydon | Ali Mobile Ringwood",
+    metaDescription: "Need phone, iPhone, Samsung or Apple Watch repair near Croydon? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
+    customH1: "Phone Repair Near Croydon",
+    customIntro: "Croydon customers can visit Ali Mobile & Repair at Ringwood Square for phone, iPhone, Samsung, iPad, MacBook and Apple Watch repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, with walk-ins welcome and quotes confirmed before repair.",
     customLocalSection: {
-      title: "Transit Options from Croydon to Ringwood Square",
+      title: "Travelling for Phone Repair from Croydon",
       paragraphs: [
         "Croydon locals have excellent transport links to our Ringwood shop. You can drive west via Mt Dandenong Road or Maroondah Highway, arriving at Ringwood Square Shopping Centre in roughly 10 minutes. There is plenty of customer parking right in front of the centre.",
         "Alternatively, catch the Lilydale line train from Croydon Station. It takes about 6 minutes to reach Ringwood Station, from which you can take a brief walk across the street to find our kiosk situated near the Coles supermarket."
       ]
     },
     customScenarioSection: {
-      title: "Typical Croydon Device Assessment Scenarios",
+      title: "iPhone, Samsung and Apple Watch Repairs near Croydon",
       paragraphs: [
-        "We often see Croydon customers who want to confirm if a cracked rear panel has damaged the wireless charging coils. At our bench, we perform a power-draw test and check the frame alignment before booking a back glass replacement.",
-        "Another frequent scenario is charging port failure. Before recommending a port replacement, we inspect the USB-C or Lightning port under magnification to clear out any compressed pocket lint or debris, which sometimes solves the issue without needing new parts."
+        "We often see Croydon customers looking for phone repair, iPhone repair, Samsung phone repair or phone screen repair near Croydon. At our bench, we inspect cracked screens, rear damage, battery symptoms and charging behaviour before confirming the repair quote.",
+        "Croydon customers also ask about Apple Watch repair and watch repair support. We confirm the exact Apple Watch model, fault and part path first, then explain practical timing and quote details before repair."
       ]
     },
     customFaqs: [
@@ -471,22 +471,22 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Brand Smart", "Nunawading Station", "Whitehorse Road"],
     route: "Continue east along Maroondah Highway until Ringwood Square.",
     localReason: "A convenient repair stop for customers comparing quick local service against larger shopping-centre queues.",
-    metaTitle: "Nunawading Device Diagnostics | Ringwood Square Repair Desk",
-    metaDescription: "Professional phone, tablet, and MacBook diagnostics for Nunawading commuters. Drop off your device at Ringwood Square for screen and charging port repairs.",
-    customH1: "Device Assessments for Nunawading Commuters & Commercial Clients",
-    customIntro: "Conveniently located 10 minutes east of Nunawading, our Ringwood Square kiosk is set up to serve busy commuters and local commercial clients. We offer straightforward diagnostic checks, battery replacements, and USB-C port repairs, allowing you to drop off a device on your way to work or during a lunch break.",
+    metaTitle: "Apple, MacBook & Phone Repair Near Nunawading | Ali Mobile Ringwood",
+    metaDescription: "Need Apple, MacBook, computer or phone repair near Nunawading? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
+    customH1: "Apple, MacBook & Phone Repair Near Nunawading",
+    customIntro: "Nunawading customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre for Apple, MacBook, iPhone, Samsung, iPad and phone repair support. We are opposite Bunnings Warehouse Ringwood and confirm the quote path before repair.",
     customLocalSection: {
-      title: "Getting to Ringwood Square from Nunawading",
+      title: "Travelling for Apple and Phone Repair from Nunawading",
       paragraphs: [
-        "If you are commuting from Nunawading, driving straight east along Maroondah Highway (Whitehorse Road) takes you past Mitcham directly to Ringwood Square in under 10 minutes. The centre offers easy parking access for quick drop-offs.",
+        "If you are commuting from Nunawading, driving straight east along Maroondah Highway (Whitehorse Road) takes you past Mitcham directly to Ringwood Square in under 10 minutes. The centre offers easy parking access for in-person repair visits.",
         "If you prefer public transport, take the Belgrave or Lilydale train from Nunawading Station. The train ride is typically around 7 minutes to Ringwood Station. Our kiosk is located just across the road inside Ringwood Square Shopping Centre."
       ]
     },
     customScenarioSection: {
-      title: "Commuter & Commercial Repair Scenarios from Nunawading",
+      title: "MacBook, iPhone and Samsung Repairs near Nunawading",
       paragraphs: [
-        "Nunawading has a mix of residential and business offices. We frequently assist commercial users who rely on their laptops or tablets for daily operations. We check power draws, display connections, and battery cycles to provide rapid answers.",
-        "For office workers, dropping off an iPhone with a failing battery or loose USB-C port in the morning allows us to inspect the unit and have it ready for collection by the time they return from the city in the afternoon."
+        "Nunawading has a mix of residential and business offices, so customers often ask about Apple repairs, MacBook repair, computer repairs and laptop repair near Nunawading. We check power draw, display connections, battery condition and model-specific part paths before quoting.",
+        "For iPhone, Samsung phone, iPad, screen replacement and battery replacement enquiries near Nunawading, bring the device to Ringwood Square so we can confirm the model, fault and quote path before work begins."
       ]
     },
     customFaqs: [
@@ -495,12 +495,12 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "No. We operate exclusively from Kiosk C1 in Ringwood Square Shopping Centre. Nunawading is a direct 10-minute drive or train ride to our shop."
       },
       {
-        question: "Can Nunawading businesses drop off multiple devices for inspection?",
+        question: "Can Nunawading businesses bring multiple devices for inspection?",
         answer: "Yes. Commercial clients frequently bring in several iPads or MacBooks for battery and screen diagnostics at our Ringwood Square bench."
       },
       {
-        question: "Can I leave my phone with you while commuting from Nunawading to the city?",
-        answer: "Yes, this is very common. Drop it off in the morning near Ringwood Station, and pick it up on your return commute in the evening."
+        question: "Can I visit while commuting from Nunawading to the city?",
+        answer: "Yes. Ringwood Square is close to Ringwood Station, so many customers visit before or after their commute. We confirm the repair path and expected timing after checking the device."
       },
       {
         question: "Do you repair USB-C charging ports for Nunawading customers?",
@@ -543,6 +543,24 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Glen Waverley Station", "The Glen", "Springvale Road"],
     route: "Travel toward Ringwood by bus or drive through Canterbury Road and Wantirna Road for Ringwood Square parking.",
     localReason: "Glen Waverley customers can call first for model checks and visit only when the likely repair path is clear.",
+    metaTitle: "Phone, Apple & Laptop Repair Near Glen Waverley | Ali Mobile Ringwood",
+    metaDescription: "Need phone, Apple, laptop or computer repair near Glen Waverley or Syndal? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
+    customH1: "Phone, Apple & Laptop Repair Near Glen Waverley",
+    customIntro: "Glen Waverley and Syndal customers can visit Ali Mobile & Repair at Ringwood Square for mobile phone, iPhone, Samsung, iPad, MacBook and laptop repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+    customLocalSection: {
+      title: "Travelling for Phone and Laptop Repair from Glen Waverley",
+      paragraphs: [
+        "Glen Waverley customers can travel toward Ringwood by bus or drive through Canterbury Road and Wantirna Road for Ringwood Square parking. Calling ahead helps confirm the likely model, fault and parts path before you make the trip.",
+        "Customers near Syndal can use the same route toward Ringwood Square. Once at the centre, visit Kiosk C1 for quote-first support on phone repair, Apple repairs, laptop repair and computer repairs near Glen Waverley."
+      ]
+    },
+    customScenarioSection: {
+      title: "Mobile, Apple and MacBook Repairs near Glen Waverley",
+      paragraphs: [
+        "Glen Waverley customers often ask about mobile repair, mobile phone repair, phone repair, iPhone repair and Samsung phone repair. We confirm the exact device model, inspect the fault and explain repair timing before work begins.",
+        "For Apple repairs, MacBook repair, laptop repair, computer repairs, iPad repair and phone screen repair near Glen Waverley, bring the device to Ringwood Square so we can check the model and quote path in person."
+      ]
+    },
     showChineseServiceCta: true,
   },
   {
@@ -553,22 +571,22 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Knox Private Hospital", "EastLink", "Stud Road"],
     route: "Take EastLink north, exit toward Ringwood, then park at Ringwood Square.",
     localReason: "Good for customers who want to call first, confirm pricing, then visit only when the repair path is clear.",
-    metaTitle: "Wantirna Phone & Tablet Repair Assessments | Ringwood C1",
-    metaDescription: "Need phone or tablet repair checks near Wantirna? We provide face-to-face assessments for iPad, Samsung, and iPhone display or charging problems at Ringwood Square.",
-    customH1: "Phone and Tablet Repair Assessments for Wantirna Residents",
-    customIntro: "Our kiosk at Ringwood Square Shopping Centre offers Wantirna residents clear, face-to-face diagnostics and device assessments. We inspect display, touch, and charging problems on iPads, Samsung devices, and iPhones, ensuring we confirm parts, pricing, and estimated turnaround times before any repair work starts.",
+    metaTitle: "Phone Screen, Apple & MacBook Repair Near Wantirna | Ali Mobile Ringwood",
+    metaDescription: "Need phone screen, Apple, iPhone or MacBook repair near Wantirna or Studfield? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
+    customH1: "Phone Screen, Apple & MacBook Repair Near Wantirna",
+    customIntro: "Wantirna and Studfield customers can visit Ali Mobile & Repair at Ringwood Square for phone screen, iPhone, Samsung, Apple, iPad and MacBook repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
     customLocalSection: {
-      title: "Transit Paths from Wantirna to Ringwood Square",
+      title: "Travelling for Phone Screen Repair from Wantirna",
       paragraphs: [
         "Wantirna residents have direct road links to our shop. Driving straight north via Wantirna Road or using EastLink typically takes about 12 minutes depending on traffic. Ample parking is available at Ringwood Square.",
         "By public transport, you can catch the SmartBus 901 towards Ringwood Station from corridors along Wantirna Road, then walk 5 minutes into the shopping centre."
       ]
     },
     customScenarioSection: {
-      title: "Wantirna iPad & Samsung Assessment Scenarios",
+      title: "Apple, iPhone and MacBook Repairs near Wantirna",
       paragraphs: [
-        "When Wantirna families bring in an iPad or Samsung Galaxy with touch unresponsiveness or cracked glass, we perform a counter inspection to verify the underlying damage. We explain the screen repair options face-to-face and confirm if replacement digitizers are in stock.",
-        "For charging issues, we test the power draw at our bench. We confirm whether the issue is a simple cable fault, a clogged port, or a damaged charging IC, giving you a transparent quote before you authorize any work."
+        "Wantirna and Studfield customers often ask about phone screen repair, iPhone repair, Samsung phone repair and Apple repairs near Wantirna. We inspect cracked glass, touch faults, battery symptoms and charging issues before confirming the quote.",
+        "For MacBook repair, iPad repair, battery replacement and charging port repair near Wantirna, we check the exact model and likely parts path first so the repair remains assessment-led and quote-first."
       ]
     },
     customFaqs: [
