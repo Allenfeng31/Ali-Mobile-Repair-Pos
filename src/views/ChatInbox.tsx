@@ -14,6 +14,7 @@ import {
   X,
   Clock3,
   Phone,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { cn } from '@/lib/utils';
@@ -114,7 +115,7 @@ export function ChatInbox() {
   const [apptStatusCache, setApptStatusCache] = useState<Record<string, string>>({});
   const [bookingsOpen, setBookingsOpen] = useState(false);
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
-  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
+  const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [sendingReminderId, setSendingReminderId] = useState<string | null>(null);
@@ -475,6 +476,19 @@ export function ChatInbox() {
 
   const pendingBookings = bookings.filter(booking => booking.status === 'pending');
   const confirmedBookings = bookings.filter(booking => booking.status === 'confirmed');
+  const sortedBookings = [...bookings].sort((a, b) => {
+    const getStatusRank = (status: string) => {
+      if (status === 'pending') return 0;
+      if (status === 'confirmed') return 1;
+      if (status === 'arrived') return 2;
+      return 3;
+    };
+
+    const statusDiff = getStatusRank(a.status) - getStatusRank(b.status);
+    if (statusDiff !== 0) return statusDiff;
+
+    return new Date(a.datetime).getTime() - new Date(b.datetime).getTime();
+  });
   const nowTime = Date.now();
   const nextFutureConfirmedBooking =
     confirmedBookings.find(booking => new Date(booking.datetime).getTime() >= nowTime) || null;
@@ -786,32 +800,37 @@ export function ChatInbox() {
     <div className="max-w-4xl mx-auto px-4 pb-20">
       {bookingsOpen && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden overscroll-contain bg-slate-900/35 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-8">
-          <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.25rem] border border-white/30 bg-[var(--color-neu-bg)] shadow-[0_34px_90px_rgba(15,23,42,0.28)] sm:max-h-[86vh] sm:rounded-[3rem]">
-            <div className="shrink-0 flex flex-col gap-6 border-b border-white/40 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-              <div>
+          <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/30 bg-[var(--color-neu-bg)] shadow-[0_34px_90px_rgba(15,23,42,0.28)] sm:max-h-[86vh] sm:rounded-[3rem]">
+            <div className="sticky top-0 z-10 shrink-0 flex items-start justify-between gap-3 border-b border-white/40 bg-[var(--color-neu-bg)] p-4 sm:p-6">
+              <div className="min-w-0">
                 <span className="text-[10px] font-black uppercase tracking-[0.24em] text-blue-600">Today & Upcoming</span>
-                <h2 className="mt-2 text-3xl font-black tracking-tight text-black">Booking Control</h2>
-                <p className="mt-2 text-xs font-bold text-gray-500">Pending approvals, confirmed repairs, and the next bookings on the bench.</p>
+                <h2 className="mt-1 text-2xl font-black tracking-tight text-black sm:mt-2 sm:text-3xl">Booking Control</h2>
+                <p className="mt-1 text-xs font-bold text-gray-500 sm:mt-2">Pending first, then confirmed repairs.</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                 <button
+                  type="button"
                   onClick={loadBookings}
                   disabled={bookingsLoading}
-                  className="h-12 rounded-2xl bg-[var(--color-neu-bg)] px-5 text-[10px] font-black uppercase tracking-widest text-blue-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-neu-bg)] text-blue-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                  aria-label="Refresh bookings"
+                  title="Refresh bookings"
                 >
-                  Refresh
+                  <RefreshCw size={22} strokeWidth={3} className={bookingsLoading ? "animate-spin" : ""} />
                 </button>
                 <button
+                  type="button"
                   onClick={() => setBookingsOpen(false)}
                   className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-neu-bg)] text-gray-500 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)]"
                   aria-label="Close booking control"
+                  title="Close booking control"
                 >
                   <X size={22} strokeWidth={3} />
                 </button>
               </div>
             </div>
 
-            <div className="shrink-0 grid gap-4 px-5 pt-5 sm:grid-cols-3 sm:px-6 sm:pt-6">
+            <div className="hidden shrink-0 gap-4 px-5 pt-5 sm:grid sm:grid-cols-3 sm:px-6 sm:pt-6">
               <div className="rounded-[2rem] bg-amber-50 p-5 shadow-[var(--shadow-neu-sm)]">
                 <p className="text-[9px] font-black uppercase tracking-[0.22em] text-amber-600">Pending</p>
                 <p className="mt-2 text-3xl font-black text-black">{pendingBookings.length}</p>
@@ -843,124 +862,170 @@ export function ChatInbox() {
                 </div>
               ) : (
                 <div className="grid gap-4">
-                  {bookings.map((booking) => {
+                  {sortedBookings.map((booking) => {
                     const isPending = booking.status === 'pending';
                     const isUpdating = updatingBookingId === booking.id;
                     const cleanBookingNote = booking.notes?.replace('[MULTI-DEVICE]', '').trim() || '';
-                    const isNoteExpanded = Boolean(expandedNotes[booking.id]);
-                    const canToggleNote = cleanBookingNote.length > 120;
+                    const isExpanded = expandedBookingId === booking.id;
+                    const deviceLabel = [booking.brand, booking.model].filter(Boolean).join(' ') || 'Device model to confirm';
+                    const serviceLabel = booking.service || 'Repair service to confirm';
+                    const statusLabel =
+                      isPending
+                        ? 'Pending Confirmation'
+                        : booking.status === 'arrived'
+                          ? 'Arrived'
+                          : booking.status === 'confirmed'
+                            ? 'Confirmed Booking'
+                            : booking.status;
 
                     return (
                       <article
                         key={booking.id}
-                        className="rounded-[2.25rem] border border-white/30 bg-[var(--color-neu-bg)] p-5 shadow-[var(--shadow-neu-flat)]"
+                        className={cn(
+                          "overflow-hidden rounded-[2rem] border p-4 shadow-[var(--shadow-neu-flat)] sm:rounded-[2.25rem] sm:p-5",
+                          isPending
+                            ? "border-emerald-200 bg-emerald-50/90"
+                            : "border-white/30 bg-[var(--color-neu-bg)]"
+                        )}
                       >
-                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedBookingId(prev => prev === booking.id ? null : booking.id)}
+                          aria-expanded={isExpanded}
+                          className="block w-full cursor-pointer text-left"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
                               <span className={cn(
-                                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-widest",
-                                isPending ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                                "inline-flex min-h-8 items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-widest",
+                                isPending ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-700"
                               )}>
                                 {isPending ? <Clock3 size={12} strokeWidth={3} /> : <CheckCircle2 size={12} strokeWidth={3} />}
-                                {isPending ? 'Pending Confirmation' : 'Confirmed Booking'}
+                                {statusLabel}
                               </span>
-                              <span className="rounded-full bg-white/60 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                              <span className="rounded-full bg-white/70 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-gray-600">
                                 {formatBookingTime(booking.datetime)}
                               </span>
                             </div>
-                            <h3 className="truncate text-xl font-black text-black">{booking.customer_name}</h3>
-                            <div className="mt-2 grid gap-1 text-xs font-bold text-gray-500 sm:grid-cols-2">
-                              <p className="flex items-center gap-2">
-                                <Phone size={13} strokeWidth={3} className="text-blue-600" />
-                                {booking.phone}
-                              </p>
-                              <p className="truncate">
-                                {booking.brand} {booking.model} · {booking.service}
-                              </p>
-                            </div>
-                            {cleanBookingNote && (
-                              <div className="mt-3">
-                                <p
-                                  id={`booking-note-${booking.id}`}
-                                  className={cn(
-                                    "break-words text-xs font-semibold leading-relaxed text-gray-500",
-                                    canToggleNote && !isNoteExpanded && "line-clamp-2"
-                                  )}
-                                >
-                                  {cleanBookingNote}
-                                </p>
-                                {canToggleNote && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setExpandedNotes(prev => ({
-                                        ...prev,
-                                        [booking.id]: !prev[booking.id],
-                                      }));
-                                    }}
-                                    aria-expanded={isNoteExpanded}
-                                    aria-controls={`booking-note-${booking.id}`}
-                                    className="mt-2 text-[10px] font-black uppercase tracking-widest text-blue-600 active:scale-95"
-                                  >
-                                    {isNoteExpanded ? 'Read less' : 'Read more'}
-                                  </button>
-                                )}
-                              </div>
-                            )}
+                            <ChevronDown
+                              size={22}
+                              strokeWidth={3}
+                              className={cn(
+                                "mt-1 shrink-0 text-gray-500 transition-transform",
+                                isExpanded && "rotate-180"
+                              )}
+                              aria-hidden="true"
+                            />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
-                            {isPending && (
-                              <button
-                                onClick={() => updateAppointmentStatus(booking.id, 'confirmed')}
-                                disabled={isUpdating}
-                                className="rounded-2xl bg-green-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(34,197,94,0.24)] transition-all active:scale-95 disabled:opacity-50"
-                              >
-                                Confirm
-                              </button>
-                            )}
-                            {!isPending && (
-                              <button
-                                onClick={() => sendAppointmentReminder(booking.id)}
-                                disabled={Boolean(booking.reminder_sent_at) || sendingReminderId === booking.id}
-                                className={cn(
-                                  "rounded-2xl px-5 py-3 text-[10px] font-black uppercase tracking-widest shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:cursor-default disabled:active:scale-100",
-                                  booking.reminder_sent_at
-                                    ? "bg-green-100 text-green-700 disabled:opacity-100"
-                                    : "bg-[var(--color-neu-bg)] text-blue-600 disabled:opacity-55"
-                                )}
-                              >
-                                <span className="inline-flex items-center gap-1.5">
-                                  {booking.reminder_sent_at ? <CheckCircle2 size={13} strokeWidth={3} /> : <BellRing size={13} strokeWidth={3} />}
-                                  {booking.reminder_sent_at ? 'Sent' : sendingReminderId === booking.id ? 'Sending' : 'Reminder'}
-                                </span>
-                              </button>
-                            )}
-                            <div className="flex flex-col gap-2">
-                              {!isPending && booking.status !== 'arrived' && (
-                                <button
-                                  onClick={() => updateAppointmentStatus(booking.id, 'arrived')}
-                                  disabled={isUpdating}
-                                  className="rounded-2xl bg-blue-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(59,130,246,0.24)] transition-all active:scale-95 disabled:opacity-50"
-                                >
-                                  Arrived
-                                </button>
-                              )}
-                              <button
-                                onClick={() => {
-                                  if (window.confirm('Cancel this booking request?')) {
-                                    updateAppointmentStatus(booking.id, 'declined');
-                                  }
-                                }}
-                                disabled={isUpdating}
-                                className="rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
-                              >
-                                Cancel
-                              </button>
+                          <div className="mt-4 space-y-2">
+                            <h3 className="break-words text-2xl font-black leading-tight text-black sm:text-3xl">
+                              {deviceLabel}
+                            </h3>
+                            <p className="break-words text-lg font-black leading-snug text-gray-700 sm:text-xl">
+                              {serviceLabel}
+                            </p>
+                            <div className="flex items-center justify-between gap-3 pt-1">
+                              <p className="min-w-0 break-words text-sm font-black text-gray-600">
+                                {booking.customer_name}
+                              </p>
+                              <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-blue-600">
+                                {isExpanded ? 'Hide details' : 'Tap for actions'}
+                              </span>
                             </div>
                           </div>
-                        </div>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="mt-5 space-y-4 border-t border-white/60 pt-5">
+                            <div className="grid gap-3 text-sm font-bold text-gray-600 sm:grid-cols-2">
+                              <a
+                                href={`tel:${booking.phone}`}
+                                className="flex min-h-12 items-center gap-2 rounded-2xl bg-white/70 px-4 py-3 text-blue-700 shadow-[var(--shadow-neu-sm)]"
+                              >
+                                <Phone size={15} strokeWidth={3} />
+                                <span className="break-all">{booking.phone}</span>
+                              </a>
+                              <div className="rounded-2xl bg-white/70 px-4 py-3 shadow-[var(--shadow-neu-sm)]">
+                                <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">Full device</span>
+                                <span className="mt-1 block break-words text-black">{deviceLabel}</span>
+                              </div>
+                              <div className="rounded-2xl bg-white/70 px-4 py-3 shadow-[var(--shadow-neu-sm)] sm:col-span-2">
+                                <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">Repair type</span>
+                                <span className="mt-1 block break-words text-black">{serviceLabel}</span>
+                              </div>
+                              <div className="rounded-2xl bg-white/70 px-4 py-3 shadow-[var(--shadow-neu-sm)] sm:col-span-2">
+                                <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">Notes</span>
+                                <p className="mt-1 break-words text-gray-700">
+                                  {cleanBookingNote || 'No notes added.'}
+                                </p>
+                              </div>
+                              {!isPending && (
+                                <div className="rounded-2xl bg-white/70 px-4 py-3 shadow-[var(--shadow-neu-sm)] sm:col-span-2">
+                                  <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">Reminder SMS</span>
+                                  <p className="mt-1 text-gray-700">
+                                    {booking.reminder_sent_at ? 'Sent' : 'Not sent yet'}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
+                              {isPending && (
+                                <button
+                                  type="button"
+                                  onClick={() => updateAppointmentStatus(booking.id, 'confirmed')}
+                                  disabled={isUpdating}
+                                  className="min-h-12 rounded-2xl bg-green-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(34,197,94,0.24)] transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                  Confirm
+                                </button>
+                              )}
+                              {!isPending && (
+                                <button
+                                  type="button"
+                                  onClick={() => sendAppointmentReminder(booking.id)}
+                                  disabled={Boolean(booking.reminder_sent_at) || sendingReminderId === booking.id}
+                                  className={cn(
+                                    "min-h-12 rounded-2xl px-5 py-3 text-[10px] font-black uppercase tracking-widest shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:cursor-default disabled:active:scale-100",
+                                    booking.reminder_sent_at
+                                      ? "bg-green-100 text-green-700 disabled:opacity-100"
+                                      : "bg-[var(--color-neu-bg)] text-blue-600 disabled:opacity-55"
+                                  )}
+                                >
+                                  <span className="inline-flex items-center gap-1.5">
+                                    {booking.reminder_sent_at ? <CheckCircle2 size={13} strokeWidth={3} /> : <BellRing size={13} strokeWidth={3} />}
+                                    {booking.reminder_sent_at ? 'Sent' : sendingReminderId === booking.id ? 'Sending' : 'Reminder'}
+                                  </span>
+                                </button>
+                              )}
+                              <div className="flex flex-col gap-2">
+                                {!isPending && booking.status !== 'arrived' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => updateAppointmentStatus(booking.id, 'arrived')}
+                                    disabled={isUpdating}
+                                    className="min-h-12 rounded-2xl bg-blue-500 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_10px_22px_rgba(59,130,246,0.24)] transition-all active:scale-95 disabled:opacity-50"
+                                  >
+                                    Arrived
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (window.confirm('Cancel this booking request?')) {
+                                      updateAppointmentStatus(booking.id, 'declined');
+                                    }
+                                  }}
+                                  disabled={isUpdating}
+                                  className="min-h-12 rounded-2xl bg-[var(--color-neu-bg)] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-[var(--shadow-neu-flat)] transition-all active:scale-95 active:shadow-[var(--shadow-neu-pressed)] disabled:opacity-50"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </article>
                     );
                   })}
