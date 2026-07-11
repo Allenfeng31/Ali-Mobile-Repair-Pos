@@ -1,14 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import ClientChatWidget from "../ClientChatWidget";
 import Header from "../Header";
 import { CartProvider } from "@/context/CartContext";
 import PageTransition from "@/components/PageTransition";
 import SocialIcon from "@/components/SocialIcon";
 import { Clock3, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
-
-const ChatWidget = dynamic(() => import("../ChatWidget"));
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -49,7 +47,7 @@ export default function PublicLayout({
             {children}
           </PageTransition>
         </main>
-        <ChatWidget />
+        <ClientChatWidget />
         <footer className="footer">
           <div className="footer-shell">
             <div className="footer-cta-panel">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import Image from "next/image";
 
 import ChatNowButton from "@/components/ChatNowButton";
 import ServiceAreas from "@/components/seo/ServiceAreas";
@@ -154,9 +155,12 @@ export default function RepairsHubPage() {
           {repairCategories.map((category, index) => (
             <Link href={category.href} key={category.href} className={styles.categoryCard}>
               <div className={styles.cardImage} aria-hidden="true">
-                <div
+                <Image
                   className={styles.cardPhoto}
-                  style={{ backgroundImage: `url('${category.image}')` }}
+                  src={category.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1180px) 50vw, 25vw"
                 />
               </div>
               <div className={styles.cardContent}>
