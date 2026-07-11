@@ -51,6 +51,7 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { supabase } from '../lib/supabase';
 import { Lock } from 'lucide-react';
+import { getOrderTenderTotals } from '../lib/reportTenderTotals';
 
 interface ReportsViewProps {
   orders: Order[];
@@ -184,8 +185,8 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const stats = useMemo(() => {
     const totalRevenue = validOrders.reduce((acc, o) => acc + o.total, 0);
     const totalProfit = validOrders.reduce((acc, o) => acc + o.profit, 0);
-    const cashTotal = validOrders.reduce((acc, o) => acc + (o.paymentMethod === 'cash' || !o.paymentMethod ? o.total : 0), 0);
-    const eftposTotal = validOrders.reduce((acc, o) => acc + (o.paymentMethod === 'eftpos' ? o.total : 0), 0);
+    const cashTotal = validOrders.reduce((acc, o) => acc + getOrderTenderTotals(o).cash, 0);
+    const eftposTotal = validOrders.reduce((acc, o) => acc + getOrderTenderTotals(o).eftpos, 0);
     const surchargeTotal = validOrders.reduce((acc, o) => acc + (o.surcharge || 0), 0);
     const taxTotal = validOrders.reduce((acc, o) => acc + (o.tax || 0), 0);
     const repairsCount = validOrders.filter(o => o.type === 'repair').length;
@@ -487,6 +488,13 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             value={`$${stats.cashTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
             trend="Manual Settle"
             icon={Banknote}
+            color="primary"
+          />
+          <StatCard
+            label="Card Collections"
+            value={`$${stats.eftposTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            trend="EFTPOS Settle"
+            icon={CreditCard}
             color="primary"
           />
         </div>
@@ -974,6 +982,11 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedOrder(null)} className="absolute inset-0 bg-black/40" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-lg bg-[var(--color-neu-bg)] rounded-[3rem] shadow-[var(--shadow-neu-floating)] overflow-hidden border border-white/20">
               <div className="p-8 space-y-8">
+                {(() => {
+                  const tenderTotals = getOrderTenderTotals(selectedOrder);
+
+                  return (
+                    <>
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-3xl font-black text-black tracking-tight">Audit Details</h3>
@@ -1016,6 +1029,18 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                       <span className="text-lg font-black text-black">TOTAL PAID</span>
                       <span className="text-3xl font-black text-black">${selectedOrder.total.toFixed(2)}</span>
                     </div>
+                    {(tenderTotals.cash > 0 || tenderTotals.eftpos > 0) && (
+                      <div className="grid grid-cols-2 gap-3 pt-3">
+                        <div className="rounded-2xl bg-[var(--color-neu-bg)] p-4 shadow-[var(--shadow-neu-sm)]">
+                          <span className="block text-[9px] font-black uppercase tracking-widest text-gray-500">Cash Payment</span>
+                          <span className="mt-1 block text-lg font-black text-black">${tenderTotals.cash.toFixed(2)}</span>
+                        </div>
+                        <div className="rounded-2xl bg-[var(--color-neu-bg)] p-4 shadow-[var(--shadow-neu-sm)]">
+                          <span className="block text-[9px] font-black uppercase tracking-widest text-gray-500">Card Payment</span>
+                          <span className="mt-1 block text-lg font-black text-black">${tenderTotals.eftpos.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-green-600/5 p-5 rounded-2xl border border-green-600/10 flex justify-between items-center">
@@ -1044,6 +1069,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                     </button>
                   )}
                 </div>
+                    </>
+                  );
+                })()}
               </div>
             </motion.div>
           </div>
