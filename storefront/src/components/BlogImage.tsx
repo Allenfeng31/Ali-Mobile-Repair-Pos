@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import React, { useState } from 'react';
 
 interface BlogImageProps {
@@ -7,12 +8,19 @@ interface BlogImageProps {
   alt: string;
   className?: string;
   priority?: boolean;
+  sizes?: string;
 }
 
-export function BlogImage({ src, alt, className, priority = false }: BlogImageProps) {
+export function BlogImage({
+  src,
+  alt,
+  className,
+  priority = false,
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+}: BlogImageProps) {
   const [error, setError] = useState(!src);
 
-  if (error) {
+  if (error || !src) {
     return (
       <div className={`blog-placeholder-img ${className || ''}`} style={{ 
         width: '100%', 
@@ -32,12 +40,13 @@ export function BlogImage({ src, alt, className, priority = false }: BlogImagePr
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={src}
       alt={alt}
+      fill
+      sizes={sizes}
       className={className}
-      loading={priority ? 'eager' : 'lazy'}
+      priority={priority}
       onError={() => setError(true)}
     />
   );
