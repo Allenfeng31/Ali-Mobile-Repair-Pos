@@ -30,6 +30,12 @@ export const SIX_REPAIR_IPHONE_REPAIR_TYPES = [
   'back-glass-replacement',
   'front-camera-replacement',
   'back-camera-replacement',
+  'earpiece-speaker-replacement',
+  'loudspeaker-replacement',
+  'microphone-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+  'camera-lens-replacement',
 ] as const satisfies ReadonlyArray<AliMobileEnhancedIphoneRepairType>;
 
 export const FIVE_REPAIR_IPHONE_REPAIR_TYPES = [
@@ -38,6 +44,12 @@ export const FIVE_REPAIR_IPHONE_REPAIR_TYPES = [
   'charging-port-replacement',
   'front-camera-replacement',
   'back-camera-replacement',
+  'earpiece-speaker-replacement',
+  'loudspeaker-replacement',
+  'microphone-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+  'camera-lens-replacement',
 ] as const satisfies ReadonlyArray<AliMobileEnhancedIphoneRepairType>;
 
 function defineIphoneHardwareConfig(

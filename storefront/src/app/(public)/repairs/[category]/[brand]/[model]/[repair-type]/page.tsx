@@ -22,9 +22,11 @@ import {
   getAliMobileEnhancedIphoneRepairType,
   getAliMobileEnhancedIphoneSeoPocket,
   isAliMobileEnhancedIphoneRepairPage,
-  type AliMobileEnhancedIphoneRepairType,
-  type RepairTypeSeoPocket,
 } from '@/lib/seo/content/iphone';
+import type {
+  AliMobileEnhancedIphoneRepairType,
+  RepairTypeSeoPocket,
+} from '@/lib/seo/content/iphone/types';
 import {
   getAliMobileEnhancedSamsungHubLinks,
   getAliMobileEnhancedSamsungRepairType,

@@ -4,7 +4,13 @@ export type AliMobileEnhancedIphoneRepairType =
   | "charging-port-replacement"
   | "back-glass-replacement"
   | "front-camera-replacement"
-  | "back-camera-replacement";
+  | "back-camera-replacement"
+  | "earpiece-speaker-replacement"
+  | "loudspeaker-replacement"
+  | "microphone-replacement"
+  | "power-button-replacement"
+  | "volume-button-replacement"
+  | "camera-lens-replacement";
 
 export type Iphone14ProMaxPilotRepairType =
   | "screen-replacement"

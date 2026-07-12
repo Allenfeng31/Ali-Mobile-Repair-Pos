@@ -8,6 +8,7 @@ import {
   IPHONE_HARDWARE_CONFIG,
 } from './config';
 import { applyIphoneFrontCameraReplacementSeoPocket } from './front-camera-replacement';
+import { applyIphoneHardwareRepairSeoPocket } from './hardware-repairs';
 import { applyIphoneScreenReplacementSeoPocket } from './screen-replacement';
 import type {
   AliMobileEnhancedIphoneModelSlug,
@@ -128,6 +129,13 @@ export function getAliMobileEnhancedIphoneSeoPocket({
       return applyIphoneFrontCameraReplacementSeoPocket(pocket, hardwareConfig);
     case "back-camera-replacement":
       return applyIphoneBackCameraReplacementSeoPocket(pocket, hardwareConfig);
+    case "earpiece-speaker-replacement":
+    case "loudspeaker-replacement":
+    case "microphone-replacement":
+    case "power-button-replacement":
+    case "volume-button-replacement":
+    case "camera-lens-replacement":
+      return applyIphoneHardwareRepairSeoPocket(pocket, hardwareConfig, enhancedRepairType);
     default:
       return pocket;
   }

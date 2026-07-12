@@ -1,7 +1,7 @@
-import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
-import type { AliMobileEnhancedIpadRepairType } from '@/lib/seo/content/ipad';
-import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung';
-import type { AliMobileEnhancedSamsungTabletRepairType } from '@/lib/seo/content/samsung-tablet';
+import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone/types';
+import type { AliMobileEnhancedIpadRepairType } from '@/lib/seo/content/ipad/types';
+import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung/types';
+import type { AliMobileEnhancedSamsungTabletRepairType } from '@/lib/seo/content/samsung-tablet/types';
 
 export type CommonRepairProblemsRepairType =
   | AliMobileEnhancedIphoneRepairType
@@ -50,6 +50,30 @@ const SECTION_COPY: Record<
   },
   "back-camera-replacement": {
     heading: (modelName) => `Common ${modelName} Back Camera Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "earpiece-speaker-replacement": {
+    heading: (modelName) => `Common ${modelName} Earpiece Speaker Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "loudspeaker-replacement": {
+    heading: (modelName) => `Common ${modelName} Loudspeaker Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "microphone-replacement": {
+    heading: (modelName) => `Common ${modelName} Microphone Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "power-button-replacement": {
+    heading: (modelName) => `Common ${modelName} Power Button Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "volume-button-replacement": {
+    heading: (modelName) => `Common ${modelName} Volume Button Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "camera-lens-replacement": {
+    heading: (modelName) => `Common ${modelName} Camera Lens Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
   "back-housing-replacement": {

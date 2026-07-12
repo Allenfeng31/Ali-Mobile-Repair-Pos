@@ -240,6 +240,180 @@ export function getIphoneWhyChooseContent(
         },
       ],
     },
+    "earpiece-speaker-replacement": {
+      kicker: "Ali Mobile support",
+      heading: `Why choose Ali Mobile for ${modelName} earpiece speaker replacement`,
+      intro:
+        "Call-audio faults can come from mesh blockage, software behaviour, the receiver path, or part failure, so Ali Mobile checks the symptoms before confirming earpiece speaker replacement.",
+      cards: [
+        {
+          title: "Receiver audio checks",
+          icon: Smartphone,
+          points: [
+            "We compare normal call audio, loudspeaker behaviour, low receiver volume, and distortion before confirming the repair path.",
+          ],
+        },
+        {
+          title: "Mesh and audio-path inspection",
+          icon: Search,
+          points: [
+            "Speaker mesh condition, blockage signs, software behaviour, audio path, and part condition are checked before a quote is confirmed.",
+          ],
+        },
+        {
+          title: "Practical call retesting",
+          icon: ClipboardCheck,
+          points: [
+            "After repair we retest the relevant call-audio path and explain any remaining limitation clearly before handover.",
+          ],
+        },
+      ],
+    },
+    "loudspeaker-replacement": {
+      kicker: "Ali Mobile support",
+      heading: `Why choose Ali Mobile for ${modelName} loudspeaker replacement`,
+      intro:
+        "Bottom-speaker symptoms can overlap with settings, contamination, charging-port path issues, or board-level faults, so Ali Mobile diagnoses speaker behaviour first.",
+      cards: [
+        {
+          title: "Ringtone and media testing",
+          icon: Smartphone,
+          points: [
+            "We test ringtone, media playback, no-sound symptoms, and distorted bottom-speaker output before confirming loudspeaker replacement.",
+          ],
+        },
+        {
+          title: "Lower-path diagnosis",
+          icon: Search,
+          points: [
+            "Speaker condition, settings, charging-port path overlap, contamination, and board-level fault signs are checked before work begins.",
+          ],
+        },
+        {
+          title: "Relevant speaker retesting",
+          icon: ClipboardCheck,
+          points: [
+            "After repair we retest the speaker output linked to the repair area and explain any remaining audio limitation clearly before handover.",
+          ],
+        },
+      ],
+    },
+    "microphone-replacement": {
+      kicker: "Ali Mobile support",
+      heading: `Why choose Ali Mobile for ${modelName} microphone replacement`,
+      intro:
+        "Microphone faults can show differently in calls, recordings, and apps, so Ali Mobile checks the microphone path, blockage signs, and software behaviour before quoting.",
+      cards: [
+        {
+          title: "Call and recording checks",
+          icon: Smartphone,
+          points: [
+            "We compare caller-cannot-hear symptoms, unclear voice memos, muffled recordings, and app behaviour before confirming the repair path.",
+          ],
+        },
+        {
+          title: "Blockage and audio-path review",
+          icon: Search,
+          points: [
+            "Dust blockage, software causes, microphone path condition, and board-level audio fault signs are checked before replacement is confirmed.",
+          ],
+        },
+        {
+          title: "Microphone retesting",
+          icon: ClipboardCheck,
+          points: [
+            "After repair we retest the relevant microphone behaviour and explain any remaining audio limitation clearly before handover.",
+          ],
+        },
+      ],
+    },
+    "power-button-replacement": {
+      kicker: "Ali Mobile support",
+      heading: `Why choose Ali Mobile for ${modelName} power button replacement`,
+      intro:
+        "Power button faults can be mechanical, flex-related, or linked to housing damage, so Ali Mobile inspects the button and surrounding frame before confirming replacement.",
+      cards: [
+        {
+          title: "Button movement assessment",
+          icon: Smartphone,
+          points: [
+            "We check stuck, hard-to-press, intermittent wake, and lock-response symptoms before confirming the repair path.",
+          ],
+        },
+        {
+          title: "Flex and housing checks",
+          icon: Search,
+          points: [
+            "Button flex condition, housing damage, impact signs, and internal connection behaviour are inspected before a quote is confirmed.",
+          ],
+        },
+        {
+          title: "Wake and lock retesting",
+          icon: ClipboardCheck,
+          points: [
+            "After repair we retest the relevant wake and lock behaviour before handover.",
+          ],
+        },
+      ],
+    },
+    "volume-button-replacement": {
+      kicker: "Ali Mobile support",
+      heading: `Why choose Ali Mobile for ${modelName} volume button replacement`,
+      intro:
+        "Volume button issues can come from button flex, frame damage, internal connection, or settings, so Ali Mobile checks the practical cause before quoting.",
+      cards: [
+        {
+          title: "Volume response checks",
+          icon: Smartphone,
+          points: [
+            "We test stuck buttons, no response, intermittent response, and click feel before confirming replacement.",
+          ],
+        },
+        {
+          title: "Frame, flex, and settings review",
+          icon: Search,
+          points: [
+            "Button flex condition, frame damage, internal connection, and relevant software settings are checked before work begins.",
+          ],
+        },
+        {
+          title: "Button retesting",
+          icon: ClipboardCheck,
+          points: [
+            "After repair we retest volume up and down response and explain any remaining limitation clearly before handover.",
+          ],
+        },
+      ],
+    },
+    "camera-lens-replacement": {
+      kicker: "Ali Mobile support",
+      heading: `Why choose Ali Mobile for ${modelName} camera lens replacement`,
+      intro:
+        "Rear camera lens damage can look like a camera-module fault, so Ali Mobile checks the outer lens glass, image output, and dust risk before confirming the repair scope.",
+      cards: [
+        {
+          title: "Lens glass inspection",
+          icon: Smartphone,
+          points: [
+            "We inspect cracked rear camera lens glass, scratches, missing glass, blurry camera output, and dust risk before quoting.",
+          ],
+        },
+        {
+          title: "Lens versus module diagnosis",
+          icon: Search,
+          points: [
+            "Camera module condition is checked so lens-only replacement is only confirmed when the internal camera path appears suitable.",
+          ],
+        },
+        {
+          title: "Camera output retesting",
+          icon: ClipboardCheck,
+          points: [
+            "After repair we retest the relevant rear camera output and explain any remaining module or housing limitation clearly before handover.",
+          ],
+        },
+      ],
+    },
   };
 }
 

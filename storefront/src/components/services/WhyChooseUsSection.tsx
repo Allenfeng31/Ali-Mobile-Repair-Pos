@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getIphoneWhyChooseContent, IPHONE_WHY_CHOOSE_SHARED_HIGHLIGHTS } from '@/lib/seo/content/iphone/why-choose';
-import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone';
+import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone/types';
 import {
   getIpadHardwareConfigByModelName,
   getIpadWhyChooseConfig,
