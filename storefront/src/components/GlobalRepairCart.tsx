@@ -10,6 +10,7 @@ import {
 } from '@/lib/inventoryUtils';
 import { smartSortModels } from '@/lib/modelSortConfig';
 import { withVirtualCameraLensGroupedService } from '@/lib/virtualCameraLens';
+import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from '@/lib/virtualPhoneRepairs';
 import { Pencil, Trash2 } from 'lucide-react';
 import './RepairCart.css';
 
@@ -341,8 +342,8 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const availableServices = useMemo(() => {
     if (!selectedBrand || !selectedModel) return [];
     const filtered = inventory.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
-    return withVirtualCameraLensGroupedService(
-      groupServicesByBaseName(filtered),
+    return withVirtualPhoneRepairGroupedServices(
+      withVirtualCameraLensGroupedService(groupServicesByBaseName(filtered), selectedBrand, selectedModel, selectedCategory),
       selectedBrand,
       selectedModel,
       selectedCategory
@@ -561,7 +562,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                       <div className="service-name-price">
                         <span className="service-name">{getCartDisplayServiceName(selectedCategory, selectedBrand, s.service)}</span>
                         <span className="service-price">
-                          {s.price > 0 ? (s.variants.length > 1 ? `From $${s.price}` : `$${s.price.toFixed(2)}`) : "Quote on Request"}
+                          {s.price > 0 ? (s.variants.length > 1 || isVirtualPhoneRepairName(s.service) ? `From $${s.price.toFixed(2)}` : `$${s.price.toFixed(2)}`) : "Quote on Request"}
                         </span>
                       </div>
                     </div>

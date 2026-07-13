@@ -28,6 +28,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/repairs/phone/google/camera-lens-replacement`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.76 },
     { url: `${baseUrl}/repairs/phone/oppo/camera-lens-replacement`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.76 },
     { url: `${baseUrl}/repairs/phone/camera-lens-replacement`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.74 },
+    ...['samsung', 'google', 'oppo'].flatMap((brand) => [
+      'loudspeaker-replacement',
+      'earpiece-speaker-replacement',
+      'power-button-replacement',
+      'volume-button-replacement',
+    ].map((repair) => ({ url: `${baseUrl}/repairs/phone/${brand}/${repair}`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.76 }))),
+    ...[
+      'loudspeaker-replacement',
+      'earpiece-speaker-replacement',
+      'power-button-replacement',
+      'volume-button-replacement',
+    ].map((repair) => ({ url: `${baseUrl}/repairs/phone/${repair}`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.74 })),
     { url: `${baseUrl}/repairs/water-damage`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.78 },
     { url: `${baseUrl}/book-repair`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/zh/phone-repair-melbourne-east`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.75 },

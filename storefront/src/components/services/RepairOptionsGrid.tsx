@@ -3,9 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { analytics } from "@/lib/analytics";
-import { Battery, Camera, Droplet, Plug, Smartphone, Wrench } from "lucide-react";
+import { Battery, Camera, Droplet, Ear, Plug, Power, Smartphone, Volume2, Wrench } from "lucide-react";
 import { getStartingPrice } from "@/lib/repairStartingPrices";
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref } from "@/lib/virtualCameraLens";
+import { getVirtualPhoneRepairLandingHref, getVirtualPhoneRepair, type VirtualPhoneRepairSlug } from "@/lib/virtualPhoneRepairs";
 
 interface RepairVariant {
   quality_grade: string;
@@ -50,6 +51,10 @@ export default function RepairOptionsGrid({
       case "front-camera-replacement":
       case "back-camera-replacement":
       case "camera-lens-replacement": return <Camera size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "loudspeaker-replacement": return <Volume2 size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "earpiece-speaker-replacement": return <Ear size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "power-button-replacement": return <Power size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "volume-button-replacement": return <Volume2 size={23} strokeWidth={2.4} aria-hidden="true" />;
       default: return <Wrench size={23} strokeWidth={2.4} aria-hidden="true" />;
     }
   };
@@ -85,6 +90,10 @@ export default function RepairOptionsGrid({
   const getRepairHref = (rt: RepairOption) => {
     if (rt.slug === CAMERA_LENS_REPAIR_SLUG && categorySlug === "phone" && brandSlug !== "iphone") {
       return getCameraLensLandingHref(categorySlug, brandSlug, modelSlug) || `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`;
+    }
+
+    if (categorySlug === "phone" && getVirtualPhoneRepair(rt.slug)) {
+      return getVirtualPhoneRepairLandingHref(categorySlug, brandSlug, modelSlug, rt.slug as VirtualPhoneRepairSlug) || `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`;
     }
 
     const publicRepairSlug =

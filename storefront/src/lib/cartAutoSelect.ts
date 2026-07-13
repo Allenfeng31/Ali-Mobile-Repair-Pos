@@ -1,5 +1,6 @@
 import { ParsedItem, groupServicesByBaseName } from './inventoryUtils';
 import { CAMERA_LENS_REPAIR_NAME, withVirtualCameraLensGroupedService } from './virtualCameraLens';
+import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from './virtualPhoneRepairs';
 
 export interface AutoSelectResult {
   brand: string | null;
@@ -49,8 +50,8 @@ export function resolveInitialCartState(
   const decodedService = decodeURIComponent(serviceParam).toLowerCase();
   
   // Group services
-  const grouped = withVirtualCameraLensGroupedService(
-    groupServicesByBaseName(matchedItems),
+  const grouped = withVirtualPhoneRepairGroupedServices(
+    withVirtualCameraLensGroupedService(groupServicesByBaseName(matchedItems), brand, model, category),
     brand,
     model,
     category
@@ -58,10 +59,10 @@ export function resolveInitialCartState(
   const matchedGroup = grouped.find(g => g.service.toLowerCase() === decodedService);
 
   if (!matchedGroup) {
-    if (decodedService !== CAMERA_LENS_REPAIR_NAME.toLowerCase()) {
+    if (decodedService !== CAMERA_LENS_REPAIR_NAME.toLowerCase() && !isVirtualPhoneRepairName(decodeURIComponent(serviceParam))) {
       return { brand, model, category, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
     }
-    return { brand, model, category, serviceToSelect: null, serviceToExpand: CAMERA_LENS_REPAIR_NAME, shouldAutoConfirm: false };
+    return { brand, model, category, serviceToSelect: null, serviceToExpand: decodeURIComponent(serviceParam), shouldAutoConfirm: false };
   }
 
   // Check variants
