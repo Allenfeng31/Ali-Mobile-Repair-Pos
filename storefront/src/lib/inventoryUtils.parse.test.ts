@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { displayBrand, parseItem } from './inventoryUtils';
+import { displayBrand, parseItem, slugify } from './inventoryUtils';
 
 describe('parseItem', () => {
   it('maps iPad rows that are stored under P Other into the tablet brand/model with the POS price', () => {
@@ -43,5 +43,49 @@ describe('parseItem', () => {
       price: 140,
       deviceType: 'tablet',
     });
+  });
+
+  it.each([
+    ['iPhone 14', 'Loudspeaker Replacement', 'loudspeaker-replacement'],
+    ['iPhone 13 mini', 'Earpiece Speaker Replacement', 'earpiece-speaker-replacement'],
+    ['iPhone 14 Plus', 'Microphone Replacement', 'microphone-replacement'],
+    ['iPhone 15 Pro', 'Power Button Replacement', 'power-button-replacement'],
+    ['iPhone 16 Pro Max', 'Volume Button Replacement', 'volume-button-replacement'],
+    ['iPhone SE 3', 'Loudspeaker Replacement', 'loudspeaker-replacement'],
+  ])('parses %s %s without a flex-cable collision or model-prefixed slug', (model, repairName, repairSlug) => {
+    const parsed = parseItem({
+      id: 3000,
+      name: `${model} ${repairName}`,
+      model: `P iPhone||${model} ${repairName}`,
+      device_model: 'A2893',
+      price: 180,
+      category: repairName,
+      quality_grade: 'Standard',
+      is_recommended: false,
+    });
+
+    expect(parsed).toMatchObject({
+      brand: 'P iPhone',
+      deviceModel: model,
+      service: repairName,
+      deviceType: 'phone',
+    });
+    expect(slugify(parsed!.service)).toBe(repairSlug);
+    expect(slugify(parsed!.service)).not.toContain('iphone');
+    expect(parsed!.service).not.toBe('Flex Cable');
+  });
+
+  it('keeps legacy generic Power Button rows mapped to Flex Cable', () => {
+    const parsed = parseItem({
+      id: 3001,
+      name: 'Power Button',
+      model: 'P iPhone||iPhone 14',
+      price: 120,
+      category: 'Power Button',
+      quality_grade: 'Standard',
+      is_recommended: false,
+    });
+
+    expect(parsed?.service).toBe('Flex Cable');
   });
 });

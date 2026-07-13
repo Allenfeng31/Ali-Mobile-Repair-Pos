@@ -140,6 +140,8 @@ const REPAIR_NAME_MAP: Record<string, string> = {
 };
 
 const COMMON_SERVICES = [
+  "Earpiece Speaker Replacement", "Loudspeaker Replacement", "Microphone Replacement",
+  "Power Button Replacement", "Volume Button Replacement",
   "Screen Replacement", "Battery Replacement", "Charging Port Repair", "Charging Port Replacement",
   "Logic Board Repair", "Screen Repair", "Battery Service", "Back Camera", "Back Camera Replacement",
   "Front Camera", "Front Camera Replacement", "Charging Port", "Logic Board", "Back Glass", "Back Glass/Housing", "Back Glass / Housing", "Back Housing", "Back Housing Replacement",
