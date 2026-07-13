@@ -18,9 +18,11 @@ import ReviewsSection from "@/components/ReviewsSection";
 import CommonRepairProblemsSection from "@/components/services/CommonRepairProblemsSection";
 import {
   CAMERA_LENS_REPAIR_NAME,
+  CAMERA_LENS_REPAIR_SLUG,
   type CameraLensModelOption,
   getCameraLensPrice,
 } from "@/lib/virtualCameraLens";
+import { formatScopedRepairPriceLabel } from "@/lib/scopedRepairPriceLabel";
 
 interface CameraLensLandingPageProps {
   brandName?: string;
@@ -67,7 +69,7 @@ function getBookRepairHref(option: CameraLensModelOption | null, fallbackBrandNa
 
 function getDisplayPrice(brandName: string | undefined, selectedModel: CameraLensModelOption | null) {
   const price = getCameraLensPrice(selectedModel?.brand ?? brandName ?? "");
-  return price > 0 ? `$${price}` : "Quote on Request";
+  return formatScopedRepairPriceLabel(CAMERA_LENS_REPAIR_SLUG, price, price > 0 ? `$${price}` : "Quote on Request");
 }
 
 export default function CameraLensLandingPage(props: CameraLensLandingPageProps) {
@@ -95,7 +97,7 @@ function CameraLensLandingPageContent({
     brandSlug
   );
   const price = getDisplayPrice(brandName, selectedModel);
-  const isQuote = price === "Quote on Request";
+  const isStartingPriceOnly = price === "Starting from";
   const bookRepairHref = getBookRepairHref(selectedModel, brandName);
   const repairHubHref = brandSlug
     ? `/repairs/phone/${brandSlug === "google" ? "google-pixel" : brandSlug}`
@@ -176,11 +178,11 @@ function CameraLensLandingPageContent({
             <h2 className="mt-3 text-xl font-black leading-tight text-slate-950">
               {CAMERA_LENS_REPAIR_NAME}
             </h2>
-            <p className={`mt-4 text-3xl font-extrabold ${isQuote ? "text-slate-950" : "text-blue-600"}`}>
+            <p className={`mt-4 text-3xl font-extrabold ${isStartingPriceOnly ? "text-slate-950" : "text-blue-600"}`}>
               {price}
             </p>
             <p className="mx-auto mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-500">
-              {isQuote
+              {isStartingPriceOnly
                 ? "Final price is confirmed after inspection. If the camera module is damaged, we will explain the repair options before work begins."
                 : "Final fitment is confirmed after inspection. If the camera module is damaged, we will advise before repair."}
             </p>

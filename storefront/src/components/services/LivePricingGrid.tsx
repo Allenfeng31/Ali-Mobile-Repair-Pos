@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { RawItem, ParsedItem, parseItem } from '@/lib/inventoryUtils';
+import { RawItem, ParsedItem, parseItem, slugify } from '@/lib/inventoryUtils';
+import { formatScopedRepairPriceLabel, isStartingPriceRepair } from '@/lib/scopedRepairPriceLabel';
 
 import QuoteRequestModal from './QuoteRequestModal';
 
@@ -98,12 +99,30 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
             </tr>
           </thead>
           <tbody>
-            {displayList.map((item, i) => (
-              <tr key={i} style={{ borderBottom: i === displayList.length - 1 ? 'none' : '1px solid var(--layer-border)' }}>
+            {displayList.map((item, i) => {
+              const repairSlug = slugify(item.service);
+              const scopedPriceLabel = formatScopedRepairPriceLabel(
+                repairSlug,
+                item.price,
+                item.price > 0 ? `Starting at $${item.price}` : 'Request Quote'
+              );
+
+              return <tr key={i} style={{ borderBottom: i === displayList.length - 1 ? 'none' : '1px solid var(--layer-border)' }}>
                 <td style={{ padding: '1rem', fontWeight: 600 }}>{item.deviceModel || item.model}</td>
                 <td style={{ padding: '1rem', opacity: 0.8 }}>{item.service}</td>
                 <td style={{ padding: '1rem', textAlign: 'right' }}>
-                  {item.price > 0 ? (
+                  {isStartingPriceRepair(repairSlug) ? (
+                    item.price > 0 ? <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{scopedPriceLabel}</span> : (
+                      <button
+                        onClick={() => handleQuoteClick(item.deviceModel || (item as any).model, item.service)}
+                        style={{
+                          background: 'var(--primary)', color: 'white', border: 'none', padding: '4px 12px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer'
+                        }}
+                      >
+                        {scopedPriceLabel}
+                      </button>
+                    )
+                  ) : item.price > 0 ? (
                     <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Starting at ${item.price}</span>
                   ) : (
                     <button 
@@ -123,8 +142,8 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
                     </button>
                   )}
                 </td>
-              </tr>
-            ))}
+              </tr>;
+            })}
           </tbody>
         </table>
       </div>

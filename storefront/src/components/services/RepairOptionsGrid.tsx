@@ -5,6 +5,7 @@ import Link from "next/link";
 import { analytics } from "@/lib/analytics";
 import { Battery, Camera, Droplet, Ear, Plug, Power, Smartphone, Volume2, Wrench } from "lucide-react";
 import { getStartingPrice } from "@/lib/repairStartingPrices";
+import { formatScopedRepairPriceLabel } from "@/lib/scopedRepairPriceLabel";
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref } from "@/lib/virtualCameraLens";
 import { getVirtualPhoneRepairLandingHref, getVirtualPhoneRepair, type VirtualPhoneRepairSlug } from "@/lib/virtualPhoneRepairs";
 
@@ -64,16 +65,15 @@ export default function RepairOptionsGrid({
   };
 
   const getDisplayPrice = (rt: RepairOption) => {
+    let unscopedLabel: string;
     if (rt.price > 0) {
-      return `From $${rt.price}`;
+      unscopedLabel = `From $${rt.price}`;
+    } else {
+      const startingPrice = getStartingPrice(categorySlug, brandSlug, rt.slug);
+      unscopedLabel = startingPrice ? `Starting from $${startingPrice}` : "Quote on Request";
     }
 
-    const startingPrice = getStartingPrice(categorySlug, brandSlug, rt.slug);
-    if (startingPrice) {
-      return `Starting from $${startingPrice}`;
-    }
-
-    return "Quote on Request";
+    return formatScopedRepairPriceLabel(rt.slug, rt.price, unscopedLabel);
   };
 
   const getRepairDisplayName = (rt: RepairOption) => {

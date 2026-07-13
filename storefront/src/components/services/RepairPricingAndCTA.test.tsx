@@ -9,6 +9,7 @@ import React from 'react';
 
 // Track router.push calls
 const mockPush = vi.fn();
+let mockParams: Record<string, string> = {};
 
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
@@ -19,6 +20,7 @@ vi.mock('next/navigation', () => ({
     back: vi.fn(),
   }),
   useSearchParams: () => new URLSearchParams(),
+  useParams: () => mockParams,
 }));
 
 // Mock analytics
@@ -30,6 +32,10 @@ vi.mock('@/lib/analytics', () => ({
 }));
 
 describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
+  beforeEach(() => {
+    mockParams = {};
+  });
+
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -167,6 +173,14 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(mockPush).toHaveBeenCalledTimes(1);
     const url = mockPush.mock.calls[0][0];
     expect(url).toContain('tier=Standard');
+  });
+
+  it('uses Starting from for a zero-price scoped repair', () => {
+    mockParams = { 'repair-type': 'earpiece-speaker-replacement' };
+    render(<RepairPricingAndCTA {...defaultProps} variants={[{ quality_grade: 'Genuine', price: 0 }]} />);
+
+    expect(screen.getByText('Starting from')).toBeInTheDocument();
+    expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
   });
 
   // ── Step 3: Nuclear Spacer & Layout ──────────────────────────────────────────

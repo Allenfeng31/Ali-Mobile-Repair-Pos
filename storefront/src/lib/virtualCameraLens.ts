@@ -1,5 +1,6 @@
 import { displayBrand, slugify, type ParsedItem, type GroupedService } from './inventoryUtils';
 import type { RepairOption } from './api';
+import { formatScopedRepairPriceLabel } from './scopedRepairPriceLabel';
 
 export const CAMERA_LENS_REPAIR_SLUG = 'camera-lens-replacement';
 export const CAMERA_LENS_REPAIR_NAME = 'Camera Lens Replacement';
@@ -40,7 +41,7 @@ export function getCameraLensPrice(brand: string): number {
 
 export function getCameraLensPriceLabel(brand: string) {
   const price = getCameraLensPrice(brand);
-  return price > 0 ? `From $${price}` : 'Quote on Request';
+  return formatScopedRepairPriceLabel(CAMERA_LENS_REPAIR_SLUG, price, price > 0 ? `From $${price}` : 'Quote on Request');
 }
 
 export function getVirtualCameraLensId(brand: string, model: string) {

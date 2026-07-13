@@ -6,8 +6,9 @@ import { useCart, RepairService, CartDevice } from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
 import { 
   RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle,
-  groupServicesByBaseName, GroupedService
+  groupServicesByBaseName, GroupedService, slugify
 } from '@/lib/inventoryUtils';
+import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
 import { smartSortModels } from '@/lib/modelSortConfig';
 import { withVirtualCameraLensGroupedService } from '@/lib/virtualCameraLens';
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from '@/lib/virtualPhoneRepairs';
@@ -562,7 +563,11 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                       <div className="service-name-price">
                         <span className="service-name">{getCartDisplayServiceName(selectedCategory, selectedBrand, s.service)}</span>
                         <span className="service-price">
-                          {s.price > 0 ? (s.variants.length > 1 || isVirtualPhoneRepairName(s.service) ? `From $${s.price.toFixed(2)}` : `$${s.price.toFixed(2)}`) : "Quote on Request"}
+                          {formatScopedRepairPriceLabel(
+                            slugify(s.service),
+                            s.price,
+                            s.price > 0 ? (s.variants.length > 1 || isVirtualPhoneRepairName(s.service) ? `From $${s.price.toFixed(2)}` : `$${s.price.toFixed(2)}`) : "Quote on Request"
+                          )}
                         </span>
                       </div>
                     </div>

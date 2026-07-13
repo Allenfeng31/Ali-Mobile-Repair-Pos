@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { analytics } from '@/lib/analytics';
 import { ClipboardCheck, PhoneCall, ThumbsUp } from 'lucide-react';
 import { getStartingPrice } from '@/lib/repairStartingPrices';
+import { formatScopedRepairPriceLabel, isStartingPriceRepair } from '@/lib/scopedRepairPriceLabel';
 
 interface RepairVariant {
   quality_grade: string;
@@ -107,9 +108,10 @@ export default function RepairPricingAndCTA({
   const displayVariants = variants.length > 0 ? variants : [];
   const isMultiple = displayVariants.length > 1;
 
-  const startingPrice = showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
+  const startingPrice = !isStartingPriceRepair(repairSlug) && showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
     ? getStartingPrice(categorySlug, brandSlug, repairSlug)
     : null;
+  const zeroPriceLabel = formatScopedRepairPriceLabel(repairSlug, displayVariants[0]?.price, 'Quote on Request');
 
   const handleCardClick = (tierName: string) => {
     setShowValidationHint(false);
@@ -236,7 +238,7 @@ export default function RepairPricingAndCTA({
             </div>
           )}
           <p className="text-2xl font-extrabold text-blue-600 dark:text-black mb-4">
-            Quote on Request
+            {zeroPriceLabel}
           </p>
           <p className="text-base text-slate-500 dark:text-black leading-relaxed">
             Please fill out the form below or call{' '}
