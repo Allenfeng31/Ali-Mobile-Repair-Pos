@@ -24,11 +24,25 @@ description: Minimises token and quota use for Ali Mobile coding tasks. Use for 
 - Do not produce exhaustive reports unless explicitly requested.
 - Do not repeat context already supplied by the user.
 
-## Browser and screenshot rules
+### Local-only execution and quota protection
 
-- Do not use Chrome, browser automation, Playwright or screenshots unless explicitly requested.
-- Do not validate many routes, device families or viewport sizes unless explicitly requested.
-- For visual work, make the source change and leave visual QA to the user unless specifically assigned.
+For Ali Mobile tasks, use local workspace tools by default.
+
+Do not invoke Chrome, browser plugins, browser connectors, browser automation, Playwright, Puppeteer, Selenium, screenshots, MCP/plugin discovery or external connectors unless the user explicitly requests browser or plugin use.
+
+Do not install browser automation dependencies.
+
+Use direct file inspection, repository search, git diff/status, TypeScript and production build checks.
+
+Mark any check requiring a browser as manual user review instead of attempting browser automation.
+
+Batch commands and avoid repeated exploratory work to conserve Codex quota.
+
+Every Ali Mobile execution prompt must begin with:
+
+Use Codex with RTK first.
+Use ali-mobile-lean-agent.
+Use UI/UX skill, SEO skill, design-system consistency skill, component-reuse skill, internal-linking skill, booking-flow safety skill, and concise-edit skill.
 
 ## Validation rules
 
