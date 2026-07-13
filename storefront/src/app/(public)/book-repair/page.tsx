@@ -332,33 +332,35 @@ export default function BookRepairPage() {
         </section>
 
         {!hasConfirmedDevices && (
-          <section className="mb-5 rounded-[26px] border border-blue-100 bg-white/90 p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] sm:p-5" aria-labelledby="quote-start-heading">
-            <span className="booking-kicker">Not sure what repair to choose?</span>
-            <h2 id="quote-start-heading" className="m-0 text-[1.35rem] font-black leading-tight tracking-normal text-slate-950 sm:text-[1.55rem]">
-              Start with your device or tell us the issue.
-            </h2>
-            <p className="mt-2 max-w-[40rem] text-[0.96rem] font-semibold leading-7 text-slate-600">
-              If you do not know your exact model, choose the closest device category, visit Ringwood Square, or call ahead for a quote-first repair path. Timing depends on the model, fault and parts availability.
-            </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <Link href="/repairs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-black text-white shadow-sm transition-colors hover:bg-blue-700">
-                Browse Repairs
-                <ArrowRight size={17} strokeWidth={2.6} aria-hidden="true" />
-              </Link>
-              <Link href="/repairs/phone" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-3 text-sm font-black text-blue-700 transition-colors hover:bg-blue-50">
-                Phone Repairs
-                <Wrench size={17} strokeWidth={2.5} aria-hidden="true" />
-              </Link>
-              <Link href="/locations/ringwood" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-3 text-sm font-black text-blue-700 transition-colors hover:bg-blue-50">
-                Visit Ringwood Square
-                <MapPin size={17} strokeWidth={2.5} aria-hidden="true" />
-              </Link>
-              <a href="tel:0481058514" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-3 text-sm font-black text-blue-700 transition-colors hover:bg-blue-50">
-                Call Now
-                <PhoneCall size={17} strokeWidth={2.5} aria-hidden="true" />
-              </a>
-            </div>
-          </section>
+          <div className="booking-workspace mb-[clamp(1rem,2.4vw,1.45rem)]">
+            <section className="w-full rounded-[28px] border border-slate-200 bg-white/90 p-6 text-center shadow-[0_20px_70px_rgba(15,23,42,0.08)] md:p-[50px]" aria-labelledby="quote-start-heading">
+              <span className="booking-kicker">Not sure what repair to choose?</span>
+              <h2 id="quote-start-heading" className="mx-auto max-w-[34rem] text-balance text-[1.35rem] font-black leading-tight tracking-normal text-slate-950 sm:text-[1.55rem]">
+                Start with your device or tell us the issue.
+              </h2>
+              <p className="mx-auto mt-3 max-w-[40rem] text-[0.96rem] font-semibold leading-7 text-slate-600">
+                If you do not know your exact model, choose the closest device category, visit Ringwood Square, or call ahead for a quote-first repair path. Timing depends on the model, fault and parts availability.
+              </p>
+              <div className="mx-auto mt-8 grid w-full max-w-[620px] gap-3 sm:grid-cols-2">
+                <Link href="/repairs" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-black text-white shadow-sm transition-colors hover:bg-blue-700">
+                  Browse Repairs
+                  <ArrowRight size={17} strokeWidth={2.6} aria-hidden="true" />
+                </Link>
+                <Link href="/repairs/phone" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-3 text-sm font-black text-blue-700 transition-colors hover:bg-blue-50">
+                  Phone Repairs
+                  <Wrench size={17} strokeWidth={2.5} aria-hidden="true" />
+                </Link>
+                <Link href="/locations/ringwood" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-3 text-sm font-black text-blue-700 transition-colors hover:bg-blue-50">
+                  Visit Ringwood Square
+                  <MapPin size={17} strokeWidth={2.5} aria-hidden="true" />
+                </Link>
+                <a href="tel:0481058514" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-3 text-sm font-black text-blue-700 transition-colors hover:bg-blue-50">
+                  Call Now
+                  <PhoneCall size={17} strokeWidth={2.5} aria-hidden="true" />
+                </a>
+              </div>
+            </section>
+          </div>
         )}
 
         <section className="booking-workspace" aria-label="Repair booking form">
