@@ -320,7 +320,7 @@ export const MANUAL_MODELS: Record<string, string[]> = {
 };
 
 export interface ServiceVariant {
-  id: number;
+  id: number | string;
   quality_grade: string;
   price: number;
   originalItem: ParsedItem;

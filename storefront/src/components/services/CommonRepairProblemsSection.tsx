@@ -117,7 +117,9 @@ export default function CommonRepairProblemsSection({
           {problems.map((problem) => (
             <article
               key={problem.title}
-              className={isIphone15MobilePilot ? 'flex h-auto flex-col rounded-[24px] border-[2px] border-slate-800 bg-transparent p-5 md:rounded-[28px] md:p-6' : 'flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6'}
+              className={isIphone15MobilePilot
+                  ? 'flex h-auto flex-col rounded-[24px] border-[2px] border-slate-800 bg-transparent p-5 md:rounded-[28px] md:p-6'
+                  : 'flex h-auto flex-col rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6'}
             >
               <div className="flex flex-col items-center text-center">
                 <h3 className="m-0 text-center text-balance text-[1rem] font-black leading-[1.3] tracking-[-0.015em] text-slate-950 md:mx-auto md:max-w-[18rem]">

@@ -9,6 +9,7 @@ import {
   groupServicesByBaseName, GroupedService
 } from '@/lib/inventoryUtils';
 import { smartSortModels } from '@/lib/modelSortConfig';
+import { withVirtualCameraLensGroupedService } from '@/lib/virtualCameraLens';
 import { Pencil, Trash2 } from 'lucide-react';
 import './RepairCart.css';
 
@@ -340,8 +341,13 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const availableServices = useMemo(() => {
     if (!selectedBrand || !selectedModel) return [];
     const filtered = inventory.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
-    return groupServicesByBaseName(filtered);
-  }, [inventory, selectedBrand, selectedModel]);
+    return withVirtualCameraLensGroupedService(
+      groupServicesByBaseName(filtered),
+      selectedBrand,
+      selectedModel,
+      selectedCategory
+    );
+  }, [inventory, selectedBrand, selectedModel, selectedCategory]);
 
   const hasVariantInCart = (s: GroupedService) => 
     s.variants.some(v => device.services.some(ds => ds.id === v.id));
@@ -353,7 +359,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     const inCart = hasVariantInCart(s);
     if (inCart) {
       const variantIds = s.variants.map(v => v.id);
-      onUpdate(device.services.filter(item => !variantIds.includes(item.id as number)));
+      onUpdate(device.services.filter(item => !variantIds.includes(item.id)));
     } else if (s.service === device.pendingExpandedService && !localCollapsedGroups[s.service]) {
       setLocalCollapsedGroups({ ...localCollapsedGroups, [s.service]: true });
     } else {
@@ -364,7 +370,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     }
   };
 
-  const selectVariant = (s: GroupedService, variantId: number) => {
+  const selectVariant = (s: GroupedService, variantId: number | string) => {
     const variant = s.variants.find(v => v.id === variantId);
     if (!variant) return;
     const name = s.variants.length > 1 ? `${s.service} - ${variant.quality_grade}` : s.service;

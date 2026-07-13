@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, preserveRouteSegment, safeSlugSegment } from "@/lib/inventoryUtils";
+import { withVirtualCameraLensRepairOption } from "@/lib/virtualCameraLens";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
@@ -286,7 +287,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
   const introBrandPrefix = brandName && modelName.toLowerCase().startsWith(brandName.toLowerCase()) ? "" : `${brandName} `;
-  const repairTypes = data?.repairTypes || [];
+  const repairTypes = withVirtualCameraLensRepairOption(data?.repairTypes || [], categorySlug, brandSlug);
   const isPhoneModelPage = categorySlug === "phone";
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";

@@ -1,10 +1,11 @@
 import { ParsedItem, groupServicesByBaseName } from './inventoryUtils';
+import { CAMERA_LENS_REPAIR_NAME, withVirtualCameraLensGroupedService } from './virtualCameraLens';
 
 export interface AutoSelectResult {
   brand: string | null;
   model: string | null;
   category: string | null;
-  serviceToSelect: { id: number, name: string, price: number } | null;
+  serviceToSelect: { id: number | string, name: string, price: number } | null;
   serviceToExpand: string | null;
   shouldAutoConfirm: boolean;
 }
@@ -37,7 +38,7 @@ export function resolveInitialCartState(
     return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
   }
 
-  const category = matchedItems[0].category;
+  const category = matchedItems[0].deviceType;
   const brand = matchedItems[0].brand;
   const model = matchedItems[0].deviceModel;
 
@@ -48,11 +49,19 @@ export function resolveInitialCartState(
   const decodedService = decodeURIComponent(serviceParam).toLowerCase();
   
   // Group services
-  const grouped = groupServicesByBaseName(matchedItems);
+  const grouped = withVirtualCameraLensGroupedService(
+    groupServicesByBaseName(matchedItems),
+    brand,
+    model,
+    category
+  );
   const matchedGroup = grouped.find(g => g.service.toLowerCase() === decodedService);
 
   if (!matchedGroup) {
-    return { brand, model, category, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
+    if (decodedService !== CAMERA_LENS_REPAIR_NAME.toLowerCase()) {
+      return { brand, model, category, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
+    }
+    return { brand, model, category, serviceToSelect: null, serviceToExpand: CAMERA_LENS_REPAIR_NAME, shouldAutoConfirm: false };
   }
 
   // Check variants
@@ -97,4 +106,3 @@ export function resolveInitialCartState(
     shouldAutoConfirm: !hasMultipleVariants
   };
 }
-

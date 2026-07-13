@@ -163,11 +163,10 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       // 7. SAFE LEGACY REDIRECTS (Google Pixel)
-      { source: '/repairs/phone/google/:path*', destination: '/repairs/phone/google-pixel/:path*', permanent: true },
+      { source: '/repairs/phone/google', destination: '/repairs/phone/google-pixel', permanent: true },
       { source: '/repairs/phones/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
       { source: '/repairs/phones/google-pixel/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
       { source: '/repairs/phone/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
-      { source: '/repairs/phone/google/:model', destination: '/repairs/phone/google-pixel/:model', permanent: true },
       // 8. SAFE LEGACY REDIRECTS (Oppo)
       { source: '/repairs/phones/oppo/:model/:repairType', destination: '/repairs/phone/oppo/:model/:repairType', permanent: true },
       // 9. SAFE LEGACY REDIRECTS (Tablet / iPad)

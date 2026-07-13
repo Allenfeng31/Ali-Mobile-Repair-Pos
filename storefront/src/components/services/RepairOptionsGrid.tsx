@@ -5,6 +5,7 @@ import Link from "next/link";
 import { analytics } from "@/lib/analytics";
 import { Battery, Camera, Droplet, Plug, Smartphone, Wrench } from "lucide-react";
 import { getStartingPrice } from "@/lib/repairStartingPrices";
+import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref } from "@/lib/virtualCameraLens";
 
 interface RepairVariant {
   quality_grade: string;
@@ -47,7 +48,8 @@ export default function RepairOptionsGrid({
       case "back-housing-replacement": return <Smartphone size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "camera-repair":
       case "front-camera-replacement":
-      case "back-camera-replacement": return <Camera size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "back-camera-replacement":
+      case "camera-lens-replacement": return <Camera size={23} strokeWidth={2.4} aria-hidden="true" />;
       default: return <Wrench size={23} strokeWidth={2.4} aria-hidden="true" />;
     }
   };
@@ -81,6 +83,10 @@ export default function RepairOptionsGrid({
   };
 
   const getRepairHref = (rt: RepairOption) => {
+    if (rt.slug === CAMERA_LENS_REPAIR_SLUG && categorySlug === "phone" && brandSlug !== "iphone") {
+      return getCameraLensLandingHref(categorySlug, brandSlug, modelSlug) || `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`;
+    }
+
     const publicRepairSlug =
       categorySlug === "phone" &&
       (rt.slug === "back-housing-replacement" || rt.slug === "back-glass-replacement")
