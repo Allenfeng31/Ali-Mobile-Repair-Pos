@@ -108,6 +108,15 @@ import {
   isAliMobileEnhancedAppleWatchRepairPage,
 } from '@/lib/seo/content/apple-watch';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
+import {
+  buildCanonicalModelRepairPath,
+  getCanonicalBrandSlug,
+  getCentralWaterDamageHref,
+  getGrandfatheredWaterDamageStaticParams,
+  isGooglePixelAliasBrand,
+  isGrandfatheredWaterDamagePath,
+  isWaterDamageRepairSlug,
+} from '@/lib/waterDamageRouting';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
 import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTabletEnhancedSeoSection';
@@ -4389,6 +4398,7 @@ export async function generateStaticParams() {
 
         const publicRepairSlug = getPublicRepairSlug(brand.category, brand.slug, model.slug, repair.slug);
         if (!publicRepairSlug || !publicRepairSlug.trim()) continue;
+        if (isWaterDamageRepairSlug(publicRepairSlug)) continue;
 
         const dedupeKey = [
           brand.category,
@@ -4410,7 +4420,10 @@ export async function generateStaticParams() {
     }
   }
 
-  return params;
+  return [
+    ...params,
+    ...getGrandfatheredWaterDamageStaticParams(),
+  ];
 }
 
 /** Stable hash: deterministic index from a string (sum of char codes mod length). */
@@ -4566,9 +4579,59 @@ function isUnsupportedGooglePixelRepairRoute(resolvedParams: Awaited<RepairPageP
   }) === null;
 }
 
+async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['params']>) {
+  const canonicalBrand = getCanonicalBrandSlug(rawParams.brand);
+  const canonicalRepairSlug = isWaterDamageRepairSlug(rawParams['repair-type'])
+    ? 'water-damage-repair'
+    : rawParams['repair-type'];
+  const catalog = await fetchRepairCatalog();
+  const brandEntry = catalog.brands.find(
+    (brand) => brand.category === rawParams.category && brand.slug === canonicalBrand
+  );
+  const modelEntry = brandEntry?.models.find((model) => model.slug === rawParams.model);
+
+  if (!brandEntry || !modelEntry) {
+    notFound();
+  }
+
+  const isGoogleAlias = isGooglePixelAliasBrand(rawParams.brand);
+  if (isWaterDamageRepairSlug(rawParams['repair-type'])) {
+    const canonicalPath = buildCanonicalModelRepairPath(
+      rawParams.category,
+      canonicalBrand,
+      rawParams.model,
+      canonicalRepairSlug
+    );
+
+    if (
+      isGoogleAlias ||
+      rawParams['repair-type'] !== canonicalRepairSlug ||
+      !isGrandfatheredWaterDamagePath(canonicalPath)
+    ) {
+      permanentRedirect(getCentralWaterDamageHref());
+    }
+  }
+
+  if (isGoogleAlias) {
+    permanentRedirect(
+      buildCanonicalModelRepairPath(
+        rawParams.category,
+        canonicalBrand,
+        rawParams.model,
+        canonicalRepairSlug
+      )
+    );
+  }
+
+  return rawParams;
+}
+
 export async function generateMetadata({ params }: RepairPageProps) {
-  const resolvedParams = await params;
-  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) {
+  const resolvedParams = await resolveRepairRouteParams(await params);
+  if (
+    (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) &&
+    !isWaterDamageRepairSlug(resolvedParams['repair-type'])
+  ) {
     notFound();
   }
   const internalRepairSlug = resolveRepairSlugForLookup(
@@ -4727,7 +4790,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   ipadGenuineRepairSlugs?: string[];
   ipadGenuineModelsWithRepair?: string[];
 } | null> {
-  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams)) {
+  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams) && !isWaterDamageRepairSlug(resolvedParams['repair-type'])) {
     return null;
   }
 
@@ -4881,7 +4944,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   };
 }
 
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import RepairResultsMatchingSection from '@/components/repair-results/RepairResultsMatchingSection';
@@ -4889,9 +4952,12 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 
 export default async function RepairServicePage({ params }: RepairPageProps) {
-  const resolvedParams = await params;
+  const resolvedParams = await resolveRepairRouteParams(await params);
   console.log('[DEBUG] checking route:', resolvedParams);
-  if (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) {
+  if (
+    (isUnsupportedSamsungNoteRepairRoute(resolvedParams) || isUnsupportedGooglePixelRepairRoute(resolvedParams)) &&
+    !isWaterDamageRepairSlug(resolvedParams['repair-type'])
+  ) {
     console.log('[DEBUG] isUnsupported route');
     notFound();
   }

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { fetchRepairCatalog, fetchModelRepairTypes, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, preserveRouteSegment, safeSlugSegment } from "@/lib/inventoryUtils";
 import { withVirtualCameraLensRepairOption } from "@/lib/virtualCameraLens";
 import { withVirtualPhoneRepairOptions } from "@/lib/virtualPhoneRepairs";
+import { getCanonicalBrandSlug, isGooglePixelAliasBrand } from "@/lib/waterDamageRouting";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
@@ -29,6 +30,18 @@ type RepairTypeEntry = {
 };
 
 const RELATED_MODEL_LIMIT = 5;
+
+async function resolveModelRouteParams(rawParams: Awaited<ModelPageProps['params']>) {
+  if (!isGooglePixelAliasBrand(rawParams.brand)) return rawParams;
+
+  const canonicalBrand = getCanonicalBrandSlug(rawParams.brand);
+  const modelData = await fetchModelRepairTypes(rawParams.category, canonicalBrand, rawParams.model);
+  if (!modelData) {
+    notFound();
+  }
+
+  permanentRedirect(`/repairs/${rawParams.category}/${canonicalBrand}/${rawParams.model}`);
+}
 
 function getRepairBySlugs(repairTypes: RepairTypeEntry[], slugs: string[]) {
   return repairTypes.find((repair) => slugs.includes(repair.slug));
@@ -191,7 +204,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
-  const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
+  const { category: categorySlug, brand: brandSlug, model: modelSlug } = await resolveModelRouteParams(await params);
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
   if (!data) {
@@ -278,7 +291,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
 }
 
 export default async function ModelRepairSelectPage({ params }: ModelPageProps) {
-  const { category: categorySlug, brand: brandSlug, model: modelSlug } = await params;
+  const { category: categorySlug, brand: brandSlug, model: modelSlug } = await resolveModelRouteParams(await params);
   const data = await fetchModelRepairTypes(categorySlug, brandSlug, modelSlug);
 
   if (!data) {

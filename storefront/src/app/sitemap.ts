@@ -5,6 +5,7 @@ import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
+import { getWaterDamageSitemapPaths, isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -40,13 +41,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       'power-button-replacement',
       'volume-button-replacement',
     ].map((repair) => ({ url: `${baseUrl}/repairs/phone/${repair}`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.74 })),
-    { url: `${baseUrl}/repairs/water-damage`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.78 },
     { url: `${baseUrl}/book-repair`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/zh/phone-repair-melbourne-east`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.75 },
     { url: `${baseUrl}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
   ];
 
   const sitemapUrls = [...staticUrls, ...blogUrls];
+  const grandfatheredWaterDamageUrls: MetadataRoute.Sitemap = getWaterDamageSitemapPaths().map((path) => ({
+    url: `${baseUrl}${path}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }));
 
   const locationUrls: MetadataRoute.Sitemap = SERVICE_AREAS.map(area => ({
     url: `${baseUrl}/locations/${area.slug}`,
@@ -98,6 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
         for (const repair of model.repairTypes) {
           if (repair.slug.includes('flex-cable')) continue;
+          if (isWaterDamageRepairSlug(repair.slug)) continue;
 
           repairUrls.push({
             url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
@@ -109,10 +116,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    return [...sitemapUrls, ...locationUrls, ...categoryUrls, ...brandUrls, ...modelUrls, ...repairUrls];
+    return [...sitemapUrls, ...grandfatheredWaterDamageUrls, ...locationUrls, ...categoryUrls, ...brandUrls, ...modelUrls, ...repairUrls];
   } catch (error) {
     console.error("Failed to generate dynamic sitemap:", error);
   }
 
-  return [...sitemapUrls, ...locationUrls];
+  return [...sitemapUrls, ...grandfatheredWaterDamageUrls, ...locationUrls];
 }
