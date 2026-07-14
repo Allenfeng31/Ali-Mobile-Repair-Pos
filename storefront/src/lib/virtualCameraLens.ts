@@ -82,6 +82,7 @@ export function getVirtualCameraLensRepairOption(categorySlug: string, brandSlug
     name: CAMERA_LENS_REPAIR_NAME,
     price,
     variants: [],
+    sourceType: 'virtual' as const,
   };
 }
 
@@ -131,6 +132,7 @@ export function withVirtualCameraLensGroupedService(
             deviceType: 'phone',
             quality_grade: price > 0 ? 'Fixed Price' : 'Quote',
             is_recommended: false,
+            sourceType: 'virtual' as const,
           } as unknown as ParsedItem,
         },
       ],

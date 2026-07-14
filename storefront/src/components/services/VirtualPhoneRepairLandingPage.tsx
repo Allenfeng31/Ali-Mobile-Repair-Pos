@@ -38,7 +38,7 @@ function VirtualPhoneRepairLandingPageContent({ brandName, brandSlug, repairSlug
   const searchParams = useSearchParams();
   const repair = getVirtualPhoneRepair(repairSlug);
   if (!repair) return null;
-  const priceLabel = formatScopedRepairPriceLabel(repair.slug, 50, 'From $50');
+  const priceLabel = formatScopedRepairPriceLabel(repair.slug, 50, 'From $50', 'virtual');
   const selectedModel = getSelectedModel(models, searchParams.get("brand"), searchParams.get("model"), brandSlug);
   const params = new URLSearchParams({ category: "phone", service: repair.name });
   if (selectedModel) {

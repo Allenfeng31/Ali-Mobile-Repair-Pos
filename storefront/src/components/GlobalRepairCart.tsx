@@ -566,7 +566,8 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                           {formatScopedRepairPriceLabel(
                             slugify(s.service),
                             s.price,
-                            s.price > 0 ? (s.variants.length > 1 || isVirtualPhoneRepairName(s.service) ? `From $${s.price.toFixed(2)}` : `$${s.price.toFixed(2)}`) : "Quote on Request"
+                            s.price > 0 ? (s.variants.length > 1 || isVirtualPhoneRepairName(s.service) ? `From $${s.price.toFixed(2)}` : `$${s.price.toFixed(2)}`) : "Quote on Request",
+                            s.variants[0]?.originalItem?.sourceType
                           )}
                         </span>
                       </div>

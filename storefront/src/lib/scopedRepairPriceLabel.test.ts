@@ -21,4 +21,13 @@ describe('formatScopedRepairPriceLabel', () => {
   ])('preserves the unscoped %s label', (slug, price, expected) => {
     expect(formatScopedRepairPriceLabel(slug, price, expected)).toBe(expected);
   });
+
+  it.each([
+    ['camera-lens-replacement', 50, quote, 'real'], // Real POS product (iPhone camera lens) should preserve the quote label
+    ['camera-lens-replacement', 0, quote, 'real'],
+    ['camera-lens-replacement', 50, 'Starting from $50', 'virtual'], // Virtual Android should return starting from
+    ['camera-lens-replacement', 0, 'Starting from', 'virtual'],
+  ])('handles sourceType for %s with price %s appropriately', (slug, price, expected, sourceType) => {
+    expect(formatScopedRepairPriceLabel(slug, price, quote, sourceType as 'real' | 'virtual')).toBe(expected);
+  });
 });

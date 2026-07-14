@@ -19,6 +19,7 @@ interface RepairOption {
   name: string;
   price: number;
   variants?: RepairVariant[];
+  sourceType?: 'real' | 'virtual';
 }
 
 interface RepairOptionsGridProps {
@@ -73,7 +74,7 @@ export default function RepairOptionsGrid({
       unscopedLabel = startingPrice ? `Starting from $${startingPrice}` : "Quote on Request";
     }
 
-    return formatScopedRepairPriceLabel(rt.slug, rt.price, unscopedLabel);
+    return formatScopedRepairPriceLabel(rt.slug, rt.price, unscopedLabel, rt.sourceType);
   };
 
   const getRepairDisplayName = (rt: RepairOption) => {

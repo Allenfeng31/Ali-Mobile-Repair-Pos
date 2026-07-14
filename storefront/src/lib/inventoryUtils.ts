@@ -23,6 +23,7 @@ export interface ParsedItem {
   deviceType: "phone" | "tablet" | "computer" | "watch";
   quality_grade: string;
   is_recommended: boolean;
+  sourceType?: 'real' | 'virtual';
 }
 
 export function safeSlugSegment(input: unknown): string {
@@ -293,6 +294,7 @@ export function parseItem(raw: RawItem): ParsedItem | null {
     deviceType: detectDeviceType(brand),
     quality_grade: raw.quality_grade || "Standard",
     is_recommended: raw.is_recommended || false,
+    sourceType: 'real',
   };
 }
 

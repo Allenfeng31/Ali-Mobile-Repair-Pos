@@ -69,7 +69,7 @@ function getBookRepairHref(option: CameraLensModelOption | null, fallbackBrandNa
 
 function getDisplayPrice(brandName: string | undefined, selectedModel: CameraLensModelOption | null) {
   const price = getCameraLensPrice(selectedModel?.brand ?? brandName ?? "");
-  return formatScopedRepairPriceLabel(CAMERA_LENS_REPAIR_SLUG, price, price > 0 ? `$${price}` : "Quote on Request");
+  return formatScopedRepairPriceLabel(CAMERA_LENS_REPAIR_SLUG, price, price > 0 ? `$${price}` : "Quote on Request", 'virtual');
 }
 
 export default function CameraLensLandingPage(props: CameraLensLandingPageProps) {

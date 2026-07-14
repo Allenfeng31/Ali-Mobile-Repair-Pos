@@ -21,6 +21,7 @@ interface RepairPricingAndCTAProps {
   showBackHousingNotice?: boolean;
   showStartingPriceFallback?: boolean;
   variants?: RepairVariant[];
+  sourceType?: 'real' | 'virtual';
 }
 
 const TIER_DESCRIPTION_OVERRIDES: Record<string, Record<string, string>> = {
@@ -75,7 +76,8 @@ export default function RepairPricingAndCTA({
   bookingRepairName,
   showBackHousingNotice = false,
   showStartingPriceFallback = true,
-  variants = []
+  variants = [],
+  sourceType
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
   const params = useParams();
@@ -111,7 +113,7 @@ export default function RepairPricingAndCTA({
   const startingPrice = !isStartingPriceRepair(repairSlug) && showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
     ? getStartingPrice(categorySlug, brandSlug, repairSlug)
     : null;
-  const zeroPriceLabel = formatScopedRepairPriceLabel(repairSlug, displayVariants[0]?.price, 'Quote on Request');
+  const zeroPriceLabel = formatScopedRepairPriceLabel(repairSlug, displayVariants[0]?.price, 'Quote on Request', sourceType);
 
   const handleCardClick = (tierName: string) => {
     setShowValidationHint(false);

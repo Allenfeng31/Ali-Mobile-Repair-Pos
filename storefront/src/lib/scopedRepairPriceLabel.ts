@@ -17,9 +17,10 @@ export function isStartingPriceRepair(repairSlug: string) {
 export function formatScopedRepairPriceLabel(
   repairSlug: string,
   price: number | null | undefined,
-  unscopedLabel: string
+  unscopedLabel: string,
+  sourceType?: 'real' | 'virtual'
 ) {
-  if (!isStartingPriceRepair(repairSlug)) return unscopedLabel;
+  if (sourceType === 'real' || !isStartingPriceRepair(repairSlug)) return unscopedLabel;
 
   return typeof price === 'number' && Number.isFinite(price) && price > 0
     ? `Starting from $${formatAmount(price)}`

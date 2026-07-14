@@ -104,7 +104,8 @@ export default function LivePricingGrid({ deviceType, defaultItems, title }: { d
               const scopedPriceLabel = formatScopedRepairPriceLabel(
                 repairSlug,
                 item.price,
-                item.price > 0 ? `Starting at $${item.price}` : 'Request Quote'
+                item.price > 0 ? `Starting at $${item.price}` : 'Request Quote',
+                item.sourceType
               );
 
               return <tr key={i} style={{ borderBottom: i === displayList.length - 1 ? 'none' : '1px solid var(--layer-border)' }}>

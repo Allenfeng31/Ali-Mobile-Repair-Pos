@@ -5453,6 +5453,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             showBackHousingNotice={showBackHousingNotice}
             showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && price === 0 && !isNoteBackGlass)}
             variants={details?.variants || []}
+            sourceType={(details as any)?.sourceType}
           />
 
           <div className="trust-badges">

@@ -27,6 +27,7 @@ export interface RepairOption {
   name: string;
   price: number;
   variants?: RepairVariant[];
+  sourceType?: 'real' | 'virtual';
 }
 
 export interface ModelEntry {
@@ -327,7 +328,7 @@ function ensureCoreRepairTypes(
   // Always add universal repair types for non-OPPO (or unconfigured OPPO) models
   for (const core of UNIVERSAL_REPAIR_TYPES) {
     if (!result.some(r => r.slug === core.slug)) {
-      result.push({ ...core });
+      result.push({ ...core, sourceType: 'real' });
     }
   }
 
@@ -339,7 +340,7 @@ function ensureCoreRepairTypes(
   // Conditionally add back-glass-repair
   if (qualifiesForBackGlass(brandSlug, modelName)) {
     if (!result.some(r => r.slug === BACK_GLASS_REPAIR.slug)) {
-      result.push({ ...BACK_GLASS_REPAIR });
+      result.push({ ...BACK_GLASS_REPAIR, sourceType: 'real' });
     }
   } else {
     // Remove back-glass if it was in POS data but shouldn't be
@@ -412,6 +413,7 @@ function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
         name: standardName,
         price: item.price,
         variants: [{ quality_grade: item.quality_grade, price: item.price, is_recommended: item.is_recommended }],
+        sourceType: 'real',
       });
     }
   }
@@ -533,6 +535,7 @@ export async function fetchRepairDetails(
   price: number;
   variants: RepairVariant[];
   source: 'pos' | 'fallback';
+  sourceType?: 'real' | 'virtual';
 } | null> {
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);
@@ -552,6 +555,7 @@ export async function fetchRepairDetails(
     price: repairEntry.price,
     variants: repairEntry.variants || [],
     source: catalog.source,
+    sourceType: repairEntry.sourceType,
   };
 }
 
