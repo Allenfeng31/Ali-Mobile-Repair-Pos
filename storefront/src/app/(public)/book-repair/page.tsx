@@ -5,6 +5,7 @@ import Link from "next/link";
 import GlobalRepairCart from "@/components/GlobalRepairCart";
 import { formatOtherRepairServiceName, isOtherRepairService, useCart, type RepairService } from "@/context/CartContext";
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
+import { buildBookingPayload } from "@/lib/bookingPayload";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -238,15 +239,10 @@ export default function BookRepairPage() {
       // Format as DD/MM/YYYY HH:mm for display
       const displayDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${selectedSlot}`;
 
-      const payload = {
-        customer_name: formData.name,
+      const payload = buildBookingPayload({
+        customerName: formData.name,
         phone: formData.phone,
-        devices: confirmedDevices.map(d => ({
-          brand: d.brand,
-          model: d.model,
-          category: d.category,
-          services: d.services
-        })),
+        devices: confirmedDevices,
         total: totalPrice,
         hasCustomQuote,
         pricing: {
@@ -257,10 +253,10 @@ export default function BookRepairPage() {
           total: totalPrice,
         },
         datetime: dateObj.toISOString(),
-        displayDate: displayDate,
+        displayDate,
         notes: formData.notes,
-        session_token: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null
-      };
+        sessionToken: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null,
+      });
 
       const res = await fetch("/api/proxy/book-repair", {
         method: "POST",

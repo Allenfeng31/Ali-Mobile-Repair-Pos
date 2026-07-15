@@ -1,10 +1,49 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { loadEnvConfig } from '@next/env';
+
+const { fetchRepairCatalogMock } = vi.hoisted(() => {
+  const logicBoardRepair = { slug: 'logic-board-repair' };
+  const representativePixelModels = [
+    'pixel-3',
+    'pixel-8a',
+    'pixel-8-pro',
+    'pixel-10',
+    'pixel-10-pro-fold',
+  ];
+  const pixelModels = [
+    ...representativePixelModels,
+    ...Array.from({ length: 22 }, (_, index) => `pixel-fixture-${index + 1}`),
+  ].map((slug) => ({ slug, repairTypes: [logicBoardRepair] }));
+  const samsungModels = [
+    'galaxy-s24-ultra',
+    ...Array.from({ length: 396 }, (_, index) => `galaxy-fixture-${index + 1}`),
+  ].map((slug) => ({ slug, repairTypes: [logicBoardRepair] }));
+
+  return {
+    fetchRepairCatalogMock: vi.fn(async () => ({
+      brands: [
+        { category: 'phone', slug: 'google-pixel', models: pixelModels },
+        { category: 'phone', slug: 'iphone', models: [{ slug: 'iphone-15-pro-max', repairTypes: [logicBoardRepair] }] },
+        { category: 'phone', slug: 'samsung', models: samsungModels },
+      ],
+    })),
+  };
+});
+
+vi.mock('@/lib/api', () => ({ fetchRepairCatalog: fetchRepairCatalogMock }));
+
 import sitemap from './sitemap';
 
 loadEnvConfig(process.cwd());
 
 describe('Sitemap SEO Generation', () => {
+  it('excludes booking-only Other Repair from public sitemap output', async () => {
+    const urls = await sitemap();
+    const paths = urls.map((entry) => new URL(entry.url).pathname);
+
+    expect(paths.filter((path) => path.includes('/other-repair'))).toEqual([]);
+  });
+
   it('enforces Logic Board repair canonical and alias invariants', async () => {
     const urls = await sitemap();
     const paths = urls.map(u => {

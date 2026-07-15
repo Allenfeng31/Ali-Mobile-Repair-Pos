@@ -1,6 +1,26 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  calculateCartPricing,
+  normalizeCartDevices,
+  updateCartDeviceServices,
+} from '@/lib/otherRepairBooking';
+export {
+  appendOtherRepairOption,
+  createOtherRepairService,
+  formatOtherRepairServiceName,
+  getOtherRepairPriceLabel,
+  isDiscountQualifyingService,
+  isOtherRepairService,
+  OTHER_REPAIR_MAX_DESCRIPTION_LENGTH,
+  OTHER_REPAIR_MIN_DESCRIPTION_LENGTH,
+  OTHER_REPAIR_SERVICE_ID,
+  OTHER_REPAIR_SERVICE_NAME,
+  removeOtherRepairOption,
+  updateOtherRepairDescription,
+  validateOtherRepairDescription,
+} from '@/lib/otherRepairBooking';
 
 export interface RepairService {
   id: number | string;
@@ -8,18 +28,6 @@ export interface RepairService {
   price: number;
   customDescription?: string;
 }
-
-export const OTHER_REPAIR_SERVICE_ID = 'booking-only-other-repair';
-export const OTHER_REPAIR_SERVICE_NAME = 'Other Repair';
-
-export const isOtherRepairService = (service: RepairService) =>
-  service.id === OTHER_REPAIR_SERVICE_ID && service.name === OTHER_REPAIR_SERVICE_NAME;
-
-export const formatOtherRepairServiceName = (service: RepairService) => {
-  if (!isOtherRepairService(service)) return service.name;
-  const description = service.customDescription?.trim();
-  return description ? `${OTHER_REPAIR_SERVICE_NAME} - ${description}` : OTHER_REPAIR_SERVICE_NAME;
-};
 
 export interface CartDevice {
   id: string; // Internal UUID for the cart item
@@ -69,11 +77,6 @@ const parseDiscountRate = (value: unknown, fallback: number) => {
   return Math.min(Math.max(normalized, 0), 0.95);
 };
 
-const priceToCents = (value: number | undefined) => Math.round((Number(value) || 0) * 100);
-const centsToPrice = (cents: number) => Number((cents / 100).toFixed(2));
-const isAccessoryService = (service: RepairService) =>
-  String(service.id).startsWith('upsell-') || isOtherRepairService(service);
-
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [devices, setDevices] = useState<CartDevice[]>([]);
   const [discountConfig, setDiscountConfig] = useState<MultiDiscountConfig>(DEFAULT_MULTI_DISCOUNT_CONFIG);
@@ -83,7 +86,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('repair_cart');
     if (saved) {
       try {
-        setDevices(JSON.parse(saved));
+        setDevices(normalizeCartDevices(JSON.parse(saved)));
       } catch (e) {
         console.error('Failed to load cart', e);
       }
@@ -131,9 +134,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateServices = (deviceId: string, services: RepairService[]) => {
-    setDevices(prev => prev.map(d => 
-      d.id === deviceId ? { ...d, services } : d
-    ));
+    setDevices(prev => updateCartDeviceServices(prev, deviceId, services));
   };
 
   const updateDeviceInfo = (deviceId: string, brand: string, model: string, category: string) => {
@@ -158,32 +159,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDevices([]);
   };
 
-  const confirmedDevices = devices.filter(d => d.isConfirmed);
-
-  const subtotalCents = confirmedDevices.reduce((sum, device) => 
-    sum + device.services.reduce((serviceSum, service) => serviceSum + priceToCents(service.price), 0)
-  , 0);
-
-  const qualifyingRepairItemCount = confirmedDevices.reduce((sum, device) => 
-    sum + device.services.filter(service => !isAccessoryService(service)).length
-  , 0);
-
-  const discountRate = qualifyingRepairItemCount >= 3
-    ? discountConfig.multi_discount_tier_3
-    : qualifyingRepairItemCount === 2
-      ? discountConfig.multi_discount_tier_2
-      : 0;
-
-  const discountCents = Math.round(subtotalCents * discountRate);
-  const subtotalPrice = centsToPrice(subtotalCents);
-  const discountAmount = centsToPrice(discountCents);
-  const totalPrice = centsToPrice(subtotalCents - discountCents);
-
-  const hasConfirmedDevices = confirmedDevices.length > 0;
-
-  const hasCustomQuote = confirmedDevices.some(device => 
-    device.services.some(s => s.price === 0)
-  );
+  const {
+    subtotalPrice,
+    discountRate,
+    discountAmount,
+    totalPrice,
+    qualifyingRepairItemCount,
+    hasConfirmedDevices,
+    hasCustomQuote,
+  } = calculateCartPricing(devices, discountConfig);
 
   return (
     <CartContext.Provider value={{ 

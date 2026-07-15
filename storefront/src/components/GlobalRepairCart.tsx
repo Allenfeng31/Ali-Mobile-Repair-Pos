@@ -3,10 +3,14 @@
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
+  appendOtherRepairOption,
   formatOtherRepairServiceName,
+  getOtherRepairPriceLabel,
   isOtherRepairService,
-  OTHER_REPAIR_SERVICE_ID,
   OTHER_REPAIR_SERVICE_NAME,
+  removeOtherRepairOption,
+  updateOtherRepairDescription as updateOtherRepairDescriptionInServices,
+  validateOtherRepairDescription,
   useCart,
   RepairService,
   CartDevice,
@@ -373,22 +377,17 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
 
   const toggleOtherRepair = () => {
     if (isOtherRepairSelected) {
-      onUpdate(device.services.filter(service => !isOtherRepairService(service)));
+      onUpdate(removeOtherRepairOption(device.services));
       setOtherRepairError(false);
       return;
     }
 
-    onUpdate([
-      ...device.services,
-      { id: OTHER_REPAIR_SERVICE_ID, name: OTHER_REPAIR_SERVICE_NAME, price: 0, customDescription: '' },
-    ]);
+    onUpdate(appendOtherRepairOption(device.services));
   };
 
   const updateOtherRepairDescription = (customDescription: string) => {
-    onUpdate(device.services.map(service =>
-      isOtherRepairService(service) ? { ...service, customDescription } : service
-    ));
-    if (customDescription.trim().length >= 5 && customDescription.trim().length <= 300) setOtherRepairError(false);
+    onUpdate(updateOtherRepairDescriptionInServices(device.services, customDescription));
+    if (validateOtherRepairDescription(customDescription).valid) setOtherRepairError(false);
   };
 
   const toggleService = (s: GroupedService) => {
@@ -418,8 +417,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     if (!selectedBrand || !selectedModel) return alert("Please select brand and model first");
     if (device.services.length === 0) return alert("Please select at least one repair service");
     if (isOtherRepairSelected) {
-      const desc = otherRepairService?.customDescription?.trim() || '';
-      if (desc.length < 5 || desc.length > 300) {
+      if (!validateOtherRepairDescription(otherRepairService?.customDescription).valid) {
         setOtherRepairError(true);
         return;
       }
@@ -696,7 +694,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                 <div className="checkbox-custom" />
                 <div className="service-name-price">
                   <span className="service-name">{OTHER_REPAIR_SERVICE_NAME}</span>
-                  <span className="service-price">Quote on Request</span>
+                  <span className="service-price">{getOtherRepairPriceLabel()}</span>
                 </div>
               </div>
               {isOtherRepairSelected && (
