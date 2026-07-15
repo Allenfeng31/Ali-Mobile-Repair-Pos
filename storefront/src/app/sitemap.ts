@@ -86,25 +86,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const repairUrls: MetadataRoute.Sitemap = [];
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
-        // Expose only Pixel 8 Pro for Google Pixel brand for now
-        if (brand.slug === 'google-pixel' && model.slug !== 'pixel-8-pro') {
-          continue;
+        const isExcludedPixel = brand.slug === 'google-pixel' && model.slug !== 'pixel-8-pro';
+        const isExcludedOppo = brand.slug === 'oppo' && !getOppoModelConfig(model.slug);
+
+        if (!isExcludedPixel && !isExcludedOppo) {
+          modelUrls.push({
+            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+          });
         }
 
-        // Wait for OPPO models to be fully validated before exposing to sitemap
-        if (brand.slug === 'oppo' && !getOppoModelConfig(model.slug)) {
-          continue;
-        }
-
-        modelUrls.push({
-          url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}`,
-          lastModified: new Date(),
-          changeFrequency: 'weekly' as const,
-          priority: 0.7,
-        });
         for (const repair of model.repairTypes) {
           if (repair.slug.includes('flex-cable')) continue;
           if (isWaterDamageRepairSlug(repair.slug)) continue;
+
+          if (isExcludedOppo) continue;
+          if (isExcludedPixel && repair.slug !== 'logic-board-repair') continue;
 
           repairUrls.push({
             url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
