@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useCart, RepairService, CartDevice } from '@/context/CartContext';
+import {
+  formatOtherRepairServiceName,
+  isOtherRepairService,
+  OTHER_REPAIR_SERVICE_ID,
+  OTHER_REPAIR_SERVICE_NAME,
+  useCart,
+  RepairService,
+  CartDevice,
+} from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
 import { 
   RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle,
@@ -43,6 +51,8 @@ const CartContent = () => {
     discountAmount, qualifyingRepairItemCount, discountConfig, hasCustomQuote 
   } = useCart();
   const searchParams = useSearchParams();
+  const hasOtherRepair = devices.some(device => device.services.some(isOtherRepairService));
+  const hasQuoteOnRequest = hasCustomQuote || hasOtherRepair;
   
   const [inventory, setInventory] = useState<ParsedItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -245,17 +255,17 @@ const CartContent = () => {
                     <div className="discount-savings-row">You save ${discountAmount.toFixed(2)}</div>
                     <div>
                       ${totalPrice.toFixed(2)}
-                      {hasCustomQuote && <span className="custom-quote-badge"> + Custom Quote</span>}
+                      {hasQuoteOnRequest && <span className="custom-quote-badge"> + {hasOtherRepair ? 'Quote on Request' : 'Custom Quote'}</span>}
                     </div>
                   </div>
                 ) : (
                   <>
                     ${totalPrice.toFixed(2)}
-                    {hasCustomQuote && <span className="custom-quote-badge"> + Custom Quote</span>}
+                    {hasQuoteOnRequest && <span className="custom-quote-badge"> + {hasOtherRepair ? 'Quote on Request' : 'Custom Quote'}</span>}
                   </>
                 )
               ) : (
-                hasCustomQuote ? "Custom Quote" : "$0.00"
+                hasQuoteOnRequest ? (hasOtherRepair ? "Quote on Request" : "Custom Quote") : "$0.00"
               )}
             </div>
             <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.5rem', color: 'var(--foreground)' }}>
@@ -292,6 +302,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const [selectedBrand, setSelectedBrand] = useState(device.brand || "");
   const [selectedModel, setSelectedModel] = useState(device.model || "");
   const [localCollapsedGroups, setLocalCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [otherRepairError, setOtherRepairError] = useState(false);
 
   const sortedBrands = useMemo(() => {
     const PRIORITY_BRANDS = ['iPhone', 'Samsung', 'Google', 'Oppo'];
@@ -357,6 +368,29 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const isGroupSelected = (s: GroupedService) => 
     !localCollapsedGroups[s.service] && (hasVariantInCart(s) || s.service === device.pendingExpandedService);
 
+  const otherRepairService = device.services.find(isOtherRepairService);
+  const isOtherRepairSelected = Boolean(otherRepairService);
+
+  const toggleOtherRepair = () => {
+    if (isOtherRepairSelected) {
+      onUpdate(device.services.filter(service => !isOtherRepairService(service)));
+      setOtherRepairError(false);
+      return;
+    }
+
+    onUpdate([
+      ...device.services,
+      { id: OTHER_REPAIR_SERVICE_ID, name: OTHER_REPAIR_SERVICE_NAME, price: 0, customDescription: '' },
+    ]);
+  };
+
+  const updateOtherRepairDescription = (customDescription: string) => {
+    onUpdate(device.services.map(service =>
+      isOtherRepairService(service) ? { ...service, customDescription } : service
+    ));
+    if (customDescription.trim().length >= 5 && customDescription.trim().length <= 300) setOtherRepairError(false);
+  };
+
   const toggleService = (s: GroupedService) => {
     const inCart = hasVariantInCart(s);
     if (inCart) {
@@ -383,6 +417,13 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const handleConfirm = () => {
     if (!selectedBrand || !selectedModel) return alert("Please select brand and model first");
     if (device.services.length === 0) return alert("Please select at least one repair service");
+    if (isOtherRepairSelected) {
+      const desc = otherRepairService?.customDescription?.trim() || '';
+      if (desc.length < 5 || desc.length > 300) {
+        setOtherRepairError(true);
+        return;
+      }
+    }
     onUpdateInfo(selectedBrand, selectedModel, selectedCategory);
     onConfirm();
     setTimeout(() => {
@@ -399,7 +440,11 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               {formatDeviceTitle(device.brand, device.model)}
             </div>
             <div className="summary-services truncate">
-              {device.services.filter(s => !String(s.id).startsWith('upsell-')).map(s => getCartDisplayServiceName(device.category || 'phone', device.brand, s.name)).join(", ")}
+              {device.services.filter(s => !String(s.id).startsWith('upsell-')).map(s =>
+                isOtherRepairService(s)
+                  ? formatOtherRepairServiceName(s)
+                  : getCartDisplayServiceName(device.category || 'phone', device.brand, s.name)
+              ).join(", ")}
             </div>
           </div>
           <div className="summary-actions flex shrink-0 items-center gap-2">
@@ -643,6 +688,44 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                 No standard pricing found. We can still help! Please add to cart and we will quote you.
               </p>
             )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div
+                className={`service-card ${isOtherRepairSelected ? 'selected' : ''}`}
+                onClick={toggleOtherRepair}
+              >
+                <div className="checkbox-custom" />
+                <div className="service-name-price">
+                  <span className="service-name">{OTHER_REPAIR_SERVICE_NAME}</span>
+                  <span className="service-price">Quote on Request</span>
+                </div>
+              </div>
+              {isOtherRepairSelected && (
+                <div className="selector-group">
+                  <label htmlFor={`other-repair-description-${device.id}`}>Describe the repair or issue</label>
+                  <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '0.5rem' }}>
+                    Can’t find your repair? Describe the issue and we’ll assess it.
+                  </p>
+                  <textarea
+                    id={`other-repair-description-${device.id}`}
+                    className="cart-control"
+                    value={otherRepairService?.customDescription || ''}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(event) => updateOtherRepairDescription(event.target.value)}
+                    required
+                    maxLength={300}
+                    aria-invalid={otherRepairError}
+                    aria-describedby={otherRepairError ? `other-repair-error-${device.id}` : undefined}
+                    placeholder="Tell us what needs repairing"
+                    rows={3}
+                  />
+                  {otherRepairError && (
+                    <p id={`other-repair-error-${device.id}`} role="alert" style={{ color: 'var(--red)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                      Please provide a description of at least 5 characters before confirming.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="confirmation-row">

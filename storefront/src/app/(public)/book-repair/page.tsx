@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import GlobalRepairCart from "@/components/GlobalRepairCart";
-import { useCart } from "@/context/CartContext";
+import { formatOtherRepairServiceName, isOtherRepairService, useCart, type RepairService } from "@/context/CartContext";
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +28,12 @@ function getCartDisplayServiceName(category: string, brand: string, rawServiceNa
     return rawServiceName.replace('Back Housing Replacement', 'Back Glass Replacement');
   }
   return rawServiceName;
+}
+
+function getBookingServiceDisplayName(category: string, brand: string, service: RepairService) {
+  return isOtherRepairService(service)
+    ? formatOtherRepairServiceName(service)
+    : getCartDisplayServiceName(category, brand, service.name);
 }
 
 function generateICS(booking: any) {
@@ -149,6 +155,7 @@ export default function BookRepairPage() {
     clearCart,
   } = useCart();
   const confirmedDevices = devices.filter(d => d.isConfirmed);
+  const hasOtherRepair = confirmedDevices.some(device => device.services.some(isOtherRepairService));
   const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<any>(null);
@@ -270,8 +277,8 @@ export default function BookRepairPage() {
         brand: confirmedDevices[0].brand,
         model: confirmedDevices[0].model,
         service: confirmedDevices.length > 1
-          ? `${getCartDisplayServiceName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0]?.name || 'Repair')} + more`
-          : (getCartDisplayServiceName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0]?.name || 'Repair'))
+          ? `${getBookingServiceDisplayName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0] || { id: 'fallback', name: 'Repair', price: 0 })} + more`
+          : getBookingServiceDisplayName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0] || { id: 'fallback', name: 'Repair', price: 0 })
       });
       clearCart();
     } catch (err) {
@@ -454,7 +461,7 @@ export default function BookRepairPage() {
                   <div>
                     {confirmedDevices.map((d, i) => (
                       <div key={i} className="booking-summary-line">
-                        <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => getCartDisplayServiceName(d.category || 'phone', d.brand, s.name)).join(', ')}
+                        <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => getBookingServiceDisplayName(d.category || 'phone', d.brand, s)).join(', ')}
                       </div>
                     ))}
                     <div className="booking-total-row">
@@ -466,16 +473,16 @@ export default function BookRepairPage() {
                               <small className="booking-original-total">${subtotalPrice.toFixed(2)}</small>
                               <small className="booking-discount-chip">-{Math.round(discountRate * 100)}% Multi-Device</small>
                               <span>${totalPrice.toFixed(2)}</span>
-                              {hasCustomQuote && <small> + Custom Quote</small>}
+                              {hasCustomQuote && <small> + {hasOtherRepair ? 'Quote on Request' : 'Custom Quote'}</small>}
                             </span>
                           ) : (
                             <>
                               ${totalPrice.toFixed(2)}
-                              {hasCustomQuote && <small> + Custom Quote</small>}
+                              {hasCustomQuote && <small> + {hasOtherRepair ? 'Quote on Request' : 'Custom Quote'}</small>}
                             </>
                           )
                         ) : (
-                          hasCustomQuote ? "Custom Quote" : "$0.00"
+                          hasCustomQuote ? (hasOtherRepair ? "Quote on Request" : "Custom Quote") : "$0.00"
                         )}
                       </strong>
                     </div>

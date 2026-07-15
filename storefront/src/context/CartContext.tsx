@@ -6,7 +6,20 @@ export interface RepairService {
   id: number | string;
   name: string;
   price: number;
+  customDescription?: string;
 }
+
+export const OTHER_REPAIR_SERVICE_ID = 'booking-only-other-repair';
+export const OTHER_REPAIR_SERVICE_NAME = 'Other Repair';
+
+export const isOtherRepairService = (service: RepairService) =>
+  service.id === OTHER_REPAIR_SERVICE_ID && service.name === OTHER_REPAIR_SERVICE_NAME;
+
+export const formatOtherRepairServiceName = (service: RepairService) => {
+  if (!isOtherRepairService(service)) return service.name;
+  const description = service.customDescription?.trim();
+  return description ? `${OTHER_REPAIR_SERVICE_NAME} - ${description}` : OTHER_REPAIR_SERVICE_NAME;
+};
 
 export interface CartDevice {
   id: string; // Internal UUID for the cart item
@@ -58,7 +71,8 @@ const parseDiscountRate = (value: unknown, fallback: number) => {
 
 const priceToCents = (value: number | undefined) => Math.round((Number(value) || 0) * 100);
 const centsToPrice = (cents: number) => Number((cents / 100).toFixed(2));
-const isAccessoryService = (service: RepairService) => String(service.id).startsWith('upsell-');
+const isAccessoryService = (service: RepairService) =>
+  String(service.id).startsWith('upsell-') || isOtherRepairService(service);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [devices, setDevices] = useState<CartDevice[]>([]);

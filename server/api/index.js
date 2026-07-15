@@ -309,8 +309,20 @@ const readStoreConfigRows = async () => {
 
 const loadStoreConfig = async () => normalizeStoreConfig(await readStoreConfigRows());
 
-const servicePriceToCents = (service) => Math.round((Number(service?.price) || 0) * 100);
-const isAccessoryService = (service) => String(service?.id || '').startsWith('upsell-');
+const OTHER_REPAIR_SERVICE_NAME = 'Other Repair';
+const isOtherRepairService = (service) => service?.name === OTHER_REPAIR_SERVICE_NAME;
+const getOtherRepairDescription = (service) => String(service?.customDescription || '').trim();
+const formatBookingServiceName = (service) => {
+  const serviceName = String(service?.name || 'Repair');
+  return isOtherRepairService(service)
+    ? `${OTHER_REPAIR_SERVICE_NAME} - ${getOtherRepairDescription(service)}`
+    : serviceName;
+};
+const servicePriceToCents = (service) => isOtherRepairService(service)
+  ? 0
+  : Math.round((Number(service?.price) || 0) * 100);
+const isAccessoryService = (service) =>
+  String(service?.id || '').startsWith('upsell-') || isOtherRepairService(service);
 
 const calculateMultiItemPricing = (devices = [], config = DEFAULT_STORE_CONFIG) => {
   const allServices = devices.flatMap(device => Array.isArray(device?.services) ? device.services : []);
@@ -1071,6 +1083,16 @@ app.post('/api/book-repair', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  const allServices = devices.flatMap(device => Array.isArray(device?.services) ? device.services : []);
+  const invalidOtherRepair = allServices.find(service => {
+    if (!isOtherRepairService(service)) return false;
+    const desc = getOtherRepairDescription(service);
+    return !desc || desc.length < 5 || desc.length > 300;
+  });
+  if (invalidOtherRepair) {
+    return res.status(400).json({ error: 'Other Repair requires a description between 5 and 300 characters' });
+  }
+
   const storeConfig = await loadStoreConfig();
   const serverPricing = calculateMultiItemPricing(devices, storeConfig);
   const submittedTotal = Number(total);
@@ -1080,8 +1102,17 @@ app.post('/api/book-repair', async (req, res) => {
     ? ` | Multi-device discount: -${Math.round(serverPricing.discountRate * 100)}% (-$${serverPricing.discountAmount.toFixed(2)}) from $${serverPricing.subtotal.toFixed(2)}`
     : '';
 
-  // 1. Create Main Appointment Record
   const mainDevice = devices[0];
+  const mainDeviceServiceSummary = mainDevice.services.map(formatBookingServiceName).join(', ') || 'Repair';
+  const bookingSummary = devices
+    .map(device => `${device.brand} ${device.model}: ${device.services.map(formatBookingServiceName).join(', ')}`)
+    .join(' | ');
+  const hasOtherRepair = allServices.some(isOtherRepairService);
+  const appointmentServiceSummary = hasOtherRepair && devices.length > 1
+    ? bookingSummary
+    : mainDeviceServiceSummary;
+
+  // 1. Create Main Appointment Record
   const { data: appointment, error: apptError } = await supabase
     .from('appointments')
     .insert([{
@@ -1089,7 +1120,7 @@ app.post('/api/book-repair', async (req, res) => {
       phone,
       brand: mainDevice.brand,
       model: mainDevice.model,
-      service: devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair'),
+      service: hasOtherRepair ? appointmentServiceSummary : (devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair')),
       datetime,
       notes: `[MULTI-DEVICE] Total: $${canonicalTotal.toFixed(2)}${discountSummary} ${hasCustomQuote ? '(+Custom)' : ''}${totalMismatch ? ` | Submitted total was $${submittedTotal.toFixed(2)}` : ''} | Full Notes: ${notes}`,
       status: 'pending'
@@ -1112,9 +1143,10 @@ app.post('/api/book-repair', async (req, res) => {
     if (newSession) sessionId = newSession.id;
   }
 
-  const bookingSummary = devices.map(d => `${d.brand} ${d.model}: ${d.services.map(s => s.name).join(', ')}`).join(' | ');
   const mainDeviceTitle = `${mainDevice.brand} ${mainDevice.model}`;
-  const mainServiceDescription = devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair');
+  const mainServiceDescription = hasOtherRepair
+    ? appointmentServiceSummary
+    : (devices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair'));
 
   const messageContent = `[BOOKING_DATA] ${JSON.stringify({
     appointmentId: appointment.id,
