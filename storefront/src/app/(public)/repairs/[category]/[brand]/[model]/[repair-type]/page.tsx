@@ -117,6 +117,7 @@ import {
   isGrandfatheredWaterDamagePath,
   isWaterDamageRepairSlug,
 } from '@/lib/waterDamageRouting';
+import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from '@/lib/logicBoardRouting';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
 import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTabletEnhancedSeoSection';
@@ -4590,8 +4591,27 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
   );
   const modelEntry = brandEntry?.models.find((model) => model.slug === rawParams.model);
 
+  const logicBoardRouteDecision = resolveLegacyLogicBoardRoute({
+    category: rawParams.category,
+    brand: canonicalBrand,
+    model: rawParams.model,
+    requestedRepairSlug: rawParams['repair-type'],
+    modelExists: Boolean(brandEntry && modelEntry),
+    canonicalLogicBoardServiceExists: Boolean(
+      modelEntry?.repairTypes.some((repair) => repair.slug === CANONICAL_LOGIC_BOARD_REPAIR_SLUG)
+    ),
+  });
+
+  if (logicBoardRouteDecision.type === 'not-found') {
+    notFound();
+  }
+
   if (!brandEntry || !modelEntry) {
     notFound();
+  }
+
+  if (logicBoardRouteDecision.type === 'redirect') {
+    permanentRedirect(logicBoardRouteDecision.destination);
   }
 
   const isGoogleAlias = isGooglePixelAliasBrand(rawParams.brand);
