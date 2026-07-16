@@ -54,8 +54,6 @@ const nextConfig: NextConfig = {
       { source: '/hobart-detail-p01', destination: '/', permanent: true },
       
       // 2. LEGACY BLOG POSTS
-      { source: '/blog/categories/shop-news', destination: '/blog', permanent: true },
-      { source: '/blog/reliable-phone-repair-ringwood', destination: '/blog', permanent: true },
       { source: '/post/iphone-13-cases-are-available-now', destination: '/repairs/phone/iphone/iphone-13', permanent: true },
       { source: '/post/full-privacy-screen-protect-available-now', destination: '/repairs/phone', permanent: true },
       { source: '/post/put-a-new-light-box', destination: '/', permanent: true },
@@ -63,7 +61,8 @@ const nextConfig: NextConfig = {
       { source: '/post/we-start-our-blog', destination: '/blog', permanent: true },
 
       // 3. WIX PRODUCT PAGES (Wildcards - strict order required)
-      { source: '/product-page/ipad-case-:slug(.*)', destination: '/repairs/tablet/apple', permanent: true },
+      { source: '/product-page/ipad-case', destination: '/repairs/tablet/ipad', permanent: true },
+      { source: '/product-page/ipad-case-:slug(.*)', destination: '/repairs/tablet/ipad', permanent: true },
       { source: '/product-page/:path*', destination: '/repairs/phone', permanent: true },
 
       // 4. MANUAL STOREFRONT CORRECTIONS
@@ -258,7 +257,7 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/galaxy-tab-s8-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/lenovo-tab-m10-plus-gen-3-battery-service', destination: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/battery-replacement', permanent: true },
-      { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/battery-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/galaxy-tab-a-80-2015-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/galaxy-tab-s10-lite-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/battery-replacement', permanent: true },
@@ -271,6 +270,16 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/galaxy-tab-s6-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/battery-replacement', permanent: true },
       // 13. GSC LEGACY ALIAS REDIRECTS (Tablet)
+      { source: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526/galaxy-tab-s10-fe-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526/front-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200--sm-x205', destination: '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/galaxy-tab-a-101-2019-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/lenovo-tab-p11-gen-2-back-camera', destination: '/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/back-camera-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620--sm-x626/galaxy-tab-s10-fe-plus-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620-sm-x626/screen-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516', destination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510-sm-x516', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930--sm-x936', destination: '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/galaxy-tab-s6-water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860-sm-t865/water-damage-repair', permanent: true },
       { source: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/lenovo-tab-m8-gen-4-screen-repair', destination: '/repairs/tablet/lenovo/lenovo-tab-m8-gen-4-tb-300fu/screen-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835/galaxy-tab-s4-water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830-sm-t835/water-damage-repair', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/galaxy-tab-a-97-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/screen-replacement', permanent: true },
