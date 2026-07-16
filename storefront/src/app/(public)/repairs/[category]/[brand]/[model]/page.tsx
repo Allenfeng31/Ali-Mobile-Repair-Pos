@@ -6,6 +6,7 @@ import { formatDynamicParam, preserveRouteSegment, safeSlugSegment } from "@/lib
 import { withVirtualCameraLensRepairOption } from "@/lib/virtualCameraLens";
 import { withVirtualPhoneRepairOptions } from "@/lib/virtualPhoneRepairs";
 import { getCanonicalBrandSlug, isGooglePixelAliasBrand } from "@/lib/waterDamageRouting";
+import { getSelectedCrawledModelHubContent } from "@/lib/seo/content/selectedCrawledRepairPages";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
@@ -213,6 +214,11 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
+  const selectedCrawledModelHubContent = getSelectedCrawledModelHubContent({
+    category: categorySlug,
+    brand: brandSlug,
+    model: modelSlug,
+  });
   const canonicalPath = `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${preserveRouteSegment(modelSlug)}`;
   const isPhoneModelPage = categorySlug === "phone";
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
@@ -226,14 +232,18 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage || isSamsungTabletModelPage;
 
   return {
-    title: isMacBookModelPage
+    title: selectedCrawledModelHubContent
+      ? selectedCrawledModelHubContent.metaTitle
+      : isMacBookModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
       : isSamsungTabletModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
       : isEnhancedPhoneModelPage
       ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking | Ali Mobile`
       : `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
-    description: isIPhoneModelPage
+    description: selectedCrawledModelHubContent
+      ? selectedCrawledModelHubContent.metaDescription
+      : isIPhoneModelPage
       ? `Choose the available repairs for ${modelName}, view current pricing, check common timing, compare screen options where published, and book with Ali Mobile & Repair in Ringwood.`
       : isSamsungModelPage
       ? `Choose the available Samsung repairs for ${modelName}, view current pricing, check screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
@@ -256,14 +266,18 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       canonical: canonicalPath,
     },
     openGraph: {
-      title: isMacBookModelPage
+      title: selectedCrawledModelHubContent
+        ? selectedCrawledModelHubContent.metaTitle
+        : isMacBookModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
         : isSamsungTabletModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
         : isEnhancedPhoneModelPage
         ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking`
         : `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
-      description: isIPhoneModelPage
+      description: selectedCrawledModelHubContent
+        ? selectedCrawledModelHubContent.metaDescription
+        : isIPhoneModelPage
         ? `Choose the available repairs for ${modelName}, view current pricing, check common timing, compare screen options where published, and book with Ali Mobile & Repair in Ringwood.`
         : isSamsungModelPage
         ? `Choose the available Samsung repairs for ${modelName}, view current pricing, check screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
@@ -300,6 +314,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
+  const selectedCrawledModelHubContent = getSelectedCrawledModelHubContent({
+    category: categorySlug,
+    brand: brandSlug,
+    model: modelSlug,
+  });
   const introBrandPrefix = brandName && modelName.toLowerCase().startsWith(brandName.toLowerCase()) ? "" : `${brandName} `;
   const repairTypes = withVirtualPhoneRepairOptions(
     withVirtualCameraLensRepairOption(data?.repairTypes || [], categorySlug, brandSlug),
@@ -1841,7 +1860,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </span>
             <h1 id="model-repair-heading">{modelName} repair options</h1>
             <p>
-              Choose the available repair for your exact {modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.
+              {selectedCrawledModelHubContent?.heroIntro ?? `Choose the available repair for your exact ${modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.`}
             </p>
             <div className="repair-hero-actions">
               <a href="#repair-options" className="repair-primary-action">

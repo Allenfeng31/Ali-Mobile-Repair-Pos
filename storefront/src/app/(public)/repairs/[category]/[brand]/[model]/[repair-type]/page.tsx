@@ -108,6 +108,7 @@ import {
   isAliMobileEnhancedAppleWatchRepairPage,
 } from '@/lib/seo/content/apple-watch';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
+import { getSelectedCrawledRepairPageContent } from '@/lib/seo/content/selectedCrawledRepairPages';
 import {
   buildCanonicalModelRepairPath,
   getCanonicalBrandSlug,
@@ -4699,11 +4700,19 @@ export async function generateMetadata({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const selectedCrawledRepairContent = getSelectedCrawledRepairPageContent({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+  });
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
   const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
-  const title = enhancedLenovoTabletSeoPocket
+  const title = selectedCrawledRepairContent
+    ? selectedCrawledRepairContent.metaTitle
+    : enhancedLenovoTabletSeoPocket
     ? enhancedLenovoTabletSeoPocket.metaTitle
     : enhancedSamsungTabletSeoPocket
     ? enhancedSamsungTabletSeoPocket.metaTitle
@@ -4716,7 +4725,9 @@ export async function generateMetadata({ params }: RepairPageProps) {
     : modelCode
       ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
       : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
-  const description = enhancedLenovoTabletSeoPocket
+  const description = selectedCrawledRepairContent
+    ? selectedCrawledRepairContent.metaDescription
+    : enhancedLenovoTabletSeoPocket
     ? enhancedLenovoTabletSeoPocket.metaDescription
     : enhancedSamsungTabletSeoPocket
     ? enhancedSamsungTabletSeoPocket.metaDescription
@@ -5105,6 +5116,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
   });
+  const selectedCrawledRepairContent = getSelectedCrawledRepairPageContent({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+  });
   const samsungSeoPocket = getAliMobileEnhancedSamsungSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
@@ -5119,13 +5136,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairType: resolvedParams['repair-type'],
     pocket: samsungSeoPocket,
   });
-  const seoPocket = getAliMobileEnhancedOppoSeoPocket({
+  const inheritedSeoPocket = getAliMobileEnhancedOppoSeoPocket({
     category: resolvedParams.category,
     brand: resolvedParams.brand,
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
     pocket: pixelSeoPocket,
   });
+  const seoPocket = selectedCrawledRepairContent?.pocket ?? inheritedSeoPocket;
   const seoDisplayModel =
     enhancedLenovoTabletSeoPocket?.modelName ??
     enhancedSamsungTabletSeoPocket?.modelName ??
@@ -5491,6 +5509,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       <RepairServiceSchema
         serviceName={`${seoDisplayModel} ${finalRepairName} in Ringwood`}
         description={
+          selectedCrawledRepairContent?.schemaDescription ??
           enhancedSamsungTabletSeoPocket?.schemaDescription ??
           enhancedIpadSeoPocket?.schemaDescription ??
           `Professional ${finalRepairName} for ${seoDisplayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`
@@ -5526,7 +5545,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             </p>
           ) : null}
           <p className="repair-detail-subtitle">
-            {enhancedSamsungTabletSeoPocket?.heroSubtitle ??
+            {selectedCrawledRepairContent?.heroSubtitle ??
+              enhancedSamsungTabletSeoPocket?.heroSubtitle ??
               enhancedIpadSeoPocket?.heroSubtitle ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>

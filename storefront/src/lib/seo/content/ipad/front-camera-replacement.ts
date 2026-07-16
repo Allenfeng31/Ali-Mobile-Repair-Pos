@@ -81,7 +81,9 @@ export function buildIpadFrontCameraReplacementPocket(config: IpadHardwareConfig
         shortDescription:
           `${getIpadCenterStageSentence(config)} ${faceIdSentence}`,
         bestFor:
-          'Camera complaints that also involve framing behavior, Face ID concern, or uncertainty about how the front-camera path is tested.',
+          config.biometricType === 'face-id'
+            ? 'Camera complaints that also involve framing behavior, Face ID concern, or uncertainty about how the front-camera path is tested.'
+            : 'Camera complaints that also involve framing behavior or uncertainty about how the front-camera path is tested.',
         notes:
           'Center Stage behavior is still checked in context of app support and current settings where the model supports it.',
       },
