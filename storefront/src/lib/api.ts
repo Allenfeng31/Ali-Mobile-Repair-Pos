@@ -13,42 +13,32 @@ import type {
   SamsungHardwareConfig,
 } from './seo/content/samsung/types';
 import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
+import {
+  PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS,
+  createSharedPublicRepairCatalogueLoader,
+  resolvePublicRepairCatalogue,
+  runBoundedPublicCatalogueAttempts,
+  type BrandEntry,
+  type ModelEntry,
+  type RepairCatalog,
+  type RepairOption,
+  type RepairVariant,
+} from './publicRepairCataloguePolicy';
+import {
+  readCurrentPublicRepairCatalogueSnapshot,
+  writeCurrentPublicRepairCatalogueSnapshot,
+} from './publicRepairCatalogueSnapshot.server';
+
+export type {
+  BrandEntry,
+  ModelEntry,
+  PublicRepairCatalogueSource,
+  RepairCatalog,
+  RepairOption,
+  RepairVariant,
+} from './publicRepairCataloguePolicy';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-
-export interface RepairVariant {
-  quality_grade: string;
-  price: number;
-  is_recommended: boolean;
-}
-
-export interface RepairOption {
-  slug: string;
-  name: string;
-  price: number;
-  variants?: RepairVariant[];
-  sourceType?: 'real' | 'virtual';
-}
-
-export interface ModelEntry {
-  model: string;
-  slug: string;
-  modelCode?: string;
-  repairTypes: RepairOption[];
-}
-
-export interface BrandEntry {
-  category: string;
-  brand: string;
-  slug: string;
-  icon: string;
-  models: ModelEntry[];
-}
-
-export interface RepairCatalog {
-  brands: BrandEntry[];
-  source: 'pos' | 'fallback';
-}
 
 // ─── Brand icon mapping ─────────────────────────────────────────────────────
 
@@ -72,30 +62,54 @@ function getCategoryIcon(category: string): string {
 // ─── POS Fetch (Server-Side Only) ───────────────────────────────────────────
 
 const POS_INVENTORY_ENDPOINT = '/api/inventory';
+const POS_FETCH_TIMEOUT_MS = 8_000;
+const POS_FETCH_MAX_ATTEMPTS = 3;
+const POS_FETCH_BACKOFF_MS = [150, 350] as const;
+const CATALOGUE_REFRESH_MS = PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS * 1_000;
 
-async function fetchPOSInventory(): Promise<RawItem[] | null> {
+function getPublicRepairCatalogueMode(): 'production' | 'development' | 'test' {
+  const explicitMode = process.env.PUBLIC_REPAIR_CATALOGUE_MODE;
+  if (explicitMode === 'test' || process.env.NODE_ENV === 'test') return 'test';
+  if (explicitMode === 'development' && process.env.NODE_ENV !== 'production') return 'development';
+  return 'production';
+}
+
+function allowMajorCatalogueShrink() {
+  return process.env.PUBLIC_REPAIR_CATALOGUE_ALLOW_MAJOR_SHRINK === 'approved';
+}
+
+function waitForBackoff(milliseconds: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function fetchPOSInventory(): Promise<RawItem[]> {
   const baseUrl = process.env.POS_API_URL || process.env.NEXT_PUBLIC_POS_API_URL;
 
   if (!baseUrl) {
-    console.warn('[api.ts] No POS_API_URL configured, using fallback data');
-    return null;
+    throw new Error('Public POS inventory endpoint is not configured.');
   }
 
-  try {
-    const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
-      next: { revalidate: 86400 }, // Phase 2C: 24-hour cache TTL
-    });
-
-    if (!res.ok) {
-      console.error(`[api.ts] POS API returned ${res.status}`);
-      return null;
+  return runBoundedPublicCatalogueAttempts(async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), POS_FETCH_TIMEOUT_MS);
+    try {
+      const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
+        next: { revalidate: PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS },
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`POS inventory request returned HTTP ${res.status}.`);
+      const payload: unknown = await res.json();
+      if (!Array.isArray(payload)) throw new Error('POS inventory response is not an array.');
+      return payload as RawItem[];
+    } finally {
+      clearTimeout(timeout);
     }
-
-    return await res.json();
-  } catch (error) {
-    console.error('[api.ts] Failed to fetch POS inventory:', error);
-    return null;
-  }
+  }, {
+    maxAttempts: POS_FETCH_MAX_ATTEMPTS,
+    backoffMilliseconds: POS_FETCH_BACKOFF_MS,
+    wait: waitForBackoff,
+    onFailure: (attempt) => console.warn(`[public-catalogue] POS refresh attempt ${attempt}/${POS_FETCH_MAX_ATTEMPTS} failed.`),
+  });
 }
 
 // ─── Data Sanitization ───────────────────────────────────────────────────────
@@ -354,7 +368,7 @@ function ensureCoreRepairTypes(
 
 // ─── Transform POS Data → RepairCatalog ─────────────────────────────────────
 
-function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
+export function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
   const parsed = rawItems.map(parseItem).filter(Boolean) as ParsedItem[];
 
   // Group by category|brand → model → { repairTypes, code }
@@ -487,32 +501,34 @@ function buildFallbackCatalog(): BrandEntry[] {
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 /**
- * Fetches the repair catalog from POS backend, with graceful fallback
- * to hardcoded seo-data.ts if the POS API is unreachable.
- *
- * This function is designed for server-side use only (RSC / generateStaticParams).
- * The ISR cache ensures it's called at most once per hour.
+ * Resolves one shared public catalogue per 24-hour refresh window. Production
+ * uses live POS or the durable last-known-good snapshot; it never accepts the
+ * small development fallback.
  */
 export async function fetchRepairCatalog(): Promise<RepairCatalog> {
-  const rawItems = await fetchPOSInventory();
-
-  if (rawItems && rawItems.length > 0) {
-    const brands = transformPOSToCatalog(rawItems);
-    if (brands.length > 0) {
-      return { brands, source: 'pos' };
-    }
-  }
-
-  // Fallback to hardcoded data
-  return { brands: backfillSamsungCatalogModels(buildFallbackCatalog()), source: 'fallback' };
+  return sharedPublicRepairCatalogue();
 }
+
+const sharedPublicRepairCatalogue = createSharedPublicRepairCatalogueLoader(() =>
+  resolvePublicRepairCatalogue({
+    mode: getPublicRepairCatalogueMode(),
+    fetchLiveInventory: fetchPOSInventory,
+    transformLiveInventory: (items) => transformPOSToCatalog(items),
+    readSnapshot: readCurrentPublicRepairCatalogueSnapshot,
+    writeSnapshot: writeCurrentPublicRepairCatalogueSnapshot,
+    createDevelopmentFallback: () => backfillSamsungCatalogModels(buildFallbackCatalog()),
+    allowMajorShrink: allowMajorCatalogueShrink(),
+    onWarning: (message) => console.warn(`[public-catalogue] ${message}`),
+  }),
+  CATALOGUE_REFRESH_MS,
+);
 
 /**
  * Fetch a specific brand's model list for the sub-hub page.
  */
 export async function fetchBrandModels(categorySlug: string, brandSlug: string): Promise<{
   brand: BrandEntry | null;
-  source: 'pos' | 'fallback';
+  source: RepairCatalog['source'];
 }> {
   const catalog = await fetchRepairCatalog();
   const brand = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug) || null;
@@ -534,7 +550,7 @@ export async function fetchRepairDetails(
   repairType: string;
   price: number;
   variants: RepairVariant[];
-  source: 'pos' | 'fallback';
+  source: RepairCatalog['source'];
   sourceType?: 'real' | 'virtual';
 } | null> {
   const catalog = await fetchRepairCatalog();
@@ -570,7 +586,7 @@ export async function fetchModelRepairTypes(
   brand: string;
   model: string;
   repairTypes: RepairOption[];
-  source: 'pos' | 'fallback';
+  source: RepairCatalog['source'];
 } | null> {
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);

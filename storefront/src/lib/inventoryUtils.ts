@@ -3,7 +3,7 @@ export interface RawItem {
   name: string;
   model: string;   // "Brand||ServiceName" or plain "ServiceName"
   device_model?: string; // Official AU Model Code
-  price: number;
+  price?: number | null;
   category: string;
   sku?: string;
   quality_grade?: string;
