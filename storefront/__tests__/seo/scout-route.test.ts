@@ -24,6 +24,10 @@ vi.mock('@supabase/auth-helpers-nextjs', () => ({
   createRouteHandlerClient: mocks.createRouteHandlerClient,
 }));
 
+vi.mock('@/utils/supabase/service-role', () => ({
+  createServiceRoleClient: mocks.createRouteHandlerClient,
+}));
+
 vi.mock('@/lib/seo/scout', () => ({
   runScoutEngine: mocks.runScoutEngine,
   buildStrategicScoutQueries: mocks.buildStrategicScoutQueries,

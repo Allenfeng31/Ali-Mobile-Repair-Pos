@@ -29,9 +29,9 @@ describe('generateFaqs', () => {
     
     const comparisonFaq = faqs.find(f => f.question.includes('difference between Standard, Premium, and Genuine'));
     expect(comparisonFaq).toBeDefined();
-    expect(comparisonFaq?.answer).toContain('Standard (In-cell LCD)');
-    expect(comparisonFaq?.answer).toContain('Premium (Soft OLED)');
-    expect(comparisonFaq?.answer).toContain('Genuine (OEM)');
+    expect(comparisonFaq?.answer).toContain('Standard aftermarket');
+    expect(comparisonFaq?.answer).toContain('Premium aftermarket');
+    expect(comparisonFaq?.answer).toContain('Genuine');
   });
 
   it('should generate correctly with fallback values if exact brand missing', () => {
