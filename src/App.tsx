@@ -15,6 +15,8 @@ import { UsbPrintTest } from './components/UsbPrintTest';
 import { SeoGeoScoutView } from './views/SeoGeoScout';
 import { RepairResultsView } from './views/RepairResults';
 import { useAuthStore } from './hooks/useAuthStore';
+import { supabase } from './lib/supabase';
+import { usePosAuthLifecycle } from './hooks/usePosAuthLifecycle';
 import { AnimatePresence } from 'motion/react';
 import { 
   Smartphone, 
@@ -130,6 +132,7 @@ const getCategoryIcon = (name: string, category: string) => {
 export default function App() {
   const { permissions, isLoading: permissionsLoading } = useAuthStore();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   
   const [lang, setLang] = useState<Language>(() => (localStorage.getItem('pos_lang') as Language) || 'en');
@@ -146,33 +149,6 @@ export default function App() {
 
   // Fetch initial data from backend API
   useEffect(() => {
-    // Check local storage for persistent login and validate expiry
-    const savedSessionString = localStorage.getItem('pos_session');
-    if (savedSessionString) {
-      try {
-        const { user, expiresAt } = JSON.parse(savedSessionString);
-        if (expiresAt && Date.now() < expiresAt) {
-          setCurrentUser(user);
-          setIsAuthenticated(true);
-          // Sync with Zustand and fetch permissions
-          useAuthStore.getState().setUser(user);
-          if (user.id) {
-            useAuthStore.getState().fetchPermissions(user.id);
-          }
-          // Sliding session: refresh expiry on each app load so active users stay logged in
-          const REFRESH_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
-          localStorage.setItem('pos_session', JSON.stringify({
-            user,
-            expiresAt: Date.now() + REFRESH_DURATION
-          }));
-        } else {
-          localStorage.removeItem('pos_session');
-        }
-      } catch (e) {
-        console.error('Failed to parse session', e);
-      }
-    }
-
     const loadData = async () => {
       try {
         const { api } = await import('./lib/api');
@@ -237,6 +213,32 @@ export default function App() {
     };
     loadData();
   }, []);
+
+  const applyAuthenticatedUser = (user: any) => {
+      if (!user?.id) return;
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      useAuthStore.getState().setUser(user);
+      useAuthStore.getState().fetchPermissions(user.id);
+      localStorage.setItem('pos_session', JSON.stringify({ user, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 }));
+    };
+  const clearConfirmedSession = () => {
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('pos_session');
+      useAuthStore.getState().setUser(null);
+    };
+  usePosAuthLifecycle(supabase, {
+    authenticated: applyAuthenticatedUser,
+    signedOut: clearConfirmedSession,
+    restorationFailure: (cachedUser) => {
+      if (!cachedUser) return;
+      setCurrentUser(cachedUser);
+      setIsAuthenticated(true);
+      useAuthStore.getState().setUser(cachedUser);
+    },
+    ready: () => setAuthReady(true),
+  });
 
   useEffect(() => {
     const handlePopState = () => {
@@ -324,6 +326,7 @@ export default function App() {
     }));
   };
 
+  if (!authReady) return null;
   if (!isAuthenticated) {
     return <LoginView onLogin={handleLogin} lang={lang} setLang={handleLang} />;
   }

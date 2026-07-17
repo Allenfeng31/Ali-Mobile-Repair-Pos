@@ -8,6 +8,7 @@ const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
 const { syncCustomerToGoogleContacts, scheduleGoogleContactsSync } = require('./googleContactsSync.js');
+const { createRequireStaffAuth } = require('./staffAuth.js');
 const {
   calculateMultiItemPricing,
   formatBookingServiceName,
@@ -103,46 +104,11 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.log('✅ [Security] Using service_role key — database fully protected by RLS.');
-} else {
-  console.warn('⚠️  [Security] Using anon key — add SUPABASE_SERVICE_ROLE_KEY to server/.env for maximum security.');
+if (supabaseKey) {
+  console.log('✅ [Security] Supabase admin client initialized.');
 }
 
-const requireStaffAuth = async (req, res, next) => {
-  const authHeader = req.headers.authorization || '';
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  const token = match?.[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: staff session required.' });
-  }
-
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  const user = userData?.user;
-
-  if (userError || !user) {
-    return res.status(401).json({ error: 'Unauthorized: invalid staff session.' });
-  }
-
-  const { data: permissions, error: permissionsError } = await supabase
-    .from('employee_permissions')
-    .select('user_id, is_super_admin')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (permissionsError) {
-    return res.status(500).json({ error: permissionsError.message });
-  }
-
-  if (!permissions) {
-    return res.status(403).json({ error: 'Forbidden: staff permissions required.' });
-  }
-
-  req.staffUser = user;
-  req.staffPermissions = permissions;
-  next();
-};
+const requireStaffAuth = createRequireStaffAuth(supabase);
 
 const getLocalIp = () => {
   const os = require('os');

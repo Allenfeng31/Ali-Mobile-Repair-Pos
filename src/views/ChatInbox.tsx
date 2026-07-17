@@ -20,6 +20,8 @@ import { useAuthStore } from '../hooks/useAuthStore';
 import { cn } from '@/lib/utils';
 import { getApiBaseUrl } from '@/lib/apiBase';
 import { supabase } from '@/lib/supabase';
+import { getStaffChatStatus, getStaffChatStatusMessage, type StaffChatStatus } from '@/lib/staffChatStatus';
+import { useAdaptivePoll, type PollOutcome } from '@/hooks/useAdaptivePoll';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,7 +71,7 @@ const getStaffAuthHeaders = async () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-type ChatAuthError = 'expired' | 'forbidden' | null;
+type ChatAuthError = StaffChatStatus;
 
 /**
  * Strips metadata from customer intro messages to reveal the actual feedback/message.
@@ -120,39 +122,43 @@ export function ChatInbox() {
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [sendingReminderId, setSendingReminderId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionsInFlight = useRef(false);
+  const messagesInFlight = useRef(false);
 
   const scrollToBottom = () =>
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
   const loadSessions = useCallback(async () => {
+    if (sessionsInFlight.current || document.hidden) return 'retry' as PollOutcome;
+    sessionsInFlight.current = true;
     try {
       const headers = await getStaffAuthHeaders();
       if (!headers.Authorization) {
         setChatAuthError('expired');
         setSessions([]);
-        return;
+        return 'stop';
       }
 
       const res = await fetch(`${API_BASE}/chat/sessions`, {
         headers,
       });
-      if (res.status === 401) {
-        setChatAuthError('expired');
-        setSessions([]);
-        return;
-      }
-      if (res.status === 403) {
-        setChatAuthError('forbidden');
-        setSessions([]);
-        return;
+      const status = getStaffChatStatus(res.status);
+      if (status) {
+        setChatAuthError(status);
+        if (status === 'expired' || status === 'forbidden') setSessions([]);
+        return status === 'expired' || status === 'forbidden' ? 'stop' : 'retry';
       }
       if (res.ok) {
         setChatAuthError(null);
         setSessions(await res.json());
+        return 'success';
       }
+      return 'retry';
     } catch (_) {
+      setChatAuthError('unavailable');
+      return 'retry';
     } finally {
+      sessionsInFlight.current = false;
       setLoading(false);
     }
   }, []);
@@ -182,29 +188,28 @@ export function ChatInbox() {
   }, [apptStatusCache]);
 
   const loadMessages = useCallback(async (sessionId: string) => {
+    if (messagesInFlight.current || document.hidden) return 'retry' as PollOutcome;
+    messagesInFlight.current = true;
     setMessagesLoading(true);
     setMessageLoadError(null);
     try {
       const headers = await getStaffAuthHeaders();
       if (!headers.Authorization) {
         setChatAuthError('expired');
-        return;
+        return 'stop';
       }
 
       const res = await fetch(`${API_BASE}/chat/session/id/${sessionId}/messages`, {
         headers,
       });
-      if (res.status === 401) {
-        setChatAuthError('expired');
-        return;
-      }
-      if (res.status === 403) {
-        setChatAuthError('forbidden');
-        return;
+      const status = getStaffChatStatus(res.status);
+      if (status) {
+        setChatAuthError(status);
+        return status === 'expired' || status === 'forbidden' ? 'stop' : 'retry';
       }
       if (!res.ok) {
         setMessageLoadError('Could not load this conversation. Please refresh and try again.');
-        return;
+        return 'retry';
       }
       if (res.ok) {
         setChatAuthError(null);
@@ -234,19 +239,19 @@ export function ChatInbox() {
         }
 
         loadSessions();
+        return 'success';
       }
     } catch (_) {
+      setChatAuthError('unavailable');
       setMessageLoadError('Could not load this conversation. Please refresh and try again.');
+      return 'retry';
     } finally {
+      messagesInFlight.current = false;
       setMessagesLoading(false);
     }
   }, [loadSessions, fetchBookingStatuses]);
 
-  useEffect(() => {
-    loadSessions();
-    pollRef.current = setInterval(loadSessions, 5000);
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [loadSessions]);
+  useAdaptivePoll(loadSessions, 15_000);
 
   useEffect(() => {
     loadBookings();
@@ -254,12 +259,11 @@ export function ChatInbox() {
     return () => clearInterval(interval);
   }, [loadBookings]);
 
-  useEffect(() => {
-    if (!activeSession) return;
-    loadMessages(activeSession.id);
-    const interval = setInterval(() => loadMessages(activeSession.id), 3000);
-    return () => clearInterval(interval);
-  }, [activeSession, loadMessages]);
+  useAdaptivePoll(
+    useCallback(() => activeSession ? loadMessages(activeSession.id) : Promise.resolve('stop' as PollOutcome), [activeSession, loadMessages]),
+    9_000,
+    Boolean(activeSession)
+  );
 
   useEffect(() => {
     if (activeSession) scrollToBottom();
@@ -1083,9 +1087,7 @@ export function ChatInbox() {
         <div className="text-center py-24 px-6 bg-red-50 shadow-[var(--shadow-neu-pressed)] rounded-[3rem] border border-red-100 flex flex-col items-center">
           <MessageSquare className="text-red-300 mb-8" size={72} strokeWidth={1.5} />
           <h3 className="text-xl font-black text-red-700">
-            {chatAuthError === 'expired'
-              ? 'Staff session expired. Please sign out and sign back in.'
-              : 'This account does not have staff chat permission.'}
+            {getStaffChatStatusMessage(chatAuthError)}
           </h3>
           <p className="text-xs font-bold text-red-600/80 mt-3 max-w-md">
             If this is a mobile or PWA device, force refresh the POS app after signing in again so it loads the latest staff chat code.

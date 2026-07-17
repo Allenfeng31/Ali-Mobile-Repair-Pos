@@ -29,6 +29,8 @@ import { api } from '@/lib/api';
 import { getApiBaseUrl } from '@/lib/apiBase';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/hooks/useAuthStore';
+import { getStaffChatStatus, getStaffChatStatusMessage, type StaffChatStatus } from '@/lib/staffChatStatus';
+import { useAdaptivePoll, type PollOutcome } from '@/hooks/useAdaptivePoll';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -76,7 +78,7 @@ const getStaffAuthHeaders = async () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-type ChatAuthWarning = 'expired' | 'forbidden' | null;
+type ChatAuthWarning = StaffChatStatus;
 
 // ─── Slim Settings Panel ──────────────────────────────────────────────────────
 function SettingsPanel({
@@ -522,26 +524,24 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
 
   const checkUnreadChats = React.useCallback(async () => {
     const API_BASE = getApiBaseUrl();
+    if (document.hidden) return 'retry' as PollOutcome;
 
     try {
       const headers = await getStaffAuthHeaders();
       if (!headers.Authorization) {
         setChatAuthWarning('expired');
-        return null;
+        return 'stop';
       }
 
       const res = await fetch(`${API_BASE}/chat/unread-summary`, {
         headers,
       });
-      if (res.status === 401) {
-        setChatAuthWarning('expired');
-        return null;
+      const status = getStaffChatStatus(res.status);
+      if (status) {
+        setChatAuthWarning(status);
+        return status === 'expired' || status === 'forbidden' ? 'stop' : 'retry';
       }
-      if (res.status === 403) {
-        setChatAuthWarning('forbidden');
-        return null;
-      }
-      if (!res.ok) return null;
+      if (!res.ok) return 'retry';
 
       setChatAuthWarning(null);
       const summary = await res.json();
@@ -558,18 +558,14 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
         lastNativeNotificationIdRef.current = null;
       }
 
-      return summary;
+      return 'success';
     } catch (_) {
-      return null;
+      setChatAuthWarning('unavailable');
+      return 'retry';
     }
   }, [playChatAlertSound, showNativeChatNotification]);
 
-  // Poll backend unread state so every open POS device reflects global chat status.
-  React.useEffect(() => {
-    checkUnreadChats();
-    const interval = setInterval(checkUnreadChats, 30000);
-    return () => clearInterval(interval);
-  }, [checkUnreadChats]);
+  useAdaptivePoll(checkUnreadChats, 30_000);
 
   const markChatSeen = React.useCallback(async () => {
     const API_BASE = getApiBaseUrl();
@@ -805,9 +801,7 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
             <div className="mx-auto flex max-w-5xl flex-col gap-3 rounded-[2rem] border border-amber-200 bg-amber-50 p-4 text-amber-800 shadow-[0_18px_45px_rgba(245,158,11,0.18)] sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-black">
-                  {chatAuthWarning === 'expired'
-                    ? 'Staff chat session expired. Please sign out and sign back in.'
-                    : 'This account does not have staff chat permission.'}
+                  {getStaffChatStatusMessage(chatAuthWarning)}
                 </p>
                 <p className="mt-1 text-xs font-bold text-amber-700/80">
                   On mobile or PWA, force refresh the POS app after signing in again so the latest staff chat code loads.
