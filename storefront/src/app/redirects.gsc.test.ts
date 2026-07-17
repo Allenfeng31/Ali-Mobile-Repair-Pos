@@ -47,6 +47,14 @@ const approvedRedirects = [
     destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580',
   },
   {
+    source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580/galaxy-tab-a-101-2016-back-camera',
+    destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580/back-camera-replacement',
+  },
+  {
+    source: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu/lenovo-tab-m10-plus-gen-3-battery-service',
+    destination: '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu-tb-128fu/battery-replacement',
+  },
+  {
     source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-battery-service',
     destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595/battery-replacement',
   },
@@ -103,6 +111,11 @@ const approvedRedirects = [
 const removedBlogSources = [
   '/blog/categories/shop-news',
   '/blog/reliable-phone-repair-ringwood',
+] as const;
+
+const malformedSimilarSources = [
+  '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fv/lenovo-tab-m10-plus-gen-3-battery-service',
+  '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t581/galaxy-tab-a-101-2016-back-camera',
 ] as const;
 
 async function getRedirects() {
@@ -175,6 +188,15 @@ describe('July 15 GSC technical redirect batch', () => {
     }
   });
 
+  it('does not broaden either corrected legacy rule to similar malformed model paths', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    for (const source of malformedSimilarSources) {
+      expect(sources.has(source), source).toBe(false);
+    }
+  });
+
   it('keeps sitemap alias-free while preserving logic board, water damage, and Other Repair invariants', async () => {
     const urls = await sitemap();
     const paths = urls.map((entry) => getPathname(entry.url));
@@ -190,5 +212,6 @@ describe('July 15 GSC technical redirect batch', () => {
     expect(paths.filter((path) => path.endsWith('/logic-board-repair'))).toHaveLength(425);
     expect(paths.filter((path) => path.includes('water-damage'))).toHaveLength(427);
     expect(paths.filter((path) => path.includes('/other-repair'))).toHaveLength(0);
+    expect(new Set(paths)).toHaveLength(paths.length);
   });
 });
