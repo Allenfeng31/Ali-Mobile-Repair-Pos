@@ -1,4 +1,5 @@
 import { getApiBaseUrl, getApiDiagnostics } from './apiBase';
+import { supabase } from './supabase';
 
 const API_URL = getApiBaseUrl();
 
@@ -48,7 +49,39 @@ const handleResponse = async (res: Response) => {
   return data;
 };
 
+const getStaffAuthHeaders = async () => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const api = {
+  // Sync
+  getSyncLogs: async () => {
+    const headers = await getStaffAuthHeaders();
+    const res = await fetch(`${API_URL}/admin/sync-contacts/logs`, {
+      headers,
+    });
+    return handleResponse(res);
+  },
+  retrySyncTask: async (taskId: string) => {
+    const authHeaders = await getStaffAuthHeaders();
+    const res = await fetch(`${API_URL}/admin/sync-contacts/retry`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({ taskId })
+    });
+    return handleResponse(res);
+  },
+  recheckSyncTask: async (taskId: string) => {
+    const authHeaders = await getStaffAuthHeaders();
+    const res = await fetch(`${API_URL}/admin/sync-contacts/recheck`, {
+      method: 'POST',
+      headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskId }),
+    });
+    return handleResponse(res);
+  },
   // Authentication
   login: async (username: string, password: string) => {
     const res = await fetch(`${API_URL}/login`, {

@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Customer } from '../types';
+import { GoogleSyncPanel } from '../components/GoogleSyncPanel';
 import { motion, AnimatePresence } from 'motion/react';
 import { RepairTicketModal } from '../components/RepairTicketModal';
 import { api } from '../lib/api';
@@ -184,7 +185,7 @@ const CustomerCard = React.memo(function CustomerCard({
                   <>
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
-                      <span 
+                      <span
                         className="text-[10px] font-black text-blue-600 uppercase tracking-widest truncate max-w-[140px] xs:max-w-[180px] sm:max-w-[250px] md:max-w-[350px] block"
                         title={combinedText}
                       >
@@ -489,7 +490,7 @@ export function CustomersView() {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterSyncedOnly, setFilterSyncedOnly] = useState(false);
+  const [showSyncPanel, setShowSyncPanel] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingAllOrders, setIsViewingAllOrders] = useState(false);
@@ -512,7 +513,7 @@ export function CustomersView() {
   const [upsells, setUpsells] = useState<any[]>([]);
   const [selectedUpsells, setSelectedUpsells] = useState<string[]>([]);
   const customerFormRef = useRef<HTMLFormElement | null>(null);
-  
+
   // NEW: Loading State Lock for API Submissions
   const [isSaving, setIsSaving] = useState(false);
 
@@ -656,9 +657,9 @@ export function CustomersView() {
       hasRepairMatch
     );
 
-    if (filterSyncedOnly && !c.synced_to_google) return false;
+
     return matchesSearch;
-  }), [filterSyncedOnly, debouncedSearch, sortedCustomers]);
+  }), [debouncedSearch, sortedCustomers]);
 
   const inProcessingCustomers = useMemo(
     () => filteredCustomers.filter(c => getCustomerOverallStatus(c) !== 'Completed'),
@@ -808,7 +809,7 @@ export function CustomersView() {
       deposit: index === 0 ? totalDeposit : 0,
       status: 'In Processing'
     });
-    
+
     const existingCustomerIndex = customers.findIndex(c => c.phone === submittedFormData.phone);
 
     try {
@@ -885,7 +886,7 @@ export function CustomersView() {
     if (isSaving) return;
     setIsSaving(true);
     const submittedFormData = readCustomerFormData(e.currentTarget, formData);
-    
+
     const initials = submittedFormData.name.split(' ').map(n => n[0]).join('').toUpperCase();
     const updateData = {
       name: submittedFormData.name,
@@ -1083,6 +1084,7 @@ export function CustomersView() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      {showSyncPanel && <GoogleSyncPanel onClose={() => setShowSyncPanel(false)} />}
       {/* Customer List: Top on Mobile, Left on Desktop */}
       <section className="lg:col-span-7 space-y-10 order-1 lg:order-1">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
@@ -1114,16 +1116,16 @@ export function CustomersView() {
             />
           </div>
           <button
-            onClick={() => setFilterSyncedOnly(!filterSyncedOnly)}
+            onClick={() => setShowSyncPanel(true)}
             className={cn(
               "px-8 py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 border border-white/20",
-              filterSyncedOnly
+              showSyncPanel
                 ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]"
                 : "bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-600 active:shadow-[var(--shadow-neu-pressed)]"
             )}
           >
-            {filterSyncedOnly ? <Check size={16} strokeWidth={4} /> : <Users size={16} strokeWidth={3} />}
-            Google Sync Only
+            {showSyncPanel ? <Check size={16} strokeWidth={4} /> : <Users size={16} strokeWidth={3} />}
+            Google Sync
           </button>
         </div>
 

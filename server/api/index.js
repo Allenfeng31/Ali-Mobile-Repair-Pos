@@ -7,8 +7,10 @@ const path = require('path');
 const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
-const { syncCustomerToGoogleContacts, scheduleGoogleContactsSync } = require('./googleContactsSync.js');
+const { persistGoogleContactSyncTask } = require('./googleContactsSync.js');
 const { createRequireStaffAuth } = require('./staffAuth.js');
+const { createSyncContactsAdminRouter } = require('./syncContactsAdmin.js');
+const { resolveServerSupabaseKey } = require('../lib/supabaseKeyResolver.js');
 const {
   calculateMultiItemPricing,
   formatBookingServiceName,
@@ -16,8 +18,9 @@ const {
   normaliseBookingDevices,
   validateBookingOtherRepairItems,
 } = require('../lib/otherRepairBooking.js');
-// Only load dotenv in local development (where .env file exists)
-if (process.env.NODE_ENV !== 'production') {
+// Loading a local environment file is an explicit developer action, never an
+// import side effect. Hosted environments provide configuration directly.
+if (require.main === module && process.env.LOAD_LOCAL_ENV === 'true') {
   require('dotenv').config({ path: path.join(__dirname, '../.env') });
 }
 
@@ -86,20 +89,16 @@ app.get('/', (req, res) => {
 });
 
 // Initialize Supabase
-// Use service_role key if available (bypasses RLS, recommended for server-side use)
-// Get service_role key from: Supabase Dashboard → Settings → API → service_role (secret)
+// Use SUPABASE_SECRET_KEY for maximum security
 const supabaseUrl =
   process.env.SUPABASE_URL ||
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.VITE_SUPABASE_URL;
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ [Supabase] Missing Supabase environment variables. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the backend Vercel project.');
+const supabaseKey = resolveServerSupabaseKey(process.env);
+
+if (!supabaseUrl) {
+  throw new Error('Server database URL is not configured.');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -107,6 +106,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 if (supabaseKey) {
   console.log('✅ [Security] Supabase admin client initialized.');
 }
+
 
 const requireStaffAuth = createRequireStaffAuth(supabase);
 
@@ -701,7 +701,7 @@ app.get('/api/inventory', async (req, res) => {
 app.post('/api/inventory', async (req, res) => {
   const item = req.body;
 
-  // If we have a device_model and name, try to find existing first to prevent duplicates 
+  // If we have a device_model and name, try to find existing first to prevent duplicates
   // until a DB-level unique constraint is applied.
   if (item.device_model && item.name) {
     const { data: existing } = await supabase
@@ -903,21 +903,7 @@ app.post('/api/customers', async (req, res) => {
 
   // Sync to Google Contacts (Non-blocking Outbox pattern)
   if (data && data[0]) {
-    try {
-      const { data: logData } = await supabase.from('failed_sync_logs').insert([{
-        customer_id: data[0].id,
-        sync_payload: data[0],
-        status: 'pending'
-      }]).select();
-      
-      const logId = (logData && logData[0]) ? logData[0].id : null;
-      
-      scheduleGoogleContactsSync({ customer: data[0], supabase, logId }).catch(err => {
-        console.warn('[Google Contacts Sync] Non-blocking sync failed:', err);
-      });
-    } catch (err) {
-      console.error('[Google Contacts] Failed to init outbox sync:', err);
-    }
+    await persistGoogleContactSyncTask({ customer: data[0], operation: 'create', supabase });
   }
 
   res.json({ ...data[0], repairs: [] });
@@ -925,8 +911,23 @@ app.post('/api/customers', async (req, res) => {
 
 app.put('/api/customers/:id', async (req, res) => {
   const { repairs, ...customerData } = req.body;
+
+  // Fetch old data to check if normalized phone or name changed
+  const { data: oldCustomer, error: oldError } = await supabase.from('customers').select('name, phone').eq('id', req.params.id).single();
+
   const { data, error } = await supabase.from('customers').update(customerData).eq('id', req.params.id).select();
   if (error) return res.status(500).json({ error: error.message });
+
+  if (data && data[0] && !oldError && oldCustomer) {
+    const oldName = (oldCustomer.name || '').trim().toLowerCase();
+    const newName = (data[0].name || '').trim().toLowerCase();
+    const oldPhone = (oldCustomer.phone || '').trim().replace(/\D/g, '');
+    const newPhone = (data[0].phone || '').trim().replace(/\D/g, '');
+
+    if (oldName !== newName || oldPhone !== newPhone) {
+      await persistGoogleContactSyncTask({ customer: data[0], operation: 'update', supabase });
+    }
+  }
 
   res.json(data[0]);
 });
@@ -1282,27 +1283,12 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
         console.error(`❌ [Appointment] Failed to create repair record: ${repairError.message}`);
       } else {
         console.log(`✅ [Appointment] Repair record successfully linked for ${name}`);
-        
-        if (isNewCustomer) {
-          // Sync to Google Contacts (Non-blocking Outbox pattern with booking_id)
-          try {
-            const syncPayload = { id: customerId, name: name.trim(), phone: phone.trim() };
-            const { data: logData } = await supabase.from('failed_sync_logs').insert([{
-              customer_id: customerId,
-              booking_id: repairId,
-              sync_payload: syncPayload,
-              status: 'pending'
-            }]).select();
-            
-            const logId = (logData && logData[0]) ? logData[0].id : null;
-            
-            scheduleGoogleContactsSync({ customer: syncPayload, supabase, logId }).catch(err => {
-              console.warn('[Google Contacts Sync] Non-blocking sync failed:', err);
-            });
-          } catch (err) {
-            console.error('[Google Contacts] Failed to init outbox sync:', err);
-          }
-        }
+      }
+
+      // Sync to Google Contacts (Decoupled from repair success)
+      if (isNewCustomer) {
+        const syncPayload = { id: customerId, name: name.trim(), phone: phone.trim() };
+        await persistGoogleContactSyncTask({ customer: syncPayload, operation: 'create', supabase });
       }
     }
   }
@@ -1583,7 +1569,7 @@ app.get('/api/repairs/track/:id', async (req, res) => {
           .order('timestamp', { ascending: false })
           .limit(1)
           .maybeSingle();
-        
+
         if (recentRepair) {
           repair = recentRepair;
           customerName = customer.name;
@@ -2411,82 +2397,10 @@ app.post('/api/push/test', async (req, res) => {
 // ----------------------------------------------------------------------
 // ADMIN SYNC ROUTES
 // ----------------------------------------------------------------------
-app.post('/api/admin/sync-contacts/retry', async (req, res) => {
-  try {
-    // 1. Strict Auth Verification
-    const authHeader = req.headers.authorization;
-    const adminSecret = process.env.ADMIN_SYNC_SECRET;
-    
-    if (!adminSecret) {
-      return res.status(500).json({ error: 'ADMIN_SYNC_SECRET is not configured on the server.' });
-    }
-    
-    if (authHeader !== `Bearer ${adminSecret}`) {
-      return res.status(401).json({ error: 'Unauthorized: Invalid admin secret.' });
-    }
-
-    // 2. Query only pending/failed with a strict attempt ceiling (Max 5 attempts)
-    const { data: logs, error } = await supabase
-      .from('failed_sync_logs')
-      .select('*')
-      .in('status', ['pending', 'failed'])
-      .lt('attempts', 5);
-
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    if (!logs || logs.length === 0) {
-      return res.json({ message: 'No actionable logs found.', processed: 0 });
-    }
-
-    let successCount = 0;
-    let failCount = 0;
-
-    for (const log of logs) {
-      // 3. Apply Processing Lock (Optimistic Locking) to avoid Vercel Cron race conditions
-      const { data: locked, error: lockError } = await supabase
-        .from('failed_sync_logs')
-        .update({ status: 'processing', attempts: (log.attempts || 0) + 1 })
-        .eq('id', log.id)
-        .in('status', ['pending', 'failed'])
-        .select();
-
-      // If lockError or no rows returned, another worker grabbed it
-      if (lockError || !locked || locked.length === 0) continue;
-
-      try {
-        const isSuccess = await syncCustomerToGoogleContacts(log.sync_payload, supabase);
-        if (isSuccess) {
-          await supabase.from('failed_sync_logs').update({ 
-            status: 'synced', 
-            error_reason: null, 
-            updated_at: new Date().toISOString() 
-          }).eq('id', log.id);
-          successCount++;
-        } else {
-          await supabase.from('failed_sync_logs').update({ 
-            status: 'failed', 
-            error_reason: 'Retry sync returned false (timeout or disabled)', 
-            updated_at: new Date().toISOString() 
-          }).eq('id', log.id);
-          failCount++;
-        }
-      } catch (err) {
-        await supabase.from('failed_sync_logs').update({ 
-          status: 'failed', 
-          error_reason: err.message, 
-          updated_at: new Date().toISOString() 
-        }).eq('id', log.id);
-        failCount++;
-      }
-    }
-
-    return res.json({ message: 'Retry complete', processed: successCount + failCount, successCount, failCount });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
+app.use('/api/admin/sync-contacts', createSyncContactsAdminRouter({
+  supabase,
+  requireStaffAuth,
+}));
 
 // ----------------------------------------------------------------------
 // ERROR HANDLING

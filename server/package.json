@@ -5,7 +5,7 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
-    "dev": "nodemon api/index.js"
+    "dev": "LOAD_LOCAL_ENV=true nodemon api/index.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
