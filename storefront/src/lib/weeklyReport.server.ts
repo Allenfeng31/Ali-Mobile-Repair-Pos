@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { format, startOfWeek, subYears } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { resolveServerSupabaseKey } from "@/utils/supabase/service-role";
 
 const MELBOURNE_TZ = "Australia/Melbourne";
 const MIN_REPAIR_VIEWS = 5;
@@ -66,7 +67,7 @@ export type WeeklyReport = {
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = resolveServerSupabaseKey();
 
   if (!url || !serviceKey) {
     throw new Error("Missing Supabase service credentials for weekly report.");

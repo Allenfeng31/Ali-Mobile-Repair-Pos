@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
+import { resolveServerSupabaseKey } from '@/utils/supabase/service-role';
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -8,7 +9,7 @@ const fromNumber = process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM_NU
 const adminNumber = process.env.ADMIN_PHONE_NUMBER || '+61481058514';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseServiceKey = resolveServerSupabaseKey();
 
 export async function POST(request: Request) {
   try {
@@ -60,4 +61,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to send alert' }, { status: 500 });
   }
 }
-

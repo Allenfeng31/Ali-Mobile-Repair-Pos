@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { startOfDay, endOfDay, subDays, format } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { resolveServerSupabaseKey } from '@/utils/supabase/service-role';
 
 const MELBOURNE_TZ = 'Australia/Melbourne';
 
@@ -12,7 +13,7 @@ const MELBOURNE_TZ = 'Australia/Melbourne';
  */
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = resolveServerSupabaseKey();
 
   if (!url || !serviceKey) {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_URL server env vars');

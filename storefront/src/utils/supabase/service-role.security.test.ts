@@ -12,6 +12,7 @@ describe('Service Role Security', () => {
 
   it('contains no NEXT_PUBLIC service-role key', () => {
     expect(sourceCode).not.toContain('NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY');
+    expect(sourceCode).not.toContain('NEXT_PUBLIC_SUPABASE_SECRET_KEY');
   });
 
   it('is not imported by any client component', () => {
