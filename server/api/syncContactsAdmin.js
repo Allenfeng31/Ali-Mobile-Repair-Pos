@@ -87,6 +87,7 @@ function createSyncContactsAdminHandlers({ supabase, now = () => new Date() }) {
         customer: claimedTask.sync_payload,
       });
 
+      if (result.code) return res.status(502).json({ success: false, code: result.code, error: 'Google sync status could not be saved.' });
       return res.status(result.success ? 200 : 502).json({
         success: result.success,
         task: toSafeTask({ ...claimedTask, ...result.task }),
@@ -113,6 +114,7 @@ function createSyncContactsAdminHandlers({ supabase, now = () => new Date() }) {
 
       const result = await recheckVerificationRequiredSyncTask({ supabase, task, now });
       if (!result.claimed) return res.status(409).json({ error: 'This verification is already in progress.' });
+      if (result.code) return res.status(502).json({ success: false, found: result.found, code: result.code, error: 'Google verification status could not be saved.' });
       return res.status(200).json({ success: result.found, task: toSafeTask({ ...task, ...result.task }) });
     } catch {
       return res.status(500).json({ error: 'Unable to recheck Google Contacts.' });

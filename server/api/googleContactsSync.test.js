@@ -7,9 +7,18 @@ import https from 'node:https';
 const axios = require('axios');
 
 const {
+  DEFAULT_GOOGLE_CONTACTS_TIMEOUT_MS,
+  MAX_GOOGLE_CONTACTS_TIMEOUT_MS,
+  MIN_GOOGLE_CONTACTS_TIMEOUT_MS,
   MAX_SYNC_ATTEMPTS,
   STALE_LOCK_MS,
   claimSyncTask,
+  establishCreateDispatchBarrier,
+  finalizeSyncTask,
+  finalizeVerificationRequiredTask,
+  getGoogleContactsTimeoutMs,
+  isStaleVerificationLock,
+  reportStage,
   recheckVerificationRequiredSyncTask,
   enqueueGoogleContactSync,
   persistGoogleContactSyncTask,
@@ -61,6 +70,92 @@ function createTaskStore(task) {
 }
 
 describe('Google Contacts sync behaviour', () => {
+  it('uses a bounded server-only Google timeout configuration', () => {
+    expect(getGoogleContactsTimeoutMs({})).toBe(DEFAULT_GOOGLE_CONTACTS_TIMEOUT_MS);
+    expect(getGoogleContactsTimeoutMs({ GOOGLE_CONTACTS_TIMEOUT_MS: '15000' })).toBe(15000);
+    expect(getGoogleContactsTimeoutMs({ GOOGLE_CONTACTS_TIMEOUT_MS: String(MIN_GOOGLE_CONTACTS_TIMEOUT_MS - 1) })).toBe(DEFAULT_GOOGLE_CONTACTS_TIMEOUT_MS);
+    expect(getGoogleContactsTimeoutMs({ GOOGLE_CONTACTS_TIMEOUT_MS: String(MAX_GOOGLE_CONTACTS_TIMEOUT_MS + 1) })).toBe(DEFAULT_GOOGLE_CONTACTS_TIMEOUT_MS);
+    expect(getGoogleContactsTimeoutMs({ GOOGLE_CONTACTS_TIMEOUT_MS: 'invalid' })).toBe(DEFAULT_GOOGLE_CONTACTS_TIMEOUT_MS);
+  });
+
+  it('does not dispatch CREATE when the durable dispatch barrier fails', async () => {
+    const createContact = vi.fn();
+    const result = await syncCustomerToGoogleContacts(customer, createSettingsSupabase(true), {
+      people: { searchContacts: vi.fn().mockResolvedValue({ data: { results: [] } }), createContact },
+    }, 'create', {}, { beforeCreate: async () => ({ ok: false, code: 'dispatch_barrier_failed' }), report: vi.fn() });
+    expect(result).toMatchObject({ code: 'dispatch_barrier_failed', retryable: true });
+    expect(createContact).not.toHaveBeenCalled();
+  });
+
+  it('turns the durable post-dispatch barrier into non-retryable search-only state', async () => {
+    const now = new Date('2026-07-18T00:00:00.000Z');
+    const task = { id: 'barrier-1', status: 'processing', attempts: 1, locked_at: now.toISOString() };
+    const store = createTaskStore(task);
+    const barrier = await establishCreateDispatchBarrier({ supabase: store.supabase, task, now });
+    expect(barrier.ok).toBe(true);
+    expect(store.state).toMatchObject({ status: 'verification_required', create_dispatch_started_at: now.toISOString(), attempts: 1 });
+    expect(isRetryEligible(store.state, now)).toBe(false);
+    expect(isStaleVerificationLock(store.state, new Date(now.getTime() + STALE_LOCK_MS + 1))).toBe(true);
+  });
+
+  it('never synthesizes success when queue finalization persistence fails', async () => {
+    const task = { id: 'finalize-1', status: 'verification_required', attempts: 1, locked_at: '2026-07-18T00:00:00.000Z' };
+    const supabase = { from: vi.fn(() => ({ update: () => ({ eq: () => ({ eq: () => ({ eq: () => ({ select: async () => ({ data: null, error: { code: 'write_failed' } }) }) }) }) }) })) };
+    const result = await finalizeSyncTask({ supabase, task, result: { success: true }, now: new Date('2026-07-18T00:01:00.000Z') });
+    expect(result).toEqual({ ok: false, code: 'queue_finalize_failed' });
+  });
+
+  it('never synthesizes Recheck success when verification finalization persistence fails', async () => {
+    const task = { id: 'recheck-finalize-1', status: 'verification_required', attempts: 1, locked_at: '2026-07-18T00:00:00.000Z' };
+    const supabase = { from: vi.fn(() => ({ update: () => ({ eq: () => ({ eq: () => ({ eq: () => ({ select: async () => ({ data: null, error: { code: 'write_failed' } }) }) }) }) }) })) };
+    const result = await finalizeVerificationRequiredTask({ supabase, task, found: true, now: new Date('2026-07-18T00:01:00.000Z') });
+    expect(result).toEqual({ ok: false, code: 'queue_finalize_failed' });
+  });
+
+  it('accurately reports found=true but success=false when markCustomerSynced fails during Recheck', async () => {
+    const task = { id: 'recheck-cust-write-1', status: 'verification_required', attempts: 1, sync_operation: 'create', sync_payload: { id: 1, phone: '0412345678' } };
+    const supabase = {
+      from: vi.fn((table) => {
+        if (table === 'customers') return { update: () => ({ eq: async () => ({ error: { code: 'write_error' } }) }) };
+        const chain = { select: async () => ({ data: [task] }) };
+        const eqChain = { eq: () => eqChain, is: () => chain, select: chain.select };
+        return { update: () => eqChain };
+      })
+    };
+    const googleClient = { people: { searchContacts: vi.fn().mockResolvedValue({ data: { results: [{ person: { resourceName: '123', phoneNumbers: [{ value: '0412345678' }] } }] } }) } };
+    const result = await recheckVerificationRequiredSyncTask({ supabase, task, googleClient, now: () => new Date() });
+    expect(result).toMatchObject({ claimed: true, found: true, code: 'customer_status_write_failed' });
+  });
+
+  it('accurately reports found=true but success=false when queue finalization fails after Recheck match', async () => {
+    const task = { id: 'recheck-queue-write-1', status: 'verification_required', attempts: 1, sync_operation: 'create', sync_payload: { id: 1, phone: '0412345678' } };
+    const supabase = {
+      from: vi.fn((table) => {
+        if (table === 'customers') return { update: () => ({ eq: async () => ({ data: [{ id: 1 }] }) }) };
+        return { update: (payload) => {
+          const chain = {
+            select: async () => {
+              if (payload.status === 'synced') return { error: { code: 'finalize_error' } };
+              return { data: [task] };
+            }
+          };
+          const eqChain = { eq: () => eqChain, is: () => chain, select: chain.select };
+          return eqChain;
+        } };
+      })
+    };
+    const googleClient = { people: { searchContacts: vi.fn().mockResolvedValue({ data: { results: [{ person: { resourceName: '123', phoneNumbers: [{ value: '0412345678' }] } }] } }) } };
+    const result = await recheckVerificationRequiredSyncTask({ supabase, task, googleClient, now: () => new Date() });
+    expect(result).toMatchObject({ claimed: true, found: true, code: 'queue_finalize_failed' });
+  });
+
+  it('emits safe stage telemetry without payload or secrets', () => {
+    const report = vi.fn();
+    reportStage(report, { operation: 'create', stage: 'create_dispatched', startedAt: Date.now(), category: 'timeout', createDispatched: true, correlation: 'abc123' });
+    const [, event] = report.mock.calls[0];
+    expect(event).toEqual(expect.objectContaining({ operation: 'create', stage: 'create_dispatched', elapsed_ms: expect.any(Number), create_dispatched: true, correlation: 'abc123' }));
+    expect(Object.keys(event)).not.toEqual(expect.arrayContaining(['customer_id', 'phone', 'payload', 'token', 'resourceName']));
+  });
   it('returns structured outcomes without contacting Google when disabled or unconfigured', async () => {
     const disabledClient = { people: { searchContacts: vi.fn(), createContact: vi.fn() } };
     const disabled = await syncCustomerToGoogleContacts(customer, createSettingsSupabase(false), disabledClient);
