@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { revalidatePath, revalidateTag } from 'next/cache';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { fetchRepairCatalog } from '@/lib/api';
+import { buildRepairResultTaxonomy, resolveRepairResultTaxonomy } from '@/lib/repairResultTaxonomy';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
   REPAIR_RESULT_BUCKET,
@@ -164,6 +164,15 @@ export async function GET(request: Request) {
       return jsonWithCors(request, { error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (new URL(request.url).searchParams.get('view') === 'taxonomy') {
+      const taxonomy = buildRepairResultTaxonomy(await fetchRepairCatalog());
+      return jsonWithCors(
+        request,
+        { status: 'SUCCESS', data: taxonomy },
+        { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } },
+      );
+    }
+
     const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('repair_results')
@@ -223,6 +232,17 @@ export async function POST(request: Request) {
       return jsonWithCors(request, { error: 'Invalid device category.' }, { status: 400 });
     }
 
+    const canonicalTaxonomy = resolveRepairResultTaxonomy(await fetchRepairCatalog(), {
+      deviceCategory,
+      brandSlug: getString(formData, 'brand_slug'),
+      modelSlug: getString(formData, 'model_slug'),
+      repairTypeSlug: getString(formData, 'repair_type_slug'),
+    });
+
+    if (!canonicalTaxonomy) {
+      return jsonWithCors(request, { error: 'Selected repair taxonomy does not have a valid Storefront destination.' }, { status: 400 });
+    }
+
     if (!VALID_STATUSES.has(status)) {
       return jsonWithCors(request, { error: 'Invalid status.' }, { status: 400 });
     }
@@ -278,12 +298,12 @@ export async function POST(request: Request) {
         .insert({
           id,
           device_category: deviceCategory,
-          brand: getString(formData, 'brand'),
-          brand_slug: getString(formData, 'brand_slug'),
-          model: getString(formData, 'model'),
-          model_slug: getString(formData, 'model_slug'),
-          repair_type: getString(formData, 'repair_type'),
-          repair_type_slug: getString(formData, 'repair_type_slug'),
+          brand: canonicalTaxonomy.brand,
+          brand_slug: canonicalTaxonomy.brandSlug,
+          model: canonicalTaxonomy.model,
+          model_slug: canonicalTaxonomy.modelSlug,
+          repair_type: canonicalTaxonomy.repairType,
+          repair_type_slug: canonicalTaxonomy.repairTypeSlug,
           before_image_path: beforeImagePath,
           after_image_path: afterImagePath,
           image_pair_alt_text: getOptionalString(formData, 'image_pair_alt_text'),
@@ -300,7 +320,7 @@ export async function POST(request: Request) {
           featured_on_repair_hub: getBoolean(formData, 'featured_on_repair_hub'),
           featured_on_brand_hub: getBoolean(formData, 'featured_on_brand_hub'),
           sort_order: getInteger(formData, 'sort_order'),
-          related_repair_url: getOptionalString(formData, 'related_repair_url'),
+          related_repair_url: canonicalTaxonomy.relatedRepairUrl,
           published_at: status === 'published' ? new Date().toISOString() : null,
         })
         .select(PUBLIC_REPAIR_RESULT_SELECT)
@@ -311,7 +331,7 @@ export async function POST(request: Request) {
       }
       
       data = insertData;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Clean up ONLY this request's uploaded paths
       if (uploadedPaths.length > 0) {
         await supabase.storage.from(REPAIR_RESULT_BUCKET).remove(uploadedPaths).catch(cleanupError => {
@@ -320,7 +340,11 @@ export async function POST(request: Request) {
       }
       
       // 7. If the insert fails because the UUID was concurrently inserted (unique constraint violation code 23505)
-      if (error && error.code === '23505') {
+      const errorCode =
+        typeof error === 'object' && error !== null && 'code' in error
+          ? (error as { code?: unknown }).code
+          : undefined;
+      if (errorCode === '23505') {
         const { data: concurrentRecord } = await supabase
           .from('repair_results')
           .select(PUBLIC_REPAIR_RESULT_SELECT)
