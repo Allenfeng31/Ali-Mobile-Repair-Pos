@@ -9,6 +9,7 @@ import { formatScopedRepairPriceLabel } from "@/lib/scopedRepairPriceLabel";
 import { getModelHubRepairHref } from "@/lib/waterDamageRouting";
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref } from "@/lib/virtualCameraLens";
 import { getVirtualPhoneRepairLandingHref, getVirtualPhoneRepair, type VirtualPhoneRepairSlug } from "@/lib/virtualPhoneRepairs";
+import { sortRepairOptionsForDisplay } from "@/lib/repairOptionDisplayOrder";
 
 interface RepairVariant {
   quality_grade: string;
@@ -40,6 +41,8 @@ export default function RepairOptionsGrid({
   modelSlug,
   modelName,
 }: RepairOptionsGridProps) {
+  const displayRepairTypes = sortRepairOptionsForDisplay(repairTypes);
+
   const getRepairIcon = (slug: string) => {
     switch (slug) {
       case "screen-replacement": return <Smartphone size={23} strokeWidth={2.4} aria-hidden="true" />;
@@ -113,7 +116,7 @@ export default function RepairOptionsGrid({
   return (
     <>
       <div className="repair-option-grid items-stretch">
-        {repairTypes.map((rt) => {
+        {displayRepairTypes.map((rt) => {
           return (
             <div key={rt.slug} className="flex h-full flex-col">
               <Link
