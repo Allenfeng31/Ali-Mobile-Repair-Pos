@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { generateFaqs } from './repairFaqs';
+import {
+  STANDARD_WARRANTY_SUMMARY,
+  WATER_DAMAGE_WARRANTY_SUMMARY,
+} from '@/lib/repairPolicy';
 
 // Mocking Lucide icons and other components that might be imported in page.tsx
 // Since we are only testing the logic of generateFaqs, we just need to ensure the import doesn't fail.
@@ -54,5 +58,13 @@ describe('generateFaqs', () => {
     
     const comparisonFaq = faqs.find(f => f.question.includes('difference between Standard, Premium, and Genuine'));
     expect(comparisonFaq).toBeUndefined();
+  });
+
+  it.each(['water-damage-repair', 'water-damage'])('uses the no-warranty FAQ policy for %s', (repairSlug) => {
+    const faqs = generateFaqs('iPhone 15', 'Water Damage Repair', repairSlug, 50, 'A3090', 'Apple');
+    const warrantyFaq = faqs.find((faq) => faq.question.startsWith('Is there a warranty'));
+
+    expect(warrantyFaq?.answer).toBe(WATER_DAMAGE_WARRANTY_SUMMARY);
+    expect(warrantyFaq?.answer).not.toContain(STANDARD_WARRANTY_SUMMARY);
   });
 });

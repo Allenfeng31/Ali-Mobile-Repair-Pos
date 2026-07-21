@@ -39,6 +39,8 @@ describe('Water Damage routing helpers', () => {
 
     expect(getModelHubRepairHref('screen-replacement', screenPath)).toBe(screenPath);
     expect(isWaterDamageRepairSlug('water-damage-repair')).toBe(true);
+    expect(isWaterDamageRepairSlug('water-damage')).toBe(true);
+    expect(isWaterDamageRepairSlug('water-damage-cleaning')).toBe(false);
     expect(isWaterDamageRepairSlug('logic-board-repair')).toBe(false);
     expect(isGrandfatheredWaterDamagePath(frozenPath)).toBe(true);
     expect(buildCanonicalModelRepairPath('phone', 'google', 'pixel-8-pro', 'water-damage-repair')).toBe('/repairs/phone/google-pixel/pixel-8-pro/water-damage-repair');

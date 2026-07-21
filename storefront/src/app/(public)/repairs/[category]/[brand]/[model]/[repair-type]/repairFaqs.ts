@@ -1,4 +1,11 @@
 import { LSI_KEYWORDS } from '@/data/seo-data';
+import {
+  INSPECTION_FEE_SUMMARY,
+  NO_FIX_NO_CHARGE_SUMMARY,
+  STANDARD_WARRANTY_SUMMARY,
+  WATER_DAMAGE_WARRANTY_SUMMARY,
+} from '@/lib/repairPolicy';
+import { isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
 
 export function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
   if (slug === 'screen-replacement') return { component: LSI_KEYWORDS.components.screen, issue: LSI_KEYWORDS.issues.screenDamage };
@@ -16,7 +23,7 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
   const altComponent = lsi.component?.[1] || 'damaged component';
 
   const displayModel = modelCode ? `${model} (${modelCode})` : model;
-  const isWaterDamage = repairSlug === 'water-damage-repair';
+  const isWaterDamage = isWaterDamageRepairSlug(repairSlug);
   const isLogicBoard = repairSlug === 'logic-board-repair';
   const isDataRecovery = repairSlug === 'data-recovery';
   const isNoPower = repairSlug === 'no-power';
@@ -81,19 +88,19 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
     q2,
     {
       question: `How much does a ${model} ${repairName.toLowerCase()} cost?`,
-      answer: `${priceInfo} ${isWaterDamage ? 'Please note that due to the labor-intensive nature of the drying and cleaning process, a specialized labor fee applies even if the device is ultimately unrepairable.' : 'Our "No Fix, No Charge" policy means you only pay if we successfully complete the repair.'}`,
+      answer: `${priceInfo} ${NO_FIX_NO_CHARGE_SUMMARY}`,
     },
     {
       question: `What if my ${model} has additional damage beyond the ${isWaterDamage ? 'initial leak' : component}?`,
-      answer: `Our technicians perform a free diagnostic assessment on every device. ${isWaterDamage ? 'Water damage often affects multiple areas simultaneously. We will test every function and give you a full report before you commit to any major part replacements.' : `If we discover additional issues such as ${lsi.issue?.[0] || 'internal damage'}, we'll inform you before proceeding with any extra work. You're never charged for repairs you didn't approve.`}`,
+      answer: `${INSPECTION_FEE_SUMMARY} ${isWaterDamage ? 'Water damage often affects multiple areas simultaneously. We will test every function and give you a full report before you commit to any major part replacements.' : `If we discover additional issues such as ${lsi.issue?.[0] || 'internal damage'}, we'll inform you before proceeding with any extra work. You're never charged for repairs you didn't approve.`}`,
     },
     {
       question: `Is there a warranty for ${model} ${isWaterDamage ? 'water damage recovery' : repairName.toLowerCase()}?`,
       answer: isWaterDamage
-        ? `Due to the unpredictable nature of liquid-induced corrosion, we do not offer a general warranty on water damage rescue services. However, if we replace a specific part (like a new screen), that specific part will still be covered by our 6-month warranty, provided the rest of the device remains stable.`
+        ? WATER_DAMAGE_WARRANTY_SUMMARY
         : isComplexDiagnostic
-        ? `Warranty coverage depends on the final repair path. If parts are replaced to restore function, they are covered by our standard 6-month warranty.`
-        : `Yes, all our standard repairs come with a comprehensive 6-month warranty on both parts and labor at our Ringwood location.`,
+        ? STANDARD_WARRANTY_SUMMARY
+        : STANDARD_WARRANTY_SUMMARY,
     },
   ];
 

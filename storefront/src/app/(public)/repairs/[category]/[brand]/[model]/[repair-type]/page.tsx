@@ -3,6 +3,8 @@ import { REPAIR_TYPES } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails, type RepairVariant } from '@/lib/api';
 import { slugify, formatDynamicParam, preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
+import RepairPolicySection from '@/components/services/RepairPolicySection';
+import { getRepairPolicyVariant, getWaterDamageServiceDescription } from '@/lib/repairPolicy';
 import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench, ShieldAlert, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
@@ -4765,46 +4767,6 @@ export async function generateMetadata({ params }: RepairPageProps) {
   };
 }
 
-function WaterDamagePolicySection() {
-  return (
-    <div className="page-container" style={{ paddingTop: '0', paddingBottom: '0' }}>
-      <div style={{
-        background: '#fef2f2',
-        border: '1px solid #fee2e2',
-        borderRadius: '1rem',
-        padding: '2rem',
-        marginTop: '0rem',
-        marginBottom: '3rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-          <ShieldAlert size={28} color="#dc2626" />
-          <h2 style={{ margin: 0, color: '#991b1b', fontSize: '1.5rem', fontWeight: 700 }}>
-            Special Policy: Water Damage Recovery
-          </h2>
-        </div>
-        <div style={{ color: '#b91c1c', lineHeight: '1.6', fontSize: '1.05rem' }}>
-          <p style={{ margin: 0 }}>
-            While our general motto is "No Fix, No Charge," water damage is a special case. 
-            Liquid damage requires immediate intervention: we must completely disassemble your phone, dry every component, 
-            and perform professional alcohol cleaning to stop corrosion. Because this specialized labor is required regardless 
-            of the final outcome, a labor fee applies even if the phone is not successfully repaired. 
-            Furthermore, due to the complexity of motherboard corrosion, we do not provide a general warranty for 
-            water damage rescue. <em>Exception:</em> If a specific part (e.g., a screen) is replaced, that part will carry 
-            our standard warranty.
-          </p>
-          <p style={{ margin: '0.9rem 0 0', fontSize: '0.98rem' }}>
-            Need urgent advice after liquid exposure?{' '}
-            <Link href="/repairs/water-damage" prefetch={false} style={{ fontWeight: 800, textDecoration: 'underline' }}>
-              Read our phone water damage assessment guide
-            </Link>{' '}
-            before charging or testing the device.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['params']>): Promise<{
   details: {
     brand: string;
@@ -5365,7 +5327,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams.model,
     resolvedParams['repair-type']
   );
-  const isWaterDamageRepairPage = resolvedParams['repair-type'] === 'water-damage-repair';
+  const isWaterDamageRepairPage = isWaterDamageRepairSlug(resolvedParams['repair-type']);
+  const repairPolicyVariant = getRepairPolicyVariant(resolvedParams['repair-type']);
   const finalRepairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
@@ -5515,7 +5478,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       <RepairServiceSchema
         serviceName={`${seoDisplayModel} ${finalRepairName} in Ringwood`}
         description={
-          selectedCrawledRepairContent?.schemaDescription ??
+          isWaterDamageRepairPage
+            ? getWaterDamageServiceDescription(`${seoDisplayModel} ${finalRepairName} in Ringwood`)
+            : selectedCrawledRepairContent?.schemaDescription ??
           enhancedSamsungTabletSeoPocket?.schemaDescription ??
           enhancedIpadSeoPocket?.schemaDescription ??
           `Professional ${finalRepairName} for ${seoDisplayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`
@@ -5569,7 +5534,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           />
 
           <div className="trust-badges">
-            {resolvedParams['repair-type'] === 'water-damage-repair' ? (
+            {isWaterDamageRepairPage ? (
               <>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
@@ -5581,7 +5546,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 </div>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><CheckCircle size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-                  Warranty Depends on Repair Result
+                  No Warranty for Water Damage
                 </div>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
@@ -5615,11 +5580,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        {isWaterDamageRepairPage && (
-          <ScrollReveal>
-            <WaterDamagePolicySection />
-          </ScrollReveal>
-        )}
+        <ScrollReveal>
+          <RepairPolicySection variant={repairPolicyVariant} />
+        </ScrollReveal>
 
         <RepairResultsMatchingSection
           category={resolvedParams.category}
