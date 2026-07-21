@@ -165,20 +165,24 @@ export default function RepairPricingAndCTA({
   return (
     <div className="w-full flex flex-col items-center mt-8">
       {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
-        <div className={`grid gap-4 md:gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
-          {displayVariants.map((variant) => {
-            const isSelected = selectedTier === variant.quality_grade;
-            
-            return (
-              <div 
-                key={variant.quality_grade}
-                role="button"
-                tabIndex={0}
-                aria-pressed={isSelected}
-                aria-label={`Select ${variant.quality_grade} tier at $${variant.price}`}
-                onClick={() => handleCardClick(variant.quality_grade)}
-                onKeyDown={(e) => handleCardKeyDown(e, variant.quality_grade)}
-                className={`
+        <>
+          <h2 className="mb-4 text-center text-xl font-bold text-slate-900">
+            {modelName} {repairName} options and pricing
+          </h2>
+          <div className={`grid gap-4 md:gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
+            {displayVariants.map((variant) => {
+              const isSelected = selectedTier === variant.quality_grade;
+
+              return (
+                <div
+                  key={variant.quality_grade}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
+                  aria-label={`Select ${variant.quality_grade} tier at $${variant.price}`}
+                  onClick={() => handleCardClick(variant.quality_grade)}
+                  onKeyDown={(e) => handleCardKeyDown(e, variant.quality_grade)}
+                  className={`
                   relative flex flex-col rounded-2xl border p-5 sm:p-6 md:p-8
                   cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.03]
                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
@@ -188,47 +192,48 @@ export default function RepairPricingAndCTA({
                       ? 'bg-blue-50/30 border-blue-300 shadow-md ring-1 ring-blue-300 hover:bg-blue-50' 
                       : 'bg-white border-slate-200 shadow-sm hover:shadow-md hover:bg-blue-50'}
                   ${showValidationHint && !isSelected ? 'animate-pulse ring-2 ring-red-400' : ''}
-                `}
-              >
-                {/* Recommended Badge */}
-                {variant.is_recommended && (
-                  <div className={`flex items-center gap-1 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-bl-lg rounded-tr-xl shadow-md absolute top-0 right-0 z-10
-                    ${isSelected ? 'bg-white text-blue-600' : 'bg-blue-600 text-white'}
+                  `}
+                >
+                  {/* Recommended Badge */}
+                  {variant.is_recommended && (
+                    <div className={`flex items-center gap-1 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-bl-lg rounded-tr-xl shadow-md absolute top-0 right-0 z-10
+                      ${isSelected ? 'bg-white text-blue-600' : 'bg-blue-600 text-white'}
                   `}>
-                    <ThumbsUp size={14} />
-                    RECOMMENDED
+                      <ThumbsUp size={14} />
+                      RECOMMENDED
+                    </div>
+                  )}
+
+                  {/* Tier Name */}
+                  <div className="mb-1 text-center">
+                    <h3 className={`text-xl font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                      {variant.quality_grade}
+                    </h3>
                   </div>
-                )}
 
-                {/* Tier Name */}
-                <div className="mb-1 text-center">
-                  <h3 className={`text-xl font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                    {variant.quality_grade}
-                  </h3>
+                  {/* Price */}
+                  <div className="flex items-baseline justify-center mb-4">
+                    <span className={`text-2xl font-extrabold ${isSelected ? 'text-blue-100' : 'text-blue-600'}`}>
+                      ${variant.price}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  {getTierDescription(variant.quality_grade) && (
+                    <p className={`text-sm leading-relaxed mt-2 flex-grow text-center ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
+                      {getTierDescription(variant.quality_grade)}
+                    </p>
+                  )}
+
+                  {/* Selection Indicator */}
+                  <div className={`mt-4 text-center text-xs font-semibold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-slate-400'}`}>
+                    {isSelected ? '✓ Selected' : 'Tap to select'}
+                  </div>
                 </div>
-
-                {/* Price */}
-                <div className="flex items-baseline justify-center mb-4">
-                  <span className={`text-2xl font-extrabold ${isSelected ? 'text-blue-100' : 'text-blue-600'}`}>
-                    ${variant.price}
-                  </span>
-                </div>
-
-                {/* Description */}
-                {getTierDescription(variant.quality_grade) && (
-                  <p className={`text-sm leading-relaxed mt-2 flex-grow text-center ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
-                    {getTierDescription(variant.quality_grade)}
-                  </p>
-                )}
-
-                {/* Selection Indicator */}
-                <div className={`mt-4 text-center text-xs font-semibold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-slate-400'}`}>
-                  {isSelected ? '✓ Selected' : 'Tap to select'}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       ) : (
         <div className="mb-12 mt-4 text-center max-w-md mx-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm dark:bg-white dark:border-white sm:p-6 md:p-10">
           {startingPrice && (

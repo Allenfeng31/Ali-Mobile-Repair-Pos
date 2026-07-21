@@ -122,6 +122,7 @@ import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from 
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
 import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTabletEnhancedSeoSection';
+import { buildRepairDetailSeo, getRepairDetailHeading } from './repairDetailSeo';
 
 export const revalidate = 86400;
 
@@ -4745,8 +4746,13 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const isFlexCable = resolvedParams['repair-type'].includes('flex-cable');
 
   return {
-    title,
-    description,
+    ...buildRepairDetailSeo({
+      title,
+      description,
+      canonicalUrl,
+      model,
+      repairName,
+    }),
     alternates: {
       canonical: canonicalUrl
     },
@@ -5538,7 +5544,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
         <section className="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">
           <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
-          <h1>{seoDisplayModel} {finalRepairName} in Ringwood</h1>
+          <h1>{getRepairDetailHeading(seoDisplayModel, finalRepairName)}</h1>
           {(enhancedSamsungTabletSeoPocket?.supportLabel ?? enhancedIpadSeoPocket?.supportLabel) ? (
             <p className="mx-auto mt-4 max-w-3xl text-sm font-semibold leading-6 text-slate-600">
               {enhancedSamsungTabletSeoPocket?.supportLabel ?? enhancedIpadSeoPocket?.supportLabel}
