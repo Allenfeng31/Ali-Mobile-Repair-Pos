@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -135,6 +137,17 @@ describe('repair detail metadata', () => {
   it('retains the existing 404 behavior for an invalid taxonomy combination', async () => {
     await expect(generateMetadata(params('phone', 'iphone', 'not-a-real-model', 'screen-replacement'))).rejects.toThrow(
       'NEXT_NOT_FOUND'
+    );
+  });
+
+  it('places Repair Results before the policy disclosure after pricing', () => {
+    const pageSource = readFileSync(
+      resolve(process.cwd(), 'src/app/(public)/repairs/[category]/[brand]/[model]/[repair-type]/page.tsx'),
+      'utf8'
+    );
+
+    expect(pageSource.indexOf('<RepairResultsMatchingSection')).toBeLessThan(
+      pageSource.indexOf('<RepairPolicySection')
     );
   });
 });

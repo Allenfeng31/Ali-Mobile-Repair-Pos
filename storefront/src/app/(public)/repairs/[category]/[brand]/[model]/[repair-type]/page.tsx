@@ -5580,10 +5580,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           </div>
         </section>
 
-        <ScrollReveal>
-          <RepairPolicySection variant={repairPolicyVariant} />
-        </ScrollReveal>
-
         <RepairResultsMatchingSection
           category={resolvedParams.category}
           brand={resolvedParams.brand}
@@ -5592,6 +5588,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           context="detail"
           mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
         />
+
+        <ScrollReveal>
+          <RepairPolicySection variant={repairPolicyVariant} />
+        </ScrollReveal>
 
         {(enhancedLenovoTabletSeoPocket || enhancedSamsungTabletSeoPocket || enhancedMacBookSeoPocket) && (
           <ScrollReveal>
