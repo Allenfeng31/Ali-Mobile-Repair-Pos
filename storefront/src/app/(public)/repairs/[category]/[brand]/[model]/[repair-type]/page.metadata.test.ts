@@ -61,6 +61,11 @@ const catalog: RepairCatalog = {
           model: 'MacBook Air M2 13 2022',
           repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 400 }],
         },
+        {
+          slug: 'macbook-unlisted-13',
+          model: 'MacBook Unlisted 13',
+          repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 500 }],
+        },
       ],
     },
   ],
@@ -95,6 +100,14 @@ const repairDetails: Record<string, RepairDetails> = {
     variants: [],
     source: 'fallback',
   },
+  'laptop/macbook/macbook-unlisted-13/screen-replacement': {
+    brand: 'MacBook',
+    model: 'MacBook Unlisted 13',
+    repairType: 'Screen Replacement',
+    price: 500,
+    variants: [],
+    source: 'fallback',
+  },
 };
 
 function params(category: string, brand: string, model: string, repairType: string) {
@@ -117,6 +130,9 @@ describe('repair detail metadata', () => {
     expect(metadata.openGraph).toMatchObject({ url: canonicalUrl });
     expect(metadata.openGraph?.title).toContain('iPhone 15 Screen Replacement');
     expect(metadata.twitter?.title).toContain('iPhone 15 Screen Replacement');
+    expect(metadata.description).toContain('cracked glass');
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+    expect(metadata.twitter?.description).toBe(metadata.description);
   });
 
   it('uses canonical MacBook labels and a non-screen repair without hard-coding', async () => {
@@ -132,11 +148,30 @@ describe('repair detail metadata', () => {
       'https://www.alimobile.com.au/repairs/laptop/macbook/macbook-air-m2-13-2022/screen-replacement'
     );
     expect(batteryMetadata.openGraph?.title).toContain('iPhone 15 Battery Replacement');
+    expect(batteryMetadata.description).toContain('poor battery life');
+    expect(batteryMetadata.description).not.toBe(macbookMetadata.description);
+    expect(batteryMetadata.openGraph?.description).toBe(batteryMetadata.description);
+    expect(batteryMetadata.twitter?.description).toBe(batteryMetadata.description);
   });
 
   it('retains the existing 404 behavior for an invalid taxonomy combination', async () => {
     await expect(generateMetadata(params('phone', 'iphone', 'not-a-real-model', 'screen-replacement'))).rejects.toThrow(
       'NEXT_NOT_FOUND'
+    );
+  });
+
+  it('passes laptop category to generic metadata and social descriptions', async () => {
+    const metadata = await generateMetadata(
+      params('laptop', 'macbook', 'macbook-unlisted-13', 'screen-replacement')
+    );
+
+    expect(metadata.description).toContain('MacBook Unlisted 13');
+    expect(metadata.description).toContain('cracked display');
+    expect(metadata.description).not.toMatch(/touch-screen|touchscreen|phone/i);
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+    expect(metadata.twitter?.description).toBe(metadata.description);
+    expect(metadata.alternates?.canonical).toBe(
+      'https://www.alimobile.com.au/repairs/laptop/macbook/macbook-unlisted-13/screen-replacement'
     );
   });
 
@@ -149,5 +184,15 @@ describe('repair detail metadata', () => {
     expect(pageSource.indexOf('<RepairResultsMatchingSection')).toBeLessThan(
       pageSource.indexOf('<RepairPolicySection')
     );
+    const metadataDescriptionStart = pageSource.indexOf('const description =');
+    const metadataDescriptionEnd = pageSource.indexOf('const baseUrl =', metadataDescriptionStart);
+    const schemaDescriptionStart = pageSource.indexOf('const genericRepairIntentDescription =');
+    const schemaDescriptionEnd = pageSource.indexOf('const crossModelSectionRepairName', schemaDescriptionStart);
+    expect(pageSource.slice(metadataDescriptionStart, metadataDescriptionEnd)).toContain('category: resolvedParams.category');
+    expect(pageSource.slice(schemaDescriptionStart, schemaDescriptionEnd)).toContain('category: resolvedParams.category');
+    expect(pageSource).toContain('genericRepairIntentDescription');
+    const serviceSchemaStart = pageSource.indexOf('<RepairServiceSchema');
+    const serviceSchemaEnd = pageSource.indexOf('/>', serviceSchemaStart);
+    expect(pageSource.slice(serviceSchemaStart, serviceSchemaEnd)).toContain('genericRepairIntentDescription');
   });
 });

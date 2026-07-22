@@ -5,6 +5,7 @@ import { slugify, formatDynamicParam, preserveRouteSegment, safeSlugSegment } fr
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import RepairPolicySection from '@/components/services/RepairPolicySection';
 import { getRepairPolicyVariant, getWaterDamageServiceDescription } from '@/lib/repairPolicy';
+import { getRepairIntentDescription } from '@/lib/repairIntentDescription';
 import { Zap, ShieldCheck, CheckCircle, Droplet, Battery, Smartphone, Plug, Wrench, ShieldAlert, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import ChatNowButton from '@/components/ChatNowButton';
@@ -4431,26 +4432,6 @@ export async function generateStaticParams() {
   ];
 }
 
-/** Stable hash: deterministic index from a string (sum of char codes mod length). */
-function stableHash(str: string, modulo: number): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash + str.charCodeAt(i) * (i + 1)) % 1_000_000;
-  }
-  return hash % modulo;
-}
-
-const META_DESCRIPTION_TEMPLATES = [
-  (m: string, r: string) =>
-    `Fast, professional ${m} ${r.toLowerCase()} in Ringwood, Melbourne. Fast quote and repair options, warranty support on eligible repairs, No Fix No Charge. Book now.`,
-  (m: string, r: string) =>
-    `Need a ${m} ${r.toLowerCase()}? Our Ringwood experts offer fast turnaround for many common repairs with premium-quality parts and warranty support on eligible repairs.`,
-  (m: string, r: string) =>
-    `Walk-in ${m} ${r.toLowerCase()} at Ali Mobile Ringwood. Same-day options may be available for common repairs when parts are in stock, with transparent pricing and free diagnostics.`,
-  (m: string, r: string) =>
-    `Expert ${m} ${r.toLowerCase()} service near you in Ringwood. Fast quote and repair options, warranty support on eligible parts, and free diagnostics. Get started today.`,
-];
-
 const PHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
 const PHONE_BACK_HOUSING_INTERNAL_SLUG = "back-housing-replacement";
 const IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass / Back Housing Replacement";
@@ -4712,7 +4693,6 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
-  const templateIdx = stableHash(`${model}${repairName}`, META_DESCRIPTION_TEMPLATES.length);
   const title = selectedCrawledRepairContent
     ? selectedCrawledRepairContent.metaTitle
     : enhancedLenovoTabletSeoPocket
@@ -4740,7 +4720,12 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? enhancedMacBookSeoPocket.metaDescription
     : enhancedAppleWatchSeoPocket
     ? enhancedAppleWatchSeoPocket.metaDescription
-    : META_DESCRIPTION_TEMPLATES[templateIdx](model, repairName);
+    : getRepairIntentDescription({
+        model,
+        repairName,
+        repairSlug: internalRepairSlug,
+        category: resolvedParams.category,
+      });
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const canonicalUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
@@ -5336,6 +5321,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type'],
     knownRepair?.name || repairTypeDerived
   );
+  const genericRepairIntentDescription = getRepairIntentDescription({
+    model: seoDisplayModel,
+    repairName: finalRepairName,
+    repairSlug: internalRepairSlug,
+    category: resolvedParams.category,
+  });
   const crossModelSectionRepairName = isGalaxyAEnhancedPage
       ? getRelatedRepairPresentationName(
         resolvedParams.category,
@@ -5483,7 +5474,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             : selectedCrawledRepairContent?.schemaDescription ??
           enhancedSamsungTabletSeoPocket?.schemaDescription ??
           enhancedIpadSeoPocket?.schemaDescription ??
-          `Professional ${finalRepairName} for ${seoDisplayModel} in Ringwood. Expert technicians, fast turnaround, 6-month warranty.`
+          genericRepairIntentDescription
         }
         price={price > 0 ? String(price) : undefined}
         url={repairPageUrl}

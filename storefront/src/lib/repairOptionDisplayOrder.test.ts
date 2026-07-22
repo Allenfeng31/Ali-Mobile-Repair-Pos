@@ -1,11 +1,35 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { sortRepairOptionsForDisplay } from "./repairOptionDisplayOrder";
+import { getRepairOptionIntent, sortRepairOptionsForDisplay } from "./repairOptionDisplayOrder";
 
 type Option = { slug: string; name: string };
 
 const option = (slug: string): Option => ({ slug, name: slug });
 
 describe("sortRepairOptionsForDisplay", () => {
+  it("resolves semantic intent from normalized slugs instead of display priorities", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/lib/repairOptionDisplayOrder.ts"), "utf8");
+    const intentStart = source.indexOf("export function getRepairOptionIntent");
+    const intentEnd = source.indexOf("\n}\n\nexport function sortRepairOptionsForDisplay", intentStart) + 2;
+    const intentFunction = source.slice(intentStart, intentEnd);
+
+    expect(source).toContain("REPAIR_OPTION_INTENT_BY_SLUG");
+    expect(intentFunction).not.toContain("getRepairOptionPriority");
+    expect(getRepairOptionIntent("  CAMERA-LENS-REPLACEMENT  ")).toBe("camera-lens");
+    expect(getRepairOptionIntent("camera-repair")).toBe("generic");
+    expect(getRepairOptionIntent("water-damage")).toBe("water-damage");
+    expect(getRepairOptionIntent("water-damage-repair")).toBe("water-damage");
+    expect(getRepairOptionIntent("water-damage-cleaning")).toBe("generic");
+  });
+
+  it("keeps camera-lens, back-camera and front-camera semantics distinct", () => {
+    expect(getRepairOptionIntent("camera-lens-replacement")).toBe("camera-lens");
+    expect(getRepairOptionIntent("back-camera-lens-replacement")).toBe("camera-lens");
+    expect(getRepairOptionIntent("back-camera-replacement")).toBe("back-camera");
+    expect(getRepairOptionIntent("front-camera-replacement")).toBe("front-camera");
+  });
+
   it("applies the complete requested repair-option sequence to shuffled services", () => {
     const options = [
       "logic-board-repair", "volume-button-replacement", "water-damage-repair",
