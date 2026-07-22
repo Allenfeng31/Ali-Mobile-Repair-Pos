@@ -34,10 +34,12 @@ vi.mock('@/lib/analytics', () => ({
 describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
   beforeEach(() => {
     mockParams = {};
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
   });
 
   afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
     vi.clearAllMocks();
   });
 
@@ -181,6 +183,26 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
 
     expect(screen.getByText('Starting from')).toBeInTheDocument();
     expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
+  });
+
+  it('renders fetched tier descriptions for repairs without a static override', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([
+        { name: 'Standard', description: 'Standard quality' },
+      ]),
+    }));
+
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        repairName="Camera Repair"
+        variants={[{ quality_grade: 'Standard', price: 170 }]}
+      />
+    );
+
+    expect(global.fetch).toHaveBeenCalledWith('/api/proxy/quality-tiers');
+    expect(await screen.findByText('Standard quality')).toBeInTheDocument();
   });
 
   // ── Step 3: Nuclear Spacer & Layout ──────────────────────────────────────────

@@ -3,7 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 
 import RepairPricingAndCTA from './RepairPricingAndCTA';
 
@@ -20,12 +20,13 @@ vi.mock('@/lib/analytics', () => ({
   },
 }));
 
-vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-  ok: true,
-  json: async () => [],
-}));
+vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
 
 describe('RepairPricingAndCTA SEO headings', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('places a repair-options H2 before the tier H3 headings', () => {
     render(
       <RepairPricingAndCTA
