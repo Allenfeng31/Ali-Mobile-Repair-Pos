@@ -86,7 +86,7 @@ export default function PublicLayout({
                 <div className="footer-trust-strip" aria-label="Repair promises">
                   <span>
                     <ShieldCheck size={15} strokeWidth={2.5} aria-hidden="true" />
-                    180-Day Warranty
+                    6-Month Warranty on Standard Repairs
                   </span>
                   <span>
                     <Wrench size={15} strokeWidth={2.5} aria-hidden="true" />
