@@ -9,6 +9,7 @@ import { safeSlugSegment } from "@/lib/inventoryUtils";
 import LocationAnalyticsTracker from "@/components/analytics/LocationAnalyticsTracker";
 import ChineseServiceCta from "@/components/locations/ChineseServiceCta";
 import LocationBrandRepairLinks, { type LocationBrandRepairCard } from "./LocationBrandRepairLinks";
+import { buildLocationBreadcrumbItems } from "./locationBreadcrumbs";
 
 type LocationPageProps = {
   params: Promise<{
@@ -436,26 +437,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "@id": `${baseUrl}/locations/${area.slug}#breadcrumb`,
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: `${baseUrl}/`,
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Locations",
-          item: `${baseUrl}/locations`,
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: area.name,
-          item: `${baseUrl}/locations/${area.slug}`,
-        },
-      ],
+      itemListElement: buildLocationBreadcrumbItems(baseUrl, area),
     },
   ];
 
