@@ -118,6 +118,16 @@ const faqs = [
       "Walk-ins are welcome at our Ringwood Square kiosk. An online booking or quote request helps us prepare the repair path and gives you priority in the queue.",
   },
   {
+    question: "Do I need to share my passcode for a repair?",
+    answer:
+      "Most repairs do not require your passcode. If device access is needed for functional testing, we will ask first. You can choose not to share it and test the device with us in person before the repair is finalised. We do not browse your photos, messages or other personal content.",
+  },
+  {
+    question: "Should I back up my device before repair?",
+    answer:
+      "We recommend backing up your device before any repair. Standard part replacements normally do not affect stored data, but data cannot be guaranteed on an already damaged device. Logic-board, liquid-damage, no-power and data-recovery work can carry a higher risk, which we explain before work begins.",
+  },
+  {
     question: "Do repairs include a warranty?",
     answer:
       "Eligible repairs include a warranty on the fitted part and workmanship. Warranty does not cover new impact damage, liquid damage, misuse or unrelated faults.",
