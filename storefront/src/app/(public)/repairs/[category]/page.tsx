@@ -99,7 +99,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { t: "Premium Quality Screens & Parts Available", d: "" },
       { t: "Fast repair options for common screens and batteries", d: "" },
       { t: "No Fix, No Charge Policy", d: "" },
-      { t: "180-Day Comprehensive Warranty", d: "" }
+      { t: "6-Month Warranty on Standard Repairs", d: "" }
     ],
     pricing: {
       title: "Popular Phone Repair Pricing",
@@ -141,7 +141,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { t: "Parts availability & timing checks", d: "Timing is confirmed after model, part, and repair queue checks." },
       { t: "Quality replacement batteries", d: "Selected for compatible tablet models and confirmed before repair." },
       { t: "Detailed diagnostic checks prior to repair", d: "" },
-      { t: "180-Day Comprehensive Warranty Coverage", d: "" }
+      { t: "6-Month Warranty on Standard Repairs", d: "" }
     ],
     pricing: {
       title: "Popular Tablet Repair Pricing",
@@ -153,7 +153,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { question: "What kind of replacement batteries do you use for tablets?", answer: "We use compatible replacement batteries selected for the model and confirm the available option before repair." },
       { question: "How long does an iPad repair take?", answer: "Some iPad repairs may be completed the same day when parts are in stock, but timing depends on adhesive curing, model, repair queue, and device condition." },
       { question: "What if my tablet will not turn on or only shows a black screen?", answer: "A no-power or black-screen tablet can be related to the display, battery, charging port, liquid exposure, connector damage or board-level faults. We inspect the device first so we can confirm the likely cause and quote the right repair path." },
-      { question: "What is your warranty policy for tablet repairs?", answer: "Tablet screen and battery replacements are backed by our 180-day warranty. Warranty support depends on the fault confirmed at inspection and whether it relates to the completed repair." },
+      { question: "What is your warranty policy for tablet repairs?", answer: "Completed standard tablet repairs include a 6-month warranty covering the replacement part and labour. New damage, new or repeated liquid exposure, third-party work and unrelated faults are excluded." },
       { question: "Is my tablet data safe during the repair?", answer: "Data is normally not affected during standard screen or battery repairs, but we recommend backing up first whenever possible." }
     ]
   },
