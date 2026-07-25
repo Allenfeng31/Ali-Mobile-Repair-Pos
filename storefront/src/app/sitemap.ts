@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 
 import { fetchRepairCatalog } from '@/lib/api';
+import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { getSortedPostsData } from '@/lib/blog';
@@ -86,7 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const repairUrls: MetadataRoute.Sitemap = [];
     for (const brand of catalog.brands) {
       for (const model of brand.models) {
-        const isExcludedPixel = brand.slug === 'google-pixel' && model.slug !== 'pixel-8-pro';
+        const isExcludedPixel = brand.slug === 'google-pixel' && !getGooglePixelHardwareConfig(model.slug);
         const isExcludedOppo = brand.slug === 'oppo' && !getOppoModelConfig(model.slug);
 
         if (!isExcludedPixel && !isExcludedOppo) {
@@ -103,7 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           if (isWaterDamageRepairSlug(repair.slug)) continue;
 
           if (isExcludedOppo) continue;
-          if (isExcludedPixel && repair.slug !== 'logic-board-repair') continue;
+          if (isExcludedPixel) continue;
 
           repairUrls.push({
             url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
