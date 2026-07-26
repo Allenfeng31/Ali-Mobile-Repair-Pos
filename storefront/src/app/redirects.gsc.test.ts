@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { loadEnvConfig } from '@next/env';
 
-const { fetchRepairCatalogMock } = vi.hoisted(() => {
+const { fetchRepairCatalogMock, pixelModels, unconfiguredPixelModels, samsungModels, iphoneModels } = vi.hoisted(() => {
   const logicBoardRepair = { slug: 'logic-board-repair' };
   const representativePixelModels = [
     'pixel-3',
@@ -10,20 +10,26 @@ const { fetchRepairCatalogMock } = vi.hoisted(() => {
     'pixel-10',
     'pixel-10-pro-fold',
   ];
+  const unconfiguredPixelModels = Array.from({ length: 22 }, (_, index) => `pixel-fixture-${index + 1}`);
   const pixelModels = [
     ...representativePixelModels,
-    ...Array.from({ length: 22 }, (_, index) => `pixel-fixture-${index + 1}`),
+    ...unconfiguredPixelModels,
   ].map((slug) => ({ slug, repairTypes: [logicBoardRepair] }));
   const samsungModels = [
     'galaxy-s24-ultra',
     ...Array.from({ length: 396 }, (_, index) => `galaxy-fixture-${index + 1}`),
   ].map((slug) => ({ slug, repairTypes: [logicBoardRepair] }));
+  const iphoneModels = [{ slug: 'iphone-15-pro-max', repairTypes: [logicBoardRepair] }];
 
   return {
+    pixelModels,
+    unconfiguredPixelModels,
+    samsungModels,
+    iphoneModels,
     fetchRepairCatalogMock: vi.fn(async () => ({
       brands: [
         { category: 'phone', slug: 'google-pixel', models: pixelModels },
-        { category: 'phone', slug: 'iphone', models: [{ slug: 'iphone-15-pro-max', repairTypes: [logicBoardRepair] }] },
+        { category: 'phone', slug: 'iphone', models: iphoneModels },
         { category: 'phone', slug: 'samsung', models: samsungModels },
       ],
     })),
@@ -33,6 +39,7 @@ const { fetchRepairCatalogMock } = vi.hoisted(() => {
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog: fetchRepairCatalogMock }));
 
 import nextConfig from '../../next.config';
+import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import sitemap from './sitemap';
 
 loadEnvConfig(process.cwd());
@@ -209,7 +216,28 @@ describe('July 15 GSC technical redirect batch', () => {
       expect(paths).not.toContain(source);
     }
 
-    expect(paths.filter((path) => path.endsWith('/logic-board-repair'))).toHaveLength(425);
+    const logicBoardPaths = paths.filter((path) => path.endsWith('/logic-board-repair'));
+    const configuredPixelLogicBoardPaths = pixelModels
+      .filter((model) => getGooglePixelHardwareConfig(model.slug))
+      .map((model) => `/repairs/phone/google-pixel/${model.slug}/logic-board-repair`);
+    const nonPixelLogicBoardPaths = [
+      ...iphoneModels.map((model) => `/repairs/phone/iphone/${model.slug}/logic-board-repair`),
+      ...samsungModels.map((model) => `/repairs/phone/samsung/${model.slug}/logic-board-repair`),
+    ];
+    const expectedLogicBoardPaths = new Set([
+      ...configuredPixelLogicBoardPaths,
+      ...nonPixelLogicBoardPaths,
+    ]);
+
+    expect(logicBoardPaths).toHaveLength(expectedLogicBoardPaths.size);
+    for (const path of configuredPixelLogicBoardPaths) {
+      expect(logicBoardPaths).toContain(path);
+    }
+    for (const slug of unconfiguredPixelModels) {
+      expect(paths).not.toContain(`/repairs/phone/google-pixel/${slug}/logic-board-repair`);
+    }
+    expect(paths.filter((path) => path.endsWith('/logic-board'))).toHaveLength(0);
+    expect(paths.filter((path) => path.includes('/phone/google/') && path.endsWith('/logic-board-repair'))).toHaveLength(0);
     expect(paths.filter((path) => path.includes('water-damage'))).toHaveLength(427);
     expect(paths.filter((path) => path.includes('/other-repair'))).toHaveLength(0);
     expect(new Set(paths)).toHaveLength(paths.length);
