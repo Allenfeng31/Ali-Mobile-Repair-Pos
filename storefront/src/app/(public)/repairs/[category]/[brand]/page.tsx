@@ -71,6 +71,10 @@ const GOOGLE_PIXEL_REPAIR_TYPE_LINKS = [
   { href: "/repairs/battery-replacement", label: "Battery replacement options" },
   { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
   { href: "/repairs/back-glass-replacement", label: "Rear glass and housing repair options" },
+  { href: "/repairs/phone/google/loudspeaker-replacement", label: "Google Pixel Loudspeaker Replacement" },
+  { href: "/repairs/phone/google/earpiece-speaker-replacement", label: "Google Pixel Earpiece Speaker Replacement" },
+  { href: "/repairs/phone/google/power-button-replacement", label: "Google Pixel Power Button Replacement" },
+  { href: "/repairs/phone/google/volume-button-replacement", label: "Google Pixel Volume Button Replacement" },
 ];
 
 const OPPO_REPAIR_TYPE_LINKS = [
@@ -78,6 +82,11 @@ const OPPO_REPAIR_TYPE_LINKS = [
   { href: "/repairs/battery-replacement", label: "Battery replacement options" },
   { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
   { href: "/repairs/back-glass-replacement", label: "Rear glass and back-cover repair options" },
+  { href: "/repairs/phone/oppo/camera-lens-replacement", label: "OPPO Camera Lens Replacement" },
+  { href: "/repairs/phone/oppo/loudspeaker-replacement", label: "OPPO Loudspeaker Replacement" },
+  { href: "/repairs/phone/oppo/earpiece-speaker-replacement", label: "OPPO Earpiece Speaker Replacement" },
+  { href: "/repairs/phone/oppo/power-button-replacement", label: "OPPO Power Button Replacement" },
+  { href: "/repairs/phone/oppo/volume-button-replacement", label: "OPPO Volume Button Replacement" },
 ];
 
 const BRAND_HUB_REPAIR_CATEGORY_LINKS = [

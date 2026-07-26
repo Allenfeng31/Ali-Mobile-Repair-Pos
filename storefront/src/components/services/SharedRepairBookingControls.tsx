@@ -15,7 +15,7 @@ interface SharedRepairBookingControlsProps {
   fallbackBookingBrand?: string;
   models: SharedRepairModelOption[];
   repairName: string;
-  showSamsungModelControls?: boolean;
+  showModelControls?: boolean;
 }
 
 export default function SharedRepairBookingControls({
@@ -24,7 +24,7 @@ export default function SharedRepairBookingControls({
   fallbackBookingBrand,
   models,
   repairName,
-  showSamsungModelControls = false,
+  showModelControls = false,
 }: SharedRepairBookingControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,7 +46,7 @@ export default function SharedRepairBookingControls({
 
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-4">
-      {showSamsungModelControls ? (
+      {showModelControls ? (
         <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left">
           {selectedModel ? (
             <p className="text-sm font-bold text-slate-800">
@@ -54,17 +54,17 @@ export default function SharedRepairBookingControls({
             </p>
           ) : (
             <p className="text-sm font-semibold text-slate-700">
-              Choose your Samsung model to prepare a more accurate enquiry.
+              Choose your {fallbackBookingBrand ?? 'phone'} model to prepare a more accurate enquiry.
             </p>
           )}
-          <label className="sr-only" htmlFor={`shared-repair-model-${repairName}`}>Choose your Samsung model</label>
+          <label className="sr-only" htmlFor={`shared-repair-model-${repairName}`}>Choose your {fallbackBookingBrand ?? 'phone'} model</label>
           <select
             id={`shared-repair-model-${repairName}`}
             className="mt-3 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800"
             value={selectedModel?.modelSlug ?? ''}
             onChange={(event) => updateModel(event.target.value)}
           >
-            <option value="">Choose a Samsung model</option>
+            <option value="">Choose a {fallbackBookingBrand ?? 'phone'} model</option>
             {models.map((model) => (
               <option key={model.modelSlug} value={model.modelSlug}>{model.model}</option>
             ))}

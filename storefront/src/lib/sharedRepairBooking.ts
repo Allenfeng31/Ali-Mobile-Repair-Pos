@@ -29,7 +29,7 @@ export function getSharedRepairBookingHref({
   const params = new URLSearchParams({ category: 'phone', service: repairName });
 
   if (selectedModel) {
-    params.set('brand', selectedModel.brandSlug === 'google-pixel' ? 'google' : selectedModel.brand);
+    params.set('brand', selectedModel.brand);
     params.set('model', selectedModel.model);
   } else if (fallbackBrandName) {
     params.set('brand', fallbackBrandName);

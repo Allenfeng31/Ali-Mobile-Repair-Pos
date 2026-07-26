@@ -30,6 +30,7 @@ interface CameraLensLandingPageProps {
   canonicalPath: string;
   models: CameraLensModelOption[];
   isGeneric?: boolean;
+  showSharedRepairControls?: boolean;
 }
 
 function getDisplayPrice(brandName: string | undefined) {
@@ -45,11 +46,12 @@ export default function CameraLensLandingPage({
   canonicalPath,
   models,
   isGeneric,
+  showSharedRepairControls = false,
 }: CameraLensLandingPageProps) {
+  const hasSharedRepairControls = showSharedRepairControls || brandSlug === "samsung";
   const price = getDisplayPrice(brandName);
   const isStartingPriceOnly = price === "Starting from";
   const fallbackBookingHref = getSharedRepairBookingHref({ repairName: CAMERA_LENS_REPAIR_NAME, fallbackBrandName: brandName });
-  const isSamsungSharedPage = brandSlug === "samsung";
   const repairHubHref = brandSlug
     ? `/repairs/phone/${brandSlug === "google" ? "google-pixel" : brandSlug}`
     : "/repairs/phone";
@@ -137,7 +139,7 @@ export default function CameraLensLandingPage({
                 ? "Final price is confirmed after inspection. If the camera module is damaged, we will explain the repair options before work begins."
                 : "Final fitment is confirmed after inspection. If the camera module is damaged, we will advise before repair."}
             </p>
-            {isSamsungSharedPage ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">Samsung camera lens replacement starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
+            {hasSharedRepairControls ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">{brandName} camera lens replacement starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
           </div>
 
           <div className="mt-6 flex w-full max-w-sm flex-col items-center justify-center gap-4">
@@ -148,7 +150,7 @@ export default function CameraLensLandingPage({
                 fallbackBookingBrand={brandName}
                 models={models}
                 repairName={CAMERA_LENS_REPAIR_NAME}
-                showSamsungModelControls={isSamsungSharedPage}
+                showModelControls={hasSharedRepairControls}
               />
             </Suspense>
             <a
@@ -221,7 +223,7 @@ export default function CameraLensLandingPage({
             </article>
           ))}
         </div>
-        {isSamsungSharedPage ? <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6"><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Lens glass or a deeper camera fault?</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check the protective lens glass, camera opening, frame or housing condition and camera output. Blurry images, focus failure, shake or a black preview can involve the camera module instead of lens glass alone.</p></article><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Checks after suitable repair</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check camera image output, focus, photo and video clarity, plus whether the lens opening is clean and correctly positioned.</p></article></div> : null}
+        {hasSharedRepairControls ? <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6"><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Lens glass or a deeper camera fault?</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check the protective lens glass, camera opening, frame or housing condition and camera output. Blurry images, focus failure, shake or a black preview can involve the camera module instead of lens glass alone.</p></article><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Checks after suitable repair</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check camera image output, focus, photo and video clarity, plus whether the lens opening is clean and correctly positioned.</p></article></div> : null}
       </section>
 
       <CommonRepairProblemsSection
@@ -243,7 +245,7 @@ export default function CameraLensLandingPage({
             <p>
               Our Ringwood repair desk keeps camera lens work inspection-led, quote-first, and focused on the repair path that suits the device condition.
             </p>
-            {isSamsungSharedPage ? <p className="mt-4">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}
+            {hasSharedRepairControls ? <p className="mt-4">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}
           </div>
 
           <div className="grid w-full grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-3 lg:gap-6">

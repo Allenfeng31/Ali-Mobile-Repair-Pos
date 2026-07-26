@@ -8,7 +8,7 @@ import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { getVirtualPhoneRepair, type VirtualPhoneRepairModelOption, type VirtualPhoneRepairSlug } from '@/lib/virtualPhoneRepairs';
 import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
 
-export interface SamsungVirtualRepairContent {
+export interface SharedVirtualRepairContent {
   diagnosis: string;
   testing: string;
 }
@@ -22,7 +22,7 @@ export function getVirtualPhoneRepairHeading({
   brandSlug?: string;
   repairName: string;
 }) {
-  if (brandSlug === 'samsung') return `Samsung ${repairName}`;
+  if (brandSlug === 'samsung' || brandSlug === 'google-pixel' || brandSlug === 'oppo') return `${brandName} ${repairName}`;
   return `${brandName ? `${brandName} ` : 'Phone '}${repairName} in Ringwood`;
 }
 
@@ -33,7 +33,7 @@ interface VirtualPhoneRepairLandingPageProps {
   canonicalPath: string;
   models: VirtualPhoneRepairModelOption[];
   isGeneric?: boolean;
-  samsungContent?: SamsungVirtualRepairContent;
+  sharedContent?: SharedVirtualRepairContent;
 }
 
 function RepairIcon({ icon, size, strokeWidth }: { icon: string; size: number; strokeWidth: number }) {
@@ -54,7 +54,7 @@ export default function VirtualPhoneRepairLandingPage({
   canonicalPath,
   models,
   isGeneric,
-  samsungContent,
+  sharedContent,
 }: VirtualPhoneRepairLandingPageProps) {
   const repair = getVirtualPhoneRepair(repairSlug);
   if (!repair) return null;
@@ -94,14 +94,14 @@ export default function VirtualPhoneRepairLandingPage({
     { title: 'Common signs', body: repair.signs, icon: repair.icon },
     { title: 'Hardware problem or another cause?', body: repair.diagnosis, icon: 'clipboard' },
     { title: 'Inspection and repair', body: 'We inspect the device, confirm the suitable repair path and quote before work begins. Repair time depends on diagnosis and part availability.', icon: 'wrench' },
-    ...(samsungContent ? [
-      { title: 'Samsung checks before repair', body: samsungContent.diagnosis, icon: 'clipboard' },
-      { title: 'Testing after suitable repair', body: samsungContent.testing, icon: 'check' },
+    ...(sharedContent ? [
+      { title: 'Checks before repair', body: sharedContent.diagnosis, icon: 'clipboard' },
+      { title: 'Testing after suitable repair', body: sharedContent.testing, icon: 'check' },
     ] : []),
   ];
   const fallbackBookingHref = getSharedRepairBookingHref({
     repairName: repair.name,
-    fallbackBrandName: samsungContent ? brandName : undefined,
+    fallbackBrandName: sharedContent ? brandName : undefined,
   });
 
   return (
@@ -134,17 +134,17 @@ export default function VirtualPhoneRepairLandingPage({
               <h2 className="mt-3 w-full text-center text-xl font-black leading-tight text-slate-950">{repair.name}</h2>
               <p className="mt-4 w-full text-center text-3xl font-extrabold text-blue-600">{priceLabel}</p>
               <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">Final pricing is confirmed after inspection if additional damage or parts are involved.</p>
-              {samsungContent ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">Samsung {repair.name.toLowerCase()} starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
+              {sharedContent ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">{brandName} {repair.name.toLowerCase()} starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
             </div>
             <div className="mt-6 flex w-full max-w-sm flex-col items-center justify-center gap-4">
               <Suspense fallback={<Link href={fallbackBookingHref} className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-center text-lg font-bold !text-white shadow-lg shadow-blue-200">Book Repair Now</Link>}>
                 <SharedRepairBookingControls
                   basePath={canonicalPath}
                   brandSlug={brandSlug}
-                  fallbackBookingBrand={samsungContent ? brandName : undefined}
+                  fallbackBookingBrand={sharedContent ? brandName : undefined}
                   models={models}
                   repairName={repair.name}
-                  showSamsungModelControls={Boolean(samsungContent)}
+                  showModelControls={Boolean(sharedContent)}
                 />
               </Suspense>
               <a href="tel:0481058514" className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-center text-lg font-bold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"><PhoneCall size={19} strokeWidth={2.6} aria-hidden="true" />Call 0481 058 514</a>
@@ -163,7 +163,7 @@ export default function VirtualPhoneRepairLandingPage({
         </section>
         <CommonRepairProblemsSection modelName={brandName ?? 'Phone'} repairType={repair.slug} problems={[{ title: 'Inspection before replacement', description: 'We check the relevant speaker or button area and explain the repair options before work begins.' }, { title: 'Clear quote first', description: 'The $50 figure is a starting price. Final pricing depends on the device condition and suitable repair path.' }]} />
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="why-heading">
-          <div className="repair-workbench-heading"><span>Why choose us</span><h2 id="why-heading" className="scroll-mt-32">Why choose Ali Mobile & Repair</h2><p>Our Ringwood repair desk keeps phone repairs inspection-led, quote-first and focused on supported models.</p>{samsungContent ? <p className="mx-auto mt-4 max-w-3xl text-pretty">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}</div>
+          <div className="repair-workbench-heading"><span>Why choose us</span><h2 id="why-heading" className="scroll-mt-32">Why choose Ali Mobile & Repair</h2><p>Our Ringwood repair desk keeps phone repairs inspection-led, quote-first and focused on supported models.</p>{sharedContent ? <p className="mx-auto mt-4 max-w-3xl text-pretty">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}</div>
           <div className="grid w-full grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-3 lg:gap-6">{['Clear quote before work begins.', 'Available for supported phone models.', 'Repair time depends on diagnosis and part availability.'].map((item) => <article key={item} className="rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center text-sm font-semibold leading-6 text-slate-700">{item}</article>)}</div>
         </section>
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="links-heading">

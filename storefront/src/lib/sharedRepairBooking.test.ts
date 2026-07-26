@@ -6,6 +6,8 @@ import { createVirtualPhoneRepairMetadata } from './virtualPhoneRepairRoute';
 import { getSharedRepairBookingHref, getValidatedSharedRepairModel } from './sharedRepairBooking';
 import { getVirtualPhoneRepairHeading } from '@/components/services/VirtualPhoneRepairLandingPage';
 import { getVirtualPhoneRepair } from './virtualPhoneRepairs';
+import { GOOGLE_PIXEL_HARDWARE_CONFIG } from '@/lib/seo/content/google-pixel/config';
+import { OPPO_ENHANCED_CONFIG } from '@/lib/seo/content/oppo/config';
 
 const samsungModels = [
   { brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S22 Ultra', modelSlug: 'galaxy-s22-ultra' },
@@ -36,10 +38,16 @@ describe('Samsung shared repair metadata and model state', () => {
       expect(expectedHeading).not.toContain('in Ringwood');
     }
 
-    expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Loudspeaker Replacement' }))
-      .toBe('Google Pixel Loudspeaker Replacement in Ringwood');
-    expect(getVirtualPhoneRepairHeading({ brandName: 'OPPO', brandSlug: 'oppo', repairName: 'Loudspeaker Replacement' }))
-      .toBe('OPPO Loudspeaker Replacement in Ringwood');
+    for (const brand of [
+      ['Google Pixel', 'google-pixel'],
+      ['OPPO', 'oppo'],
+    ] as const) {
+      for (const slug of ['loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement'] as const) {
+        const heading = getVirtualPhoneRepairHeading({ brandName: brand[0], brandSlug: brand[1], repairName: getVirtualPhoneRepair(slug)!.name });
+        expect(heading).toBe(`${brand[0]} ${getVirtualPhoneRepair(slug)!.name}`);
+        expect(heading).not.toContain('in Ringwood');
+      }
+    }
     expect(getVirtualPhoneRepairHeading({ repairName: 'Loudspeaker Replacement' }))
       .toBe('Phone Loudspeaker Replacement in Ringwood');
   });
@@ -67,9 +75,18 @@ describe('Samsung shared repair metadata and model state', () => {
   });
 
   it('keeps shared metadata brand-specific outside Samsung', () => {
-    expect(createVirtualPhoneRepairMetadata('google', 'loudspeaker-replacement').title).toContain('Google Pixel');
-    expect(createVirtualPhoneRepairMetadata('oppo', 'loudspeaker-replacement').title).toContain('OPPO');
+    for (const [brand, path, label] of [
+      ['google', '/repairs/phone/google/loudspeaker-replacement', 'Google Pixel'],
+      ['oppo', '/repairs/phone/oppo/loudspeaker-replacement', 'OPPO'],
+    ] as const) {
+      const metadata = createVirtualPhoneRepairMetadata(brand, 'loudspeaker-replacement');
+      expect(metadata.title).toContain(label);
+      expect(metadata.alternates?.canonical).toBe(path);
+      expect(metadata.openGraph?.url).toBe(path);
+      expect(`${metadata.alternates?.canonical}${metadata.openGraph?.url}`).not.toContain('?');
+    }
     expect(createVirtualPhoneRepairMetadata('other', 'loudspeaker-replacement').title).toContain('Phone Loudspeaker');
+    expect(getVirtualPhoneRepairHeading({ repairName: 'Loudspeaker Replacement' })).not.toContain('Samsung');
   });
 
   it('uses only a validated Samsung model in Booking state', () => {
@@ -95,6 +112,19 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(selectedBooking.searchParams.get('model')).toBe('Galaxy S22 Ultra');
   });
 
+  it('keeps Google Pixel and OPPO selectors limited to their configured model sets and preserves their Booking brands', () => {
+    expect(Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG)).toHaveLength(27);
+    expect(Object.keys(OPPO_ENHANCED_CONFIG.models)).toHaveLength(55);
+
+    const pixel = { brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8 Pro', modelSlug: 'pixel-8-pro' };
+    const oppo = { brand: 'OPPO', brandSlug: 'oppo', model: 'Find X8 Pro', modelSlug: 'oppo-find-x8-pro' };
+    expect(getValidatedSharedRepairModel([pixel], pixel.modelSlug, 'google-pixel')).toEqual(pixel);
+    expect(getValidatedSharedRepairModel([pixel], 'pixel-fixture-unconfigured', 'google-pixel')).toBeNull();
+    expect(getValidatedSharedRepairModel([oppo], oppo.modelSlug, 'oppo')).toEqual(oppo);
+    expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: pixel }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('Google Pixel');
+    expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: oppo }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('OPPO');
+  });
+
   it('keeps primary page content server-rendered and scopes interactivity to the client island', () => {
     const virtualPage = readFileSync(resolve(process.cwd(), 'src/components/services/VirtualPhoneRepairLandingPage.tsx'), 'utf8');
     const cameraPage = readFileSync(resolve(process.cwd(), 'src/components/services/CameraLensLandingPage.tsx'), 'utf8');
@@ -110,13 +140,14 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(cameraPage).not.toContain('useSearchParams');
     expect(virtualPage).toContain('<h1 id="virtual-phone-repair-heading">');
     expect(cameraPage).toContain('<h1 id="camera-lens-heading">');
-    expect(virtualPage).toContain('Samsung {repair.name.toLowerCase()} starts from $50');
-    expect(cameraPage).toContain('Samsung camera lens replacement starts from $50');
-    expect(virtualPage).toContain("if (brandSlug === 'samsung') return `Samsung ${repairName}`;");
+    expect(virtualPage).toContain('{brandName} {repair.name.toLowerCase()} starts from $50');
+    expect(cameraPage).toContain('{brandName} camera lens replacement starts from $50');
+    expect(virtualPage).toContain("brandSlug === 'google-pixel' || brandSlug === 'oppo'");
     expect(cameraRoute).toContain('title="Samsung Camera Lens Replacement"');
     expect(controls).toContain("'use client'");
     expect(controls).toContain('useSearchParams');
-    expect(virtualRoute).toContain('brand === "samsung" ? SAMSUNG_REPAIR_CONTENT[repairSlug] : undefined');
+    expect(virtualRoute).toContain('getGooglePixelHardwareConfig(model.modelSlug)');
+    expect(virtualRoute).toContain('getOppoModelConfig(model.modelSlug)');
     expect(virtualRoute).toContain('speakerphone audio');
     expect(virtualRoute).toContain('ordinary calls near your ear');
     expect(virtualRoute).toContain('battery, charging and board-level no-power symptoms');
@@ -139,8 +170,17 @@ describe('Samsung shared repair metadata and model state', () => {
       expect(samsungLinks.match(new RegExp(`/repairs/phone/samsung/${slug}`, 'g'))).toHaveLength(1);
     }
     expect(samsungLinks).not.toContain('?model=');
-    expect(brandHub.slice(googleStart)).not.toContain('/repairs/phone/google/earpiece-speaker-replacement');
-    expect(brandHub.slice(googleStart)).not.toContain('/repairs/phone/oppo/earpiece-speaker-replacement');
+    const oppoStart = brandHub.indexOf('const OPPO_REPAIR_TYPE_LINKS');
+    const googleLinks = brandHub.slice(googleStart, oppoStart);
+    const oppoLinks = brandHub.slice(oppoStart);
+    expect(googleLinks).not.toContain('/repairs/phone/google/camera-lens-replacement');
+    for (const slug of ['loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement']) {
+      expect(googleLinks.match(new RegExp(`/repairs/phone/google/${slug}`, 'g'))).toHaveLength(1);
+    }
+    for (const slug of ['camera-lens-replacement', 'loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement']) {
+      expect(oppoLinks.match(new RegExp(`/repairs/phone/oppo/${slug}`, 'g'))).toHaveLength(1);
+    }
+    expect(`${googleLinks}${oppoLinks}`).not.toContain('?model=');
   });
 
   it('keeps camera social metadata scoped to the clean Samsung URL and leaves the Homepage untouched', () => {
@@ -158,5 +198,16 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(cameraRoute).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
     expect(homepage).not.toContain('/repairs/phone/samsung/camera-lens-replacement');
     expect(homepage).not.toContain('/repairs/phone/samsung/earpiece-speaker-replacement');
+  });
+
+  it('keeps OPPO Camera Lens metadata on its clean canonical URL without touching Google’s historical Camera ownership', () => {
+    const oppoCamera = readFileSync(resolve(process.cwd(), 'src/app/(public)/repairs/phone/oppo/camera-lens-replacement/page.tsx'), 'utf8');
+    const googleCamera = readFileSync(resolve(process.cwd(), 'src/app/(public)/repairs/phone/google/camera-lens-replacement/page.tsx'), 'utf8');
+
+    expect(oppoCamera).toContain('const PAGE_PATH = "/repairs/phone/oppo/camera-lens-replacement";');
+    expect(oppoCamera).toContain('openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH');
+    expect(oppoCamera).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
+    expect(googleCamera).toContain('const PAGE_PATH = "/repairs/phone/google/camera-lens-replacement";');
+    expect(googleCamera).not.toContain('/repairs/phone/google-pixel/camera-lens-replacement');
   });
 });
