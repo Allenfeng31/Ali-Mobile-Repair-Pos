@@ -1,11 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  ArrowRight,
   BadgeCheck,
   Camera,
   CheckCircle2,
@@ -16,6 +12,7 @@ import {
 } from "lucide-react";
 import ReviewsSection from "@/components/ReviewsSection";
 import CommonRepairProblemsSection from "@/components/services/CommonRepairProblemsSection";
+import SharedRepairBookingControls from "@/components/services/SharedRepairBookingControls";
 import {
   CAMERA_LENS_REPAIR_NAME,
   CAMERA_LENS_REPAIR_SLUG,
@@ -23,6 +20,7 @@ import {
   getCameraLensPrice,
 } from "@/lib/virtualCameraLens";
 import { formatScopedRepairPriceLabel } from "@/lib/scopedRepairPriceLabel";
+import { getSharedRepairBookingHref } from "@/lib/sharedRepairBooking";
 
 interface CameraLensLandingPageProps {
   brandName?: string;
@@ -34,53 +32,12 @@ interface CameraLensLandingPageProps {
   isGeneric?: boolean;
 }
 
-function getInitialSelection(
-  models: CameraLensModelOption[],
-  brandParam: string | null,
-  modelParam: string | null,
-  fixedBrandSlug?: string
-) {
-  if (!modelParam) return null;
-
-  return models.find((option) => {
-    const brandMatches = fixedBrandSlug
-      ? option.brandSlug === fixedBrandSlug
-      : !brandParam || option.brandSlug === brandParam;
-
-    return brandMatches && option.modelSlug === modelParam;
-  }) ?? null;
-}
-
-function getBookRepairHref(option: CameraLensModelOption | null, fallbackBrandName?: string) {
-  const params = new URLSearchParams({
-    category: "phone",
-    service: CAMERA_LENS_REPAIR_NAME,
-  });
-
-  if (option) {
-    params.set("brand", option.brandSlug === "google-pixel" ? "google" : option.brand);
-    params.set("model", option.model);
-  } else if (fallbackBrandName) {
-    params.set("brand", fallbackBrandName);
-  }
-
-  return `/book-repair?${params.toString()}`;
-}
-
-function getDisplayPrice(brandName: string | undefined, selectedModel: CameraLensModelOption | null) {
-  const price = getCameraLensPrice(selectedModel?.brand ?? brandName ?? "");
+function getDisplayPrice(brandName: string | undefined) {
+  const price = getCameraLensPrice(brandName ?? "");
   return formatScopedRepairPriceLabel(CAMERA_LENS_REPAIR_SLUG, price, price > 0 ? `$${price}` : "Quote on Request", 'virtual');
 }
 
-export default function CameraLensLandingPage(props: CameraLensLandingPageProps) {
-  return (
-    <Suspense fallback={null}>
-      <CameraLensLandingPageContent {...props} />
-    </Suspense>
-  );
-}
-
-function CameraLensLandingPageContent({
+export default function CameraLensLandingPage({
   brandName,
   brandSlug,
   title,
@@ -89,16 +46,10 @@ function CameraLensLandingPageContent({
   models,
   isGeneric,
 }: CameraLensLandingPageProps) {
-  const searchParams = useSearchParams();
-  const selectedModel = getInitialSelection(
-    models,
-    searchParams.get("brand"),
-    searchParams.get("model"),
-    brandSlug
-  );
-  const price = getDisplayPrice(brandName, selectedModel);
+  const price = getDisplayPrice(brandName);
   const isStartingPriceOnly = price === "Starting from";
-  const bookRepairHref = getBookRepairHref(selectedModel, brandName);
+  const fallbackBookingHref = getSharedRepairBookingHref({ repairName: CAMERA_LENS_REPAIR_NAME, fallbackBrandName: brandName });
+  const isSamsungSharedPage = brandSlug === "samsung";
   const repairHubHref = brandSlug
     ? `/repairs/phone/${brandSlug === "google" ? "google-pixel" : brandSlug}`
     : "/repairs/phone";
@@ -171,31 +122,35 @@ function CameraLensLandingPageContent({
         </p>
 
         <div className="mt-8 flex w-full flex-col items-center">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-blue-600">
+          <div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">
+            <span className="w-full text-center text-xs font-black uppercase tracking-[0.16em] text-blue-600">
               Inspection first
             </span>
-            <h2 className="mt-3 text-xl font-black leading-tight text-slate-950">
+            <h2 className="mt-3 w-full text-center text-xl font-black leading-tight text-slate-950">
               {CAMERA_LENS_REPAIR_NAME}
             </h2>
-            <p className={`mt-4 text-3xl font-extrabold ${isStartingPriceOnly ? "text-slate-950" : "text-blue-600"}`}>
+            <p className={`mt-4 w-full text-center text-3xl font-extrabold ${isStartingPriceOnly ? "text-slate-950" : "text-blue-600"}`}>
               {price}
             </p>
-            <p className="mx-auto mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-500">
+            <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">
               {isStartingPriceOnly
                 ? "Final price is confirmed after inspection. If the camera module is damaged, we will explain the repair options before work begins."
                 : "Final fitment is confirmed after inspection. If the camera module is damaged, we will advise before repair."}
             </p>
+            {isSamsungSharedPage ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">Samsung camera lens replacement starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
           </div>
 
           <div className="mt-6 flex w-full max-w-sm flex-col items-center justify-center gap-4">
-            <Link
-              href={bookRepairHref}
-              className={`inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-center text-lg font-bold shadow-lg shadow-blue-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${forceWhiteButtonText ? "!text-white" : "text-white"}`}
-            >
-              Book Repair Now
-              <ArrowRight size={20} strokeWidth={2.6} aria-hidden="true" />
-            </Link>
+            <Suspense fallback={<Link href={fallbackBookingHref} className="inline-flex min-h-14 w-full items-center justify-center rounded-2xl bg-blue-600 px-8 py-4 text-center text-lg font-bold !text-white shadow-lg shadow-blue-200">Book Repair Now</Link>}>
+              <SharedRepairBookingControls
+                basePath={canonicalPath}
+                brandSlug={brandSlug}
+                fallbackBookingBrand={brandName}
+                models={models}
+                repairName={CAMERA_LENS_REPAIR_NAME}
+                showSamsungModelControls={isSamsungSharedPage}
+              />
+            </Suspense>
             <a
               href="tel:0481058514"
               className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-center text-lg font-bold text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -266,6 +221,7 @@ function CameraLensLandingPageContent({
             </article>
           ))}
         </div>
+        {isSamsungSharedPage ? <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6"><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Lens glass or a deeper camera fault?</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check the protective lens glass, camera opening, frame or housing condition and camera output. Blurry images, focus failure, shake or a black preview can involve the camera module instead of lens glass alone.</p></article><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Checks after suitable repair</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check camera image output, focus, photo and video clarity, plus whether the lens opening is clean and correctly positioned.</p></article></div> : null}
       </section>
 
       <CommonRepairProblemsSection
@@ -287,6 +243,7 @@ function CameraLensLandingPageContent({
             <p>
               Our Ringwood repair desk keeps camera lens work inspection-led, quote-first, and focused on the repair path that suits the device condition.
             </p>
+            {isSamsungSharedPage ? <p className="mt-4">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}
           </div>
 
           <div className="grid w-full grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-3 lg:gap-6">

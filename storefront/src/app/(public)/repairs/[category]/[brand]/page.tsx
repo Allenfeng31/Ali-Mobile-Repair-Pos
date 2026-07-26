@@ -59,6 +59,11 @@ const SAMSUNG_REPAIR_TYPE_LINKS = [
   { href: "/repairs/battery-replacement", label: "Battery replacement options" },
   { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
   { href: "/repairs/back-glass-replacement", label: "Rear glass and back-cover repair options" },
+  { href: "/repairs/phone/samsung/camera-lens-replacement", label: "Samsung Camera Lens Replacement" },
+  { href: "/repairs/phone/samsung/loudspeaker-replacement", label: "Samsung Loudspeaker Replacement" },
+  { href: "/repairs/phone/samsung/earpiece-speaker-replacement", label: "Samsung Earpiece Speaker Replacement" },
+  { href: "/repairs/phone/samsung/power-button-replacement", label: "Samsung Power Button Replacement" },
+  { href: "/repairs/phone/samsung/volume-button-replacement", label: "Samsung Volume Button Replacement" },
 ];
 
 const GOOGLE_PIXEL_REPAIR_TYPE_LINKS = [
