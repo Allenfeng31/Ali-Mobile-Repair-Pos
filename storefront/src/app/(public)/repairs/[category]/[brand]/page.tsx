@@ -71,6 +71,7 @@ const GOOGLE_PIXEL_REPAIR_TYPE_LINKS = [
   { href: "/repairs/battery-replacement", label: "Battery replacement options" },
   { href: "/repairs/charging-port-replacement", label: "Charging repair options" },
   { href: "/repairs/back-glass-replacement", label: "Rear glass and housing repair options" },
+  { href: "/repairs/phone/google/camera-lens-replacement", label: "Google Pixel Camera Lens Replacement" },
   { href: "/repairs/phone/google/loudspeaker-replacement", label: "Google Pixel Loudspeaker Replacement" },
   { href: "/repairs/phone/google/earpiece-speaker-replacement", label: "Google Pixel Earpiece Speaker Replacement" },
   { href: "/repairs/phone/google/power-button-replacement", label: "Google Pixel Power Button Replacement" },

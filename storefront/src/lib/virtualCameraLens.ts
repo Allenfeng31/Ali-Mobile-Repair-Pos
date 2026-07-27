@@ -34,8 +34,7 @@ export function getCameraLensBrandKind(brand: string): CameraLensBrandKind | nul
 export function getCameraLensPrice(brand: string): number {
   const kind = getCameraLensBrandKind(brand);
 
-  if (kind === 'google') return 65;
-  if (kind === 'samsung' || kind === 'oppo') return 50;
+  if (kind === 'google' || kind === 'samsung' || kind === 'oppo') return 50;
   return 0;
 }
 

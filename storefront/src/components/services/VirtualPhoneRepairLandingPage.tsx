@@ -133,8 +133,7 @@ export default function VirtualPhoneRepairLandingPage({
               <span className="w-full text-center text-xs font-black uppercase tracking-[0.16em] text-blue-600">Inspection first</span>
               <h2 className="mt-3 w-full text-center text-xl font-black leading-tight text-slate-950">{repair.name}</h2>
               <p className="mt-4 w-full text-center text-3xl font-extrabold text-blue-600">{priceLabel}</p>
-              <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">Final pricing is confirmed after inspection if additional damage or parts are involved.</p>
-              {sharedContent ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">{brandName} {repair.name.toLowerCase()} starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
+              <p className="mt-3 w-full max-w-[32rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">Final quote depends on parts, model and device condition.</p>
             </div>
             <div className="mt-6 flex w-full max-w-sm flex-col items-center justify-center gap-4">
               <Suspense fallback={<Link href={fallbackBookingHref} className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-center text-lg font-bold !text-white shadow-lg shadow-blue-200">Book Repair Now</Link>}>

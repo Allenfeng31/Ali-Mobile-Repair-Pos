@@ -134,12 +134,9 @@ export default function CameraLensLandingPage({
             <p className={`mt-4 w-full text-center text-3xl font-extrabold ${isStartingPriceOnly ? "text-slate-950" : "text-blue-600"}`}>
               {price}
             </p>
-            <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">
-              {isStartingPriceOnly
-                ? "Final price is confirmed after inspection. If the camera module is damaged, we will explain the repair options before work begins."
-                : "Final fitment is confirmed after inspection. If the camera module is damaged, we will advise before repair."}
+            <p className="mt-3 w-full max-w-[32rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">
+              Final quote depends on parts, model and device condition.
             </p>
-            {hasSharedRepairControls ? <p className="mt-3 w-full max-w-[26rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-600">{brandName} camera lens replacement starts from $50. Final pricing depends on the exact model, confirmed fault and required part. We confirm parts availability and provide a clear quote before work begins.</p> : null}
           </div>
 
           <div className="mt-6 flex w-full max-w-sm flex-col items-center justify-center gap-4">

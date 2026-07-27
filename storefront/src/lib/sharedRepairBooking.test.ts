@@ -6,6 +6,7 @@ import { createVirtualPhoneRepairMetadata } from './virtualPhoneRepairRoute';
 import { getSharedRepairBookingHref, getValidatedSharedRepairModel } from './sharedRepairBooking';
 import { getVirtualPhoneRepairHeading } from '@/components/services/VirtualPhoneRepairLandingPage';
 import { getVirtualPhoneRepair } from './virtualPhoneRepairs';
+import { getCameraLensPrice } from './virtualCameraLens';
 import { GOOGLE_PIXEL_HARDWARE_CONFIG } from '@/lib/seo/content/google-pixel/config';
 import { OPPO_ENHANCED_CONFIG } from '@/lib/seo/content/oppo/config';
 
@@ -123,6 +124,13 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(getValidatedSharedRepairModel([oppo], oppo.modelSlug, 'oppo')).toEqual(oppo);
     expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: pixel }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('Google Pixel');
     expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: oppo }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('OPPO');
+
+    const cameraBooking = new URL(getSharedRepairBookingHref({ repairName: 'Camera Lens Replacement', selectedModel: pixel }), 'https://www.alimobile.com.au');
+    expect(cameraBooking.searchParams.get('category')).toBe('phone');
+    expect(cameraBooking.searchParams.get('brand')).toBe('Google Pixel');
+    expect(cameraBooking.searchParams.get('model')).toBe('Pixel 8 Pro');
+    expect(cameraBooking.searchParams.get('service')).toBe('Camera Lens Replacement');
+    expect(getCameraLensPrice('Google Pixel')).toBe(50);
   });
 
   it('keeps primary page content server-rendered and scopes interactivity to the client island', () => {
@@ -140,8 +148,8 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(cameraPage).not.toContain('useSearchParams');
     expect(virtualPage).toContain('<h1 id="virtual-phone-repair-heading">');
     expect(cameraPage).toContain('<h1 id="camera-lens-heading">');
-    expect(virtualPage).toContain('{brandName} {repair.name.toLowerCase()} starts from $50');
-    expect(cameraPage).toContain('{brandName} camera lens replacement starts from $50');
+    expect(virtualPage).toContain('Final quote depends on parts, model and device condition.');
+    expect(cameraPage).toContain('Final quote depends on parts, model and device condition.');
     expect(virtualPage).toContain("brandSlug === 'google-pixel' || brandSlug === 'oppo'");
     expect(cameraRoute).toContain('title="Samsung Camera Lens Replacement"');
     expect(controls).toContain("'use client'");
@@ -173,10 +181,10 @@ describe('Samsung shared repair metadata and model state', () => {
     const oppoStart = brandHub.indexOf('const OPPO_REPAIR_TYPE_LINKS');
     const googleLinks = brandHub.slice(googleStart, oppoStart);
     const oppoLinks = brandHub.slice(oppoStart);
-    expect(googleLinks).not.toContain('/repairs/phone/google/camera-lens-replacement');
-    for (const slug of ['loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement']) {
+    for (const slug of ['camera-lens-replacement', 'loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement']) {
       expect(googleLinks.match(new RegExp(`/repairs/phone/google/${slug}`, 'g'))).toHaveLength(1);
     }
+    expect(googleLinks).not.toContain('/repairs/phone/google-pixel/camera-lens-replacement');
     for (const slug of ['camera-lens-replacement', 'loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement']) {
       expect(oppoLinks.match(new RegExp(`/repairs/phone/oppo/${slug}`, 'g'))).toHaveLength(1);
     }
@@ -200,14 +208,44 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(homepage).not.toContain('/repairs/phone/samsung/earpiece-speaker-replacement');
   });
 
-  it('keeps OPPO Camera Lens metadata on its clean canonical URL without touching Google’s historical Camera ownership', () => {
+  it('keeps Google Pixel Camera Lens in-place with separate route, config and display identities', () => {
     const oppoCamera = readFileSync(resolve(process.cwd(), 'src/app/(public)/repairs/phone/oppo/camera-lens-replacement/page.tsx'), 'utf8');
     const googleCamera = readFileSync(resolve(process.cwd(), 'src/app/(public)/repairs/phone/google/camera-lens-replacement/page.tsx'), 'utf8');
+    const cameraPage = readFileSync(resolve(process.cwd(), 'src/components/services/CameraLensLandingPage.tsx'), 'utf8');
 
     expect(oppoCamera).toContain('const PAGE_PATH = "/repairs/phone/oppo/camera-lens-replacement";');
     expect(oppoCamera).toContain('openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH');
     expect(oppoCamera).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
     expect(googleCamera).toContain('const PAGE_PATH = "/repairs/phone/google/camera-lens-replacement";');
+    expect(googleCamera).toContain('getGooglePixelHardwareConfig(model.slug)');
+    expect(googleCamera).toContain('title="Google Pixel Camera Lens Replacement"');
+    expect(googleCamera).toContain('showSharedRepairControls');
+    expect(googleCamera).toContain('openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH');
+    expect(googleCamera).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
+    expect(cameraPage).toContain('const repairHubLabel = brandName ? `${brandName} Repairs` : null;');
+    expect(cameraPage).toContain('showModelControls={hasSharedRepairControls}');
+    expect(cameraPage).toContain('photo and video clarity');
     expect(googleCamera).not.toContain('/repairs/phone/google-pixel/camera-lens-replacement');
+  });
+
+  it('uses one approved, centred price-card quote boundary across Samsung, Google Pixel and OPPO shared repairs', () => {
+    const virtualPage = readFileSync(resolve(process.cwd(), 'src/components/services/VirtualPhoneRepairLandingPage.tsx'), 'utf8');
+    const cameraPage = readFileSync(resolve(process.cwd(), 'src/components/services/CameraLensLandingPage.tsx'), 'utf8');
+    const modelDetail = readFileSync(resolve(process.cwd(), 'src/app/(public)/repairs/[category]/[brand]/[model]/[repair-type]/page.tsx'), 'utf8');
+    const approvedCopy = 'Final quote depends on parts, model and device condition.';
+
+    for (const sharedPage of [virtualPage, cameraPage]) {
+      expect(sharedPage).toContain(approvedCopy);
+      expect(sharedPage).toContain('max-w-[32rem] text-center');
+      expect(sharedPage).not.toContain('Final pricing is confirmed after inspection if additional damage or parts are involved.');
+      expect(sharedPage).not.toContain('Final fitment is confirmed after inspection. If the camera module is damaged, we will advise before repair.');
+      expect(sharedPage).not.toContain('We confirm parts availability and provide a clear quote before work begins.');
+    }
+
+    expect(virtualPage).toContain("formatScopedRepairPriceLabel(repair.slug, 50, 'From $50', 'virtual')");
+    expect(cameraPage).toContain('getCameraLensPrice(brandName ?? "")');
+    expect(cameraPage).toContain('Camera lens glass or camera module?');
+    expect(cameraPage).toContain('photo and video clarity');
+    expect(modelDetail).toContain('export default');
   });
 });
