@@ -36,6 +36,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 
 // ── Types ─────────────────────────────────────────
 interface Announcement {
@@ -529,16 +530,11 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
 
   const fetchAnnouncements = async () => {
     setLoadingAnnouncements(true);
-    const { data, error } = await supabase
-      .from('storefront_announcements')
-      .select('*')
-      .order('display_order', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching announcements:', error);
+    try {
+      setAnnouncements(await api.getAnnouncements());
+    } catch {
+      console.error('Error fetching announcements');
       setAnnouncementError('Failed to load announcements');
-    } else {
-      setAnnouncements(data || []);
     }
     setLoadingAnnouncements(false);
   };
@@ -571,48 +567,36 @@ export function StorefrontCMS({ onBack }: StorefrontCMSProps) {
       display_order: announcements.length > 0 ? Math.max(...announcements.map(a => a.display_order)) + 1 : 0,
     };
 
-    const { data, error } = await supabase
-      .from('storefront_announcements')
-      .insert([newAnnouncement])
-      .select();
-
-    if (error) {
-      console.error('Error adding announcement:', error);
-      setAnnouncementError('Failed to add announcement');
-    } else if (data) {
-      setAnnouncements([...announcements, data[0]]);
+    try {
+      const created = await api.createAnnouncement(newAnnouncement);
+      setAnnouncements([...announcements, created]);
       setNewMessage('');
       setShowAddForm(false);
+    } catch {
+      console.error('Error adding announcement');
+      setAnnouncementError('Failed to add announcement');
     }
     setAddingAnnouncement(false);
   };
 
   const handleUpdateAnnouncement = async (id: string, updates: Partial<Announcement>) => {
-    const { error } = await supabase
-      .from('storefront_announcements')
-      .update(updates)
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error updating announcement:', error);
-      setAnnouncementError('Failed to update announcement');
-    } else {
+    try {
+      await api.updateAnnouncement(id, updates);
       setAnnouncements(announcements.map(a => a.id === id ? { ...a, ...updates } : a));
+    } catch {
+      console.error('Error updating announcement');
+      setAnnouncementError('Failed to update announcement');
     }
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
     if (!confirm('Delete this announcement?')) return;
-    const { error } = await supabase
-      .from('storefront_announcements')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting announcement:', error);
-      setAnnouncementError('Failed to delete announcement');
-    } else {
+    try {
+      await api.deleteAnnouncement(id);
       setAnnouncements(announcements.filter(a => a.id !== id));
+    } catch {
+      console.error('Error deleting announcement');
+      setAnnouncementError('Failed to delete announcement');
     }
   };
 

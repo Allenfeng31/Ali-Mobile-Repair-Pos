@@ -281,28 +281,33 @@ export const api = {
 
   // Announcements
   getAnnouncements: async () => {
-    const res = await fetch(`${API_URL}/announcements`);
+    const headers = await getStaffAuthHeaders();
+    const res = await fetch(`${API_URL}/announcements`, { headers });
     return handleResponse(res);
   },
   createAnnouncement: async (announcement: { message: string, is_active: boolean, display_order: number }) => {
+    const headers = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/announcements`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...headers },
       body: JSON.stringify(announcement),
     });
     return handleResponse(res);
   },
   updateAnnouncement: async (id: string, announcement: Partial<{ message: string, is_active: boolean, display_order: number }>) => {
+    const headers = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/announcements/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...headers },
       body: JSON.stringify(announcement),
     });
     return handleResponse(res);
   },
   deleteAnnouncement: async (id: string) => {
+    const headers = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/announcements/${id}`, {
       method: 'DELETE',
+      headers,
     });
     return handleResponse(res);
   },

@@ -8,14 +8,31 @@ interface Announcement {
   message: string;
 }
 
-interface TopAnnouncementBarClientProps {
-  announcements: Announcement[];
-}
-
-export function TopAnnouncementBarClient({ announcements }: TopAnnouncementBarClientProps) {
+export function TopAnnouncementBarClient() {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadAnnouncements() {
+      try {
+        const response = await fetch('/api/announcements', { signal: controller.signal, cache: 'no-store' });
+        if (response.ok) setAnnouncements(await response.json());
+      } catch {
+        // A missing announcement must not affect the rest of the page.
+      } finally {
+        if (!controller.signal.aborted) setHasLoaded(true);
+      }
+    }
+
+    void loadAnnouncements();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoaded) return;
     const dismissed = sessionStorage.getItem('announcement_dismissed');
     const shouldShow = !dismissed && announcements.length > 0;
     setIsVisible(shouldShow);
@@ -24,7 +41,7 @@ export function TopAnnouncementBarClient({ announcements }: TopAnnouncementBarCl
     return () => {
       document.documentElement.style.setProperty('--announcement-bar-height', '0px');
     };
-  }, [announcements.length]);
+  }, [announcements.length, hasLoaded]);
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -32,7 +49,7 @@ export function TopAnnouncementBarClient({ announcements }: TopAnnouncementBarCl
     document.documentElement.style.setProperty('--announcement-bar-height', '0px');
   };
 
-  if (!isVisible || announcements.length === 0) {
+  if (!hasLoaded || !isVisible || announcements.length === 0) {
     return null;
   }
 
