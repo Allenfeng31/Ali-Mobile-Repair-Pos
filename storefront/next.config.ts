@@ -165,6 +165,12 @@ const nextConfig: NextConfig = {
       { source: '/repairs/phone/google', destination: '/repairs/phone/google-pixel', permanent: true },
       { source: '/repairs/phones/google/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
       { source: '/repairs/phones/google-pixel/:model/:repairType', destination: '/repairs/phone/google-pixel/:model/:repairType', permanent: true },
+      // 7.1 GSC SHARED REPAIR ALIASES (Google Pixel)
+      { source: '/repairs/phone/google-pixel/camera-lens-replacement', destination: '/repairs/phone/google/camera-lens-replacement', permanent: true },
+      { source: '/repairs/phone/google-pixel/loudspeaker-replacement', destination: '/repairs/phone/google/loudspeaker-replacement', permanent: true },
+      { source: '/repairs/phone/google-pixel/earpiece-speaker-replacement', destination: '/repairs/phone/google/earpiece-speaker-replacement', permanent: true },
+      { source: '/repairs/phone/google-pixel/power-button-replacement', destination: '/repairs/phone/google/power-button-replacement', permanent: true },
+      { source: '/repairs/phone/google-pixel/volume-button-replacement', destination: '/repairs/phone/google/volume-button-replacement', permanent: true },
       // 8. SAFE LEGACY REDIRECTS (Oppo)
       { source: '/repairs/phones/oppo/:model/:repairType', destination: '/repairs/phone/oppo/:model/:repairType', permanent: true },
       // 9. SAFE LEGACY REDIRECTS (Tablet / iPad)

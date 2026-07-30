@@ -115,6 +115,29 @@ const approvedRedirects = [
   },
 ] as const;
 
+const googlePixelSharedRepairAliases = [
+  {
+    source: '/repairs/phone/google-pixel/camera-lens-replacement',
+    destination: '/repairs/phone/google/camera-lens-replacement',
+  },
+  {
+    source: '/repairs/phone/google-pixel/loudspeaker-replacement',
+    destination: '/repairs/phone/google/loudspeaker-replacement',
+  },
+  {
+    source: '/repairs/phone/google-pixel/earpiece-speaker-replacement',
+    destination: '/repairs/phone/google/earpiece-speaker-replacement',
+  },
+  {
+    source: '/repairs/phone/google-pixel/power-button-replacement',
+    destination: '/repairs/phone/google/power-button-replacement',
+  },
+  {
+    source: '/repairs/phone/google-pixel/volume-button-replacement',
+    destination: '/repairs/phone/google/volume-button-replacement',
+  },
+] as const;
+
 const removedBlogSources = [
   '/blog/categories/shop-news',
   '/blog/reliable-phone-repair-ringwood',
@@ -195,6 +218,37 @@ describe('July 15 GSC technical redirect batch', () => {
     }
   });
 
+  it('permanently redirects each Google Pixel shared-repair alias directly to its Google canonical URL', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    for (const { source, destination } of googlePixelSharedRepairAliases) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+      expect(matches[0].source).not.toContain('?');
+      expect(matches[0].destination).not.toContain('?');
+
+      const request = new URL(`https://www.alimobile.com.au${source}?model=pixel-8-pro`);
+      const redirectTarget = new URL(destination, request.origin);
+
+      redirectTarget.search = request.search;
+      expect(`${redirectTarget.pathname}${redirectTarget.search}`).toBe(`${destination}?model=pixel-8-pro`);
+    }
+  });
+
+  it('keeps Google Pixel brand, model and repair-detail routes outside the shared-repair alias boundary', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    expect(sources.has('/repairs/phone/google-pixel')).toBe(false);
+    expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro')).toBe(false);
+    expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro/screen-replacement')).toBe(false);
+    expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair')).toBe(false);
+  });
+
   it('does not broaden either corrected legacy rule to similar malformed model paths', async () => {
     const redirects = await getRedirects();
     const sources = new Set(redirects.map((entry) => entry.source));
@@ -210,6 +264,11 @@ describe('July 15 GSC technical redirect batch', () => {
 
     for (const { source } of approvedRedirects) {
       expect(paths).not.toContain(source);
+    }
+
+    for (const { source, destination } of googlePixelSharedRepairAliases) {
+      expect(paths).not.toContain(source);
+      expect(paths.filter((path) => path === destination), destination).toHaveLength(1);
     }
 
     for (const source of removedBlogSources) {
