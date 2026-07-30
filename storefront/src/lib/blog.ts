@@ -46,7 +46,27 @@ export interface BlogPost {
   seo_title?: string | null;
   cover_image_alt?: string | null;
   author_name?: string | null;
+  hero_intro?: string | null;
   updated_at?: string;
+}
+
+interface SupabaseBlogRecord {
+  id?: string | number;
+  slug?: string;
+  title?: string;
+  published_at?: string;
+  created_at?: string;
+  description?: string;
+  cover_image?: string;
+  content?: string;
+  seo_title?: string;
+  cover_image_alt?: string;
+  author_name?: string;
+  updated_at?: string;
+}
+
+interface MarkdownBlogPost extends Omit<BlogPost, "contentHtml"> {
+  content: string;
 }
 
 /**
@@ -57,7 +77,9 @@ function capitalizeTitle(title: string): string {
   if (!title) return '';
   
   const words = title.toLowerCase().split(' ');
+  const lowerCaseWords = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'the', 'to', 'with']);
   const capitalizedWords = words.map((word, index) => {
+    if (index > 0 && lowerCaseWords.has(word)) return word;
     if (word === 'iphone') return 'iPhone';
     if (word === 'ipad') return 'iPad';
     if (word === 'faq' || word.startsWith('faq:')) return `FAQ${word.slice(3)}`;
@@ -90,7 +112,7 @@ async function getSupabasePosts(): Promise<BlogPost[]> {
       return [];
     }
 
-      return (data || []).map((post: any) => ({
+      return ((data || []) as SupabaseBlogRecord[]).map((post) => ({
         slug: post.slug || `post-${post.id}`,
         title: post.title || 'Untitled Post',
         date: post.published_at || post.created_at || new Date().toISOString(),
@@ -101,6 +123,7 @@ async function getSupabasePosts(): Promise<BlogPost[]> {
         seo_title: post.seo_title || null,
         cover_image_alt: post.cover_image_alt || null,
         author_name: post.author_name || null,
+        hero_intro: null,
         updated_at: post.updated_at || undefined,
       })).filter((post) => !isRemovedBlogSlug(post.slug));
   } catch (err) {
@@ -114,7 +137,7 @@ async function getSupabasePosts(): Promise<BlogPost[]> {
  */
 export async function getSortedPostsData() {
   // 1. Get markdown posts
-  const markdownPosts: any[] = [];
+  const markdownPosts: MarkdownBlogPost[] = [];
   if (fs.existsSync(postsDirectory)) {
     const fileNames = fs.readdirSync(postsDirectory).filter(fileName => fileName.endsWith('.md'));
     
@@ -148,13 +171,14 @@ export async function getSortedPostsData() {
         seo_title: matterResult.data.seo_title || null,
         cover_image_alt: matterResult.data.cover_image_alt || null,
         author_name: matterResult.data.author || null,
+        hero_intro: matterResult.data.hero_intro || null,
         updated_at: matterResult.data.updated_at || undefined,
       });
     }
   }
 
   // 2. Get Supabase posts
-  let supabasePosts: any[] = [];
+  let supabasePosts: BlogPost[] = [];
   try {
     supabasePosts = await getSupabasePosts();
   } catch (err) {
@@ -217,6 +241,7 @@ export async function getPostData(slug: string): Promise<BlogPost> {
           seo_title: data.seo_title || null,
           cover_image_alt: data.cover_image_alt || null,
           author_name: data.author_name || null,
+          hero_intro: null,
           updated_at: data.updated_at || undefined,
         };
       }
@@ -247,6 +272,7 @@ export async function getPostData(slug: string): Promise<BlogPost> {
     seo_title: matterResult.data.seo_title || null,
     cover_image_alt: matterResult.data.cover_image_alt || null,
     author_name: matterResult.data.author || null,
+    hero_intro: matterResult.data.hero_intro || null,
     updated_at: matterResult.data.updated_at || undefined,
   };
 }

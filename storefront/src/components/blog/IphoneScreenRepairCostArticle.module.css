@@ -1,0 +1,101 @@
+.article { display: grid; gap: clamp(2.5rem, 6vw, 4rem); }
+.article section { min-width: 0; }
+.article h2 { margin: 0 0 .8rem; color: #0f172a; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 900; line-height: 1.15; }
+.article h3 { margin: 0 0 .8rem; color: #0f172a; font-size: 1.05rem; font-weight: 850; }
+.article p { margin: 0 0 1rem; }
+.intro, .tableNote, .sourceNote { color: #475569; font-size: .94rem; }
+.tableScroll { width: 100%; margin: 1.1rem 0 .7rem; overflow-x: auto; border: 1px solid rgba(148, 163, 184, .35); border-radius: 1rem; background: #fff; scrollbar-color: #64748b transparent; }
+.tableScroll:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.olderModels { margin: 1rem 0 .7rem; }
+.olderModels summary { display: flex; min-height: 3.1rem; align-items: center; justify-content: center; padding: 1.25rem; border: 1px solid rgba(37, 99, 235, .25); border-radius: 1rem; background: #eff6ff; color: #1d4ed8; cursor: pointer; font-weight: 850; text-align: center; }
+.olderModels summary:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.olderModels[open] summary { border-bottom-right-radius: .5rem; border-bottom-left-radius: .5rem; }
+.priceTable, .comparisonTable { width: 100%; min-width: 680px; border-collapse: collapse; color: #1e293b; font-size: .9rem; line-height: 1.45; }
+.priceTable caption, .comparisonTable caption { padding: .9rem 1rem; color: #334155; font-weight: 750; text-align: left; caption-side: top; }
+.priceTable th, .priceTable td, .comparisonTable th, .comparisonTable td { padding: .72rem .85rem; border-top: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+.priceTable thead th, .comparisonTable thead th { border-top: 0; background: #eff6ff; color: #0f172a; font-weight: 850; }
+.priceTable tbody tr:nth-child(even), .comparisonTable tbody tr:nth-child(even) { background: #f8fafc; }
+.priceTable tbody th, .comparisonTable tbody th { font-weight: 800; }
+.priceTable th:first-child, .priceTable td:first-child { position: sticky; left: 0; z-index: 1; background: inherit; box-shadow: 1px 0 0 #e2e8f0; }
+.priceTable thead th:first-child { z-index: 2; background: #eff6ff; }
+.mobilePriceLabel { display: none; }
+.comparisonMobileLabel { display: none; }
+.comparisonValue { min-width: 0; }
+.comparisonMark { font-weight: 850; white-space: nowrap; }
+.comparisonFootnote { margin: .8rem 0 0; color: #475569; font-size: .84rem; line-height: 1.5; }
+.comparisonFigure, .screenPhoto { margin: 1.2rem 0; }
+.comparisonFigure { overflow: hidden; border: 1px solid rgba(148, 163, 184, .28); border-radius: 1rem; background: #fff; }
+.comparisonFigure img, .screenPhoto img { display: block; width: 100%; height: auto; }
+.comparisonFigure figcaption, .screenPhoto figcaption { padding: 1.25rem; color: #64748b; font-size: .8rem; line-height: 1.45; text-align: center; }
+.optionPhotos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.4rem; }
+.screenPhoto { overflow: hidden; border: 1px solid rgba(148, 163, 184, .28); border-radius: 1rem; background: #fff; }
+.sampleSection { display: grid; gap: 1.5rem; padding: 1.25rem; border: 1px solid rgba(37, 99, 235, .18); border-radius: 1.25rem; background: #f8fbff; text-align: center; }
+.sampleHeading { max-width: 47rem; margin: 0 auto; }
+.sampleContent { display: grid; grid-template-columns: minmax(15rem, .75fr) minmax(0, 1.25fr); gap: 1.25rem; align-items: stretch; }
+.sampleVisual { display: grid; align-content: center; justify-items: center; gap: 1rem; padding: 1.25rem; border: 1px solid rgba(148, 163, 184, .28); border-radius: 1rem; background: #fff; }
+.donut { position: relative; width: 11rem; height: 11rem; }
+.donut svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut circle { fill: none; stroke-width: 15; }
+.donutTrack { stroke: #e2e8f0; }
+.donutSoftOled { stroke: #2563eb; stroke-dasharray: 72 28; stroke-dashoffset: 0; }
+.donutLcd { stroke: #0891b2; stroke-dasharray: 21 79; stroke-dashoffset: -72; }
+.donutOriginal { stroke: #a16207; stroke-dasharray: 7 93; stroke-dashoffset: -93; }
+.donut > span { position: absolute; inset: 0; display: grid; place-content: center; color: #334155; font-size: .77rem; line-height: 1.1; text-align: center; }
+.donut strong { display: block; color: #0f172a; font-size: 1.55rem; }
+.legend { display: grid; gap: .55rem; width: 100%; margin: 0; padding: 0; list-style: none; color: #334155; font-size: .86rem; font-weight: 700; text-align: left; }
+.legend li { display: flex; gap: .45rem; align-items: flex-start; }
+.legend li span { width: .75rem; height: .75rem; flex: 0 0 auto; margin-top: .2rem; border-radius: 999px; }
+.sampleCards { display: grid; gap: .8rem; }
+.sampleCard { display: grid; gap: .5rem; padding: 1.25rem; border: 1px solid rgba(148, 163, 184, .28); border-radius: 1rem; background: #fff; text-align: center; }
+.sampleCard h3, .sampleCard p { margin: 0; }
+.sampleCard p strong, .sampleCard p span { display: block; }
+.sampleCard p strong { color: #0f172a; font-size: 1.2rem; }
+.sampleCard p span { color: #475569; font-size: .86rem; font-weight: 750; }
+.sampleCard > p:last-child { color: #334155; font-size: .88rem; line-height: 1.45; }
+.sampleBar { height: .55rem; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+.sampleBar span { display: block; height: 100%; border-radius: inherit; }
+.interpretationBox { padding: 1.25rem; border: 1px solid rgba(14, 116, 144, .2); border-radius: 1rem; background: #f0fdfa; text-align: center; }
+.interpretationBox h3, .interpretationBox p { margin: 0; }
+.interpretationBox p { margin-top: .5rem; }
+.factorGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin: 1rem 0 1.2rem; }
+.factorGrid div { padding: 1.25rem; border: 1px solid rgba(148, 163, 184, .28); border-radius: .8rem; background: #fff; color: #334155; font-size: .92rem; font-weight: 750; line-height: 1.4; text-align: center; }
+.decisionSection { padding: 1.25rem; border: 1px solid rgba(14, 116, 144, .2); border-radius: 1.25rem; background: #f0fdfa; text-align: center; }
+.decisionSection ul { margin: 1rem 0; padding-left: 1.2rem; }
+.decisionSection li { margin: .4rem 0; }
+.contactSection { padding: 1.25rem; border-radius: 1.25rem; background: #0f172a; color: #dbeafe; text-align: center; }
+.contactSection h2, .contactSection a { color: #fff; }
+.contactSection a:not(.bookLink) { font-weight: 800; }
+.bookLink { display: inline-flex; min-height: 2.9rem; align-items: center; justify-content: center; padding: 0 1.1rem; border-radius: .75rem; background: #2563eb; color: #fff; font-weight: 850; text-decoration: none; }
+.contactSection .sourceNote { margin: 1rem 0 0; color: #bfdbfe; }
+@media (max-width: 760px) { .optionPhotos, .sampleContent { grid-template-columns: 1fr; } }
+@media (min-width: 641px) and (max-width: 800px) {
+  .priceTable { min-width: 0; table-layout: fixed; font-size: .82rem; }
+  .priceTable th:first-child { width: 34%; }
+  .priceTable th, .priceTable td { padding: .65rem .55rem; overflow-wrap: anywhere; }
+}
+@media (max-width: 640px) {
+  .priceTableScroll { overflow: visible; border: 0; border-radius: 0; background: transparent; }
+  .priceTable { min-width: 0; border-collapse: separate; border-spacing: 0 .7rem; font-size: .9rem; }
+  .priceTable caption { padding: .9rem 0; }
+  .priceTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .priceTable tbody { display: block; }
+  .priceTable tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid rgba(148, 163, 184, .35); border-radius: .85rem; background: #fff; }
+  .priceTable tbody tr:nth-child(even) { background: #fff; }
+  .priceTable th:first-child { position: static; grid-column: 1 / -1; padding: .75rem .9rem; border-top: 0; background: #eff6ff; box-shadow: none; overflow-wrap: anywhere; }
+  .priceTable td { display: grid; min-width: 0; gap: .25rem; padding: .65rem .35rem .7rem; border-top: 1px solid #e2e8f0; color: #0f172a; font-weight: 800; line-height: 1.25; text-align: center; }
+  .priceTable td + td { border-left: 1px solid #e2e8f0; }
+  .mobilePriceLabel { display: block; color: #475569; font-size: clamp(.62rem, 3vw, .72rem); font-weight: 750; line-height: 1.2; overflow-wrap: normal; }
+  .comparisonTableScroll { overflow: visible; border: 0; border-radius: 0; background: transparent; }
+  .comparisonTable { min-width: 0; border-collapse: separate; border-spacing: 0 .7rem; font-size: .9rem; }
+  .comparisonTable caption { padding: .9rem 0; }
+  .comparisonTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .comparisonTable tbody { display: block; }
+  .comparisonTable tbody tr { display: grid; overflow: hidden; border: 1px solid rgba(148, 163, 184, .35); border-radius: .85rem; background: #fff; }
+  .comparisonTable tbody tr:nth-child(even) { background: #fff; }
+  .comparisonTable tbody th { padding: .75rem .9rem; border-top: 0; background: #eff6ff; overflow-wrap: anywhere; }
+  .comparisonTable tbody td { display: grid; grid-template-columns: minmax(105px, 38%) minmax(0, 1fr); align-items: center; column-gap: .75rem; min-width: 0; padding: .7rem .9rem; border-top: 1px solid #e2e8f0; color: #0f172a; font-weight: 800; line-height: 1.35; }
+  .comparisonMobileLabel { display: block; color: #1d4ed8; font-size: .72rem; font-weight: 800; line-height: 1.2; }
+  .comparisonValue { min-width: 0; overflow-wrap: anywhere; }
+}
+@media (max-width: 360px) { .comparisonTable tbody td { grid-template-columns: minmax(92px, 36%) minmax(0, 1fr); column-gap: .6rem; padding: .65rem .7rem; } }
+@media (max-width: 460px) { .article { gap: 2.25rem; } .factorGrid { grid-template-columns: 1fr; } .donut { width: 9.5rem; height: 9.5rem; } }

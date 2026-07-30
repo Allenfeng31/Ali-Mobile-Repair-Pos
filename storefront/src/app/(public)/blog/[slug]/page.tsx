@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
+import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
+import { IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
 import { getPostData, isRemovedBlogSlug } from "@/lib/blog";
 
 import styles from "./BlogPost.module.css";
@@ -15,21 +17,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   try {
     const postData = await getPostData(slug);
 
-    const metaTitle = postData.seo_title || postData.title;
+    const metaTitle = postData.seo_title || `${postData.title} | Ali Mobile Repair Blog`;
 
     return {
-      title: `${metaTitle} | Ali Mobile Repair Blog`,
+      title: metaTitle,
       description: postData.description,
       alternates: {
         canonical: `/blog/${slug}`,
       },
       openGraph: {
-        title: `${metaTitle} | Ali Mobile Repair Blog`,
+        title: metaTitle,
         description: postData.description,
         url: `/blog/${slug}`,
         type: "article",
         locale: "en_AU",
         siteName: "Ali Mobile & Repair",
+        images: postData.image ? [{ url: postData.image, alt: postData.cover_image_alt || postData.title }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: metaTitle,
+        description: postData.description,
+        images: postData.image ? [postData.image] : undefined,
       },
     };
   } catch {
@@ -59,9 +68,10 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     : "";
 
   const authorName = postData.author_name || "Ali Mobile & Repair";
+  const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
   const authorType = authorName === "Ali Mobile & Repair" ? "Organization" : "Person";
 
-  const jsonLd: any = {
+  const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: postData.title,
@@ -83,7 +93,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   };
 
   if (postData.image) {
-    jsonLd.image = [postData.image];
+    jsonLd.image = [postData.image.startsWith("/") ? `https://www.alimobile.com.au${postData.image}` : postData.image];
   }
 
   return (
@@ -106,10 +116,10 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               <span>By {authorName}</span>
             </div>
             <h1 id="article-title">{postData.title}</h1>
-            {postData.description && <p>{postData.description}</p>}
+            {(postData.hero_intro || postData.description) && <p>{postData.hero_intro || postData.description}</p>}
           </div>
 
-          {postData.image && (
+          {postData.image && !isIphoneScreenCostArticle && (
             <div className={styles.coverWrapper} style={{ objectFit: 'cover', width: '100%', maxHeight: '600px', overflow: 'hidden' }}>
               <BlogImage
                 src={postData.image}
@@ -122,10 +132,14 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         </section>
 
         <article className={styles.articleCard}>
-          <div
-            className={styles.articleBody}
-            dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
-          />
+          {isIphoneScreenCostArticle ? (
+            <IphoneScreenRepairCostArticle />
+          ) : (
+            <div
+              className={styles.articleBody}
+              dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
+            />
+          )}
         </article>
 
         <section className={styles.ctaCard}>
