@@ -20,6 +20,10 @@ const { fetchRepairCatalogMock, pixelModels, unconfiguredPixelModels, samsungMod
     ...Array.from({ length: 396 }, (_, index) => `galaxy-fixture-${index + 1}`),
   ].map((slug) => ({ slug, repairTypes: [logicBoardRepair] }));
   const iphoneModels = [{ slug: 'iphone-15-pro-max', repairTypes: [logicBoardRepair] }];
+  const tabletModels = [
+    'galaxy-tab-s11-sm-x730-sm-x736',
+    'galaxy-tab-s-84-sm-t700-sm-t705',
+  ].map((slug) => ({ slug, repairTypes: [{ slug: 'screen-replacement' }] }));
 
   return {
     pixelModels,
@@ -31,6 +35,7 @@ const { fetchRepairCatalogMock, pixelModels, unconfiguredPixelModels, samsungMod
         { category: 'phone', slug: 'google-pixel', models: pixelModels },
         { category: 'phone', slug: 'iphone', models: iphoneModels },
         { category: 'phone', slug: 'samsung', models: samsungModels },
+        { category: 'tablet', slug: 'samsung', models: tabletModels },
       ],
     })),
   };
@@ -138,6 +143,43 @@ const googlePixelSharedRepairAliases = [
   },
 ] as const;
 
+const tabletGsc404Redirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736', '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730-sm-t733-sm-t736'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920--sm-x926', '/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920-sm-x926'],
+  ['/repairs/tablet/samsung/galaxy-tab-s8-ultra-sm-x900--sm-x906', '/repairs/tablet/samsung/galaxy-tab-s8-ultra-sm-x900-sm-x906'],
+  ['/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705', '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705'],
+  ['/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706', '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700-sm-x706'],
+  ['/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215', '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210-sm-x215'],
+  ['/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736', '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730-sm-x736'],
+  ['/repairs/tablet/samsung/galaxy-tab-s2-97-sm-t810--sm-t815', '/repairs/tablet/samsung/galaxy-tab-s2-97-sm-t810-sm-t815'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595', '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595'],
+  ['/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835', '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830-sm-t835'],
+  ['/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610--sm-p613--sm-p615--sm-p619', '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619'],
+  ['/repairs/tablet/samsung/galaxy-tab-s8-plus-sm-x800--sm-x806', '/repairs/tablet/samsung/galaxy-tab-s8-plus-sm-x800-sm-x806'],
+  ['/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865', '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860-sm-t865'],
+  ['/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710--sm-t715', '/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710-sm-t715'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620--sm-x626', '/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620-sm-x626'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616', '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526', '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526'],
+  ['/repairs/tablet/samsung/galaxy-tab-s7-plus-sm-t970--sm-t975--sm-t976', '/repairs/tablet/samsung/galaxy-tab-s7-plus-sm-t970-sm-t975-sm-t976'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2017-sm-t380--sm-t385', '/repairs/tablet/samsung/galaxy-tab-a-80-2017-sm-t380-sm-t385'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-plus-sm-x820--sm-x826', '/repairs/tablet/samsung/galaxy-tab-s10-plus-sm-x820-sm-x826'],
+  ['/repairs/tablet/samsung/galaxy-tab-s3-sm-t820--sm-t825', '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825'],
+  ['/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725', '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555', '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555'],
+  ['/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu', '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu-tb-128fu'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810--sm-x816/galaxy-tab-s9-plus-water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810-sm-x816/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-a8-sm-x200--sm-x205/charging-port-replacement', '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205/charging-port-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510-sm-x516/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/front-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/front-camera-replacement'],
+  ['/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/lenovo-tab-m9-battery-service', '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/battery-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/screen-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/galaxy-tab-s5e-screen-repair', '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616/back-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736/galaxy-tab-s11-back-housing', '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730-sm-x736'],
+  ['/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705/galaxy-tab-s-84-back-housing', '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705'],
+] as const;
+
 const removedBlogSources = [
   '/blog/categories/shop-news',
   '/blog/reliable-phone-repair-ringwood',
@@ -146,6 +188,8 @@ const removedBlogSources = [
 const malformedSimilarSources = [
   '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fv/lenovo-tab-m10-plus-gen-3-battery-service',
   '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t581/galaxy-tab-a-101-2016-back-camera',
+  '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x735',
+  '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200--sm-x206/charging-port-replacement',
 ] as const;
 
 async function getRedirects() {
@@ -249,6 +293,40 @@ describe('July 15 GSC technical redirect batch', () => {
     expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair')).toBe(false);
   });
 
+  it('permanently reconciles each approved Tablet GSC 404 source in one hop', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(tabletGsc404Redirects).toHaveLength(34);
+    for (const [source, destination] of tabletGsc404Redirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+      expect(matches[0].source).not.toContain('?');
+      expect(matches[0].destination).not.toContain('?');
+
+      const request = new URL(`https://www.alimobile.com.au${source}?model=tablet-fixture`);
+      const redirectTarget = new URL(destination, request.origin);
+
+      redirectTarget.search = request.search;
+      expect(`${redirectTarget.pathname}${redirectTarget.search}`).toBe(`${destination}?model=tablet-fixture`);
+    }
+  });
+
+  it('keeps canonical Tablet model hubs untouched', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+    const canonicalModelHubs = new Set(
+      tabletGsc404Redirects.map(([, destination]) => destination.split('/').slice(0, 5).join('/')),
+    );
+
+    for (const modelHub of canonicalModelHubs) {
+      expect(sources.has(modelHub), modelHub).toBe(false);
+    }
+  });
+
   it('does not broaden either corrected legacy rule to similar malformed model paths', async () => {
     const redirects = await getRedirects();
     const sources = new Set(redirects.map((entry) => entry.source));
@@ -261,6 +339,9 @@ describe('July 15 GSC technical redirect batch', () => {
   it('keeps sitemap alias-free while preserving logic board, water damage, and Other Repair invariants', async () => {
     const urls = await sitemap();
     const paths = urls.map((entry) => getPathname(entry.url));
+    const backHousingModelHubDestinations = tabletGsc404Redirects
+      .filter(([source]) => source.endsWith('-back-housing'))
+      .map(([, destination]) => destination);
 
     for (const { source } of approvedRedirects) {
       expect(paths).not.toContain(source);
@@ -271,6 +352,14 @@ describe('July 15 GSC technical redirect batch', () => {
       expect(paths.filter((path) => path === destination), destination).toHaveLength(1);
     }
 
+    for (const [source, destination] of tabletGsc404Redirects) {
+      expect(paths).not.toContain(source);
+      expect(paths.filter((path) => path === destination).length, destination).toBeLessThanOrEqual(1);
+    }
+    expect(backHousingModelHubDestinations).toHaveLength(2);
+    for (const destination of backHousingModelHubDestinations) {
+      expect(paths.filter((path) => path === destination), destination).toHaveLength(1);
+    }
     for (const source of removedBlogSources) {
       expect(paths).not.toContain(source);
     }
