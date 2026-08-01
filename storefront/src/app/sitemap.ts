@@ -3,6 +3,7 @@ import { MetadataRoute } from 'next';
 import { fetchRepairCatalog } from '@/lib/api';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
+import { isConfiguredAppleWatchModel } from '@/lib/seo/content/apple-watch';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
@@ -89,8 +90,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const model of brand.models) {
         const isExcludedPixel = brand.slug === 'google-pixel' && !getGooglePixelHardwareConfig(model.slug);
         const isExcludedOppo = brand.slug === 'oppo' && !getOppoModelConfig(model.slug);
+        const isExcludedAppleWatch = brand.category === 'watch' && brand.slug === 'apple' && !isConfiguredAppleWatchModel(model.slug);
 
-        if (!isExcludedPixel && !isExcludedOppo) {
+        if (!isExcludedPixel && !isExcludedOppo && !isExcludedAppleWatch) {
           modelUrls.push({
             url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}`,
             lastModified: new Date(),
@@ -105,6 +107,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
           if (isExcludedOppo) continue;
           if (isExcludedPixel) continue;
+          if (isExcludedAppleWatch) continue;
+          if (brand.category === 'watch' && brand.slug === 'apple' && repair.slug === 'charging-port-replacement') continue;
 
           repairUrls.push({
             url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,

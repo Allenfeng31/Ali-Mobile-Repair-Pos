@@ -185,6 +185,28 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
   });
 
+  it('renders the Apple Watch diagnostic quote wording and passes Charging Repair to booking', () => {
+    mockParams = { category: 'watch', brand: 'apple', 'repair-type': 'charging-repair' };
+    render(
+      <RepairPricingAndCTA
+        brandName="Apple"
+        modelName="Apple Watch Series 3 38mm"
+        repairName="Charging Repair"
+        variants={[]}
+        sourceType="diagnostic"
+      />,
+    );
+
+    expect(screen.getByText('Inspection required')).toBeInTheDocument();
+    expect(screen.getByText('Final quote depends on the confirmed fault, parts and device condition.')).toBeInTheDocument();
+    expect(screen.queryByText(/instant quote/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /book repair now/i }));
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('service=Charging+Repair'));
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('brand=Apple'));
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('model=Apple+Watch+Series+3+38mm'));
+  });
+
   it('renders fetched tier descriptions for repairs without a static override', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,

@@ -24,6 +24,7 @@ import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
 import { smartSortModels } from '@/lib/modelSortConfig';
 import { withVirtualCameraLensGroupedService } from '@/lib/virtualCameraLens';
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from '@/lib/virtualPhoneRepairs';
+import { withAppleWatchChargingRepairGroupedService } from '@/lib/seo/content/apple-watch';
 import { Pencil, Trash2 } from 'lucide-react';
 import './RepairCart.css';
 
@@ -358,12 +359,12 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const availableServices = useMemo(() => {
     if (!selectedBrand || !selectedModel) return [];
     const filtered = inventory.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
-    return withVirtualPhoneRepairGroupedServices(
+    return withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
       withVirtualCameraLensGroupedService(groupServicesByBaseName(filtered), selectedBrand, selectedModel, selectedCategory),
       selectedBrand,
       selectedModel,
       selectedCategory
-    );
+    ), selectedBrand, selectedModel, selectedCategory);
   }, [inventory, selectedBrand, selectedModel, selectedCategory]);
 
   const hasVariantInCart = (s: GroupedService) => 

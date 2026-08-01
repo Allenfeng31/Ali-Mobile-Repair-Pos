@@ -20,7 +20,7 @@ export interface RepairOption {
   name: string;
   price: number;
   variants?: RepairVariant[];
-  sourceType?: 'real' | 'virtual';
+  sourceType?: 'real' | 'virtual' | 'diagnostic';
 }
 
 export interface ModelEntry {

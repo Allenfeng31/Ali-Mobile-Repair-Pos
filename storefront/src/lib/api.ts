@@ -7,6 +7,7 @@ import {
   normalizeSamsungCatalogModelName,
 } from './inventoryUtils';
 import { OPPO_ENHANCED_CONFIG } from './seo/content/oppo/config';
+import { withAppleWatchChargingRepairOption } from './seo/content/apple-watch';
 import { SAMSUNG_HARDWARE_CONFIG } from './seo/content/samsung/config';
 import type {
   AliMobileEnhancedSamsungRepairType,
@@ -284,10 +285,14 @@ function qualifiesForBackGlass(brandSlug: string, modelName: string): boolean {
 /** Ensure every model has core repair types, with smart back-glass filtering */
 function ensureCoreRepairTypes(
   repairTypes: RepairOption[],
+  categorySlug: string,
   brandSlug: string,
   modelName: string
 ): RepairOption[] {
-  const result = [...repairTypes];
+  const isAppleWatch = categorySlug === 'watch' && brandSlug === 'apple';
+  const result = isAppleWatch
+    ? repairTypes.filter((repair) => repair.slug !== 'charging-port-replacement')
+    : [...repairTypes];
   const isGalaxyNoteModel = brandSlug.includes('samsung') && /galaxy\s+note/i.test(modelName);
 
   const isOppo = brandSlug === 'oppo';
@@ -339,8 +344,9 @@ function ensureCoreRepairTypes(
     }
   }
 
-  // Always add universal repair types for non-OPPO (or unconfigured OPPO) models
+  // Apple Watch uses magnetic charging diagnosis rather than a physical charging-port repair.
   for (const core of UNIVERSAL_REPAIR_TYPES) {
+    if (isAppleWatch && core.slug === 'charging-port-replacement') continue;
     if (!result.some(r => r.slug === core.slug)) {
       result.push({ ...core, sourceType: 'real' });
     }
@@ -363,7 +369,7 @@ function ensureCoreRepairTypes(
     if (idx !== -1) result.splice(idx, 1);
   }
 
-  return result;
+  return withAppleWatchChargingRepairOption(result, categorySlug, brandSlug, slugify(modelName));
 }
 
 // ─── Transform POS Data → RepairCatalog ─────────────────────────────────────
@@ -436,16 +442,17 @@ export function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
   const brands: BrandEntry[] = [];
   for (const [compoundKey, modelMap] of brandMap) {
     const [category, brand] = compoundKey.split('|');
+    const brandBaseName = brand.replace(/\s+(Tablet|Phone|Watch|Laptop)$/i, '');
+    const canonicalBrandSlug = slugify(brandBaseName);
     const models: ModelEntry[] = [];
     for (const [model, { repairTypes, code }] of modelMap) {
       models.push({
         model,
         slug: slugify(model),
         modelCode: code,
-        repairTypes: ensureCoreRepairTypes(repairTypes, slugify(brand), model),
+        repairTypes: ensureCoreRepairTypes(repairTypes, category, canonicalBrandSlug, model),
       });
     }
-    const brandBaseName = brand.replace(/\s+(Tablet|Phone|Watch|Laptop)$/i, '');
     const normalizedBrandName = brandBaseName.toLowerCase() === 'google' ? 'Google Pixel' : brandBaseName;
     brands.push({
       category,
@@ -469,6 +476,7 @@ function buildFallbackCatalog(): BrandEntry[] {
     
     for (const model of MODELS[brand] || []) {
       const category = getDeviceCategory(brand, model);
+      const canonicalBrandSlug = slugify(brand.replace(/\s+(Tablet|Phone|Watch|Laptop)$/i, ''));
       if (!categoryMap.has(category)) {
         categoryMap.set(category, []);
       }
@@ -476,11 +484,11 @@ function buildFallbackCatalog(): BrandEntry[] {
       categoryMap.get(category)!.push({
         model,
         slug: slugify(model),
-        repairTypes: REPAIR_TYPES.map(rt => ({
+        repairTypes: ensureCoreRepairTypes(REPAIR_TYPES.map(rt => ({
           slug: rt.slug,
           name: rt.name,
           price: 0,
-        })),
+        })), category, canonicalBrandSlug, model),
       });
     }
     
@@ -551,7 +559,7 @@ export async function fetchRepairDetails(
   price: number;
   variants: RepairVariant[];
   source: RepairCatalog['source'];
-  sourceType?: 'real' | 'virtual';
+  sourceType?: 'real' | 'virtual' | 'diagnostic';
 } | null> {
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);

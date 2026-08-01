@@ -108,6 +108,7 @@ import {
   getAppleWatchModelHubLinks,
   getAppleWatchRepairLabel,
   getAppleWatchSameModelRepairLinks,
+  isConfiguredAppleWatchModel,
   isAliMobileEnhancedAppleWatchRepairPage,
 } from '@/lib/seo/content/apple-watch';
 import { getAliMobileEnhancedOppoSeoPocket, getAliMobileEnhancedOppoRepairType, isAliMobileEnhancedOppoRepairPage, getEnhancedOppoSeriesModelHubLinks, getOppoModelConfig } from '@/lib/seo/content/oppo';
@@ -132,7 +133,7 @@ export const revalidate = 86400;
 function getRepairIcon(slug: string, size = 48) {
   if (slug.includes('water')) return <Droplet size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
   if (slug.includes('battery')) return <Battery size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
-  if (slug.includes('port')) return <Plug size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
+  if (slug.includes('port') || slug === 'charging-repair') return <Plug size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
   if (slug.includes('screen') || slug.includes('glass') || slug.includes('display')) return <Smartphone size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
   return <Wrench size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
 }
@@ -4592,6 +4593,15 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
   }
 
   if (!brandEntry || !modelEntry) {
+    notFound();
+  }
+
+  if (
+    rawParams.category === 'watch' &&
+    canonicalBrand === 'apple' &&
+    rawParams['repair-type'] === 'charging-repair' &&
+    !isConfiguredAppleWatchModel(rawParams.model)
+  ) {
     notFound();
   }
 

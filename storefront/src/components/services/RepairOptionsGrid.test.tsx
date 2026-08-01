@@ -51,4 +51,24 @@ describe("RepairOptionsGrid", () => {
       link.querySelector(".repair-option-name")?.textContent
     )).toEqual(["Screen", "Battery", "Water Damage", "Power Button", "Keyboard Repair"]);
   });
+
+  it('keeps the configured Apple Watch card on the charging-repair route with a visible diagnostic label', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[
+          { slug: 'charging-repair', name: 'Charging Repair', price: 0, sourceType: 'diagnostic' },
+        ]}
+        categorySlug="watch"
+        brandSlug="apple"
+        modelSlug="apple-watch-series-3-38mm"
+        modelName="Apple Watch Series 3 38mm"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /charging repair/i })).toHaveAttribute(
+      'href',
+      '/repairs/watch/apple/apple-watch-series-3-38mm/charging-repair',
+    );
+    expect(screen.getByText('Final quote depends on the confirmed fault, parts and device condition.')).toBeInTheDocument();
+  });
 });

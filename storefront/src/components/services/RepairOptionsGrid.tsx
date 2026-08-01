@@ -21,7 +21,7 @@ interface RepairOption {
   name: string;
   price: number;
   variants?: RepairVariant[];
-  sourceType?: 'real' | 'virtual';
+  sourceType?: 'real' | 'virtual' | 'diagnostic';
 }
 
 interface RepairOptionsGridProps {
@@ -48,7 +48,8 @@ export default function RepairOptionsGrid({
       case "screen-replacement": return <Smartphone size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "battery-replacement": return <Battery size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "charging-port-repair":
-      case "charging-port-replacement": return <Plug size={23} strokeWidth={2.4} aria-hidden="true" />;
+      case "charging-port-replacement":
+      case "charging-repair": return <Plug size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "water-damage-repair": return <Droplet size={23} strokeWidth={2.4} aria-hidden="true" />;
       case "back-glass-repair":
       case "back-glass-replacement":
@@ -141,7 +142,9 @@ export default function RepairOptionsGrid({
         })}
       </div>
       <p className="mt-3 text-center text-sm font-medium text-slate-500">
-        Prices are starting prices. Final quote depends on parts, model, and device condition.
+        {displayRepairTypes.some((repair) => repair.sourceType === 'diagnostic')
+          ? 'Final quote depends on the confirmed fault, parts and device condition.'
+          : 'Prices are starting prices. Final quote depends on parts, model, and device condition.'}
       </p>
     </>
   );

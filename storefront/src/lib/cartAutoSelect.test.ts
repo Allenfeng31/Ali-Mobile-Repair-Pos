@@ -93,4 +93,33 @@ describe('cartAutoSelect', () => {
     expect(result.serviceToSelect?.id).toBe(3);
     expect(result.shouldAutoConfirm).toBe(true);
   });
+
+  it('auto-selects the configured Apple Watch Charging Repair diagnostic service', () => {
+    const result = resolveInitialCartState(
+      'Apple',
+      'Apple Watch Series 3 38mm',
+      'Charging Repair',
+      [{
+        id: 10,
+        category: 'watch',
+        brand: 'Apple Watch',
+        deviceModel: 'Apple Watch Series 3 38mm',
+        service: 'Screen Replacement',
+        price: 0,
+        deviceType: 'watch',
+        quality_grade: 'Standard',
+        is_recommended: false,
+        name: 'Apple Watch Series 3 38mm Screen Replacement',
+      }],
+    );
+
+    expect(result).toMatchObject({
+      brand: 'Apple Watch',
+      model: 'Apple Watch Series 3 38mm',
+      category: 'watch',
+      serviceToSelect: expect.objectContaining({ name: 'Charging Repair', price: 0 }),
+      serviceToExpand: null,
+      shouldAutoConfirm: true,
+    });
+  });
 });

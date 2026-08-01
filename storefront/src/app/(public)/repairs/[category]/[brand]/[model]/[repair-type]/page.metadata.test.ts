@@ -68,6 +68,24 @@ const catalog: RepairCatalog = {
         },
       ],
     },
+    {
+      category: 'watch',
+      slug: 'apple',
+      brand: 'Apple',
+      icon: 'watch',
+      models: [
+        {
+          slug: 'apple-watch-series-3-38mm',
+          model: 'Apple Watch Series 3 38mm',
+          repairTypes: [{ slug: 'charging-repair', name: 'Charging Repair', price: 0, sourceType: 'diagnostic' }],
+        },
+        {
+          slug: 'apple-watch-unconfigured',
+          model: 'Apple Watch Unconfigured',
+          repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0 }],
+        },
+      ],
+    },
   ],
 };
 
@@ -107,6 +125,15 @@ const repairDetails: Record<string, RepairDetails> = {
     price: 500,
     variants: [],
     source: 'fallback',
+  },
+  'watch/apple/apple-watch-series-3-38mm/charging-repair': {
+    brand: 'Apple',
+    model: 'Apple Watch Series 3 38mm',
+    repairType: 'Charging Repair',
+    price: 0,
+    variants: [],
+    source: 'fallback',
+    sourceType: 'diagnostic',
   },
 };
 
@@ -173,6 +200,27 @@ describe('repair detail metadata', () => {
     expect(metadata.alternates?.canonical).toBe(
       'https://www.alimobile.com.au/repairs/laptop/macbook/macbook-unlisted-13/screen-replacement'
     );
+  });
+
+  it('uses the exact Apple Watch Charging Repair canonical and social metadata', async () => {
+    const metadata = await generateMetadata(
+      params('watch', 'apple', 'apple-watch-series-3-38mm', 'charging-repair'),
+    );
+    const canonicalUrl = 'https://www.alimobile.com.au/repairs/watch/apple/apple-watch-series-3-38mm/charging-repair';
+
+    expect(metadata.alternates?.canonical).toBe(canonicalUrl);
+    expect(metadata.openGraph).toMatchObject({ url: canonicalUrl });
+    expect(metadata.openGraph?.title).toContain('Apple Watch Series 3 38mm Charging Repair');
+    expect(metadata.twitter?.title).toContain('Apple Watch Series 3 38mm Charging Repair');
+    expect(metadata.description).toContain('Apple Watch Series 3 38mm');
+    expect(metadata.description).not.toMatch(/charging port/i);
+    expect(metadata.robots).toBeUndefined();
+  });
+
+  it('keeps an unconfigured Apple Watch charging-repair route as a 404', async () => {
+    await expect(generateMetadata(
+      params('watch', 'apple', 'apple-watch-unconfigured', 'charging-repair'),
+    )).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
   it('places Repair Results before the policy disclosure after pricing', () => {

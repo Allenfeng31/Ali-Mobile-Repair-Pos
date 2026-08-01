@@ -1,6 +1,7 @@
 import { ParsedItem, groupServicesByBaseName } from './inventoryUtils';
 import { CAMERA_LENS_REPAIR_NAME, withVirtualCameraLensGroupedService } from './virtualCameraLens';
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from './virtualPhoneRepairs';
+import { APPLE_WATCH_CHARGING_REPAIR_NAME, withAppleWatchChargingRepairGroupedService } from './seo/content/apple-watch';
 
 export interface AutoSelectResult {
   brand: string | null;
@@ -32,7 +33,8 @@ export function resolveInitialCartState(
       ? i.brand.split(' ')[1].toLowerCase() 
       : i.brand.toLowerCase();
       
-    return itemBrand === decodedBrand && i.deviceModel.toLowerCase() === decodedModel;
+    const isAppleWatchBrandMatch = decodedBrand === 'apple' && itemBrand === 'apple watch';
+    return (itemBrand === decodedBrand || isAppleWatchBrandMatch) && i.deviceModel.toLowerCase() === decodedModel;
   });
 
   if (matchedItems.length === 0) {
@@ -50,16 +52,20 @@ export function resolveInitialCartState(
   const decodedService = decodeURIComponent(serviceParam).toLowerCase();
   
   // Group services
-  const grouped = withVirtualPhoneRepairGroupedServices(
+  const grouped = withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
     withVirtualCameraLensGroupedService(groupServicesByBaseName(matchedItems), brand, model, category),
     brand,
     model,
     category
-  );
+  ), brand, model, category);
   const matchedGroup = grouped.find(g => g.service.toLowerCase() === decodedService);
 
   if (!matchedGroup) {
-    if (decodedService !== CAMERA_LENS_REPAIR_NAME.toLowerCase() && !isVirtualPhoneRepairName(decodeURIComponent(serviceParam))) {
+    if (
+      decodedService !== CAMERA_LENS_REPAIR_NAME.toLowerCase() &&
+      decodedService !== APPLE_WATCH_CHARGING_REPAIR_NAME.toLowerCase() &&
+      !isVirtualPhoneRepairName(decodeURIComponent(serviceParam))
+    ) {
       return { brand, model, category, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
     }
     return { brand, model, category, serviceToSelect: null, serviceToExpand: decodeURIComponent(serviceParam), shouldAutoConfirm: false };

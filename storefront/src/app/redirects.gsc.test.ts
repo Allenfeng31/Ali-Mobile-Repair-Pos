@@ -45,6 +45,7 @@ vi.mock('@/lib/api', () => ({ fetchRepairCatalog: fetchRepairCatalogMock }));
 
 import nextConfig from '../../next.config';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
+import { APPLE_WATCH_MODELS } from '@/lib/seo/content/apple-watch';
 import sitemap from './sitemap';
 
 loadEnvConfig(process.cwd());
@@ -142,6 +143,11 @@ const googlePixelSharedRepairAliases = [
     destination: '/repairs/phone/google/volume-button-replacement',
   },
 ] as const;
+
+const appleWatchChargingRepairAliases = APPLE_WATCH_MODELS.map((model) => ({
+  source: `/repairs/watch/apple/${model}/charging-port-replacement`,
+  destination: `/repairs/watch/apple/${model}/charging-repair`,
+}));
 
 const tabletGsc404Redirects = [
   ['/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736', '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730-sm-t733-sm-t736'],
@@ -291,6 +297,30 @@ describe('July 15 GSC technical redirect batch', () => {
     expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro')).toBe(false);
     expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro/screen-replacement')).toBe(false);
     expect(sources.has('/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair')).toBe(false);
+  });
+
+  it('permanently redirects each configured Apple Watch legacy charging-port URL directly to Charging Repair', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(appleWatchChargingRepairAliases).toHaveLength(22);
+    for (const { source, destination } of appleWatchChargingRepairAliases) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+      expect(matches[0].source).not.toContain('?');
+      expect(matches[0].destination).not.toContain('?');
+
+      const request = new URL(`https://www.alimobile.com.au${source}?model=apple-watch-fixture`);
+      const redirectTarget = new URL(destination, request.origin);
+      redirectTarget.search = request.search;
+      expect(`${redirectTarget.pathname}${redirectTarget.search}`).toBe(`${destination}?model=apple-watch-fixture`);
+    }
+
+    expect(redirectBySource.has('/repairs/watch/apple/charging-port-replacement')).toBe(false);
+    expect(redirectBySource.has('/repairs/watch/apple/apple-watch-unconfigured/charging-port-replacement')).toBe(false);
   });
 
   it('permanently reconciles each approved Tablet GSC 404 source in one hop', async () => {

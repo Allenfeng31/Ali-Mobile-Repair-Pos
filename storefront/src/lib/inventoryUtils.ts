@@ -23,7 +23,7 @@ export interface ParsedItem {
   deviceType: "phone" | "tablet" | "computer" | "watch";
   quality_grade: string;
   is_recommended: boolean;
-  sourceType?: 'real' | 'virtual';
+  sourceType?: 'real' | 'virtual' | 'diagnostic';
 }
 
 export function safeSlugSegment(input: unknown): string {

@@ -13,6 +13,7 @@ import {
   getGooglePixelHardwareConfig,
   GOOGLE_PIXEL_HARDWARE_CONFIG,
 } from '@/lib/seo/content/google-pixel/config';
+import { APPLE_WATCH_MODELS } from '@/lib/seo/content/apple-watch';
 import sitemap from './sitemap';
 
 loadEnvConfig(process.cwd());
@@ -130,5 +131,39 @@ describe('Sitemap SEO Generation', () => {
 
     expect(new URL(urls.find((entry) => entry.url.endsWith('/repairs/phone/google-pixel/pixel-8a'))!.url).origin)
       .toBe('https://www.alimobile.com.au');
+  });
+
+  it('includes only configured Apple Watch Charging Repair routes and no legacy charging-port aliases', async () => {
+    fetchRepairCatalogMock.mockResolvedValueOnce({
+      brands: [{
+        category: 'watch',
+        slug: 'apple',
+        models: [
+          ...APPLE_WATCH_MODELS.map((slug) => ({
+            slug,
+            repairTypes: [
+              { slug: 'screen-replacement' },
+              { slug: 'charging-repair' },
+              { slug: 'charging-port-replacement' },
+            ],
+          })),
+          {
+            slug: 'apple-watch-unconfigured',
+            repairTypes: [{ slug: 'screen-replacement' }, { slug: 'charging-repair' }],
+          },
+        ],
+      }],
+    });
+
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+
+    for (const model of APPLE_WATCH_MODELS) {
+      expect(paths.filter((path) => path === `/repairs/watch/apple/${model}`)).toHaveLength(1);
+      expect(paths.filter((path) => path === `/repairs/watch/apple/${model}/charging-repair`)).toHaveLength(1);
+      expect(paths).not.toContain(`/repairs/watch/apple/${model}/charging-port-replacement`);
+    }
+    expect(paths).not.toContain('/repairs/watch/apple/apple-watch-unconfigured');
+    expect(paths).not.toContain('/repairs/watch/apple/apple-watch-unconfigured/charging-repair');
+    expect(paths.filter((path) => path.includes('/charging-port-replacement'))).toHaveLength(1);
   });
 });

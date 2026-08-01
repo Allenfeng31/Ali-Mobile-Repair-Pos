@@ -1,7 +1,10 @@
+import { displayBrand, slugify, type GroupedService, type ParsedItem } from '../../../inventoryUtils';
+import type { RepairOption } from '../../../publicRepairCataloguePolicy';
+
 export type AppleWatchRepairSlug =
   | 'screen-replacement'
   | 'battery-replacement'
-  | 'charging-port-replacement';
+  | 'charging-repair';
 
 type AppleWatchModelSlug =
   | 'apple-watch-series-3-38mm'
@@ -111,8 +114,11 @@ export interface AppleWatchExploreLink {
 export const APPLE_WATCH_REPAIRS: ReadonlyArray<AppleWatchRepairSlug> = [
   'screen-replacement',
   'battery-replacement',
-  'charging-port-replacement',
+  'charging-repair',
 ];
+
+export const APPLE_WATCH_CHARGING_REPAIR_SLUG = 'charging-repair';
+export const APPLE_WATCH_CHARGING_REPAIR_NAME = 'Charging Repair';
 
 export const APPLE_WATCH_MODELS: ReadonlyArray<AppleWatchModelSlug> = [
   'apple-watch-series-3-38mm',
@@ -387,12 +393,12 @@ const MODEL_CONFIGS: Record<AppleWatchModelSlug, AppleWatchModelConfig> = {
 const REPAIR_LABELS: Record<AppleWatchRepairSlug, string> = {
   'screen-replacement': 'screen replacement',
   'battery-replacement': 'battery replacement',
-  'charging-port-replacement': 'charging repair',
+'charging-repair': 'Charging Repair',
 };
 
 type AppleWatchPageKey = `${AppleWatchModelSlug}|${AppleWatchRepairSlug}`;
 
-function isAppleWatchModelSlug(value: string): value is AppleWatchModelSlug {
+export function isConfiguredAppleWatchModel(value: string): value is AppleWatchModelSlug {
   return Object.prototype.hasOwnProperty.call(MODEL_CONFIGS, value);
 }
 
@@ -661,9 +667,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-3-38mm|charging-port-replacement': {
+'apple-watch-series-3-38mm|charging-repair': {
     "modelName": "Apple Watch Series 3 38mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 3 38mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Ringwood charging help for Apple Watch Series 3 38mm: known-good cable tests, rear-contact inspection and quote before work starts.",
     "quickAnswer": "For this older compact Series 3, charging repair means checking magnetic alignment, rear-contact condition, battery behaviour and board-level warning signs.",
@@ -723,8 +729,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 3 38mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this long-serving fitness tracker."
+        "question": "Does Apple Watch Series 3 38mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this long-serving fitness tracker."
       },
       {
         "question": "Why does my Series 3 38mm charge only sometimes?",
@@ -1051,9 +1057,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-3-42mm|charging-port-replacement': {
+'apple-watch-series-3-42mm|charging-repair': {
     "modelName": "Apple Watch Series 3 42mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 3 42mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch magnetic charging diagnosis for Apple Watch Series 3 42mm, covering intermittent charging, overheating and accessory faults.",
     "quickAnswer": "Charging trouble on the Series 3 42mm can be accessory-side or watch-side. Known-good gear is compared before internal repair is recommended.",
@@ -1113,8 +1119,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 3 42mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this older workout companion."
+        "question": "Does Apple Watch Series 3 42mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this older workout companion."
       },
       {
         "question": "Why does my Series 3 42mm charge only sometimes?",
@@ -1441,9 +1447,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-4-40mm|charging-port-replacement': {
+'apple-watch-series-4-40mm|charging-repair': {
     "modelName": "Apple Watch Series 4 40mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 4 40mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 4 40mm charging repair in Ringwood for magnetic puck, cable, adapter, rear surface and internal power-path checks.",
     "quickAnswer": "Apple Watch Series 4 40mm uses rear magnetic charging, not a normal exposed port. We test the puck, cable, adapter, rear surface, heat and internal power risk before quoting.",
@@ -1503,8 +1509,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 4 40mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this redesigned compact model."
+        "question": "Does Apple Watch Series 4 40mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this redesigned compact model."
       },
       {
         "question": "Why does my Series 4 40mm charge only sometimes?",
@@ -1831,9 +1837,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-4-44mm|charging-port-replacement': {
+'apple-watch-series-4-44mm|charging-repair': {
     "modelName": "Apple Watch Series 4 44mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 4 44mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 4 44mm not charging? Ali Mobile checks the magnetic charging setup and watch-side fault risk before quoting.",
     "quickAnswer": "If the larger daily companion only charges sometimes, we test cable fit, the rear charging surface and startup behaviour before approving work.",
@@ -1893,8 +1899,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 4 44mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger daily companion."
+        "question": "Does Apple Watch Series 4 44mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger daily companion."
       },
       {
         "question": "Why does my Series 4 44mm charge only sometimes?",
@@ -2221,9 +2227,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-5-40mm|charging-port-replacement': {
+'apple-watch-series-5-40mm|charging-repair': {
     "modelName": "Apple Watch Series 5 40mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 5 40mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Ringwood charging help for Apple Watch Series 5 40mm: known-good cable tests, rear-contact inspection and quote before work starts.",
     "quickAnswer": "For this always-on Series 5, charging repair means checking magnetic alignment, rear-contact condition, battery behaviour and board-level warning signs.",
@@ -2283,8 +2289,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 5 40mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact always-on watch."
+        "question": "Does Apple Watch Series 5 40mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact always-on watch."
       },
       {
         "question": "Why does my Series 5 40mm charge only sometimes?",
@@ -2611,9 +2617,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-5-44mm|charging-port-replacement': {
+'apple-watch-series-5-44mm|charging-repair': {
     "modelName": "Apple Watch Series 5 44mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 5 44mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch magnetic charging diagnosis for Apple Watch Series 5 44mm, covering intermittent charging, overheating and accessory faults.",
     "quickAnswer": "Charging trouble on the Series 5 44mm can be accessory-side or watch-side. Known-good gear is compared before internal repair is recommended.",
@@ -2673,8 +2679,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 5 44mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger always-on companion."
+        "question": "Does Apple Watch Series 5 44mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger always-on companion."
       },
       {
         "question": "Why does my Series 5 44mm charge only sometimes?",
@@ -3001,9 +3007,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-6-40mm|charging-port-replacement': {
+'apple-watch-series-6-40mm|charging-repair': {
     "modelName": "Apple Watch Series 6 40mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 6 40mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 6 40mm charging repair in Ringwood for magnetic puck, cable, adapter, rear surface and internal power-path checks.",
     "quickAnswer": "Apple Watch Series 6 40mm uses rear magnetic charging, not a normal exposed port. We test the puck, cable, adapter, rear surface, heat and internal power risk before quoting.",
@@ -3063,8 +3069,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 6 40mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact health-tracking watch."
+        "question": "Does Apple Watch Series 6 40mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact health-tracking watch."
       },
       {
         "question": "Why does my Series 6 40mm charge only sometimes?",
@@ -3391,9 +3397,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-6-44mm|charging-port-replacement': {
+'apple-watch-series-6-44mm|charging-repair': {
     "modelName": "Apple Watch Series 6 44mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 6 44mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 6 44mm not charging? Ali Mobile checks the magnetic charging setup and watch-side fault risk before quoting.",
     "quickAnswer": "If the larger health-tracking companion only charges sometimes, we test cable fit, the rear charging surface and startup behaviour before approving work.",
@@ -3453,8 +3459,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 6 44mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger health-tracking companion."
+        "question": "Does Apple Watch Series 6 44mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger health-tracking companion."
       },
       {
         "question": "Why does my Series 6 44mm charge only sometimes?",
@@ -3781,9 +3787,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-se-1st-gen-40mm|charging-port-replacement': {
+'apple-watch-se-1st-gen-40mm|charging-repair': {
     "modelName": "Apple Watch SE 1st Gen 40mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch SE 1st Gen 40mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Ringwood charging help for Apple Watch SE 1st Gen 40mm: known-good cable tests, rear-contact inspection and quote before work starts.",
     "quickAnswer": "For this first-generation SE, charging repair means checking magnetic alignment, rear-contact condition, battery behaviour and board-level warning signs.",
@@ -3843,8 +3849,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch SE 1st Gen 40mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this family-friendly compact model."
+        "question": "Does Apple Watch SE 1st Gen 40mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this family-friendly compact model."
       },
       {
         "question": "Why does my SE 1st Gen 40mm charge only sometimes?",
@@ -4171,9 +4177,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-se-1st-gen-44mm|charging-port-replacement': {
+'apple-watch-se-1st-gen-44mm|charging-repair': {
     "modelName": "Apple Watch SE 1st Gen 44mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch SE 1st Gen 44mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch magnetic charging diagnosis for Apple Watch SE 1st Gen 44mm, covering intermittent charging, overheating and accessory faults.",
     "quickAnswer": "Charging trouble on the SE 1st Gen 44mm can be accessory-side or watch-side. Known-good gear is compared before internal repair is recommended.",
@@ -4233,8 +4239,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch SE 1st Gen 44mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this everyday larger SE."
+        "question": "Does Apple Watch SE 1st Gen 44mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this everyday larger SE."
       },
       {
         "question": "Why does my SE 1st Gen 44mm charge only sometimes?",
@@ -4561,9 +4567,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-7-41mm|charging-port-replacement': {
+'apple-watch-series-7-41mm|charging-repair': {
     "modelName": "Apple Watch Series 7 41mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 7 41mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 7 41mm charging repair in Ringwood for magnetic puck, cable, adapter, rear surface and internal power-path checks.",
     "quickAnswer": "Apple Watch Series 7 41mm uses rear magnetic charging, not a normal exposed port. We test the puck, cable, adapter, rear surface, heat and internal power risk before quoting.",
@@ -4623,8 +4629,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 7 41mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact fast-charge generation."
+        "question": "Does Apple Watch Series 7 41mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact fast-charge generation."
       },
       {
         "question": "Why does my Series 7 41mm charge only sometimes?",
@@ -4951,9 +4957,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-7-45mm|charging-port-replacement': {
+'apple-watch-series-7-45mm|charging-repair': {
     "modelName": "Apple Watch Series 7 45mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 7 45mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 7 45mm not charging? Ali Mobile checks the magnetic charging setup and watch-side fault risk before quoting.",
     "quickAnswer": "If the larger fast-charge generation only charges sometimes, we test cable fit, the rear charging surface and startup behaviour before approving work.",
@@ -5013,8 +5019,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 7 45mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger fast-charge generation."
+        "question": "Does Apple Watch Series 7 45mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger fast-charge generation."
       },
       {
         "question": "Why does my Series 7 45mm charge only sometimes?",
@@ -5341,9 +5347,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-8-41mm|charging-port-replacement': {
+'apple-watch-series-8-41mm|charging-repair': {
     "modelName": "Apple Watch Series 8 41mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 8 41mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Ringwood charging help for Apple Watch Series 8 41mm: known-good cable tests, rear-contact inspection and quote before work starts.",
     "quickAnswer": "For this Series 8 sensor generation, charging repair means checking magnetic alignment, rear-contact condition, battery behaviour and board-level warning signs.",
@@ -5403,8 +5409,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 8 41mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact sensor model."
+        "question": "Does Apple Watch Series 8 41mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this compact sensor model."
       },
       {
         "question": "Why does my Series 8 41mm charge only sometimes?",
@@ -5731,9 +5737,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-8-45mm|charging-port-replacement': {
+'apple-watch-series-8-45mm|charging-repair': {
     "modelName": "Apple Watch Series 8 45mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 8 45mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch magnetic charging diagnosis for Apple Watch Series 8 45mm, covering intermittent charging, overheating and accessory faults.",
     "quickAnswer": "Charging trouble on the Series 8 45mm can be accessory-side or watch-side. Known-good gear is compared before internal repair is recommended.",
@@ -5793,8 +5799,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 8 45mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger sensor model."
+        "question": "Does Apple Watch Series 8 45mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger sensor model."
       },
       {
         "question": "Why does my Series 8 45mm charge only sometimes?",
@@ -6121,9 +6127,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-9-41mm|charging-port-replacement': {
+'apple-watch-series-9-41mm|charging-repair': {
     "modelName": "Apple Watch Series 9 41mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 9 41mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 9 41mm charging repair in Ringwood for magnetic puck, cable, adapter, rear surface and internal power-path checks.",
     "quickAnswer": "Apple Watch Series 9 41mm uses rear magnetic charging, not a normal exposed port. We test the puck, cable, adapter, rear surface, heat and internal power risk before quoting.",
@@ -6183,8 +6189,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 9 41mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer compact model."
+        "question": "Does Apple Watch Series 9 41mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer compact model."
       },
       {
         "question": "Why does my Series 9 41mm charge only sometimes?",
@@ -6511,9 +6517,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-9-45mm|charging-port-replacement': {
+'apple-watch-series-9-45mm|charging-repair': {
     "modelName": "Apple Watch Series 9 45mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 9 45mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch Series 9 45mm not charging? Ali Mobile checks the magnetic charging setup and watch-side fault risk before quoting.",
     "quickAnswer": "If the newer larger model only charges sometimes, we test cable fit, the rear charging surface and startup behaviour before approving work.",
@@ -6573,8 +6579,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 9 45mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer larger model."
+        "question": "Does Apple Watch Series 9 45mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer larger model."
       },
       {
         "question": "Why does my Series 9 45mm charge only sometimes?",
@@ -6901,9 +6907,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-10-42mm|charging-port-replacement': {
+'apple-watch-series-10-42mm|charging-repair': {
     "modelName": "Apple Watch Series 10 42mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 10 42mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Ringwood charging help for Apple Watch Series 10 42mm: known-good cable tests, rear-contact inspection and quote before work starts.",
     "quickAnswer": "For this newer thin Series 10, charging repair means checking magnetic alignment, rear-contact condition, battery behaviour and board-level warning signs.",
@@ -6963,8 +6969,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 10 42mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this thin compact generation."
+        "question": "Does Apple Watch Series 10 42mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this thin compact generation."
       },
       {
         "question": "Why does my Series 10 42mm charge only sometimes?",
@@ -7291,9 +7297,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-series-10-46mm|charging-port-replacement': {
+'apple-watch-series-10-46mm|charging-repair': {
     "modelName": "Apple Watch Series 10 46mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Series 10 46mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch magnetic charging diagnosis for Apple Watch Series 10 46mm, covering intermittent charging, overheating and accessory faults.",
     "quickAnswer": "Charging trouble on the Series 10 46mm can be accessory-side or watch-side. Known-good gear is compared before internal repair is recommended.",
@@ -7353,8 +7359,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Series 10 46mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger thin generation."
+        "question": "Does Apple Watch Series 10 46mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this larger thin generation."
       },
       {
         "question": "Why does my Series 10 46mm charge only sometimes?",
@@ -7681,9 +7687,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-se-2nd-gen-40mm|charging-port-replacement': {
+'apple-watch-se-2nd-gen-40mm|charging-repair': {
     "modelName": "Apple Watch SE 2nd Gen 40mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch SE 2nd Gen 40mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch SE 2nd Gen 40mm charging repair in Ringwood for magnetic puck, cable, adapter, rear surface and internal power-path checks.",
     "quickAnswer": "Apple Watch SE 2nd Gen 40mm uses rear magnetic charging, not a normal exposed port. We test the puck, cable, adapter, rear surface, heat and internal power risk before quoting.",
@@ -7743,8 +7749,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch SE 2nd Gen 40mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer compact SE."
+        "question": "Does Apple Watch SE 2nd Gen 40mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer compact SE."
       },
       {
         "question": "Why does my SE 2nd Gen 40mm charge only sometimes?",
@@ -8071,9 +8077,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-se-2nd-gen-44mm|charging-port-replacement': {
+'apple-watch-se-2nd-gen-44mm|charging-repair': {
     "modelName": "Apple Watch SE 2nd Gen 44mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch SE 2nd Gen 44mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch SE 2nd Gen 44mm not charging? Ali Mobile checks the magnetic charging setup and watch-side fault risk before quoting.",
     "quickAnswer": "If the newer larger SE only charges sometimes, we test cable fit, the rear charging surface and startup behaviour before approving work.",
@@ -8133,8 +8139,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch SE 2nd Gen 44mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer larger SE."
+        "question": "Does Apple Watch SE 2nd Gen 44mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer larger SE."
       },
       {
         "question": "Why does my SE 2nd Gen 44mm charge only sometimes?",
@@ -8461,9 +8467,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-ultra-49mm|charging-port-replacement': {
+'apple-watch-ultra-49mm|charging-repair': {
     "modelName": "Apple Watch Ultra 49mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Ultra 49mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Ringwood charging help for Apple Watch Ultra 49mm: known-good cable tests, rear-contact inspection and quote before work starts.",
     "quickAnswer": "For this first-generation Ultra, charging repair means checking magnetic alignment, rear-contact condition, battery behaviour and board-level warning signs.",
@@ -8523,8 +8529,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Ultra 49mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this rugged 49mm model."
+        "question": "Does Apple Watch Ultra 49mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this rugged 49mm model."
       },
       {
         "question": "Why does my Ultra 49mm charge only sometimes?",
@@ -8851,9 +8857,9 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
       ]
     }
   },
-  'apple-watch-ultra-2-49mm|charging-port-replacement': {
+'apple-watch-ultra-2-49mm|charging-repair': {
     "modelName": "Apple Watch Ultra 2 49mm",
-    "repairSlug": "charging-port-replacement",
+"repairSlug": "charging-repair",
     "metaTitle": "Apple Watch Ultra 2 49mm charging repair in Ringwood | Ali Mobile",
     "metaDescription": "Apple Watch magnetic charging diagnosis for Apple Watch Ultra 2 49mm, covering intermittent charging, overheating and accessory faults.",
     "quickAnswer": "Charging trouble on the Ultra 2 49mm can be accessory-side or watch-side. Known-good gear is compared before internal repair is recommended.",
@@ -8913,8 +8919,8 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     ],
     "faq": [
       {
-        "question": "Does Apple Watch Ultra 2 49mm have a normal charging port?",
-        "answer": "No. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer rugged 49mm model."
+        "question": "Does Apple Watch Ultra 2 49mm use magnetic charging?",
+        "answer": "Yes. Apple Watch uses rear magnetic charging, so diagnosis starts with the puck, cable, adapter and rear surface on this newer rugged 49mm model."
       },
       {
         "question": "Why does my Ultra 2 49mm charge only sometimes?",
@@ -9009,7 +9015,7 @@ export function isAliMobileEnhancedAppleWatchRepairPage({
   return (
     category === 'watch' &&
     (brand === 'apple' || brand === 'apple-watch') &&
-    isAppleWatchModelSlug(model) &&
+    isConfiguredAppleWatchModel(model) &&
     isAppleWatchRepairSlug(repairType) &&
     Boolean(APPLE_WATCH_PAGE_CONTENT[`${model}|${repairType}` as AppleWatchPageKey])
   );
@@ -9033,7 +9039,7 @@ export function getAliMobileEnhancedAppleWatchSeoPocket({
   modelSlug: string;
   repairSlug: string;
 }): AppleWatchEnhancedSeoPocket | null {
-  if (!isAppleWatchModelSlug(modelSlug) || !isAppleWatchRepairSlug(repairSlug)) {
+  if (!isConfiguredAppleWatchModel(modelSlug) || !isAppleWatchRepairSlug(repairSlug)) {
     return null;
   }
 
@@ -9042,6 +9048,81 @@ export function getAliMobileEnhancedAppleWatchSeoPocket({
 
 export function getAppleWatchRepairLabel(repairSlug: AppleWatchRepairSlug) {
   return REPAIR_LABELS[repairSlug];
+}
+
+export function withAppleWatchChargingRepairOption(
+  repairTypes: RepairOption[],
+  categorySlug: string,
+  brandSlug: string,
+  modelSlug: string,
+) {
+  if (
+    categorySlug !== 'watch' ||
+    brandSlug !== 'apple' ||
+    !isConfiguredAppleWatchModel(modelSlug) ||
+    repairTypes.some((repair) => repair.slug === APPLE_WATCH_CHARGING_REPAIR_SLUG)
+  ) {
+    return repairTypes;
+  }
+
+  return [
+    ...repairTypes.filter((repair) => repair.slug !== 'charging-port-replacement'),
+    {
+      slug: APPLE_WATCH_CHARGING_REPAIR_SLUG,
+      name: APPLE_WATCH_CHARGING_REPAIR_NAME,
+      price: 0,
+      variants: [],
+      sourceType: 'diagnostic' as const,
+    },
+  ];
+}
+
+export function withAppleWatchChargingRepairGroupedService(
+  services: GroupedService[],
+  brand: string,
+  model: string,
+  category: string,
+) {
+  const brandSlug = slugify(displayBrand(brand));
+  if (
+    category !== 'watch' ||
+    (brandSlug !== 'apple' && brandSlug !== 'apple-watch') ||
+    !isConfiguredAppleWatchModel(slugify(model)) ||
+    services.some((service) => slugify(service.service) === APPLE_WATCH_CHARGING_REPAIR_SLUG)
+  ) {
+    return services;
+  }
+
+  const id = `diagnostic-apple-watch-charging-repair-${slugify(model)}`;
+  return [
+    ...services.filter((service) => slugify(service.service) !== 'charging-port-replacement'),
+    {
+      id: `grouped-${id}`,
+      service: APPLE_WATCH_CHARGING_REPAIR_NAME,
+      price: 0,
+      variants: [
+        {
+          id,
+          quality_grade: 'Inspection required',
+          price: 0,
+          originalItem: {
+            id,
+            name: APPLE_WATCH_CHARGING_REPAIR_NAME,
+            model,
+            brand,
+            deviceModel: model,
+            service: APPLE_WATCH_CHARGING_REPAIR_NAME,
+            price: 0,
+            category,
+            deviceType: 'watch',
+            quality_grade: 'Inspection required',
+            is_recommended: false,
+            sourceType: 'diagnostic',
+          } as unknown as ParsedItem,
+        },
+      ],
+    },
+  ];
 }
 
 export function getAppleWatchSameModelRepairLinks(modelSlug: AppleWatchModelSlug, currentRepair: AppleWatchRepairSlug): AppleWatchExploreLink[] {

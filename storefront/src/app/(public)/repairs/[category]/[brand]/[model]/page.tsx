@@ -402,7 +402,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const screenRepair = getRepairBySlugs(repairTypes, ["screen-replacement", "screen-repair"]);
   const batteryRepair = getRepairBySlugs(repairTypes, ["battery-replacement", "battery-service", "battery-repair"]);
-  const chargingRepair = getRepairBySlugs(repairTypes, ["charging-port-replacement", "charging-port-repair", "charging-port"]);
+  const chargingRepair = getRepairBySlugs(repairTypes, ["charging-repair", "charging-port-replacement", "charging-port-repair", "charging-port"]);
   const backHousingRepair = getRepairBySlugs(repairTypes, ["back-housing-replacement", "back-glass-replacement", "back-glass", "back-housing"]);
   const hasScreenRepair = Boolean(screenRepair);
   const hasBatteryRepair = Boolean(batteryRepair);
@@ -426,7 +426,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     {
       icon: PlugZap,
-      text: "Loose charging port or cable connection issues",
+      text: isAppleWatchModelPage ? "Charging response, magnetic charger or cable issues" : "Loose charging port or cable connection issues",
     },
     {
       icon: Camera,

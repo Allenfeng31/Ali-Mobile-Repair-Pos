@@ -21,7 +21,7 @@ interface RepairPricingAndCTAProps {
   showBackHousingNotice?: boolean;
   showStartingPriceFallback?: boolean;
   variants?: RepairVariant[];
-  sourceType?: 'real' | 'virtual';
+  sourceType?: 'real' | 'virtual' | 'diagnostic';
 }
 
 const TIER_DESCRIPTION_OVERRIDES: Record<string, Record<string, string>> = {
@@ -110,7 +110,8 @@ export default function RepairPricingAndCTA({
   const displayVariants = variants.length > 0 ? variants : [];
   const isMultiple = displayVariants.length > 1;
 
-  const startingPrice = !isStartingPriceRepair(repairSlug) && showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
+  const isDiagnostic = sourceType === 'diagnostic';
+  const startingPrice = !isDiagnostic && !isStartingPriceRepair(repairSlug) && showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
     ? getStartingPrice(categorySlug, brandSlug, repairSlug)
     : null;
   const zeroPriceLabel = formatScopedRepairPriceLabel(repairSlug, displayVariants[0]?.price, 'Quote on Request', sourceType);
@@ -248,11 +249,13 @@ export default function RepairPricingAndCTA({
             {zeroPriceLabel}
           </p>
           <p className="text-base text-slate-500 dark:text-black leading-relaxed">
-            Please fill out the form below or call{' '}
-            <a href="tel:0481058514" className="text-blue-600 dark:text-blue-700 font-bold hover:underline">
-              0481 058 514
-            </a>{' '}
-            for an instant quote.
+            {isDiagnostic
+              ? 'Final quote depends on the confirmed fault, parts and device condition.'
+              : <>Please fill out the form below or call{' '}
+                  <a href="tel:0481058514" className="text-blue-600 dark:text-blue-700 font-bold hover:underline">
+                    0481 058 514
+                  </a>{' '}
+                  for an instant quote.</>}
           </p>
         </div>
       )}

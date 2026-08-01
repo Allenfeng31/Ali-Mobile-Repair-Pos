@@ -1,4 +1,11 @@
 import type { NextConfig } from "next";
+import { APPLE_WATCH_MODELS } from "./src/lib/seo/content/apple-watch";
+
+const APPLE_WATCH_CHARGING_REPAIR_REDIRECTS = APPLE_WATCH_MODELS.map((model) => ({
+  source: `/repairs/watch/apple/${model}/charging-port-replacement`,
+  destination: `/repairs/watch/apple/${model}/charging-repair`,
+  permanent: true,
+}));
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -79,6 +86,8 @@ const nextConfig: NextConfig = {
       { source: '/repairs/phone/samsung/galaxy-note-20-ultra/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-20-ultra/back-glass-replacement', permanent: true },
 
       // 5. EXISTING REDIRECTS
+      // Apple Watch uses magnetic charging diagnosis. Keep only configured legacy model aliases.
+      ...APPLE_WATCH_CHARGING_REPAIR_REDIRECTS,
       {
         source: '/services/:path*',
         destination: '/repairs/:path*',
