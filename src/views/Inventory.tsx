@@ -35,6 +35,16 @@ import { InventoryItem } from '../types';
 import { api } from '../lib/api';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { Lock } from 'lucide-react';
+import {
+  buildBulkRepairRows,
+  deriveRepairBrandOptions,
+  isDuplicateRepairRow,
+  priceLabel,
+  repairBrandOptionsForCategory,
+  REPAIR_DEVICE_CATEGORIES,
+  RepairDeviceCategory,
+  toStoredRepairBrand,
+} from '../lib/inventoryCreation';
 
 interface InventoryViewProps {
   inventory: InventoryItem[];
@@ -76,6 +86,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
+    sku: '',
     category: 'Phone Repair',
     brand: 'iPhone',
     model: '',
@@ -90,8 +101,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   // ── Bulk Generate Repair Suite ──────────────────────────────────────
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkGenerating, setBulkGenerating] = useState(false);
-  const [bulkBrand, setBulkBrand] = useState('P Samsung'); // Will be overridden by user selection
-  const [bulkDeviceCategory, setBulkDeviceCategory] = useState('Phone Repair');
+  const [bulkBrand, setBulkBrand] = useState('P Samsung');
+  const [bulkDeviceCategory, setBulkDeviceCategory] = useState<RepairDeviceCategory>('Phone');
   const [bulkModel, setBulkModel] = useState('');
   const [bulkDeviceModel, setBulkDeviceModel] = useState('');
   const [bulkRepairs, setBulkRepairs] = useState<Record<string, { selected: boolean; price: string; costPrice: string }>>({
@@ -114,6 +125,21 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     { label: 'Logic Board Repair', iconName: 'Cpu' },
   ] as const;
 
+  const repairBrandOptions = React.useMemo(
+    () => deriveRepairBrandOptions(brands, inventory),
+    [brands, inventory],
+  );
+  const bulkBrandOptions = React.useMemo(
+    () => repairBrandOptionsForCategory(repairBrandOptions, bulkDeviceCategory),
+    [repairBrandOptions, bulkDeviceCategory],
+  );
+  const isAccessoryProduct = !bulkMode && editingId === null;
+
+  React.useEffect(() => {
+    if (bulkBrandOptions.some((option) => option.value === bulkBrand)) return;
+    setBulkBrand(bulkBrandOptions[0]?.value || '');
+  }, [bulkBrand, bulkBrandOptions]);
+
   const getIconComponent = (name: string) => {
     const icons: Record<string, any> = {
       Battery, Tablet, Laptop, Watch, Headphones, Smartphone, Wrench, Zap, Package, Camera, Cpu, LayoutIcon, Volume2, Mic, Wifi
@@ -124,44 +150,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const handleBulkGenerate = async () => {
     if (!bulkModel.trim()) return;
 
-    const targetModel = bulkModel.trim();
-    const itemsToCreate: any[] = [];
-    let duplicateCount = 0;
-
-    for (const tmpl of REPAIR_TEMPLATES) {
-      const config = bulkRepairs[tmpl.label];
-      if (!config || !config.selected) continue;
-
-      const itemName = `${bulkModel.trim()} ${tmpl.label}`;
-      const itemModel = `${bulkBrand}||${bulkModel.trim()}`;
-
-      // Duplicate check for this specific row
-      const isDuplicate = inventory.some(i => 
-        (i.model === itemModel || i.model === targetModel) &&
-        i.name === itemName
-      );
-
-      if (isDuplicate) {
-        duplicateCount++;
-        continue;
-      }
-
-      itemsToCreate.push({
-        name: itemName,
-        model: itemModel,
-        device_model: bulkDeviceModel.trim() || null,
-        stock: 0,
-        minStock: 0,
-        costPrice: config.costPrice ? parseFloat(config.costPrice) : 0,
-        price: config.price ? parseFloat(config.price) : 0,
-        margin: 0,
-        iconName: tmpl.iconName,
-        status: 'in-stock',
-        category: tmpl.label, // THIS MUST BE THE REPAIR TYPE
-        is_pinned: false,
-        pin_order: 0,
-      });
-    }
+    const { rows: itemsToCreate, duplicateCount } = buildBulkRepairRows({
+      inventory,
+      brand: bulkBrand,
+      modelName: bulkModel,
+      deviceModel: bulkDeviceModel,
+      templates: REPAIR_TEMPLATES,
+      selections: bulkRepairs,
+    });
 
     if (itemsToCreate.length === 0) {
       setSuccessMessage(duplicateCount > 0 ? 'All selected repair items already exist.' : 'No items selected to generate.');
@@ -218,13 +214,14 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
   const handleAddBrand = async () => {
     if (!newBrand.trim()) return;
-    const brName = newBrand.trim();
+    const brName = toStoredRepairBrand(newBrand.trim(), bulkDeviceCategory);
     if (!brands.includes(brName)) {
       const updated = [...brands, brName];
       setBrands(updated);
       await api.updateSetting('ali_pos_brands', JSON.stringify(updated));
     }
     setFormData({ ...formData, brand: brName });
+    setBulkBrand(brName);
     setIsAddingBrand(false);
     setNewBrand('');
   };
@@ -256,6 +253,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
   const clearForm = () => {
     setFormData({
       name: '',
+      sku: '',
       category: 'Phone Repair',
       brand: 'iPhone',
       model: '',
@@ -287,6 +285,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     setEditingId(item.id);
     setFormData({
       name: item.name,
+      sku: item.sku || '',
       category: item.category,
       brand: item.brand || 'iPhone',
       model: item.model,
@@ -301,6 +300,9 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
     if (e) e.preventDefault();
     if (!formData.name) return;
 
+    const category = isAccessoryProduct ? 'Accessories' : formData.category;
+    const model = isAccessoryProduct ? formData.model.trim() || 'Accessories' : formData.model;
+    const brand = isAccessoryProduct ? 'Accessories' : formData.brand;
     const baseIconName = formData.name.toLowerCase().includes('screen') || formData.name.toLowerCase().includes('lcd') || formData.name.toLowerCase().includes('display') ? 'Smartphone' :
       formData.name.toLowerCase().includes('battery') ? 'Battery' :
         formData.name.toLowerCase().includes('charging') || formData.name.toLowerCase().includes('port') || formData.name.toLowerCase().includes('charge') ? 'Zap' :
@@ -308,14 +310,15 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
             formData.name.toLowerCase().includes('housing') || formData.name.toLowerCase().includes('glass') || formData.name.toLowerCase().includes('back cover') ? 'Layout' :
               formData.name.toLowerCase().includes('logic board') || formData.name.toLowerCase().includes('motherboard') || formData.name.toLowerCase().includes('ic ') ? 'Cpu' :
                 formData.name.toLowerCase().includes('speaker') || formData.name.toLowerCase().includes('buzzer') ? 'Volume2' :
-                  formData.category.toLowerCase().includes('tablet') ? 'Tablet' :
-                    formData.category.toLowerCase().includes('laptop') ? 'Laptop' :
-                      formData.category.toLowerCase().includes('watch') ? 'Watch' :
-                        formData.category.toLowerCase().includes('accessory') ? 'Headphones' :
-                          formData.category.toLowerCase().includes('phone') ? 'Smartphone' :
-                            formData.category.toLowerCase().includes('service') ? 'Wrench' : 'Package';
+                  category.toLowerCase().includes('tablet') ? 'Tablet' :
+                    category.toLowerCase().includes('laptop') ? 'Laptop' :
+                      category.toLowerCase().includes('watch') ? 'Watch' :
+                        category.toLowerCase().includes('accessory') ? 'Headphones' :
+                          category.toLowerCase().includes('phone') ? 'Smartphone' :
+                            category.toLowerCase().includes('service') ? 'Wrench' : 'Package';
 
-    const itemsToSave = formData.variants.map(variant => {
+    const variantsToSave = isAccessoryProduct ? formData.variants.slice(0, 1) : formData.variants;
+    const itemsToSave = variantsToSave.map(variant => {
       const cost = parseFloat(variant.costPrice) || 0;
       const selling = parseFloat(variant.sellingPrice) || 0;
       const margin = cost > 0 ? Math.round(((selling - cost) / selling) * 100) : 0;
@@ -325,9 +328,10 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
       return {
         ...(variant.id > 1000000000000 ? {} : { id: variant.id }),
         name: formData.name,
-        model: `${formData.brand}||${formData.model}`,
+        sku: formData.sku.trim() || null,
+        model: `${brand}||${model}`,
         device_model: formData.device_model,
-        category: formData.category,
+        category,
         is_pinned: formData.is_pinned,
         pin_order: formData.pin_order,
         iconName: baseIconName,
@@ -354,6 +358,11 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
     setSaving(true);
     try {
+      if (isAccessoryProduct && !categories.includes('Accessories')) {
+        const updatedCategories = [...categories, 'Accessories'];
+        setCategories(updatedCategories);
+        await api.updateSetting('ali_pos_categories', JSON.stringify(updatedCategories));
+      }
       const newItems = itemsToSave.filter(i => !i.id);
       const existingItems = itemsToSave.filter(i => i.id);
 
@@ -781,19 +790,26 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
           {/* Sidebar Forms */}
           <aside className="lg:col-span-4 flex flex-col gap-10 order-last lg:order-first w-full sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
-            {/* Bulk Mode Toggle */}
-            <button
-              onClick={() => { setBulkMode(!bulkMode); setEditingId(null); }}
-              className={cn(
-                "w-full flex items-center justify-center gap-3 py-5 rounded-[2rem] font-black text-base transition-all active:scale-[0.98]",
-                bulkMode
-                  ? "bg-[var(--color-neu-bg)] text-orange-600 shadow-[var(--shadow-neu-pressed)]"
-                  : "bg-[var(--color-neu-bg)] text-blue-600 shadow-[var(--shadow-neu-flat)]"
-              )}
-            >
-              <Layers size={22} className={bulkMode ? "animate-pulse" : ""} strokeWidth={3} />
-              {bulkMode ? 'BULK MODE ON' : 'BULK GENERATE REPAIRS'}
-            </button>
+            <div className="grid grid-cols-2 gap-3" aria-label="Product creation mode">
+              <button
+                onClick={() => { setBulkMode(false); setEditingId(null); }}
+                className={cn(
+                  "flex items-center justify-center gap-2 py-4 rounded-[2rem] font-black text-sm transition-all active:scale-[0.98]",
+                  !bulkMode ? "text-blue-600 shadow-[var(--shadow-neu-pressed)]" : "text-gray-500 shadow-[var(--shadow-neu-flat)]"
+                )}
+              >
+                <Headphones size={20} strokeWidth={3} /> ACCESSORY PRODUCT
+              </button>
+              <button
+                onClick={() => { setBulkMode(true); setEditingId(null); }}
+                className={cn(
+                  "flex items-center justify-center gap-2 py-4 rounded-[2rem] font-black text-sm transition-all active:scale-[0.98]",
+                  bulkMode ? "text-orange-600 shadow-[var(--shadow-neu-pressed)]" : "text-gray-500 shadow-[var(--shadow-neu-flat)]"
+                )}
+              >
+                <Layers size={20} className={bulkMode ? "animate-pulse" : ""} strokeWidth={3} /> BULK REPAIR
+              </button>
+            </div>
 
             {/* Bulk Panel */}
             {bulkMode && (
@@ -811,6 +827,18 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Device Category</label>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                        <select
+                          className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
+                          value={bulkDeviceCategory}
+                          onChange={e => setBulkDeviceCategory(e.target.value as RepairDeviceCategory)}
+                        >
+                          {REPAIR_DEVICE_CATEGORIES.map(category => <option key={category.value} value={category.value}>{category.value}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
                       <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Brand</label>
                       <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
                         <select
@@ -818,21 +846,20 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           value={bulkBrand}
                           onChange={e => setBulkBrand(e.target.value)}
                         >
-                          {brands.map(b => <option key={b} value={b}>{getDisplayBrand(b)}</option>)}
+                          <option value="" disabled>Select Brand</option>
+                          {bulkBrandOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                         </select>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Device Category</label>
-                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
-                        <select
-                          className="w-full px-5 py-4 bg-transparent border-none text-black font-bold focus:ring-0 outline-none appearance-none cursor-pointer"
-                          value={bulkDeviceCategory}
-                          onChange={e => setBulkDeviceCategory(e.target.value)}
-                        >
-                          {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </div>
+                      <p className="text-[10px] font-bold text-gray-500">Brands come from Settings and existing repair inventory. Add a brand in Settings, then select it here.</p>
+                      {isAddingBrand ? (
+                        <div className="flex gap-2 pt-2">
+                          <input className="min-w-0 flex-1 px-3 py-2 rounded-xl bg-transparent shadow-[var(--shadow-neu-pressed)] font-bold" placeholder="New brand" value={newBrand} onChange={e => setNewBrand(e.target.value)} />
+                          <button type="button" onClick={handleAddBrand} className="px-3 rounded-xl text-blue-600 font-black shadow-[var(--shadow-neu-flat)]">Save</button>
+                          <button type="button" onClick={() => setIsAddingBrand(false)} className="px-3 rounded-xl text-gray-500 font-black shadow-[var(--shadow-neu-flat)]">Cancel</button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => setIsAddingBrand(true)} className="pt-2 text-[10px] font-black text-blue-600 uppercase">+ Add brand for {bulkDeviceCategory}</button>
+                      )}
                     </div>
                   </div>
 
@@ -867,10 +894,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         const config = bulkRepairs[tmpl.label] || { selected: false, price: '', costPrice: '' };
                         const itemName = bulkModel.trim() ? `${bulkModel.trim()} ${tmpl.label}` : tmpl.label;
                         
-                        const isDuplicate = bulkModel.trim() ? inventory.some(i => 
-                          (i.model === `${bulkBrand}||${bulkModel.trim()}` || i.model === bulkModel.trim()) &&
-                          i.name === itemName
-                        ) : false;
+                        const isDuplicate = bulkModel.trim() ? isDuplicateRepairRow(inventory, bulkBrand, bulkModel, tmpl.label) : false;
 
                         return (
                           <div key={tmpl.label} className={cn("p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl space-y-3 transition-opacity", !config.selected && "opacity-60")}>
@@ -913,6 +937,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                       })}
                                     />
                                   </div>
+                                  <p className="text-[10px] font-bold text-gray-500">{priceLabel(config.price)}</p>
                                 </div>
                                 <div className="space-y-1">
                                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cost ($)</label>
@@ -944,6 +969,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   >
                     {bulkGenerating ? 'Generating...' : `CREATE ${Object.values(bulkRepairs).filter(r => r.selected).length} ITEMS`}
                   </button>
+                  <p className="text-[10px] font-bold text-gray-500 text-center">Preview only creates selected, non-duplicate repair rows in one final batch.</p>
                 </div>
               </div>
             )}
@@ -957,7 +983,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 <div className="w-10 h-10 rounded-2xl shadow-[var(--shadow-neu-sm)] flex items-center justify-center text-blue-500">
                   <Wrench size={24} strokeWidth={3} />
                 </div>
-                {t('inv', 'itemDet')}
+                {isAccessoryProduct ? 'Accessory Product' : t('inv', 'itemDet')}
               </h2>
 
               <div className="space-y-6">
@@ -973,7 +999,22 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isAccessoryProduct && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Category</label>
+                      <div className="px-4 py-3 rounded-2xl text-black font-bold shadow-[var(--shadow-neu-pressed)]">Accessories</div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-gray-600 uppercase tracking-widest">SKU</label>
+                      <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
+                        <input className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none" placeholder="Optional SKU" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isAccessoryProduct && <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Brand Control */}
                   <div className="space-y-2">
                     <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Brand</label>
@@ -1091,22 +1132,22 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       </div>
                     )}
                   </div>
-                </div>
+                </div>}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Model</label>
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">{isAccessoryProduct ? 'Optional model' : 'Model'}</label>
                     <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
                       <input
                         className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
-                        placeholder="iPhone 13"
+                        placeholder={isAccessoryProduct ? 'Optional device model' : 'iPhone 13'}
                         value={formData.model}
                         onChange={e => setFormData({ ...formData, model: e.target.value })}
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Code</label>
+                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest">{isAccessoryProduct ? 'Optional code' : 'Code'}</label>
                     <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1">
                       <input
                         className="w-full px-4 py-3 bg-transparent border-none text-black font-bold focus:ring-0 outline-none"
@@ -1163,8 +1204,8 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-xs font-black text-gray-600 uppercase tracking-widest">Variants</label>
-                  {formData.variants.map((variant, idx) => (
+                  <label className="text-xs font-black text-gray-600 uppercase tracking-widest">{isAccessoryProduct ? 'Stock and price' : 'Variants'}</label>
+                  {formData.variants.slice(0, isAccessoryProduct ? 1 : formData.variants.length).map((variant, idx) => (
                     <div key={idx} className="p-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-2xl flex flex-col gap-3 relative">
                       {formData.variants.length > 1 && (
                         <button
@@ -1179,7 +1220,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                         </button>
                       )}
                       <div className="flex justify-between items-center">
-                        <select
+                        {!isAccessoryProduct && <select
                           className="bg-transparent border-none text-sm font-black text-blue-600 focus:ring-0 outline-none cursor-pointer"
                           value={variant.quality_grade}
                           onChange={e => {
@@ -1189,7 +1230,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           }}
                         >
                           {qualityTiers.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                        </select>
+                        </select>}
                         <div className="flex items-center gap-2">
                           <label className="text-[10px] font-black text-gray-600 uppercase">Stock</label>
                           <input
@@ -1219,7 +1260,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                           />
                         </div>
                         <div className="flex-1">
-                          <label className="text-[10px] font-black text-gray-600 uppercase ml-1">Sell</label>
+                          <label className="text-[10px] font-black text-gray-600 uppercase ml-1">{isAccessoryProduct ? 'Price' : 'Sell'}</label>
                           <input
                             type="number"
                             className="w-full px-3 py-2 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-xs font-black text-blue-600"
@@ -1234,12 +1275,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                       </div>
                     </div>
                   ))}
-                  <button
+                  {!isAccessoryProduct && <button
                     onClick={() => setFormData({ ...formData, variants: [...formData.variants, { id: Date.now(), quality_grade: 'Premium', stock: '', minStock: '5', costPrice: '', sellingPrice: '', is_recommended: false }] })}
                     className="w-full py-3 text-xs font-black text-blue-600 rounded-2xl shadow-[var(--shadow-neu-sm)] active:shadow-[var(--shadow-neu-pressed)]"
                   >
                     + ADD VARIANT
-                  </button>
+                  </button>}
                 </div>
 
                 <div className="pt-6 flex gap-4">

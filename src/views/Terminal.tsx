@@ -35,6 +35,7 @@ import { InvoiceModal } from '../components/InvoiceModal';
 import { api } from '../lib/api';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
+import { matchesTerminalSearch, terminalCategoryOptions } from '../lib/terminalSearch';
 
 interface TerminalViewProps {
   inventory: InventoryItem[];
@@ -127,15 +128,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   };
 
   const filteredItems = inventory.filter(item => {
-    const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean);
-    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term =>
-      (item.name || '').toLowerCase().includes(term) ||
-      (item.model || '').toLowerCase().includes(term) ||
-      (item.device_model || '').toLowerCase().includes(term) ||
-      (item.brand || '').toLowerCase().includes(term) ||
-      (item.sku || '').toLowerCase().includes(term) ||
-      (item.category || '').toLowerCase().includes(term)
-    );
+    const matchesSearch = matchesTerminalSearch(item, searchQuery);
 
     // If there's a search query, prioritize it and ignore category/brand filters (Global Search)
     if (searchQuery.trim() !== '') {
@@ -144,6 +137,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
     const itemCat = item.category || '';
     let matchesCategory = activeCategory === 'All Items' || itemCat === activeCategory;
+    if (activeCategory === 'Accessories') {
+      matchesCategory = /accessor/i.test(itemCat);
+    }
 
     // Handle Quick Access specially
     if (activeCategory === '⭐ Quick Access') {
@@ -253,14 +249,14 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const currentItems = filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const displayBrands = ['All Brands', ...brands];
-  const displayCategories = ['⭐ Quick Access', 'All Items', ...categories];
+  const displayCategories = terminalCategoryOptions(categories);
 
   const addToCart = (item: any) => {
     if (searchQuery) setSearchQuery('');
     setCart(prev => [...prev, {
       id: Math.random().toString(36).substr(2, 9),
       name: item.name,
-      sku: `SKU-${item.name.substring(0, 3).toUpperCase()}`,
+      sku: item.sku || `SKU-${item.name.substring(0, 3).toUpperCase()}`,
       price: item.price,
       qty: 1,
       icon: item.icon

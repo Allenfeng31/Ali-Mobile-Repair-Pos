@@ -79,10 +79,8 @@ describe('InventoryView', () => {
     const itemRow = screen.getByText('iPhone 13 Screen');
     fireEvent.click(itemRow);
 
-    // The Quick Edit panel should open. 
-    // We expect the "Variants / Quality Tiers" text to exist multiple times because we updated the UI.
-    const variantHeaders = screen.getAllByText('Variants / Quality Tiers');
-    expect(variantHeaders.length).toBeGreaterThan(1);
+    // The Quick Edit panel should expose the actual current variants heading.
+    expect(screen.getByText('Variants & Pricing')).toBeTruthy();
 
     // Check if the initial variant is loaded in Quick Edit Panel
     const gradeSelects = screen.getAllByRole('combobox');

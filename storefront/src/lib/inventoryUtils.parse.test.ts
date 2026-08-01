@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { displayBrand, parseItem, slugify } from './inventoryUtils';
 
 describe('parseItem', () => {
+  it('excludes the exact canonical Accessories category before repair parsing', () => {
+    expect(parseItem({
+      id: 1,
+      name: 'USB-C Fast Charger',
+      model: 'Accessories||Accessories',
+      category: 'Accessories',
+      sku: 'CHG-USB-C-20W',
+      price: 29,
+    })).toBeNull();
+  });
+
   it('maps iPad rows that are stored under P Other into the tablet brand/model with the POS price', () => {
     const parsed = parseItem({
       id: 1138,

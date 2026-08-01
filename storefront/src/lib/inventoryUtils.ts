@@ -216,6 +216,10 @@ export function formatDeviceTitle(brand: string, model: string): string {
 }
 
 export function parseItem(raw: RawItem): ParsedItem | null {
+  // POS Accessories are sellable in Terminal but never form part of the public repair catalogue.
+  // This exact canonical category check is intentionally evaluated before heuristic fallbacks.
+  if (raw.category === 'Accessories') return null;
+
   // Exclude the legacy incorrect Phone record for Samsung A9 Plus
   // The correct public device exists in the Tablet catalog.
   // Excluded here to keep it operational in POS for invoicing while removing it from the public storefront.
