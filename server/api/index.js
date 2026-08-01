@@ -12,6 +12,7 @@ const { createRequireStaffAuth } = require('./staffAuth.js');
 const { createSyncContactsAdminRouter } = require('./syncContactsAdmin.js');
 const { resolveServerSupabaseKey } = require('../lib/supabaseKeyResolver.js');
 const { notifyStorefrontAnnouncementChange } = require('./announcementRevalidation.js');
+const { notifyStorefrontRepairCatalogueMutation } = require('./catalogueRevalidation.js');
 const { createAnnouncementHandlers } = require('./announcementHandlers.js');
 const {
   calculateMultiItemPricing,
@@ -708,7 +709,7 @@ app.post('/api/inventory', async (req, res) => {
   if (item.device_model && item.name) {
     const { data: existing } = await supabase
       .from('inventory')
-      .select('id')
+      .select('*')
       .eq('device_model', item.device_model)
       .eq('name', item.name)
       .maybeSingle();
@@ -720,6 +721,11 @@ app.post('/api/inventory', async (req, res) => {
         .eq('id', existing.id)
         .select();
       if (error) return res.status(500).json({ error: error.message });
+      void notifyStorefrontRepairCatalogueMutation({
+        operation: 'update',
+        items: [data[0]],
+        beforeById: { [existing.id]: existing },
+      });
       return res.json(data[0]);
     }
   }
@@ -739,6 +745,7 @@ app.post('/api/inventory', async (req, res) => {
     console.error(`❌ [Database Error] Failed to create inventory item:`, error.message);
     return res.status(500).json({ error: error.message });
   }
+  void notifyStorefrontRepairCatalogueMutation({ operation: 'create', items: [data[0]] });
   res.json(data[0]);
 });
 
@@ -769,6 +776,7 @@ app.post('/api/inventory/bulk', async (req, res) => {
     }
 
     console.log(`✅ [Inventory] Bulk generated ${data.length} items successfully.`);
+    void notifyStorefrontRepairCatalogueMutation({ operation: 'create', items: data });
     res.json(data);
   } catch (err) {
     console.error(`❌ [Inventory] Bulk insert exception:`, err.message);
@@ -778,6 +786,7 @@ app.post('/api/inventory/bulk', async (req, res) => {
 
 app.put('/api/inventory/:id', async (req, res) => {
   const itemData = req.body;
+  const { data: previous } = await supabase.from('inventory').select('*').eq('id', req.params.id).maybeSingle();
   let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();
 
   if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
@@ -790,12 +799,19 @@ app.put('/api/inventory/:id', async (req, res) => {
     console.error(`❌ [Database Error] Failed to update inventory item ${req.params.id}:`, error.message);
     return res.status(500).json({ error: error.message });
   }
+  void notifyStorefrontRepairCatalogueMutation({
+    operation: 'update',
+    items: [data[0]],
+    beforeById: previous ? { [previous.id]: previous } : {},
+  });
   res.json(data[0]);
 });
 
 app.delete('/api/inventory/:id', async (req, res) => {
+  const { data: previous } = await supabase.from('inventory').select('*').eq('id', req.params.id).maybeSingle();
   const { error } = await supabase.from('inventory').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
+  if (previous) void notifyStorefrontRepairCatalogueMutation({ operation: 'delete', items: [previous] });
   res.json({ success: true });
 });
 

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { isApprovedPublicRepairRetirement } from './publicRepairCatalogueRetirements';
 
 export const PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION = 1;
-export const PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS = 86_400;
+export const PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS = 604_800;
 export const PUBLIC_REPAIR_CATALOGUE_DEFAULT_MIN_REPAIR_RATIO = 0.7;
 export const PUBLIC_REPAIR_CATALOGUE_REQUIRED_CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'] as const;
 
@@ -80,6 +80,7 @@ export interface PublicRepairCatalogueResolverDependencies<RawItem> {
   minRepairRatio?: number;
   refreshWindowMilliseconds?: number;
   allowMajorShrink?: boolean;
+  forceRefresh?: boolean;
   now?: () => Date;
   onWarning?: (message: string) => void;
 }
@@ -358,10 +359,10 @@ export async function resolvePublicRepairCatalogue<RawItem>(
   }
   const previous = previousSnapshot ? catalogFromSnapshot(previousSnapshot) : null;
 
-  if (previous) {
+  if (previous && !dependencies.forceRefresh) {
     const snapshotAge = now().getTime() - Date.parse(previous.validatedAt);
     if (Number.isFinite(snapshotAge) && snapshotAge >= 0 && snapshotAge < refreshWindowMilliseconds) {
-      dependencies.onWarning?.('Using the current last-known-good public catalogue snapshot; the 24-hour refresh window has not elapsed.');
+      dependencies.onWarning?.('Using the current last-known-good public catalogue snapshot; the 7-day safety refresh window has not elapsed.');
       return previous;
     }
   }

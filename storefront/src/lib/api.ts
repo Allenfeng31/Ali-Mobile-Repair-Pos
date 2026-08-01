@@ -67,6 +67,7 @@ const POS_FETCH_TIMEOUT_MS = 8_000;
 const POS_FETCH_MAX_ATTEMPTS = 3;
 const POS_FETCH_BACKOFF_MS = [150, 350] as const;
 const CATALOGUE_REFRESH_MS = PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS * 1_000;
+export const PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG = 'public-repair-catalogue-source';
 
 function getPublicRepairCatalogueMode(): 'production' | 'development' | 'test' {
   const explicitMode = process.env.PUBLIC_REPAIR_CATALOGUE_MODE;
@@ -95,7 +96,10 @@ async function fetchPOSInventory(): Promise<RawItem[]> {
     const timeout = setTimeout(() => controller.abort(), POS_FETCH_TIMEOUT_MS);
     try {
       const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
-        next: { revalidate: PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS },
+        next: {
+          revalidate: PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS,
+          tags: [PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG],
+        },
         signal: controller.signal,
       });
       if (!res.ok) throw new Error(`POS inventory request returned HTTP ${res.status}.`);
@@ -509,16 +513,12 @@ function buildFallbackCatalog(): BrandEntry[] {
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 /**
- * Resolves one shared public catalogue per 24-hour refresh window. Production
+ * Resolves one shared public catalogue per 7-day safety refresh window. Production
  * uses live POS or the durable last-known-good snapshot; it never accepts the
  * small development fallback.
  */
-export async function fetchRepairCatalog(): Promise<RepairCatalog> {
-  return sharedPublicRepairCatalogue();
-}
-
-const sharedPublicRepairCatalogue = createSharedPublicRepairCatalogueLoader(() =>
-  resolvePublicRepairCatalogue({
+function resolveCurrentPublicRepairCatalogue(forceRefresh = false): Promise<RepairCatalog> {
+  return resolvePublicRepairCatalogue({
     mode: getPublicRepairCatalogueMode(),
     fetchLiveInventory: fetchPOSInventory,
     transformLiveInventory: (items) => transformPOSToCatalog(items),
@@ -526,8 +526,22 @@ const sharedPublicRepairCatalogue = createSharedPublicRepairCatalogueLoader(() =
     writeSnapshot: writeCurrentPublicRepairCatalogueSnapshot,
     createDevelopmentFallback: () => backfillSamsungCatalogModels(buildFallbackCatalog()),
     allowMajorShrink: allowMajorCatalogueShrink(),
+    forceRefresh,
     onWarning: (message) => console.warn(`[public-catalogue] ${message}`),
-  }),
+  });
+}
+
+export async function fetchRepairCatalog(): Promise<RepairCatalog> {
+  return sharedPublicRepairCatalogue();
+}
+
+/** Refreshes, validates, and durably stores the snapshot before route invalidation. */
+export async function refreshPublicRepairCatalogue(): Promise<RepairCatalog> {
+  return resolveCurrentPublicRepairCatalogue(true);
+}
+
+const sharedPublicRepairCatalogue = createSharedPublicRepairCatalogueLoader(
+  () => resolveCurrentPublicRepairCatalogue(),
   CATALOGUE_REFRESH_MS,
 );
 

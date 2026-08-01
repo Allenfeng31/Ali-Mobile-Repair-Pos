@@ -48,7 +48,7 @@ function snapshotFor(brands: BrandEntry[]): StoredPublicRepairCatalogueSnapshot 
 }
 
 function stale(snapshot: StoredPublicRepairCatalogueSnapshot) {
-  return { ...snapshot, validatedAt: '2026-07-14T00:00:00.000Z' };
+  return { ...snapshot, validatedAt: '2026-07-08T00:00:00.000Z' };
 }
 
 async function resolveWith({
@@ -120,7 +120,7 @@ describe('public repair catalogue safety policy', () => {
     expect(second.writes).toHaveLength(0);
   });
 
-  it('does not request POS again while a validated snapshot is inside the 24-hour refresh window', async () => {
+  it('does not request POS again while a validated snapshot is inside the 7-day safety refresh window', async () => {
     const first = await resolveWith({});
     const fetchLiveInventory = vi.fn(async () => [1]);
     const second = await resolveWith({ snapshot: first.stored, fetchLiveInventory });
