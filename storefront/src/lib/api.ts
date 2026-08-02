@@ -84,8 +84,15 @@ function waitForBackoff(milliseconds: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function fetchPOSInventory(): Promise<RawItem[]> {
-  const baseUrl = process.env.POS_API_URL || process.env.NEXT_PUBLIC_POS_API_URL;
+export async function fetchPOSInventory({
+  forceLive = false,
+  baseUrl = process.env.POS_API_URL || process.env.NEXT_PUBLIC_POS_API_URL,
+  fetchImpl = fetch,
+}: {
+  forceLive?: boolean;
+  baseUrl?: string;
+  fetchImpl?: typeof fetch;
+} = {}): Promise<RawItem[]> {
 
   if (!baseUrl) {
     throw new Error('Public POS inventory endpoint is not configured.');
@@ -95,11 +102,15 @@ async function fetchPOSInventory(): Promise<RawItem[]> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), POS_FETCH_TIMEOUT_MS);
     try {
-      const res = await fetch(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
-        next: {
-          revalidate: PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS,
-          tags: [PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG],
-        },
+      const res = await fetchImpl(`${baseUrl}${POS_INVENTORY_ENDPOINT}`, {
+        ...(forceLive
+          ? { cache: 'no-store' as const }
+          : {
+              next: {
+                revalidate: PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS,
+                tags: [PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG],
+              },
+            }),
         signal: controller.signal,
       });
       if (!res.ok) throw new Error(`POS inventory request returned HTTP ${res.status}.`);
@@ -520,7 +531,7 @@ function buildFallbackCatalog(): BrandEntry[] {
 function resolveCurrentPublicRepairCatalogue(forceRefresh = false): Promise<RepairCatalog> {
   return resolvePublicRepairCatalogue({
     mode: getPublicRepairCatalogueMode(),
-    fetchLiveInventory: fetchPOSInventory,
+    fetchLiveInventory: () => fetchPOSInventory({ forceLive: forceRefresh }),
     transformLiveInventory: (items) => transformPOSToCatalog(items),
     readSnapshot: readCurrentPublicRepairCatalogueSnapshot,
     writeSnapshot: writeCurrentPublicRepairCatalogueSnapshot,

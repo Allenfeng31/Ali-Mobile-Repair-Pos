@@ -109,6 +109,12 @@ async function notifyStorefrontRepairCatalogueMutation({
         body: JSON.stringify({ mutations }),
         signal: controller.signal,
       });
+      let outcome = response.ok ? 'success' : 'failed';
+      if (response.ok && typeof response.clone === 'function') {
+        const body = await response.clone().json().catch(() => null);
+        if (body?.ignored === true) outcome = 'ignored';
+      }
+      console.info('[Repair catalogue] notifier result', { operation, mutationCount: mutations.length, status: response.status, outcome });
       if (response.ok) return true;
     } catch {
       // The inventory mutation already succeeded. Retry once without exposing details or secrets.

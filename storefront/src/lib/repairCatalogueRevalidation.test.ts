@@ -30,6 +30,18 @@ describe('repair catalogue event invalidation policy', () => {
     expect(paths.some((path) => path.includes('samsung') || path.includes('google-pixel'))).toBe(false);
   });
 
+  it('treats the Moto G24 $140 price mutation as a public, non-topology update', () => {
+    const mutations = normalizeCatalogueMutations({ mutations: [mutation({ brand: 'Motorola', model: 'Moto G24', repairType: 'Screen Replacement', changedFields: ['price'] })] })!;
+    expect(mutations).toEqual([expect.objectContaining({
+      category: 'phone', brand: 'motorola', model: 'moto-g24', repairType: 'screen-replacement', topologyChanged: false,
+    })]);
+    expect(repairCataloguePathsForMutations(mutations)).toEqual(expect.arrayContaining([
+      '/repairs/phone/motorola/moto-g24/screen-replacement',
+      '/repairs/phone/motorola/moto-g24',
+      '/repairs/phone/motorola',
+    ]));
+  });
+
   it('expands topology changes only to the necessary category, repairs index, and sitemap', () => {
     const paths = repairCataloguePathsForMutations(normalizeCatalogueMutations({ mutations: [mutation({ operation: 'create', topologyChanged: true })] })!);
     expect(paths).toEqual(expect.arrayContaining(['/repairs/phone', '/repairs', '/sitemap.xml']));

@@ -128,6 +128,26 @@ describe('public repair catalogue safety policy', () => {
     expect(fetchLiveInventory).not.toHaveBeenCalled();
   });
 
+  it('forces a live candidate and snapshot write when an authenticated event bypasses the safety window', async () => {
+    const first = await resolveWith({});
+    const fetchLiveInventory = vi.fn(async () => [1]);
+    let stored = first.stored!;
+    const writes: StoredPublicRepairCatalogueSnapshot[] = [];
+    const catalog = await resolvePublicRepairCatalogue({
+      mode: 'production',
+      fetchLiveInventory,
+      transformLiveInventory: () => completeBrands(),
+      readSnapshot: async () => stored,
+      writeSnapshot: async (snapshot) => { writes.push(snapshot); stored = snapshot; },
+      createDevelopmentFallback: completeBrands,
+      forceRefresh: true,
+      now,
+    });
+    expect(fetchLiveInventory).toHaveBeenCalledTimes(1);
+    expect(writes).toHaveLength(1);
+    expect(catalog.catalogueSource).toBe('live-pos');
+  });
+
   it('blocks production when neither live POS nor a snapshot is available', async () => {
     await expect(resolveWith({ fetchLiveInventory: async () => { throw new Error('offline'); } }))
       .rejects.toThrow('Production build stopped');

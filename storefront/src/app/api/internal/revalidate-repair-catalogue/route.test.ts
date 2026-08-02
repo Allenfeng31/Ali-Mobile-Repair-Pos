@@ -3,10 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const revalidateTag = vi.hoisted(() => vi.fn());
 const revalidatePath = vi.hoisted(() => vi.fn());
 const refreshPublicRepairCatalogue = vi.hoisted(() => vi.fn());
+const fetchRepairCatalog = vi.hoisted(() => vi.fn());
 vi.mock('next/cache', () => ({ revalidateTag, revalidatePath }));
 vi.mock('@/lib/api', () => ({
   PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG: 'public-repair-catalogue-source',
   refreshPublicRepairCatalogue,
+  fetchRepairCatalog,
 }));
 
 import { POST } from './route';
@@ -33,6 +35,7 @@ afterEach(() => {
   revalidateTag.mockReset();
   revalidatePath.mockReset();
   refreshPublicRepairCatalogue.mockReset();
+  fetchRepairCatalog.mockReset();
 });
 
 describe('repair catalogue revalidation webhook', () => {
@@ -46,10 +49,15 @@ describe('repair catalogue revalidation webhook', () => {
   it('refreshes the durable catalogue snapshot before invalidating price-only paths', async () => {
     vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
     const order: string[] = [];
+    const dummyCatalogue = {
+      catalogueSource: 'live-pos',
+      brands: [{ category: 'phone', slug: 'motorola', models: [{ slug: 'moto-g24', repairTypes: [{ slug: 'screen-replacement' }] }] }]
+    };
+    fetchRepairCatalog.mockResolvedValueOnce(dummyCatalogue);
     revalidateTag.mockImplementation(() => order.push('source'));
     refreshPublicRepairCatalogue.mockImplementation(async () => {
       order.push('snapshot');
-      return { catalogueSource: 'live-pos' };
+      return dummyCatalogue;
     });
     revalidatePath.mockImplementation(() => order.push('path'));
 
@@ -77,12 +85,48 @@ describe('repair catalogue revalidation webhook', () => {
 
   it('adds only category, repairs index, and sitemap for a topology mutation', async () => {
     vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
-    refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos' });
+    refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });
     expect((await POST(request(payload({ operation: 'create', topologyChanged: true })))).status).toBe(200);
     expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone');
     expect(revalidatePath).toHaveBeenCalledWith('/repairs');
     expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
     expect(revalidatePath).not.toHaveBeenCalledWith('/');
+  });
+
+  it('detects missing live topology (e.g. Moto G24 price update on old snapshot without it) and triggers broad invalidation', async () => {
+    vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
+    // Before: no Moto G24
+    fetchRepairCatalog.mockResolvedValueOnce({ brands: [] });
+    // After: Moto G24 exists
+    refreshPublicRepairCatalogue.mockResolvedValueOnce({
+      catalogueSource: 'live-pos',
+      brands: [{ category: 'phone', slug: 'motorola', models: [{ slug: 'moto-g24', repairTypes: [{ slug: 'screen-replacement' }] }] }]
+    });
+
+    const response = await POST(request(payload()));
+    expect(response.status).toBe(200);
+    // Should trigger broad invalidation because topology changed
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs');
+    expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone');
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/motorola/moto-g24/screen-replacement');
+  });
+
+  it('detects model deletion and invalidates parent URLs', async () => {
+    vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
+    fetchRepairCatalog.mockResolvedValueOnce({
+      brands: [{ category: 'phone', slug: 'motorola', models: [{ slug: 'old-model', repairTypes: [{ slug: 'screen-replacement' }] }] }]
+    });
+    refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });
+
+    // Payload deletes the model
+    const response = await POST(request(payload({ operation: 'delete', model: 'old-model', topologyChanged: true })));
+    expect(response.status).toBe(200);
+
+    // Explicitly invalidates the deleted detail and its parents
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/motorola/old-model');
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/motorola');
+    expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
   });
 
   it('does not invalidate paths when refresh falls back to last-known-good data', async () => {

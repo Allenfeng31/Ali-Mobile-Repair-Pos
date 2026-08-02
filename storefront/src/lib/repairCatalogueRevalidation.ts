@@ -1,4 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
+import type { RepairCatalog } from '@/lib/api';
 
 export type CatalogueMutation = {
   operation: 'create' | 'update' | 'delete';
@@ -83,6 +84,21 @@ export function normalizeCatalogueMutations(payload: unknown): CatalogueMutation
 
 export function isIgnoredCatalogueMutation(mutations: CatalogueMutation[]) {
   return mutations.every((mutation) => mutation.operation === 'update' && mutation.changedFields.every((field) => ['stock', 'quantity', 'minStock', 'status'].includes(field)));
+}
+
+export function extractCatalogueTopology(catalog: RepairCatalog): Set<string> {
+  const topology = new Set<string>();
+  for (const brand of catalog.brands) {
+    topology.add(`${brand.category}`);
+    topology.add(`${brand.category}/${brand.slug}`);
+    for (const model of brand.models) {
+      topology.add(`${brand.category}/${brand.slug}/${model.slug}`);
+      for (const repair of model.repairTypes) {
+        topology.add(`${brand.category}/${brand.slug}/${model.slug}/${repair.slug}`);
+      }
+    }
+  }
+  return topology;
 }
 
 export function repairCataloguePathsForMutations(mutations: CatalogueMutation[]) {
