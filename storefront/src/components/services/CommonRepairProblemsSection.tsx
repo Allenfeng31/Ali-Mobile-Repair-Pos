@@ -2,12 +2,14 @@ import type { AliMobileEnhancedIphoneRepairType } from '@/lib/seo/content/iphone
 import type { AliMobileEnhancedIpadRepairType } from '@/lib/seo/content/ipad/types';
 import type { AliMobileEnhancedSamsungRepairType } from '@/lib/seo/content/samsung/types';
 import type { AliMobileEnhancedSamsungTabletRepairType } from '@/lib/seo/content/samsung-tablet/types';
+import type { AppleWatchRepairSlug } from '@/lib/seo/content/apple-watch/index';
 
 export type CommonRepairProblemsRepairType =
   | AliMobileEnhancedIphoneRepairType
   | AliMobileEnhancedSamsungRepairType
   | AliMobileEnhancedIpadRepairType
-  | AliMobileEnhancedSamsungTabletRepairType;
+  | AliMobileEnhancedSamsungTabletRepairType
+  | AppleWatchRepairSlug;
 
 interface RepairProblem {
   title: string;
@@ -38,6 +40,10 @@ const SECTION_COPY: Record<
   },
   "charging-port-replacement": {
     heading: (modelName) => `Common ${modelName} Charging Port Problems`,
+    intro: "These are common signs we check before confirming the repair path.",
+  },
+  "charging-repair": {
+    heading: (modelName) => `Common ${modelName} Charging Problems`,
     intro: "These are common signs we check before confirming the repair path.",
   },
   "back-glass-replacement": {
