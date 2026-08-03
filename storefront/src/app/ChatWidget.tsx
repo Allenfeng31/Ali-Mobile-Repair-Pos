@@ -46,6 +46,20 @@ interface Message {
   created_at: string;
 }
 
+export function getRecoveryCustomerIntro(
+  savedName: string | null,
+  savedPhone: string | null,
+  introSent: string | null,
+  messages: Message[],
+) {
+  const name = savedName?.trim();
+  if (!name || !introSent || messages.some(message => message.content.startsWith(INTRO_PREFIX))) {
+    return null;
+  }
+
+  return `${INTRO_PREFIX}\nName: ${name}\nPhone: ${savedPhone?.trim() || ''}`;
+}
+
 // ─── Main Widget ──────────────────────────────────────────────────────────────
 
 export default function ChatWidget() {
@@ -130,18 +144,18 @@ export default function ChatWidget() {
         const savedPhone = localStorage.getItem(CUSTOMER_PHONE_KEY);
         const introSent  = localStorage.getItem(CUSTOMER_INTRO_SENT_KEY);
 
-        if (savedName && savedPhone && introSent) {
+        if (savedName && introSent) {
           const msgsRes = await fetch(`${getApiBase()}/chat/session/${token}/messages`);
           if (msgsRes.ok) {
             const msgs: Message[] = await msgsRes.json();
-            const hasIntro = msgs.some(m => m.content.startsWith(INTRO_PREFIX));
-            if (!hasIntro) {
+            const recoveryIntro = getRecoveryCustomerIntro(savedName, savedPhone, introSent, msgs);
+            if (recoveryIntro) {
               // Session was deleted and just recreated — resend customer info
               await fetch(`${getApiBase()}/chat/session/${token}/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  content: `${INTRO_PREFIX}\nName: ${savedName}\nPhone: ${savedPhone}`,
+                  content: recoveryIntro,
                 }),
               });
             }

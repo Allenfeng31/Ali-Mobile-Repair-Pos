@@ -9,7 +9,7 @@ vi.mock('@/hooks/useAuthStore', () => ({ useAuthStore: () => ({ permissions: { i
 vi.mock('@/lib/supabase', () => ({ supabase: { auth: { getSession } } }));
 vi.mock('@/lib/apiBase', () => ({ getApiBaseUrl: () => '/api' }));
 
-import { ChatInbox } from './ChatInbox';
+import { ChatInbox, getChatSessionLabel } from './ChatInbox';
 
 const messageFor = (status: number) => new Response('{}', { status, headers: { 'Content-Type': 'application/json' } });
 
@@ -29,5 +29,21 @@ describe('ChatInbox adaptive polling integration', () => {
     await polls[0]();
     await waitFor(() => expect(screen.getByText(text)).toBeTruthy());
     if (status !== 401) expect(screen.queryByText('Staff session expired. Please sign out and sign back in.')).toBeNull();
+  });
+});
+
+describe('ChatInbox session labels', () => {
+  it('keeps anonymous labels stable when the session list is reordered', () => {
+    const first = { id: 'synthetic-session-alpha', customer_name: null };
+    const second = { id: 'synthetic-session-beta', customer_name: null };
+
+    const firstLabel = getChatSessionLabel(first);
+    const secondLabel = getChatSessionLabel(second);
+
+    expect(getChatSessionLabel(second)).toBe(secondLabel);
+    expect(getChatSessionLabel(first)).toBe(firstLabel);
+    expect(firstLabel).not.toBe(secondLabel);
+    expect(firstLabel).not.toContain(first.id);
+    expect(firstLabel).not.toBe('Customer #001');
   });
 });

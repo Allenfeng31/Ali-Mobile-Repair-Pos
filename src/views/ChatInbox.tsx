@@ -45,6 +45,17 @@ interface ChatSession {
   customer_phone?: string | null;
 }
 
+export function getChatSessionLabel(session: Pick<ChatSession, 'id' | 'customer_name'>) {
+  const customerName = session.customer_name?.trim();
+  if (customerName) return customerName;
+
+  let hash = 2166136261;
+  for (const character of session.id) {
+    hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
+  }
+  return `Customer #${(hash >>> 0).toString(36).toUpperCase().padStart(6, '0').slice(-6)}`;
+}
+
 interface BookingRecord {
   id: string;
   customer_name: string;
@@ -511,11 +522,6 @@ export function ChatInbox() {
     return { name: session.customer_name, phone: session.customer_phone };
   };
 
-  const getSessionLabel = (session: ChatSession, idx: number) => {
-    if (session.customer_name) return session.customer_name;
-    return `Customer #${String(idx + 1).padStart(3, '0')}`;
-  };
-
   const getSessionSubLabel = (session: ChatSession) => {
     if (session.customer_phone) return session.customer_phone;
     return null;
@@ -523,7 +529,6 @@ export function ChatInbox() {
 
   // ── Conversation view ──────────────────────────────────────────────────────
   if (activeSession) {
-    const sessionIdx = sessions.findIndex(s => s.id === activeSession.id);
     const customerInfo = getCustomerInfo(activeSession);
     const visibleMessages = messages;
 
@@ -610,7 +615,7 @@ export function ChatInbox() {
             <ArrowLeft size={22} strokeWidth={3} />
           </button>
           <div className="flex-1">
-            <h2 className="text-xl font-black text-black tracking-tight leading-none">{getSessionLabel(activeSession, sessionIdx)}</h2>
+            <h2 className="text-xl font-black text-black tracking-tight leading-none">{getChatSessionLabel(activeSession)}</h2>
             {customerInfo?.phone && (
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Mobile: {customerInfo.phone}</p>
             )}
@@ -1110,7 +1115,7 @@ export function ChatInbox() {
       )}
 
       <div className="grid grid-cols-1 gap-6">
-        {sessions.map((session, idx) => {
+        {sessions.map((session) => {
           const unread = getUnreadCount(session);
           const lastMsg = getLastMessage(session);
           const isActive = activeSession?.id === session.id;
@@ -1140,7 +1145,7 @@ export function ChatInbox() {
                       "text-lg font-black tracking-tight",
                       unread > 0 ? "text-blue-600" : "text-black"
                     )}>
-                      {getSessionLabel(session, idx)}
+                      {getChatSessionLabel(session)}
                     </span>
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">
                       {formatTime(session.last_message_at || session.created_at)}
