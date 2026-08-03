@@ -1,4 +1,5 @@
 import React from 'react';
+import { LOCAL_BUSINESS_OPENING_HOURS } from '@/lib/businessHours';
 
 interface StoreData {
   name: string;
@@ -16,7 +17,7 @@ interface StoreData {
     longitude: number;
   };
   openingHoursSpecification: Array<{
-    dayOfWeek: string | string[];
+    dayOfWeek: string | readonly string[];
     opens: string;
     closes: string;
   }>;
@@ -36,13 +37,7 @@ const MAIN_STORE_CONFIG: StoreData = {
     addressCountry: 'AU',
   },
   geo: { latitude: -37.815444, longitude: 145.222375 },
-  openingHoursSpecification: [
-    {
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      opens: '10:00',
-      closes: '17:00',
-    }
-  ],
+  openingHoursSpecification: [LOCAL_BUSINESS_OPENING_HOURS],
   priceRange: '$$',
 };
 

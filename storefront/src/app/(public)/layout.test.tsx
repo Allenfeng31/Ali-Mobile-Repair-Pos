@@ -44,5 +44,7 @@ describe("PublicLayout footer", () => {
       expect(link).toHaveAttribute("href", "/book-repair");
     });
     expect(within(footer).getByRole("link", { name: "Call 0481 058 514" })).toHaveAttribute("href", "tel:0481058514");
+    expect(within(footer).getByText("Mon-Sat, 9am-5pm")).toBeInTheDocument();
+    expect(within(footer).queryByText("Mon-Sat, 10am-5pm")).not.toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { LOCAL_BUSINESS_OPENING_HOURS } from "@/lib/businessHours";
 
 import styles from "./AboutUs.module.css";
 
@@ -117,14 +118,7 @@ const localBusinessSchema = {
     latitude: -37.81534,
     longitude: 145.22851,
   },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      opens: "10:00",
-      closes: "17:00",
-    },
-  ],
+  openingHoursSpecification: [LOCAL_BUSINESS_OPENING_HOURS],
   areaServed: [
     { "@type": "City", name: "Ringwood" },
     { "@type": "AdministrativeArea", name: "Melbourne eastern suburbs" },

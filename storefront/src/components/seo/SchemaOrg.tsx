@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { LOCAL_BUSINESS_OPENING_HOURS } from "@/lib/businessHours";
 
 interface SchemaOrgProps {
   type: 'LocalBusiness' | 'Service';
@@ -21,8 +22,8 @@ export function SchemaOrg({ type, data }: SchemaOrgProps) {
   );
 }
 
-export function LocalBusinessSchema() {
-  const businessData = {
+export function getLocalBusinessSchemaData() {
+  return {
     "@type": "MobilePhoneStore",
     "name": "Ali Mobile & Repair",
     "image": "https://www.alimobile.com.au/logo.png",
@@ -44,14 +45,7 @@ export function LocalBusinessSchema() {
       "latitude": -37.815340,
       "longitude": 145.228510
     },
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        "opens": "10:00",
-        "closes": "17:00"
-      }
-    ],
+    "openingHoursSpecification": [LOCAL_BUSINESS_OPENING_HOURS],
     "sameAs": [
       "https://www.facebook.com/alimobileandreari/"
     ],
@@ -92,8 +86,10 @@ export function LocalBusinessSchema() {
       "geoRadius": "15000"
     }
   };
+}
 
-  return <SchemaOrg type="LocalBusiness" data={businessData} />;
+export function LocalBusinessSchema() {
+  return <SchemaOrg type="LocalBusiness" data={getLocalBusinessSchemaData()} />;
 }
 
 export function RepairServiceSchema({

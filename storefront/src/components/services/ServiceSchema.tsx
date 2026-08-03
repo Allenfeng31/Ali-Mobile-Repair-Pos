@@ -1,12 +1,13 @@
 import Script from "next/script";
+import { LOCAL_BUSINESS_OPENING_HOURS } from "@/lib/businessHours";
 
 interface ServiceSchemaProps {
   serviceName: string;
   description: string;
 }
 
-export function ServiceSchema({ serviceName, description }: ServiceSchemaProps) {
-  const localBusinessSchema = {
+export function getServiceLocalBusinessSchema(description: string) {
+  return {
     "@context": "https://schema.org",
     "@type": "MobilePhoneStore",
     "@id": "https://www.alimobile.com.au/#localbusiness",
@@ -28,15 +29,12 @@ export function ServiceSchema({ serviceName, description }: ServiceSchemaProps) 
     },
     "url": "https://www.alimobile.com.au",
     "telephone": "0481 058 514",
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        "opens": "10:00",
-        "closes": "17:00"
-      }
-    ]
+    "openingHoursSpecification": [LOCAL_BUSINESS_OPENING_HOURS]
   };
+}
+
+export function ServiceSchema({ serviceName, description }: ServiceSchemaProps) {
+  const localBusinessSchema = getServiceLocalBusinessSchema(description);
 
   return (
     <>

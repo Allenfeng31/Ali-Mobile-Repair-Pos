@@ -566,7 +566,7 @@ You must strictly follow these humanizer rules to write natural, authentic copy.
    - NO Chatbot artifacts or meta-commentary (e.g. "I hope this helps", "let's dive in", "here's what you need to know"). Start directly with the content.
    - NO Fragmented Headers: Do not place a single-sentence rhetorical warm-up paragraph immediately under a heading before starting the real content.
    - NO Filler Phrases or Hedging: Use "to" instead of "in order to", "because" instead of "due to the fact that". Avoid excessive qualifications like "could potentially possibly be argued" or instruction padding like "Treat your device with care around water and steam" (instead, just state the IP rating facts).
-   - NO Generic up-beat conclusions: End with specific local action points, shop hours (10am-5pm), address, or phone number instead of "book your diagnostic check today" or "the future looks bright".
+   - NO Generic up-beat conclusions: End with specific local action points, shop hours (9am-5pm), address, or phone number instead of "book your diagnostic check today" or "the future looks bright".
 10. Claim Safety and KB rules:
      - iPhone screen repairs:
        * For older models (like iPhone 11, iPhone XR): compare budget LCDs vs premium OEM-quality LCDs, write "We use a specialist programmer where the model supports it to transfer original display data and preserve True Tone behaviour. If this data transfer is skipped, you may see an Apple warning message or find that True Tone adapts differently than before."

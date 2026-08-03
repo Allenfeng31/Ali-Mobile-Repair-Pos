@@ -6,6 +6,7 @@ import GlobalRepairCart from "@/components/GlobalRepairCart";
 import { formatOtherRepairServiceName, isOtherRepairService, useCart, type RepairService } from "@/context/CartContext";
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
 import { buildBookingPayload } from "@/lib/bookingPayload";
+import { BUSINESS_HOURS } from "@/lib/businessHours";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -166,9 +167,7 @@ export default function BookRepairPage() {
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
 
-  const TIME_SLOTS = [
-    "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
-  ];
+  const TIME_SLOTS = BUSINESS_HOURS.bookingStartSlots;
 
   // ── VIC Public Holidays 2026/2027 ─────────────────────────────────────────
   const VIC_PUBLIC_HOLIDAYS = [

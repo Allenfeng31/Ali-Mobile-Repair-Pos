@@ -6,6 +6,7 @@ import Header from "../Header";
 import { CartProvider } from "@/context/CartContext";
 import PageTransition from "@/components/PageTransition";
 import SocialIcon from "@/components/SocialIcon";
+import { BUSINESS_HOURS } from "@/lib/businessHours";
 import { Clock3, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 
 export const viewport: Viewport = {
@@ -137,7 +138,7 @@ export default function PublicLayout({
                 <div className="footer-contact-card">
                   <Clock3 size={19} strokeWidth={2.4} aria-hidden="true" />
                   <span>Opening hours</span>
-                  <strong>Mon-Sat, 10am-5pm</strong>
+                  <strong>{BUSINESS_HOURS.compactDisplay}</strong>
                   <small>Walk-ins welcome. Online bookings get priority.</small>
                 </div>
               </div>

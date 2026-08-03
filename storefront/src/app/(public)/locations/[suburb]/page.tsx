@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BUSINESS_HOURS } from "@/lib/businessHours";
 import { notFound } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight, Battery, CheckCircle2, Clock, MapPin, Navigation, PhoneCall, PlugZap, ShieldCheck, Smartphone, Wrench } from "lucide-react";
@@ -842,7 +843,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
                 <details>
                   <summary>What are your opening hours?</summary>
                   <p>
-                    We are open from 10am to 5pm, Monday to Saturday. If you are travelling from {area.name},
+                    We are open from {BUSINESS_HOURS.sentenceDisplay}. If you are travelling from {area.name},
                     you can call ahead to check timing, parts availability, or whether booking is recommended.
                   </p>
                 </details>
