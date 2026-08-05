@@ -15,10 +15,19 @@ describe("business hours", () => {
     expect(BUSINESS_HOURS.closes).toBe("17:00");
     expect(BUSINESS_HOURS.compactDisplay).toBe("Mon-Sat, 9am-5pm");
     expect(BUSINESS_HOURS.sentenceDisplay).toBe("9am to 5pm, Monday to Saturday");
-    expect(BUSINESS_HOURS.bookingStartSlots).toEqual([
-      "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",
-    ]);
+    expect(BUSINESS_HOURS.bookingStartSlots).toHaveLength(16);
+    expect(BUSINESS_HOURS.bookingStartSlots[0]).toBe("09:00");
+    expect(BUSINESS_HOURS.bookingStartSlots[1]).toBe("09:30");
+    expect(BUSINESS_HOURS.bookingStartSlots.at(-1)).toBe("16:30");
+    expect(BUSINESS_HOURS.bookingStartSlots).toContain("12:30");
+    expect(BUSINESS_HOURS.bookingStartSlots).toContain("16:00");
     expect(BUSINESS_HOURS.bookingStartSlots).not.toContain("17:00");
+    expect(BUSINESS_HOURS.bookingStartSlots).not.toContain("08:30");
+    for (let index = 1; index < BUSINESS_HOURS.bookingStartSlots.length; index += 1) {
+      const [previousHour, previousMinute] = BUSINESS_HOURS.bookingStartSlots[index - 1].split(":").map(Number);
+      const [hour, minute] = BUSINESS_HOURS.bookingStartSlots[index].split(":").map(Number);
+      expect(hour * 60 + minute - (previousHour * 60 + previousMinute)).toBe(30);
+    }
     expect(LOCAL_BUSINESS_OPENING_HOURS).toMatchObject({
       opens: "09:00",
       closes: "17:00",
