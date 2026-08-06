@@ -6,6 +6,7 @@ import { Order } from '../types';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { POS_REPAIR_WARRANTY_TEXT } from '@/lib/repairWarranty';
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -206,7 +207,7 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
         .align('center')
         .separator('-')
         .boldOn()
-        .wrapText('WARRANTY: 180 DAYS ON MOBILE REPAIRS ONLY (parts and labor). No refunds on water damage repairs. Thank you!')
+        .wrapText(`WARRANTY: ${POS_REPAIR_WARRANTY_TEXT}`)
         .boldOff()
         .separator('-')
         .blank()

@@ -2,6 +2,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { TopAnnouncementBar } from "@/components/TopAnnouncementBar";
 import { Analytics } from "@vercel/analytics/next";
+import { ROOT_SOCIAL_DESCRIPTION } from "@/lib/siteMetadata";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Ali Mobile & Repair | Ringwood, Melbourne",
-    description: "Expert mobile phone and electronics repair in Ringwood Square. Fast, reliable, with a 6-month warranty.",
+    description: ROOT_SOCIAL_DESCRIPTION,
   }
 };
 

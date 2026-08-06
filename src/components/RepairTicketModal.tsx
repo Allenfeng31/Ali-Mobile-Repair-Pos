@@ -6,6 +6,7 @@ import { RepairRecord, Customer } from '../types';
 import { useScrollLock } from '../hooks/useScrollLock';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
+import { POS_REPAIR_WARRANTY_TEXT } from '@/lib/repairWarranty';
 
 interface RepairTicketModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
   const disclaimerTerms = [
     { en: "Data Backup: Data loss is not covered. Please backup your device." },
     { en: "Liquid Damage: No warranty on liquid damage repairs once they leave the shop." },
-    { en: "Warranty: 180 days warranty on parts and labor." },
+    { en: `Warranty: ${POS_REPAIR_WARRANTY_TEXT}` },
     { en: "Unclaimed Goods: Items not collected within 180 days will be disposed of." }
   ];
 
@@ -186,7 +187,7 @@ export function RepairTicketModal({ isOpen, onClose, repair, customer, t }: Repa
         .align('left')
         .wrapText('1. DATA BACKUP: Data loss is not covered. Please backup your device.')
         .wrapText('2. LIQUID DAMAGE: No warranty on liquid damage repairs once they leave the shop.')
-        .wrapText('3. WARRANTY: 180 days on mobile repairs only (parts and labor).')
+        .wrapText(`3. WARRANTY: ${POS_REPAIR_WARRANTY_TEXT}`)
         .wrapText('4. UNCLAIMED GOODS: Items not collected within 180 days will be disposed of.')
         .blank()
 
