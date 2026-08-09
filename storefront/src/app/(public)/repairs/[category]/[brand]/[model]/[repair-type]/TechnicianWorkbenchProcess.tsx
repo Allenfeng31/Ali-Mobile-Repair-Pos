@@ -93,7 +93,7 @@ export default function TechnicianWorkbenchProcess({
   const secondaryProblems = pocket.commonProblems.slice(splitIndex);
   const outcomesProblems = secondaryProblems.length > 0 ? secondaryProblems : primaryProblems;
   const headings = pocket.workbenchHeadings || {
-    options: "Which repair path fits this iPhone 13?",
+    options: "Which repair path fits your device?",
     diagnostics: "What do we test before quoting?",
     symptoms: "Which symptoms matter most?",
     outcomes: "What can affect the final result?",
