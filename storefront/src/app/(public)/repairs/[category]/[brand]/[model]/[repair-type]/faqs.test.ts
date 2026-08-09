@@ -67,4 +67,21 @@ describe('generateFaqs', () => {
     expect(warrantyFaq?.answer).toBe(WATER_DAMAGE_WARRANTY_SUMMARY);
     expect(warrantyFaq?.answer).not.toContain(STANDARD_WARRANTY_SUMMARY);
   });
+
+  it.each(['screen-replacement', 'battery-replacement'])('uses the standard part-and-labour policy for %s', (repairSlug) => {
+    const faqs = generateFaqs('iPhone 15', 'Standard Repair', repairSlug, 50, 'A3090', 'Apple');
+    const warrantyFaq = faqs.find((faq) => faq.question.startsWith('Is there a warranty'));
+
+    expect(warrantyFaq?.answer).toBe(STANDARD_WARRANTY_SUMMARY);
+    expect(warrantyFaq?.answer).toContain('replacement part and labour');
+  });
+
+  it.each(['logic-board-repair', 'data-recovery'])('does not make outcome or whole-device guarantees for %s', (repairSlug) => {
+    const faqs = generateFaqs('iPhone 15', 'Assessment Service', repairSlug, 50, 'A3090', 'Apple');
+    const answers = faqs.map((faq) => faq.answer).join(' ');
+
+    expect(answers).not.toMatch(/guaranteed successful repair/i);
+    expect(answers).not.toMatch(/guaranteed data recovery/i);
+    expect(answers).not.toMatch(/unconditional whole[- ]device warranty/i);
+  });
 });

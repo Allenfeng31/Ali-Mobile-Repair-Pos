@@ -19,6 +19,12 @@ import {
 } from '@/lib/repairPolicy';
 
 describe('RepairPolicySection', () => {
+  it('keeps the authoritative standard repair summary exact', () => {
+    expect(STANDARD_WARRANTY_SUMMARY).toBe(
+      'Completed standard repairs include a 6-month warranty covering the replacement part and labour.'
+    );
+  });
+
   it('shows compact standard summaries with full policy content in closed disclosures', () => {
     expect(getRepairPolicyVariant('screen-replacement')).toBe('standard');
     expect(getRepairPolicyVariant('battery-replacement')).toBe('standard');

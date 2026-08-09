@@ -37,6 +37,7 @@ describe("PublicLayout footer", () => {
     expect(warranty).toBeInTheDocument();
     expect(warranty.querySelector("svg")).toBeInTheDocument();
     expect(within(trustStrip).queryByText("180-Day Warranty")).not.toBeInTheDocument();
+    expect(within(footer).queryByText(/180 Day|Comprehensive Warranty/i)).not.toBeInTheDocument();
     expect(within(trustStrip).getByText("No Fix, No Charge")).toBeInTheDocument();
     expect(trustStrip).toHaveClass("footer-trust-strip");
     expect(within(footer).getAllByRole("link", { name: "Book Repair" })).toHaveLength(2);
