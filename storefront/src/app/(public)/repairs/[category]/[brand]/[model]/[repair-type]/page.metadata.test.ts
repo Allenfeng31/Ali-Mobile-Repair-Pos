@@ -69,6 +69,40 @@ const catalog: RepairCatalog = {
       ],
     },
     {
+      category: 'tablet',
+      slug: 'samsung',
+      brand: 'Samsung',
+      icon: 'tablet',
+      models: [
+        {
+          slug: 'galaxy-tab-a8-sm-x200-sm-x205',
+          model: 'Galaxy Tab A8',
+          repairTypes: [{
+            slug: 'battery-replacement',
+            name: 'Galaxy Tab A8 Battery Service',
+            price: 90,
+          }],
+        },
+      ],
+    },
+    {
+      category: 'tablet',
+      slug: 'lenovo',
+      brand: 'Lenovo',
+      icon: 'tablet',
+      models: [
+        {
+          slug: 'lenovo-tab-p11-gen-2-tb-350fu',
+          model: 'Lenovo Tab P11 Gen 2',
+          repairTypes: [{
+            slug: 'charging-port-replacement',
+            name: 'Lenovo Tab P11 Gen 2 Charging Port',
+            price: 0,
+          }],
+        },
+      ],
+    },
+    {
       category: 'watch',
       slug: 'apple',
       brand: 'Apple',
@@ -126,6 +160,22 @@ const repairDetails: Record<string, RepairDetails> = {
     variants: [],
     source: 'fallback',
   },
+  'tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205/battery-replacement': {
+    brand: 'Samsung',
+    model: 'Galaxy Tab A8',
+    repairType: 'Galaxy Tab A8 Battery Service',
+    price: 90,
+    variants: [],
+    source: 'fallback',
+  },
+  'tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/charging-port-replacement': {
+    brand: 'Lenovo',
+    model: 'Lenovo Tab P11 Gen 2',
+    repairType: 'Lenovo Tab P11 Gen 2 Charging Port',
+    price: 0,
+    variants: [],
+    source: 'fallback',
+  },
   'watch/apple/apple-watch-series-3-38mm/charging-repair': {
     brand: 'Apple',
     model: 'Apple Watch Series 3 38mm',
@@ -155,8 +205,8 @@ describe('repair detail metadata', () => {
 
     expect(metadata.alternates?.canonical).toBe(canonicalUrl);
     expect(metadata.openGraph).toMatchObject({ url: canonicalUrl });
-    expect(metadata.openGraph?.title).toContain('iPhone 15 Screen Replacement');
-    expect(metadata.twitter?.title).toContain('iPhone 15 Screen Replacement');
+    expect(metadata.openGraph?.title).toBe('iPhone 15 Screen Replacement | Ali Mobile & Repair');
+    expect(metadata.twitter?.title).toBe('iPhone 15 Screen Replacement | Ali Mobile & Repair');
     expect(metadata.description).toContain('cracked glass');
     expect(metadata.openGraph?.description).toBe(metadata.description);
     expect(metadata.twitter?.description).toBe(metadata.description);
@@ -179,6 +229,43 @@ describe('repair detail metadata', () => {
     expect(batteryMetadata.description).not.toBe(macbookMetadata.description);
     expect(batteryMetadata.openGraph?.description).toBe(batteryMetadata.description);
     expect(batteryMetadata.twitter?.description).toBe(batteryMetadata.description);
+  });
+
+  it('uses the enhanced Samsung Tablet identity for social metadata instead of the raw catalogue label', async () => {
+    const metadata = await generateMetadata(
+      params('tablet', 'samsung', 'galaxy-tab-a8-sm-x200-sm-x205', 'battery-replacement')
+    );
+    const expectedTitle = 'Galaxy Tab A8 (SM-X200 / SM-X205) Battery Replacement | Ali Mobile & Repair';
+
+    expect(metadata.openGraph?.title).toBe(expectedTitle);
+    expect(metadata.twitter?.title).toBe(expectedTitle);
+    expect(String(metadata.openGraph?.title).match(/Galaxy Tab A8/g)).toHaveLength(1);
+    expect(metadata.openGraph?.title).not.toContain('Battery Service');
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+    expect(metadata.twitter?.description).toBe(metadata.description);
+    expect(metadata.alternates?.canonical).toBe(
+      'https://www.alimobile.com.au/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205/battery-replacement'
+    );
+    expect(metadata.openGraph?.url).toBe(metadata.alternates?.canonical);
+  });
+
+  it('uses the enhanced Lenovo Tablet identity for social metadata instead of the raw catalogue label', async () => {
+    const metadata = await generateMetadata(
+      params('tablet', 'lenovo', 'lenovo-tab-p11-gen-2-tb-350fu', 'charging-port-replacement')
+    );
+    const expectedTitle = 'Lenovo Tab P11 Gen 2 (TB-350FU) Charging Port Replacement | Ali Mobile & Repair';
+
+    expect(metadata.openGraph?.title).toBe(expectedTitle);
+    expect(metadata.twitter?.title).toBe(expectedTitle);
+    expect(String(metadata.openGraph?.title).match(/Lenovo Tab P11 Gen 2/g)).toHaveLength(1);
+    expect(metadata.openGraph?.title).not.toMatch(/Charging Port \|/);
+    expect(metadata.openGraph?.title).toContain('Charging Port Replacement');
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+    expect(metadata.twitter?.description).toBe(metadata.description);
+    expect(metadata.alternates?.canonical).toBe(
+      'https://www.alimobile.com.au/repairs/tablet/lenovo/lenovo-tab-p11-gen-2-tb-350fu/charging-port-replacement'
+    );
+    expect(metadata.openGraph?.url).toBe(metadata.alternates?.canonical);
   });
 
   it('retains the existing 404 behavior for an invalid taxonomy combination', async () => {

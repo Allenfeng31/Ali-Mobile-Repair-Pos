@@ -86,6 +86,7 @@ import {
   getAliMobileEnhancedLenovoTabletSeoPocket,
   getLenovoTabletCategoryHubLinks,
   getLenovoTabletModelHubLinks,
+  getLenovoTabletRepairLabel,
   getLenovoTabletSameModelRepairLinks,
   getLenovoTabletSameRepairLinks,
   isAliMobileEnhancedLenovoTabletRepairPage,
@@ -4741,14 +4742,20 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const canonicalUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
 
   const isFlexCable = resolvedParams['repair-type'].includes('flex-cable');
+  const socialModel = enhancedLenovoTabletSeoPocket?.modelName ?? enhancedSamsungTabletSeoPocket?.modelName ?? model;
+  const socialRepairName = enhancedLenovoTabletSeoPocket
+    ? getLenovoTabletRepairLabel(enhancedLenovoTabletSeoPocket.repairType)
+    : enhancedSamsungTabletSeoPocket
+      ? getSamsungTabletRepairLabel(enhancedSamsungTabletSeoPocket.repairType)
+      : repairName;
 
   return {
     ...buildRepairDetailSeo({
       title,
       description,
       canonicalUrl,
-      model,
-      repairName,
+      model: socialModel,
+      repairName: socialRepairName,
     }),
     alternates: {
       canonical: canonicalUrl
