@@ -1,6 +1,6 @@
 // src/views/Reports.tsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   TrendingUp,
   Wrench,
@@ -52,6 +52,8 @@ import { useAuthStore } from '../hooks/useAuthStore';
 import { supabase } from '../lib/supabase';
 import { Lock } from 'lucide-react';
 import { getOrderTenderTotals } from '../lib/reportTenderTotals';
+import { api } from '../lib/api';
+import { getMelbourneCalendarDate, offsetCalendarDate } from '../lib/reportsOrderRange';
 
 interface ReportsViewProps {
   orders: Order[];
@@ -64,9 +66,11 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getMelbourneCalendarDate();
   const [startDate, setStartDate] = useState<string>(todayStr);
   const [endDate, setEndDate] = useState<string>(todayStr);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const orderRequestId = useRef(0);
 
   const [showRevenueModal, setShowRevenueModal] = useState(false);
   const [showSurchargeModal, setShowSurchargeModal] = useState(false);
@@ -76,6 +80,46 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
   const [searchOrderQuery, setSearchOrderQuery] = useState('');
   const [orderPage, setOrderPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    const requestId = ++orderRequestId.current;
+    const controller = new AbortController();
+
+    const loadOrders = async () => {
+      setOrdersLoading(true);
+      setOrders?.([]);
+      try {
+        const [ordersData, settings] = await Promise.all([
+          api.getOrders({ from: startDate || undefined, to: endDate || undefined, signal: controller.signal }),
+          api.getSettings(),
+        ]);
+        if (controller.signal.aborted || requestId !== orderRequestId.current || !Array.isArray(ordersData)) return;
+
+        let refundedKeys: string[] = [];
+        if (settings?.ali_pos_refunded_orders) {
+          try {
+            refundedKeys = JSON.parse(settings.ali_pos_refunded_orders);
+          } catch (error) {
+            console.error('Failed to parse refunded keys', error);
+          }
+        }
+        setOrders?.(ordersData.map((order) => ({
+          ...order,
+          status: refundedKeys.includes(order.id) ? 'refunded' : 'completed',
+        })));
+      } catch (error) {
+        if (!controller.signal.aborted && requestId === orderRequestId.current) {
+          console.error('[Reports] Order range fetch failed:', error);
+          setOrders?.([]);
+        }
+      } finally {
+        if (!controller.signal.aborted && requestId === orderRequestId.current) setOrdersLoading(false);
+      }
+    };
+
+    void loadOrders();
+    return () => controller.abort();
+  }, [endDate, setOrders, startDate]);
 
   // ─── Web Analytics State ─────────────────────────────────────
   const [analyticsEvents, setAnalyticsEvents] = useState<any[]>([]);
@@ -163,22 +207,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
     showTaxModal
   );
 
-  const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
-      const orderDate = new Date(o.timestamp);
-      if (startDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        if (orderDate < start) return false;
-      }
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        if (orderDate > end) return false;
-      }
-      return true;
-    });
-  }, [orders, startDate, endDate]);
+  const filteredOrders = orders;
 
   const validOrders = useMemo(() => filteredOrders.filter(o => o.status !== 'refunded'), [filteredOrders]);
 
@@ -367,9 +396,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => {
-                const today = new Date();
-                setStartDate(today.toISOString().split('T')[0]);
-                setEndDate(today.toISOString().split('T')[0]);
+                const today = getMelbourneCalendarDate();
+                setStartDate(today);
+                setEndDate(today);
               }}
               className="w-full py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black font-black text-sm rounded-2xl active:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
@@ -377,11 +406,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             </button>
             <button
               onClick={() => {
-                const today = new Date();
-                const lastWeek = new Date();
-                lastWeek.setDate(today.getDate() - 7);
-                setStartDate(lastWeek.toISOString().split('T')[0]);
-                setEndDate(today.toISOString().split('T')[0]);
+                const today = getMelbourneCalendarDate();
+                setStartDate(offsetCalendarDate(today, -7));
+                setEndDate(today);
               }}
               className="w-full py-4 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-black font-black text-sm rounded-2xl active:shadow-[var(--shadow-neu-pressed)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
@@ -417,6 +444,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             <h2 className="text-5xl font-black tracking-tight text-black mt-1 [text-shadow:-4px_4px_6px_var(--color-neu-shadow-dark)]">
               Sales Reports
             </h2>
+            {ordersLoading && <span className="text-[10px] font-bold text-gray-500">Loading report period…</span>}
           </div>
           <button
             onClick={() => window.open('https://ali-mobile-repair-pos.vercel.app/dashboard/analytics', '_blank')}

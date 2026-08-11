@@ -152,25 +152,11 @@ export default function App() {
     const loadData = async () => {
       try {
         const { api } = await import('./lib/api');
-        const [inventoryData, ordersData, settingsData] = await Promise.all([
+        const [inventoryData, settingsData] = await Promise.all([
           api.getInventory(),
-          api.getOrders(),
           api.getSettings()
         ]);
-        
-        if (Array.isArray(ordersData)) {
-          let refundedKeys: string[] = [];
-          if (settingsData && settingsData.ali_pos_refunded_orders) {
-            try {
-              refundedKeys = JSON.parse(settingsData.ali_pos_refunded_orders);
-            } catch (e) { console.error('Failed to parse refunded keys', e); }
-          }
-          setOrders(ordersData.map(o => ({
-            ...o,
-            status: refundedKeys.includes(o.id) ? 'refunded' : 'completed'
-          })));
-        }
-        
+
         if (Array.isArray(inventoryData)) {
           setInventory(inventoryData.map(item => {
             let parsedBrand = 'Other';

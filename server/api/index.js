@@ -14,6 +14,7 @@ const { resolveServerSupabaseKey } = require('../lib/supabaseKeyResolver.js');
 const { notifyStorefrontAnnouncementChange } = require('./announcementRevalidation.js');
 const { notifyStorefrontRepairCatalogueMutation } = require('./catalogueRevalidation.js');
 const { createAnnouncementHandlers } = require('./announcementHandlers.js');
+const { createOrdersHandlers } = require('./ordersHandlers.js');
 const {
   calculateMultiItemPricing,
   formatBookingServiceName,
@@ -818,22 +819,8 @@ app.delete('/api/inventory/:id', async (req, res) => {
 // ----------------------------------------------------------------------
 // ORDERS
 // ----------------------------------------------------------------------
-app.get('/api/orders', async (req, res) => {
-  // Fetch orders with their items
-  const { data: orders, error: ordersError } = await supabase.from('orders').select('*').order('timestamp', { ascending: false });
-  if (ordersError) return res.status(500).json({ error: ordersError.message });
-
-  const { data: items, error: itemsError } = await supabase.from('order_items').select('*');
-  if (itemsError) return res.status(500).json({ error: itemsError.message });
-
-  // Map items back to their parents
-  const ordersWithItems = orders.map(order => ({
-    ...order,
-    items: items.filter(item => item.order_id === order.id)
-  }));
-
-  res.json(ordersWithItems);
-});
+const ordersHandlers = createOrdersHandlers({ supabase });
+app.get('/api/orders', ordersHandlers.get);
 
 app.post('/api/orders', async (req, res) => {
   const { items, ...fullOrderData } = req.body;

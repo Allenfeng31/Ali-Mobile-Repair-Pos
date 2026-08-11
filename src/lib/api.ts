@@ -129,8 +129,12 @@ export const api = {
   },
 
   // Orders
-  getOrders: async () => {
-    const res = await fetch(`${API_URL}/orders`);
+  getOrders: async ({ from, to, signal }: { from?: string; to?: string; signal?: AbortSignal } = {}) => {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    const query = params.toString();
+    const res = await fetch(`${API_URL}/orders${query ? `?${query}` : ''}`, { signal });
     return handleResponse(res);
   },
   createOrder: async (order: any) => {
