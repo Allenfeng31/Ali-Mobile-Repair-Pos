@@ -5,11 +5,14 @@ import {
   type GoogleReviewsPayload,
   type PublicGoogleReview,
 } from "@/lib/reviewsData";
+import { unstable_cache } from "next/cache";
 
 const GOOGLE_PLACES_DETAILS_URL = "https://places.googleapis.com/v1/places";
 const GOOGLE_PLACES_LEGACY_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json";
 const GOOGLE_REVIEWS_TIMEOUT_MS = 3500;
 const MIN_REVIEW_COUNT = 6;
+export const GOOGLE_REVIEWS_REVALIDATE_SECONDS = 86400;
+export const GOOGLE_REVIEWS_CACHE_TAG = "google-reviews";
 
 interface GooglePlaceReviewText {
   text?: string;
@@ -225,13 +228,7 @@ async function fetchRelevantNewApiReviews(
   };
 }
 
-export async function getGoogleReviews(): Promise<GoogleReviewsPayload> {
-  const { apiKey, placeId } = getGooglePlacesConfig();
-
-  if (!apiKey || !placeId) {
-    return createFallbackGoogleReviewsPayload();
-  }
-
+async function fetchGoogleReviews(apiKey: string, placeId: string): Promise<GoogleReviewsPayload> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), GOOGLE_REVIEWS_TIMEOUT_MS);
 
@@ -256,4 +253,23 @@ export async function getGoogleReviews(): Promise<GoogleReviewsPayload> {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+const getCachedGoogleReviews = unstable_cache(
+  fetchGoogleReviews,
+  [GOOGLE_REVIEWS_CACHE_TAG],
+  {
+    revalidate: GOOGLE_REVIEWS_REVALIDATE_SECONDS,
+    tags: [GOOGLE_REVIEWS_CACHE_TAG],
+  }
+);
+
+export async function getGoogleReviews(): Promise<GoogleReviewsPayload> {
+  const { apiKey, placeId } = getGooglePlacesConfig();
+
+  if (!apiKey || !placeId) {
+    return createFallbackGoogleReviewsPayload();
+  }
+
+  return getCachedGoogleReviews(apiKey, placeId);
 }

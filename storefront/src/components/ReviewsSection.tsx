@@ -120,10 +120,7 @@ export default function ReviewsSection() {
 
     async function loadReviews() {
       try {
-        const response = await fetch("/api/google-reviews", {
-          cache: "no-store",
-          signal: controller.signal,
-        });
+        const response = await fetch("/api/google-reviews", { signal: controller.signal });
 
         if (!response.ok) {
           return;
