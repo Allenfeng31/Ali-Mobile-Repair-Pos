@@ -52,7 +52,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       "Kiosk C1",
       "Walk-ins welcome",
       "Book online or call ahead",
-      "Opposite Bunnings Warehouse",
+      "Kiosk C1 opposite Bunnings Warehouse Ringwood",
       "Free parking available",
       "Close to Eastland and Ringwood Station",
       "Near Ringwood East, Heathmont, Mitcham and Croydon",
@@ -168,8 +168,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Phone Repair from Ringwood East",
       paragraphs: [
-        "Getting here from Ringwood East is extremely simple and direct. You can drive west via Dublin Road or Maroondah Highway, which typically takes about 5 minutes depending on traffic. Ample parking is available right at Ringwood Square near the entrance.",
-        "If you prefer public transport, take the Lilydale line train from Ringwood East Station to Ringwood Station. The train ride is only around 3 minutes. From the station exit, it is just a brief walk across the street past Coles to our kiosk."
+        "Getting here from Ringwood East is extremely simple and direct. You can drive west via Dublin Road or Maroondah Highway, which typically takes about 5 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
+        "If you prefer public transport, take the Lilydale line train from Ringwood East Station to Ringwood Station. The train ride is only around 3 minutes. From Ringwood Station, walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood."
       ]
     },
     customScenarioSection: {
@@ -230,8 +230,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Ringwood North",
       paragraphs: [
-        "Driving from Ringwood North is very straightforward. Head directly south along Warrandyte Road, which typically takes about 7 minutes depending on traffic. You can park in the main Ringwood Square Shopping Centre lot for easy counter access.",
-        "If you are taking public transport, catch a local bus along the Warrandyte Road corridor towards Ringwood Station, then walk a few minutes into the shopping centre near Coles."
+        "Driving from Ringwood North is very straightforward. Head directly south along Warrandyte Road, which typically takes about 7 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
+        "If you are taking public transport, catch a local bus along the Warrandyte Road corridor towards Ringwood Station, then walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood."
       ]
     },
     customScenarioSection: {
@@ -260,7 +260,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       },
       {
         question: "What parking options do you have for Ringwood North visitors?",
-        answer: "Ringwood Square has a large, free open-air car park. You can park close to the centre entrances and walk straight to Kiosk C1 (near Coles)."
+        answer: "Free underground and outdoor parking is available at Ringwood Square. From the centre, look for Kiosk C1 opposite Bunnings Warehouse Ringwood."
       },
       {
         question: "Can you diagnose tablet issues for Ringwood North families?",
@@ -292,8 +292,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Phone and MacBook Repair from Heathmont",
       paragraphs: [
-        "Travel from Heathmont is very convenient. Driving north via Canterbury Road and Great Ryrie Street typically takes about 5 minutes depending on traffic. Ringwood Square has a spacious free parking lot near Coles.",
-        "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (typically around a 4-minute trip), then walk across the road directly into Ringwood Square."
+        "Travel from Heathmont is very convenient. Driving north via Canterbury Road and Great Ryrie Street typically takes about 5 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
+        "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (typically around a 4-minute trip), then walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood."
       ]
     },
     customScenarioSection: {
@@ -347,58 +347,59 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Croydon Central", "Croydon Station", "Mt Dandenong Road"],
     route: "Head west toward Ringwood, then turn into Ringwood Square for easy centre parking.",
     localReason: "Worth the short trip for careful diagnostics, transparent quoting, and No Fix No Charge on eligible jobs.",
-    metaTitle: "Phone & iPhone Repair Near Croydon | Ali Mobile Ringwood",
-    metaDescription: "Need phone, iPhone, Samsung or Apple Watch repair near Croydon? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
-    customH1: "Phone Repair Near Croydon",
-    customIntro: "Croydon customers can visit Ali Mobile & Repair at Ringwood Square for phone, iPhone, Samsung, iPad, MacBook and Apple Watch repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, with walk-ins welcome and quotes confirmed before repair.",
+    metaTitle: "Phone, iPhone, iPad & MacBook Repair Near Croydon | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and MacBook repair near Croydon at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
+    customH1: "Phone, iPhone, iPad & MacBook Repair Near Croydon",
+    customIntro: "Croydon customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone and Samsung repair assessment, with MacBook repair as a clear second service focus. The same Ringwood desk also supports iPad and Apple Watch enquiries after model and fault confirmation.",
     customLocalSection: {
-      title: "Travelling for Phone Repair from Croydon",
+      title: "Travelling from Croydon to Ringwood Square",
       paragraphs: [
-        "Croydon locals have excellent transport links to our Ringwood shop. You can drive west via Mt Dandenong Road or Maroondah Highway, arriving at Ringwood Square Shopping Centre in roughly 10 minutes. There is plenty of customer parking right in front of the centre.",
-        "Alternatively, catch the Lilydale line train from Croydon Station. It takes about 6 minutes to reach Ringwood Station, from which you can take a brief walk across the street to find our kiosk situated near the Coles supermarket."
+        "From Croydon, travel west via Mt Dandenong Road or Maroondah Highway to Ringwood Square. The trip is often about 10 minutes depending on traffic, and calling ahead can help confirm likely parts availability and timing before you travel.",
+        "Alternatively, the Lilydale line connects Croydon Station with Ringwood Station. From Ringwood Station, walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood for a model check and confirmed quote path."
       ]
     },
     customScenarioSection: {
-      title: "iPhone, Samsung and Apple Watch Repairs near Croydon",
+      title: "Phone, iPhone, Samsung and MacBook Repairs near Croydon",
       paragraphs: [
-        "We often see Croydon customers looking for phone repair, iPhone repair, Samsung phone repair or phone screen repair near Croydon. At our bench, we inspect cracked screens, rear damage, battery symptoms and charging behaviour before confirming the repair quote.",
-        "Croydon customers also ask about Apple Watch repair and watch repair support. We confirm the exact Apple Watch model, fault and part path first, then explain practical timing and quote details before repair."
+        "For phone, iPhone and Samsung faults, Croydon customers can bring cracked screens, battery symptoms and charging issues to Ringwood Square for model and fault assessment before a repair quote is confirmed.",
+        "MacBook Air and MacBook Pro screen, battery, keyboard, charging and diagnostic assessment enquiries are also assessed at Ringwood Square. The exact model, fault and practical parts path guide the quote and timing discussion."
       ]
     },
     customFaqs: [
       {
-        question: "Do you have a physical shop front in Croydon?",
-        answer: "No, our physical store is situated at Kiosk C1 inside Ringwood Square Shopping Centre. We are located near Coles, about 10 minutes from Croydon."
+        question: "Do you have a repair shop in Croydon?",
+        answer: "No. Ali Mobile & Repair operates from Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood, not from a Croydon shop, counter or collection point."
       },
       {
-        question: "Can I get my back glass inspected before ordering a repair from Croydon?",
-        answer: "Yes. We inspect the frame structure and camera housing at our Ringwood kiosk to make sure a new back glass will seat correctly."
+        question: "Where is the repair kiosk for Croydon customers?",
+        answer: "The repair kiosk is Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood. Contact the team before travelling if you want to confirm the likely repair path."
       },
       {
-        question: "How do I confirm if you have my replacement screen in stock before leaving Croydon?",
-        answer: "We recommend calling or messaging our Ringwood team. We will check our current inventory and can hold a screen or battery for you."
+        question: "Can you assess iPhone and Samsung repairs from Croydon?",
+        answer: "Yes. The Ringwood Square kiosk assesses supported iPhone and Samsung screen, battery and charging faults after confirming the exact model and issue."
       },
       {
-        question: "What happens if my charging port just needs a clean?",
-        answer: "Many Croydon clients bring in devices that won't charge, only to find it's blocked by lint. We can clean the port at our bench; if that fixes it, we charge a cleaning fee instead of a full port replacement."
+        question: "Can you assess MacBook repairs for Croydon customers?",
+        answer: "Yes. Bring the MacBook Air or MacBook Pro to Ringwood Square for model confirmation and assessment of screen, battery, keyboard, charging or other supported hardware faults."
       },
       {
-        question: "Is there parking available when driving from Croydon?",
-        answer: "Yes, Ringwood Square has a large, free open-air parking lot. You can park close to the entrance and walk straight to Kiosk C1."
+        question: "How can I check parts availability and timing before travelling?",
+        answer: "Contact the Ringwood Square team with the device model and fault. They can check the current parts availability, explain the quote process and discuss likely timing before you travel."
       },
       {
-        question: "Do you offer warranty cover on repairs for Croydon clients?",
-        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+        question: "Could a charging problem be cleaning, a cable, battery or port fault?",
+        answer: "Yes. Charging symptoms can have several causes, including debris, the cable, battery condition or a port fault, so the device needs assessment before a repair path is confirmed."
       },
       {
-        question: "How long should I expect to wait for a battery replacement?",
-        answer: "Most iPhone battery swaps take around 20 to 40 minutes, depending on the model and current queue. We suggest calling from Croydon first to check wait times."
+        question: "How do parking, quotes and warranty details work?",
+        answer: "Ringwood Square provides centre parking. The team confirms the quote after assessing the model and fault, while applicable warranty coverage is explained for the selected repair before approval or at handover."
       }
     ],
     customLinks: [
-      { href: "/repairs/back-glass-replacement", label: "Back glass repair near Croydon" },
-      { href: "/repairs/battery-replacement", label: "Croydon battery diagnostic options" },
-      { href: "/repairs/charging-port-replacement", label: "Charging port repair near Croydon" }
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung phone repair options" },
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" },
+      { href: "/repairs/screen-replacement", label: "Screen repair pathways" }
     ]
   },
   {
@@ -416,8 +417,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Phone Repair from Mitcham",
       paragraphs: [
-        "Getting to Ringwood Square from Mitcham is incredibly direct. Commuters can catch the Lilydale or Belgrave line from Mitcham Station and arrive at Ringwood Station in approximately 5 minutes. From the station, walk across the road past Coles into the main shopping corridor.",
-        "If you are driving from Mitcham, follow Maroondah Highway east for about 4 kilometers. Ringwood Square is on your left just before the major intersection, offering ample centre parking close to the kiosk entrance. This makes it easy to drop in during your weekly shopping run."
+        "Getting to Ringwood Square from Mitcham is incredibly direct. Commuters can catch the Lilydale or Belgrave line from Mitcham Station and arrive at Ringwood Station in approximately 5 minutes. From Ringwood Station, walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood.",
+        "If you are driving from Mitcham, follow Maroondah Highway east for about 4 kilometers. Free underground and outdoor parking is available at Ringwood Square."
       ]
     },
     customScenarioSection: {
@@ -430,7 +431,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customFaqs: [
       {
         question: "Is Ali Mobile located in Mitcham or Ringwood?",
-        answer: "We are located at Kiosk C1 inside Ringwood Square Shopping Centre (near Coles), which is a short 5-minute train trip or drive east from Mitcham."
+        answer: "We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, which is a short 5-minute train trip or drive east from Mitcham."
       },
       {
         question: "How do Mitcham commuters visit for repair?",
@@ -701,7 +702,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Bayswater",
       paragraphs: [
-        "Bayswater residents can easily access our Ringwood shop. Driving west along Mountain Highway or Bayswater Road typically takes about 12 minutes depending on traffic. You can park in the main centre lot near Coles for easy entry.",
+        "Bayswater residents can easily access our Ringwood shop. Driving west along Mountain Highway or Bayswater Road typically takes about 12 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
         "If using public transport, the bus connections or a short train trip via Ringwood Station provide direct access, followed by a brief walk across the street into the shopping centre."
       ]
     },
@@ -715,7 +716,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customFaqs: [
       {
         question: "Do you have a physical repair shop inside Bayswater?",
-        answer: "No, our physical kiosk is located at Kiosk C1, Ringwood Square Shopping Centre (near Coles), Seymour Street, Ringwood. Bayswater is typically a short 12-minute drive away."
+        answer: "No, our physical kiosk is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, Seymour Street, Ringwood. Bayswater is typically a short 12-minute drive away."
       },
       {
         question: "What types of work devices do you repair for Bayswater trades?",
@@ -763,7 +764,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Boronia",
       paragraphs: [
-        "Boronia locals can reach our kiosk easily by road or rail. Driving north-west via Boronia Road and Dorset Road typically takes about 16 minutes depending on traffic. Ringwood Square offers spacious free parking near Coles.",
+        "Boronia locals can reach our kiosk easily by road or rail. Driving north-west via Boronia Road and Dorset Road typically takes about 16 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
         "If you are commuting, taking the Belgrave line train from Boronia Station to Ringwood Station is a short train connection of around 11 minutes. Our shop is just across the street from the station exit."
       ]
     },
@@ -899,7 +900,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Vermont",
       paragraphs: [
-        "Vermont residents have a very quick commute to our kiosk. Driving north-east via Canterbury Road and Wantirna Road typically takes about 12 minutes depending on traffic. You can park in the free Ringwood Square lot close to Coles.",
+        "Vermont residents have a very quick commute to our kiosk. Driving north-east via Canterbury Road and Wantirna Road typically takes about 12 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
         "If you are taking public transport, catch Bus 742 from Vermont directly to Ringwood Station, then walk across the road into the shopping centre."
       ]
     },
@@ -962,7 +963,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Springvale",
       paragraphs: [
-        "Driving north via Springvale Road and EastLink typically takes about 28 minutes depending on traffic. Ringwood Square Shopping Centre offers spacious open-air parking near Coles.",
+        "Driving north via Springvale Road and EastLink typically takes about 28 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
         "Alternatively, public transport users can take the SmartBus 902 toward Nunawading, then transfer to the Lilydale or Belgrave train line to reach Ringwood Station, which is directly opposite the shopping centre."
       ]
     },
@@ -1024,7 +1025,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Kilsyth",
       paragraphs: [
-        "Travelling from Kilsyth is very convenient. Driving west via Mt Dandenong Road or Maroondah Highway typically takes about 18 minutes depending on traffic. You can park in the free Ringwood Square lot close to Coles.",
+        "Travelling from Kilsyth is very convenient. Driving west via Mt Dandenong Road or Maroondah Highway typically takes about 18 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
         "If you prefer public transport, local bus routes connect Kilsyth to Croydon Station, where you can take a brief train trip to Ringwood Station."
       ]
     },
@@ -1062,7 +1063,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       },
       {
         question: "Is there parking available near the kiosk?",
-        answer: "Yes, Ringwood Square has a large, free open-air car park right in front of the centre near Coles."
+        answer: "Free underground and outdoor parking is available at Ringwood Square. The kiosk is Kiosk C1 opposite Bunnings Warehouse Ringwood."
       }
     ],
     customLinks: [
@@ -1211,7 +1212,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLocalSection: {
       title: "Travelling for Repair from Lilydale",
       paragraphs: [
-        "Driving from Lilydale is very direct. Head west along Maroondah Highway through Croydon, which typically takes about 18 minutes depending on traffic. Ringwood Square Shopping Centre has free open-air parking near Coles.",
+        "Driving from Lilydale is very direct. Head west along Maroondah Highway through Croydon, which typically takes about 18 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
         "If taking public transport, you can take a direct train connection from Lilydale Station to Ringwood Station. The train ride is approximately 15 minutes. Walk across the street to find our kiosk inside the centre."
       ]
     },
@@ -1584,7 +1585,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Travelling for Repair from Park Orchards",
       paragraphs: [
         "Travelling from Park Orchards is straightforward. Driving south via Park Road, Warrandyte Road, or connecting through Ringwood North routes typically takes about 12 minutes depending on traffic.",
-        "Ringwood Square Shopping Centre has free open-air parking near Coles, making it easy to bring in your device to our kiosk."
+        "Free underground and outdoor parking is available at Ringwood Square, making it easy to bring in your device to the kiosk."
       ]
     },
     customScenarioSection: {
