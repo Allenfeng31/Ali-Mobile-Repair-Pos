@@ -561,24 +561,56 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Glen Waverley Station", "The Glen", "Springvale Road"],
     route: "Travel toward Ringwood by bus or drive through Canterbury Road and Wantirna Road for Ringwood Square parking.",
     localReason: "Glen Waverley customers can call first for model checks and visit only when the likely repair path is clear.",
-    metaTitle: "Phone, Apple & Laptop Repair Near Glen Waverley | Ali Mobile Ringwood",
-    metaDescription: "Need phone, Apple, laptop or computer repair near Glen Waverley or Syndal? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
-    customH1: "Phone, Apple & Laptop Repair Near Glen Waverley",
-    customIntro: "Glen Waverley and Syndal customers can visit Ali Mobile & Repair at Ringwood Square for mobile phone repair near Glen Waverley, iPhone, Samsung, iPad, MacBook and laptop repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+    metaTitle: "MacBook & Phone Repair Near Glen Waverley & Syndal | Ali Mobile",
+    metaDescription: "MacBook, laptop and phone repair near Glen Waverley and Syndal at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
+    customH1: "MacBook, Laptop & Phone Repair Near Glen Waverley and Syndal",
+    customIntro: "MacBook, supported laptop hardware and Apple device repair for Glen Waverley and Syndal is completed at Ali Mobile & Repair, Kiosk C1 inside Ringwood Square. The same Ringwood desk also supports phones, iPhone, Samsung and iPad after model and fault assessment.",
     customLocalSection: {
-      title: "Travelling for Phone and Laptop Repair from Glen Waverley",
+      title: "Travelling from Glen Waverley and Syndal to Ringwood Square",
       paragraphs: [
-        "Glen Waverley customers can travel toward Ringwood by bus or drive through Canterbury Road and Wantirna Road for Ringwood Square parking. Calling ahead helps confirm the likely model, fault and parts path before you make the trip.",
-        "Customers near Syndal can use the same route toward Ringwood Square. Once at the centre, visit Kiosk C1 for quote-first support on phone repair, Apple repairs, laptop repair and computer repairs near Glen Waverley."
+        "From Glen Waverley, drive through Canterbury Road and Wantirna Road to Ringwood Square, typically about 25 minutes depending on traffic. Bus 742 connects Glen Waverley Station with Ringwood Station for customers travelling by public transport.",
+        "Customers near Syndal can use the same route to Kiosk C1 inside Ringwood Square. Calling ahead helps us confirm the MacBook or laptop model, likely fault, parts path and quote before you travel."
       ]
     },
     customScenarioSection: {
-      title: "Mobile, Apple and MacBook Repairs near Glen Waverley",
+      title: "MacBook, laptop and Apple device assessment near Glen Waverley and Syndal",
       paragraphs: [
-        "Glen Waverley customers often ask about mobile repair near Glen Waverley, mobile phone repair near Glen Waverley, phone repair near Glen Waverley, iPhone repair and Samsung phone repair. We confirm the exact device model, inspect the fault and explain repair timing before work begins.",
-        "For Apple repairs near Glen Waverley, laptop and MacBook repair near Glen Waverley, computer repair assessment, iPad repair and phone screen repair near Glen Waverley, bring the device to Ringwood Square so we can check the model and quote path in person."
+        "For MacBook, supported laptop hardware and Apple device faults, we use a device repair or diagnostic assessment to confirm the exact model, likely hardware issue and practical quote path before work is approved.",
+        "The same Ringwood Square desk also assesses iPhone, Samsung and iPad repairs. Phone support follows the same model, fault, parts and confirmed-quote process rather than a fixed-price or same-day promise."
       ]
     },
+    customFaqs: [
+      {
+        question: "Do you have a repair shop in Glen Waverley or Syndal?",
+        answer: "No. Ali Mobile & Repair operates from Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood, not from a Glen Waverley or Syndal branch."
+      },
+      {
+        question: "Where is the repair desk for Glen Waverley and Syndal customers?",
+        answer: "The repair desk is at Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood. Customers can use Bus 742 to Ringwood Station or travel by road before visiting the kiosk."
+      },
+      {
+        question: "Can you assess MacBook or supported laptop hardware problems?",
+        answer: "Yes. Bring the MacBook or supported laptop hardware to Ringwood Square for model identification, a hardware assessment or diagnostic assessment, and a confirmed quote path where a repair is suitable."
+      },
+      {
+        question: "Do you also support iPhone, Samsung and iPad repairs?",
+        answer: "Yes. The Ringwood Square desk also assesses supported iPhone, Samsung and iPad faults after confirming the model, issue and likely parts path."
+      },
+      {
+        question: "Do you provide general IT support or on-site computer service?",
+        answer: "No. Ali Mobile & Repair focuses on device hardware repair assessment and supported repairs at Ringwood Square; we do not offer managed IT, network support or on-site computer service."
+      },
+      {
+        question: "What should I confirm before travelling from Glen Waverley or Syndal?",
+        answer: "Contact the Ringwood Square team with the device model and fault first. We can check the likely repair path, parts availability, quote process and timing before you travel."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" },
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+    ],
     showChineseServiceCta: true,
   },
   {
