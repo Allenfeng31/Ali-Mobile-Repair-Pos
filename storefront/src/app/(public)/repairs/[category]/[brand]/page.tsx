@@ -720,7 +720,16 @@ function getBatchPhoneServiceAreaDescription(config: BatchPhoneBrandHubConfig, a
 }
 
 const PHONE_FEATURED_SERVICE_AREA_SLUGS = ["ringwood-east", "heathmont", "mitcham", "croydon"];
-const MACBOOK_NEARBY_SERVICE_AREA_SLUGS = ["heathmont", "nunawading", "glenwaverley", "wantirna", "clayton", "lilydale"];
+const MACBOOK_NEARBY_SERVICE_AREA_SLUGS = [
+  "ringwood-east",
+  "ringwood-north",
+  "heathmont",
+  "mitcham",
+  "croydon",
+  "nunawading",
+  "wantirna",
+  "glenwaverley",
+];
 const APPLE_WATCH_NEARBY_SERVICE_AREA_SLUGS = ["croydon"];
 
 function buildFeaturedServiceAreaSource() {
@@ -834,12 +843,14 @@ function getLenovoTabletServiceAreaDescription(areaName: string, index: number) 
 
 function getMacBookServiceAreaDescription(areaName: string, index: number) {
   const descriptions: Record<string, string> = {
+    "Ringwood East": "MacBook repair near Ringwood East is handled with a quote-first approach after we confirm the exact model and fault at Ringwood Square.",
+    "Ringwood North": "MacBook repair near Ringwood North starts with MacBook Air or MacBook Pro model identification and assessment before work begins.",
     Heathmont: "MacBook repair near Heathmont starts with model confirmation, fault assessment and a quote-first parts path at Ringwood Square.",
+    Mitcham: "MacBook repair near Mitcham is supported from our Ringwood Square repair desk, with the exact model, fault, parts availability and quote confirmed before work begins.",
+    Croydon: "MacBook repair near Croydon starts with model and fault confirmation. Customers can contact our Ringwood Square team before travelling to check parts availability and likely timing.",
     Nunawading: "MacBook repair near Nunawading is handled from our Ringwood Square repair desk after we confirm the exact MacBook Air or MacBook Pro model.",
     "Glen Waverley": "MacBook repair near Glen Waverley and Syndal customers can start online, then visit Kiosk C1 for assessment and quote support.",
     Wantirna: "MacBook repair near Wantirna and Studfield customers is assessment-led, with parts availability and timing confirmed before work begins.",
-    Clayton: "MacBook repair near Clayton customers can call ahead before travelling to Ringwood Square for model, fault and parts-path checks.",
-    Lilydale: "MacBook repair near Lilydale customers can start with a model check, then visit Kiosk C1 for quote-first assessment support.",
   };
 
   return descriptions[areaName] || `${areaName} customers can choose their exact MacBook model before visiting our Ringwood Square repair desk.`;
@@ -2208,7 +2219,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <span className="repair-kicker">Nearby support</span>
               <h2 id="macbook-service-area-heading">Nearby MacBook repair service areas</h2>
               <p>
-                Customers also visit Ali Mobile & Repair at Ringwood Square from Heathmont, Nunawading, Glen Waverley, Wantirna, Clayton and Lilydale for MacBook repair assessment and quote support.
+                Customers also visit Ali Mobile & Repair at Ringwood Square from Ringwood East, Ringwood North, Heathmont, Mitcham, Croydon, Nunawading, Wantirna and Glen Waverley for MacBook repair assessment and quote support.
               </p>
             </div>
             <IPhoneServiceAreaLinks cards={macbookServiceAreas} />
