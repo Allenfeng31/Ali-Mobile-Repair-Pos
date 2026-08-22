@@ -160,60 +160,66 @@ export const SERVICE_AREAS: ServiceArea[] = [
     transitAdvice: "A simple trip along Maroondah Highway or through Ringwood East Village.",
     landmarks: ["Ringwood East Station", "Maroondah Highway", "Ringwood Lake"],
     route: "Head west toward Ringwood Square and use the centre parking near Maroondah Highway.",
-    localReason: "Close enough for quick diagnostics, model checks, and same-day repair may be available on common repairs when parts are in stock.",
-    metaTitle: "Phone & iPhone Repair Near Ringwood East | Ali Mobile Ringwood Square",
-    metaDescription: "Need phone, iPhone, Samsung, iPad or MacBook repair near Ringwood East? Visit Kiosk C1 inside Ringwood Square Shopping Centre for face-to-face checks.",
-    customH1: "Phone Repair Near Ringwood East",
-    customIntro: "Ringwood East customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre for phone and iPhone repair near Ringwood East, Samsung, iPad and MacBook repair support. We are opposite Bunnings Warehouse Ringwood and close to Eastland and Ringwood Station.",
+    localReason: "Ringwood East residents can contact the Ringwood Square team for model checks, fault assessment and a confirmed quote before supported work begins.",
+    metaTitle: "Phone, iPhone & MacBook Repair Near Ringwood East | Ali Mobile",
+    metaDescription: "Phone, iPhone and MacBook repair near Ringwood East at Ringwood Square Kiosk C1, with model checks and a confirmed quote before supported work.",
+    customH1: "Phone, iPhone & MacBook Repair Near Ringwood East",
+    customIntro: "Ringwood East customers can visit Ali Mobile & Repair for phone repair near Ringwood East, iPhone repair and model identification. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phone assessment and repair, MacBook hardware assessment, supported Google Pixel models, and iPad or tablet faults after the exact device and issue are confirmed.",
     customLocalSection: {
-      title: "Travelling for Phone Repair from Ringwood East",
+      title: "Planning a repair visit from Ringwood East",
       paragraphs: [
-        "Getting here from Ringwood East is extremely simple and direct. You can drive west via Dublin Road or Maroondah Highway, which typically takes about 5 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
-        "If you prefer public transport, take the Lilydale line train from Ringwood East Station to Ringwood Station. The train ride is only around 3 minutes. From Ringwood Station, walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood."
+        "Ali Mobile & Repair does not operate a Ringwood East branch, shop, counter or collection point. All device assessments and supported repairs are handled at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Free underground and outdoor parking is available at Ringwood Square. Contact the Ringwood Square team before travelling with the model and symptoms so availability can be checked after the exact device is identified."
       ]
     },
     customScenarioSection: {
-      title: "iPhone and Samsung Repairs near Ringwood East",
+      title: "Phone-first assessment with MacBook hardware support",
       paragraphs: [
-        "Many Ringwood East locals visit to combine a device assessment with their weekly shopping or errands at Ringwood Square. Whether it is a cracked phone screen or an iPad that will not turn on, we perform bench diagnostics in your presence.",
-        "For MacBook repair near Ringwood East and Apple repair support near Ringwood East, we inspect the device, confirm the model and fault, then explain the price, parts path and expected timing before any work begins."
+        "For phone and iPhone faults, the Ringwood team assesses screen damage, battery symptoms, charging problems, camera faults and no-power issues before confirming whether a supported repair path is available. Samsung phone assessment and repair follows the same model-and-fault process.",
+        "MacBook Air and MacBook Pro enquiries are limited to hardware assessment and supported hardware repair. Supported Google Pixel models and iPad or tablet faults can also be assessed after the model, fault and practical repair scope are confirmed before a quote is provided."
       ]
     },
     customFaqs: [
       {
-        question: "Is there an Ali Mobile storefront in Ringwood East?",
-        answer: "No. We operate exclusively from Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood. Ringwood East is typically a 5-minute drive or a short 3-minute train ride away."
+        question: "Is there an Ali Mobile & Repair shop in Ringwood East?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Ringwood East branch, shop, counter or collection point."
       },
       {
-        question: "Do I need to book an appointment from Ringwood East?",
-        answer: "Walk-ins are always welcome. However, letting us know your model and symptoms beforehand helps us reserve parts and schedule bench time for your visit."
+        question: "Which phone and tablet faults can be assessed?",
+        answer: "The Ringwood Square desk can assess supported iPhone, Samsung phone, Google Pixel, iPad and tablet faults after identifying the exact model and issue."
       },
       {
-        question: "How fast can you replace a screen or battery for a Ringwood East visitor?",
-        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+        question: "How are Ringwood East phone and iPhone faults assessed?",
+        answer: "Screen, battery, charging, camera and no-power symptoms are assessed against the exact model before a suitable repair path and quote can be confirmed."
       },
       {
-        question: "Do you offer face-to-face checks for Ringwood East customers?",
-        answer: "Yes. We inspect the hardware at our counter in your presence, confirming the fault and the final quote before starting any paid repair work."
+        question: "What MacBook work is within your support scope?",
+        answer: "MacBook Air and MacBook Pro enquiries are limited to supported hardware assessment and repair after model and fault confirmation."
       },
       {
-        question: "What if my iPad has a cracked screen or touch issue?",
-        answer: "We can perform an iPad glass and display assessment at our bench, explaining the replacement path and checking parts availability for your specific iPad generation."
+        question: "Do you provide general computer repair or managed IT?",
+        answer: "No. Ali Mobile & Repair provides supported device hardware assessment and repair at Ringwood Square. We do not provide general computer repair, general PC repair, IT support, managed IT, networking, software administration, remote support or on-site IT support."
       },
       {
-        question: "Can you claim a warranty on repairs if I live in Ringwood East?",
-        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+        question: "What should I confirm before travelling from Ringwood East?",
+        answer: "Contact the Ringwood Square team with the model and fault. They can discuss the assessment process, likely parts availability and a confirmed quote before supported work begins."
       },
       {
-        question: "What is your policy if a device cannot be fixed?",
-        answer: "We apply a 'No Fix, No Charge' policy to eligible diagnostics. If we inspect your phone and find severe board-level damage that makes it unrepairable, you will not pay the repair fee."
+        question: "Where is the repair desk and is parking available?",
+        answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Free underground and outdoor parking is available at Ringwood Square."
+      },
+      {
+        question: "Can repair timing, parts availability or a result be guaranteed?",
+        answer: "No. Timing and availability depend on the exact model, fault and assessment. The quote is confirmed before supported work begins."
       }
     ],
     customLinks: [
-      { href: "/repairs/screen-replacement", label: "Ringwood East screen assessment options" },
-      { href: "/repairs/battery-replacement", label: "Battery checks near Ringwood East" },
-      { href: "/repairs/tablet/ipad", label: "iPad display diagnostics for Ringwood East residents" }
-    ]
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+    ],
+    showChineseServiceCta: true,
   },
   {
     name: "Ringwood North",
@@ -738,59 +744,66 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Bayswater Station", "Mountain Highway", "Bayswater Village"],
     route: "Travel west along Mountain Highway and continue toward Ringwood Square.",
     localReason: "A short drive for battery, screen, charging port, and tablet repairs with clear quote options.",
-    metaTitle: "Phone & iPhone Repair Near Bayswater | Ali Mobile Ringwood",
-    metaDescription: "Professional device repairs for Bayswater trades and local small businesses. Get charging, battery, and screen checks at Kiosk C1, Ringwood Square.",
-    customH1: "Phone & iPhone Repair Near Bayswater",
-    customIntro: "Bayswater customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
+    metaTitle: "Phone, MacBook & Laptop Repair Near Bayswater | Ali Mobile",
+    metaDescription: "Phone, iPhone, MacBook and supported laptop repair near Bayswater at Ringwood Square Kiosk C1, with model checks and confirmed quotes before work.",
+    customH1: "Phone, MacBook & Laptop Repair Near Bayswater",
+    customIntro: "Bayswater customers can visit Ali Mobile & Repair for phone and iPhone assessment alongside MacBook and supported laptop hardware repair. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phones, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed.",
     customLocalSection: {
-      title: "Travelling for Repair from Bayswater",
+      title: "Planning a repair visit from Bayswater",
       paragraphs: [
-        "Bayswater residents can easily access our Ringwood shop. Driving west along Mountain Highway or Bayswater Road typically takes about 12 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
-        "If using public transport, the bus connections or a short train trip via Ringwood Station provide direct access, followed by a brief walk across the street into the shopping centre."
+        "Ali Mobile & Repair does not operate a Bayswater branch, shop, counter or collection point. All device assessments and supported repairs are handled at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Driving west along Mountain Highway or Bayswater Road typically takes about 12 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
+        "Bayswater Station and local bus connections provide existing public-transport options toward Ringwood Station. Contact the Ringwood Square team before travelling with the model and symptoms so the assessment scope and parts availability can be discussed."
       ]
     },
     customScenarioSection: {
-      title: "Phone and Device Repairs near Bayswater",
+      title: "Phone and laptop hardware assessment near Bayswater",
       paragraphs: [
-        "We regularly support Bayswater tradespeople and local business owners who rely on their phones and tablets for daily operations. If your device has stopped charging or suffers from a rapidly draining battery, we run power draw tests at our bench.",
-        "Instead of recommending an immediate port replacement, we inspect the port for dirt or structural damage. If it is clogged, we can clean it to restore function; otherwise, we quote the exact replacement part required."
+        "Phone and iPhone faults are assessed for screen damage, battery symptoms, charging problems, camera faults and no-power issues before a supported repair path and quote are confirmed. Samsung phones and supported Google Pixel models follow the same model-and-fault process.",
+        "MacBook Air, MacBook Pro and supported laptop enquiries are limited to hardware assessment and supported hardware repair. iPad and tablet faults can also be assessed after confirming the exact model, hardware symptoms and practical repair scope."
       ]
     },
     customFaqs: [
       {
-        question: "Do you have a physical repair shop inside Bayswater?",
-        answer: "No, our physical kiosk is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, Seymour Street, Ringwood. Bayswater is typically a short 12-minute drive away."
+        question: "Is there an Ali Mobile & Repair shop in Bayswater?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Bayswater branch, shop, counter or collection point."
       },
       {
-        question: "What types of work devices do you repair for Bayswater trades?",
-        answer: "We inspect and repair trade phones, tablets, and laptops used in daily business operations, covering screens, battery swaps, and loose charging ports."
+        question: "Which phone, tablet and laptop faults can be assessed?",
+        answer: "The Ringwood Square desk can assess supported iPhone, Samsung phone, Google Pixel, iPad, tablet, MacBook and laptop hardware faults after identifying the exact model and issue."
       },
       {
-        question: "How fast can you check or fix my device?",
-        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+        question: "How are Bayswater phone and iPhone faults assessed?",
+        answer: "Screen, battery, charging, camera and no-power symptoms are assessed against the exact model before a suitable repair path and quote can be confirmed."
       },
       {
-        question: "Do you offer warranty cover for Bayswater clients?",
-        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+        question: "What MacBook and laptop work is within your support scope?",
+        answer: "MacBook Air, MacBook Pro and supported laptop enquiries are limited to hardware assessment and supported hardware repair after model and fault confirmation."
       },
       {
-        question: "Can you inspect devices that won't charge?",
-        answer: "Yes. We run a diagnostic on the charging port and power draw to check if the port is damaged, dirty, or if the battery is failing."
+        question: "Do you provide general computer repair or IT support?",
+        answer: "No. Ali Mobile & Repair provides supported device hardware assessment and repair at Ringwood Square. We do not provide general computer repair, general PC repair, IT support, managed IT, networking, software administration, remote support or on-site IT support."
       },
       {
-        question: "Do you charge for charging port cleaning?",
-        answer: "Yes, charging port cleaning is a paid service when it resolves the issue without needing to replace the charging port component."
+        question: "What should I confirm before travelling from Bayswater?",
+        answer: "Contact the Ringwood Square team with the model and fault. They can discuss the assessment process, likely parts availability and a confirmed quote before supported work begins."
       },
       {
-        question: "What happens if a work phone is found to be unrepairable?",
-        answer: "We apply a 'No Fix, No Charge' policy to eligible diagnostic checkups. If a phone has terminal board damage, you won't pay the repair price."
+        question: "Where is the repair desk and is parking available?",
+        answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Free underground and outdoor parking is available at Ringwood Square."
+      },
+      {
+        question: "Can timing, parts availability or a repair result be guaranteed?",
+        answer: "No. Timing and availability depend on the exact model, fault and assessment. The quote is confirmed before supported work begins."
       }
     ],
     customLinks: [
-      { href: "/repairs/charging-port-replacement", label: "Bayswater work-phone and charging repair options" },
-      { href: "/repairs/battery-replacement", label: "Battery assessments near Bayswater" },
-      { href: "/repairs/tablet/ipad", label: "iPad screen diagnostics for Bayswater small businesses" }
-    ]
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+    ],
+    showChineseServiceCta: true,
   },
   {
     name: "Boronia",
