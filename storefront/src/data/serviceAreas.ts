@@ -860,7 +860,56 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Burwood Highway", "Deakin University", "Vermont South"],
     route: "Drive east along Burwood Highway, then connect through Vermont South and Wantirna toward Ringwood.",
     localReason: "Burwood customers can phone ahead for repair pricing, model checks, and repair timing before making the trip.",
-    metaTitle: "Phone, iPhone & Laptop Repair Near Burwood | Ali Mobile Ringwood",
+    metaTitle: "Phone, iPhone, iPad & MacBook Repair Near Burwood | Ali Mobile",
+    metaDescription: "Phone, iPhone, iPad and MacBook repair near Burwood, Burwood East and Burwood Heights at Ringwood Square Kiosk C1, with model checks and confirmed quotes.",
+    customH1: "Phone, iPhone, iPad & MacBook Repair Near Burwood",
+    customIntro: "Burwood, Burwood East, Burwood Heights and Bennettswood customers can visit Ali Mobile & Repair for phone, iPhone, iPad and MacBook repair assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk supports Samsung and supported Google Pixel repairs, with the exact model, fault and quote confirmed before work.",
+    customLocalSection: {
+      title: "Visiting from Burwood and nearby eastern suburbs",
+      paragraphs: [
+        "Ali Mobile & Repair does not operate a Burwood, Burwood East, Burwood Heights or Bennettswood branch, shop, counter or collection point. All device assessments and repairs are completed at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Free underground and outdoor parking is available at Ringwood Square. Before travelling, share the exact device model and symptoms so the Ringwood team can discuss the support scope, parts availability and quote process before work."
+      ]
+    },
+    customScenarioSection: {
+      title: "Multi-device hardware assessment near Burwood",
+      paragraphs: [
+        "MacBook and supported laptop hardware enquiries are assessed at Ringwood Square for screen, battery, charging, camera and no-power symptoms. The exact device, fault and practical repair path are checked before a quote is confirmed.",
+        "The same assessment-first process supports phone, iPhone, Samsung, supported Google Pixel and iPad or tablet repairs. It helps confirm whether a screen, battery, charging, camera or no-power fault is within the available repair scope."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a repair shop in Burwood, Burwood East, Burwood Heights or Bennettswood?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Burwood, Burwood East, Burwood Heights or Bennettswood branch, shop, counter or collection point."
+      },
+      {
+        question: "What should I confirm before travelling from Burwood?",
+        answer: "Contact the Ringwood Square team with the exact model and fault. They can discuss the support scope, likely parts availability and quote process before work."
+      },
+      {
+        question: "Which phones and tablets can Burwood customers bring in?",
+        answer: "The Ringwood desk can assess supported iPhone, Samsung, Google Pixel, iPad and tablet faults after confirming the exact device and issue."
+      },
+      {
+        question: "Do you provide MacBook repair, general IT support or on-site computer service?",
+        answer: "Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square. We do not provide general IT, managed IT, networking, software administration or on-site computer service."
+      },
+      {
+        question: "Can screen, battery, charging, camera or no-power faults be assessed?",
+        answer: "Yes. The Ringwood team can assess screen, battery, charging, camera and no-power symptoms to confirm the device, fault and suitable repair path before quoting."
+      },
+      {
+        question: "Where is the Ringwood repair desk and is parking available?",
+        answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Free underground and outdoor parking is available at Ringwood Square."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/phone/iphone", label: "iPhone repair options for Burwood customers" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options for Burwood customers" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options for Burwood customers" },
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options for Burwood customers" }
+    ],
     showChineseServiceCta: true,
   },
   {
