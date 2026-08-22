@@ -51,6 +51,24 @@ function legacySuccessResponse() {
   }), { status: 200 });
 }
 
+function newApiSuccessResponse() {
+  return new Response(JSON.stringify({
+    rating: 4.9,
+    userRatingCount: 314,
+    reviews: [{
+      name: "places/reviews/current",
+      rating: 5,
+      text: { text: "Fast and careful repair." },
+      authorAttribution: { displayName: "Current API Customer" },
+      relativePublishTimeDescription: "2 days ago",
+    }],
+  }), { status: 200 });
+}
+
+function abortError() {
+  return Object.assign(new Error("request aborted"), { name: "AbortError" });
+}
+
 describe("Google Places review cache", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -58,18 +76,25 @@ describe("Google Places review cache", () => {
     unstableCache.mockReset().mockImplementation(createDataCache());
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "test-key");
     vi.stubEnv("GOOGLE_PLACE_ID", "test-place");
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
-  it("uses a 24-hour tagged Data Cache and shares one upstream request within that TTL", async () => {
+  it("uses the v2 24-hour Data Cache only for successful Google results", async () => {
     const fetchMock = vi.fn().mockImplementation(legacySuccessResponse);
     vi.stubGlobal("fetch", fetchMock);
-    const { getGoogleReviews, GOOGLE_REVIEWS_CACHE_TAG, GOOGLE_REVIEWS_REVALIDATE_SECONDS } = await loadGoogleReviews();
+    const {
+      getGoogleReviews,
+      GOOGLE_REVIEWS_CACHE_KEY,
+      GOOGLE_REVIEWS_CACHE_TAG,
+      GOOGLE_REVIEWS_REVALIDATE_SECONDS,
+    } = await loadGoogleReviews();
 
     const [first, second] = await Promise.all([getGoogleReviews(), getGoogleReviews()]);
 
@@ -79,15 +104,17 @@ describe("Google Places review cache", () => {
     ]));
     expect(second).toEqual(first);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(GOOGLE_REVIEWS_CACHE_KEY).toBe("google-reviews-v2");
+    expect(GOOGLE_REVIEWS_CACHE_KEY).not.toContain("v1");
     expect(unstableCache).toHaveBeenCalledWith(
       expect.any(Function),
-      [GOOGLE_REVIEWS_CACHE_TAG],
+      ["google-reviews-v2"],
       { revalidate: 86400, tags: [GOOGLE_REVIEWS_CACHE_TAG] }
     );
     expect(GOOGLE_REVIEWS_REVALIDATE_SECONDS).toBe(86400);
   });
 
-  it("permits one refreshed upstream read after the 24-hour cache lifetime", async () => {
+  it("permits one refreshed successful upstream read after the 24-hour cache lifetime", async () => {
     const fetchMock = vi.fn().mockImplementation(legacySuccessResponse);
     vi.stubGlobal("fetch", fetchMock);
     const { getGoogleReviews } = await loadGoogleReviews();
@@ -101,22 +128,26 @@ describe("Google Places review cache", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("does not cache an upstream fallback result for 24 hours", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 403 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { getGoogleReviews, GOOGLE_REVIEWS_FALLBACK_REVALIDATE_SECONDS } = await loadGoogleReviews();
+
+    const first = await getGoogleReviews();
+    const second = await getGoogleReviews();
+
+    expect(first).toMatchObject({ source: "fallback", aggregateRating: { ratingValue: "", reviewCount: "" } });
+    expect(second).toMatchObject({ source: "fallback", aggregateRating: { ratingValue: "", reviewCount: "" } });
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(GOOGLE_REVIEWS_FALLBACK_REVALIDATE_SECONDS).toBe(300);
+  });
+
   it("maps rating, userRatingCount, and reviews from the current Places API response", async () => {
     vi.stubGlobal("fetch", vi.fn((url: string) => {
       if (url.startsWith("https://maps.googleapis.com")) {
         return Promise.resolve(new Response(JSON.stringify({ status: "ZERO_RESULTS" }), { status: 200 }));
       }
-      return Promise.resolve(new Response(JSON.stringify({
-        rating: 4.9,
-        userRatingCount: 314,
-        reviews: [{
-          name: "places/reviews/current",
-          rating: 5,
-          text: { text: "Fast and careful repair." },
-          authorAttribution: { displayName: "Current API Customer" },
-          relativePublishTimeDescription: "2 days ago",
-        }],
-      }), { status: 200 }));
+      return Promise.resolve(newApiSuccessResponse());
     }));
     const { getGoogleReviews } = await loadGoogleReviews();
 
@@ -128,19 +159,41 @@ describe("Google Places review cache", () => {
     ]));
   });
 
-  it("uses the existing fallback with an empty aggregate rating after Places failures", async () => {
-    vi.stubGlobal("fetch", vi.fn()
-      .mockResolvedValueOnce(new Response(null, { status: 403 }))
-      .mockRejectedValueOnce(new TypeError("network unavailable")));
+  it("continues to the New API with an independent signal after Legacy fails", async () => {
+    const signals: AbortSignal[] = [];
+    vi.stubGlobal("fetch", vi.fn((url: string, init?: RequestInit) => {
+      signals.push(init?.signal as AbortSignal);
+      if (url.startsWith("https://maps.googleapis.com")) return Promise.reject(abortError());
+      return Promise.resolve(newApiSuccessResponse());
+    }));
+    const { getGoogleReviews } = await loadGoogleReviews();
+
+    await expect(getGoogleReviews()).resolves.toMatchObject({ source: "google-partial-fallback" });
+
+    expect(signals).toHaveLength(2);
+    expect(signals[0]).not.toBe(signals[1]);
+    expect(signals[1]?.aborted).toBe(false);
+  });
+
+  it.each([
+    ["403", () => new Response(null, { status: 403 })],
+    ["network error", () => Promise.reject(new TypeError("network unavailable"))],
+    ["timeout", () => Promise.reject(abortError())],
+  ])("returns the safe fallback when both APIs fail with %s", async (_name, response) => {
+    const fetchMock = vi.fn().mockImplementation(response);
+    vi.stubGlobal("fetch", fetchMock);
     const { getGoogleReviews } = await loadGoogleReviews();
 
     const payload = await getGoogleReviews();
 
     expect(payload).toMatchObject({ source: "fallback", aggregateRating: { ratingValue: "", reviewCount: "" } });
     expect(payload.reviews.length).toBeGreaterThan(0);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(payload)).not.toContain("test-key");
+    expect(JSON.stringify(payload)).not.toContain("network unavailable");
   });
 
-  it("returns the existing fallback without a Google request when configuration is absent", async () => {
+  it("returns fallback without a Google request when configuration is absent", async () => {
     vi.stubEnv("GOOGLE_PLACES_API_KEY", "");
     vi.stubEnv("GOOGLE_PLACE_ID", "");
     const fetchMock = vi.fn();
@@ -152,5 +205,6 @@ describe("Google Places review cache", () => {
       aggregateRating: { ratingValue: "", reviewCount: "" },
     });
     expect(fetchMock).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith("[google-reviews] configuration missing-configuration");
   });
 });

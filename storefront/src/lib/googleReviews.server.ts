@@ -12,7 +12,21 @@ const GOOGLE_PLACES_LEGACY_DETAILS_URL = "https://maps.googleapis.com/maps/api/p
 const GOOGLE_REVIEWS_TIMEOUT_MS = 3500;
 const MIN_REVIEW_COUNT = 6;
 export const GOOGLE_REVIEWS_REVALIDATE_SECONDS = 86400;
+export const GOOGLE_REVIEWS_FALLBACK_REVALIDATE_SECONDS = 300;
 export const GOOGLE_REVIEWS_CACHE_TAG = "google-reviews";
+export const GOOGLE_REVIEWS_CACHE_KEY = "google-reviews-v2";
+
+type GoogleReviewsApi = "legacy" | "new" | "configuration" | "all";
+type GoogleReviewsFailureKind = `http-${number}` | "invalid-response" | "no-valid-reviews" | "network" | "timeout" | "missing-configuration";
+
+class GoogleReviewsUpstreamError extends Error {
+  constructor(
+    readonly api: GoogleReviewsApi,
+    readonly kind: GoogleReviewsFailureKind
+  ) {
+    super(`${api}:${kind}`);
+  }
+}
 
 interface GooglePlaceReviewText {
   text?: string;
@@ -62,6 +76,35 @@ function getGooglePlacesConfig() {
     apiKey: process.env.GOOGLE_PLACES_API_KEY,
     placeId: process.env.GOOGLE_PLACE_ID || process.env.GOOGLE_BUSINESS_PLACE_ID,
   };
+}
+
+function logGoogleReviewsFailure(api: GoogleReviewsApi, kind: GoogleReviewsFailureKind) {
+  console.warn(`[google-reviews] ${api} ${kind}`);
+}
+
+function getGoogleReviewsFailureKind(error: unknown): GoogleReviewsFailureKind {
+  if (error instanceof GoogleReviewsUpstreamError) return error.kind;
+  if (error instanceof Error && error.name === "AbortError") return "timeout";
+  return "network";
+}
+
+async function withIndependentGoogleTimeout<T>(
+  api: Extract<GoogleReviewsApi, "legacy" | "new">,
+  request: (signal: AbortSignal) => Promise<T>
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GOOGLE_REVIEWS_TIMEOUT_MS);
+
+  try {
+    return await request(controller.signal);
+  } catch (error) {
+    if (controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) {
+      throw new GoogleReviewsUpstreamError(api, "timeout");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function toPublicReviewFromNewApi(review: GooglePlaceReview, index: number): PublicGoogleReview | null {
@@ -145,13 +188,13 @@ async function fetchNewestLegacyReviews(
   });
 
   if (!response.ok) {
-    throw new Error(`Google Places Legacy API returned ${response.status}`);
+    throw new GoogleReviewsUpstreamError("legacy", `http-${response.status}`);
   }
 
   const place = (await response.json()) as GoogleLegacyPlaceDetailsResponse;
 
   if (place.status !== "OK") {
-    throw new Error(`Google Places Legacy API status ${place.status ?? "UNKNOWN"}`);
+    throw new GoogleReviewsUpstreamError("legacy", "invalid-response");
   }
 
   const liveFiveStarReviews = (place.result?.reviews ?? [])
@@ -199,7 +242,7 @@ async function fetchRelevantNewApiReviews(
   );
 
   if (!response.ok) {
-    throw new Error(`Google Places API returned ${response.status}`);
+    throw new GoogleReviewsUpstreamError("new", `http-${response.status}`);
   }
 
   const place = (await response.json()) as GooglePlaceDetailsResponse;
@@ -229,35 +272,34 @@ async function fetchRelevantNewApiReviews(
 }
 
 async function fetchGoogleReviews(apiKey: string, placeId: string): Promise<GoogleReviewsPayload> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), GOOGLE_REVIEWS_TIMEOUT_MS);
-
   try {
-    const newestReviews = await fetchNewestLegacyReviews(apiKey, placeId, controller.signal).catch(
-      () => null
+    const newestReviews = await withIndependentGoogleTimeout("legacy", (signal) =>
+      fetchNewestLegacyReviews(apiKey, placeId, signal)
     );
 
-    if (newestReviews) {
-      return newestReviews;
-    }
-
-    const relevantReviews = await fetchRelevantNewApiReviews(
-      apiKey,
-      placeId,
-      controller.signal
-    ).catch(() => null);
-
-    return relevantReviews ?? createFallbackGoogleReviewsPayload();
-  } catch {
-    return createFallbackGoogleReviewsPayload();
-  } finally {
-    clearTimeout(timeout);
+    if (newestReviews) return newestReviews;
+    logGoogleReviewsFailure("legacy", "no-valid-reviews");
+  } catch (error) {
+    logGoogleReviewsFailure("legacy", getGoogleReviewsFailureKind(error));
   }
+
+  try {
+    const relevantReviews = await withIndependentGoogleTimeout("new", (signal) =>
+      fetchRelevantNewApiReviews(apiKey, placeId, signal)
+    );
+
+    if (relevantReviews) return relevantReviews;
+    logGoogleReviewsFailure("new", "no-valid-reviews");
+  } catch (error) {
+    logGoogleReviewsFailure("new", getGoogleReviewsFailureKind(error));
+  }
+
+  throw new GoogleReviewsUpstreamError("all", "no-valid-reviews");
 }
 
 const getCachedGoogleReviews = unstable_cache(
   fetchGoogleReviews,
-  [GOOGLE_REVIEWS_CACHE_TAG],
+  [GOOGLE_REVIEWS_CACHE_KEY],
   {
     revalidate: GOOGLE_REVIEWS_REVALIDATE_SECONDS,
     tags: [GOOGLE_REVIEWS_CACHE_TAG],
@@ -268,8 +310,14 @@ export async function getGoogleReviews(): Promise<GoogleReviewsPayload> {
   const { apiKey, placeId } = getGooglePlacesConfig();
 
   if (!apiKey || !placeId) {
+    logGoogleReviewsFailure("configuration", "missing-configuration");
     return createFallbackGoogleReviewsPayload();
   }
 
-  return getCachedGoogleReviews(apiKey, placeId);
+  try {
+    return await getCachedGoogleReviews(apiKey, placeId);
+  } catch (error) {
+    logGoogleReviewsFailure("all", getGoogleReviewsFailureKind(error));
+    return createFallbackGoogleReviewsPayload();
+  }
 }
