@@ -1791,7 +1791,64 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Blackburn Station", "Whitehorse Road", "Blackburn Square"],
     route: "Drive east via Whitehorse Road and Maroondah Highway through Nunawading and Mitcham.",
     localReason: "Blackburn customers have a direct train and road link to Ringwood Square for transparent quotes and warranty-backed repairs.",
-    metaTitle: "Phone & iPhone Repair Near Blackburn | Ali Mobile Ringwood",
+    metaTitle: "Apple, MacBook & Phone Repair Near Blackburn | Ali Mobile",
+    metaDescription: "Apple, MacBook, iPhone and phone repair near Blackburn, Blackburn South and Blackburn North at Ringwood Square Kiosk C1, with confirmed quotes.",
+    customH1: "Apple, MacBook & Phone Repair Near Blackburn",
+    customIntro: "Blackburn, Blackburn South and Blackburn North customers can visit Ali Mobile & Repair for Apple device hardware assessment, MacBook repair, iPhone repair and phone repair. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk also supports Samsung phones, supported Google Pixel repairs and iPad or tablet assessment after the exact model and fault are confirmed.",
+    customLocalSection: {
+      title: "Visiting from Blackburn and nearby areas",
+      paragraphs: [
+        "Ali Mobile & Repair does not operate a Blackburn, Blackburn South or Blackburn North branch, storefront, counter, collection point or on-site service. All device assessments and repairs are completed at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Free underground and outdoor parking is available at Ringwood Square. Before travelling, provide the exact model and symptoms so the team can discuss the support scope, parts availability and quote before repair begins."
+      ]
+    },
+    customScenarioSection: {
+      title: "Apple and MacBook hardware assessment near Blackburn",
+      paragraphs: [
+        "MacBook screen, battery, charging, keyboard and no-power symptoms are assessed at Ringwood Square using the exact model and fault. MacBook and laptop enquiries remain within supported laptop hardware assessment and repair scope before a quote is confirmed.",
+        "The same assessment-first process supports iPhone and phone screen, battery, charging and camera faults, as well as Samsung phones, supported Google Pixel repairs and iPad or tablet assessment where the issue is within the available repair scope."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a physical repair shop in Blackburn?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Blackburn, Blackburn South or Blackburn North branch, storefront, counter or collection point."
+      },
+      {
+        question: "Where do Blackburn customers hand in a device?",
+        answer: "Blackburn, Blackburn South and Blackburn North customers bring devices to the Ringwood Square kiosk for assessment and repair support."
+      },
+      {
+        question: "How are MacBook screen, battery, charging, keyboard or no-power issues assessed?",
+        answer: "The Ringwood team checks the exact MacBook model, hardware symptoms and practical repair path before confirming a quote."
+      },
+      {
+        question: "Do you assess iPhone, Samsung, supported Google Pixel and iPad faults?",
+        answer: "Yes. The Ringwood desk can assess supported iPhone, Samsung phone, Google Pixel, iPad and tablet faults after confirming the exact device and issue."
+      },
+      {
+        question: "Do you provide general IT or on-site computer service?",
+        answer: "No. Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square; we do not provide general IT, managed IT, networking, software administration or on-site computer service."
+      },
+      {
+        question: "What should I confirm before travelling from Blackburn?",
+        answer: "Contact the Ringwood Square team with the model and fault first. They can discuss the support scope, likely parts availability and quote process before repair begins."
+      },
+      {
+        question: "Where is the Ringwood repair desk and is parking available?",
+        answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Free underground and outdoor parking is available at Ringwood Square."
+      },
+      {
+        question: "Can a fixed repair time, parts availability or result be promised?",
+        answer: "No. The exact repair path depends on the model, fault and assessment. The quote is confirmed before repair starts."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options for Blackburn customers" },
+      { href: "/repairs/phone/iphone", label: "iPhone repair options for Blackburn customers" },
+      { href: "/repairs/phone/samsung", label: "Samsung phone repair options for Blackburn customers" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options for Blackburn customers" }
+    ],
     showChineseServiceCta: true,
   },
   {
