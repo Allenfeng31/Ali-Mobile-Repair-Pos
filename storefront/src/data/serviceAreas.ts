@@ -684,7 +684,48 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Westfield Doncaster", "Doncaster Road", "Eastern Freeway"],
     route: "Drive through Springvale Road and Maroondah Highway or use EastLink toward Ringwood Square.",
     localReason: "Doncaster customers often compare repair options before travelling, so a quick phone check can confirm parts, price range, and timing.",
-    metaTitle: "Phone & iPhone Repair Near Doncaster | Ali Mobile Ringwood",
+    metaTitle: "Apple, MacBook & Phone Repair Near Doncaster | Ali Mobile",
+    metaDescription: "Apple, MacBook, iPhone, Samsung and iPad repair near Doncaster at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
+    customH1: "Apple, MacBook & Phone Repair Near Doncaster",
+    customIntro: "Doncaster, Doncaster East and Doncaster Heights customers can bring Apple devices and MacBooks to Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for model and hardware-fault assessment. The same Ringwood desk also supports iPhone, Samsung, supported Google Pixel models and iPad or tablet repairs, with the repair path and quote confirmed before work.",
+    customLocalSection: {
+      title: "Visiting from Doncaster, Doncaster East and Doncaster Heights",
+      paragraphs: [
+        "Ali Mobile & Repair does not operate a Doncaster, Doncaster East or Doncaster Heights branch, counter or collection point. All inspections and repairs are handled at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Before travelling, share the exact model and symptom with the Ringwood Square team. They can discuss the likely hardware assessment, parts path, quote process and timing after the device has been checked."
+      ]
+    },
+    customScenarioSection: {
+      title: "Apple and MacBook hardware assessment near Doncaster",
+      paragraphs: [
+        "For MacBook Air, MacBook Pro and other supported Apple device faults, the Ringwood desk checks the exact model, hardware symptoms and practical repair path before a quote is confirmed. This keeps laptop and computer enquiries within supported hardware assessment and repair scope.",
+        "The same assessment-first process supports iPhone, Samsung, supported Google Pixel models and iPad or tablet faults, including screen, battery, charging and camera symptoms where a repair is suitable."
+      ]
+    },
+    customFaqs: [
+      {
+        question: "Do you have a repair shop in Doncaster, Doncaster East or Doncaster Heights?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Doncaster, Doncaster East or Doncaster Heights branch, counter or collection point."
+      },
+      {
+        question: "Which devices can Doncaster customers bring in for assessment?",
+        answer: "The Ringwood Square desk assesses supported Apple and MacBook hardware, plus iPhone, Samsung, supported Google Pixel models and iPad or tablet faults after confirming the exact device and issue."
+      },
+      {
+        question: "What should I confirm before travelling from Doncaster?",
+        answer: "Contact the Ringwood Square team with the model and symptom first. They can discuss the likely assessment, parts path, quote process and timing once the device has been checked."
+      },
+      {
+        question: "Do you provide general IT support or on-site computer service?",
+        answer: "No. Ali Mobile & Repair provides supported device hardware assessment and repair at Ringwood Square; we do not provide general or managed IT, network support or on-site computer service."
+      }
+    ],
+    customLinks: [
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" },
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+    ],
     showChineseServiceCta: true,
   },
   {
