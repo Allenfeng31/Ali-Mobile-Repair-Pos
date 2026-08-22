@@ -798,59 +798,61 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Boronia Station", "Dorset Square", "Mountain Highway"],
     route: "Head north-west through Dorset Road or Mountain Highway toward Ringwood Square.",
     localReason: "Boronia customers can reach our bench without mailing a device away or waiting for a vague remote quote.",
-    metaTitle: "Phone & iPhone Repair Near Boronia | Ali Mobile Ringwood",
-    metaDescription: "Need phone repairs near Boronia? Visit Kiosk C1 at Ringwood Square for face-to-face screen, battery, and charging checks. Direct Belgrave train line route.",
-    customH1: "Phone & iPhone Repair Near Boronia",
-    customIntro: "Boronia customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
+    metaTitle: "Phone, iPhone & MacBook Repair Near Boronia | Ali Mobile",
+    metaDescription: "Phone, iPhone and MacBook repair near Boronia at Ringwood Square Kiosk C1, with screen, battery and charging checks and confirmed quotes before work.",
+    customH1: "Phone, iPhone & MacBook Repair Near Boronia",
+    customIntro: "Boronia customers can visit Ali Mobile & Repair for phone repair near Boronia, iPhone repair near Boronia and supported MacBook hardware assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phone assessment and repair, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed.",
     customLocalSection: {
-      title: "Travelling for Repair from Boronia",
+      title: "Planning a repair visit from Boronia",
       paragraphs: [
-        "Boronia locals can reach our kiosk easily by road or rail. Driving north-west via Boronia Road and Dorset Road typically takes about 16 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
-        "If you are commuting, taking the Belgrave line train from Boronia Station to Ringwood Station is a short train connection of around 11 minutes. Our shop is just across the street from the station exit."
+        "There is no Boronia branch, shop, counter or collection point. All device assessments and supported repairs are handled at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Free underground and outdoor parking is available at Ringwood Square. Before travelling, share the exact model and symptoms so the team can discuss the fault, support scope, parts availability and quote before supported work begins."
       ]
     },
     customScenarioSection: {
-      title: "Phone and Device Repairs near Boronia",
+      title: "Phone-first assessment with MacBook hardware support",
       paragraphs: [
-        "We often assist Boronia commuters who experience screen cracks or charging instability during their daily travels. If your phone drops or starts draining battery unexpectedly, we open the unit to check for internal wear and confirm the battery's cycle count.",
-        "In liquid exposure cases, we run diagnostic checks to see if corrosion has affected the motherboard or charging ports, outlining a realistic assessment of whether the device can be saved before you spend money on replacement parts."
+        "For phone and iPhone faults, the Ringwood team assesses screen damage, battery symptoms, charging problems, camera faults and no-power issues before confirming whether a supported repair path is available. Samsung phones and supported Google Pixel models follow the same model-and-fault assessment process.",
+        "MacBook and laptop enquiries are limited to hardware assessment and supported hardware repair. iPad and tablet assessment is also available where the exact model and issue can be confirmed before a quote is provided."
       ]
     },
     customFaqs: [
       {
-        question: "Is there an Ali Mobile & Repair shop inside Boronia?",
-        answer: "No, our physical store is Kiosk C1, Ringwood Square Shopping Centre, Ringwood. Boronia is typically a 16-minute drive or a short 11-minute train ride away."
+        question: "Is there an Ali Mobile & Repair shop in Boronia?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Boronia branch, shop, counter or collection point."
       },
       {
-        question: "Can you fix a phone that has been dropped in water?",
-        answer: "We run liquid exposure diagnostics to clean and inspect internal components. While we cannot guarantee water-damaged devices can be fully restored, a prompt inspection gives the best chance."
+        question: "Which devices can Boronia customers bring in for assessment?",
+        answer: "The Ringwood desk can assess supported phone, iPhone, Samsung, Google Pixel, MacBook, iPad and tablet faults after the exact model and issue are identified."
       },
       {
-        question: "How fast can you replace a screen or battery for a Boronia commuter?",
-        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+        question: "How are Boronia phone screen, battery and charging faults assessed?",
+        answer: "The team checks the exact model, symptoms and practical repair path before providing a quote. Camera and no-power faults can also be assessed where they are within the available repair scope."
       },
       {
-        question: "Do I get a warranty on replacement screens?",
-        answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
+        question: "Do you provide MacBook repair or general IT support?",
+        answer: "Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square. We do not provide general computer repair, managed IT, business IT support, networking, software administration, remote IT support or on-site computer service."
       },
       {
-        question: "Do you verify parts availability before I leave Boronia?",
-        answer: "Yes, we recommend calling or messaging first. We can check our current inventory and hold screens or battery components for your model."
+        question: "What should I confirm before travelling from Boronia?",
+        answer: "Contact the Ringwood Square team with the model and fault first. They can discuss likely parts availability, the assessment process and the quote before supported work begins."
       },
       {
-        question: "What if my charging port is loose or unstable?",
-        answer: "We inspect the port for debris or pins damage. If it's dirty, we can clean it for a fee; if it's broken, we explain the replacement process."
+        question: "Where is the repair desk and is parking available?",
+        answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Free underground and outdoor parking is available at Ringwood Square."
       },
       {
-        question: "What is your policy if a diagnosed phone cannot be fixed?",
-        answer: "We apply our 'No Fix, No Charge' policy to eligible diagnostics. If a motherboard is dead or unrepairable, you will not pay the repair price."
+        question: "Can a repair time, parts availability or result be guaranteed?",
+        answer: "No. Timing and availability depend on the exact model, fault and assessment. The quote is confirmed before supported work begins."
       }
     ],
     customLinks: [
-      { href: "/repairs/screen-replacement", label: "Screen assessments for Boronia customers" },
-      { href: "/repairs/battery-replacement", label: "Boronia battery replacement services" },
-      { href: "/repairs/charging-port-replacement", label: "Charging port checks near Boronia" }
-    ]
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" },
+      { href: "/repairs/screen-replacement", label: "Screen replacement assessment options" }
+    ],
+    showChineseServiceCta: true,
   },
   {
     name: "Burwood",
