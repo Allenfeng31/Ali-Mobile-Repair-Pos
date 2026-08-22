@@ -409,60 +409,62 @@ export const SERVICE_AREAS: ServiceArea[] = [
     transitAdvice: "Use Maroondah Highway or EastLink depending on traffic.",
     landmarks: ["Mitcham Station", "EastLink", "Mitcham Shopping Centre"],
     route: "Follow Maroondah Highway east toward Ringwood Square.",
-    localReason: "Mitcham residents can reach us quickly for priority booking, phone checks, and warranty-backed repair work.",
-    metaTitle: "Phone & iPhone Repair Near Mitcham | Ali Mobile Ringwood",
-    metaDescription: "Need phone, Samsung, or iPad repairs near Mitcham? Get reliable screen, battery, and charging checks just 6 minutes away at Kiosk C1, Ringwood Square.",
-    customH1: "Phone Repair Near Mitcham",
-    customIntro: "Mitcham customers can visit Ali Mobile & Repair for phone repair near Mitcham, iPhone repair near Mitcham, Samsung phone repair near Mitcham, and MacBook and iPad repair support near Mitcham. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, a short trip from Mitcham.",
+    localReason: "Mitcham residents can contact the Ringwood Square team for model checks, fault assessment and a confirmed quote before supported work begins.",
+    metaTitle: "Apple, MacBook & Phone Repair Near Mitcham | Ali Mobile",
+    metaDescription: "Apple, MacBook, iPhone and phone repair near Mitcham at Ringwood Square Kiosk C1, with model checks and a confirmed quote before supported work.",
+    customH1: "Apple, MacBook & Phone Repair Near Mitcham",
+    customIntro: "Mitcham customers can visit Ali Mobile & Repair for Apple device repair assessment near Mitcham, including MacBook hardware faults and iPhone repair support. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk also assesses Samsung phones, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed.",
     customLocalSection: {
-      title: "Travelling for Phone Repair from Mitcham",
+      title: "Planning a repair visit from Mitcham",
       paragraphs: [
-        "Getting to Ringwood Square from Mitcham is incredibly direct. Commuters can catch the Lilydale or Belgrave line from Mitcham Station and arrive at Ringwood Station in approximately 5 minutes. From Ringwood Station, walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood.",
-        "If you are driving from Mitcham, follow Maroondah Highway east for about 4 kilometers. Free underground and outdoor parking is available at Ringwood Square."
+        "Ali Mobile & Repair does not operate a Mitcham branch, shop, counter or collection point. All device assessments and supported repairs are handled at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+        "Free underground and outdoor parking is available at Ringwood Square. Contact the Ringwood Square team before travelling with the model and symptoms so availability can be checked after the exact device is identified."
       ]
     },
     customScenarioSection: {
-      title: "iPhone and Samsung Repairs near Mitcham",
+      title: "Apple and MacBook hardware assessment near Mitcham",
       paragraphs: [
-        "Many Mitcham clients visit with cracked screens or battery degradation issues that they want checked in person. Instead of accepting an online estimate, we open the device at our counter, inspect the screen connectors, check the battery cycle count, and check for any internal dust or liquid contact.",
-        "For Samsung Galaxy phones or iPads, we help verify if the touch digitizer or charging port is the source of the fault. By explaining the repair process beforehand, we make sure you have a clear choice before any parts are replaced or work begins."
+        "MacBook Air and MacBook Pro enquiries begin with model and hardware-fault confirmation. Screen, battery, charging, keyboard, camera and no-power symptoms are assessed to determine whether supported hardware repair is practical before a quote is confirmed.",
+        "Phone and iPhone repair support remains available for Mitcham customers, alongside Samsung phone assessment, supported Google Pixel models and iPad or tablet faults. The team checks the model, fault and suitable repair scope before any supported work begins."
       ]
     },
     customFaqs: [
       {
-        question: "Is Ali Mobile located in Mitcham or Ringwood?",
-        answer: "We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, which is a short 5-minute train trip or drive east from Mitcham."
+        question: "Is there an Ali Mobile & Repair shop in Mitcham?",
+        answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Mitcham branch, shop, counter or collection point."
       },
       {
-        question: "How do Mitcham commuters visit for repair?",
-        answer: "Many Mitcham residents visit with their iPhone or iPad during a commute via Ringwood Station, then confirm the repair path and timing with the Ringwood Square team."
+        question: "Which Apple and MacBook faults can be assessed for Mitcham customers?",
+        answer: "The Ringwood team assesses supported Apple devices, including MacBook Air and MacBook Pro screen, battery, charging, keyboard, camera and no-power symptoms after confirming the exact model and fault."
       },
       {
-        question: "Do you check screen stock for Mitcham customers before they travel?",
-        answer: "Yes, we encourage calling or messaging first. We can verify if we have the specific screen or battery in stock at Ringwood Square to save you a trip."
+        question: "Do you also assess iPhone, Samsung, Google Pixel and iPad faults?",
+        answer: "Yes. The Ringwood Square desk can assess supported iPhone, Samsung phone, Google Pixel, iPad and tablet faults after identifying the model and issue."
       },
       {
-        question: "Can Mitcham residents get iPad or Samsung tablet assessments?",
-        answer: "Yes. We inspect charging port wear, battery health, and display damage for iPads and Samsung Galaxy Tabs directly at our Ringwood bench."
+        question: "Do you provide general computer repair or IT support?",
+        answer: "No. Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square. We do not provide general computer repair, general PC repair, IT support, managed IT, business network support, networking, software administration, remote support or on-site computer service."
       },
       {
-        question: "What is the typical repair turnaround time for a Mitcham visitor?",
-        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+        question: "What should I confirm before travelling from Mitcham?",
+        answer: "Contact the Ringwood Square team with the model and fault. They can discuss the assessment process, likely parts availability and a confirmed quote before supported work begins."
       },
       {
-        question: "Do Mitcham customers need an appointment?",
-        answer: "Walk-ins are always welcome. However, booking online helps us reserve specific replacement parts for your model ahead of your visit."
+        question: "Where is the repair desk and is parking available?",
+        answer: "Ali Mobile & Repair is at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. Free underground and outdoor parking is available at Ringwood Square."
       },
       {
-        question: "What if my phone cannot be fixed after I travel from Mitcham?",
-        answer: "We apply a 'No Fix, No Charge' policy to eligible diagnostic jobs. If we open the device at our Ringwood bench and find it is beyond repair due to board damage, you won't pay the repair fee."
+        question: "Can booking priority, timing, parts availability or a repair result be guaranteed?",
+        answer: "No. Booking requests remain subject to confirmation, and timing and availability depend on the exact model, fault and assessment. The quote is confirmed before supported work begins."
       }
     ],
     customLinks: [
-      { href: "/repairs/screen-replacement", label: "Mitcham customers comparing screen repair options" },
-      { href: "/repairs/battery-replacement", label: "Battery diagnostic checks near Mitcham" },
-      { href: "/repairs/tablet/ipad", label: "iPad repair support near Mitcham" }
-    ]
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" },
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+    ],
+    showChineseServiceCta: true,
   },
   {
     name: "Nunawading",
