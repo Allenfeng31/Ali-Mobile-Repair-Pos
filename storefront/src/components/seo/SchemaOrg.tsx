@@ -119,7 +119,6 @@ export function RepairServiceSchema({
       "@type": "Offer",
       "price": parsedPrice.toFixed(2),
       "priceCurrency": "AUD",
-      "availability": "https://schema.org/InStock",
     };
     if (url) offerData.url = url;
     serviceData.offers = offerData;
