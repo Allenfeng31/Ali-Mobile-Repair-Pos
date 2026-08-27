@@ -1,4 +1,5 @@
-const REPAIR_CATALOGUE_REVALIDATION_TIMEOUT_MS = 3_000;
+// 3 x 8s upstream attempts + 150ms/350ms backoff + snapshot/revalidation margin.
+const REPAIR_CATALOGUE_REVALIDATION_TIMEOUT_MS = 30_000;
 const REPAIR_CATALOGUE_REVALIDATION_ATTEMPTS = 2;
 const STOREFRONT_REVALIDATION_PATH = 'https://www.alimobile.com.au/api/internal/revalidate-repair-catalogue';
 const STOCK_ONLY_FIELDS = new Set(['stock', 'minStock', 'status', 'quantity']);
@@ -71,8 +72,7 @@ function sanitizeCatalogueMutation({ operation, item, before }) {
 function sanitizeCatalogueMutations({ operation, items, beforeById = {} }) {
   return (items || [])
     .map((item) => sanitizeCatalogueMutation({ operation, item, before: beforeById[item.id] }))
-    .filter(Boolean)
-    .slice(0, 50);
+    .filter(Boolean);
 }
 
 function isFixedStorefrontDestination(url) {
@@ -127,6 +127,22 @@ async function notifyStorefrontRepairCatalogueMutation({
   return false;
 }
 
+async function deliverCatalogueOutboxEvent({ eventId, eventVersion, mutations, fetchImpl = fetch, url = process.env.STOREFRONT_CATALOGUE_REVALIDATION_URL, secret = process.env.CATALOGUE_REVALIDATION_SECRET, setTimeoutImpl = setTimeout, clearTimeoutImpl = clearTimeout } = {}) {
+  if (!eventId || !Number.isSafeInteger(eventVersion) || !mutations?.length || !secret || !isFixedStorefrontDestination(url)) return { ok: false, category: 'authentication' };
+  for (let attempt = 0; attempt < REPAIR_CATALOGUE_REVALIDATION_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeoutImpl(() => controller.abort(), REPAIR_CATALOGUE_REVALIDATION_TIMEOUT_MS);
+    try {
+      const response = await fetchImpl(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-catalogue-revalidation-secret': secret }, body: JSON.stringify({ eventId, eventVersion, mutations }), signal: controller.signal });
+      if (response.ok) return { ok: true };
+      if (response.status === 401 || response.status === 403) return { ok: false, category: 'authentication' };
+    } catch (error) {
+      if (error?.name === 'AbortError') return { ok: false, category: 'timeout' };
+    } finally { clearTimeoutImpl(timeout); }
+  }
+  return { ok: false, category: 'network' };
+}
+
 module.exports = {
   REPAIR_CATALOGUE_REVALIDATION_ATTEMPTS,
   REPAIR_CATALOGUE_REVALIDATION_TIMEOUT_MS,
@@ -134,5 +150,6 @@ module.exports = {
   extractRepairIdentity,
   sanitizeCatalogueMutation,
   sanitizeCatalogueMutations,
+  deliverCatalogueOutboxEvent,
   notifyStorefrontRepairCatalogueMutation,
 };

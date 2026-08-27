@@ -36,8 +36,13 @@ export async function POST(request: Request) {
   if (rawBody.length > MAX_BODY_BYTES) return Response.json({ error: 'Invalid mutation payload.' }, { status: 413 });
 
   let mutations;
+  let eventId: string | null = null;
+  let eventVersion: number | null = null;
   try {
-    mutations = normalizeCatalogueMutations(JSON.parse(rawBody));
+    const payload = JSON.parse(rawBody);
+    eventId = typeof payload?.eventId === 'string' && payload.eventId.length <= 128 ? payload.eventId : null;
+    eventVersion = Number.isSafeInteger(payload?.eventVersion) && payload.eventVersion > 0 ? payload.eventVersion : null;
+    mutations = normalizeCatalogueMutations(payload);
   } catch {
     mutations = null;
   }
@@ -45,6 +50,7 @@ export async function POST(request: Request) {
   logRevalidation('received', {
     mutationCount: mutations.length,
     operation: [...new Set(mutations.map((mutation) => mutation.operation))].join(','),
+    ...(eventId ? { eventVersion: eventVersion || 0 } : {}),
   });
   if (isIgnoredCatalogueMutation(mutations)) {
     logRevalidation('ignored', { reason: 'stock-only', mutationCount: mutations.length, status: 200 });
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
   revalidateTag(PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG, { expire: 0 } as any);
   let catalogue: RepairCatalog;
   try {
-    catalogue = await refreshPublicRepairCatalogue();
+    catalogue = await refreshPublicRepairCatalogue(mutations.filter((mutation) => mutation.retirement || mutation.operation === 'delete').map((mutation) => ({ category: mutation.category, brand: mutation.brand, model: mutation.model, repairType: mutation.repairType })));
     if (catalogue.catalogueSource !== 'live-pos') {
       logRevalidation('live-refresh-failed', { reason: 'not-live-pos', status: 503 });
       return Response.json({ error: 'Catalogue refresh failed.' }, { status: 503 });

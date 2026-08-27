@@ -258,4 +258,12 @@ describe('public repair catalogue safety policy', () => {
     await expect(Promise.all([load(), load(), load()])).resolves.toEqual(['catalogue', 'catalogue', 'catalogue']);
     expect(calls).toBe(1);
   });
+
+  it('does not retain an explicit retirement while still retaining an unannounced temporary missing entry', () => {
+    const previous = completeBrands(1);
+    const candidate = completeBrands(1);
+    candidate[0].models[0].repairTypes = [];
+    expect(mergeMissingPublicRepairEntries(previous, candidate, () => false).retainedMissingEntries).toBe(1);
+    expect(mergeMissingPublicRepairEntries(previous, candidate, () => true).brands.find((brand) => brand.category === 'phone')?.models[0].repairTypes).toEqual([]);
+  });
 });

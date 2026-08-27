@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const { secretMatches, isAuthorizedCron } = require('./internalProcessorAuth.js');
 const { execSync, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -12,7 +13,8 @@ const { createRequireStaffAuth } = require('./staffAuth.js');
 const { createSyncContactsAdminRouter } = require('./syncContactsAdmin.js');
 const { resolveServerSupabaseKey } = require('../lib/supabaseKeyResolver.js');
 const { notifyStorefrontAnnouncementChange } = require('./announcementRevalidation.js');
-const { notifyStorefrontRepairCatalogueMutation } = require('./catalogueRevalidation.js');
+const { deliverCatalogueOutboxEvent } = require('./catalogueRevalidation.js');
+const { runCatalogueOutboxProcessor } = require('./catalogueOutbox.js');
 const { createAnnouncementHandlers } = require('./announcementHandlers.js');
 const { createOrdersHandlers } = require('./ordersHandlers.js');
 const {
@@ -722,11 +724,6 @@ app.post('/api/inventory', async (req, res) => {
         .eq('id', existing.id)
         .select();
       if (error) return res.status(500).json({ error: error.message });
-      void notifyStorefrontRepairCatalogueMutation({
-        operation: 'update',
-        items: [data[0]],
-        beforeById: { [existing.id]: existing },
-      });
       return res.json(data[0]);
     }
   }
@@ -746,7 +743,6 @@ app.post('/api/inventory', async (req, res) => {
     console.error(`❌ [Database Error] Failed to create inventory item:`, error.message);
     return res.status(500).json({ error: error.message });
   }
-  void notifyStorefrontRepairCatalogueMutation({ operation: 'create', items: [data[0]] });
   res.json(data[0]);
 });
 
@@ -777,7 +773,6 @@ app.post('/api/inventory/bulk', async (req, res) => {
     }
 
     console.log(`✅ [Inventory] Bulk generated ${data.length} items successfully.`);
-    void notifyStorefrontRepairCatalogueMutation({ operation: 'create', items: data });
     res.json(data);
   } catch (err) {
     console.error(`❌ [Inventory] Bulk insert exception:`, err.message);
@@ -787,7 +782,6 @@ app.post('/api/inventory/bulk', async (req, res) => {
 
 app.put('/api/inventory/:id', async (req, res) => {
   const itemData = req.body;
-  const { data: previous } = await supabase.from('inventory').select('*').eq('id', req.params.id).maybeSingle();
   let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();
 
   if (error && (error.message.includes("is_pinned") || error.message.includes("pin_order"))) {
@@ -800,19 +794,12 @@ app.put('/api/inventory/:id', async (req, res) => {
     console.error(`❌ [Database Error] Failed to update inventory item ${req.params.id}:`, error.message);
     return res.status(500).json({ error: error.message });
   }
-  void notifyStorefrontRepairCatalogueMutation({
-    operation: 'update',
-    items: [data[0]],
-    beforeById: previous ? { [previous.id]: previous } : {},
-  });
   res.json(data[0]);
 });
 
 app.delete('/api/inventory/:id', async (req, res) => {
-  const { data: previous } = await supabase.from('inventory').select('*').eq('id', req.params.id).maybeSingle();
   const { error } = await supabase.from('inventory').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
-  if (previous) void notifyStorefrontRepairCatalogueMutation({ operation: 'delete', items: [previous] });
   res.json({ success: true });
 });
 
@@ -2355,6 +2342,36 @@ app.use('/api/admin/sync-contacts', createSyncContactsAdminRouter({
   supabase,
   requireStaffAuth,
 }));
+
+// Durable recovery entry. Deployment must schedule this protected endpoint; it
+// is deliberately not tied to the inventory request lifecycle.
+app.post('/api/admin/process-catalogue-outbox', requireStaffAuth, async (_req, res) => {
+  try {
+    const result = await runCatalogueOutboxProcessor({ supabase, deliver: deliverCatalogueOutboxEvent });
+    return res.json(result);
+  } catch {
+    return res.status(503).json({ error: 'Catalogue outbox processing is unavailable.' });
+  }
+});
+
+app.post('/api/internal/process-catalogue-outbox', async (req, res) => {
+  if (!secretMatches(req.headers['x-catalogue-outbox-secret'], process.env.CATALOGUE_OUTBOX_PROCESSOR_SECRET)) return res.status(401).json({ error: 'Unauthorized.' });
+  try {
+    return res.json(await runCatalogueOutboxProcessor({ supabase, deliver: deliverCatalogueOutboxEvent }));
+  } catch {
+    return res.status(503).json({ error: 'Catalogue outbox processing is unavailable.' });
+  }
+});
+
+app.get('/api/internal/process-catalogue-outbox', async (req, res) => {
+  if (!isAuthorizedCron(req.headers.authorization, process.env.CRON_SECRET)) return res.status(401).json({ error: 'Unauthorized.' });
+  try {
+    const result = await runCatalogueOutboxProcessor({ supabase, deliver: deliverCatalogueOutboxEvent });
+    return res.json({ processed: result.delivered, pendingFailures: result.failed });
+  } catch {
+    return res.status(503).json({ error: 'Catalogue outbox processing is unavailable.' });
+  }
+});
 
 // ----------------------------------------------------------------------
 // ERROR HANDLING

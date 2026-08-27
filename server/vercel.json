@@ -1,5 +1,11 @@
 {
   "regions": ["syd1"],
+  "crons": [
+    {
+      "path": "/api/internal/process-catalogue-outbox",
+      "schedule": "30 16 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

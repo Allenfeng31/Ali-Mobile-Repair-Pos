@@ -40,6 +40,19 @@ export interface BrandEntry {
 
 export interface PublicRepairCataloguePayload {
   brands: BrandEntry[];
+  /** Retired records are retained only for later legacy-route policy decisions. */
+  retiredRepairs?: LegacyRepairDetail[];
+}
+
+export interface LegacyRepairDetail {
+  lifecycle: 'retired';
+  category: string;
+  brand: string;
+  brandSlug: string;
+  model: string;
+  modelSlug: string;
+  modelCode?: string;
+  repair: RepairOption;
 }
 
 export interface RepairCatalog extends PublicRepairCataloguePayload {
@@ -83,6 +96,7 @@ export interface PublicRepairCatalogueResolverDependencies<RawItem> {
   forceRefresh?: boolean;
   now?: () => Date;
   onWarning?: (message: string) => void;
+  isExplicitRetirement?: (category: string, brand: string, model: string, repair: string) => boolean;
 }
 
 export function createSharedPublicRepairCatalogueLoader<T>(
@@ -169,6 +183,13 @@ export function serializePublicRepairCatalogue(brands: BrandEntry[]): PublicRepa
   };
 }
 
+function serializeLegacyRepairDetails(retiredRepairs: readonly LegacyRepairDetail[] = []) {
+  return retiredRepairs.map((entry) => ({
+    ...entry,
+    repair: serializePublicRepairCatalogue([{ category: entry.category, brand: entry.brand, slug: entry.brandSlug, icon: '', models: [{ model: entry.model, slug: entry.modelSlug, ...(entry.modelCode ? { modelCode: entry.modelCode } : {}), repairTypes: [entry.repair] }] }]).brands[0].models[0].repairTypes[0],
+  }));
+}
+
 export function countPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCatalogueCounts {
   return brands.reduce(
     (counts, brand) => {
@@ -181,7 +202,7 @@ export function countPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCa
 }
 
 export function checksumPublicRepairCatalogue(payload: PublicRepairCataloguePayload) {
-  return createHash('sha256').update(JSON.stringify(serializePublicRepairCatalogue(payload.brands))).digest('hex');
+  return createHash('sha256').update(JSON.stringify({ ...serializePublicRepairCatalogue(payload.brands), ...(payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(payload.retiredRepairs) } : {}) })).digest('hex');
 }
 
 export function validatePublicRepairCatalogue(payload: PublicRepairCataloguePayload): string | null {
@@ -270,8 +291,9 @@ function createCatalog(
   source: PublicRepairCatalogueSource,
   inventoryRowCount: number,
   now: Date,
+  retiredRepairs: LegacyRepairDetail[] = [],
 ): RepairCatalog {
-  const payload = serializePublicRepairCatalogue(brands);
+  const payload = { ...serializePublicRepairCatalogue(brands), ...(retiredRepairs.length ? { retiredRepairs: serializeLegacyRepairDetails(retiredRepairs) } : {}) };
   const validationError = validatePublicRepairCatalogue(payload);
   if (validationError) throw new Error(`Public repair catalogue rejected: ${validationError}.`);
   const counts = countPublicRepairCatalogue(payload.brands);
@@ -289,7 +311,7 @@ function createCatalog(
 }
 
 function catalogFromSnapshot(snapshot: StoredPublicRepairCatalogueSnapshot): RepairCatalog {
-  const payload = serializePublicRepairCatalogue(snapshot.payload.brands);
+  const payload = { ...serializePublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) };
   const validationError = validatePublicRepairCatalogue(payload);
   if (validationError || checksumPublicRepairCatalogue(payload) !== snapshot.checksum) {
     throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
@@ -308,6 +330,18 @@ function catalogFromSnapshot(snapshot: StoredPublicRepairCatalogueSnapshot): Rep
     inventoryRowCount: snapshot.inventoryRowCount,
     ...counts,
   };
+}
+
+function collectExplicitRetirements(previous: BrandEntry[], candidate: BrandEntry[], isRetired: (category: string, brand: string, model: string, repair: string) => boolean) {
+  const retired: LegacyRepairDetail[] = [];
+  for (const brand of previous) for (const model of brand.models) for (const repair of model.repairTypes) {
+    const stillActive = candidate.find((nextBrand) => nextBrand.category === brand.category && nextBrand.slug === brand.slug)
+      ?.models.find((nextModel) => nextModel.slug === model.slug)?.repairTypes.some((nextRepair) => nextRepair.slug === repair.slug);
+    if (!stillActive && isRetired(brand.category, brand.slug, model.slug, repair.slug)) {
+      retired.push({ lifecycle: 'retired', category: brand.category, brand: brand.brand, brandSlug: brand.slug, model: model.model, modelSlug: model.slug, ...(model.modelCode ? { modelCode: model.modelCode } : {}), repair });
+    }
+  }
+  return retired;
 }
 
 function assertCandidateIsNotCatastrophic(
@@ -331,7 +365,7 @@ function assertCandidateIsNotCatastrophic(
 
 function snapshotFromCatalog(catalog: RepairCatalog): StoredPublicRepairCatalogueSnapshot {
   return {
-    payload: serializePublicRepairCatalogue(catalog.brands),
+    payload: { ...serializePublicRepairCatalogue(catalog.brands), ...(catalog.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(catalog.retiredRepairs) } : {}) },
     checksum: catalog.checksum,
     fetchedAt: catalog.fetchedAt,
     validatedAt: catalog.validatedAt,
@@ -377,11 +411,14 @@ export async function resolvePublicRepairCatalogue<RawItem>(
       now(),
     );
     assertCandidateIsNotCatastrophic(candidate, previous, minRepairRatio, Boolean(dependencies.allowMajorShrink));
-    const merged = previous ? mergeMissingPublicRepairEntries(previous.brands, candidate.brands) : { brands: candidate.brands, retainedMissingEntries: 0 };
+    const isRetired = dependencies.isExplicitRetirement ?? isApprovedPublicRepairRetirement;
+    const merged = previous ? mergeMissingPublicRepairEntries(previous.brands, candidate.brands, isRetired) : { brands: candidate.brands, retainedMissingEntries: 0 };
     if (merged.retainedMissingEntries > 0) {
       dependencies.onWarning?.(`Retained ${merged.retainedMissingEntries} previously verified public repair entries missing from this refresh.`);
     }
-    const accepted = createCatalog(merged.brands, 'live-pos', candidate.inventoryRowCount, now());
+    const newlyRetired = previous ? collectExplicitRetirements(previous.brands, candidate.brands, isRetired) : [];
+    const retiredRepairs = [...(previous?.retiredRepairs || []), ...newlyRetired].filter((entry, index, entries) => entries.findIndex((other) => `${other.category}/${other.brandSlug}/${other.modelSlug}/${other.repair.slug}` === `${entry.category}/${entry.brandSlug}/${entry.modelSlug}/${entry.repair.slug}`) === index);
+    const accepted = createCatalog(merged.brands, 'live-pos', candidate.inventoryRowCount, now(), retiredRepairs);
     await dependencies.writeSnapshot(snapshotFromCatalog(accepted));
     return accepted;
   } catch (error) {

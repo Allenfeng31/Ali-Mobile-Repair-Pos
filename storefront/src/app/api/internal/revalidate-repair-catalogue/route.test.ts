@@ -135,4 +135,16 @@ describe('repair catalogue revalidation webhook', () => {
     expect((await POST(request(payload()))).status).toBe(503);
     expect(revalidatePath).not.toHaveBeenCalled();
   });
+
+  it('accepts an event identity and invalidates both old and new rename paths without creating a redirect', async () => {
+    vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
+    refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });
+    const response = await POST(request(JSON.stringify({ eventId: 'event-1', eventVersion: 2, mutations: [
+      JSON.parse(payload({ model: 'Moto G24', topologyChanged: true })).mutations[0],
+      { ...JSON.parse(payload({ model: 'Moto G24 5G', topologyChanged: true })).mutations[0], changedFields: ['model'] },
+    ] })));
+    expect(response.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/motorola/moto-g24/screen-replacement');
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/motorola/moto-g24-5g/screen-replacement');
+  });
 });

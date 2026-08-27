@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import catalogueRevalidation from './catalogueRevalidation.js';
 
 const {
+  REPAIR_CATALOGUE_REVALIDATION_TIMEOUT_MS,
   STOREFRONT_REVALIDATION_PATH,
   notifyStorefrontRepairCatalogueMutation,
   sanitizeCatalogueMutations,
@@ -21,6 +22,10 @@ const repair = (overrides = {}) => ({
 });
 
 describe('repair catalogue revalidation notifier', () => {
+  it('allows the complete Storefront live-refresh budget plus persistence margin', () => {
+    // 3 × 8s requests + 150ms + 350ms retry backoff = 24.5s before snapshot work.
+    expect(REPAIR_CATALOGUE_REVALIDATION_TIMEOUT_MS).toBeGreaterThanOrEqual(30_000);
+  });
   it('sanitizes a public repair and keeps every brand on the same payload shape', () => {
     expect(sanitizeCatalogueMutations({ operation: 'create', items: [repair()] })).toEqual([
       expect.objectContaining({ category: 'phone', brand: 'Motorola', model: 'Moto G24', repairType: 'Screen Replacement', topologyChanged: true }),

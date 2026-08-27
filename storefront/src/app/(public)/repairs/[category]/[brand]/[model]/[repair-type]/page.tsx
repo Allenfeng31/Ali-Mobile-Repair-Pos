@@ -4778,6 +4778,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     price: number;
     variants: RepairVariant[];
     source: 'pos' | 'fallback';
+    isLegacy?: true;
   };
   otherRepairLinks: SameModelRepairLink[];
   crossModelLinks: SameModelRepairLink[];
@@ -4796,32 +4797,46 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   }
 
   const catalog = await fetchRepairCatalog();
-  const brandEntry = catalog.brands.find(
-    (brand) => brand.category === resolvedParams.category && brand.slug === resolvedParams.brand
-  );
-
-  if (!brandEntry) {
-    console.log('[DEBUG] brandEntry is null');
-    return null;
-  }
-
-  const modelEntry = brandEntry.models.find((model) => model.slug === resolvedParams.model);
-  if (!modelEntry) {
-    console.log('[DEBUG] modelEntry is null');
-    return null;
-  }
-
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
     resolvedParams.brand,
     resolvedParams.model,
     resolvedParams['repair-type']
   );
+  const legacyRepair = catalog.retiredRepairs?.find((entry) =>
+    entry.category === resolvedParams.category &&
+    entry.brandSlug === resolvedParams.brand &&
+    entry.modelSlug === resolvedParams.model &&
+    entry.repair.slug === internalRepairSlug
+  );
+  const brandEntry = catalog.brands.find(
+    (brand) => brand.category === resolvedParams.category && brand.slug === resolvedParams.brand
+  );
+
+  if (!brandEntry) {
+    if (!legacyRepair) return null;
+    return {
+      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, isLegacy: true },
+      otherRepairLinks: [], crossModelLinks: [], galaxyARelatedRepairLinks: [], galaxyNoteRelatedRepairLinks: [], oppoRelatedRepairLinks: [], iphoneModelHubLinks: [], samsungFamilyModelHubLinks: [], oppoSeriesModelHubLinks: [], categoryHubLinks: [],
+    };
+  }
+
+  const modelEntry = brandEntry.models.find((model) => model.slug === resolvedParams.model);
+  if (!modelEntry) {
+    if (!legacyRepair) return null;
+    return {
+      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, isLegacy: true },
+      otherRepairLinks: [], crossModelLinks: [], galaxyARelatedRepairLinks: [], galaxyNoteRelatedRepairLinks: [], oppoRelatedRepairLinks: [], iphoneModelHubLinks: [], samsungFamilyModelHubLinks: [], oppoSeriesModelHubLinks: [], categoryHubLinks: [],
+    };
+  }
   console.log('[DEBUG] internalRepairSlug:', internalRepairSlug);
   const repairEntry = modelEntry.repairTypes.find((repair) => repair.slug === internalRepairSlug);
   if (!repairEntry) {
-    console.log('[DEBUG] repairEntry is null, looking for', internalRepairSlug, 'in', modelEntry.repairTypes.map(r => r.slug));
-    return null;
+    if (!legacyRepair) return null;
+    return {
+      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, isLegacy: true },
+      otherRepairLinks: [], crossModelLinks: [], galaxyARelatedRepairLinks: [], galaxyNoteRelatedRepairLinks: [], oppoRelatedRepairLinks: [], iphoneModelHubLinks: [], samsungFamilyModelHubLinks: [], oppoSeriesModelHubLinks: [], categoryHubLinks: [],
+    };
   }
   const isEnhancedSamsungFamilyPage = isAliMobileEnhancedSamsungRepairPage({
     category: resolvedParams.category,

@@ -8,6 +8,13 @@ export interface RawItem {
   sku?: string;
   quality_grade?: string;
   is_recommended?: boolean;
+  status?: string;
+  is_active?: boolean;
+  active?: boolean;
+  hidden?: boolean;
+  published?: boolean;
+  is_published?: boolean;
+  visibility?: string;
 }
 
 export interface ParsedItem {

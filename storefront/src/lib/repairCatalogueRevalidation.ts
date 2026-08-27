@@ -10,14 +10,15 @@ export type CatalogueMutation = {
   repairType: string;
   changedFields: string[];
   topologyChanged: boolean;
+  retirement?: boolean;
 };
 
-const MAX_MUTATIONS = 50;
+const MAX_MUTATIONS = 500;
 const MAX_TEXT_LENGTH = 120;
 const SAFE_CHANGED_FIELDS = new Set(['name', 'model', 'device_model', 'category', 'price', 'costPrice', 'quality_grade', 'is_recommended', 'topology', 'stock', 'quantity', 'minStock', 'status']);
 const SAFE_OPERATIONS = new Set(['create', 'update', 'delete']);
 const SAFE_CATEGORIES = new Set(['phone', 'tablet', 'laptop', 'watch']);
-const SAFE_MUTATION_KEYS = new Set(['operation', 'category', 'brand', 'model', 'modelCode', 'repairType', 'changedFields', 'topologyChanged']);
+const SAFE_MUTATION_KEYS = new Set(['operation', 'category', 'brand', 'model', 'modelCode', 'repairType', 'changedFields', 'topologyChanged', 'retirement']);
 const GENERIC_REPAIR_HUBS = new Set(['screen-replacement', 'battery-replacement', 'charging-port-replacement', 'back-glass-replacement']);
 
 function toSlug(value: unknown): string | null {
@@ -77,6 +78,7 @@ export function normalizeCatalogueMutations(payload: unknown): CatalogueMutation
       repairType,
       changedFields,
       topologyChanged: Boolean(raw.topologyChanged),
+      ...(raw.retirement === true ? { retirement: true } : {}),
     });
   }
   return mutations;

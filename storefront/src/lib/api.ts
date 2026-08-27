@@ -16,7 +16,6 @@ import type {
 import { BRANDS, MODELS, REPAIR_TYPES } from '@/data/seo-data';
 import {
   PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS,
-  createSharedPublicRepairCatalogueLoader,
   resolvePublicRepairCatalogue,
   runBoundedPublicCatalogueAttempts,
   type BrandEntry,
@@ -66,7 +65,6 @@ const POS_INVENTORY_ENDPOINT = '/api/inventory';
 const POS_FETCH_TIMEOUT_MS = 8_000;
 const POS_FETCH_MAX_ATTEMPTS = 3;
 const POS_FETCH_BACKOFF_MS = [150, 350] as const;
-const CATALOGUE_REFRESH_MS = PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS * 1_000;
 export const PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG = 'public-repair-catalogue-source';
 
 function getPublicRepairCatalogueMode(): 'production' | 'development' | 'test' {
@@ -390,7 +388,9 @@ function ensureCoreRepairTypes(
 // ─── Transform POS Data → RepairCatalog ─────────────────────────────────────
 
 export function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
-  const parsed = rawItems.map(parseItem).filter(Boolean) as ParsedItem[];
+  const parsed = rawItems
+    .filter((item) => item.is_active !== false && item.active !== false && item.hidden !== true && item.published !== false && item.is_published !== false && !['inactive', 'hidden', 'unpublished', 'archived'].includes(String(item.status || item.visibility || '').toLowerCase()))
+    .map(parseItem).filter(Boolean) as ParsedItem[];
 
   // Group by category|brand → model → { repairTypes, code }
   const brandMap = new Map<string, Map<string, { repairTypes: RepairOption[], code?: string }>>();
@@ -528,7 +528,7 @@ function buildFallbackCatalog(): BrandEntry[] {
  * uses live POS or the durable last-known-good snapshot; it never accepts the
  * small development fallback.
  */
-function resolveCurrentPublicRepairCatalogue(forceRefresh = false): Promise<RepairCatalog> {
+function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
   return resolvePublicRepairCatalogue({
     mode: getPublicRepairCatalogueMode(),
     fetchLiveInventory: () => fetchPOSInventory({ forceLive: forceRefresh }),
@@ -538,23 +538,29 @@ function resolveCurrentPublicRepairCatalogue(forceRefresh = false): Promise<Repa
     createDevelopmentFallback: () => backfillSamsungCatalogModels(buildFallbackCatalog()),
     allowMajorShrink: allowMajorCatalogueShrink(),
     forceRefresh,
+    isExplicitRetirement: (category, brand, model, repair) => explicitRetirements.some((entry) => entry.category === category && entry.brand === brand && entry.model === model && entry.repairType === repair),
     onWarning: (message) => console.warn(`[public-catalogue] ${message}`),
   });
 }
 
+export function createPublicRepairCatalogueReader(resolve: () => Promise<RepairCatalog>) {
+  // Deliberately no cross-request module cache. The resolver reads the durable
+  // snapshot and Next's tagged Data Cache remains the shared authority.
+  return () => resolve();
+}
+
+const readPublicRepairCatalogue = createPublicRepairCatalogueReader(() => resolveCurrentPublicRepairCatalogue());
+
 export async function fetchRepairCatalog(): Promise<RepairCatalog> {
-  return sharedPublicRepairCatalogue();
+  // The durable snapshot and tagged POS fetch are the cross-instance cache. Do not
+  // retain a module-level promise: revalidateTag cannot invalidate warm instances.
+  return readPublicRepairCatalogue();
 }
 
 /** Refreshes, validates, and durably stores the snapshot before route invalidation. */
-export async function refreshPublicRepairCatalogue(): Promise<RepairCatalog> {
-  return resolveCurrentPublicRepairCatalogue(true);
+export async function refreshPublicRepairCatalogue(explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
+  return resolveCurrentPublicRepairCatalogue(true, explicitRetirements);
 }
-
-const sharedPublicRepairCatalogue = createSharedPublicRepairCatalogueLoader(
-  () => resolveCurrentPublicRepairCatalogue(),
-  CATALOGUE_REFRESH_MS,
-);
 
 /**
  * Fetch a specific brand's model list for the sub-hub page.
@@ -588,13 +594,23 @@ export async function fetchRepairDetails(
 } | null> {
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);
-  if (!brandEntry) return null;
+  if (!brandEntry) {
+    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && entry.modelSlug === modelSlug && entry.repair.slug === repairSlug);
+    return retired ? { brand: retired.brand, model: retired.model, modelCode: retired.modelCode, repairType: retired.repair.name, price: 0, variants: [], source: catalog.source, sourceType: retired.repair.sourceType } : null;
+  }
 
   const modelEntry = brandEntry.models.find(m => m.slug === modelSlug);
-  if (!modelEntry) return null;
+  if (!modelEntry) {
+    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && entry.modelSlug === modelSlug && entry.repair.slug === repairSlug);
+    return retired ? { brand: retired.brand, model: retired.model, modelCode: retired.modelCode, repairType: retired.repair.name, price: 0, variants: [], source: catalog.source, sourceType: retired.repair.sourceType } : null;
+  }
 
   const repairEntry = modelEntry.repairTypes.find(r => r.slug === repairSlug);
-  if (!repairEntry) return null;
+  if (!repairEntry) {
+    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && entry.modelSlug === modelSlug && entry.repair.slug === repairSlug);
+    if (!retired) return null;
+    return { brand: retired.brand, model: retired.model, modelCode: retired.modelCode, repairType: retired.repair.name, price: 0, variants: [], source: catalog.source, sourceType: retired.repair.sourceType };
+  }
 
   return {
     brand: brandEntry.brand,
