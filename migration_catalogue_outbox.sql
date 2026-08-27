@@ -56,7 +56,11 @@ BEGIN
   END IF;
   INSERT INTO public.catalogue_mutation_outbox (operation, before_item, after_item, lifecycle)
   VALUES (
-    lower(TG_OP),
+    CASE TG_OP
+      WHEN 'INSERT' THEN 'create'
+      WHEN 'UPDATE' THEN 'update'
+      WHEN 'DELETE' THEN 'delete'
+    END,
     previous_row,
     next_row,
     jsonb_strip_nulls(jsonb_build_object(

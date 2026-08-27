@@ -6,6 +6,12 @@ import path from 'node:path';
 const migration = fs.readFileSync(path.resolve(__dirname, '../../migration_catalogue_outbox.sql'), 'utf8');
 
 describe('catalogue outbox migration contract', () => {
+  it('maps PostgreSQL trigger operations to the public create/update/delete contract', () => {
+    expect(migration).toContain("operation text NOT NULL CHECK (operation IN ('create', 'update', 'delete'))");
+    expect(migration).toMatch(/CASE\s+TG_OP\s+WHEN 'INSERT' THEN 'create'\s+WHEN 'UPDATE' THEN 'update'\s+WHEN 'DELETE' THEN 'delete'\s+END/is);
+    expect(migration).not.toMatch(/VALUES\s*\(\s*lower\(TG_OP\)/i);
+  });
+
   it('is additive, transactional, and records inventory mutations in the same Postgres transaction', () => {
     expect(migration).toContain('BEGIN;');
     expect(migration).toContain('CREATE TABLE IF NOT EXISTS public.catalogue_mutation_outbox');
