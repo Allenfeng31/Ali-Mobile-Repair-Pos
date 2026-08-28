@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   PHONE_PAGE_MODE_POLICY_VERSION,
+  checksumGrandfatheredPhoneRepairIdentities,
   createSealedPhoneRepairBaselineManifest,
   isGrandfatheredPhoneRepair,
   phoneRepairIdentityKey,
@@ -49,6 +50,39 @@ function mutable(manifest: LegacyPhoneRepairBaselineManifest) {
 }
 
 describe('legacyPhoneRepairBaseline', () => {
+  it('uses deterministic code-unit ordering when localeCompare is unavailable', () => {
+    const identities = ['a-b', 'ab', 'a-2', 'a-10'].map((modelSlug) => ({
+      category: 'phone' as const,
+      brandSlug: 'oppo',
+      modelSlug,
+      repairSlug: 'screen-replacement',
+      repairOriginAtCapture: 'pos' as const,
+    }));
+    const first = createSealedPhoneRepairBaselineManifest({
+      policyVersion: PHONE_PAGE_MODE_POLICY_VERSION, reason: 'pre-pos-only-policy',
+      capturedAt: '2026-08-28T00:00:00.000Z', sealedAt: '2026-08-28T00:01:00.000Z',
+      sourceSnapshot: { checksum: SOURCE_CHECKSUM, schemaVersion: 1, validatedAt: '2026-08-28T00:00:30.000Z', publicModelCount: 4, publicRepairCount: 4 },
+      identities,
+    });
+    const reversed = createSealedPhoneRepairBaselineManifest({
+      policyVersion: PHONE_PAGE_MODE_POLICY_VERSION, reason: 'pre-pos-only-policy',
+      capturedAt: '2026-08-28T00:00:00.000Z', sealedAt: '2026-08-28T00:01:00.000Z',
+      sourceSnapshot: { checksum: SOURCE_CHECKSUM, schemaVersion: 1, validatedAt: '2026-08-28T00:00:30.000Z', publicModelCount: 4, publicRepairCount: 4 },
+      identities: [...identities].reverse(),
+    });
+    const originalLocaleCompare = String.prototype.localeCompare;
+
+    try {
+      String.prototype.localeCompare = () => { throw new Error('localeCompare must not be used'); };
+      expect(checksumGrandfatheredPhoneRepairIdentities(identities)).toBe(first.identityChecksum);
+      expect(validateSealedPhoneRepairBaselineManifest(first).identityChecksum).toBe(first.identityChecksum);
+      expect(first.identities).toEqual(reversed.identities);
+      expect(first.identityChecksum).toBe(reversed.identityChecksum);
+    } finally {
+      String.prototype.localeCompare = originalLocaleCompare;
+    }
+  });
+
   it('matches only the complete canonical identity and excludes origin from the key', () => {
     const manifest = createManifest();
     const identity = {

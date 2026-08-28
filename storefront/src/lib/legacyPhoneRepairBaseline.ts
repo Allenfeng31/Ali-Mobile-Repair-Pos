@@ -65,6 +65,11 @@ const ALLOWED_ORIGINS = new Set<GrandfatherableRepairOrigin>([
   'unknown-legacy',
 ]);
 
+/** Locale- and ICU-independent ordering for sealed identity and report contracts. */
+export function compareDeterministicStrings(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -142,6 +147,16 @@ function checksumForIdentities(identities: readonly GrandfatheredPhoneRepairIden
   return createHash('sha256').update(JSON.stringify(representation)).digest('hex');
 }
 
+/** Deterministic audit checksum for explicitly supplied candidate identities. */
+export function checksumGrandfatheredPhoneRepairIdentities(
+  identities: readonly GrandfatheredPhoneRepairIdentity[],
+) {
+  const sorted = identities.map((identity) => ({ ...identity }));
+  sorted.forEach(assertGrandfatherableIdentity);
+  sorted.sort((left, right) => compareDeterministicStrings(phoneRepairIdentityKey(left), phoneRepairIdentityKey(right)));
+  return checksumForIdentities(sorted);
+}
+
 function deepFreeze<T>(value: T): T {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
     Object.freeze(value);
@@ -167,7 +182,7 @@ export function createSealedPhoneRepairBaselineManifest(
 ): Readonly<LegacyPhoneRepairBaselineManifest> {
   const identities = input.identities.map((identity) => ({ ...identity }));
   identities.forEach(assertGrandfatherableIdentity);
-  identities.sort((left, right) => phoneRepairIdentityKey(left).localeCompare(phoneRepairIdentityKey(right)));
+  identities.sort((left, right) => compareDeterministicStrings(phoneRepairIdentityKey(left), phoneRepairIdentityKey(right)));
 
   return validateSealedPhoneRepairBaselineManifest({
     ...input,
