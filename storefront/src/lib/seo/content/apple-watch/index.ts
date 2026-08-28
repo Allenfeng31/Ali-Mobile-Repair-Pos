@@ -9073,6 +9073,7 @@ export function withAppleWatchChargingRepairOption(
       price: 0,
       variants: [],
       sourceType: 'diagnostic' as const,
+      repairOrigin: 'diagnostic' as const,
     },
   ];
 }

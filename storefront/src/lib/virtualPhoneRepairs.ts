@@ -95,7 +95,7 @@ export function withVirtualPhoneRepairOptions(repairTypes: RepairOption[], categ
   const existing = new Set(repairTypes.map((repair) => repair.slug));
   const virtualOptions = VIRTUAL_PHONE_REPAIRS
     .filter((repair) => !existing.has(repair.slug))
-    .map((repair) => ({ slug: repair.slug, name: repair.name, price: 50, variants: [], sourceType: 'virtual' as const }));
+    .map((repair) => ({ slug: repair.slug, name: repair.name, price: 50, variants: [], sourceType: 'virtual' as const, repairOrigin: 'virtual' as const }));
 
   return virtualOptions.length > 0 ? [...repairTypes, ...virtualOptions] : repairTypes;
 }

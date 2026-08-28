@@ -82,6 +82,7 @@ export function getVirtualCameraLensRepairOption(categorySlug: string, brandSlug
     price,
     variants: [],
     sourceType: 'virtual' as const,
+    repairOrigin: 'virtual' as const,
   };
 }
 

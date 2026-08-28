@@ -179,16 +179,17 @@ function normalizeRepairSlug(rawName: string): string {
 // ─── Repair Matrix Expansion ─────────────────────────────────────────────────
 
 const UNIVERSAL_REPAIR_TYPES: RepairOption[] = [
-  { slug: 'screen-replacement',          name: 'Screen Replacement',          price: 0 },
-  { slug: 'battery-replacement',         name: 'Battery Replacement',         price: 0 },
-  { slug: 'charging-port-replacement',   name: 'Charging Port Replacement',   price: 0 },
-  { slug: 'water-damage-repair',         name: 'Water Damage Cleaning / Assessment', price: 0 },
+  { slug: 'screen-replacement',          name: 'Screen Replacement',          price: 0, repairOrigin: 'synthetic-core' },
+  { slug: 'battery-replacement',         name: 'Battery Replacement',         price: 0, repairOrigin: 'synthetic-core' },
+  { slug: 'charging-port-replacement',   name: 'Charging Port Replacement',   price: 0, repairOrigin: 'synthetic-core' },
+  { slug: 'water-damage-repair',         name: 'Water Damage Cleaning / Assessment', price: 0, repairOrigin: 'synthetic-core' },
 ];
 
 const BACK_GLASS_REPAIR: RepairOption = {
   slug: 'back-glass-replacement',
   name: 'Back Glass Replacement',
   price: 0,
+  repairOrigin: 'synthetic-backfill',
 };
 
 const SAMSUNG_CATALOG_BACKFILL_MODEL_SLUGS = ['galaxy-a37-5g', 'galaxy-a57-5g'] as const;
@@ -212,6 +213,7 @@ function buildSamsungBackfillRepairs(config: SamsungHardwareConfig): RepairOptio
         ? SAMSUNG_REPAIR_TYPE_NAMES['back-glass-replacement']
         : SAMSUNG_REPAIR_TYPE_NAMES[slug],
     price: 0,
+    repairOrigin: 'synthetic-backfill',
   }));
 }
 
@@ -449,6 +451,7 @@ export function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
         price: item.price,
         variants: [{ quality_grade: item.quality_grade, price: item.price, is_recommended: item.is_recommended }],
         sourceType: 'real',
+        repairOrigin: 'pos',
       });
     }
   }
@@ -503,6 +506,7 @@ function buildFallbackCatalog(): BrandEntry[] {
           slug: rt.slug,
           name: rt.name,
           price: 0,
+          repairOrigin: 'synthetic-backfill',
         })), category, canonicalBrandSlug, model),
       });
     }

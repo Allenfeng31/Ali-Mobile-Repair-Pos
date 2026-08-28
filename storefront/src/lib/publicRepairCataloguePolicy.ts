@@ -8,6 +8,7 @@ export const PUBLIC_REPAIR_CATALOGUE_REQUIRED_CATEGORIES = ['phone', 'tablet', '
 
 export type PublicRepairCatalogueSource = 'live-pos' | 'last-known-good' | 'development-fallback';
 export type PublicRepairCatalogueMode = 'production' | 'development' | 'test';
+export type RepairOrigin = 'pos' | 'synthetic-core' | 'synthetic-backfill' | 'virtual' | 'diagnostic' | 'unknown-legacy';
 
 export interface RepairVariant {
   quality_grade: string;
@@ -21,6 +22,8 @@ export interface RepairOption {
   price: number;
   variants?: RepairVariant[];
   sourceType?: 'real' | 'virtual' | 'diagnostic';
+  /** Optional only at legacy snapshot ingestion; public catalogue serialization always normalizes it. */
+  repairOrigin?: RepairOrigin;
 }
 
 export interface ModelEntry {
@@ -147,12 +150,27 @@ function safePrice(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
+function isRepairOrigin(value: unknown): value is RepairOrigin {
+  return value === 'pos' ||
+    value === 'synthetic-core' ||
+    value === 'synthetic-backfill' ||
+    value === 'virtual' ||
+    value === 'diagnostic' ||
+    value === 'unknown-legacy';
+}
+
+function normalizeRepairOrigin(value: unknown): RepairOrigin {
+  return isRepairOrigin(value) ? value : 'unknown-legacy';
+}
+
 function sorted<T>(items: readonly T[], compare: (a: T, b: T) => number) {
   return [...items].sort(compare);
 }
 
-/** Removes non-public POS fields before snapshot persistence. */
-export function serializePublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCataloguePayload {
+function serializePublicRepairCatalogueRepresentation(
+  brands: BrandEntry[],
+  includeRepairOrigin: boolean,
+): PublicRepairCataloguePayload {
   return {
     brands: sorted(brands, (a, b) => `${a.category}/${a.slug}`.localeCompare(`${b.category}/${b.slug}`)).map((brand) => ({
       category: brand.category,
@@ -167,6 +185,7 @@ export function serializePublicRepairCatalogue(brands: BrandEntry[]): PublicRepa
           slug: repair.slug,
           name: repair.name,
           price: safePrice(repair.price),
+          ...(includeRepairOrigin ? { repairOrigin: normalizeRepairOrigin(repair.repairOrigin) } : {}),
           ...(repair.sourceType ? { sourceType: repair.sourceType } : {}),
           ...(repair.variants
             ? {
@@ -183,10 +202,27 @@ export function serializePublicRepairCatalogue(brands: BrandEntry[]): PublicRepa
   };
 }
 
+/** Removes non-public POS fields before snapshot persistence. */
+export function serializePublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCataloguePayload {
+  return serializePublicRepairCatalogueRepresentation(brands, true);
+}
+
+/** Exact checksum representation used by snapshots created before RepairOrigin existed. */
+function serializeLegacyPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCataloguePayload {
+  return serializePublicRepairCatalogueRepresentation(brands, false);
+}
+
 function serializeLegacyRepairDetails(retiredRepairs: readonly LegacyRepairDetail[] = []) {
   return retiredRepairs.map((entry) => ({
     ...entry,
     repair: serializePublicRepairCatalogue([{ category: entry.category, brand: entry.brand, slug: entry.brandSlug, icon: '', models: [{ model: entry.model, slug: entry.modelSlug, ...(entry.modelCode ? { modelCode: entry.modelCode } : {}), repairTypes: [entry.repair] }] }]).brands[0].models[0].repairTypes[0],
+  }));
+}
+
+function serializePreOriginLegacyRepairDetails(retiredRepairs: readonly LegacyRepairDetail[] = []) {
+  return retiredRepairs.map((entry) => ({
+    ...entry,
+    repair: serializeLegacyPublicRepairCatalogue([{ category: entry.category, brand: entry.brand, slug: entry.brandSlug, icon: '', models: [{ model: entry.model, slug: entry.modelSlug, ...(entry.modelCode ? { modelCode: entry.modelCode } : {}), repairTypes: [entry.repair] }] }]).brands[0].models[0].repairTypes[0],
   }));
 }
 
@@ -203,6 +239,10 @@ export function countPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCa
 
 export function checksumPublicRepairCatalogue(payload: PublicRepairCataloguePayload) {
   return createHash('sha256').update(JSON.stringify({ ...serializePublicRepairCatalogue(payload.brands), ...(payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(payload.retiredRepairs) } : {}) })).digest('hex');
+}
+
+function checksumPreOriginLegacyPublicRepairCatalogue(payload: PublicRepairCataloguePayload) {
+  return createHash('sha256').update(JSON.stringify({ ...serializeLegacyPublicRepairCatalogue(payload.brands), ...(payload.retiredRepairs?.length ? { retiredRepairs: serializePreOriginLegacyRepairDetails(payload.retiredRepairs) } : {}) })).digest('hex');
 }
 
 export function validatePublicRepairCatalogue(payload: PublicRepairCataloguePayload): string | null {
@@ -310,12 +350,31 @@ function createCatalog(
   };
 }
 
+function snapshotRepairOriginSchema(payload: PublicRepairCataloguePayload): 'current' | 'legacy' | 'mixed' {
+  const repairs = [
+    ...payload.brands.flatMap((brand) => brand.models.flatMap((model) => model.repairTypes)),
+    ...(payload.retiredRepairs ?? []).map((entry) => entry.repair),
+  ];
+  if (repairs.every((repair) => isRepairOrigin(repair.repairOrigin))) return 'current';
+  if (repairs.every((repair) => !Object.hasOwn(repair, 'repairOrigin'))) return 'legacy';
+  return 'mixed';
+}
+
 function catalogFromSnapshot(snapshot: StoredPublicRepairCatalogueSnapshot): RepairCatalog {
-  const payload = { ...serializePublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) };
-  const validationError = validatePublicRepairCatalogue(payload);
-  if (validationError || checksumPublicRepairCatalogue(payload) !== snapshot.checksum) {
+  const originSchema = snapshotRepairOriginSchema(snapshot.payload);
+  if (originSchema === 'mixed') throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
+
+  const checksumPayload = originSchema === 'legacy'
+    ? { ...serializeLegacyPublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializePreOriginLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) }
+    : { ...serializePublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) };
+  const validationError = validatePublicRepairCatalogue(checksumPayload);
+  const checksum = originSchema === 'legacy'
+    ? checksumPreOriginLegacyPublicRepairCatalogue(checksumPayload)
+    : checksumPublicRepairCatalogue(checksumPayload);
+  if (validationError || checksum !== snapshot.checksum) {
     throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
   }
+  const payload = { ...serializePublicRepairCatalogue(checksumPayload.brands), ...(checksumPayload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(checksumPayload.retiredRepairs) } : {}) };
   const counts = countPublicRepairCatalogue(payload.brands);
   if (counts.publicModelCount !== snapshot.publicModelCount || counts.publicRepairCount !== snapshot.publicRepairCount) {
     throw new Error('Last-known-good public repair catalogue snapshot counts do not match its payload.');
@@ -326,7 +385,7 @@ function catalogFromSnapshot(snapshot: StoredPublicRepairCatalogueSnapshot): Rep
     catalogueSource: 'last-known-good',
     fetchedAt: snapshot.fetchedAt,
     validatedAt: snapshot.validatedAt,
-    checksum: snapshot.checksum,
+    checksum: checksumPublicRepairCatalogue(payload),
     inventoryRowCount: snapshot.inventoryRowCount,
     ...counts,
   };
