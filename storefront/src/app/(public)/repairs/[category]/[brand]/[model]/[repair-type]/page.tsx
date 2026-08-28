@@ -1,6 +1,7 @@
 import React from 'react';
 import { REPAIR_TYPES } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails, type RepairVariant } from '@/lib/api';
+import { resolveRepairDetailPricing } from '@/lib/repairDetailPricing';
 import { slugify, formatDynamicParam, preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import RepairPolicySection from '@/components/services/RepairPolicySection';
@@ -5005,6 +5006,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   }
   const repairTypeDerived = details?.repairType || formatDynamicParam(resolvedParams['repair-type']);
   const price = details?.price || 0;
+  const detailPricing = resolveRepairDetailPricing({
+    basePrice: details?.price,
+    variants: details?.variants,
+  });
   const modelCode = details?.modelCode;
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
@@ -5508,14 +5513,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           enhancedIpadSeoPocket?.schemaDescription ??
           genericRepairIntentDescription
         }
-        price={price > 0 ? String(price) : undefined}
+        price={detailPricing.canEmitOffer ? String(detailPricing.resolvedPrice) : undefined}
         url={repairPageUrl}
       />
 
       <RepairTypeClient
         deviceModel={displayModel}
         repairType={finalRepairName}
-        price={price}
+        price={detailPricing.resolvedPrice ?? 0}
       />
 
       {/* Repair detail hero */}
@@ -5551,8 +5556,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
             showBackHousingNotice={showBackHousingNotice}
-            showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && price === 0 && !isNoteBackGlass)}
+            showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass)}
             variants={details?.variants || []}
+            pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
           />
 

@@ -5,6 +5,10 @@ import { useRouter, useParams } from 'next/navigation';
 import { analytics } from '@/lib/analytics';
 import { ClipboardCheck, PhoneCall, ThumbsUp } from 'lucide-react';
 import { getStartingPrice } from '@/lib/repairStartingPrices';
+import {
+  resolveRepairDetailPricing,
+  type RepairDetailPricing,
+} from '@/lib/repairDetailPricing';
 import { formatScopedRepairPriceLabel, isStartingPriceRepair } from '@/lib/scopedRepairPriceLabel';
 
 interface RepairVariant {
@@ -21,6 +25,7 @@ interface RepairPricingAndCTAProps {
   showBackHousingNotice?: boolean;
   showStartingPriceFallback?: boolean;
   variants?: RepairVariant[];
+  pricing?: RepairDetailPricing;
   sourceType?: 'real' | 'virtual' | 'diagnostic';
 }
 
@@ -77,6 +82,7 @@ export default function RepairPricingAndCTA({
   showBackHousingNotice = false,
   showStartingPriceFallback = true,
   variants = [],
+  pricing,
   sourceType
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
@@ -107,11 +113,13 @@ export default function RepairPricingAndCTA({
     fetchTierDescriptions();
   }, []);
 
-  const displayVariants = variants.length > 0 ? variants : [];
+  const resolvedPricing = pricing ?? resolveRepairDetailPricing({ variants });
+  const displayVariants = resolvedPricing.validVariants;
   const isMultiple = displayVariants.length > 1;
+  const hasResolvedPrice = resolvedPricing.resolvedPrice !== null;
 
   const isDiagnostic = sourceType === 'diagnostic';
-  const startingPrice = !isDiagnostic && !isStartingPriceRepair(repairSlug) && showStartingPriceFallback && (displayVariants.length === 0 || displayVariants[0].price === 0)
+  const startingPrice = !isDiagnostic && !isStartingPriceRepair(repairSlug) && showStartingPriceFallback && resolvedPricing.isQuoteOnly
     ? getStartingPrice(categorySlug, brandSlug, repairSlug)
     : null;
   const zeroPriceLabel = formatScopedRepairPriceLabel(repairSlug, displayVariants[0]?.price, 'Quote on Request', sourceType);
@@ -165,13 +173,14 @@ export default function RepairPricingAndCTA({
 
   return (
     <div className="w-full flex flex-col items-center mt-8">
-      {displayVariants.length > 0 && displayVariants[0].price > 0 ? (
+      {hasResolvedPrice ? (
         <>
           <h2 className="mb-4 text-center text-xl font-bold text-slate-900">
             {modelName} {repairName} options and pricing
           </h2>
-          <div className={`grid gap-4 md:gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
-            {displayVariants.map((variant) => {
+          {displayVariants.length > 0 ? (
+            <div className={`grid gap-4 md:gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
+              {displayVariants.map((variant) => {
               const isSelected = selectedTier === variant.quality_grade;
 
               return (
@@ -232,8 +241,14 @@ export default function RepairPricingAndCTA({
                   </div>
                 </div>
               );
-            })}
-          </div>
+              })}
+            </div>
+          ) : (
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Repair price</p>
+              <p className="mt-2 text-3xl font-extrabold text-blue-600">${resolvedPricing.resolvedPrice}</p>
+            </div>
+          )}
         </>
       ) : (
         <div className="mb-12 mt-4 text-center max-w-md mx-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm dark:bg-white dark:border-white sm:p-6 md:p-10">

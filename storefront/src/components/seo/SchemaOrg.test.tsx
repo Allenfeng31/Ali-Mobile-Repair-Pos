@@ -33,4 +33,13 @@ describe('RepairServiceSchema offer policy', () => {
   it.each([undefined, '0', 'not-a-price'])('does not create an Offer for %j', (price) => {
     expect(repairServiceData(price)).not.toHaveProperty('offers');
   });
+
+  it.each(['250', '85'])('keeps the resolved OPPO Find X8 Pro price as the Offer amount', (price) => {
+    expect(repairServiceData(price)).toMatchObject({
+      offers: {
+        price: `${Number(price).toFixed(2)}`,
+        priceCurrency: 'AUD',
+      },
+    });
+  });
 });

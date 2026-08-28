@@ -185,6 +185,48 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
   });
 
+  it('shows an exact base price instead of a static quote fallback when no tier is available', () => {
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        variants={[]}
+        pricing={{
+          resolvedPrice: 250,
+          validVariants: [],
+          source: 'base',
+          isQuoteOnly: false,
+          canEmitOffer: true,
+        }}
+      />,
+    );
+
+    expect(screen.getByText('$250')).toBeInTheDocument();
+    expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
+    expect(screen.queryByText('Starting from')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /book repair now/i }));
+    expect(mockPush).toHaveBeenCalledWith(expect.not.stringContaining('tier='));
+  });
+
+  it('uses valid later tiers when an invalid variant appears first', () => {
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        variants={[{ quality_grade: 'Genuine', price: 275 }]}
+        pricing={{
+          resolvedPrice: 275,
+          validVariants: [{ quality_grade: 'Genuine', price: 275 }],
+          source: 'variant',
+          isQuoteOnly: false,
+          canEmitOffer: true,
+        }}
+      />,
+    );
+
+    expect(screen.getByText('$275')).toBeInTheDocument();
+    expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
+  });
+
   it('renders the Apple Watch diagnostic quote wording and passes Charging Repair to booking', () => {
     mockParams = { category: 'watch', brand: 'apple', 'repair-type': 'charging-repair' };
     render(
