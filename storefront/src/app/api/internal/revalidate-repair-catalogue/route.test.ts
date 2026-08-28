@@ -67,6 +67,25 @@ describe('repair catalogue revalidation webhook', () => {
     expect(revalidatePath).not.toHaveBeenCalledWith('/sitemap.xml');
   });
 
+  it('invalidates canonical OPPO detail paths for raw POS repair aliases', async () => {
+    vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
+    refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });
+
+    const response = await POST(request(JSON.stringify({ mutations: [
+      { operation: 'update', category: 'phone', brand: 'OPPO', model: 'Find X8 Pro', repairType: 'Screen Repair', changedFields: ['price'], topologyChanged: false },
+      { operation: 'update', category: 'phone', brand: 'OPPO', model: 'Find X8 Pro', repairType: 'Battery Service', changedFields: ['price'], topologyChanged: false },
+      { operation: 'update', category: 'phone', brand: 'OPPO', model: 'Find X8 Pro', repairType: 'Front Camera', changedFields: ['price'], topologyChanged: false },
+    ] })));
+
+    expect(response.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/oppo/find-x8-pro/screen-replacement');
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/oppo/find-x8-pro/battery-replacement');
+    expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/oppo/find-x8-pro/front-camera-replacement');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/repairs/phone/oppo/find-x8-pro/screen-repair');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/repairs/phone/oppo/find-x8-pro/battery-service');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/repairs/phone/oppo/find-x8-pro/front-camera');
+  });
+
   it('rejects Accessories/path injection and skips stock-only notifications', async () => {
     vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
     expect((await POST(request(payload({ brand: 'Accessories' })))).status).toBe(400);
@@ -140,8 +159,8 @@ describe('repair catalogue revalidation webhook', () => {
     vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
     refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });
     const response = await POST(request(JSON.stringify({ eventId: 'event-1', eventVersion: 2, mutations: [
-      JSON.parse(payload({ model: 'Moto G24', topologyChanged: true })).mutations[0],
-      { ...JSON.parse(payload({ model: 'Moto G24 5G', topologyChanged: true })).mutations[0], changedFields: ['model'] },
+      JSON.parse(payload({ model: 'Moto G24', repairType: 'Screen Repair', topologyChanged: true })).mutations[0],
+      { ...JSON.parse(payload({ model: 'Moto G24 5G', repairType: 'Screen Repair', topologyChanged: true })).mutations[0], changedFields: ['model'] },
     ] })));
     expect(response.status).toBe(200);
     expect(revalidatePath).toHaveBeenCalledWith('/repairs/phone/motorola/moto-g24/screen-replacement');

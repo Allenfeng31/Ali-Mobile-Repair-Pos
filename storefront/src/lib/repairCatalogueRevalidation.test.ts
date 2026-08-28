@@ -42,6 +42,46 @@ describe('repair catalogue event invalidation policy', () => {
     ]));
   });
 
+  it('maps raw POS repair aliases to canonical OPPO detail paths', () => {
+    const mutations = normalizeCatalogueMutations({
+      mutations: [
+        mutation({ brand: 'OPPO', model: 'Find X8 Pro', repairType: 'Screen Repair' }),
+        mutation({ brand: 'OPPO', model: 'Find X8 Pro', repairType: 'Battery Service' }),
+        mutation({ brand: 'OPPO', model: 'Find X8 Pro', repairType: 'Front Camera' }),
+      ],
+    })!;
+
+    expect(mutations.map((entry) => entry.repairType)).toEqual([
+      'screen-replacement',
+      'battery-replacement',
+      'front-camera-replacement',
+    ]);
+
+    const paths = repairCataloguePathsForMutations(mutations);
+    expect(paths).toEqual(expect.arrayContaining([
+      '/repairs/phone/oppo/find-x8-pro/screen-replacement',
+      '/repairs/phone/oppo/find-x8-pro/battery-replacement',
+      '/repairs/phone/oppo/find-x8-pro/front-camera-replacement',
+    ]));
+    expect(paths).not.toEqual(expect.arrayContaining([
+      '/repairs/phone/oppo/find-x8-pro/screen-repair',
+      '/repairs/phone/oppo/find-x8-pro/battery-service',
+      '/repairs/phone/oppo/find-x8-pro/front-camera',
+    ]));
+  });
+
+  it.each([
+    ['Back Camera', 'back-camera-replacement'],
+    ['Charging Port Repair', 'charging-port-replacement'],
+    ['Back Housing', 'back-glass-replacement'],
+    ['Logic Board', 'logic-board-repair'],
+    ['screen-replacement', 'screen-replacement'],
+    ['Other Repair Type', 'other-repair-type'],
+  ])('uses the catalogue canonical slug for %s', (repairType, expectedSlug) => {
+    const [normalized] = normalizeCatalogueMutations({ mutations: [mutation({ repairType })] })!;
+    expect(normalized.repairType).toBe(expectedSlug);
+  });
+
   it('expands topology changes only to the necessary category, repairs index, and sitemap', () => {
     const paths = repairCataloguePathsForMutations(normalizeCatalogueMutations({ mutations: [mutation({ operation: 'create', topologyChanged: true })] })!);
     expect(paths).toEqual(expect.arrayContaining(['/repairs/phone', '/repairs', '/sitemap.xml']));

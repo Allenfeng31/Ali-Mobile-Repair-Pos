@@ -35,8 +35,25 @@ function canonicalBrandSlug(category: CatalogueMutation['category'], brand: unkn
   return slug;
 }
 
+function canonicalPublicRepairSlug(slug: string): string {
+  const repairSlugRules: Array<[RegExp, string]> = [
+    [/(^|-)screen-(repair|replacement)$/, 'screen-replacement'],
+    [/(^|-)battery-(service|repair|replacement)$/, 'battery-replacement'],
+    [/(^|-)charging-port(-(repair|replacement))?$/, 'charging-port-replacement'],
+    [/(^|-)back-housing(-(repair|replacement))?$/, 'back-glass-replacement'],
+    [/(^|-)back-glass(-(repair|replacement))?$/, 'back-glass-replacement'],
+    [/(^|-)front-camera(-(repair|replacement))?$/, 'front-camera-replacement'],
+    [/(^|-)back-camera(-(repair|replacement))?$/, 'back-camera-replacement'],
+    [/(^|-)water-damage(-(repair|recovery))?$/, 'water-damage-repair'],
+    [/(^|-)logic-board(-(repair|replacement))?$/, 'logic-board-repair'],
+  ];
+
+  return repairSlugRules.find(([pattern]) => pattern.test(slug))?.[1] ?? slug;
+}
+
 function canonicalRepairSlug(category: CatalogueMutation['category'], brand: string, repair: unknown): string | null {
-  const slug = toSlug(repair);
+  const rawSlug = toSlug(repair);
+  const slug = rawSlug ? canonicalPublicRepairSlug(rawSlug) : null;
   if (!slug) return null;
   return category === 'watch' && brand === 'apple' && slug === 'charging-port-replacement' ? 'charging-repair' : slug;
 }
