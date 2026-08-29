@@ -109,12 +109,43 @@ describe('selectLegacyPhoneRepairCandidates', () => {
     expect(formatLegacyPhoneRepairCandidateDryRun(first, 'summary')).toContain('DRY RUN ONLY');
     expect(formatLegacyPhoneRepairCandidateDryRun(first, 'summary')).toContain('NO BASELINE WRITTEN');
     expect(formatLegacyPhoneRepairCandidateDryRun(first, 'json')).toBe(JSON.stringify(first, null, 2));
+    expect(first.candidateTopologyChecksum).toMatch(/^[a-f0-9]{64}$/);
+    expect(formatLegacyPhoneRepairCandidateDryRun(first, 'summary')).toContain('Candidate topology checksum:');
 
     const conflict = input();
     conflict.catalogue.retiredRepairs!.push({
       lifecycle: 'retired', category: 'phone', brand: 'OPPO', brandSlug: 'oppo', model: 'Find X8 Pro', modelSlug: 'find-x8-pro', repair: repair('screen-replacement', 'pos'),
     });
     expect(() => selectLegacyPhoneRepairCandidates(conflict)).toThrow('active/retired exact identity conflict');
+  });
+
+  it('changes the topology checksum for every exact tuple change and identity addition or removal', () => {
+    const original = selectLegacyPhoneRepairCandidates(input());
+    const cases = [
+      ['category', (value: LegacyPhoneRepairCandidateSelectionInput) => { value.catalogue.brands[0].category = 'tablet'; }],
+      ['brand', (value: LegacyPhoneRepairCandidateSelectionInput) => { value.catalogue.brands[0].slug = 'oneplus'; }],
+      ['model', (value: LegacyPhoneRepairCandidateSelectionInput) => { value.catalogue.brands[0].models[0].slug = 'find-x7-pro'; }],
+      ['repair', (value: LegacyPhoneRepairCandidateSelectionInput) => { value.catalogue.brands[0].models[0].repairTypes[0].slug = 'logic-board-repair'; }],
+      ['add', (value: LegacyPhoneRepairCandidateSelectionInput) => { value.catalogue.brands[0].models[1].repairTypes.push(repair('logic-board-repair', 'pos')); }],
+      ['remove', (value: LegacyPhoneRepairCandidateSelectionInput) => { value.catalogue.brands[0].models[1].repairTypes.pop(); }],
+    ] as const;
+
+    for (const [, mutate] of cases) {
+      const changed = structuredClone(input());
+      mutate(changed);
+      expect(selectLegacyPhoneRepairCandidates(changed).candidateTopologyChecksum)
+        .not.toBe(original.candidateTopologyChecksum);
+    }
+  });
+
+  it('keeps route topology stable while capture origin changes the origin-aware checksum', () => {
+    const original = selectLegacyPhoneRepairCandidates(input());
+    const originsChanged = structuredClone(input());
+    originsChanged.catalogue.brands[0].models[0].repairTypes[0].repairOrigin = 'synthetic-core';
+    const changed = selectLegacyPhoneRepairCandidates(originsChanged);
+
+    expect(changed.candidateTopologyChecksum).toBe(original.candidateTopologyChecksum);
+    expect(changed.candidateIdentityChecksum).not.toBe(original.candidateIdentityChecksum);
   });
 
   it('fails closed for duplicate exact identities or missing/mixed repair origins', () => {

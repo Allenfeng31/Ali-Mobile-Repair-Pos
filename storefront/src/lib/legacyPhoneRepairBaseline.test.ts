@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PHONE_PAGE_MODE_POLICY_VERSION,
   checksumGrandfatheredPhoneRepairIdentities,
+  checksumLegacyPhoneRepairRouteTopology,
   createSealedPhoneRepairBaselineManifest,
   isGrandfatheredPhoneRepair,
   phoneRepairIdentityKey,
@@ -50,6 +51,25 @@ function mutable(manifest: LegacyPhoneRepairBaselineManifest) {
 }
 
 describe('legacyPhoneRepairBaseline', () => {
+  it('hashes only sorted exact route tuples for topology comparison', () => {
+    const identities = [
+      { category: 'phone', brandSlug: 'oppo', modelSlug: 'a-10', repairSlug: 'screen-replacement', repairOriginAtCapture: 'unknown-legacy' },
+      { category: 'phone', brandSlug: 'oppo', modelSlug: 'a-2', repairSlug: 'battery-replacement', repairOriginAtCapture: 'unknown-legacy' },
+    ] as const;
+    const originsChanged = identities.map((identity, index) => ({
+      ...identity,
+      repairOriginAtCapture: index === 0 ? 'pos' as const : 'synthetic-core' as const,
+    }));
+
+    expect(checksumLegacyPhoneRepairRouteTopology([...identities].reverse()))
+      .toBe(checksumLegacyPhoneRepairRouteTopology(identities));
+    expect(checksumLegacyPhoneRepairRouteTopology(originsChanged))
+      .toBe(checksumLegacyPhoneRepairRouteTopology(identities));
+    expect(checksumGrandfatheredPhoneRepairIdentities(originsChanged))
+      .not.toBe(checksumGrandfatheredPhoneRepairIdentities(identities));
+    expect(checksumLegacyPhoneRepairRouteTopology(identities)).toMatch(/^[a-f0-9]{64}$/);
+    expect(identities[0].repairOriginAtCapture).toBe('unknown-legacy');
+  });
   it('uses deterministic code-unit ordering when localeCompare is unavailable', () => {
     const identities = ['a-b', 'ab', 'a-2', 'a-10'].map((modelSlug) => ({
       category: 'phone' as const,

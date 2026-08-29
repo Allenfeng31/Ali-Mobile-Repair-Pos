@@ -143,6 +143,23 @@ function checksumForIdentities(identities: readonly GrandfatheredPhoneRepairIden
   return createHash('sha256').update(JSON.stringify(representation)).digest('hex');
 }
 
+/**
+ * Advisory v1/v2 comparison checksum for the exact route set only. It intentionally
+ * excludes capture origin and all mutable catalogue detail.
+ */
+export function checksumLegacyPhoneRepairRouteTopology(
+  identities: readonly PhoneRepairIdentityLookup[],
+) {
+  const sorted = identities.map((identity) => ({ ...identity }));
+  sorted.forEach(assertCanonicalLookupIdentity);
+  sorted.sort((left, right) => compareDeterministicStrings(phoneRepairIdentityKey(left), phoneRepairIdentityKey(right)));
+  return createHash('sha256').update(JSON.stringify({
+    schemaVersion: 1,
+    kind: 'legacy-phone-repair-route-topology',
+    identities: sorted.map(identityTuple),
+  })).digest('hex');
+}
+
 /** Deterministic audit checksum for explicitly supplied candidate identities. */
 export function checksumGrandfatheredPhoneRepairIdentities(
   identities: readonly GrandfatheredPhoneRepairIdentity[],

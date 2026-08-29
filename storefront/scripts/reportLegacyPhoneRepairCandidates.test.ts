@@ -69,6 +69,7 @@ describe('reportLegacyPhoneRepairCandidates local dry run', () => {
     const output = await runLocalDryRun(['--input', path, '--format', 'json']);
     const parsed = JSON.parse(output);
     expect(parsed).toMatchObject({ dryRun: true, baselineWritten: false });
+    expect(parsed.candidateTopologyChecksum).toMatch(/^[a-f0-9]{64}$/);
     expect(output).not.toContain('"price"');
     expect(output).not.toContain('variants');
   });
@@ -76,6 +77,7 @@ describe('reportLegacyPhoneRepairCandidates local dry run', () => {
   it('prints the local-only summary including validation provenance', async () => {
     const { path } = await fixture(JSON.stringify(currentRow()));
     await expect(runLocalDryRun(['--format', 'summary', '--input', path])).resolves.toContain('DRY RUN ONLY');
+    await expect(runLocalDryRun(['--format', 'summary', '--input', path])).resolves.toContain('Candidate topology checksum:');
     await expect(runLocalDryRun(['--format', 'summary', '--input', path])).resolves.toContain('Validated at: 2026-08-29T01:00:00.000Z');
   });
 

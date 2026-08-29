@@ -7,6 +7,7 @@ import {
 } from './publicRepairCataloguePolicy';
 import {
   checksumGrandfatheredPhoneRepairIdentities,
+  checksumLegacyPhoneRepairRouteTopology,
   compareDeterministicStrings,
   phoneRepairIdentityKey,
   type GrandfatheredPhoneRepairIdentity,
@@ -31,6 +32,7 @@ export type CandidateSelectionReport = {
   sourceSnapshot: { checksum: string; schemaVersion: number };
   candidates: readonly GrandfatheredPhoneRepairIdentity[];
   candidateIdentityChecksum: string;
+  candidateTopologyChecksum: string;
   counts: { brands: number; models: number; repairsExamined: number; candidates: number; excluded: number };
   byBrand: Readonly<Record<string, number>>;
   byRepairSlug: Readonly<Record<string, number>>;
@@ -201,6 +203,7 @@ export function selectLegacyPhoneRepairCandidates(
     sourceSnapshot: { ...input.sourceSnapshot },
     candidates,
     candidateIdentityChecksum: checksumGrandfatheredPhoneRepairIdentities(candidates),
+    candidateTopologyChecksum: checksumLegacyPhoneRepairRouteTopology(candidates),
     counts: {
       brands: input.catalogue.brands.length,
       models,
@@ -233,6 +236,7 @@ export function formatLegacyPhoneRepairCandidateDryRun(
     `Candidates: ${report.counts.candidates}`,
     `Excluded: ${report.counts.excluded}`,
     `Candidate identity checksum: ${report.candidateIdentityChecksum}`,
+    `Candidate topology checksum: ${report.candidateTopologyChecksum}`,
     formatCounts('By brand', report.byBrand),
     formatCounts('By repair slug', report.byRepairSlug),
     formatCounts('By origin', report.byOrigin),
