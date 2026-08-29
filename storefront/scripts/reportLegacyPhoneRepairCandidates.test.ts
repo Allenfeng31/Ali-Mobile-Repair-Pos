@@ -79,6 +79,16 @@ describe('reportLegacyPhoneRepairCandidates local dry run', () => {
     await expect(runLocalDryRun(['--format', 'summary', '--input', path])).resolves.toContain('Validated at: 2026-08-29T01:00:00.000Z');
   });
 
+  it('accepts a PostgreSQL TIMESTAMPTZ fixture and reports its canonical validated timestamp', async () => {
+    const value = currentRow();
+    value.fetched_at = '2026-08-29 11:00:00.123+10';
+    value.validated_at = '2026-08-29 11:00:00.123+10';
+    const { path } = await fixture(JSON.stringify(value));
+
+    await expect(runLocalDryRun(['--input', path, '--format', 'summary']))
+      .resolves.toContain('Validated at: 2026-08-29T01:00:00.123Z');
+  });
+
   it.each([
     ['previous pre-Origin', previousRow(false)],
     ['previous Origin', previousRow(true)],
