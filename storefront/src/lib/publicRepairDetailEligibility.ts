@@ -1,5 +1,3 @@
-import 'server-only';
-
 import { getAliMobileEnhancedGooglePixelRepairType } from './seo/content/google-pixel';
 import { getAliMobileEnhancedSamsungRepairType } from './seo/content/samsung';
 import { getSamsungHardwareConfig } from './seo/content/samsung/config';

@@ -3,6 +3,7 @@ import 'server-only';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import {
   PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION,
+  PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION,
   type StoredPublicRepairCatalogueSnapshot,
 } from './publicRepairCataloguePolicy';
 
@@ -22,11 +23,14 @@ type SnapshotRow = {
 };
 
 function asStoredSnapshot(row: SnapshotRow): StoredPublicRepairCatalogueSnapshot {
-  if (row.snapshot_key !== SNAPSHOT_KEY || row.schema_version !== PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION || row.source !== 'live-pos') {
+  if (row.snapshot_key !== SNAPSHOT_KEY
+    || (row.schema_version !== PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION && row.schema_version !== PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION)
+    || row.source !== 'live-pos') {
     throw new Error('Public repair catalogue snapshot metadata is invalid.');
   }
 
   return {
+    schemaVersion: row.schema_version,
     payload: row.payload,
     checksum: row.checksum,
     fetchedAt: row.fetched_at,

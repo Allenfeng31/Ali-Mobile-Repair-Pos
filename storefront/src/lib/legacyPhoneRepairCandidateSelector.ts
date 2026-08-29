@@ -1,7 +1,6 @@
-import 'server-only';
-
 import {
   PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION,
+  PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION,
   type PublicRepairCataloguePayload,
   type RepairOption,
   type RepairOrigin,
@@ -84,7 +83,8 @@ function deepFreeze<T>(value: T): T {
 
 function assertSourceSnapshot(sourceSnapshot: LegacyPhoneRepairCandidateSelectionInput['sourceSnapshot']) {
   if (!SHA256_PATTERN.test(sourceSnapshot.checksum)
-    || sourceSnapshot.schemaVersion !== PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION) {
+    || (sourceSnapshot.schemaVersion !== PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION
+      && sourceSnapshot.schemaVersion !== PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION)) {
     throw new Error('Legacy phone repair candidate source snapshot is invalid.');
   }
 }

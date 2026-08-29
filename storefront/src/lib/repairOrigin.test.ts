@@ -165,6 +165,7 @@ describe('repair catalogue origin tracing', () => {
     const payload = serializePublicRepairCatalogue(completeBrands('pos'));
     const current: StoredPublicRepairCatalogueSnapshot = {
       ...LEGACY_SNAPSHOT,
+      schemaVersion: 2,
       payload,
       checksum: checksumPublicRepairCatalogue(payload),
       inventoryRowCount: 8,

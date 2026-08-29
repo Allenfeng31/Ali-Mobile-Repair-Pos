@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
 import { isApprovedPublicRepairRetirement } from './publicRepairCatalogueRetirements';
+import { compareDeterministicStrings } from './deterministicStrings';
 
-export const PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION = 1;
+export const PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION = 2;
+export const PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION = 1;
 export const PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS = 604_800;
 export const PUBLIC_REPAIR_CATALOGUE_DEFAULT_MIN_REPAIR_RATIO = 0.7;
 export const PUBLIC_REPAIR_CATALOGUE_REQUIRED_CATEGORIES = ['phone', 'tablet', 'laptop', 'watch'] as const;
@@ -71,6 +73,8 @@ export interface RepairCatalog extends PublicRepairCataloguePayload {
 }
 
 export interface StoredPublicRepairCatalogueSnapshot {
+  /** Missing only for persisted pre-v2 test/legacy inputs; it is treated as v1. */
+  schemaVersion?: number;
   payload: PublicRepairCataloguePayload;
   checksum: string;
   fetchedAt: string;
@@ -170,18 +174,22 @@ function sorted<T>(items: readonly T[], compare: (a: T, b: T) => number) {
 function serializePublicRepairCatalogueRepresentation(
   brands: BrandEntry[],
   includeRepairOrigin: boolean,
+  ordering: 'deterministic' | 'persisted' = 'deterministic',
 ): PublicRepairCataloguePayload {
+  const order = <T>(items: readonly T[], compare: (left: T, right: T) => number) => (
+    ordering === 'persisted' ? [...items] : sorted(items, compare)
+  );
   return {
-    brands: sorted(brands, (a, b) => `${a.category}/${a.slug}`.localeCompare(`${b.category}/${b.slug}`)).map((brand) => ({
+    brands: order(brands, (a, b) => compareDeterministicStrings(`${a.category}/${a.slug}`, `${b.category}/${b.slug}`)).map((brand) => ({
       category: brand.category,
       brand: brand.brand,
       slug: brand.slug,
       icon: brand.icon,
-      models: sorted(brand.models, (a, b) => a.slug.localeCompare(b.slug)).map((model) => ({
+      models: order(brand.models, (a, b) => compareDeterministicStrings(a.slug, b.slug)).map((model) => ({
         model: model.model,
         slug: model.slug,
         ...(model.modelCode ? { modelCode: model.modelCode } : {}),
-        repairTypes: sorted(model.repairTypes, (a, b) => a.slug.localeCompare(b.slug)).map((repair) => ({
+        repairTypes: order(model.repairTypes, (a, b) => compareDeterministicStrings(a.slug, b.slug)).map((repair) => ({
           slug: repair.slug,
           name: repair.name,
           price: safePrice(repair.price),
@@ -209,7 +217,12 @@ export function serializePublicRepairCatalogue(brands: BrandEntry[]): PublicRepa
 
 /** Exact checksum representation used by snapshots created before RepairOrigin existed. */
 function serializeLegacyPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCataloguePayload {
-  return serializePublicRepairCatalogueRepresentation(brands, false);
+  return serializePublicRepairCatalogueRepresentation(brands, false, 'persisted');
+}
+
+/** v1 Origin snapshots retain persisted array order to avoid locale/ICU re-sorting. */
+function serializePreviousOriginPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCataloguePayload {
+  return serializePublicRepairCatalogueRepresentation(brands, true, 'persisted');
 }
 
 function serializeLegacyRepairDetails(retiredRepairs: readonly LegacyRepairDetail[] = []) {
@@ -226,6 +239,13 @@ function serializePreOriginLegacyRepairDetails(retiredRepairs: readonly LegacyRe
   }));
 }
 
+function serializePreviousOriginRepairDetails(retiredRepairs: readonly LegacyRepairDetail[] = []) {
+  return retiredRepairs.map((entry) => ({
+    ...entry,
+    repair: serializePreviousOriginPublicRepairCatalogue([{ category: entry.category, brand: entry.brand, slug: entry.brandSlug, icon: '', models: [{ model: entry.model, slug: entry.modelSlug, ...(entry.modelCode ? { modelCode: entry.modelCode } : {}), repairTypes: [entry.repair] }] }]).brands[0].models[0].repairTypes[0],
+  }));
+}
+
 export function countPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCatalogueCounts {
   return brands.reduce(
     (counts, brand) => {
@@ -238,11 +258,22 @@ export function countPublicRepairCatalogue(brands: BrandEntry[]): PublicRepairCa
 }
 
 export function checksumPublicRepairCatalogue(payload: PublicRepairCataloguePayload) {
-  return createHash('sha256').update(JSON.stringify({ ...serializePublicRepairCatalogue(payload.brands), ...(payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(payload.retiredRepairs) } : {}) })).digest('hex');
+  const canonicalPayload = {
+    ...serializePublicRepairCatalogue(payload.brands),
+    ...(payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(payload.retiredRepairs) } : {}),
+  };
+  return createHash('sha256').update(JSON.stringify({
+    schemaVersion: PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION,
+    payload: canonicalPayload,
+  })).digest('hex');
 }
 
 function checksumPreOriginLegacyPublicRepairCatalogue(payload: PublicRepairCataloguePayload) {
   return createHash('sha256').update(JSON.stringify({ ...serializeLegacyPublicRepairCatalogue(payload.brands), ...(payload.retiredRepairs?.length ? { retiredRepairs: serializePreOriginLegacyRepairDetails(payload.retiredRepairs) } : {}) })).digest('hex');
+}
+
+function checksumPreviousOriginPublicRepairCatalogue(payload: PublicRepairCataloguePayload) {
+  return createHash('sha256').update(JSON.stringify({ ...serializePreviousOriginPublicRepairCatalogue(payload.brands), ...(payload.retiredRepairs?.length ? { retiredRepairs: serializePreviousOriginRepairDetails(payload.retiredRepairs) } : {}) })).digest('hex');
 }
 
 export function validatePublicRepairCatalogue(payload: PublicRepairCataloguePayload): string | null {
@@ -360,16 +391,28 @@ function snapshotRepairOriginSchema(payload: PublicRepairCataloguePayload): 'cur
   return 'mixed';
 }
 
-function catalogFromSnapshot(snapshot: StoredPublicRepairCatalogueSnapshot): RepairCatalog {
+export function hydratePublicRepairCatalogueSnapshot(snapshot: StoredPublicRepairCatalogueSnapshot): RepairCatalog {
+  const schemaVersion = snapshot.schemaVersion ?? PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION;
+  if (schemaVersion !== PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION && schemaVersion !== PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION) {
+    throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
+  }
   const originSchema = snapshotRepairOriginSchema(snapshot.payload);
-  if (originSchema === 'mixed') throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
+  if (originSchema === 'mixed'
+    || (schemaVersion === PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION && originSchema !== 'current')) {
+    throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
+  }
 
+  const isPreviousSchema = schemaVersion === PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION;
   const checksumPayload = originSchema === 'legacy'
     ? { ...serializeLegacyPublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializePreOriginLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) }
-    : { ...serializePublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) };
+    : isPreviousSchema
+      ? { ...serializePreviousOriginPublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializePreviousOriginRepairDetails(snapshot.payload.retiredRepairs) } : {}) }
+      : { ...serializePublicRepairCatalogue(snapshot.payload.brands), ...(snapshot.payload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(snapshot.payload.retiredRepairs) } : {}) };
   const validationError = validatePublicRepairCatalogue(checksumPayload);
   const checksum = originSchema === 'legacy'
     ? checksumPreOriginLegacyPublicRepairCatalogue(checksumPayload)
+    : isPreviousSchema
+      ? checksumPreviousOriginPublicRepairCatalogue(checksumPayload)
     : checksumPublicRepairCatalogue(checksumPayload);
   if (validationError || checksum !== snapshot.checksum) {
     throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
@@ -424,6 +467,7 @@ function assertCandidateIsNotCatastrophic(
 
 function snapshotFromCatalog(catalog: RepairCatalog): StoredPublicRepairCatalogueSnapshot {
   return {
+    schemaVersion: PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION,
     payload: { ...serializePublicRepairCatalogue(catalog.brands), ...(catalog.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(catalog.retiredRepairs) } : {}) },
     checksum: catalog.checksum,
     fetchedAt: catalog.fetchedAt,
@@ -450,7 +494,7 @@ export async function resolvePublicRepairCatalogue<RawItem>(
     dependencies.onWarning?.('Public repair catalogue snapshot storage is unavailable in explicit development/test mode.');
     previousSnapshot = null;
   }
-  const previous = previousSnapshot ? catalogFromSnapshot(previousSnapshot) : null;
+  const previous = previousSnapshot ? hydratePublicRepairCatalogueSnapshot(previousSnapshot) : null;
 
   if (previous && !dependencies.forceRefresh) {
     const snapshotAge = now().getTime() - Date.parse(previous.validatedAt);

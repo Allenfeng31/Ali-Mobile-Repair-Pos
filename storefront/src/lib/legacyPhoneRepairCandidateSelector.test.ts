@@ -131,7 +131,7 @@ describe('selectLegacyPhoneRepairCandidates', () => {
     expect(() => selectLegacyPhoneRepairCandidates(corrupt)).toThrow('source snapshot is invalid');
 
     const wrongSchema = input();
-    wrongSchema.sourceSnapshot.schemaVersion = 2;
+    wrongSchema.sourceSnapshot.schemaVersion = 3;
     expect(() => selectLegacyPhoneRepairCandidates(wrongSchema)).toThrow('source snapshot is invalid');
   });
 });

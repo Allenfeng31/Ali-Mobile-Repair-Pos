@@ -1,9 +1,8 @@
-import 'server-only';
-
 import { createHash } from 'node:crypto';
 
 import { isWaterDamageRepairSlug } from './waterDamageRouting';
 import type { RepairOrigin } from './publicRepairCataloguePolicy';
+import { compareDeterministicStrings } from './deterministicStrings';
 
 export const PHONE_PAGE_MODE_POLICY_VERSION = 'phone-page-mode-v1' as const;
 
@@ -65,10 +64,7 @@ const ALLOWED_ORIGINS = new Set<GrandfatherableRepairOrigin>([
   'unknown-legacy',
 ]);
 
-/** Locale- and ICU-independent ordering for sealed identity and report contracts. */
-export function compareDeterministicStrings(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
-}
+export { compareDeterministicStrings } from './deterministicStrings';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
