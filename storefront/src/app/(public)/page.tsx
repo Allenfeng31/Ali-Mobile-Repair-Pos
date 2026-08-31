@@ -13,6 +13,7 @@ const ReviewsSection = dynamic(() => import("@/components/ReviewsSection"));
 const HomeFAQ = dynamic(() => import("@/components/HomeFAQ"));
 const ServiceAreas = dynamic(() => import("@/components/seo/ServiceAreas"));
 import ScrollReveal from "@/components/ScrollReveal";
+import RingwoodSquareLocationMap from "@/components/RingwoodSquareLocationMap";
 
 const popularRepairs = [
   {
@@ -292,6 +293,12 @@ export default function Home() {
               ></iframe>
             </div>
           </div>
+
+          <RingwoodSquareLocationMap
+            heading="Find our kiosk inside the centre"
+            description="Enter via Coles or Bunnings and use the map below to find Ali Mobile & Repair."
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1152px"
+          />
         </section>
       </ScrollReveal>
 

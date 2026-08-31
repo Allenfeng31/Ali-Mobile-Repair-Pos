@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import GlobalRepairCart from "@/components/GlobalRepairCart";
+import RingwoodSquareLocationMap from "@/components/RingwoodSquareLocationMap";
 import { formatOtherRepairServiceName, isOtherRepairService, useCart, type RepairService } from "@/context/CartContext";
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
 import { buildBookingPayload } from "@/lib/bookingPayload";
@@ -104,6 +105,14 @@ function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }
             <strong>Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134</strong>
           </div>
         </div>
+
+        <RingwoodSquareLocationMap
+          heading="How to find us"
+          description="We’re inside Ringwood Square Shopping Centre. Enter via Coles or Bunnings and use the map below to find our kiosk."
+          headingLevel={2}
+          sizes="(max-width: 768px) 100vw, 720px"
+          variant="booking-confirmation"
+        />
 
         <div className="booking-next-steps">
           <h2>Before you arrive</h2>
