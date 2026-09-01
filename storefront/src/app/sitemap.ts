@@ -40,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/repairs/back-glass-replacement`, changeFrequency: 'weekly', priority: 0.82 },
     { url: `${baseUrl}/repairs/phone/front-camera-replacement`, changeFrequency: 'weekly', priority: 0.74 },
     { url: `${baseUrl}/repairs/phone/back-camera-replacement`, changeFrequency: 'weekly', priority: 0.74 },
+    { url: `${baseUrl}/repairs/phone/logic-board-repair`, changeFrequency: 'weekly', priority: 0.74 },
     { url: `${baseUrl}/repairs/phone/samsung/camera-lens-replacement`, changeFrequency: 'weekly', priority: 0.76 },
     { url: `${baseUrl}/repairs/phone/google/camera-lens-replacement`, changeFrequency: 'weekly', priority: 0.76 },
     { url: `${baseUrl}/repairs/phone/oppo/camera-lens-replacement`, changeFrequency: 'weekly', priority: 0.76 },

@@ -86,6 +86,7 @@ describe('evaluateNonIphonePublicRepairPageMode', () => {
   it.each([
     ['front-camera-replacement', '/repairs/phone/front-camera-replacement'],
     ['back-camera-replacement', '/repairs/phone/back-camera-replacement'],
+    ['logic-board-repair', '/repairs/phone/logic-board-repair'],
   ])('routes insufficient-evidence %s to its real global shared master', (repairSlug, href) => {
     expect(evaluateNonIphonePublicRepairPageMode(baseInput({
       repairOrigin: 'synthetic-backfill',

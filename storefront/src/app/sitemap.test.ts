@@ -45,11 +45,12 @@ fetchRepairCatalogMock.mockResolvedValue({
 });
 
 describe('Sitemap SEO Generation', () => {
-  it('includes each quote-only global camera module master once without query or lastModified', async () => {
+  it('includes each quote-only global camera module and logic board master once without query or lastModified', async () => {
     const urls = await sitemap();
     for (const path of [
       '/repairs/phone/front-camera-replacement',
       '/repairs/phone/back-camera-replacement',
+      '/repairs/phone/logic-board-repair',
     ]) {
       const entries = urls.filter((entry) => new URL(entry.url).pathname === path);
       expect(entries).toHaveLength(1);
@@ -73,7 +74,7 @@ describe('Sitemap SEO Generation', () => {
       try {
         const urlObj = new URL(u.url);
         return urlObj.pathname;
-      } catch (e) {
+    } catch {
         return u.url.replace(/^https?:\/\/[^\/]+/, '');
       }
     });
@@ -104,7 +105,7 @@ describe('Sitemap SEO Generation', () => {
 
     // Logic Board paths remain canonical and include each configured Pixel model.
     const logicBoardUrls = paths.filter(p => p.endsWith('/logic-board-repair'));
-    expect(logicBoardUrls.length).toBe(426);
+    expect(logicBoardUrls.length).toBe(427);
 
     const pixelLogicBoardUrls = logicBoardUrls.filter(p => p.includes('/phone/google-pixel/'));
     expect(pixelLogicBoardUrls.length).toBe(Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG).length);

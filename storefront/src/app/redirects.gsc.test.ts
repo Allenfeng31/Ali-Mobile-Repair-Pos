@@ -405,6 +405,7 @@ describe('July 15 GSC technical redirect batch', () => {
     const expectedLogicBoardPaths = new Set([
       ...configuredPixelLogicBoardPaths,
       ...nonPixelLogicBoardPaths,
+      '/repairs/phone/logic-board-repair',
     ]);
 
     expect(logicBoardPaths).toHaveLength(expectedLogicBoardPaths.size);
