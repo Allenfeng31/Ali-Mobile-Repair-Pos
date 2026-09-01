@@ -283,7 +283,6 @@ export default function Header() {
               </div>
               <Link href="/about-us" prefetch={true}>About Us</Link>
               <Link href="/blog" prefetch={true}>Blog</Link>
-              <Link href="/track-status" prefetch={true}>Track Status</Link>
             </nav>
           </div>
 
@@ -409,7 +408,6 @@ export default function Header() {
                 <Link href="/locations/ringwood" onClick={closeAllNavigationMenus} className="mobile-menu-link">Visit Ringwood Square</Link>
                 <Link href="/about-us" onClick={closeAllNavigationMenus} className="mobile-menu-link">About Us</Link>
                 <Link href="/blog" onClick={closeAllNavigationMenus} className="mobile-menu-link">Blog</Link>
-                <Link href="/track-status" onClick={closeAllNavigationMenus} className="mobile-menu-link">Track Status</Link>
               </div>
             </nav>
 

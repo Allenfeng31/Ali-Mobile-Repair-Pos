@@ -155,7 +155,6 @@ export default function PublicLayout({
                   <h3>Support</h3>
                   <Link href="/book-repair" prefetch={true}>Book Repair</Link>
                   <Link href="/zh/phone-repair-melbourne-east" prefetch={true}>中文服务</Link>
-                  <Link href="/track-status" prefetch={true}>Track Repair Status</Link>
                   <Link href="/about-us" prefetch={true}>About Us</Link>
                   <Link href="/privacy-policy" prefetch={true}>Privacy Policy</Link>
                 </div>
