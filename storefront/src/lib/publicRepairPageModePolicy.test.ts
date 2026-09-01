@@ -79,12 +79,23 @@ describe('evaluateNonIphonePublicRepairPageMode', () => {
       mode: 'shared', reason: 'shared-brand-route', target: { scope: 'brand', href: '/repairs/phone/google/power-button-replacement' },
     });
     expect(evaluateNonIphonePublicRepairPageMode(baseInput({ repairOrigin: 'absent', eligibilityEvidence: 'none', repairSlug: 'front-camera-replacement' }))).toEqual({
-      mode: 'unresolved',
-      reason: 'shared-master-missing',
-      target: null,
-      routeAvailable: false,
-      desiredMode: 'shared',
-      desiredSharedScope: 'global',
+      mode: 'shared', reason: 'shared-global-route', target: { scope: 'global', href: '/repairs/phone/front-camera-replacement' }, routeAvailable: true,
+    });
+  });
+
+  it.each([
+    ['front-camera-replacement', '/repairs/phone/front-camera-replacement'],
+    ['back-camera-replacement', '/repairs/phone/back-camera-replacement'],
+  ])('routes insufficient-evidence %s to its real global shared master', (repairSlug, href) => {
+    expect(evaluateNonIphonePublicRepairPageMode(baseInput({
+      repairOrigin: 'synthetic-backfill',
+      eligibilityEvidence: 'none',
+      repairSlug,
+    }))).toEqual({
+      mode: 'shared',
+      reason: 'shared-global-route',
+      target: { scope: 'global', href },
+      routeAvailable: true,
     });
   });
 
@@ -161,7 +172,7 @@ describe('evaluateNonIphonePublicRepairPageMode', () => {
       mode: 'shared', target: { scope: 'brand', href: '/repairs/phone/samsung/loudspeaker-replacement' },
     });
     expect(evaluateNonIphonePublicRepairPageMode(baseInput({ brandSlug: 'nokia', modelSlug: 'g42', repairOrigin: 'absent', eligibilityEvidence: 'none', repairSlug: 'back-camera-replacement' }))).toMatchObject({
-      mode: 'unresolved', reason: 'shared-master-missing', target: null,
+      mode: 'shared', reason: 'shared-global-route', target: { scope: 'global', href: '/repairs/phone/back-camera-replacement' },
     });
   });
 

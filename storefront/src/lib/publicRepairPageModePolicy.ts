@@ -89,6 +89,8 @@ const sharedRoutes: SharedRoute[] = [
   { repairSlug: 'battery-replacement', href: '/repairs/battery-replacement' },
   { repairSlug: 'charging-port-replacement', href: '/repairs/charging-port-replacement' },
   { repairSlug: 'back-glass-replacement', href: '/repairs/back-glass-replacement' },
+  { repairSlug: 'front-camera-replacement', href: '/repairs/phone/front-camera-replacement' },
+  { repairSlug: 'back-camera-replacement', href: '/repairs/phone/back-camera-replacement' },
   ...SHARED_ONLY_REPAIR_SLUG_LIST.flatMap((repairSlug) => [
     { repairSlug, href: `/repairs/phone/${repairSlug}` },
     ...SHARED_ROUTE_BRAND_IDENTITIES.map(({ catalogueBrandSlug, routeBrandSegment }) => ({

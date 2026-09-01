@@ -45,6 +45,20 @@ fetchRepairCatalogMock.mockResolvedValue({
 });
 
 describe('Sitemap SEO Generation', () => {
+  it('includes each quote-only global camera module master once without query or lastModified', async () => {
+    const urls = await sitemap();
+    for (const path of [
+      '/repairs/phone/front-camera-replacement',
+      '/repairs/phone/back-camera-replacement',
+    ]) {
+      const entries = urls.filter((entry) => new URL(entry.url).pathname === path);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].url).toBe(`https://www.alimobile.com.au${path}`);
+      expect(entries[0]).not.toHaveProperty('lastModified');
+      expect(entries[0].url).not.toContain('?');
+    }
+  });
+
   it('excludes booking-only Other Repair from public sitemap output', async () => {
     const urls = await sitemap();
     const paths = urls.map((entry) => new URL(entry.url).pathname);
