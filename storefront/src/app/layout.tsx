@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { TopAnnouncementBar } from "@/components/TopAnnouncementBar";
 import { Analytics } from "@vercel/analytics/next";
 import { ROOT_SOCIAL_DESCRIPTION } from "@/lib/siteMetadata";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { getValidatedGoogleAnalyticsId } from "@/lib/googleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,12 +33,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = getValidatedGoogleAnalyticsId(
+    process.env.VERCEL_ENV,
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+  );
+
   return (
     <html lang="en" suppressHydrationWarning className={inter.className}>
       <body className="antialiased min-h-screen bg-slate-50">
         <TopAnnouncementBar />
         {children}
         <Analytics />
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );

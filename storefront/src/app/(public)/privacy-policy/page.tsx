@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
       <section style={{ marginTop: '2rem' }}>
         <h2>1. Introduction</h2>
         <p>
-          Ali Mobile Repair ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains 
+          Ali Mobile Repair (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains
           how we collect, use, and safeguard your personal information when you use our website and repair services 
           in Melbourne, Victoria.
         </p>
@@ -51,7 +51,20 @@ export default function PrivacyPolicyPage() {
       </section>
 
       <section style={{ marginTop: '2rem' }}>
-        <h2>5. Your Rights</h2>
+        <h2>5. Website Analytics and Cookies</h2>
+        <p>
+          We use Google Analytics to understand how visitors use our website, such as pages viewed, general device and browser information, approximate location and interactions with the site. Google Analytics may use cookies and similar technologies.
+        </p>
+        <p style={{ marginTop: '1rem' }}>
+          We use this information to improve our website and services. We do not intentionally send customer names, phone numbers, email addresses, booking details or repair information to Google Analytics.
+        </p>
+        <p style={{ marginTop: '1rem' }}>
+          Analytics information may be processed by Google in accordance with <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>Google&apos;s Privacy Policy</a>. Visitors can control cookies through their browser settings and may use <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>Google&apos;s Analytics opt-out tools</a>.
+        </p>
+      </section>
+
+      <section style={{ marginTop: '2rem' }}>
+        <h2>6. Your Rights</h2>
         <p>
           You have the right to access, correct, or request deletion of your personal information held in our records. 
           For any privacy-related inquiries, please visit us in-store at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
