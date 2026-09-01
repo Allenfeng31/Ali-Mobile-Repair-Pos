@@ -22,11 +22,11 @@ vi.mock("@/lib/waterDamageRouting", () => ({
 }));
 vi.mock("@/lib/virtualCameraLens", () => ({
   CAMERA_LENS_REPAIR_SLUG: "camera-lens-replacement",
-  getCameraLensLandingHref: () => null,
+  getCameraLensLandingHref: () => '/repairs/phone/google/camera-lens-replacement?model=pixel-8-pro',
 }));
 vi.mock("@/lib/virtualPhoneRepairs", () => ({
-  getVirtualPhoneRepair: () => null,
-  getVirtualPhoneRepairLandingHref: () => null,
+  getVirtualPhoneRepair: (slug: string) => slug === 'loudspeaker-replacement' ? { slug } : null,
+  getVirtualPhoneRepairLandingHref: () => '/repairs/phone/google/loudspeaker-replacement?model=pixel-8-pro',
 }));
 
 describe("RepairOptionsGrid", () => {
@@ -70,5 +70,58 @@ describe("RepairOptionsGrid", () => {
       '/repairs/watch/apple/apple-watch-series-3-38mm/charging-repair',
     );
     expect(screen.getByText('Final quote depends on the confirmed fault, parts and device condition.')).toBeInTheDocument();
+  });
+
+  it('uses a Server-resolved href without allowing client helpers to override it', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[
+          {
+            slug: 'camera-lens-replacement',
+            name: 'Camera Lens Replacement',
+            price: 0,
+            href: '/repairs/phone/camera-lens-replacement?brand=motorola&model=moto-g04',
+          },
+        ]}
+        categorySlug="phone"
+        brandSlug="motorola"
+        modelSlug="moto-g04"
+        modelName="Moto G04"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /camera lens replacement/i })).toHaveAttribute(
+      'href',
+      '/repairs/phone/camera-lens-replacement?brand=motorola&model=moto-g04',
+    );
+  });
+
+  it('uses existing special route helpers only when the Server leaves unresolved repairs without href', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[
+          { slug: 'camera-lens-replacement', name: 'Camera Lens Replacement', price: 0 },
+          { slug: 'loudspeaker-replacement', name: 'Loudspeaker Replacement', price: 0 },
+          { slug: 'screen-replacement', name: 'Screen Replacement', price: 0 },
+        ]}
+        categorySlug="phone"
+        brandSlug="google-pixel"
+        modelSlug="pixel-8-pro"
+        modelName="Pixel 8 Pro"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /camera lens replacement/i })).toHaveAttribute(
+      'href',
+      '/repairs/phone/google/camera-lens-replacement?model=pixel-8-pro',
+    );
+    expect(screen.getByRole('link', { name: /loudspeaker replacement/i })).toHaveAttribute(
+      'href',
+      '/repairs/phone/google/loudspeaker-replacement?model=pixel-8-pro',
+    );
+    expect(screen.getByRole('link', { name: /^screen replacement/i })).toHaveAttribute(
+      'href',
+      '/repairs/phone/google-pixel/pixel-8-pro/screen-replacement',
+    );
   });
 });

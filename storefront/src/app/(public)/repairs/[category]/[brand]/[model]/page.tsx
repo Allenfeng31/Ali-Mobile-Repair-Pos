@@ -6,6 +6,7 @@ import { formatDynamicParam, preserveRouteSegment, safeSlugSegment } from "@/lib
 import { withVirtualCameraLensRepairOption } from "@/lib/virtualCameraLens";
 import { withVirtualPhoneRepairOptions } from "@/lib/virtualPhoneRepairs";
 import { getCanonicalBrandSlug, isGooglePixelAliasBrand } from "@/lib/waterDamageRouting";
+import { resolveModelHubRepairPageMode } from "@/lib/modelHubRepairPageMode";
 import { getSelectedCrawledModelHubContent } from "@/lib/seo/content/selectedCrawledRepairPages";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
@@ -338,10 +339,17 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isLaptopModelPage = categorySlug === "laptop";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
   const isEnhancedPhoneModelPage = isPhoneModelPage || isTabletModelPage || isMacBookModelPage || isAppleWatchModelPage;
-  const brandCatalogEntry = isEnhancedPhoneModelPage
-    ? (await fetchRepairCatalog()).brands.find((brand) => brand.category === categorySlug && brand.slug === brandSlug)
-    : null;
-  const sameBrandModels = getOrderedSameBrandModels(modelName, modelSlug, brandCatalogEntry?.models);
+  const brandModels = isEnhancedPhoneModelPage ? data.brandModels : [];
+  const sameBrandModels = getOrderedSameBrandModels(modelName, modelSlug, brandModels);
+  const gridRepairTypes = isPhoneModelPage && !isIPhoneModelPage
+    ? resolveModelHubRepairPageMode({
+        category: categorySlug,
+        brandSlug,
+        modelSlug,
+        catalogueSource: data.catalogueSource,
+        repairTypes,
+      }).options
+    : repairTypes;
   const visibleRelatedModels = sameBrandModels.slice(0, RELATED_MODEL_LIMIT);
   const relatedModelHubLabel = isIPhoneModelPage
     ? "iPhone"
@@ -387,7 +395,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? "watch repair services"
     : `${formatDynamicParam(categorySlug)} repair services`;
   const supportingRepairLinks = [
-    ...(brandCatalogEntry
+    ...(brandModels.length > 0
       ? [
           {
             href: `/repairs/${categorySlug}/${brandSlug}`,
@@ -1928,7 +1936,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </h2>
         </div>
         <RepairOptionsGrid
-          repairTypes={repairTypes}
+          repairTypes={gridRepairTypes}
           categorySlug={categorySlug}
           brandSlug={brandSlug}
           modelSlug={modelSlug}

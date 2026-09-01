@@ -628,20 +628,21 @@ export async function fetchRepairDetails(
   };
 }
 
-/**
- * Fetch repair types for a specific brand + model (for the intermediate model page).
- */
-export async function fetchModelRepairTypes(
-  categorySlug: string,
-  brandSlug: string,
-  modelSlug: string
-): Promise<{
+export type ModelRepairTypesResult = {
   brand: string;
   model: string;
   repairTypes: RepairOption[];
   source: RepairCatalog['source'];
-} | null> {
-  const catalog = await fetchRepairCatalog();
+  catalogueSource: RepairCatalog['catalogueSource'];
+  brandModels: ModelEntry[];
+};
+
+export function selectModelRepairTypesFromCatalogue(
+  catalog: RepairCatalog,
+  categorySlug: string,
+  brandSlug: string,
+  modelSlug: string,
+): ModelRepairTypesResult | null {
   const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);
   if (!brandEntry) return null;
 
@@ -653,5 +654,23 @@ export async function fetchModelRepairTypes(
     model: modelEntry.model,
     repairTypes: modelEntry.repairTypes,
     source: catalog.source,
+    catalogueSource: catalog.catalogueSource,
+    brandModels: brandEntry.models,
   };
+}
+
+/**
+ * Fetch repair types for a specific brand + model (for the intermediate model page).
+ */
+export async function fetchModelRepairTypes(
+  categorySlug: string,
+  brandSlug: string,
+  modelSlug: string,
+): Promise<ModelRepairTypesResult | null> {
+  return selectModelRepairTypesFromCatalogue(
+    await fetchRepairCatalog(),
+    categorySlug,
+    brandSlug,
+    modelSlug,
+  );
 }

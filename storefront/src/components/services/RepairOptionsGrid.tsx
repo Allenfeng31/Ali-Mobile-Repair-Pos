@@ -22,10 +22,11 @@ interface RepairOption {
   price: number;
   variants?: RepairVariant[];
   sourceType?: 'real' | 'virtual' | 'diagnostic';
+  href?: string;
 }
 
 interface RepairOptionsGridProps {
-  repairTypes: RepairOption[];
+  repairTypes: readonly RepairOption[];
   categorySlug: string;
   brandSlug: string;
   modelSlug: string;
@@ -94,6 +95,8 @@ export default function RepairOptionsGrid({
   };
 
   const getRepairHref = (rt: RepairOption) => {
+    if (rt.href) return rt.href;
+
     if (rt.slug === CAMERA_LENS_REPAIR_SLUG && categorySlug === "phone" && brandSlug !== "iphone") {
       return getCameraLensLandingHref(categorySlug, brandSlug, modelSlug) || `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`;
     }
