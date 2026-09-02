@@ -173,6 +173,7 @@ export const PUBLIC_REPAIR_RESULT_SELECT = [
 
 const PUBLIC_REPAIR_RESULTS_FETCH_TIMEOUT_MS = 3500;
 export const MAX_SERVER_REPAIR_RESULT_PROOFS = 4;
+export const MAX_DETAIL_INITIAL_REPAIR_RESULTS = 1;
 
 export function createPublicRepairResultsClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -241,6 +242,32 @@ export function isPublicRepairResult(result: Pick<PublicRepairResult, 'status' |
     result.before_image_path.trim().length > 0 &&
     result.after_image_path.trim().length > 0
   );
+}
+
+/**
+ * Projects an already-query-ordered exact Detail result into the existing
+ * public matching-item shape. Media storage paths stay server-only.
+ */
+export function selectDetailRepairResultInitialSeeds(
+  results: readonly PublicRepairResult[],
+): RepairResultMatchingItem[] {
+  return results
+    .filter(isPublicRepairResult)
+    .slice(0, MAX_DETAIL_INITIAL_REPAIR_RESULTS)
+    .map((result) => ({
+      id: result.id,
+      device_category: result.device_category,
+      brand: result.brand,
+      brand_slug: result.brand_slug,
+      model: result.model,
+      model_slug: result.model_slug,
+      repair_type: result.repair_type,
+      repair_type_slug: result.repair_type_slug,
+      image_pair_alt_text: result.image_pair_alt_text,
+      title: result.title,
+      short_description: result.short_description,
+      related_repair_url: result.related_repair_url,
+    }));
 }
 
 export function getRepairResultBrandAliases(brandSlug: string) {

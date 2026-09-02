@@ -19,6 +19,7 @@ interface RepairResultsMatchingSectionProps {
   repairType?: string;
   context: RepairResultsMatchingContext;
   mobileVariant?: 'iphone15-compact-pilot';
+  initialResults?: RepairResultMatchingItem[];
 }
 
 interface MatchingApiResponse {
@@ -55,12 +56,14 @@ function buildMatchingUrl({
 export default function RepairResultsMatchingSection(props: RepairResultsMatchingSectionProps) {
   const observerTargetRef = useRef<HTMLDivElement | null>(null);
   const requestedRef = useRef(false);
+  const hasInitialResults = Boolean(props.initialResults?.length);
   const [shouldLoad, setShouldLoad] = useState(false);
-  const [results, setResults] = useState<RepairResultMatchingItem[]>([]);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [results, setResults] = useState<RepairResultMatchingItem[]>(() => props.initialResults || []);
+  const [hasLoaded, setHasLoaded] = useState(hasInitialResults);
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
+    if (hasInitialResults) return;
     const target = observerTargetRef.current;
     if (!target || shouldLoad) return;
 
@@ -76,9 +79,10 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [shouldLoad]);
+  }, [hasInitialResults, shouldLoad]);
 
   useEffect(() => {
+    if (hasInitialResults) return;
     if (!shouldLoad || requestedRef.current) return;
     requestedRef.current = true;
 
@@ -111,7 +115,7 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
 
     loadMatches();
     return () => controller.abort();
-  }, [props, shouldLoad]);
+  }, [hasInitialResults, props, shouldLoad]);
 
   if (!hasLoaded) {
     return <div ref={observerTargetRef} className={styles.observerTarget} aria-hidden="true" />;

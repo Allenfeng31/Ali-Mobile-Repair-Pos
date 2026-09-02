@@ -4965,6 +4965,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import RepairTypeClient from '@/components/services/RepairTypeClient';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import RepairResultsMatchingSection from '@/components/repair-results/RepairResultsMatchingSection';
+import { fetchRepairDetailInitialResults } from '@/lib/repair-results.server';
 import ScrollReveal from '@/components/ScrollReveal';
 
 
@@ -4978,7 +4979,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     console.log('[DEBUG] isUnsupported route');
     notFound();
   }
-  const pageData = await fetchRepairPageData(resolvedParams);
+  const [pageData, detailInitialResults] = await Promise.all([
+    fetchRepairPageData(resolvedParams),
+    fetchRepairDetailInitialResults({
+      category: resolvedParams.category as 'phone' | 'tablet' | 'laptop' | 'watch',
+      brandSlug: resolvedParams.brand,
+      modelSlug: resolvedParams.model,
+      repairTypeSlug: resolvedParams['repair-type'],
+    }),
+  ]);
 
   if (!pageData) {
     console.log('[DEBUG] pageData is null');
@@ -5615,6 +5624,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           model={resolvedParams.model}
           repairType={resolvedParams['repair-type']}
           context="detail"
+          initialResults={detailInitialResults.length ? detailInitialResults : undefined}
           mobileVariant={isIphone15ScreenMobilePilot ? 'iphone15-compact-pilot' : undefined}
         />
 
