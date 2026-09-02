@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getRepairTypeHubDefinition } from './repair-type-hubs';
 
 export type RepairResultDeviceCategory = 'phone' | 'tablet' | 'laptop' | 'watch';
 export type RepairResultStatus = 'draft' | 'approved' | 'published' | 'archived';
@@ -59,6 +60,27 @@ export interface RepairResultMatchingItem {
   short_description: string | null;
   related_repair_url: string | null;
 }
+
+export interface ServerRepairResultProof {
+  device_category: RepairResultDeviceCategory;
+  brand: string;
+  brand_slug: string;
+  model: string;
+  model_slug: string;
+  repair_type: string;
+  repair_type_slug: string;
+  title: string;
+  short_description: string | null;
+  related_repair_url: string | null;
+}
+
+export type ServerRepairResultProofRequest =
+  | { surface: 'homepage'; limit?: number }
+  | { surface: 'repair-hub'; category: RepairResultDeviceCategory; limit?: number }
+  | { surface: 'brand-hub'; category: RepairResultDeviceCategory; brandSlug: string; limit?: number }
+  | { surface: 'model-hub'; category: RepairResultDeviceCategory; brandSlug: string; modelSlug: string; limit?: number }
+  | { surface: 'repair-detail'; category: RepairResultDeviceCategory; brandSlug: string; modelSlug: string; repairTypeSlug: string; limit?: number }
+  | { surface: 'repair-type-hub'; category: RepairResultDeviceCategory; repairTypeSlug: string; limit?: number };
 
 export const REPAIR_RESULT_BUCKET = 'repair-results';
 
@@ -150,6 +172,7 @@ export const PUBLIC_REPAIR_RESULT_SELECT = [
 ].join(',');
 
 const PUBLIC_REPAIR_RESULTS_FETCH_TIMEOUT_MS = 3500;
+export const MAX_SERVER_REPAIR_RESULT_PROOFS = 4;
 
 export function createPublicRepairResultsClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -218,6 +241,95 @@ export function isPublicRepairResult(result: Pick<PublicRepairResult, 'status' |
     result.before_image_path.trim().length > 0 &&
     result.after_image_path.trim().length > 0
   );
+}
+
+export function getRepairResultBrandAliases(brandSlug: string) {
+  return brandSlug === 'iphone' || brandSlug === 'ipad' ? [brandSlug, 'apple'] : [brandSlug];
+}
+
+export function getServerRepairResultProofLimit(limit?: number) {
+  if (!Number.isFinite(limit) || !limit || limit < 1) return MAX_SERVER_REPAIR_RESULT_PROOFS;
+  return Math.min(Math.floor(limit), MAX_SERVER_REPAIR_RESULT_PROOFS);
+}
+
+function compareServerRepairResultProofs(
+  left: PublicRepairResult,
+  right: PublicRepairResult,
+  surface: ServerRepairResultProofRequest['surface'],
+) {
+  if (surface === 'homepage' && left.sort_order !== right.sort_order) {
+    return left.sort_order - right.sort_order;
+  }
+
+  const leftPublished = left.published_at || left.created_at;
+  const rightPublished = right.published_at || right.created_at;
+  if (leftPublished !== rightPublished) return leftPublished > rightPublished ? -1 : 1;
+  if (left.created_at !== right.created_at) return left.created_at > right.created_at ? -1 : 1;
+  return left.id > right.id ? -1 : left.id < right.id ? 1 : 0;
+}
+
+function isServerRepairResultProofMatch(
+  result: PublicRepairResult,
+  request: ServerRepairResultProofRequest,
+) {
+  if (!isPublicRepairResult(result)) return false;
+
+  switch (request.surface) {
+    case 'homepage':
+      return result.featured_on_homepage;
+    case 'repair-hub':
+      return result.featured_on_repair_hub && result.device_category === request.category;
+    case 'brand-hub':
+      return result.featured_on_brand_hub
+        && result.device_category === request.category
+        && getRepairResultBrandAliases(request.brandSlug).includes(result.brand_slug);
+    case 'model-hub':
+      return result.device_category === request.category
+        && getRepairResultBrandAliases(request.brandSlug).includes(result.brand_slug)
+        && result.model_slug === request.modelSlug;
+    case 'repair-detail':
+      return result.device_category === request.category
+        && getRepairResultBrandAliases(request.brandSlug).includes(result.brand_slug)
+        && result.model_slug === request.modelSlug
+        && result.repair_type_slug === request.repairTypeSlug;
+    case 'repair-type-hub': {
+      const repairHub = getRepairTypeHubDefinition(request.repairTypeSlug);
+      if (!repairHub) return false;
+      return result.device_category === request.category
+        && repairHub.aliases.includes(result.repair_type_slug);
+    }
+  }
+}
+
+function toServerRepairResultProof(result: PublicRepairResult): ServerRepairResultProof {
+  return {
+    device_category: result.device_category,
+    brand: result.brand,
+    brand_slug: result.brand_slug,
+    model: result.model,
+    model_slug: result.model_slug,
+    repair_type: result.repair_type,
+    repair_type_slug: result.repair_type_slug,
+    title: result.title,
+    short_description: result.short_description,
+    related_repair_url: result.related_repair_url,
+  };
+}
+
+/**
+ * Storefront-only read adapter. It projects already-published Repair Result
+ * records into a safe, serializable proof shape; it does not decide taxonomy
+ * or placement eligibility beyond the existing persisted facts.
+ */
+export function selectServerRepairResultProofs(
+  results: readonly PublicRepairResult[],
+  request: ServerRepairResultProofRequest,
+): ServerRepairResultProof[] {
+  return results
+    .filter((result) => isServerRepairResultProofMatch(result, request))
+    .sort((left, right) => compareServerRepairResultProofs(left, right, request.surface))
+    .slice(0, getServerRepairResultProofLimit(request.limit))
+    .map(toServerRepairResultProof);
 }
 
 type HubRepairGroup = 'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing';
