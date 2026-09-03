@@ -34,15 +34,27 @@ function formatDate(isoString: string) {
   }
 }
 
-export default function RealRepairResultsSection() {
+interface RealRepairResultsSectionProps {
+  initialResults?: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>;
+  initialLatestPublishedAt?: string | null;
+}
+
+export default function RealRepairResultsSection({
+  initialResults,
+  initialLatestPublishedAt,
+}: RealRepairResultsSectionProps) {
+  const hasInitialResults = REPAIR_RESULT_CATEGORIES.some((category) => initialResults?.[category.value]);
   const [resultsByCategory, setResultsByCategory] = useState<
     Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>
-  >({});
-  const [activeCategory, setActiveCategory] = useState<RepairResultDeviceCategory>('phone');
-  const [latestPublishedAt, setLatestPublishedAt] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  >(() => initialResults || {});
+  const [activeCategory, setActiveCategory] = useState<RepairResultDeviceCategory>(() => (
+    initialResults?.phone ? 'phone' : firstAvailableCategory(initialResults || {})
+  ));
+  const [latestPublishedAt, setLatestPublishedAt] = useState<string | null>(initialLatestPublishedAt || null);
+  const [isLoading, setIsLoading] = useState(!hasInitialResults);
 
   useEffect(() => {
+    if (hasInitialResults) return;
     const controller = new AbortController();
 
     async function loadRepairResults() {
@@ -81,7 +93,7 @@ export default function RealRepairResultsSection() {
     loadRepairResults();
 
     return () => controller.abort();
-  }, []);
+  }, [hasInitialResults]);
 
   const hasResults = REPAIR_RESULT_CATEGORIES.some((category) => resultsByCategory[category.value]);
 

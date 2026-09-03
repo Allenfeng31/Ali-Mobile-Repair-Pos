@@ -5,12 +5,15 @@ import {
   createPublicRepairResultsClient,
   getRepairResultBrandAliases,
   getServerRepairResultProofLimit,
+  MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS,
   MAX_DETAIL_INITIAL_REPAIR_RESULTS,
   PUBLIC_REPAIR_RESULT_SELECT,
+  selectHomepageRepairResultSeed,
   selectModelRepairResultInitialSeeds,
   selectDetailRepairResultInitialSeeds,
   selectServerRepairResultProofs,
   type PublicRepairResult,
+  type HomepageRepairResultSeed,
   type RepairResultDeviceCategory,
   type RepairResultMatchingItem,
   type ServerRepairResultProof,
@@ -31,6 +34,44 @@ export interface ModelRepairResultSeedRequest {
 }
 
 const MAX_MODEL_INITIAL_REPAIR_RESULT_QUERY_ROWS = 12;
+
+const EMPTY_HOMEPAGE_REPAIR_RESULT_SEED: HomepageRepairResultSeed = {
+  resultsByCategory: {},
+  latestPublishedAt: null,
+};
+
+/**
+ * Mirrors the existing homepage endpoint's one-query, category-first public
+ * selection while serializing only the fields rendered by the client module.
+ */
+export async function fetchHomepageRepairResultSeed(): Promise<HomepageRepairResultSeed> {
+  const supabase = createPublicRepairResultsClient();
+  if (!supabase) return EMPTY_HOMEPAGE_REPAIR_RESULT_SEED;
+
+  try {
+    const { data, error } = await supabase
+      .from('repair_results')
+      .select(PUBLIC_REPAIR_RESULT_SELECT)
+      .eq('status', 'published')
+      .eq('privacy_checked', true)
+      .eq('featured_on_homepage', true)
+      .neq('before_image_path', '')
+      .neq('after_image_path', '')
+      .order('sort_order', { ascending: true })
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS);
+
+    if (error) {
+      console.error('[repair-results] Failed to fetch Homepage initial results:', error);
+      return EMPTY_HOMEPAGE_REPAIR_RESULT_SEED;
+    }
+
+    return selectHomepageRepairResultSeed((data || []) as unknown as PublicRepairResult[]);
+  } catch (error) {
+    console.error('[repair-results] Unexpected Homepage initial result failure:', error);
+    return EMPTY_HOMEPAGE_REPAIR_RESULT_SEED;
+  }
+}
 
 /**
  * Reads only exact, already-public Model Hub candidates. The shared selector

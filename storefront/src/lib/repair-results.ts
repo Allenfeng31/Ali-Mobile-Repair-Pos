@@ -46,6 +46,11 @@ export interface RepairResultHomepageItem {
   related_repair_url: string | null;
 }
 
+export interface HomepageRepairResultSeed {
+  resultsByCategory: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>>;
+  latestPublishedAt: string | null;
+}
+
 export interface RepairResultMatchingItem {
   id: string;
   device_category: RepairResultDeviceCategory;
@@ -174,6 +179,7 @@ export const PUBLIC_REPAIR_RESULT_SELECT = [
 const PUBLIC_REPAIR_RESULTS_FETCH_TIMEOUT_MS = 3500;
 export const MAX_SERVER_REPAIR_RESULT_PROOFS = 4;
 export const MAX_DETAIL_INITIAL_REPAIR_RESULTS = 1;
+export const MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS = 24;
 
 export function createPublicRepairResultsClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -242,6 +248,44 @@ export function isPublicRepairResult(result: Pick<PublicRepairResult, 'status' |
     result.before_image_path.trim().length > 0 &&
     result.after_image_path.trim().length > 0
   );
+}
+
+function toRepairResultHomepageItem(result: PublicRepairResult): RepairResultHomepageItem {
+  return {
+    id: result.id,
+    device_category: result.device_category,
+    model: result.model,
+    repair_type: result.repair_type,
+    image_pair_alt_text: result.image_pair_alt_text,
+    title: result.title,
+    short_description: result.short_description,
+    related_repair_url: result.related_repair_url,
+  };
+}
+
+/**
+ * Applies the existing homepage query order to at most 24 candidates, then
+ * keeps the first qualifying public result for each fixed homepage category.
+ */
+export function selectHomepageRepairResultSeed(
+  results: readonly PublicRepairResult[],
+): HomepageRepairResultSeed {
+  const resultsByCategory: Partial<Record<RepairResultDeviceCategory, RepairResultHomepageItem>> = {};
+  let latestPublishedAt: string | null = null;
+
+  for (const result of results.slice(0, MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS)) {
+    if (!isPublicRepairResult(result) || !result.featured_on_homepage || resultsByCategory[result.device_category]) {
+      continue;
+    }
+
+    resultsByCategory[result.device_category] = toRepairResultHomepageItem(result);
+    const timestamp = result.published_at || result.created_at;
+    if (timestamp && (!latestPublishedAt || new Date(timestamp) > new Date(latestPublishedAt))) {
+      latestPublishedAt = timestamp;
+    }
+  }
+
+  return { resultsByCategory, latestPublishedAt };
 }
 
 /**
@@ -490,18 +534,20 @@ export async function fetchFeaturedRepairResultsByCategory(): Promise<Partial<Re
       .neq('after_image_path', '')
       .order('sort_order', { ascending: true })
       .order('published_at', { ascending: false, nullsFirst: false })
-      .limit(24);
+      .limit(MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS);
 
     if (error) {
       console.error('[repair-results] Failed to fetch featured repair results:', error);
       return {};
     }
 
+    const publicResults = (data || []) as unknown as PublicRepairResult[];
+    const selected = selectHomepageRepairResultSeed(publicResults);
     const byCategory: Partial<Record<RepairResultDeviceCategory, PublicRepairResult>> = {};
+    const selectedIds = new Set(Object.values(selected.resultsByCategory).map((result) => result.id));
 
-    for (const result of (data || []) as unknown as PublicRepairResult[]) {
-      if (!isPublicRepairResult(result)) continue;
-      if (!byCategory[result.device_category]) {
+    for (const result of publicResults) {
+      if (selectedIds.has(result.id)) {
         byCategory[result.device_category] = result;
       }
     }

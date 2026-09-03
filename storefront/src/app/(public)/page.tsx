@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import RealRepairResultsSection from "@/components/repair-results/RealRepairResultsSection";
+import { fetchHomepageRepairResultSeed } from "@/lib/repair-results.server";
+import { REPAIR_RESULT_CATEGORIES } from "@/lib/repair-results";
 import { REPAIR_CATEGORY_NAV_ITEMS } from "@/lib/repairCategoryNavigation";
 import heroStyles from "./HomeHero.module.css";
 import homeStyles from "./HomePage.module.css";
@@ -72,7 +74,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const homepageRepairResultSeed = await fetchHomepageRepairResultSeed();
+  const hasHomepageRepairResultSeed = REPAIR_RESULT_CATEGORIES.some(
+    (category) => homepageRepairResultSeed.resultsByCategory[category.value],
+  );
+
   return (
     <main>
       <LocalBusinessSchema />
@@ -224,7 +231,10 @@ export default function Home() {
       </ScrollReveal>
 
       <ScrollReveal>
-        <RealRepairResultsSection />
+        <RealRepairResultsSection
+          initialResults={hasHomepageRepairResultSeed ? homepageRepairResultSeed.resultsByCategory : undefined}
+          initialLatestPublishedAt={hasHomepageRepairResultSeed ? homepageRepairResultSeed.latestPublishedAt : undefined}
+        />
       </ScrollReveal>
 
       <ScrollReveal>
