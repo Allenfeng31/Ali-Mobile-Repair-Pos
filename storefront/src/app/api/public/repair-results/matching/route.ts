@@ -158,8 +158,7 @@ export async function GET(request: Request) {
              .eq('repair_type_slug', repairType)
              .limit(limit);
       } else {
-        const prefixUrl = `/repairs/${category}/${brand}/${model}/`;
-        q = q.or(`model_slug.eq.${model},related_repair_url.like.${prefixUrl}%`)
+        q = q.eq('model_slug', model)
              .limit(Math.max(limit * 4, 8));
       }
 
