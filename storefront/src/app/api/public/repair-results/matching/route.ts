@@ -3,7 +3,9 @@ import {
   PUBLIC_REPAIR_RESULT_SELECT,
   REPAIR_RESULT_CATEGORIES,
   createPublicRepairResultsClient,
+  getRepairResultBrandAliases,
   isPublicRepairResult,
+  selectModelRepairResultInitialSeeds,
   type PublicRepairResult,
   type RepairResultDeviceCategory,
   type RepairResultMatchingItem,
@@ -53,25 +55,6 @@ function pickPublicFields(result: PublicRepairResult): RepairResultMatchingItem 
     image_pair_alt_text: result.image_pair_alt_text,
     related_repair_url: result.related_repair_url,
   };
-}
-
-function uniqueByRepairType(results: PublicRepairResult[], limit: number) {
-  const seen = new Set<string>();
-  const unique: PublicRepairResult[] = [];
-  const overflow: PublicRepairResult[] = [];
-
-  for (const result of results) {
-    if (!isPublicRepairResult(result)) continue;
-
-    if (!seen.has(result.repair_type_slug)) {
-      seen.add(result.repair_type_slug);
-      unique.push(result);
-    } else {
-      overflow.push(result);
-    }
-  }
-
-  return [...unique, ...overflow].slice(0, limit);
 }
 
 export async function GET(request: Request) {
@@ -165,7 +148,7 @@ export async function GET(request: Request) {
       return q;
     };
 
-    const aliases = brand === 'iphone' || brand === 'ipad' ? [brand, 'apple'] : [brand];
+    const aliases = getRepairResultBrandAliases(brand);
     let data: any[] = [];
     let fetchError: any = null;
 
@@ -200,11 +183,11 @@ export async function GET(request: Request) {
 
     const publicResults = ((data || []) as unknown as PublicRepairResult[]).filter(isPublicRepairResult);
     const results = context === 'model'
-      ? uniqueByRepairType(publicResults, limit)
-      : publicResults.slice(0, limit);
+      ? selectModelRepairResultInitialSeeds(data as unknown as PublicRepairResult[], limit)
+      : publicResults.slice(0, limit).map(pickPublicFields);
 
     return NextResponse.json(
-      { status: 'SUCCESS', data: results.map(pickPublicFields) },
+      { status: 'SUCCESS', data: results },
       { headers: CACHE_HEADERS }
     );
   } catch (error) {

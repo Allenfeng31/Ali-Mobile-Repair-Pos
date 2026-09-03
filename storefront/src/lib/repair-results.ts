@@ -270,6 +270,50 @@ export function selectDetailRepairResultInitialSeeds(
     }));
 }
 
+/**
+ * Selects ordered, already-queried Model Hub candidates for the existing
+ * public matching-item UI. Alias-overlap IDs are collapsed before repair-type
+ * diversity is applied, and private storage paths never leave this boundary.
+ */
+export function selectModelRepairResultInitialSeeds(
+  results: readonly PublicRepairResult[],
+  limit = 3,
+): RepairResultMatchingItem[] {
+  const seenIds = new Set<string>();
+  const seenRepairTypes = new Set<string>();
+  const distinct: PublicRepairResult[] = [];
+  const duplicates: PublicRepairResult[] = [];
+
+  for (const result of results) {
+    if (seenIds.has(result.id) || !isPublicRepairResult(result)) continue;
+    seenIds.add(result.id);
+
+    if (seenRepairTypes.has(result.repair_type_slug)) {
+      duplicates.push(result);
+    } else {
+      seenRepairTypes.add(result.repair_type_slug);
+      distinct.push(result);
+    }
+  }
+
+  return [...distinct, ...duplicates]
+    .slice(0, Math.min(Math.max(0, limit), 3))
+    .map((result) => ({
+      id: result.id,
+      device_category: result.device_category,
+      brand: result.brand,
+      brand_slug: result.brand_slug,
+      model: result.model,
+      model_slug: result.model_slug,
+      repair_type: result.repair_type,
+      repair_type_slug: result.repair_type_slug,
+      image_pair_alt_text: result.image_pair_alt_text,
+      title: result.title,
+      short_description: result.short_description,
+      related_repair_url: result.related_repair_url,
+    }));
+}
+
 export function getRepairResultBrandAliases(brandSlug: string) {
   return brandSlug === 'iphone' || brandSlug === 'ipad' ? [brandSlug, 'apple'] : [brandSlug];
 }

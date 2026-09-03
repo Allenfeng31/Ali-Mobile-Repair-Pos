@@ -4,7 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchModelRepairTypes, fetchRepairCatalog } from '@/lib/api';
 
-const state = vi.hoisted(() => ({ gridProps: null as { repairTypes: Array<{ slug: string; href?: string }> } | null }));
+const state = vi.hoisted(() => ({
+  gridProps: null as { repairTypes: Array<{ slug: string; href?: string }> } | null,
+  matchingProps: [] as Array<{ initialResults?: unknown[] }>,
+}));
+const fetchModelRepairResultSeeds = vi.hoisted(() => vi.fn());
 
 vi.mock('next/link', () => ({
   default: ({ children, href, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode; href: string }) => <a href={href} {...props}>{children}</a>,
@@ -28,7 +32,13 @@ vi.mock('@/components/services/RepairOptionsGrid', () => ({
   },
 }));
 vi.mock('@/components/services/RepairCTA', () => ({ default: () => null }));
-vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({ default: () => null }));
+vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({
+  default: (props: { initialResults?: unknown[] }) => {
+    state.matchingProps.push(props);
+    return null;
+  },
+}));
+vi.mock('@/lib/repair-results.server', () => ({ fetchModelRepairResultSeeds }));
 vi.mock('@/components/ScrollReveal', () => ({ default: ({ children }: { children: ReactNode }) => <>{children}</> }));
 vi.mock('@/components/FloatingJumpCTA', () => ({ default: () => null }));
 
@@ -49,8 +59,10 @@ const modelData = (overrides: Record<string, unknown> = {}) => ({
 
 beforeEach(() => {
   state.gridProps = null;
+  state.matchingProps = [];
   vi.mocked(fetchRepairCatalog).mockReset();
   vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData() as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+  fetchModelRepairResultSeeds.mockResolvedValue([]);
 });
 
 describe('Model Hub page-mode Server consumer', () => {
@@ -106,5 +118,37 @@ describe('Model Hub page-mode Server consumer', () => {
 
     expect(state.gridProps?.repairTypes).toEqual([expect.objectContaining({ slug: 'screen-replacement' })]);
     expect(state.gridProps?.repairTypes[0]).not.toHaveProperty('href');
+  });
+
+  it('passes canonical exact-model server seeds to the one enhanced-branch Repair Results module', async () => {
+    const seed = [{ id: 'exact-result', model_slug: 'find-x8-pro' }];
+    fetchModelRepairResultSeeds.mockResolvedValueOnce(seed);
+
+    renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'phone', brand: 'oppo', model: 'find-x8-pro' }) }));
+
+    expect(fetchModelRepairResultSeeds).toHaveBeenCalledWith({ category: 'phone', brandSlug: 'oppo', modelSlug: 'find-x8-pro' });
+    expect(state.matchingProps).toEqual([expect.objectContaining({ initialResults: seed })]);
+  });
+
+  it('passes the same server seed to the one standard-branch Repair Results module', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Future Brand',
+      model: 'Future Laptop',
+      repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' }],
+      brandModels: [{ slug: 'future-laptop', model: 'Future Laptop', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+    const seed = [{ id: 'future-laptop-result', model_slug: 'future-laptop' }];
+    fetchModelRepairResultSeeds.mockResolvedValueOnce(seed);
+
+    renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'laptop', brand: 'future-brand', model: 'future-laptop' }) }));
+
+    expect(fetchModelRepairResultSeeds).toHaveBeenCalledWith({ category: 'laptop', brandSlug: 'future-brand', modelSlug: 'future-laptop' });
+    expect(state.matchingProps).toEqual([expect.objectContaining({ initialResults: seed })]);
+  });
+
+  it('keeps the enhanced branch unseeded when the server reader has no usable results', async () => {
+    renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'phone', brand: 'oppo', model: 'find-x8-pro' }) }));
+
+    expect(state.matchingProps).toEqual([expect.objectContaining({ initialResults: undefined })]);
   });
 });

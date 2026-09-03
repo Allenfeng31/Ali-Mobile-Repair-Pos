@@ -13,6 +13,7 @@ import BackButton from "@/components/BackButton";
 import RepairOptionsGrid from "@/components/services/RepairOptionsGrid";
 import RepairCTA from "@/components/services/RepairCTA";
 import RepairResultsMatchingSection from "@/components/repair-results/RepairResultsMatchingSection";
+import { fetchModelRepairResultSeeds } from "@/lib/repair-results.server";
 import ScrollReveal from "@/components/ScrollReveal";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
@@ -312,6 +313,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   if (!data) {
     notFound();
   }
+
+  const modelInitialResults = await fetchModelRepairResultSeeds({
+    category: categorySlug as "phone" | "tablet" | "laptop" | "watch",
+    brandSlug,
+    modelSlug,
+  });
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
@@ -1962,6 +1969,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             brand={brandSlug}
             model={modelSlug}
             context="model"
+            initialResults={modelInitialResults.length > 0 ? modelInitialResults : undefined}
           />
 
           <ScrollReveal>
@@ -2297,6 +2305,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             brand={brandSlug}
             model={modelSlug}
             context="model"
+            initialResults={modelInitialResults.length > 0 ? modelInitialResults : undefined}
           />
 
           <ScrollReveal>

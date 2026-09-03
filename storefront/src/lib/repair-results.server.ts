@@ -7,6 +7,7 @@ import {
   getServerRepairResultProofLimit,
   MAX_DETAIL_INITIAL_REPAIR_RESULTS,
   PUBLIC_REPAIR_RESULT_SELECT,
+  selectModelRepairResultInitialSeeds,
   selectDetailRepairResultInitialSeeds,
   selectServerRepairResultProofs,
   type PublicRepairResult,
@@ -21,6 +22,60 @@ export interface RepairDetailInitialResultSeedRequest {
   brandSlug: string;
   modelSlug: string;
   repairTypeSlug: string;
+}
+
+export interface ModelRepairResultSeedRequest {
+  category: RepairResultDeviceCategory;
+  brandSlug: string;
+  modelSlug: string;
+}
+
+const MAX_MODEL_INITIAL_REPAIR_RESULT_QUERY_ROWS = 12;
+
+/**
+ * Reads only exact, already-public Model Hub candidates. The shared selector
+ * preserves the matching API's alias, diversity, projection, and max-three
+ * behavior without exposing storage paths to the page.
+ */
+export async function fetchModelRepairResultSeeds(
+  request: ModelRepairResultSeedRequest,
+): Promise<RepairResultMatchingItem[]> {
+  const supabase = createPublicRepairResultsClient();
+  if (!supabase) return [];
+
+  const records: PublicRepairResult[] = [];
+
+  try {
+    for (const brandSlug of getRepairResultBrandAliases(request.brandSlug).slice(0, 2)) {
+      const { data, error } = await supabase
+        .from('repair_results')
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .eq('status', 'published')
+        .eq('privacy_checked', true)
+        .eq('device_category', request.category)
+        .eq('brand_slug', brandSlug)
+        .eq('model_slug', request.modelSlug)
+        .neq('before_image_path', '')
+        .neq('after_image_path', '')
+        .order('featured_on_homepage', { ascending: false })
+        .order('sort_order', { ascending: true })
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('updated_at', { ascending: false })
+        .limit(MAX_MODEL_INITIAL_REPAIR_RESULT_QUERY_ROWS);
+
+      if (error) {
+        console.error('[repair-results] Failed to fetch Model initial results:', error);
+        return [];
+      }
+
+      records.push(...((data || []) as unknown as PublicRepairResult[]));
+    }
+
+    return selectModelRepairResultInitialSeeds(records);
+  } catch (error) {
+    console.error('[repair-results] Unexpected Model initial result failure:', error);
+    return [];
+  }
 }
 
 /**
