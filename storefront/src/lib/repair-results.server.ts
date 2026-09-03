@@ -6,9 +6,11 @@ import {
   getRepairResultBrandAliases,
   getServerRepairResultProofLimit,
   MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS,
+  MAX_HUB_REPAIR_RESULT_QUERY_ROWS,
   MAX_DETAIL_INITIAL_REPAIR_RESULTS,
   PUBLIC_REPAIR_RESULT_SELECT,
   selectHomepageRepairResultSeed,
+  selectCategoryHubRepairResultSeeds,
   selectModelRepairResultInitialSeeds,
   selectDetailRepairResultInitialSeeds,
   selectServerRepairResultProofs,
@@ -39,6 +41,46 @@ const EMPTY_HOMEPAGE_REPAIR_RESULT_SEED: HomepageRepairResultSeed = {
   resultsByCategory: {},
   latestPublishedAt: null,
 };
+
+/**
+ * Mirrors the existing Category Hub endpoint's one-query, four repair-group
+ * selection while returning only safe visual fields for the client module.
+ */
+export async function fetchCategoryHubRepairResultSeeds(
+  category: RepairResultDeviceCategory,
+): Promise<RepairResultMatchingItem[]> {
+  const supabase = createPublicRepairResultsClient();
+  if (!supabase) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('repair_results')
+      .select(PUBLIC_REPAIR_RESULT_SELECT)
+      .eq('status', 'published')
+      .eq('privacy_checked', true)
+      .neq('before_image_path', '')
+      .neq('after_image_path', '')
+      .eq('device_category', category)
+      .eq('featured_on_repair_hub', true)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(MAX_HUB_REPAIR_RESULT_QUERY_ROWS);
+
+    if (error) {
+      console.error('[repair-results] Failed to fetch Category Hub initial results:', error);
+      return [];
+    }
+
+    return selectCategoryHubRepairResultSeeds(
+      (data || []) as unknown as PublicRepairResult[],
+      category,
+    );
+  } catch (error) {
+    console.error('[repair-results] Unexpected Category Hub initial result failure:', error);
+    return [];
+  }
+}
 
 /**
  * Mirrors the existing homepage endpoint's one-query, category-first public

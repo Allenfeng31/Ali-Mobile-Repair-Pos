@@ -12,6 +12,7 @@ import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
 import { type RepairResultDeviceCategory } from '@/lib/repair-results';
+import { fetchCategoryHubRepairResultSeeds } from '@/lib/repair-results.server';
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -301,7 +302,10 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   }
 
   // Fetch from the API for the dynamic brand grid
-  const catalog = await fetchRepairCatalog();
+  const [categoryRepairResultSeeds, catalog] = await Promise.all([
+    fetchCategoryHubRepairResultSeeds(category as RepairResultDeviceCategory),
+    fetchRepairCatalog(),
+  ]);
   const validBrands = catalog.brands.filter(b => b.category === category);
 
   // Dynamically split into Popular and Other
@@ -1111,6 +1115,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         <HubRepairResultsSection
           category={category as RepairResultDeviceCategory}
           scope="repair-hub"
+          initialResults={categoryRepairResultSeeds.length > 0 ? categoryRepairResultSeeds : undefined}
         />
 
         <ScrollReveal>

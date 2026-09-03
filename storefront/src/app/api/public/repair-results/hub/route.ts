@@ -2,27 +2,13 @@ import { NextResponse } from 'next/server';
 import {
   createPublicRepairResultsClient,
   PUBLIC_REPAIR_RESULT_SELECT,
+  MAX_HUB_REPAIR_RESULT_QUERY_ROWS,
+  selectHubRepairResults,
   type PublicRepairResult,
 } from '@/lib/repair-results';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-function normalizeRepairGroup(slug: string): 'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing' | null {
-  if (slug === 'screen-replacement' || slug === 'screen-repair' || slug === 'screen') {
-    return 'screen';
-  }
-  if (slug === 'battery-replacement' || slug === 'battery-service' || slug === 'battery-repair' || slug === 'battery') {
-    return 'battery';
-  }
-  if (slug === 'charging-port-replacement' || slug === 'charging-port-repair' || slug === 'charging-port') {
-    return 'charging-port';
-  }
-  if (slug === 'back-glass-replacement' || slug === 'back-housing-replacement' || slug === 'back-glass' || slug === 'back-housing') {
-    return 'back-glass-or-housing';
-  }
-  return null;
-}
 
 export async function GET(request: Request) {
   try {
@@ -59,7 +45,7 @@ export async function GET(request: Request) {
       .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
-      .limit(50);
+      .limit(MAX_HUB_REPAIR_RESULT_QUERY_ROWS);
 
     const { data, error } = await query;
 
@@ -68,20 +54,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Database query failed.' }, { status: 500 });
     }
 
-    const groups: Partial<Record<'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing', PublicRepairResult>> = {};
-
-    for (const result of (data || []) as unknown as PublicRepairResult[]) {
-      const group = normalizeRepairGroup(result.repair_type_slug);
-      if (group && !groups[group]) {
-        groups[group] = result;
-        if (Object.keys(groups).length === 4) {
-          break; // Optimization: stop processing once all groups are found
-        }
-      }
-    }
-
-    const groupOrder = ['screen', 'battery', 'charging-port', 'back-glass-or-housing'] as const;
-    const finalData = groupOrder.map(group => groups[group]).filter(Boolean);
+    const finalData = selectHubRepairResults((data || []) as unknown as PublicRepairResult[]);
 
     return NextResponse.json(
       { status: 'SUCCESS', data: finalData },

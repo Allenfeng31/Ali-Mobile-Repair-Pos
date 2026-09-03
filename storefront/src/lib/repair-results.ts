@@ -180,6 +180,7 @@ const PUBLIC_REPAIR_RESULTS_FETCH_TIMEOUT_MS = 3500;
 export const MAX_SERVER_REPAIR_RESULT_PROOFS = 4;
 export const MAX_DETAIL_INITIAL_REPAIR_RESULTS = 1;
 export const MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS = 24;
+export const MAX_HUB_REPAIR_RESULT_QUERY_ROWS = 50;
 
 export function createPublicRepairResultsClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -447,9 +448,9 @@ export function selectServerRepairResultProofs(
     .map(toServerRepairResultProof);
 }
 
-type HubRepairGroup = 'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing';
+export type HubRepairGroup = 'screen' | 'battery' | 'charging-port' | 'back-glass-or-housing';
 
-function normalizeHubRepairGroup(slug: string): HubRepairGroup | null {
+export function normalizeHubRepairGroup(slug: string): HubRepairGroup | null {
   if (slug === 'screen-replacement' || slug === 'screen-repair' || slug === 'screen') {
     return 'screen';
   }
@@ -463,6 +464,66 @@ function normalizeHubRepairGroup(slug: string): HubRepairGroup | null {
     return 'back-glass-or-housing';
   }
   return null;
+}
+
+const HUB_REPAIR_GROUP_ORDER: readonly HubRepairGroup[] = [
+  'screen',
+  'battery',
+  'charging-port',
+  'back-glass-or-housing',
+];
+
+function toRepairResultMatchingItem(result: PublicRepairResult): RepairResultMatchingItem {
+  return {
+    id: result.id,
+    device_category: result.device_category,
+    brand: result.brand,
+    brand_slug: result.brand_slug,
+    model: result.model,
+    model_slug: result.model_slug,
+    repair_type: result.repair_type,
+    repair_type_slug: result.repair_type_slug,
+    image_pair_alt_text: result.image_pair_alt_text,
+    title: result.title,
+    short_description: result.short_description,
+    related_repair_url: result.related_repair_url,
+  };
+}
+
+/**
+ * Selects the existing Hub UI's first public result per repair group from an
+ * already-query-ordered, bounded candidate list.
+ */
+export function selectHubRepairResults(
+  results: readonly PublicRepairResult[],
+): PublicRepairResult[] {
+  const groups: Partial<Record<HubRepairGroup, PublicRepairResult>> = {};
+
+  for (const result of results.slice(0, MAX_HUB_REPAIR_RESULT_QUERY_ROWS)) {
+    if (!isPublicRepairResult(result)) continue;
+    const group = normalizeHubRepairGroup(result.repair_type_slug);
+    if (group && !groups[group]) {
+      groups[group] = result;
+      if (Object.keys(groups).length === HUB_REPAIR_GROUP_ORDER.length) break;
+    }
+  }
+
+  return HUB_REPAIR_GROUP_ORDER.map((group) => groups[group]).filter(Boolean) as PublicRepairResult[];
+}
+
+/**
+ * Projects exact-category, repair-hub placement candidates into the public
+ * visual shape used by the existing HubRepairResultsSection.
+ */
+export function selectCategoryHubRepairResultSeeds(
+  results: readonly PublicRepairResult[],
+  category: RepairResultDeviceCategory,
+): RepairResultMatchingItem[] {
+  return selectHubRepairResults(
+    results
+      .slice(0, MAX_HUB_REPAIR_RESULT_QUERY_ROWS)
+      .filter((result) => result.device_category === category && result.featured_on_repair_hub),
+  ).map(toRepairResultMatchingItem);
 }
 
 export async function fetchHubRepairResults(
@@ -493,26 +554,14 @@ export async function fetchHubRepairResults(
       .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
-      .limit(50);
+      .limit(MAX_HUB_REPAIR_RESULT_QUERY_ROWS);
 
     if (error) {
       console.error('[repair-results] Failed to fetch hub repair results:', error);
       return [];
     }
 
-    const groups: Partial<Record<HubRepairGroup, PublicRepairResult>> = {};
-
-    for (const result of (data || []) as unknown as PublicRepairResult[]) {
-      if (!isPublicRepairResult(result)) continue;
-      const group = normalizeHubRepairGroup(result.repair_type_slug);
-      if (group && !groups[group]) {
-        groups[group] = result;
-        if (Object.keys(groups).length === 4) break;
-      }
-    }
-
-    const groupOrder: HubRepairGroup[] = ['screen', 'battery', 'charging-port', 'back-glass-or-housing'];
-    return groupOrder.map(group => groups[group]).filter(Boolean) as PublicRepairResult[];
+    return selectHubRepairResults((data || []) as unknown as PublicRepairResult[]);
   } catch (error) {
     console.error('[repair-results] Unexpected hub repair result failure:', error);
     return [];
