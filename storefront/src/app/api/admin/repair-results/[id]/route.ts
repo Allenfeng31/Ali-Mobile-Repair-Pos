@@ -2,9 +2,10 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { revalidatePath, revalidateTag } from 'next/cache';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { repairResultAffectedPathsForMutation } from '@/lib/repairResultRevalidation';
+import { revalidateRepairResultPaths } from '@/lib/repairResultRevalidation.server';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
   REPAIR_RESULT_BUCKET,
@@ -249,11 +250,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     if (error) throw error;
 
-    let warningMessage = '';
+    revalidateRepairResultPaths(repairResultAffectedPathsForMutation(record, data as unknown as PublicRepairResult));
+
     return jsonWithCors(request, { 
-      status: 'SUCCESS', 
+      status: 'SUCCESS',
       data,
-      ...(warningMessage ? { warning: warningMessage } : {})
     }, { status: 200 });
 
   } catch (error) {

@@ -5,12 +5,15 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { fetchRepairCatalog } from '@/lib/api';
+import { repairResultAffectedPathsForMutation } from '@/lib/repairResultRevalidation';
+import { revalidateRepairResultPaths } from '@/lib/repairResultRevalidation.server';
 import { buildRepairResultTaxonomy, resolveRepairResultTaxonomy } from '@/lib/repairResultTaxonomy';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
   REPAIR_RESULT_BUCKET,
   type RepairResultDeviceCategory,
   type RepairResultStatus,
+  type PublicRepairResult,
 } from '@/lib/repair-results';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -65,6 +68,18 @@ function jsonWithCors(request: Request, body: unknown, init?: ResponseInit) {
     ...init,
     headers: buildCorsHeaders(request, init?.headers),
   });
+}
+
+function revalidateIdempotentReplay(record: PublicRepairResult) {
+  const paths = repairResultAffectedPathsForMutation(null, record);
+
+  try {
+    revalidateRepairResultPaths(paths);
+  } catch {
+    console.error('[repair-results] Replay page revalidation failed after idempotent replay.', {
+      affectedPathCount: paths.length,
+    });
+  }
 }
 
 async function assertBearerAuthenticated(request: Request) {
@@ -274,6 +289,7 @@ export async function POST(request: Request) {
 
     // 3. If it already exists before uploading, return 200 with idempotentReplay: true
     if (existingRecord) {
+      revalidateIdempotentReplay(existingRecord as unknown as PublicRepairResult);
       return jsonWithCors(request, {
         status: 'SUCCESS',
         data: existingRecord,
@@ -352,6 +368,7 @@ export async function POST(request: Request) {
           .maybeSingle();
           
         if (concurrentRecord) {
+          revalidateIdempotentReplay(concurrentRecord as unknown as PublicRepairResult);
           return jsonWithCors(request, {
             status: 'SUCCESS',
             data: concurrentRecord,
@@ -363,8 +380,7 @@ export async function POST(request: Request) {
       // 8. For any other insertion failure
       throw error;
     }
-
-
+    revalidateRepairResultPaths(repairResultAffectedPathsForMutation(null, data as unknown as PublicRepairResult));
 
     return jsonWithCors(request, { status: 'SUCCESS', data }, { status: 201 });
   } catch (error) {
