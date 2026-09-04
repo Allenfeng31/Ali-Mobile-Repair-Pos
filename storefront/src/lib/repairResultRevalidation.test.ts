@@ -20,6 +20,7 @@ describe('repair result revalidation paths', () => {
     expect(repairResultAffectedPaths(baseResult)).toEqual([
       '/repairs/phone/iphone/iphone-16-pro/screen-replacement',
       '/repairs/phone/iphone/iphone-16-pro',
+      '/repairs/screen-replacement',
     ]);
   });
 
@@ -37,6 +38,7 @@ describe('repair result revalidation paths', () => {
       '/repairs/phone/iphone',
       '/repairs/phone',
       '/',
+      '/repairs/screen-replacement',
     ]);
     expect(paths).not.toContain('/repairs');
   });
@@ -50,6 +52,7 @@ describe('repair result revalidation paths', () => {
       '/repairs/phone/iphone/iphone-15-pro',
       '/repairs/phone/iphone',
       '/',
+      '/repairs/screen-replacement',
       '/repairs/phone/iphone/iphone-16-pro/screen-replacement',
       '/repairs/phone/iphone/iphone-16-pro',
     ]);
@@ -67,5 +70,35 @@ describe('repair result revalidation paths', () => {
       '/repairs/phone/future-brand/future-model/future-repair',
       '/repairs/phone/future-brand/future-model',
     ]);
+  });
+
+  it('maps only existing phone aliases to generic repair-type hubs across old and new mutation states', () => {
+    expect(repairResultAffectedPaths({ ...baseResult, repair_type_slug: 'screen-repair' }))
+      .toContain('/repairs/screen-replacement');
+    expect(repairResultAffectedPaths({ ...baseResult, repair_type_slug: 'battery-service' }))
+      .toContain('/repairs/battery-replacement');
+    expect(repairResultAffectedPaths({ ...baseResult, repair_type_slug: 'charging-port' }))
+      .toContain('/repairs/charging-port-replacement');
+    expect(repairResultAffectedPaths({ ...baseResult, repair_type_slug: 'back-housing' }))
+      .toContain('/repairs/back-glass-replacement');
+    expect(repairResultAffectedPathsForMutation(
+      { ...baseResult, device_category: 'phone', repair_type_slug: 'charging-port-repair' },
+      { ...baseResult, device_category: 'tablet', repair_type_slug: 'charging-port-repair' },
+    )).toContain('/repairs/charging-port-replacement');
+    for (const category of ['tablet', 'laptop', 'watch'] as const) {
+      expect(repairResultAffectedPaths({ ...baseResult, device_category: category }))
+        .not.toContain('/repairs/screen-replacement');
+    }
+    for (const unsupported of ['housing-replacement', 'back-cover-replacement', 'rear-glass']) {
+      expect(repairResultAffectedPaths({ ...baseResult, repair_type_slug: unsupported }))
+        .not.toContain('/repairs/back-glass-replacement');
+    }
+    expect(repairResultAffectedPathsForMutation(
+      { ...baseResult, repair_type_slug: 'screen-replacement' },
+      { ...baseResult, repair_type_slug: 'battery-replacement' },
+    )).toEqual(expect.arrayContaining([
+      '/repairs/screen-replacement',
+      '/repairs/battery-replacement',
+    ]));
   });
 });

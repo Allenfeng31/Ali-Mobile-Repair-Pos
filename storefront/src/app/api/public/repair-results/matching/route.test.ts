@@ -247,4 +247,23 @@ describe('public Repair Results matching route', () => {
     expect((await detailResponse.json()).data.map((item: { id: string }) => item.id)).toEqual(['detail-url-fallback']);
     expect((await hubResponse.json()).data.map((item: { id: string }) => item.id)).toEqual(['detail-url-fallback']);
   });
+
+  it('keeps generic hub aliases, source ordering, and the maximum of three through the shared selector', async () => {
+    const supabase = createSupabase([
+      result({ id: 'screen-alias', repair_type_slug: 'screen-repair', published_at: '2026-09-04T00:00:00.000Z' }),
+      result({ id: 'screen-current', published_at: '2026-09-03T00:00:00.000Z' }),
+      result({ id: 'screen-third', published_at: '2026-09-02T00:00:00.000Z' }),
+      result({ id: 'screen-fourth', published_at: '2026-09-01T00:00:00.000Z' }),
+      result({ id: 'unsupported', repair_type_slug: 'housing-replacement' }),
+    ]);
+    createPublicRepairResultsClient.mockReturnValue(supabase.client);
+
+    const response = await GET(new Request(
+      'http://localhost/api/public/repair-results/matching?context=hub&category=phone&repair_type=screen-replacement',
+    ));
+
+    expect((await response.json()).data.map((item: { id: string }) => item.id))
+      .toEqual(['screen-alias', 'screen-current', 'screen-third']);
+    expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=300, stale-while-revalidate=86400');
+  });
 });

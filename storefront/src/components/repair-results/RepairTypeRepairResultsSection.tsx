@@ -15,6 +15,7 @@ interface RepairTypeRepairResultsSectionProps {
   repairType: string;
   heading: string;
   description: string;
+  initialResults?: RepairResultMatchingItem[];
 }
 
 interface MatchingApiResponse {
@@ -37,11 +38,13 @@ export default function RepairTypeRepairResultsSection(props: RepairTypeRepairRe
   const observerTargetRef = useRef<HTMLDivElement | null>(null);
   const requestedRef = useRef(false);
   const [shouldLoad, setShouldLoad] = useState(false);
-  const [results, setResults] = useState<RepairResultMatchingItem[]>([]);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const hasInitialResults = Boolean(props.initialResults?.length);
+  const [results, setResults] = useState<RepairResultMatchingItem[]>(() => props.initialResults || []);
+  const [hasLoaded, setHasLoaded] = useState(hasInitialResults);
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
+    if (hasInitialResults) return;
     const target = observerTargetRef.current;
     if (!target || shouldLoad) return;
 
@@ -57,9 +60,10 @@ export default function RepairTypeRepairResultsSection(props: RepairTypeRepairRe
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [shouldLoad]);
+  }, [hasInitialResults, shouldLoad]);
 
   useEffect(() => {
+    if (hasInitialResults) return;
     if (!shouldLoad || requestedRef.current) return;
     requestedRef.current = true;
 
@@ -101,7 +105,7 @@ export default function RepairTypeRepairResultsSection(props: RepairTypeRepairRe
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [props, shouldLoad]);
+  }, [hasInitialResults, props, shouldLoad]);
 
   if (!hasLoaded) {
     return <div ref={observerTargetRef} className={styles.observerTarget} aria-hidden="true" />;

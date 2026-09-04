@@ -1,4 +1,5 @@
 import type { PublicRepairResult } from './repair-results';
+import { getRepairTypeHubDefinition } from './repair-type-hubs';
 
 export type RepairResultRevalidationState = Pick<
   PublicRepairResult,
@@ -29,6 +30,10 @@ export function repairResultAffectedPaths(
   if (result.featured_on_brand_hub) paths.push(brandPath);
   if (result.featured_on_repair_hub) paths.push(`/repairs/${result.device_category}`);
   if (result.featured_on_homepage) paths.push('/');
+  if (result.device_category === 'phone') {
+    const repairTypeHub = getRepairTypeHubDefinition(result.repair_type_slug);
+    if (repairTypeHub) paths.push(`/repairs/${repairTypeHub.slug}`);
+  }
 
   return paths;
 }

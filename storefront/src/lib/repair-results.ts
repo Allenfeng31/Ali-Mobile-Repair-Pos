@@ -491,6 +491,28 @@ export function toRepairResultMatchingItem(result: PublicRepairResult): RepairRe
 }
 
 /**
+ * Selects the existing generic Repair-Type Hub contract from already ordered
+ * candidate rows and projects only the visual fields used by its UI.
+ */
+export function selectRepairTypeHubRepairResultSeeds(
+  results: readonly PublicRepairResult[],
+  category: RepairResultDeviceCategory,
+  repairTypeSlug: string,
+): RepairResultMatchingItem[] {
+  const repairHub = getRepairTypeHubDefinition(repairTypeSlug);
+  if (!repairHub) return [];
+
+  return results
+    .filter((result) => (
+      result.device_category === category
+      && repairHub.aliases.includes(result.repair_type_slug)
+      && isPublicRepairResult(result)
+    ))
+    .slice(0, 3)
+    .map(toRepairResultMatchingItem);
+}
+
+/**
  * Selects the existing Hub UI's first public result per repair group from an
  * already-query-ordered, bounded candidate list.
  */

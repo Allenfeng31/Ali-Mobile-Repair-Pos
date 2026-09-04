@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  selectRepairTypeHubRepairResultSeeds,
   selectServerRepairResultProofs,
   type PublicRepairResult,
 } from './repair-results';
@@ -39,6 +40,57 @@ function result(overrides: Partial<PublicRepairResult> = {}): PublicRepairResult
 }
 
 describe('server repair result proofs', () => {
+  it('selects the existing phone repair-type hub aliases in source order as safe max-three visual seeds', () => {
+    const rows = [
+      result({ id: 'screen-alias', repair_type_slug: 'screen-repair' }),
+      result({ id: 'screen-current', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'screen-third', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'screen-fourth', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'tablet', device_category: 'tablet', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'unsupported', repair_type_slug: 'housing-replacement' }),
+    ];
+
+    const seeds = selectRepairTypeHubRepairResultSeeds(rows, 'phone', 'screen-replacement');
+
+    expect(seeds.map((seed) => seed.id)).toEqual(['screen-alias', 'screen-current', 'screen-third']);
+    expect(seeds[0]).toMatchObject({ image_pair_alt_text: 'Approved repair result' });
+    expect(seeds[0]).not.toHaveProperty('before_image_path');
+    expect(seeds[0]).not.toHaveProperty('after_image_path');
+  });
+
+  it.each([
+    ['screen-replacement', ['screen-replacement', 'screen-repair']],
+    ['battery-replacement', ['battery-replacement', 'battery-service', 'battery-repair']],
+    ['charging-port-replacement', ['charging-port-replacement', 'charging-port-repair', 'charging-port']],
+    ['back-glass-replacement', ['back-glass-replacement', 'back-housing-replacement', 'back-glass', 'back-housing']],
+  ])('selects every existing %s alias without introducing new aliases', (canonicalSlug, aliases) => {
+    const rows = aliases.map((repair_type_slug, index) => result({ id: `${canonicalSlug}-${index}`, repair_type_slug }));
+    const seeds = selectRepairTypeHubRepairResultSeeds(rows, 'phone', canonicalSlug);
+
+    expect(seeds.map((seed) => seed.repair_type_slug)).toEqual(aliases.slice(0, 3));
+    for (const alias of aliases) {
+      expect(selectRepairTypeHubRepairResultSeeds([result({ repair_type_slug: alias })], 'phone', canonicalSlug))
+        .toEqual([expect.objectContaining({ repair_type_slug: alias })]);
+    }
+    for (const unsupported of ['housing-replacement', 'back-cover-replacement', 'rear-glass']) {
+      expect(selectRepairTypeHubRepairResultSeeds([result({ repair_type_slug: unsupported })], 'phone', canonicalSlug)).toEqual([]);
+    }
+  });
+
+  it('requires public eligibility and exact category without adding diversity rules', () => {
+    const rows = [
+      result({ id: 'published-one', model_slug: 'future-phone', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'published-two', model_slug: 'future-phone', repair_type_slug: 'screen-repair' }),
+      result({ id: 'draft', status: 'draft', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'private', privacy_checked: false, repair_type_slug: 'screen-replacement' }),
+      result({ id: 'before-missing', before_image_path: '', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'after-missing', after_image_path: '', repair_type_slug: 'screen-replacement' }),
+      result({ id: 'tablet', device_category: 'tablet', repair_type_slug: 'screen-replacement' }),
+    ];
+
+    expect(selectRepairTypeHubRepairResultSeeds(rows, 'phone', 'screen-replacement').map((seed) => seed.id))
+      .toEqual(['published-one', 'published-two']);
+  });
   it('uses existing placement flags and canonical taxonomy without a current inventory allowlist', () => {
     const homepage = result({ id: 'homepage', featured_on_homepage: true });
     const repairHub = result({ id: 'repair-hub', featured_on_repair_hub: true });

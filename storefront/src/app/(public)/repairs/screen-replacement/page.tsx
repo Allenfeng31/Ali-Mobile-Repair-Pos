@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
+import { fetchRepairTypeHubRepairResultSeeds } from '@/lib/repair-results.server';
 import { buildRepairTypeHubCatalog } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
@@ -83,7 +84,10 @@ function buildHeroHighlights() {
 }
 
 export default async function ScreenReplacementPage() {
-  const catalog = await fetchRepairCatalog();
+  const [catalog, repairResultSeeds] = await Promise.all([
+    fetchRepairCatalog(),
+    fetchRepairTypeHubRepairResultSeeds({ category: 'phone', repairTypeSlug: 'screen-replacement' }),
+  ]);
   const data = buildRepairTypeHubCatalog(catalog, 'screen-replacement');
 
   if (!data || data.categories.length === 0) {
@@ -229,6 +233,7 @@ export default async function ScreenReplacementPage() {
             category="phone"
             repairType="screen-replacement"
             heading="Recent Screen Replacement Results"
+            initialResults={repairResultSeeds.length > 0 ? repairResultSeeds : undefined}
             description="Published, privacy-checked before and after photos from recent screen repair jobs completed by Ali Mobile & Repair."
           />
         }

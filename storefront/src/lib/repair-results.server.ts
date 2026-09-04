@@ -11,6 +11,7 @@ import {
   PUBLIC_REPAIR_RESULT_SELECT,
   selectHomepageRepairResultSeed,
   selectCategoryHubRepairResultSeeds,
+  selectRepairTypeHubRepairResultSeeds,
   selectModelRepairResultInitialSeeds,
   selectDetailRepairResultInitialSeeds,
   selectServerRepairResultProofs,
@@ -33,6 +34,11 @@ export interface ModelRepairResultSeedRequest {
   category: RepairResultDeviceCategory;
   brandSlug: string;
   modelSlug: string;
+}
+
+export interface RepairTypeHubRepairResultSeedRequest {
+  category: RepairResultDeviceCategory;
+  repairTypeSlug: string;
 }
 
 const MAX_MODEL_INITIAL_REPAIR_RESULT_QUERY_ROWS = 12;
@@ -78,6 +84,45 @@ export async function fetchCategoryHubRepairResultSeeds(
     );
   } catch (error) {
     console.error('[repair-results] Unexpected Category Hub initial result failure:', error);
+    return [];
+  }
+}
+
+/** Mirrors the existing generic Repair-Type Hub API contract for SSR seeds. */
+export async function fetchRepairTypeHubRepairResultSeeds(
+  request: RepairTypeHubRepairResultSeedRequest,
+): Promise<RepairResultMatchingItem[]> {
+  const repairHub = getRepairTypeHubDefinition(request.repairTypeSlug);
+  const supabase = createPublicRepairResultsClient();
+  if (!repairHub || !supabase) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('repair_results')
+      .select(PUBLIC_REPAIR_RESULT_SELECT)
+      .eq('status', 'published')
+      .eq('privacy_checked', true)
+      .eq('device_category', request.category)
+      .in('repair_type_slug', repairHub.aliases)
+      .neq('before_image_path', '')
+      .neq('after_image_path', '')
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      console.error('[repair-results] Failed to fetch Repair-Type Hub initial results:', error);
+      return [];
+    }
+
+    return selectRepairTypeHubRepairResultSeeds(
+      (data || []) as unknown as PublicRepairResult[],
+      request.category,
+      request.repairTypeSlug,
+    );
+  } catch (error) {
+    console.error('[repair-results] Unexpected Repair-Type Hub initial result failure:', error);
     return [];
   }
 }

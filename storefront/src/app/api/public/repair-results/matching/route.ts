@@ -5,6 +5,7 @@ import {
   createPublicRepairResultsClient,
   getRepairResultBrandAliases,
   isPublicRepairResult,
+  selectRepairTypeHubRepairResultSeeds,
   selectModelRepairResultInitialSeeds,
   type PublicRepairResult,
   type RepairResultDeviceCategory,
@@ -112,10 +113,15 @@ export async function GET(request: Request) {
         return emptyResponse();
       }
 
-      const publicResults = ((data || []) as unknown as PublicRepairResult[]).filter(isPublicRepairResult);
-
       return NextResponse.json(
-        { status: 'SUCCESS', data: publicResults.slice(0, limit).map(pickPublicFields) },
+        {
+          status: 'SUCCESS',
+          data: selectRepairTypeHubRepairResultSeeds(
+            (data || []) as unknown as PublicRepairResult[],
+            category,
+            repairType,
+          ).slice(0, limit),
+        },
         { headers: CACHE_HEADERS }
       );
     }
