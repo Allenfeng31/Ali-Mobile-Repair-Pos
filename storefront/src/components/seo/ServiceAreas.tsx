@@ -1,6 +1,5 @@
 "use client";
 
-import { useId, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, MapPin, Navigation, ShieldCheck } from "lucide-react";
 import { SERVICE_AREAS, type ServiceArea } from "@/data/serviceAreas";
@@ -10,8 +9,6 @@ interface ServiceAreasProps {
 }
 
 export default function ServiceAreas({ mobileVariant }: ServiceAreasProps) {
-  const [showMore, setShowMore] = useState(false);
-  const expandedSuburbsId = useId();
   const isIphone15MobilePilot = mobileVariant === 'iphone15-compact-pilot';
 
   const featuredSlugs = [
@@ -21,32 +18,14 @@ export default function ServiceAreas({ mobileVariant }: ServiceAreasProps) {
     "mitcham",
     "croydon",
     "nunawading",
-    "boxhill",
-    "glenwaverley",
-    "doncaster",
-  ];
+    "wantirna",
+    "bayswater",
+    "boronia",
+  ] as const;
 
   const featuredAreas = featuredSlugs
     .map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
     .filter((area): area is ServiceArea => Boolean(area));
-
-  const remainingAreas = SERVICE_AREAS.filter((area) => !featuredSlugs.includes(area.slug));
-  const orderedAreas = [...featuredAreas, ...remainingAreas];
-  const hasHiddenAreas = isIphone15MobilePilot
-    ? orderedAreas.length > 12
-    : remainingAreas.length > 0;
-
-  function getAreaVisibilityClass(index: number) {
-    if (showMore) return '';
-
-    if (isIphone15MobilePilot) {
-      if (index >= 12) return '!hidden';
-      if (index >= 6) return 'max-md:!hidden';
-      return '';
-    }
-
-    return index >= featuredAreas.length ? '!hidden' : '';
-  }
 
   return (
     <section
@@ -77,36 +56,20 @@ export default function ServiceAreas({ mobileVariant }: ServiceAreasProps) {
         </div>
 
         <div
-          id={expandedSuburbsId}
           className={`suburb-cloud ${isIphone15MobilePilot ? 'max-md:!grid-cols-1 max-md:!gap-2 min-[420px]:max-md:!grid-cols-2' : ''}`}
           aria-label="Service area suburb links"
         >
-          {orderedAreas.map((area, index) => (
+          {featuredAreas.map((area) => (
             <Link
               key={area.slug}
               href={`/locations/${area.slug}`}
-              className={`suburb-tag ${getAreaVisibilityClass(index)}`}
+              className="suburb-tag"
             >
               <span>{area.name}</span>
               <small>{area.driveTime}</small>
               <ArrowRight size={14} strokeWidth={2.7} aria-hidden="true" />
             </Link>
           ))}
-
-          {hasHiddenAreas && (
-            <div className="service-areas-more">
-              <button
-                type="button"
-                className="service-areas-more-toggle"
-                aria-expanded={showMore}
-                aria-controls={expandedSuburbsId}
-                onClick={() => setShowMore((current) => !current)}
-              >
-                <span>{showMore ? "Show Fewer Suburbs ↑" : "Show More Suburbs ↓"}</span>
-                <small>{isIphone15MobilePilot ? `${orderedAreas.length} total areas` : `${remainingAreas.length} more areas`}</small>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </section>
