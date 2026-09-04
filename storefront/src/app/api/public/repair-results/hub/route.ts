@@ -4,6 +4,7 @@ import {
   PUBLIC_REPAIR_RESULT_SELECT,
   MAX_HUB_REPAIR_RESULT_QUERY_ROWS,
   selectHubRepairResults,
+  toRepairResultMatchingItem,
   type PublicRepairResult,
 } from '@/lib/repair-results';
 
@@ -54,7 +55,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Database query failed.' }, { status: 500 });
     }
 
-    const finalData = selectHubRepairResults((data || []) as unknown as PublicRepairResult[]);
+    const finalData = selectHubRepairResults((data || []) as unknown as PublicRepairResult[])
+      .map(toRepairResultMatchingItem);
 
     return NextResponse.json(
       { status: 'SUCCESS', data: finalData },

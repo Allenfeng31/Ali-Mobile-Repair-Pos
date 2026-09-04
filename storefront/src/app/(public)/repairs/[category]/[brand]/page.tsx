@@ -1514,8 +1514,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     : isAppleWatchHub
     ? { category: "watch", brand: "apple" }
     : null;
-  const serverRepairResults: HubRepairResultItem[] | undefined = serverRepairResultsTarget
-    ? (await fetchHubRepairResults(serverRepairResultsTarget.category, serverRepairResultsTarget.brand)).map((result) => ({
+  const serverRepairResultRows = serverRepairResultsTarget
+    ? await fetchHubRepairResults(serverRepairResultsTarget.category, serverRepairResultsTarget.brand)
+    : [];
+  const serverRepairResults: HubRepairResultItem[] | undefined = serverRepairResultRows.length > 0
+    ? serverRepairResultRows.map((result) => ({
         id: result.id,
         device_category: result.device_category,
         brand: result.brand,

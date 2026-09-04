@@ -473,7 +473,7 @@ const HUB_REPAIR_GROUP_ORDER: readonly HubRepairGroup[] = [
   'back-glass-or-housing',
 ];
 
-function toRepairResultMatchingItem(result: PublicRepairResult): RepairResultMatchingItem {
+export function toRepairResultMatchingItem(result: PublicRepairResult): RepairResultMatchingItem {
   return {
     id: result.id,
     device_category: result.device_category,

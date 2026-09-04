@@ -5,6 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchRepairCatalog, fetchModelRepairTypes, type RepairCatalog } from "@/lib/api";
 import { getPostData, getSortedPostsData, type BlogPost } from "@/lib/blog";
 
+const fetchHubRepairResults = vi.hoisted(() => vi.fn());
+const hubRepairResultsSection = vi.hoisted(() => vi.fn((props: unknown) => {
+  void props;
+  return null;
+}));
+
 vi.mock("next/link", () => ({
   default: ({ children, href, prefetch, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode; href: string; prefetch?: boolean }) => {
     void prefetch;
@@ -24,10 +30,13 @@ vi.mock("@/lib/blog", () => ({
   getSortedPostsData: vi.fn(),
   isRemovedBlogSlug: vi.fn(() => false),
 }));
-vi.mock("@/lib/repair-results", () => ({ fetchHubRepairResults: vi.fn().mockResolvedValue([]) }));
+vi.mock("@/lib/repair-results", () => ({
+  createPublicRepairResultsClient: vi.fn(() => null),
+  fetchHubRepairResults,
+}));
 vi.mock("@/components/BlogImage", () => ({ BlogImage: () => <span data-blog-image="true" /> }));
 vi.mock("@/components/BrandModelSearch", () => ({ default: () => null }));
-vi.mock("@/components/repair-results/HubRepairResultsSection", () => ({ default: () => null }));
+vi.mock("@/components/repair-results/HubRepairResultsSection", () => ({ default: hubRepairResultsSection }));
 vi.mock("@/components/repair-results/RepairResultsMatchingSection", () => ({ default: () => null }));
 vi.mock("@/components/FloatingJumpCTA", () => ({ default: () => null }));
 vi.mock("@/components/BackButton", () => ({ default: () => null }));
@@ -80,6 +89,9 @@ const catalog: RepairCatalog = {
 const phoneModel = {
   model: "iPhone 15",
   brand: "iPhone",
+  source: "fallback" as const,
+  catalogueSource: "development-fallback" as const,
+  brandModels: [],
   repairTypes: [
     { slug: "screen-replacement", name: "Screen Replacement", price: 150 },
     { slug: "battery-replacement", name: "Battery Replacement", price: 100 },
@@ -89,6 +101,9 @@ const phoneModel = {
 const macBookModel = {
   model: "MacBook Air M2",
   brand: "MacBook",
+  source: "fallback" as const,
+  catalogueSource: "development-fallback" as const,
+  brandModels: [],
   repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 400 }],
 };
 
@@ -107,6 +122,9 @@ function expectNoLegacyWarranty(html: string) {
 }
 
 beforeEach(() => {
+  fetchHubRepairResults.mockReset();
+  fetchHubRepairResults.mockResolvedValue([]);
+  hubRepairResultsSection.mockClear();
   vi.mocked(fetchRepairCatalog).mockResolvedValue(catalog);
   vi.mocked(fetchModelRepairTypes).mockImplementation(async (category, brand) => (
     category === "laptop" && brand === "macbook" ? macBookModel : phoneModel
@@ -116,6 +134,41 @@ beforeEach(() => {
 });
 
 describe("public warranty template regressions", () => {
+  it("keeps an empty Brand Hub SSR result eligible for the existing client fallback", async () => {
+    renderToStaticMarkup(await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: "iphone" }) }));
+
+    const brandHubProps = hubRepairResultsSection.mock.calls
+      .map(([props]) => props as { scope?: string; initialResults?: unknown })
+      .find((props) => props.scope === "brand-hub");
+
+    expect(brandHubProps).toBeDefined();
+    expect(brandHubProps?.initialResults).toBeUndefined();
+  });
+
+  it("keeps a non-empty Brand Hub SSR result as the existing initial seed", async () => {
+    fetchHubRepairResults.mockResolvedValueOnce([{
+      id: "brand-seed",
+      device_category: "phone",
+      brand: "iPhone",
+      model: "iPhone 15",
+      repair_type: "Screen Replacement",
+      repair_type_slug: "screen-replacement",
+      image_pair_alt_text: null,
+      title: "iPhone screen result",
+      short_description: null,
+      related_repair_url: "/repairs/phone/iphone/iphone-15/screen-replacement",
+    }]);
+
+    renderToStaticMarkup(await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: "iphone" }) }));
+
+    const brandHubProps = hubRepairResultsSection.mock.calls
+      .map(([props]) => props as { scope?: string; initialResults?: Array<{ id: string }> })
+      .find((props) => props.scope === "brand-hub");
+
+    expect(brandHubProps).toBeDefined();
+    expect(brandHubProps?.initialResults).toEqual([expect.objectContaining({ id: "brand-seed" })]);
+  });
+
   it.each(["iphone", "samsung"])("keeps the %s Brand Hub conditional and free of legacy warranty copy", async (brand) => {
     const html = renderToStaticMarkup(await BrandHubPage({ params: Promise.resolve({ category: "phone", brand }) }));
 
