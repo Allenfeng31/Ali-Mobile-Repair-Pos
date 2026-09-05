@@ -66,15 +66,6 @@ const FEATURED_BRAND_HUB_ORDER = [
   "laptop:macbook",
 ];
 
-const popularModelLinks = [
-  { name: "iPhone 15 Pro Max", href: "/repairs/phone/iphone/iphone-15-pro-max", detail: "Screen, battery, camera, back glass" },
-  { name: "iPhone 13", href: "/repairs/phone/iphone/iphone-13", detail: "Screen, battery, charging, housing" },
-  { name: "Galaxy S24 Ultra", href: "/repairs/phone/samsung/galaxy-s24-ultra", detail: "AMOLED, battery, USB-C, camera" },
-  { name: "Galaxy S23 Ultra", href: "/repairs/phone/samsung/galaxy-s23-ultra", detail: "Screen, back housing, charging" },
-  { name: "iPad 9th Generation", href: "/repairs/tablet/ipad/ipad-9th-generation", detail: "Glass, display, charging port" },
-  { name: "MacBook Pro 13 M1 2020", href: "/repairs/laptop/macbook/macbook-pro-13-m1-2020", detail: "Screen, battery, keyboard checks" },
-];
-
 function getNearbyServiceAreas(currentSlug: string) {
   const currentIndex = SERVICE_AREAS.findIndex((area) => area.slug === currentSlug);
   if (currentIndex < 0) return SERVICE_AREAS.filter((area) => area.slug !== currentSlug).slice(0, 6);
@@ -667,25 +658,6 @@ export default async function LocationPage({ params }: LocationPageProps) {
             </p>
           </div>
           <LocationBrandRepairLinks cards={brandRepairCards} />
-        </section>
-
-        <section className="location-model-section" aria-labelledby="location-models-heading">
-          <div className="location-section-heading">
-            <span className="location-kicker location-kicker-muted">Model shortcuts</span>
-            <h2 id="location-models-heading">Popular device models we repair for {area.name} customers</h2>
-            <p>
-              Start with a model page if you want the most relevant repair types, pricing context,
-              and booking options before travelling to Ringwood Square.
-            </p>
-          </div>
-          <div className="location-model-grid">
-            {popularModelLinks.map((model) => (
-              <Link key={model.href} href={model.href} className="location-model-card">
-                <strong>{model.name}</strong>
-                <span>{model.detail}</span>
-              </Link>
-            ))}
-          </div>
         </section>
 
         <section className="location-content-grid" aria-label={`Common repair pages for ${area.name} customers`}>
