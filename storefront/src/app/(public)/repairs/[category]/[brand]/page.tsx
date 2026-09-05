@@ -732,10 +732,14 @@ const MACBOOK_NEARBY_SERVICE_AREA_SLUGS = [
 ];
 const APPLE_WATCH_NEARBY_SERVICE_AREA_SLUGS = ["croydon"];
 
+function buildCoreBrandHubServiceAreaSource() {
+  return PHONE_FEATURED_SERVICE_AREA_SLUGS.map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
+    .filter((area): area is (typeof SERVICE_AREAS)[number] => Boolean(area));
+}
+
 function buildFeaturedServiceAreaSource() {
   return [
-    ...PHONE_FEATURED_SERVICE_AREA_SLUGS.map((slug) => SERVICE_AREAS.find((area) => area.slug === slug))
-      .filter((area): area is (typeof SERVICE_AREAS)[number] => Boolean(area)),
+    ...buildCoreBrandHubServiceAreaSource(),
     ...SERVICE_AREAS.filter(
       (area) =>
         area.slug !== "ringwood" &&
@@ -1420,23 +1424,23 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : flatModelGroup;
   const brandHubSeriesGroups = usesBrandHubDesign ? buildBrandHubSeriesGroups(categorySlug, brandSlug, models) : [];
-  const phoneServiceAreaSource = isEnhancedPhoneHub ? buildFeaturedServiceAreaSource() : [];
+  const phoneServiceAreaSource = isEnhancedPhoneHub ? buildCoreBrandHubServiceAreaSource() : [];
   const ipadServiceAreas: IPhoneServiceAreaLinkCard[] = isIPadHub
-    ? buildFeaturedServiceAreaSource().map((area, index) => ({
+    ? buildCoreBrandHubServiceAreaSource().map((area, index) => ({
         href: `/locations/${area.slug}`,
         name: area.name,
         description: getIPadServiceAreaDescription(area.name, index),
       }))
     : [];
   const samsungTabletServiceAreas: IPhoneServiceAreaLinkCard[] = isSamsungTabletHub
-    ? buildFeaturedServiceAreaSource().map((area, index) => ({
+    ? buildCoreBrandHubServiceAreaSource().map((area, index) => ({
         href: `/locations/${area.slug}`,
         name: area.name,
         description: getSamsungTabletServiceAreaDescription(area.name, index),
       }))
     : [];
   const lenovoTabletServiceAreas: IPhoneServiceAreaLinkCard[] = isLenovoTabletHub
-    ? buildFeaturedServiceAreaSource().map((area, index) => ({
+    ? buildCoreBrandHubServiceAreaSource().map((area, index) => ({
         href: `/locations/${area.slug}`,
         name: area.name,
         description: getLenovoTabletServiceAreaDescription(area.name, index),
