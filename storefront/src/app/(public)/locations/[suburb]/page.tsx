@@ -171,7 +171,6 @@ function buildLocationBrandRepairCards(brands: BrandEntry[], suburbName: string)
     ...FEATURED_BRAND_HUB_ORDER
       .map((key) => validBrandHubs.find((brand) => getBrandHubSortKey(brand) === key))
       .filter((brand): brand is BrandEntry => Boolean(brand)),
-    ...validBrandHubs.filter((brand) => !FEATURED_BRAND_HUB_ORDER.includes(getBrandHubSortKey(brand))),
   ];
 
   return orderedBrands
