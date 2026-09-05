@@ -294,56 +294,58 @@ export const SERVICE_AREAS: ServiceArea[] = [
     metaTitle: "Phone, Apple & MacBook Repair Near Heathmont | Ali Mobile Ringwood",
     metaDescription: "Need phone, iPhone, Apple, MacBook or screen repair near Heathmont? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
     customH1: "Phone, Apple & MacBook Repair Near Heathmont",
-    customIntro: "Heathmont customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, iPad and MacBook repair support. We can help with Apple repairs near Heathmont, screen and glass replacement assessment, battery, charging and MacBook assessment pathways before confirming a quote.",
+    customIntro: "Heathmont customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, supported Google Pixel, iPad and MacBook hardware assessment and repair support. We confirm the exact model and fault, then provide a quote before supported work begins.",
     customLocalSection: {
-      title: "Travelling for Phone and MacBook Repair from Heathmont",
+      title: "Travelling for Repair Support from Heathmont",
       paragraphs: [
-        "Travel from Heathmont is very convenient. Driving north via Canterbury Road and Great Ryrie Street typically takes about 5 minutes depending on traffic. Free underground and outdoor parking is available at Ringwood Square.",
-        "If travelling by train, take the Belgrave line from Heathmont Station to Ringwood Station (typically around a 4-minute trip), then walk into Ringwood Square Shopping Centre and look for Kiosk C1 opposite Bunnings Warehouse Ringwood."
+        "Customers travelling from Heathmont can visit our only repair counter at Ringwood Square Shopping Centre. Free underground and outdoor parking is available at Ringwood Square. Providing the exact device model and fault details before travelling helps us explain the likely assessment path, while parts availability and timing are confirmed separately.",
+        "Customers using public transport can travel toward Ringwood Station and continue to Ringwood Square Shopping Centre. Ali Mobile & Repair does not operate a branch, shop, counter or collection point in Heathmont."
       ]
     },
     customScenarioSection: {
-      title: "Apple, MacBook and Phone Repairs near Heathmont",
+      title: "Phone, Apple and MacBook Repair Support near Heathmont",
       paragraphs: [
-        "Many Heathmont customers bring in phones, iPhones and Samsung models for screen replacement, glass replacement near Heathmont, battery or charging checks. Rather than automatically quoting a port replacement, we inspect the port under magnification and explain the practical repair path first.",
-        "For MacBook repair near Heathmont, Apple repairs near Heathmont and computer repair assessment near Heathmont, we confirm the exact model, check the likely fault, and explain whether the next step is assessment, parts ordering or a quote-first repair."
+        "For phone repair near Heathmont, we assess supported iPhone, Samsung and Google Pixel models for cracked screens or glass, battery symptoms, charging faults and camera issues. We inspect the device and confirm the supported repair path and quote before work begins.",
+        "For Apple repair and MacBook repair near Heathmont, we assess supported MacBook Air and MacBook Pro hardware issues such as display damage, battery symptoms, charging faults and no-power conditions. We confirm the exact model and hardware fault first; this service does not include general computer repair, managed IT, networking, software administration, remote support or on-site IT service."
       ]
     },
     customFaqs: [
       {
-        question: "Do you have a phone repair kiosk in Heathmont?",
-        answer: "No. Our physical shop is located at Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood. Heathmont is just a short 5-minute drive north or a 4-minute train ride away."
+        question: "Do you have a repair shop in Heathmont?",
+        answer: "No. Ali Mobile & Repair has one physical repair counter at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. We do not operate a branch, shop, counter or collection point in Heathmont."
       },
       {
-        question: "How do you check if my phone just needs a charging port clean?",
-        answer: "We inspect the port for debris under magnification at our bench. If we find compressed lint, we clean it out; if that restores power, you pay a cleaning fee instead of a port replacement."
+        question: "Which phones can you assess for Heathmont customers?",
+        answer: "We assess supported iPhone, Samsung and Google Pixel models for issues such as screen damage, battery symptoms, charging faults and camera problems. Model and repair support are confirmed before work begins."
       },
       {
-        question: "How long does a battery replacement take for Heathmont locals?",
-        answer: "Need your device back quickly? Many common screen and battery repairs can often be completed in around 15–45 minutes once work begins. We’ll confirm the expected turnaround after a quick inspection, as timing depends on the model, fault, parts availability and required testing."
+        question: "Can you assess a cracked screen or glass before repair?",
+        answer: "Yes. We inspect the display, touch response, frame and surrounding components before confirming whether a supported screen or glass repair is appropriate."
       },
       {
-        question: "Can you run battery health checks for my device?",
-        answer: "Yes. We test your battery capacity and check for cycle wear or voltage drops to recommend the best battery replacement option."
+        question: "What happens if my device is not charging?",
+        answer: "We first assess the charging port, cable response, battery symptoms and visible debris. Cleaning, battery service or port repair is recommended only after the likely fault has been identified."
       },
       {
-        question: "Do you perform iPad touch and screen assessments?",
-        answer: "Yes. We inspect iPads for screen cracks, touch responsiveness faults, and frame alignment at our Ringwood Square counter."
+        question: "Do you assess MacBook Air and MacBook Pro hardware faults?",
+        answer: "Yes. We assess supported MacBook Air and MacBook Pro models for hardware issues including display damage, battery symptoms, charging faults and no-power conditions. We do not provide managed IT, networking, software administration, remote support or on-site computer service."
       },
       {
-        question: "What is your No Fix No Charge policy for Heathmont visitors?",
-        answer: "On eligible repairs, if we open and diagnose your device and determine it cannot be repaired due to major board issues, you won't be charged the repair fee."
+        question: "Can you confirm parts and timing before I travel from Heathmont?",
+        answer: "Contact us with the exact model and fault details before travelling. We can explain the likely assessment path, but parts availability and turnaround are confirmed separately after the device and required repair have been checked."
       },
       {
-        question: "Do I need to book a spot before driving from Heathmont?",
-        answer: "You are welcome to walk in. However, booking online helps us ensure we have the replacement screen or battery in stock for your visit."
+        question: "Is parking available at Ringwood Square?",
+        answer: "Yes. Free underground and outdoor parking is available at Ringwood Square."
       }
     ],
     customLinks: [
-      { href: "/repairs/battery-replacement", label: "Heathmont battery replacement options" },
-      { href: "/repairs/charging-port-replacement", label: "Charging diagnostics and clean services near Heathmont" },
-      { href: "/repairs/tablet/ipad", label: "iPad display and touch assessments for Heathmont" }
-    ]
+      { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
+      { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware assessment options" },
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+    ],
+    showChineseServiceCta: true
   },
   {
     name: "Croydon",
