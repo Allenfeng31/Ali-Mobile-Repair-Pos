@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
-import { IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
+import { IPHONE_SCREEN_REPAIR_COST_SLUG, IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA } from "@/data/iphoneScreenRepairCost";
 import { getPostData, isRemovedBlogSlug } from "@/lib/blog";
 
 import styles from "./BlogPost.module.css";
@@ -59,8 +59,15 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     notFound();
   }
 
-  const formattedDate = postData.date
-    ? new Date(postData.date).toLocaleDateString("en-AU", {
+  const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
+  const datePublished = isIphoneScreenCostArticle
+    ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.datePublished
+    : postData.date;
+  const dateModified = isIphoneScreenCostArticle
+    ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.dateModified
+    : postData.updated_at || postData.date;
+  const formattedDate = datePublished
+    ? new Date(datePublished).toLocaleDateString("en-AU", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -68,7 +75,6 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     : "";
 
   const authorName = postData.author_name || "Ali Mobile & Repair";
-  const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
   const authorType = authorName === "Ali Mobile & Repair" ? "Organization" : "Person";
 
   const jsonLd: Record<string, unknown> = {
@@ -84,8 +90,8 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
       "@type": "Organization",
       name: "Ali Mobile & Repair",
     },
-    datePublished: postData.date,
-    dateModified: postData.updated_at || postData.date,
+    datePublished,
+    dateModified,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://www.alimobile.com.au/blog/${slug}`,

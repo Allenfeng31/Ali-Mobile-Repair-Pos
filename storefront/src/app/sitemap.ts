@@ -5,6 +5,7 @@ import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/con
 import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { isConfiguredAppleWatchModel } from '@/lib/seo/content/apple-watch';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
+import { IPHONE_SCREEN_REPAIR_COST_SLUG, IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA } from '@/data/iphoneScreenRepairCost';
 import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getWaterDamageSitemapPaths, isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
@@ -21,7 +22,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   const blogPosts = await getSortedPostsData();
   const blogUrls: MetadataRoute.Sitemap = blogPosts.map((post) => {
-    const lastModified = getReliableBlogLastModified(post.updated_at);
+    const lastModified = getReliableBlogLastModified(
+      post.slug === IPHONE_SCREEN_REPAIR_COST_SLUG
+        ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.dateModified
+        : post.updated_at,
+    );
 
     return {
       url: `${baseUrl}/blog/${post.slug}`,

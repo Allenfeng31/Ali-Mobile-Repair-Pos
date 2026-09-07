@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { fetchRepairCatalog, fetchModelRepairTypes, type RepairCatalog } from "@/lib/api";
 import { getPostData, getSortedPostsData, type BlogPost } from "@/lib/blog";
+import { IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
 
 const fetchHubRepairResults = vi.hoisted(() => vi.fn());
 const hubRepairResultsSection = vi.hoisted(() => vi.fn((props: unknown) => {
@@ -201,5 +202,21 @@ describe("public warranty template regressions", () => {
 
     expectNoLegacyWarranty(indexHtml);
     expectNoLegacyWarranty(articleHtml);
+  });
+
+  it("keeps the static iPhone screen cost article's publication and modification dates authoritative", async () => {
+    vi.mocked(getPostData).mockResolvedValue({
+      ...blogPost,
+      slug: IPHONE_SCREEN_REPAIR_COST_SLUG,
+      date: "2020-01-01",
+      updated_at: "2020-01-02",
+    });
+
+    const html = renderToStaticMarkup(await BlogArticlePage({
+      params: Promise.resolve({ slug: IPHONE_SCREEN_REPAIR_COST_SLUG }),
+    }));
+
+    expect(html).toContain('\"datePublished\":\"2026-07-29\"');
+    expect(html).toContain('\"dateModified\":\"2026-09-07\"');
   });
 });

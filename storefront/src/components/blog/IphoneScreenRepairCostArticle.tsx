@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   CURRENT_IPHONE_SCREEN_REPAIR_PRICES,
   OLDER_IPHONE_SCREEN_REPAIR_PRICES,
+  IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA,
   IPHONE_SCREEN_PHOTOS,
   SCREEN_OPTION_SAMPLE,
   SCREEN_OPTION_SAMPLE_TOTAL,
@@ -91,12 +92,14 @@ function PriceTable({ rows, caption }: { rows: IPhoneScreenRepairPrice[]; captio
 }
 
 export function IphoneScreenRepairCostArticle() {
+  const [softOledSample, lcdInCellSample, originalScreenSample] = SCREEN_OPTION_SAMPLE;
+
   return (
     <div className={styles.article}>
       <section aria-labelledby="price-table-heading">
         <h2 id="price-table-heading">Current iPhone screen replacement prices</h2>
         <p className={styles.intro}>
-          Prices checked against Ali Mobile&apos;s current public Storefront on 29 July 2026. Prices can change with parts supply, the exact model and the device&apos;s condition.
+          Prices checked against Ali Mobile&apos;s current public Storefront on {IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.displayDateModified}. Prices can change with parts supply, the exact model and the device&apos;s condition.
         </p>
         <PriceTable rows={CURRENT_IPHONE_SCREEN_REPAIR_PRICES} caption="Current Ali Mobile iPhone screen replacement prices by model and screen option" />
         <details className={styles.olderModels}>
@@ -149,11 +152,11 @@ export function IphoneScreenRepairCostArticle() {
       <section className={styles.sampleSection} aria-labelledby="selection-sample-heading">
         <div className={styles.sampleHeading}>
           <h2 id="selection-sample-heading">What 100 iPhone screen repair customers chose</h2>
-          <p>Soft OLED was selected in 72 of the 100 repairs, making it the most frequently chosen option in this Ali Mobile sample.</p>
+          <p>Soft OLED was selected in {softOledSample.customers} of the {SCREEN_OPTION_SAMPLE_TOTAL} repairs, making it the most frequently chosen option in this Ali Mobile sample.</p>
         </div>
         <div className={styles.sampleContent}>
           <div className={styles.sampleVisual}>
-            <div className={styles.donut} role="img" aria-label="Out of 100 repairs, 72 customers chose Soft OLED, 21 chose LCD or In-cell, and 7 chose Original Screen.">
+            <div className={styles.donut} role="img" aria-label={`Out of ${SCREEN_OPTION_SAMPLE_TOTAL} repairs, ${softOledSample.customers} customers chose Soft OLED, ${lcdInCellSample.customers} chose LCD or In-cell, and ${originalScreenSample.customers} chose Original Screen.`}>
               <svg viewBox="0 0 120 120" aria-hidden="true">
                 <circle className={styles.donutTrack} cx="60" cy="60" r="42" pathLength="100" />
                 <circle className={styles.donutSoftOled} cx="60" cy="60" r="42" pathLength="100" />
@@ -215,7 +218,7 @@ export function IphoneScreenRepairCostArticle() {
         <h2 id="contact-heading">Confirm the right option before repair</h2>
         <p>Ali Mobile &amp; Repair<br />Kiosk C1, Ringwood Square Shopping Centre<br />Seymour Street, Ringwood VIC 3134<br /><a href="tel:0481058514">0481 058 514</a></p>
         <Link href="/book-repair" className={styles.bookLink}>Book a repair assessment</Link>
-        <p className={styles.sourceNote}>Price source: Ali Mobile&apos;s current public Storefront. Customer-choice source: an Ali Mobile sample of 100 screen repairs. Updated 29 July 2026.</p>
+        <p className={styles.sourceNote}>Price source: Ali Mobile&apos;s current public Storefront. Customer-choice source: an Ali Mobile sample of 100 screen repairs. Updated {IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.displayDateModified}.</p>
       </section>
     </div>
   );

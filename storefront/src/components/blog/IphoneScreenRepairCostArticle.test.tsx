@@ -25,10 +25,10 @@ describe("IphoneScreenRepairCostArticle", () => {
     expect(html).toContain("Soft OLED replacement screen fitted to an iPhone");
     expect(html).toContain("Original iPhone screen used for display comparison");
     expect(html).toContain("What 100 iPhone screen repair customers chose");
-    expect(html).toContain("72 customers");
-    expect(html).toContain("72% of the sample");
-    expect(html).toContain("21 customers");
-    expect(html).toContain("21% of the sample");
+    expect(html).toContain("74 customers");
+    expect(html).toContain("74% of the sample");
+    expect(html).toContain("19 customers");
+    expect(html).toContain("19% of the sample");
     expect(html).toContain("7 customers");
     expect(html).toContain("7% of the sample");
     expect(html).toContain("not an Australia-wide market survey");
@@ -39,6 +39,8 @@ describe("IphoneScreenRepairCostArticle", () => {
     expect(html).not.toContain("Apple Official Cert");
     expect(html).not.toContain("Apple Certified");
     expect(html).not.toContain("Apple-authorised");
+    expect(html).toContain("7 September 2026");
+    expect(html).not.toContain("29 July 2026");
   });
 
   it("uses the single price data source in one responsive table rendering", () => {

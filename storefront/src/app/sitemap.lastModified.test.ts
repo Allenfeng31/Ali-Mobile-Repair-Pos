@@ -30,6 +30,7 @@ describe('sitemap lastModified policy', () => {
     fetchRepairCatalogMock.mockResolvedValue(catalogue);
     getSortedPostsDataMock.mockResolvedValue([
       { slug: 'edited-post', date: '2026-01-01T00:00:00.000Z', updated_at: '2026-02-03T04:05:06.000Z' },
+      { slug: 'how-much-does-iphone-screen-repair-cost-australia', date: '2026-07-29', updated_at: '2000-01-01T00:00:00.000Z' },
       { slug: 'published-only-post', date: '2026-01-02T00:00:00.000Z' },
       { slug: 'missing-date-post', date: '' },
     ]);
@@ -73,6 +74,9 @@ describe('sitemap lastModified policy', () => {
 
     expect(urls.find((entry) => pathname(entry) === '/blog/edited-post')).toMatchObject({
       lastModified: new Date('2026-02-03T04:05:06.000Z'),
+    });
+    expect(urls.find((entry) => pathname(entry) === '/blog/how-much-does-iphone-screen-repair-cost-australia')).toMatchObject({
+      lastModified: new Date('2026-09-07T00:00:00.000Z'),
     });
     expect(urls.find((entry) => pathname(entry) === '/blog/published-only-post')).not.toHaveProperty('lastModified');
     expect(urls.find((entry) => pathname(entry) === '/blog/missing-date-post')).not.toHaveProperty('lastModified');
