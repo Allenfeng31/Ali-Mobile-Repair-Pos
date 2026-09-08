@@ -1,0 +1,97 @@
+.article {
+  color: var(--foreground);
+}
+
+.article section + section {
+  margin-top: 2.5rem;
+}
+
+.article h2 {
+  margin: 0 0 1rem;
+}
+
+.article h3 {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.article p,
+.article li {
+  color: var(--foreground);
+  line-height: 1.7;
+}
+
+.article ul {
+  padding-left: 1.25rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+}
+
+.priceTable {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+
+.priceTable caption {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+}
+
+.priceTable th,
+.priceTable td {
+  padding: 0.875rem 1rem;
+  border-top: 1px solid var(--layer-border);
+  text-align: left;
+}
+
+.priceTable thead th {
+  background: var(--secondary);
+}
+
+.optionNote {
+  margin-top: 0.75rem;
+}
+
+.callout {
+  padding: 1rem 1.125rem;
+  border-left: 4px solid var(--primary);
+  background: var(--secondary);
+  border-radius: 0.25rem;
+}
+
+.faqList {
+  display: grid;
+  gap: 1rem;
+}
+
+.faqList details {
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.faqList summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.faqList p {
+  margin: 0.75rem 0 0;
+}
+
+@media (max-width: 640px) {
+  .priceTable {
+    min-width: 610px;
+  }
+
+  .priceTable th,
+  .priceTable td {
+    padding: 0.75rem;
+  }
+}

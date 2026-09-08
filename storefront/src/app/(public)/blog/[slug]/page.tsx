@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
+import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
 import { IPHONE_SCREEN_REPAIR_COST_SLUG, IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA } from "@/data/iphoneScreenRepairCost";
-import { getPostData, isRemovedBlogSlug } from "@/lib/blog";
+import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
+import { getPostData, isRemovedBlogSlug, type BlogPost } from "@/lib/blog";
 
 import styles from "./BlogPost.module.css";
 
@@ -13,6 +15,27 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+
+  if (slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG) {
+    return {
+      title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
+      description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
+      alternates: { canonical: `/blog/${slug}` },
+      openGraph: {
+        title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
+        description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
+        url: `/blog/${slug}`,
+        type: "article",
+        locale: "en_AU",
+        siteName: "Ali Mobile & Repair",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
+        description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
+      },
+    };
+  }
 
   try {
     const postData = await getPostData(slug);
@@ -52,18 +75,40 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     notFound();
   }
 
-  let postData;
-  try {
-    postData = await getPostData(slug);
-  } catch {
-    notFound();
+  const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
+  const isSamsungGalaxySScreenCostArticle = slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG;
+  let postData: BlogPost;
+  if (isSamsungGalaxySScreenCostArticle) {
+    postData = {
+        slug,
+        title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.title,
+        date: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.datePublished,
+        description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
+        contentHtml: "",
+        image: undefined,
+        source: "markdown" as const,
+        seo_title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
+        cover_image_alt: null,
+        author_name: "Ali Mobile & Repair",
+        hero_intro: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.heroIntro,
+        updated_at: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified,
+    };
+  } else {
+    try {
+      postData = await getPostData(slug);
+    } catch {
+      notFound();
+    }
   }
 
-  const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
-  const datePublished = isIphoneScreenCostArticle
+  const datePublished = isSamsungGalaxySScreenCostArticle
+    ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.datePublished
+    : isIphoneScreenCostArticle
     ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.datePublished
     : postData.date;
-  const dateModified = isIphoneScreenCostArticle
+  const dateModified = isSamsungGalaxySScreenCostArticle
+    ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified
+    : isIphoneScreenCostArticle
     ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.dateModified
     : postData.updated_at || postData.date;
   const formattedDate = datePublished
@@ -138,7 +183,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         </section>
 
         <article className={styles.articleCard}>
-          {isIphoneScreenCostArticle ? (
+          {isSamsungGalaxySScreenCostArticle ? (
+            <SamsungGalaxySScreenRepairCostArticle />
+          ) : isIphoneScreenCostArticle ? (
             <IphoneScreenRepairCostArticle />
           ) : (
             <div

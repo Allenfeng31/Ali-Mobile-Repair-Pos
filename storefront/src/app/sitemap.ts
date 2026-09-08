@@ -6,6 +6,7 @@ import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { isConfiguredAppleWatchModel } from '@/lib/seo/content/apple-watch';
 import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { IPHONE_SCREEN_REPAIR_COST_SLUG, IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA } from '@/data/iphoneScreenRepairCost';
+import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA } from '@/data/samsungGalaxySScreenRepairCost';
 import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getWaterDamageSitemapPaths, isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
@@ -25,7 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const lastModified = getReliableBlogLastModified(
       post.slug === IPHONE_SCREEN_REPAIR_COST_SLUG
         ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.dateModified
-        : post.updated_at,
+        : post.slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG
+          ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified
+          : post.updated_at,
     );
 
     return {
