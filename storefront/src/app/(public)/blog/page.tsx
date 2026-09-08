@@ -30,6 +30,8 @@ interface BlogPostSummary {
   date: string;
   description: string;
   image?: string;
+  updated_at?: string;
+  cover_image_alt?: string | null;
 }
 
 const deviceGuideLinks = [
@@ -70,6 +72,14 @@ function formatPostDate(date: string) {
     month: "short",
     day: "numeric",
   });
+}
+
+function formatPostFreshness(post: BlogPostSummary) {
+  const published = `Published ${formatPostDate(post.date)}`;
+
+  return post.updated_at && post.updated_at.slice(0, 10) !== post.date.slice(0, 10)
+    ? `${published} · Updated ${formatPostDate(post.updated_at)}`
+    : published;
 }
 
 export default async function BlogPage() {
@@ -115,13 +125,13 @@ export default async function BlogPage() {
             <div className={styles.featuredImage}>
               <BlogImage
                 src={featuredPost.image}
-                alt={featuredPost.title}
+                alt={featuredPost.cover_image_alt || featuredPost.title}
                 className={styles.image}
                 priority
               />
             </div>
             <div className={styles.featuredText}>
-              <span className={styles.meta}>{formatPostDate(featuredPost.date)}</span>
+              <span className={styles.meta}>{formatPostFreshness(featuredPost)}</span>
               <h2>{featuredPost.title}</h2>
               <p>{featuredPost.description}</p>
               <span className={styles.readLink}>Read Guide</span>
@@ -158,8 +168,8 @@ export default async function BlogPage() {
             {remainingPosts.map((post, index) => (
               <Link href={`/blog/${post.slug}`} key={post.slug} className={styles.blogCard}>
                 <div className={styles.cardImage}>
-                  <BlogImage src={post.image} alt={post.title} className={styles.image} />
-                  <span className={styles.dateBadge}>{formatPostDate(post.date)}</span>
+                  <BlogImage src={post.image} alt={post.cover_image_alt || post.title} className={styles.image} />
+                  <span className={styles.dateBadge}>{formatPostFreshness(post)}</span>
                 </div>
                 <div className={styles.cardBody}>
                   <span className={styles.index}>{String(index + 1).padStart(2, "0")}</span>

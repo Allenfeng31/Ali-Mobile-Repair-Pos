@@ -51,6 +51,7 @@ function PriceTable() {
 const repairExamples = [
   {
     model: "Galaxy S22 Ultra",
+    href: "/repairs/phone/samsung/galaxy-s22-ultra/screen-replacement",
     before: {
       src: "/images/blog/samsung-galaxy-s22-ultra-screen-replacement-before.webp",
       width: 3024,
@@ -68,6 +69,7 @@ const repairExamples = [
   },
   {
     model: "Galaxy S24",
+    href: "/repairs/phone/samsung/galaxy-s24/screen-replacement",
     before: {
       src: "/images/blog/samsung-galaxy-s24-screen-replacement-before.webp",
       width: 4284,
@@ -85,6 +87,7 @@ const repairExamples = [
   },
   {
     model: "Galaxy S24 Ultra",
+    href: "/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement",
     before: {
       src: "/images/blog/samsung-galaxy-s24-ultra-screen-replacement-before.webp",
       width: 4284,
@@ -148,23 +151,34 @@ const faqs = [
 export function SamsungGalaxySScreenRepairCostArticle() {
   return (
     <div className={styles.article}>
-      <section aria-labelledby="samsung-price-table-heading">
+      <section className={styles.guideNav} aria-labelledby="samsung-guide-heading">
+        <h2 id="samsung-guide-heading">In this guide</h2>
+        <nav aria-label="Samsung Galaxy S screen repair guide">
+          <a href="#samsung-price-table-heading">Prices</a>
+          <a href="#comparison-heading">Service Pack vs aftermarket</a>
+          <a href="#frame-heading">Why the frame matters</a>
+          <a href="#real-repair-examples-heading">Real repair examples</a>
+          <a href="#samsung-screen-faq-heading">FAQs</a>
+        </nav>
+      </section>
+
+      <section className={styles.wideSection} aria-labelledby="samsung-price-table-heading">
         <h2 id="samsung-price-table-heading">Samsung Galaxy S screen replacement prices</h2>
         <p>
-          Ali Mobile generally recommends a Samsung Service Pack assembly for customers who want the display experience to stay as close as practical to the original phone. This is a static Ali Mobile price guide checked on {SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.displayDateModified}; confirm the current option for your exact model before repair.
+          Ali Mobile generally recommends a Samsung Service Pack assembly for customers who want the display experience to stay as close as practical to the original phone. Browse supported <Link href="/repairs/phone/samsung">Samsung repair options</Link> before confirming the current option for your exact model. This is a static Ali Mobile price guide checked on {SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.displayDateModified}.
         </p>
         <PriceTable />
         <p className={styles.optionNote}><strong>—</strong> means Ali Mobile does not currently list an aftermarket display + frame option for that exact model.</p>
       </section>
 
-      <section aria-labelledby="service-pack-heading">
+      <section className={styles.readingSection} aria-labelledby="service-pack-heading">
         <h2 id="service-pack-heading">What is a Samsung Service Pack screen?</h2>
         <p>
-          At Ali Mobile, Samsung Service Pack refers to the genuine Samsung display assembly supplied through Samsung service channels. For these repairs, Ali Mobile uses the complete display + frame assembly. This describes the part option we fit; it does not mean Ali Mobile is Samsung or an authorised Samsung Service Centre.
+          At Ali Mobile, Samsung Service Pack refers to the genuine Samsung display assembly supplied through Samsung service channels. For these repairs, Ali Mobile uses the complete display + frame assembly. This describes the part option we fit; it does not mean Ali Mobile is Samsung or an authorised Samsung Service Centre. See our <Link href="/repairs/screen-replacement">screen replacement service</Link> for the broader repair path.
         </p>
       </section>
 
-      <section aria-labelledby="comparison-heading">
+      <section className={styles.readingSection} aria-labelledby="comparison-heading">
         <h2 id="comparison-heading">Samsung Service Pack vs aftermarket screen</h2>
         <h3>Display quality and brightness</h3>
         <p>Aftermarket OLED quality varies. In our repair experience, some panels can have a slightly smaller active display area, a more noticeable lower black border, lower brightness or subtly different colour. That does not mean every aftermarket screen is poor.</p>
@@ -176,7 +190,14 @@ export function SamsungGalaxySScreenRepairCostArticle() {
         <p>For customers who use S Pen frequently, Ali Mobile generally recommends Service Pack. In one Galaxy S25 Ultra case we encountered, S Pen state detection behaved incorrectly after a refurbished display and aftermarket frame had been fitted. That does not mean every aftermarket assembly will cause the same issue, but it is one reason we test relevant S Pen functions carefully.</p>
       </section>
 
-      <section aria-labelledby="frame-heading">
+      <section className={styles.readingSection} aria-labelledby="decision-heading">
+        <h2 id="decision-heading">When is an aftermarket screen worth considering?</h2>
+        <p>Aftermarket can be a legitimate budget choice for some older phones, particularly where the genuine repair cost is close to the phone&apos;s value and display demands are lower. Customers prioritising display quality, fingerprint sensitivity, S Pen use, original-like behaviour or longer-term ownership may prefer Service Pack.</p>
+        <h3>Is it worth repairing an older Galaxy S phone?</h3>
+        <p>Consider the phone&apos;s overall condition, other hardware faults, battery condition, repair cost, value and expected remaining use. If the phone is otherwise in good condition, a screen repair can still make sense; if it has several significant faults, replacement can be the more practical choice.</p>
+      </section>
+
+      <section className={styles.readingSection} aria-labelledby="frame-heading">
         <h2 id="frame-heading">Why does the frame matter on a Samsung OLED repair?</h2>
         <p>Samsung OLED panels are fragile during installation. In our repair experience, even a small hard fragment beneath a panel can create a pressure point, while a phone that has been dropped may have a subtly distorted or dented frame.</p>
         <p>Reattaching a fragile display to an old damaged frame can make fit, adhesive contact, sealing and long-term stability less predictable. A replacement OLED may not sit under perfectly even conditions, which can contribute to panel lifting, debris around a poor fit, local pressure, black spots, ink-like spreading or increased vulnerability after another impact.</p>
@@ -185,20 +206,20 @@ export function SamsungGalaxySScreenRepairCostArticle() {
         </aside>
       </section>
 
-      <section aria-labelledby="damage-heading">
+      <section className={styles.readingSection} aria-labelledby="damage-heading">
         <h2 id="damage-heading">What do black spots, green lines or flickering mean?</h2>
         <p>A crack with black spots, ink-like spreading, green lines, flickering or missing display areas usually indicates damage beyond only the outer glass and can involve the OLED display layer. If the screen is unstable, back up important information where possible.</p>
         <h3>What if the screen is black but the phone still works?</h3>
         <p>If the phone still vibrates, rings, makes notification sounds or appears to boot, display damage is a strong possibility. It is not a guarantee that a screen replacement is the only fix: we may need to rule out a connector or flex issue, impact-related board fault, power/display circuit issue, liquid damage or previous repair damage.</p>
       </section>
 
-      <section aria-labelledby="real-repair-examples-heading">
+      <section className={styles.wideSection} aria-labelledby="real-repair-examples-heading">
         <h2 id="real-repair-examples-heading">Real Samsung Screen Repair Examples</h2>
         <p>These photos show examples of damaged Galaxy S displays before replacement and the normal display operation visible after repair.</p>
         <div className={styles.repairExamples}>
           {repairExamples.map((example) => (
             <article className={styles.repairExample} key={example.model}>
-              <h3>{example.model}</h3>
+              <h3><Link href={example.href}>{example.model}</Link></h3>
               <div className={styles.repairPair}>
                 {(["before", "after"] as const).map((state) => {
                   const photo = example[state];
@@ -217,14 +238,7 @@ export function SamsungGalaxySScreenRepairCostArticle() {
         </div>
       </section>
 
-      <section aria-labelledby="decision-heading">
-        <h2 id="decision-heading">When is an aftermarket screen worth considering?</h2>
-        <p>Aftermarket can be a legitimate budget choice for some older phones, particularly where the genuine repair cost is close to the phone&apos;s value and display demands are lower. Customers prioritising display quality, fingerprint sensitivity, S Pen use, original-like behaviour or longer-term ownership may prefer Service Pack.</p>
-        <h3>Is it worth repairing an older Galaxy S phone?</h3>
-        <p>Consider the phone&apos;s overall condition, other hardware faults, battery condition, repair cost, value and expected remaining use. If the phone is otherwise in good condition, a screen repair can still make sense; if it has several significant faults, replacement can be the more practical choice.</p>
-      </section>
-
-      <section aria-labelledby="repair-process-heading">
+      <section className={styles.readingSection} aria-labelledby="repair-process-heading">
         <h2 id="repair-process-heading">What happens during an Ali Mobile screen repair?</h2>
         <p>We confirm the exact Galaxy model, inspect the reported fault and frame condition, and confirm the appropriate option before work. A normal screen replacement does not intentionally erase customer data, but a backup is recommended where possible.</p>
         <p>After repair, we use Samsung&apos;s built-in diagnostic and testing tools where applicable, alongside relevant checks for display, touch, fingerprint, S Pen and other functions related to the repair. Repair timing is confirmed after the exact Galaxy model, required part and availability are checked.</p>
@@ -232,7 +246,7 @@ export function SamsungGalaxySScreenRepairCostArticle() {
         <p>Browse <Link href="/repairs/phone/samsung">Samsung repair options</Link>, see the <Link href="/repairs/screen-replacement">screen replacement service</Link>, or <Link href="/book-repair">book an assessment</Link> to confirm the right option.</p>
       </section>
 
-      <section aria-labelledby="samsung-screen-faq-heading">
+      <section className={styles.readingSection} aria-labelledby="samsung-screen-faq-heading">
         <h2 id="samsung-screen-faq-heading">Samsung Galaxy S screen replacement FAQs</h2>
         <div className={styles.faqList}>
           {faqs.map((faq) => (

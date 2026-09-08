@@ -28,11 +28,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         type: "article",
         locale: "en_AU",
         siteName: "Ali Mobile & Repair",
+        images: [{
+          url: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image,
+          alt: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.coverImageAlt,
+        }],
       },
       twitter: {
         card: "summary_large_image",
         title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
         description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
+        images: [SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image],
       },
     };
   }
@@ -85,10 +90,10 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         date: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.datePublished,
         description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
         contentHtml: "",
-        image: undefined,
+        image: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image,
         source: "markdown" as const,
         seo_title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
-        cover_image_alt: null,
+        cover_image_alt: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.coverImageAlt,
         author_name: "Ali Mobile & Repair",
         hero_intro: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.heroIntro,
         updated_at: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified,
@@ -111,13 +116,16 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     : isIphoneScreenCostArticle
     ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.dateModified
     : postData.updated_at || postData.date;
-  const formattedDate = datePublished
-    ? new Date(datePublished).toLocaleDateString("en-AU", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+  const formatDate = (date: string) => new Date(date).toLocaleDateString("en-AU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const formattedDatePublished = datePublished
+    ? formatDate(datePublished)
     : "";
+  const hasDistinctUpdatedDate = Boolean(dateModified && dateModified.slice(0, 10) !== datePublished.slice(0, 10));
+  const formattedDateModified = hasDistinctUpdatedDate ? formatDate(dateModified) : "";
 
   const authorName = postData.author_name || "Ali Mobile & Repair";
   const authorType = authorName === "Ali Mobile & Repair" ? "Organization" : "Person";
@@ -161,9 +169,11 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         <section className={styles.hero} aria-labelledby="article-title">
           <div className={styles.heroCopy}>
             <span className={styles.kicker}>Repair Guide</span>
-            <div className={styles.metaRow} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', fontSize: '0.875rem', color: 'var(--color-neu-text-secondary)', marginBottom: '1rem' }}>
-              {formattedDate && <span className={styles.dateLabel}>{formattedDate}</span>}
-              {formattedDate && <span>•</span>}
+            <div className={styles.metaRow}>
+              {formattedDatePublished && <span className={styles.dateLabel}>Published {formattedDatePublished}</span>}
+              {formattedDateModified && <span aria-hidden="true">•</span>}
+              {formattedDateModified && <span className={styles.dateLabel}>Updated {formattedDateModified}</span>}
+              {(formattedDatePublished || formattedDateModified) && <span aria-hidden="true">•</span>}
               <span>By {authorName}</span>
             </div>
             <h1 id="article-title">{postData.title}</h1>

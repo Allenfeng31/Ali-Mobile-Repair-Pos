@@ -6,6 +6,39 @@
   margin-top: 2.5rem;
 }
 
+.readingSection,
+.guideNav {
+  width: min(100%, 820px);
+  margin-inline: auto;
+}
+
+.wideSection {
+  width: 100%;
+}
+
+.guideNav {
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+}
+
+.guideNav h2 {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.guideNav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.guideNav a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
 .article h2 {
   margin: 0 0 1rem;
 }

@@ -9,6 +9,9 @@ export const SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA = {
     "Compare Ali Mobile's manually checked Samsung Galaxy S screen replacement prices, including Samsung Service Pack and selected aftermarket display-with-frame options.",
   heroIntro:
     "This guide compares Ali Mobile's manually maintained Samsung Galaxy S screen replacement prices and explains when a Samsung Service Pack assembly or a selected aftermarket display-with-frame option may suit your phone.",
+  image: "/images/blog/samsung-screen-repair-cost/samsung-galaxy-s-screen-replacement-cost-guide.webp",
+  coverImageAlt:
+    "Samsung Galaxy S phones on a repair bench showing a damaged display, working display and screen assembly",
   datePublished: "2026-09-08",
   dateModified: "2026-09-08",
   displayDateModified: "8 September 2026",

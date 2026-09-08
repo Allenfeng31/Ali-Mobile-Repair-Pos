@@ -66,6 +66,33 @@ describe("SamsungGalaxySScreenRepairCostArticle", () => {
     expect(articleStyles).toContain(".repairPair {\n    grid-template-columns: 1fr;");
   });
 
+  it("keeps the guide navigation, decision order, and contextual repair links concise", () => {
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle />);
+
+    expect(html).toContain("In this guide");
+    [
+      "#samsung-price-table-heading",
+      "#comparison-heading",
+      "#frame-heading",
+      "#real-repair-examples-heading",
+      "#samsung-screen-faq-heading",
+    ].forEach((href) => expect(html).toContain(`href=\"${href}\"`));
+    expect(html.indexOf("When is an aftermarket screen worth considering?")).toBeLessThan(
+      html.indexOf("Why does the frame matter on a Samsung OLED repair?"),
+    );
+    [
+      "/repairs/phone/samsung",
+      "/repairs/screen-replacement",
+      "/repairs/phone/samsung/galaxy-s22-ultra/screen-replacement",
+      "/repairs/phone/samsung/galaxy-s24/screen-replacement",
+      "/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement",
+      "/book-repair",
+    ].forEach((href) => expect(html).toContain(`href=\"${href}\"`));
+    expect((html.match(/<a href="\//g) ?? [])).toHaveLength(8);
+    expect(articleStyles).toContain(".readingSection");
+    expect(articleStyles).toContain(".wideSection");
+  });
+
   it("uses only static article data and no runtime catalogue or POS price reader", () => {
     expect(articleSource).toContain('from "@/data/samsungGalaxySScreenRepairCost"');
     expect(articleSource).not.toMatch(/fetchRepairCatalog|fetchPOSInventory|supabase|\bfetch\s*\(/);
