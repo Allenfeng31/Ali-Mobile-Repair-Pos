@@ -65,6 +65,63 @@
   border-radius: 0.25rem;
 }
 
+.repairExamples {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.repairExample {
+  padding: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+}
+
+.repairExample h3 {
+  margin-top: 0;
+}
+
+.repairPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.repairPhoto {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.5rem;
+  background: var(--background);
+}
+
+.repairPhoto img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.repairPhotoLabel {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: 0 0 0.5rem 0;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.repairPhoto figcaption {
+  padding: 0.75rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
 .faqList {
   display: grid;
   gap: 1rem;
@@ -86,6 +143,10 @@
 }
 
 @media (max-width: 640px) {
+  .repairPair {
+    grid-template-columns: 1fr;
+  }
+
   .priceTable {
     min-width: 610px;
   }

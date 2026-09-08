@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -46,6 +47,60 @@ function PriceTable() {
     </div>
   );
 }
+
+const repairExamples = [
+  {
+    model: "Galaxy S22 Ultra",
+    before: {
+      src: "/images/blog/samsung-galaxy-s22-ultra-screen-replacement-before.webp",
+      width: 3024,
+      height: 4032,
+      alt: "Galaxy S22 Ultra before screen replacement showing a bright horizontal line and blacked-out lower display",
+      caption: "Before: a bright horizontal line and a blacked-out lower display.",
+    },
+    after: {
+      src: "/images/blog/samsung-galaxy-s22-ultra-screen-replacement-after.webp",
+      width: 3024,
+      height: 4032,
+      alt: "Galaxy S22 Ultra after screen replacement with the display working normally",
+      caption: "After: the replacement display returned to normal operation.",
+    },
+  },
+  {
+    model: "Galaxy S24",
+    before: {
+      src: "/images/blog/samsung-galaxy-s24-screen-replacement-before.webp",
+      width: 4284,
+      height: 5712,
+      alt: "Galaxy S24 before screen replacement showing yellow banding and horizontal line damage",
+      caption: "Before: yellow banding and horizontal line damage across the OLED panel.",
+    },
+    after: {
+      src: "/images/blog/samsung-galaxy-s24-screen-replacement-after.webp",
+      width: 4284,
+      height: 5712,
+      alt: "Galaxy S24 after screen replacement with the display working normally",
+      caption: "After: the replacement display returned to normal operation.",
+    },
+  },
+  {
+    model: "Galaxy S24 Ultra",
+    before: {
+      src: "/images/blog/samsung-galaxy-s24-ultra-screen-replacement-before.webp",
+      width: 4284,
+      height: 5712,
+      alt: "Galaxy S24 Ultra before screen replacement showing green-line and white-block display damage",
+      caption: "Before: green-line and white-block panel damage.",
+    },
+    after: {
+      src: "/images/blog/samsung-galaxy-s24-ultra-screen-replacement-after.webp",
+      width: 4284,
+      height: 5712,
+      alt: "Galaxy S24 Ultra after screen replacement with the display working normally",
+      caption: "After: the replacement display returned to normal operation.",
+    },
+  },
+] as const;
 
 const faqs = [
   {
@@ -135,6 +190,31 @@ export function SamsungGalaxySScreenRepairCostArticle() {
         <p>A crack with black spots, ink-like spreading, green lines, flickering or missing display areas usually indicates damage beyond only the outer glass and can involve the OLED display layer. If the screen is unstable, back up important information where possible.</p>
         <h3>What if the screen is black but the phone still works?</h3>
         <p>If the phone still vibrates, rings, makes notification sounds or appears to boot, display damage is a strong possibility. It is not a guarantee that a screen replacement is the only fix: we may need to rule out a connector or flex issue, impact-related board fault, power/display circuit issue, liquid damage or previous repair damage.</p>
+      </section>
+
+      <section aria-labelledby="real-repair-examples-heading">
+        <h2 id="real-repair-examples-heading">Real Samsung Screen Repair Examples</h2>
+        <p>These photos show examples of damaged Galaxy S displays before replacement and the normal display operation visible after repair.</p>
+        <div className={styles.repairExamples}>
+          {repairExamples.map((example) => (
+            <article className={styles.repairExample} key={example.model}>
+              <h3>{example.model}</h3>
+              <div className={styles.repairPair}>
+                {(["before", "after"] as const).map((state) => {
+                  const photo = example[state];
+
+                  return (
+                    <figure className={styles.repairPhoto} key={state}>
+                      <span className={styles.repairPhotoLabel}>{state === "before" ? "Before" : "After"}</span>
+                      <Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width: 760px) 100vw, 50vw" />
+                      <figcaption>{photo.caption}</figcaption>
+                    </figure>
+                  );
+                })}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section aria-labelledby="decision-heading">

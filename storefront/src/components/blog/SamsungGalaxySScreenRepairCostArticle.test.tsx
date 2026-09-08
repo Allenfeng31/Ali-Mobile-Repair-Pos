@@ -9,6 +9,10 @@ const articleSource = readFileSync(
   resolve(process.cwd(), "src/components/blog/SamsungGalaxySScreenRepairCostArticle.tsx"),
   "utf8",
 );
+const articleStyles = readFileSync(
+  resolve(process.cwd(), "src/components/blog/SamsungGalaxySScreenRepairCostArticle.module.css"),
+  "utf8",
+);
 
 describe("SamsungGalaxySScreenRepairCostArticle", () => {
   it("renders the complete static price table and its customer-facing option contract", () => {
@@ -34,6 +38,32 @@ describe("SamsungGalaxySScreenRepairCostArticle", () => {
     expect(html).toContain("does not restore factory water resistance");
     expect(html).toContain("does not intentionally erase customer data");
     expect(html).not.toMatch(/restored IP68|waterproof again|all aftermarket screens are 60Hz|fingerprint always fails|S Pen always fails/i);
+  });
+
+  it("renders real Galaxy S before-and-after screen repair examples with accessible local WebP evidence", () => {
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle />);
+
+    expect(html).toContain("Real Samsung Screen Repair Examples");
+    expect(html).toContain("Galaxy S22 Ultra");
+    expect(html).toContain("Galaxy S24");
+    expect(html).toContain("Galaxy S24 Ultra");
+    expect((html.match(/>Before</g) ?? [])).toHaveLength(3);
+    expect((html.match(/>After</g) ?? [])).toHaveLength(3);
+    expect(html).toContain("Galaxy S22 Ultra before screen replacement showing a bright horizontal line and blacked-out lower display");
+    expect(html).toContain("Galaxy S24 before screen replacement showing yellow banding and horizontal line damage");
+    expect(html).toContain("Galaxy S24 Ultra before screen replacement showing green-line and white-block display damage");
+    [
+      "samsung-galaxy-s22-ultra-screen-replacement-before.webp",
+      "samsung-galaxy-s22-ultra-screen-replacement-after.webp",
+      "samsung-galaxy-s24-screen-replacement-before.webp",
+      "samsung-galaxy-s24-screen-replacement-after.webp",
+      "samsung-galaxy-s24-ultra-screen-replacement-before.webp",
+      "samsung-galaxy-s24-ultra-screen-replacement-after.webp",
+    ].forEach((filename) => expect(articleSource).toContain(`/images/blog/${filename}`));
+    expect(articleSource).toContain('from "next/image"');
+    expect(articleSource).not.toMatch(/priority|preload|fetchPriority/);
+    expect(articleStyles).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
+    expect(articleStyles).toContain(".repairPair {\n    grid-template-columns: 1fr;");
   });
 
   it("uses only static article data and no runtime catalogue or POS price reader", () => {
