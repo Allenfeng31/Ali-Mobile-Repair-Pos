@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const fetchRepairCatalog = vi.hoisted(() => vi.fn());
 const fetchRepairDetailInitialResults = vi.hoisted(() => vi.fn());
 const RepairResultsMatchingSection = vi.hoisted(() => vi.fn(() => null));
+const permanentRedirect = vi.hoisted(() => vi.fn((destination: string) => {
+  throw new Error(`NEXT_REDIRECT_TEST:${destination}`);
+}));
 const notFound = vi.hoisted(() => vi.fn(() => {
   throw new Error('NEXT_NOT_FOUND_TEST');
 }));
@@ -11,7 +14,7 @@ const notFound = vi.hoisted(() => vi.fn(() => {
 vi.mock('@/lib/api', async (importOriginal) => ({ ...(await importOriginal<typeof import('@/lib/api')>()), fetchRepairCatalog }));
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairDetailInitialResults }));
 vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({ default: RepairResultsMatchingSection }));
-vi.mock('next/navigation', () => ({ notFound, permanentRedirect: vi.fn() }));
+vi.mock('next/navigation', () => ({ notFound, permanentRedirect }));
 
 import RepairServicePage from './page';
 
@@ -50,11 +53,23 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     fetchRepairDetailInitialResults.mockResolvedValue([]);
     RepairResultsMatchingSection.mockClear();
     notFound.mockClear();
+    permanentRedirect.mockClear();
+  });
+
+  it.each([
+    ['water', 'water-damage-repair', '/repairs/water-damage'],
+    ['logic board', 'logic-board-repair', '/repairs/phone/logic-board-repair'],
+  ])('redirects an allowlisted Phase 1 %s source before loading Detail data', async (_label, repairType, destination) => {
+    await expect(RepairServicePage({ params: Promise.resolve(params({ brand: 'asus', model: 'rog-phone-5', 'repair-type': repairType })) }))
+      .rejects.toThrow(`NEXT_REDIRECT_TEST:${destination}`);
+    expect(permanentRedirect).toHaveBeenCalledWith(destination);
+    expect(fetchRepairCatalog).not.toHaveBeenCalled();
   });
 
   it('returns normal page data for an active repair', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [active] });
     await expect(RepairServicePage({ params: Promise.resolve(params()) })).resolves.toBeTruthy();
+    expect(permanentRedirect).not.toHaveBeenCalled();
   });
 
   it('returns page data only for the exact retired legacy identity', async () => {

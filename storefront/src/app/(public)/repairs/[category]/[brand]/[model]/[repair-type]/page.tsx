@@ -125,6 +125,7 @@ import {
   isWaterDamageRepairSlug,
 } from '@/lib/waterDamageRouting';
 import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from '@/lib/logicBoardRouting';
+import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
 import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTabletEnhancedSeoSection';
@@ -4573,6 +4574,11 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
   const canonicalRepairSlug = isWaterDamageRepairSlug(rawParams['repair-type'])
     ? 'water-damage-repair'
     : rawParams['repair-type'];
+  const phase1Destination = getPhase1DniConsolidationDestination(
+    buildCanonicalModelRepairPath(rawParams.category, canonicalBrand, rawParams.model, canonicalRepairSlug),
+  );
+  if (phase1Destination) permanentRedirect(phase1Destination);
+
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(
     (brand) => brand.category === rawParams.category && brand.slug === canonicalBrand

@@ -91,6 +91,12 @@ describe('resolveModelHubRepairPageMode', () => {
       .not.toContain('?');
   });
 
+  it('emits the canonical shared destination for an exact Phase 1 Logic Board source', () => {
+    const result = resolve({ modelSlug: 'a16s', repairTypes: [repair('logic-board-repair')] });
+
+    expect(result.options[0]?.href).toBe('/repairs/phone/logic-board-repair');
+  });
+
   it('hides unknown taxonomy and preserves iPhone and non-phone fallback routes', () => {
     expect(resolve({ repairTypes: [repair('microsoldering-special', 'pos')] }).options).toEqual([]);
     expect(resolve({ brandSlug: 'iphone', modelSlug: 'iphone-15', repairTypes: [repair('screen-replacement')] }).options[0]?.href)

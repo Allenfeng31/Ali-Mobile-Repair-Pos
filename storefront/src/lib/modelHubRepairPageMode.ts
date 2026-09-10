@@ -8,6 +8,7 @@ import {
   type NonIphonePublicRepairPageModeDecision,
 } from './publicRepairPageModePolicy';
 import { compareDeterministicStrings } from './deterministicStrings';
+import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 
 export type ModelHubRepairPageModeInput = Readonly<{
   category: string;
@@ -140,6 +141,7 @@ export function resolveModelHubRepairPageMode(
         legacyStatus: 'none',
       });
       const fallbackHref = legacyDetailHref(input.category, input.brandSlug, input.modelSlug, repairSlug);
+      const phase1Destination = getPhase1DniConsolidationDestination(fallbackHref);
       const report = Object.freeze({
         repairSlug,
         mode: decision.mode,
@@ -147,7 +149,7 @@ export function resolveModelHubRepairPageMode(
         routeAvailable: decision.routeAvailable,
       });
 
-      return { decision, report, option: freezeOption(selectedRepair, resolvedHref(decision, fallbackHref, input.brandSlug, input.modelSlug)) };
+      return { decision, report, option: freezeOption(selectedRepair, phase1Destination ?? resolvedHref(decision, fallbackHref, input.brandSlug, input.modelSlug)) };
     });
 
   return Object.freeze({

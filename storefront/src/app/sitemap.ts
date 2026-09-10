@@ -10,6 +10,7 @@ import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG, SAMSUNG_GALAXY_S_SCREEN_REPAI
 import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getWaterDamageSitemapPaths, isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
+import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 
 function getReliableBlogLastModified(updatedAt?: string): Date | undefined {
   if (!updatedAt) return undefined;
@@ -71,7 +72,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const sitemapUrls = [...staticUrls, ...blogUrls];
-  const grandfatheredWaterDamageUrls: MetadataRoute.Sitemap = getWaterDamageSitemapPaths().map((path) => ({
+  const grandfatheredWaterDamageUrls: MetadataRoute.Sitemap = getWaterDamageSitemapPaths()
+    .filter((path) => !getPhase1DniConsolidationDestination(path))
+    .map((path) => ({
     url: `${baseUrl}${path}`,
     changeFrequency: 'weekly' as const,
     priority: 0.6,
@@ -122,13 +125,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           if (repair.slug.includes('flex-cable')) continue;
           if (isWaterDamageRepairSlug(repair.slug)) continue;
 
+          const repairPath = `/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`;
+          if (getPhase1DniConsolidationDestination(repairPath)) continue;
+
           if (isExcludedOppo) continue;
           if (isExcludedPixel) continue;
           if (isExcludedAppleWatch) continue;
           if (brand.category === 'watch' && brand.slug === 'apple' && repair.slug === 'charging-port-replacement') continue;
 
           repairUrls.push({
-            url: `${baseUrl}/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`,
+            url: `${baseUrl}${repairPath}`,
             changeFrequency: 'weekly' as const,
             priority: 0.6,
           });

@@ -14,6 +14,7 @@ import {
   GOOGLE_PIXEL_HARDWARE_CONFIG,
 } from '@/lib/seo/content/google-pixel/config';
 import { APPLE_WATCH_MODELS } from '@/lib/seo/content/apple-watch';
+import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 import sitemap from './sitemap';
 
 loadEnvConfig(process.cwd());
@@ -89,7 +90,7 @@ describe('Sitemap SEO Generation', () => {
     expect(paths).toContain('/repairs/phone/google-pixel/pixel-8-pro');
     expect(paths).toContain('/repairs/phone/google-pixel/pixel-8a');
     expect(paths).toContain('/repairs/phone/google-pixel/pixel-8a/screen-replacement');
-    expect(paths).toContain('/repairs/phone/google-pixel/pixel-8a/logic-board-repair');
+    expect(paths).not.toContain('/repairs/phone/google-pixel/pixel-8a/logic-board-repair');
 
     expect(paths).not.toContain('/repairs/phone/google-pixel/pixel-unconfigured');
     expect(paths).not.toContain('/repairs/phone/google-pixel/pixel-unconfigured/screen-replacement');
@@ -98,27 +99,33 @@ describe('Sitemap SEO Generation', () => {
     const catalogueBackedPixelRepairPaths = pixelRepairPaths.filter((path) =>
       path.endsWith('/screen-replacement') || path.endsWith('/logic-board-repair'),
     );
-    expect(catalogueBackedPixelRepairPaths).toHaveLength(
-      Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG).length * 2,
-    );
+    const expectedCatalogueBackedPixelRepairPaths = Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG).flatMap((slug) => [
+      `/repairs/phone/google-pixel/${slug}/screen-replacement`,
+      `/repairs/phone/google-pixel/${slug}/logic-board-repair`,
+    ]).filter((path) => !getPhase1DniConsolidationDestination(path));
+    expect(catalogueBackedPixelRepairPaths).toHaveLength(expectedCatalogueBackedPixelRepairPaths.length);
     expect(pixelRepairPaths).toHaveLength(new Set(pixelRepairPaths).size);
 
-    // Logic Board paths remain canonical and include each configured Pixel model.
     const logicBoardUrls = paths.filter(p => p.endsWith('/logic-board-repair'));
-    expect(logicBoardUrls.length).toBe(427);
 
     const pixelLogicBoardUrls = logicBoardUrls.filter(p => p.includes('/phone/google-pixel/'));
-    expect(pixelLogicBoardUrls.length).toBe(Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG).length);
+    expect(pixelLogicBoardUrls.length).toBe(Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG)
+      .filter((slug) => !getPhase1DniConsolidationDestination(`/repairs/phone/google-pixel/${slug}/logic-board-repair`)).length);
 
-    const representativePaths = [
+    const emittedRepresentativePaths = [
+      '/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair',
+      '/repairs/phone/google-pixel/pixel-10-pro-fold/logic-board-repair',
+    ];
+    for (const p of emittedRepresentativePaths) {
+      expect(paths).toContain(p);
+    }
+    const suppressedRepresentativePaths = [
       '/repairs/phone/google-pixel/pixel-3/logic-board-repair',
       '/repairs/phone/google-pixel/pixel-8a/logic-board-repair',
-      '/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair',
       '/repairs/phone/google-pixel/pixel-10/logic-board-repair',
-      '/repairs/phone/google-pixel/pixel-10-pro-fold/logic-board-repair'
     ];
-    for (const p of representativePaths) {
-      expect(paths).toContain(p);
+    for (const p of suppressedRepresentativePaths) {
+      expect(paths).not.toContain(p);
     }
 
     const legacyLogicBoardUrls = paths.filter(p => p.endsWith('/logic-board'));
@@ -139,13 +146,32 @@ describe('Sitemap SEO Generation', () => {
     expect(paths).toContain('/repairs/phone/oppo/find-x8/screen-replacement');
 
     const waterDamageUrls = paths.filter(p => p.includes('water-damage'));
-    expect(waterDamageUrls.length).toBe(427);
+    expect(waterDamageUrls.length).toBe(223);
 
     const malformedUrls = paths.filter(p => p.includes('undefined') || p.includes('null') || p.includes('[') || p.includes(']'));
     expect(malformedUrls.length).toBe(0);
 
     expect(new URL(urls.find((entry) => entry.url.endsWith('/repairs/phone/google-pixel/pixel-8a'))!.url).origin)
       .toBe('https://www.alimobile.com.au');
+  });
+
+  it('suppresses only exact Phase 1 source paths while retaining held and outside-sample routes', async () => {
+    fetchRepairCatalogMock.mockResolvedValueOnce({
+      brands: [
+        { category: 'phone', slug: 'asus', models: [{ slug: 'rog-phone-5', repairTypes: [logicBoardRepair, { slug: 'water-damage-repair' }] }] },
+        { category: 'phone', slug: 'samsung', models: [{ slug: 'galaxy-z-flip', repairTypes: [logicBoardRepair] }] },
+        { category: 'phone', slug: 'iphone', models: [{ slug: 'iphone-6', repairTypes: [logicBoardRepair] }] },
+      ],
+    });
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+
+    expect(paths).not.toContain('/repairs/phone/asus/rog-phone-5/logic-board-repair');
+    expect(paths).not.toContain('/repairs/phone/asus/rog-phone-5/water-damage-repair');
+    expect(paths).toContain('/repairs/laptop/macbook/macbook-air-11-2014-2015/water-damage-repair');
+    expect(paths).toContain('/repairs/phone/samsung/galaxy-z-flip/logic-board-repair');
+    expect(paths).toContain('/repairs/phone/iphone/iphone-6/logic-board-repair');
+    expect(paths).toContain('/repairs/phone/logic-board-repair');
+    expect(paths).toContain('/repairs/water-damage');
   });
 
   it('includes only configured Apple Watch Charging Repair routes and no legacy charging-port aliases', async () => {
