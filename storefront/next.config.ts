@@ -410,7 +410,6 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/screen-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/screen-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/galaxy-tab-s5e-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725/screen-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616/back-camera-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616/back-camera-replacement', permanent: true },
-      { source: '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705/galaxy-tab-s-84-back-housing', destination: '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705', permanent: true },
       // 14. NON-IPHONE BACK GLASS MIGRATION REDIRECTS
       { source: '/repairs/phone/samsung/:model/back-housing-replacement', destination: '/repairs/phone/samsung/:model/back-glass-replacement', permanent: true },
       { source: '/repairs/phone/oppo/:model/back-housing-replacement', destination: '/repairs/phone/oppo/:model/back-glass-replacement', permanent: true },

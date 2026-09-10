@@ -175,6 +175,10 @@ describe('Coverage Drilldown 404 redirect manifest', () => {
         source,
       ).toHaveLength(0);
     }
+
+    expect(
+      redirects.some((entry) => entry.source === '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705/galaxy-tab-s-84-back-housing'),
+    ).toBe(false);
   });
 
   it('does not add redirect configuration for the explicit Water Damage holds', async () => {

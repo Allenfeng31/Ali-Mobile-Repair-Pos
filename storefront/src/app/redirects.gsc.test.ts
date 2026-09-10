@@ -182,7 +182,6 @@ const tabletGsc404Redirects = [
   ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/screen-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/screen-replacement'],
   ['/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/galaxy-tab-s5e-screen-repair', '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725/screen-replacement'],
   ['/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616/back-camera-replacement'],
-  ['/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705/galaxy-tab-s-84-back-housing', '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705'],
 ] as const;
 
 const removedBlogSources = [
@@ -333,6 +332,16 @@ const samsungTabletRepairDetailSliceCPreservedRedirects = [
   ['/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/back-camera-replacement'],
 ] as const;
 
+const samsungTabletRepairDetailFinalTailBackHousingSource =
+  '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705/galaxy-tab-s-84-back-housing';
+
+const samsungTabletRepairDetailFinalTailPreservedRedirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620--sm-x626/galaxy-tab-s10-fe-plus-screen-repair', '/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620-sm-x626/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/galaxy-tab-s6-water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860-sm-t865/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835/galaxy-tab-s4-water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830-sm-t835/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/galaxy-tab-a-97-screen-repair', '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/screen-replacement'],
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -352,6 +361,25 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('leaves unsupported Samsung Tablet Final Tail back-housing unresolved', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    expect(sources.has(samsungTabletRepairDetailFinalTailBackHousingSource)).toBe(false);
+    expect(sources.has('/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705/back-housing-replacement')).toBe(false);
+    expect(
+      redirects.some((entry) => entry.source.includes('/repairs/tablet/samsung/:model/') && entry.source.includes('back-housing')),
+    ).toBe(false);
+
+    expect(samsungTabletRepairDetailFinalTailPreservedRedirects).toHaveLength(4);
+    for (const [source, destination] of samsungTabletRepairDetailFinalTailPreservedRedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+    }
+  });
+
   it('applies only the approved Samsung Tablet Repair Detail Slice C corrections', async () => {
     const redirects = await getRedirects();
     const sources = new Set(redirects.map((entry) => entry.source));
@@ -617,7 +645,7 @@ describe('July 15 GSC technical redirect batch', () => {
     const redirects = await getRedirects();
     const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
 
-    expect(tabletGsc404Redirects).toHaveLength(33);
+    expect(tabletGsc404Redirects).toHaveLength(32);
     for (const [source, destination] of tabletGsc404Redirects) {
       const matches = redirects.filter((entry) => entry.source === source);
 
@@ -676,7 +704,7 @@ describe('July 15 GSC technical redirect batch', () => {
       expect(paths).not.toContain(source);
       expect(paths.filter((path) => path === destination).length, destination).toBeLessThanOrEqual(1);
     }
-    expect(backHousingModelHubDestinations).toHaveLength(1);
+    expect(backHousingModelHubDestinations).toHaveLength(0);
     for (const destination of backHousingModelHubDestinations) {
       expect(paths.filter((path) => path === destination), destination).toHaveLength(1);
     }
