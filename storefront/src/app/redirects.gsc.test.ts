@@ -290,6 +290,28 @@ const samsungTabletRepairDetailSliceANonSources = [
   '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-back-housing',
 ] as const;
 
+const samsungTabletRepairDetailSliceBRedirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-screen-repair', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/galaxy-tab-a-101-2019-front-camera', '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/front-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-battery-service', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/battery-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-screen-repair', '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-back-camera', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/back-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/charging-port-replacement', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/charging-port-replacement'],
+] as const;
+
+const samsungTabletRepairDetailSliceBExistingRedirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/back-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/galaxy-tab-a-101-2019-charging-port', '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/charging-port-replacement'],
+] as const;
+
+const samsungTabletRepairDetailSliceBNonSources = [
+  '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-back-housing',
+  '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-back-housing',
+  '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/galaxy-tab-a-101-2019-back-housing',
+  '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-back-housing',
+  '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-screen-service',
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -309,6 +331,37 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('permanently redirects only the approved Samsung Tablet Repair Detail Slice B sources directly', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(samsungTabletRepairDetailSliceBRedirects).toHaveLength(6);
+    expect(new Set(samsungTabletRepairDetailSliceBRedirects.map(([source]) => source))).toHaveLength(6);
+    for (const [source, destination] of samsungTabletRepairDetailSliceBRedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+    }
+  });
+
+  it('preserves existing Slice B aliases while holding unsupported and nearby legacy paths', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    for (const [source, destination] of samsungTabletRepairDetailSliceBExistingRedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+    }
+
+    for (const source of samsungTabletRepairDetailSliceBNonSources) {
+      expect(sources.has(source), source).toBe(false);
+    }
+  });
+
   it('permanently redirects only the approved Samsung Tablet Repair Detail Slice A sources directly', async () => {
     const redirects = await getRedirects();
     const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));

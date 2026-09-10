@@ -67,6 +67,15 @@ const SAMSUNG_TABLET_REPAIR_DETAIL_SLICE_A_308_REDIRECTS = [
   { source: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/back-camera-replacement', permanent: true },
 ] as const;
 
+const SAMSUNG_TABLET_REPAIR_DETAIL_SLICE_B_308_REDIRECTS = [
+  { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/screen-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/galaxy-tab-a-101-2019-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/front-camera-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/battery-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/screen-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/back-camera-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/charging-port-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/charging-port-replacement', permanent: true },
+] as const;
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -347,6 +356,7 @@ const nextConfig: NextConfig = {
       ...COVERAGE_DRILLDOWN_308_REDIRECTS,
       ...CRAWLED_NI_LEGACY_404_REDIRECTS,
       ...SAMSUNG_TABLET_REPAIR_DETAIL_SLICE_A_308_REDIRECTS,
+      ...SAMSUNG_TABLET_REPAIR_DETAIL_SLICE_B_308_REDIRECTS,
       // 13. GSC LEGACY ALIAS REDIRECTS (Tablet)
       { source: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526/galaxy-tab-s10-fe-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526/front-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580', permanent: true },
