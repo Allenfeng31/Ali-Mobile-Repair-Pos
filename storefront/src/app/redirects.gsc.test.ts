@@ -176,13 +176,12 @@ const tabletGsc404Redirects = [
   ['/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu', '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu-tb-128fu'],
   ['/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810--sm-x816/galaxy-tab-s9-plus-water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810-sm-x816/water-damage-repair'],
   ['/repairs/tablet/samsung/galaxy-tab-a8-sm-x200--sm-x205/charging-port-replacement', '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205/charging-port-replacement'],
-  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510-sm-x516/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/water-damage-repair', '/repairs/water-damage'],
   ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/front-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/front-camera-replacement'],
   ['/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/lenovo-tab-m9-battery-service', '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/battery-replacement'],
   ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/screen-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/screen-replacement'],
   ['/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/galaxy-tab-s5e-screen-repair', '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725/screen-replacement'],
   ['/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616/back-camera-replacement'],
-  ['/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736/galaxy-tab-s11-back-housing', '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730-sm-x736'],
   ['/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705/galaxy-tab-s-84-back-housing', '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705'],
 ] as const;
 
@@ -312,6 +311,28 @@ const samsungTabletRepairDetailSliceBNonSources = [
   '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/galaxy-tab-a7-lite-screen-service',
 ] as const;
 
+const samsungTabletRepairDetailSliceCWaterRedirect = {
+  source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/water-damage-repair',
+  oldDestination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510-sm-x516/water-damage-repair',
+  destination: '/repairs/water-damage',
+} as const;
+
+const samsungTabletRepairDetailSliceCBackHousingSource =
+  '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736/galaxy-tab-s11-back-housing';
+
+const samsungTabletRepairDetailSliceCPreservedRedirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355/galaxy-tab-a-80-2015-water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350-sm-t355/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810--sm-x816/galaxy-tab-s9-plus-water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810-sm-x816/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/front-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/front-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/screen-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725/galaxy-tab-s5e-screen-repair', '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616/back-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526/galaxy-tab-s10-fe-front-camera', '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526/front-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-battery-service', '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595/battery-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/galaxy-tab-a-101-2019-screen-repair', '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/back-camera-replacement', '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/back-camera-replacement'],
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -331,6 +352,31 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('applies only the approved Samsung Tablet Repair Detail Slice C corrections', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(redirectBySource.get(samsungTabletRepairDetailSliceCWaterRedirect.source)).toMatchObject({
+      destination: samsungTabletRepairDetailSliceCWaterRedirect.destination,
+      permanent: true,
+    });
+    expect(redirectBySource.get(samsungTabletRepairDetailSliceCWaterRedirect.source)?.destination)
+      .not.toBe(samsungTabletRepairDetailSliceCWaterRedirect.oldDestination);
+    expect(sources.has(samsungTabletRepairDetailSliceCBackHousingSource)).toBe(false);
+    expect(
+      redirects.some((entry) => entry.source.includes('/repairs/tablet/samsung/:model/') && entry.source.includes('back-housing')),
+    ).toBe(false);
+
+    expect(samsungTabletRepairDetailSliceCPreservedRedirects).toHaveLength(10);
+    for (const [source, destination] of samsungTabletRepairDetailSliceCPreservedRedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+    }
+  });
+
   it('permanently redirects only the approved Samsung Tablet Repair Detail Slice B sources directly', async () => {
     const redirects = await getRedirects();
     const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
@@ -571,7 +617,7 @@ describe('July 15 GSC technical redirect batch', () => {
     const redirects = await getRedirects();
     const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
 
-    expect(tabletGsc404Redirects).toHaveLength(34);
+    expect(tabletGsc404Redirects).toHaveLength(33);
     for (const [source, destination] of tabletGsc404Redirects) {
       const matches = redirects.filter((entry) => entry.source === source);
 
@@ -630,7 +676,7 @@ describe('July 15 GSC technical redirect batch', () => {
       expect(paths).not.toContain(source);
       expect(paths.filter((path) => path === destination).length, destination).toBeLessThanOrEqual(1);
     }
-    expect(backHousingModelHubDestinations).toHaveLength(2);
+    expect(backHousingModelHubDestinations).toHaveLength(1);
     for (const destination of backHousingModelHubDestinations) {
       expect(paths.filter((path) => path === destination), destination).toHaveLength(1);
     }

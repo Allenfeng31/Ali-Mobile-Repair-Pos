@@ -52,7 +52,7 @@ const COVERAGE_DRILLDOWN_AUDIT_MANIFEST = [
   { id: 48, source: '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736', destination: '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730-sm-x736', disposition: 'redirect' },
   { id: 49, source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595', disposition: 'redirect' },
   { id: 50, source: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835', destination: '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830-sm-t835', disposition: 'redirect' },
-  { id: 51, source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510-sm-x516/water-damage-repair', disposition: 'redirect' },
+  { id: 51, source: '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516/water-damage-repair', destination: '/repairs/water-damage', disposition: 'redirect' },
   { id: 52, source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/front-camera-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/front-camera-replacement', disposition: 'redirect' },
   { id: 53, source: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865', destination: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860-sm-t865', disposition: 'redirect' },
   { id: 54, source: '/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710--sm-t715', destination: '/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710-sm-t715', disposition: 'redirect' },
