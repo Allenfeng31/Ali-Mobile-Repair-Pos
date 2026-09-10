@@ -198,6 +198,35 @@ const malformedSimilarSources = [
   '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200--sm-x206/charging-port-replacement',
 ] as const;
 
+const crawledNiLegacy404Redirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/screen-replacement', '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400-sm-x406/screen-replacement'],
+  ['/repairs/tablet/lenovo/lenovo-yoga-tab-13-yt-k606f/lenovo-yoga-tab-13-charging-port', '/repairs/tablet/lenovo/lenovo-yoga-tab-13-yt-k606f/charging-port-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/battery-replacement', '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210-sm-x215/battery-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-sm-x710--sm-x716/galaxy-tab-s9-battery-service', '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710-sm-x716/battery-replacement'],
+  ['/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/lenovo-tab-m10-gen-3-water-damage-repair', '/repairs/water-damage'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/battery-replacement', '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595/battery-replacement'],
+] as const;
+
+const crawledNiLegacy404NonSources = [
+  '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/screen-repair',
+  '/repairs/tablet/lenovo/lenovo-yoga-tab-13-yt-k606f/lenovo-yoga-tab-13-battery-service',
+  '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/battery-service',
+  '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710--sm-x716/screen-replacement',
+  '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/water-damage-repair',
+  '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/screen-replacement',
+  '/repairs/phone/oneplus/10-pro',
+  '/repairs/phone/nokia/c32',
+  '/repairs/phone/motorola/moto-g50',
+  '/repairs/phone/vivo/y15s/water-damage-repair',
+  '/repairs/phone/vivo/y56-5g/water-damage-repair',
+  '/repairs/phone/google/pixel-6a',
+  '/repairs/phone/google/pixel-4a/back-camera-replacement',
+  '/repairs/phone/google/pixel-10-pro-fold/charging-port-replacement',
+  '/repairs/phone/google/pixel-7a/water-damage-repair',
+  '/repairs/phone/samsung/galaxy-a50/logic-board',
+  '/repairs/phone/asus/rog-phone-5/water-damage-repair',
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -217,6 +246,34 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('permanently redirects only the six approved Crawled-NI legacy 404 sources directly', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(crawledNiLegacy404Redirects).toHaveLength(6);
+    for (const [source, destination] of crawledNiLegacy404Redirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+    }
+
+    expect(redirectBySource.get(crawledNiLegacy404Redirects[4][0])).toMatchObject({
+      destination: '/repairs/water-damage',
+      permanent: true,
+    });
+  });
+
+  it('does not broaden the six approved Crawled-NI legacy 404 redirects', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    for (const source of crawledNiLegacy404NonSources) {
+      expect(sources.has(source), source).toBe(false);
+    }
+  });
+
   it('keeps every approved redirect source exactly once with the exact destination', async () => {
     const redirects = await getRedirects();
 

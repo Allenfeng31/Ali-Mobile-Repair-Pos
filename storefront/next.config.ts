@@ -44,6 +44,15 @@ const COVERAGE_DRILLDOWN_308_REDIRECTS = [
   { source: '/repairs/tablet/ipad/ipad-pro-129-inch-4th-generation/logic-board', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-4th-generation/logic-board-repair', permanent: true },
 ] as const;
 
+const CRAWLED_NI_LEGACY_404_REDIRECTS = [
+  { source: '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406/screen-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400-sm-x406/screen-replacement', permanent: true },
+  { source: '/repairs/tablet/lenovo/lenovo-yoga-tab-13-yt-k606f/lenovo-yoga-tab-13-charging-port', destination: '/repairs/tablet/lenovo/lenovo-yoga-tab-13-yt-k606f/charging-port-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210-sm-x215/battery-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710--sm-x716/galaxy-tab-s9-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710-sm-x716/battery-replacement', permanent: true },
+  { source: '/repairs/tablet/lenovo/lenovo-tab-m10-gen-3-tb-328fu/lenovo-tab-m10-gen-3-water-damage-repair', destination: '/repairs/water-damage', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595/battery-replacement', permanent: true },
+] as const;
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -322,6 +331,7 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/galaxy-tab-s6-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865/battery-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/battery-replacement', permanent: true },
       ...COVERAGE_DRILLDOWN_308_REDIRECTS,
+      ...CRAWLED_NI_LEGACY_404_REDIRECTS,
       // 13. GSC LEGACY ALIAS REDIRECTS (Tablet)
       { source: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526/galaxy-tab-s10-fe-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526/front-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580', permanent: true },
