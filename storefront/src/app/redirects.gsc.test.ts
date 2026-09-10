@@ -227,6 +227,45 @@ const crawledNiLegacy404NonSources = [
   '/repairs/phone/asus/rog-phone-5/water-damage-repair',
 ] as const;
 
+const samsungTabletModelHubRedirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-sm-x710--sm-x716', '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710-sm-x716'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355', '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350-sm-t355'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810--sm-x816', '/repairs/tablet/samsung/galaxy-tab-s9-plus-sm-x810-sm-x816'],
+  ['/repairs/tablet/samsung/galaxy-tab-s7-plus-sm-t970--sm-t975--sm-t976', '/repairs/tablet/samsung/galaxy-tab-s7-plus-sm-t970-sm-t975-sm-t976'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400--sm-x406', '/repairs/tablet/samsung/galaxy-tab-s10-lite-sm-x400-sm-x406'],
+  ['/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610--sm-p613--sm-p615--sm-p619', '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619'],
+  ['/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720--sm-t725', '/repairs/tablet/samsung/galaxy-tab-s5e-sm-t720-sm-t725'],
+  ['/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215', '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210-sm-x215'],
+  ['/repairs/tablet/samsung/galaxy-tab-s2-97-sm-t810--sm-t815', '/repairs/tablet/samsung/galaxy-tab-s2-97-sm-t810-sm-t815'],
+  ['/repairs/tablet/samsung/galaxy-tab-s8-plus-sm-x800--sm-x806', '/repairs/tablet/samsung/galaxy-tab-s8-plus-sm-x800-sm-x806'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620--sm-x626', '/repairs/tablet/samsung/galaxy-tab-s10-fe-plus-sm-x620-sm-x626'],
+  ['/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736', '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730-sm-t733-sm-t736'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920--sm-x926', '/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920-sm-x926'],
+  ['/repairs/tablet/samsung/galaxy-tab-s8-ultra-sm-x900--sm-x906', '/repairs/tablet/samsung/galaxy-tab-s8-ultra-sm-x900-sm-x906'],
+  ['/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700--sm-t705', '/repairs/tablet/samsung/galaxy-tab-s-84-sm-t700-sm-t705'],
+  ['/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706', '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700-sm-x706'],
+  ['/repairs/tablet/samsung/galaxy-tab-s11-sm-x730--sm-x736', '/repairs/tablet/samsung/galaxy-tab-s11-sm-x730-sm-x736'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595', '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595'],
+  ['/repairs/tablet/samsung/galaxy-tab-s4-sm-t830--sm-t835', '/repairs/tablet/samsung/galaxy-tab-s4-sm-t830-sm-t835'],
+  ['/repairs/tablet/samsung/galaxy-tab-s6-sm-t860--sm-t865', '/repairs/tablet/samsung/galaxy-tab-s6-sm-t860-sm-t865'],
+  ['/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710--sm-t715', '/repairs/tablet/samsung/galaxy-tab-s2-80-sm-t710-sm-t715'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610--sm-x616', '/repairs/tablet/samsung/galaxy-tab-s9-fe-plus-sm-x610-sm-x616'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526', '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2017-sm-t380--sm-t385', '/repairs/tablet/samsung/galaxy-tab-a-80-2017-sm-t380-sm-t385'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-plus-sm-x820--sm-x826', '/repairs/tablet/samsung/galaxy-tab-s10-plus-sm-x820-sm-x826'],
+  ['/repairs/tablet/samsung/galaxy-tab-s3-sm-t820--sm-t825', '/repairs/tablet/samsung/galaxy-tab-s3-sm-t820-sm-t825'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555', '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580', '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580'],
+  ['/repairs/tablet/samsung/galaxy-tab-a8-sm-x200--sm-x205', '/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510--sm-x516', '/repairs/tablet/samsung/galaxy-tab-s9-fe-sm-x510-sm-x516'],
+  ['/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930--sm-x936', '/repairs/tablet/samsung/galaxy-tab-s11-ultra-sm-x930-sm-x936'],
+] as const;
+
+const samsungTabletModelHubNonSources = [
+  '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x917',
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -246,6 +285,29 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('keeps each audited Samsung Tablet Model Hub redirect exact and permanent', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(samsungTabletModelHubRedirects).toHaveLength(32);
+    for (const [source, destination] of samsungTabletModelHubRedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+    }
+  });
+
+  it('does not broaden the audited Samsung Tablet Model Hub redirects', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    for (const source of samsungTabletModelHubNonSources) {
+      expect(sources.has(source), source).toBe(false);
+    }
+  });
+
   it('permanently redirects only the six approved Crawled-NI legacy 404 sources directly', async () => {
     const redirects = await getRedirects();
     const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));

@@ -13,6 +13,7 @@ const COVERAGE_DRILLDOWN_308_REDIRECTS = [
   { source: '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710--sm-x716', destination: '/repairs/tablet/samsung/galaxy-tab-s9-sm-x710-sm-x716', permanent: true },
   { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/water-damage-repair', permanent: true },
   { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350--sm-t355', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2015-sm-t350-sm-t355', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916', destination: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916', permanent: true },
   { source: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/front-camera-replacement', permanent: true },
   { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/water-damage-repair', permanent: true },
   { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/battery-replacement', permanent: true },
