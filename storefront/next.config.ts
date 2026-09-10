@@ -54,6 +54,19 @@ const CRAWLED_NI_LEGACY_404_REDIRECTS = [
   { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590-sm-t595/battery-replacement', permanent: true },
 ] as const;
 
+const SAMSUNG_TABLET_REPAIR_DETAIL_SLICE_A_308_REDIRECTS = [
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/charging-port-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/charging-port-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920--sm-x926/galaxy-tab-s10-ultra-screen-repair', destination: '/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920-sm-x926/screen-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/battery-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/battery-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/front-camera-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/charging-port-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/charging-port-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/water-damage-repair', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/front-camera-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/water-damage-repair', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/water-damage-repair', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/screen-replacement', destination: '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/screen-replacement', permanent: true },
+  { source: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/back-camera-replacement', permanent: true },
+] as const;
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -314,7 +327,7 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580/galaxy-tab-a-101-2016-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/galaxy-tab-a-105-2018-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a-105-2018-sm-t590--sm-t595/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/galaxy-tab-a9-plus-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a9-plus-sm-x210--sm-x215/back-camera-replacement', permanent: true },
-      { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/back-camera-replacement', permanent: true },
+      { source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/galaxy-tab-s8-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s8-sm-x700--sm-x706/back-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/galaxy-tab-a7-back-camera', destination: '/repairs/tablet/samsung/galaxy-tab-a7-sm-t500/back-camera-replacement', permanent: true },
@@ -333,6 +346,7 @@ const nextConfig: NextConfig = {
       { source: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/galaxy-tab-s7-fe-battery-service', destination: '/repairs/tablet/samsung/galaxy-tab-s7-fe-sm-t730--sm-t733--sm-t736/battery-replacement', permanent: true },
       ...COVERAGE_DRILLDOWN_308_REDIRECTS,
       ...CRAWLED_NI_LEGACY_404_REDIRECTS,
+      ...SAMSUNG_TABLET_REPAIR_DETAIL_SLICE_A_308_REDIRECTS,
       // 13. GSC LEGACY ALIAS REDIRECTS (Tablet)
       { source: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520--sm-x526/galaxy-tab-s10-fe-front-camera', destination: '/repairs/tablet/samsung/galaxy-tab-s10-fe-sm-x520-sm-x526/front-camera-replacement', permanent: true },
       { source: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585--sm-t580', destination: '/repairs/tablet/samsung/galaxy-tab-a-101-2016-sm-p585-sm-t580', permanent: true },

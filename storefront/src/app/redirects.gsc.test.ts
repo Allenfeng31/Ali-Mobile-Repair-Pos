@@ -266,6 +266,30 @@ const samsungTabletModelHubNonSources = [
   '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x917',
 ] as const;
 
+const samsungTabletRepairDetailSliceARedirects = [
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/charging-port-replacement', '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/charging-port-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920--sm-x926/galaxy-tab-s10-ultra-screen-repair', '/repairs/tablet/samsung/galaxy-tab-s10-ultra-sm-x920-sm-x926/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/battery-replacement', '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/battery-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-front-camera', '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290-sm-t295/front-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/charging-port-replacement', '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/charging-port-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510--sm-t515/water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-a-101-2019-sm-t510-sm-t515/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-front-camera', '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/front-camera-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/water-damage-repair', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/water-damage-repair'],
+  ['/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220--sm-t225/screen-replacement', '/repairs/tablet/samsung/galaxy-tab-a7-lite-sm-t220-sm-t225/screen-replacement'],
+  ['/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-back-camera', '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910-sm-x916/back-camera-replacement'],
+] as const;
+
+const faultySamsungTabletBackCameraRedirect = {
+  source: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/galaxy-tab-s-105-back-camera',
+  oldDestination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800--sm-t805/back-camera-replacement',
+  destination: '/repairs/tablet/samsung/galaxy-tab-s-105-sm-t800-sm-t805/back-camera-replacement',
+} as const;
+
+const samsungTabletRepairDetailSliceANonSources = [
+  '/repairs/tablet/samsung/galaxy-tab-s9-ultra-sm-x910--sm-x916/galaxy-tab-s9-ultra-back-housing',
+  '/repairs/tablet/samsung/galaxy-tab-a-80-2019-sm-t290--sm-t295/galaxy-tab-a-80-2019-back-housing',
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -285,6 +309,54 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('permanently redirects only the approved Samsung Tablet Repair Detail Slice A sources directly', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(samsungTabletRepairDetailSliceARedirects).toHaveLength(10);
+    expect(new Set(samsungTabletRepairDetailSliceARedirects.map(([source]) => source))).toHaveLength(10);
+    for (const [source, destination] of samsungTabletRepairDetailSliceARedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+    }
+
+    expect(redirectBySource.get(samsungTabletRepairDetailSliceARedirects[5][0])).toMatchObject({
+      destination: samsungTabletRepairDetailSliceARedirects[5][1],
+      permanent: true,
+    });
+    expect(redirectBySource.get(samsungTabletRepairDetailSliceARedirects[7][0])).toMatchObject({
+      destination: samsungTabletRepairDetailSliceARedirects[7][1],
+      permanent: true,
+    });
+  });
+
+  it('corrects the S 10.5 back-camera redirect without an obsolete-detail hop', async () => {
+    const redirects = await getRedirects();
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+    const matches = redirects.filter((entry) => entry.source === faultySamsungTabletBackCameraRedirect.source);
+
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toMatchObject({
+      destination: faultySamsungTabletBackCameraRedirect.destination,
+      permanent: true,
+    });
+    expect(matches[0].destination).not.toBe(faultySamsungTabletBackCameraRedirect.oldDestination);
+    expect(redirectBySource.has(faultySamsungTabletBackCameraRedirect.destination)).toBe(false);
+    expect(redirectBySource.has(faultySamsungTabletBackCameraRedirect.oldDestination)).toBe(false);
+  });
+
+  it('does not broaden the Samsung Tablet Repair Detail Slice A redirects', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    for (const source of samsungTabletRepairDetailSliceANonSources) {
+      expect(sources.has(source), source).toBe(false);
+    }
+  });
+
   it('keeps each audited Samsung Tablet Model Hub redirect exact and permanent', async () => {
     const redirects = await getRedirects();
     const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
