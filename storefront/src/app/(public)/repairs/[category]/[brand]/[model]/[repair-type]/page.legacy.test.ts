@@ -24,6 +24,31 @@ const activeModelWithoutScreenRepair = {
   ...active,
   models: [{ ...active.models[0], repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 99, variants: [] }] }],
 };
+const waterRepair = { name: 'Water Damage Repair', slug: 'water-damage-repair', price: 0, variants: [] };
+const oppoA77WithoutWaterRepair = {
+  category: 'phone',
+  brand: 'OPPO',
+  slug: 'oppo',
+  models: [{ model: 'A77', slug: 'a77', repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 99, variants: [] }] }],
+};
+const pixel8ProWithWaterRepair = {
+  category: 'phone',
+  brand: 'Google Pixel',
+  slug: 'google-pixel',
+  models: [{ model: 'Pixel 8 Pro', slug: 'pixel-8-pro', repairTypes: [waterRepair] }],
+};
+const pixel4WithWaterRepair = {
+  category: 'phone',
+  brand: 'Google Pixel',
+  slug: 'google-pixel',
+  models: [{ model: 'Pixel 4', slug: 'pixel-4', repairTypes: [waterRepair] }],
+};
+const lenovoYogaSmartTabWithWaterRepair = {
+  category: 'tablet',
+  brand: 'Lenovo',
+  slug: 'lenovo',
+  models: [{ model: 'Lenovo Yoga Smart Tab', slug: 'lenovo-yoga-smart-tab-yt-x705f', repairTypes: [waterRepair] }],
+};
 const retired = { lifecycle: 'retired' as const, category: 'phone', brand: 'Motorola', brandSlug: 'motorola', model: 'Moto G24', modelSlug: 'moto-g24', repair: { name: 'Screen Replacement', slug: 'screen-replacement', price: 149, sourceType: 'real' as const } };
 
 type DetailMatchingProps = { children?: ReactNode; initialResults?: unknown } & Record<string, unknown>;
@@ -64,6 +89,38 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       .rejects.toThrow(`NEXT_REDIRECT_TEST:${destination}`);
     expect(permanentRedirect).toHaveBeenCalledWith(destination);
     expect(fetchRepairCatalog).not.toHaveBeenCalled();
+  });
+
+  it('returns notFound for OPPO A77 Water when the current model lacks that exact repair', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [oppoA77WithoutWaterRepair], retiredRepairs: [] });
+
+    await expect(RepairServicePage({ params: Promise.resolve(params({ brand: 'oppo', model: 'a77', 'repair-type': 'water-damage-repair' })) }))
+      .rejects.toThrow('NEXT_NOT_FOUND_TEST');
+    expect(permanentRedirect).not.toHaveBeenCalled();
+  });
+
+  it('keeps Pixel 8 Pro Water on its retained model-specific Detail route', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [pixel8ProWithWaterRepair], retiredRepairs: [] });
+
+    await expect(RepairServicePage({ params: Promise.resolve(params({ brand: 'google-pixel', model: 'pixel-8-pro', 'repair-type': 'water-damage-repair' })) }))
+      .resolves.toBeTruthy();
+    expect(permanentRedirect).not.toHaveBeenCalled();
+  });
+
+  it('keeps the Google-brand Pixel 4 Water alias consolidating to shared Water', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [pixel4WithWaterRepair], retiredRepairs: [] });
+
+    await expect(RepairServicePage({ params: Promise.resolve(params({ brand: 'google', model: 'pixel-4', 'repair-type': 'water-damage-repair' })) }))
+      .rejects.toThrow('NEXT_REDIRECT_TEST:/repairs/water-damage');
+    expect(permanentRedirect).toHaveBeenCalledWith('/repairs/water-damage');
+  });
+
+  it('keeps Lenovo Yoga Smart Tab Water on its retained model-specific Detail route', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [lenovoYogaSmartTabWithWaterRepair], retiredRepairs: [] });
+
+    await expect(RepairServicePage({ params: Promise.resolve(params({ category: 'tablet', brand: 'lenovo', model: 'lenovo-yoga-smart-tab-yt-x705f', 'repair-type': 'water-damage-repair' })) }))
+      .resolves.toBeTruthy();
+    expect(permanentRedirect).not.toHaveBeenCalled();
   });
 
   it('returns normal page data for an active repair', async () => {

@@ -4604,6 +4604,14 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
     notFound();
   }
 
+  const isWaterRepairRequest = isWaterDamageRepairSlug(rawParams['repair-type']);
+  if (
+    isWaterRepairRequest &&
+    !modelEntry.repairTypes.some((repair) => repair.slug === canonicalRepairSlug)
+  ) {
+    notFound();
+  }
+
   if (
     rawParams.category === 'watch' &&
     canonicalBrand === 'apple' &&
@@ -4618,7 +4626,7 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
   }
 
   const isGoogleAlias = isGooglePixelAliasBrand(rawParams.brand);
-  if (isWaterDamageRepairSlug(rawParams['repair-type'])) {
+  if (isWaterRepairRequest) {
     const canonicalPath = buildCanonicalModelRepairPath(
       rawParams.category,
       canonicalBrand,
