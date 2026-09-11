@@ -43,6 +43,8 @@ const COVERAGE_DRILLDOWN_308_REDIRECTS = [
   { source: '/repairs/phone/samsung/galaxy-s23-fe/logic-board', destination: '/repairs/phone/samsung/galaxy-s23-fe/logic-board-repair', permanent: true },
   { source: '/repairs/phone/samsung/galaxy-z-fold-5/logic-board', destination: '/repairs/phone/samsung/galaxy-z-fold-5/logic-board-repair', permanent: true },
   { source: '/repairs/tablet/ipad/ipad-pro-129-inch-4th-generation/logic-board', destination: '/repairs/tablet/ipad/ipad-pro-129-inch-4th-generation/logic-board-repair', permanent: true },
+  { source: '/repairs/laptop/macbook/macbook-air-13-inch-m1-2020', destination: '/repairs/laptop/macbook/macbook-air-13-m1-2020', permanent: true },
+  { source: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-water-damage-repair', destination: '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/water-damage-repair', permanent: true },
 ] as const;
 
 const CRAWLED_NI_LEGACY_404_REDIRECTS = [

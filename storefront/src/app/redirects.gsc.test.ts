@@ -342,6 +342,32 @@ const samsungTabletRepairDetailFinalTailPreservedRedirects = [
   ['/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550--sm-t550--sm-t555/galaxy-tab-a-97-screen-repair', '/repairs/tablet/samsung/galaxy-tab-a-97-sm-p550-sm-t550-sm-t555/screen-replacement'],
 ] as const;
 
+const nonSamsungTabletSliceARedirects = [
+  [
+    '/repairs/laptop/macbook/macbook-air-13-inch-m1-2020',
+    '/repairs/laptop/macbook/macbook-air-13-m1-2020',
+  ],
+  [
+    '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-water-damage-repair',
+    '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/water-damage-repair',
+  ],
+] as const;
+
+const nonSamsungTabletSliceAHoldSources = [
+  '/repairs/tablet/lenovo/lenovo-yoga-smart-tab-yt-x705f/lenovo-yoga-smart-tab-back-housing',
+  '/copy-of-phone-repair',
+] as const;
+
+const nonSamsungTabletSliceAExistingStaticRedirects = [
+  ['/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu--tb-128fu', '/repairs/tablet/lenovo/lenovo-tab-m10-plus-gen-3-tb-125fu-tb-128fu'],
+  ['/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/lenovo-tab-m9-battery-service', '/repairs/tablet/lenovo/lenovo-tab-m9-tb-310fu/battery-replacement'],
+  ['/repairs/phone/samsung/galaxy-s25/logic-board', '/repairs/phone/samsung/galaxy-s25/logic-board-repair'],
+  ['/repairs/phone/samsung/galaxy-note-20/logic-board', '/repairs/phone/samsung/galaxy-note-20/logic-board-repair'],
+] as const;
+
+const nonSamsungTabletSliceADynamicPixelWaterSource =
+  '/repairs/phone/google/pixel-4/water-damage-repair';
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -361,6 +387,35 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('adds only the two approved non-Samsung Tablet Slice A redirects', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(nonSamsungTabletSliceARedirects).toHaveLength(2);
+    for (const [source, destination] of nonSamsungTabletSliceARedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+      expect(redirectBySource.has(destination), destination).toBe(false);
+    }
+
+    expect(redirectBySource.get(nonSamsungTabletSliceARedirects[1][0])?.destination)
+      .not.toBe('/repairs/water-damage');
+
+    for (const source of nonSamsungTabletSliceAHoldSources) {
+      expect(sources.has(source), source).toBe(false);
+    }
+
+    for (const [source, destination] of nonSamsungTabletSliceAExistingStaticRedirects) {
+      expect(redirectBySource.get(source), source).toMatchObject({ destination, permanent: true });
+    }
+
+    expect(sources.has(nonSamsungTabletSliceADynamicPixelWaterSource)).toBe(false);
+    expect(sources.has('/repairs/laptop/macbook/macbook-air-13-inch-m2-2020')).toBe(false);
+  });
+
   it('leaves unsupported Samsung Tablet Final Tail back-housing unresolved', async () => {
     const redirects = await getRedirects();
     const sources = new Set(redirects.map((entry) => entry.source));
