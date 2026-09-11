@@ -6286,7 +6286,7 @@ export function getMacBookCategoryHubLinks(): MacBookExploreLink[] {
     { href: '/repairs/phone/iphone', label: 'Explore iPhone repairs', slug: 'iphone' },
     { href: '/repairs/tablet/ipad', label: 'Explore iPad repairs', slug: 'ipad' },
     { href: '/repairs/phone/samsung', label: 'Explore Samsung phone repairs', slug: 'samsung' },
-    { href: '/repairs/watch/apple-watch', label: 'Explore Apple Watch repairs', slug: 'apple-watch' },
+    { href: '/repairs/watch/apple', label: 'Explore Apple Watch repairs', slug: 'apple-watch' },
   ];
 }
 
