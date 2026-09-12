@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react';
+import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { RepairServiceSchema } from './SchemaOrg';
+import { LocalBusinessSchema, RepairServiceSchema } from './SchemaOrg';
 
 function repairServiceData(price?: string) {
   const element = RepairServiceSchema({
@@ -41,5 +42,18 @@ describe('RepairServiceSchema offer policy', () => {
         priceCurrency: 'AUD',
       },
     });
+  });
+});
+
+describe('LocalBusinessSchema rendering', () => {
+  it('renders one parseable MobilePhoneStore JSON-LD script for the canonical local business', () => {
+    const { container } = render(<LocalBusinessSchema />);
+    const scripts = container.querySelectorAll('script[type="application/ld+json"]');
+
+    expect(scripts).toHaveLength(1);
+
+    const schema = JSON.parse(scripts[0].textContent ?? '');
+    expect(schema['@type']).toBe('MobilePhoneStore');
+    expect(schema['@id']).toBe('https://www.alimobile.com.au/#localbusiness');
   });
 });

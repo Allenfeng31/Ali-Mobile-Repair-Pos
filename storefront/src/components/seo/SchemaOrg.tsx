@@ -1,4 +1,3 @@
-import Script from "next/script";
 import { LOCAL_BUSINESS_OPENING_HOURS } from "@/lib/businessHours";
 
 interface SchemaOrgProps {
@@ -14,7 +13,7 @@ export function SchemaOrg({ type, data }: SchemaOrgProps) {
   };
 
   return (
-    <Script
+    <script
       id={`schema-${type.toLowerCase()}`}
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
