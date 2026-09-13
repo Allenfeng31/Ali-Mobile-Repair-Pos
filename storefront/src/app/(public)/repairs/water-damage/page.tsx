@@ -163,18 +163,7 @@ const serviceSchema = {
   description:
     'Quote-first liquid damage assessment and cleaning advice for phones affected by water or other liquid exposure.',
   provider: {
-    '@type': 'LocalBusiness',
-    name: 'Ali Mobile & Repair',
-    url: 'https://www.alimobile.com.au/',
-    telephone: '0481 058 514',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Ringwood Square Shopping Centre, Kiosk C1, Seymour Street',
-      addressLocality: 'Ringwood',
-      addressRegion: 'VIC',
-      postalCode: '3134',
-      addressCountry: 'AU',
-    },
+    '@id': 'https://www.alimobile.com.au/#localbusiness',
   },
   areaServed: [
     {

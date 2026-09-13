@@ -1877,18 +1877,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? "MacBook repair support at Ringwood Square Shopping Centre, with model confirmation, quote approval and parts availability checked before work begins."
       : brandHubHeroDescription,
     provider: {
-      "@type": "LocalBusiness",
-      name: "Ali Mobile & Repair",
-      url: "https://www.alimobile.com.au/",
-      telephone: "0481 058 514",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "Ringwood Square Shopping Centre, Kiosk C1, Seymour Street",
-        addressLocality: "Ringwood",
-        addressRegion: "VIC",
-        postalCode: "3134",
-        addressCountry: "AU",
-      },
+      "@id": "https://www.alimobile.com.au/#localbusiness",
     },
     areaServed: serviceSchemaAreaSource.map((area) => ({
       "@type": "Place",

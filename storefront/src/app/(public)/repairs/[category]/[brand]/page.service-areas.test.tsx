@@ -128,6 +128,13 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       "Ringwood North, VIC",
       "Nunawading, VIC",
     ]);
+    expect(serviceSchema?.provider).toBeDefined();
+    expect(serviceSchema?.provider).toMatchObject({
+      "@id": "https://www.alimobile.com.au/#localbusiness",
+    });
+    expect(serviceSchema?.provider).not.toHaveProperty("name");
+    expect(serviceSchema?.provider).not.toHaveProperty("telephone");
+    expect(serviceSchema?.provider).not.toHaveProperty("address");
   });
 
   it("renders only the approved four local cards for the iPad Brand Hub", async () => {
