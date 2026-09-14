@@ -82,6 +82,36 @@ describe('admin repair result taxonomy route', () => {
     });
   });
 
+  it('keeps the latest-results list capped while returning authoritative global counts', async () => {
+    const latestResults = [{ id: 'latest-result' }];
+    const limit = vi.fn(async () => ({ data: latestResults, error: null }));
+    const order = vi.fn(() => ({ limit }));
+    const listSelect = vi.fn(() => ({ order }));
+    const totalSelect = vi.fn(async () => ({ data: null, error: null, count: 137 }));
+    const publishedPrivacyChecked = vi.fn(async () => ({ data: null, error: null, count: 126 }));
+    const publishedStatus = vi.fn(() => ({ eq: publishedPrivacyChecked }));
+    const from = vi.fn()
+      .mockReturnValueOnce({ select: listSelect })
+      .mockReturnValueOnce({ select: totalSelect })
+      .mockReturnValueOnce({ select: vi.fn(() => ({ eq: publishedStatus })) });
+    createServiceRoleClient.mockReturnValue({ from });
+
+    const response = await GET(new Request('http://localhost/api/admin/repair-results'));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      status: 'SUCCESS',
+      data: latestResults,
+      stats: { total: 137, published: 126 },
+    });
+    expect(order).toHaveBeenCalledWith('created_at', { ascending: false });
+    expect(limit).toHaveBeenCalledWith(100);
+    expect(totalSelect).toHaveBeenCalledWith('id', { count: 'exact', head: true });
+    expect(publishedStatus).toHaveBeenCalledWith('status', 'published');
+    expect(publishedPrivacyChecked).toHaveBeenCalledWith('privacy_checked', true);
+  });
+
   it('rejects an invalid taxonomy selection before uploads or database writes', async () => {
     fetchRepairCatalog.mockResolvedValueOnce(catalog);
     const formData = new FormData();

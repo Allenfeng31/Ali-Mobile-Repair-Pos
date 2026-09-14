@@ -189,17 +189,39 @@ export async function GET(request: Request) {
     }
 
     const supabase = createServiceRoleClient();
-    const { data, error } = await supabase
-      .from('repair_results')
-      .select(PUBLIC_REPAIR_RESULT_SELECT)
-      .order('created_at', { ascending: false })
-      .limit(100);
+    const [latestResults, totalResults, publishedResults] = await Promise.all([
+      supabase
+        .from('repair_results')
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase
+        .from('repair_results')
+        .select('id', { count: 'exact', head: true }),
+      supabase
+        .from('repair_results')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'published')
+        .eq('privacy_checked', true),
+    ]);
 
-    if (error) throw error;
+    if (latestResults.error) throw latestResults.error;
+    if (totalResults.error) throw totalResults.error;
+    if (publishedResults.error) throw publishedResults.error;
+    if (typeof totalResults.count !== 'number' || typeof publishedResults.count !== 'number') {
+      throw new Error('Authoritative repair result counts are unavailable.');
+    }
 
     return jsonWithCors(
       request,
-      { status: 'SUCCESS', data: data || [] },
+      {
+        status: 'SUCCESS',
+        data: latestResults.data || [],
+        stats: {
+          total: totalResults.count,
+          published: publishedResults.count,
+        },
+      },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
     );
   } catch (error) {
