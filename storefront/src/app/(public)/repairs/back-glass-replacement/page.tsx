@@ -134,6 +134,7 @@ export default async function BackGlassReplacementPage() {
       <ServiceSchema
         serviceName="Back Glass and Housing Repair Services in Ringwood"
         description={PAGE_DESCRIPTION}
+        url={PAGE_URL}
       />
       <script
         type="application/ld+json"

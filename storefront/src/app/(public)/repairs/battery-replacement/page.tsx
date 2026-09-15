@@ -119,6 +119,7 @@ export default async function BatteryReplacementPage() {
       <ServiceSchema
         serviceName="Battery Replacement Services in Ringwood"
         description={PAGE_DESCRIPTION}
+        url={PAGE_URL}
       />
       <script
         type="application/ld+json"

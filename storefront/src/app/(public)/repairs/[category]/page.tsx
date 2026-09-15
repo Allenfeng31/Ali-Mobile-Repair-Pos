@@ -365,6 +365,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
       <ServiceSchema
         serviceName={data.schema.serviceName}
         description={data.schema.description}
+        url={`https://www.alimobile.com.au/repairs/${safeSlugSegment(category)}`}
       />
 
       <main className="repair-page-shell">

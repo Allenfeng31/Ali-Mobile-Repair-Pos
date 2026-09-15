@@ -124,6 +124,7 @@ export default async function ScreenReplacementPage() {
       <ServiceSchema
         serviceName="Screen Replacement Services in Ringwood"
         description={PAGE_DESCRIPTION}
+        url={PAGE_URL}
       />
       <script
         type="application/ld+json"

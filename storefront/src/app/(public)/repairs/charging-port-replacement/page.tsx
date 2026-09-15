@@ -119,6 +119,7 @@ export default async function ChargingPortReplacementPage() {
       <ServiceSchema
         serviceName="Charging Port Repair Services in Ringwood"
         description={PAGE_DESCRIPTION}
+        url={PAGE_URL}
       />
       <script
         type="application/ld+json"

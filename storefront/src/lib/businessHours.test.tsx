@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 import { BUSINESS_HOURS, LOCAL_BUSINESS_OPENING_HOURS } from "./businessHours";
 import { getLocalBusinessSchemaData } from "@/components/seo/SchemaOrg";
-import { getServiceLocalBusinessSchema } from "@/components/services/ServiceSchema";
 
 describe("business hours", () => {
   it("defines the single Monday-Saturday 09:00-17:00 authority and booking starts", () => {
@@ -35,11 +34,8 @@ describe("business hours", () => {
     });
   });
 
-  it("builds 09:00-17:00 LocalBusiness JSON-LD for homepage and service schemas", () => {
+  it("builds 09:00-17:00 LocalBusiness JSON-LD for the canonical homepage entity", () => {
     expect(getLocalBusinessSchemaData()).toMatchObject({
-      openingHoursSpecification: [{ opens: "09:00", closes: "17:00" }],
-    });
-    expect(getServiceLocalBusinessSchema("Screen repair")).toMatchObject({
       openingHoursSpecification: [{ opens: "09:00", closes: "17:00" }],
     });
   });
