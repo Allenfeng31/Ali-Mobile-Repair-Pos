@@ -17,6 +17,8 @@ vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({ def
 vi.mock('next/navigation', () => ({ notFound, permanentRedirect }));
 
 import RepairServicePage from './page';
+import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
+import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 
 const params = (overrides: Record<string, string> = {}) => ({ category: 'phone', brand: 'motorola', model: 'moto-g24', 'repair-type': 'screen-replacement', ...overrides });
 const active = { category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{ model: 'Moto G24', slug: 'moto-g24', repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 149, variants: [] }] }] };
@@ -42,6 +44,18 @@ const pixel4WithWaterRepair = {
   brand: 'Google Pixel',
   slug: 'google-pixel',
   models: [{ model: 'Pixel 4', slug: 'pixel-4', repairTypes: [waterRepair] }],
+};
+const pixel9aRepairs = [
+  { name: 'Screen Replacement', slug: 'screen-replacement', price: 0, variants: [] },
+  { name: 'Battery Replacement', slug: 'battery-replacement', price: 0, variants: [] },
+  { name: 'Charging Port Replacement', slug: 'charging-port-replacement', price: 0, variants: [] },
+  { name: 'Back Glass Replacement', slug: 'back-glass-replacement', price: 0, variants: [] },
+];
+const pixel9a = {
+  category: 'phone',
+  brand: 'Google Pixel',
+  slug: 'google-pixel',
+  models: [{ model: 'Google Pixel 9a', slug: 'pixel-9a', repairTypes: pixel9aRepairs }],
 };
 const lenovoYogaSmartTabWithWaterRepair = {
   category: 'tablet',
@@ -105,6 +119,38 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     await expect(RepairServicePage({ params: Promise.resolve(params({ brand: 'google-pixel', model: 'pixel-8-pro', 'repair-type': 'water-damage-repair' })) }))
       .resolves.toBeTruthy();
     expect(permanentRedirect).not.toHaveBeenCalled();
+  });
+
+  it('serves only the configured Pixel 9a catalogue-backed Detail repairs', async () => {
+    const config = getGooglePixelHardwareConfig('pixel-9a');
+    expect(config).toMatchObject({
+      modelSlug: 'pixel-9a',
+      modelName: 'Google Pixel 9a',
+      rearPanelType: 'composite',
+      fingerprintType: 'under-display',
+      supportedRepairTypes: pixel9aRepairs.map((repair) => repair.slug),
+    });
+    expect(getGooglePixelHardwareConfig('pixel-9')).not.toBeNull();
+    expect(getGooglePixelHardwareConfig('pixel-8a')).not.toBeNull();
+
+    for (const repair of pixel9aRepairs) {
+      expect(getAliMobileEnhancedGooglePixelRepairType({
+        category: 'phone', brand: 'google-pixel', model: 'pixel-9a', 'repair-type': repair.slug,
+      })).toBe(repair.slug);
+    }
+    for (const repairType of ['front-camera-replacement', 'back-camera-replacement', 'logic-board-repair']) {
+      expect(getAliMobileEnhancedGooglePixelRepairType({
+        category: 'phone', brand: 'google-pixel', model: 'pixel-9a', 'repair-type': repairType,
+      })).toBeNull();
+    }
+
+    fetchRepairCatalog.mockResolvedValue({ brands: [pixel9a], retiredRepairs: [] });
+    for (const repair of pixel9aRepairs) {
+      await expect(RepairServicePage({ params: Promise.resolve(params({
+        brand: 'google-pixel', model: 'pixel-9a', 'repair-type': repair.slug,
+      })) })).resolves.toBeTruthy();
+    }
+    expect(notFound).not.toHaveBeenCalled();
   });
 
   it('keeps the Google-brand Pixel 4 Water alias consolidating to shared Water', async () => {

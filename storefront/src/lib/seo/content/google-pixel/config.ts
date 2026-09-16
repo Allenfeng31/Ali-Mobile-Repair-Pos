@@ -412,6 +412,20 @@ export const GOOGLE_PIXEL_HARDWARE_CONFIG: Record<
       'logic-board-repair',
     ],
   },
+  'pixel-9a': {
+    modelSlug: 'pixel-9a',
+    modelName: 'Google Pixel 9a',
+    rearPanelType: 'composite',
+    isFoldable: false,
+    displayForm: 'slab',
+    fingerprintType: 'under-display',
+    supportedRepairTypes: [
+      'screen-replacement',
+      'battery-replacement',
+      'charging-port-replacement',
+      'back-glass-replacement',
+    ],
+  },
   'pixel-9-pro': {
     modelSlug: 'pixel-9-pro',
     modelName: 'Google Pixel 9 Pro',

@@ -36,6 +36,7 @@ export type AliMobileEnhancedGooglePixelModelSlug =
   | 'pixel-8-pro'
   | 'pixel-8a'
   | 'pixel-9'
+  | 'pixel-9a'
   | 'pixel-9-pro'
   | 'pixel-9-pro-fold'
   | 'pixel-9-pro-xl';

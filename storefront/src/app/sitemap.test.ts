@@ -155,6 +155,38 @@ describe('Sitemap SEO Generation', () => {
       .toBe('https://www.alimobile.com.au');
   });
 
+  it('includes configured Pixel 9a catalogue routes while excluding unconfigured Google Pixel models', async () => {
+    fetchRepairCatalogMock.mockResolvedValueOnce({
+      brands: [{
+        category: 'phone',
+        slug: 'google-pixel',
+        models: [
+          {
+            slug: 'pixel-9a',
+            repairTypes: [
+              { slug: 'screen-replacement' },
+              { slug: 'battery-replacement' },
+              { slug: 'charging-port-replacement' },
+              { slug: 'back-glass-replacement' },
+            ],
+          },
+          { slug: 'pixel-unconfigured', repairTypes: [{ slug: 'screen-replacement' }] },
+        ],
+      }],
+    });
+
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+    expect(paths).toEqual(expect.arrayContaining([
+      '/repairs/phone/google-pixel/pixel-9a',
+      '/repairs/phone/google-pixel/pixel-9a/screen-replacement',
+      '/repairs/phone/google-pixel/pixel-9a/battery-replacement',
+      '/repairs/phone/google-pixel/pixel-9a/charging-port-replacement',
+      '/repairs/phone/google-pixel/pixel-9a/back-glass-replacement',
+    ]));
+    expect(paths).not.toContain('/repairs/phone/google-pixel/pixel-unconfigured');
+    expect(paths).not.toContain('/repairs/phone/google-pixel/pixel-unconfigured/screen-replacement');
+  });
+
   it('suppresses only exact Phase 1 source paths while retaining held and outside-sample routes', async () => {
     fetchRepairCatalogMock.mockResolvedValueOnce({
       brands: [
