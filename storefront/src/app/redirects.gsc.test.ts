@@ -44,6 +44,7 @@ const { fetchRepairCatalogMock, pixelModels, unconfiguredPixelModels, samsungMod
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog: fetchRepairCatalogMock }));
 
 import nextConfig from '../../next.config';
+import { SERVICE_AREAS } from '@/data/serviceAreas';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { APPLE_WATCH_MODELS } from '@/lib/seo/content/apple-watch';
 import sitemap from './sitemap';
@@ -119,6 +120,11 @@ const approvedRedirects = [
     source: '/product-page/ipad-case-:slug(.*)',
     destination: '/repairs/tablet/ipad',
   },
+] as const;
+
+const locationHyphenlessAliases = [
+  ['/locations/ringwoodeast', '/locations/ringwood-east'],
+  ['/locations/ringwoodnorth', '/locations/ringwood-north'],
 ] as const;
 
 const googlePixelSharedRepairAliases = [
@@ -387,6 +393,27 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('permanently redirects only the verified hyphen-less location aliases to their canonical paths', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+
+    expect(locationHyphenlessAliases).toHaveLength(2);
+    for (const [source, destination] of locationHyphenlessAliases) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+    }
+
+    for (const area of SERVICE_AREAS) {
+      expect(sources.has(`/locations/${area.slug}`), area.slug).toBe(false);
+    }
+
+    expect(
+      redirects.filter((entry) => entry.source.startsWith('/locations/')).map((entry) => entry.source),
+    ).toEqual(locationHyphenlessAliases.map(([source]) => source));
+  });
+
   it('adds only the two approved non-Samsung Tablet Slice A redirects', async () => {
     const redirects = await getRedirects();
     const sources = new Set(redirects.map((entry) => entry.source));
