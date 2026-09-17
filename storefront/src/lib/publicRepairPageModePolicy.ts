@@ -1,5 +1,202 @@
 import type { RepairOrigin } from './publicRepairCataloguePolicy';
 import { compareDeterministicStrings } from './deterministicStrings';
+import { getCanonicalBrandSlug, isWaterDamageRepairSlug } from './waterDamageRouting';
+
+export type PhoneBrandClass = 'iphone' | 'core-android' | 'secondary-phone';
+
+export type TargetPublicRepairPageMode =
+  | 'independent'
+  | 'brand-shared'
+  | 'generic-shared'
+  | 'shared-only'
+  | 'hidden';
+
+export type PublicPageOwnershipScope = 'model' | 'brand' | 'device-category' | 'global';
+
+export type SharedMasterAvailability = 'not-required' | 'available' | 'missing';
+
+export type TargetPublicRepairPageModeInput = Readonly<{
+  category: string;
+  brandSlug: string;
+  modelSlug: string;
+  repairSlug: string;
+  /** Service evidence is intentionally not used to choose the target page mode. */
+  repairOrigin?: RepairOrigin | 'absent';
+  legacyStatus?: NonIphonePublicRepairPageModeInput['legacyStatus'];
+}>;
+
+export type TargetPublicRepairPageModeDecision = Readonly<{
+  targetMode: TargetPublicRepairPageMode;
+  ownershipScope: PublicPageOwnershipScope | null;
+  independentDetailAllowed: boolean;
+  sharedDestinationRequired: boolean;
+  safeToExpose: boolean;
+  sharedMasterAvailability: SharedMasterAvailability;
+  canonicalBrandSlug: string;
+  canonicalRepairSlug: string;
+  legacyTreatment: 'none' | 'separate';
+  reason:
+    | 'iphone-normal-repair'
+    | 'core-android-model-repair'
+    | 'core-android-brand-shared'
+    | 'secondary-generic-shared'
+    | 'logic-board-shared-only'
+    | 'water-damage-shared-only'
+    | 'unsupported-device-category'
+    | 'unknown-repair-taxonomy'
+    | 'invalid-identity';
+}>;
+
+const TARGET_CORE_MODEL_REPAIR_SLUGS = new Set([
+  'screen-replacement',
+  'battery-replacement',
+  'charging-port-replacement',
+  'back-glass-replacement',
+  'back-housing-replacement',
+  'back-cover-replacement',
+]);
+
+const TARGET_PERIPHERAL_REPAIR_SLUGS = new Set([
+  'camera-lens-replacement',
+  'front-camera-replacement',
+  'back-camera-replacement',
+  'loudspeaker-replacement',
+  'earpiece-speaker-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+]);
+
+const TARGET_LOGIC_BOARD_REPAIR_SLUGS = new Set(['logic-board-repair']);
+const TARGET_DEVICE_CATEGORIES = new Set(['phone', 'tablet', 'laptop', 'watch']);
+
+function targetCanonicalRepairSlug(repairSlug: string) {
+  return isWaterDamageRepairSlug(repairSlug) ? 'water-damage-repair' : repairSlug;
+}
+
+function targetLegacyTreatment(input: TargetPublicRepairPageModeInput) {
+  return input.legacyStatus && input.legacyStatus !== 'none' ? 'separate' as const : 'none' as const;
+}
+
+function targetDecision(
+  input: TargetPublicRepairPageModeInput,
+  targetMode: TargetPublicRepairPageMode,
+  ownershipScope: PublicPageOwnershipScope | null,
+  sharedMasterAvailability: SharedMasterAvailability,
+  reason: TargetPublicRepairPageModeDecision['reason'],
+  canonicalBrandSlug: string,
+  canonicalRepairSlug: string,
+): TargetPublicRepairPageModeDecision {
+  return Object.freeze({
+    targetMode,
+    ownershipScope,
+    independentDetailAllowed: targetMode === 'independent',
+    sharedDestinationRequired: ownershipScope !== null && targetMode !== 'independent',
+    safeToExpose: targetMode !== 'hidden' && (targetMode === 'independent' || sharedMasterAvailability !== 'missing'),
+    sharedMasterAvailability,
+    canonicalBrandSlug,
+    canonicalRepairSlug,
+    legacyTreatment: targetLegacyTreatment(input),
+    reason,
+  });
+}
+
+export function classifyPhoneBrand(brandSlug: string): PhoneBrandClass {
+  const canonicalBrandSlug = getCanonicalBrandSlug(brandSlug);
+
+  if (canonicalBrandSlug === 'iphone' || canonicalBrandSlug === 'apple') return 'iphone';
+  if (canonicalBrandSlug === 'samsung' || canonicalBrandSlug === 'google-pixel' || canonicalBrandSlug === 'oppo') {
+    return 'core-android';
+  }
+
+  return 'secondary-phone';
+}
+
+/**
+ * Pure future-page policy. It deliberately does not generate hrefs or switch
+ * current routing; consumers must separately verify a shared master exists.
+ */
+export function evaluateTargetPublicRepairPageMode(
+  input: TargetPublicRepairPageModeInput,
+): TargetPublicRepairPageModeDecision {
+  const canonicalBrandSlug = getCanonicalBrandSlug(input.brandSlug);
+  const canonicalRepairSlug = targetCanonicalRepairSlug(input.repairSlug);
+
+  if (!isCanonicalSlug(input.category) || !isCanonicalSlug(canonicalBrandSlug)
+    || !isCanonicalSlug(input.modelSlug) || !isCanonicalSlug(canonicalRepairSlug)) {
+    return targetDecision(input, 'hidden', null, 'not-required', 'invalid-identity', canonicalBrandSlug, canonicalRepairSlug);
+  }
+
+  if (!TARGET_DEVICE_CATEGORIES.has(input.category)) {
+    return targetDecision(input, 'hidden', null, 'not-required', 'unsupported-device-category', canonicalBrandSlug, canonicalRepairSlug);
+  }
+
+  if (TARGET_LOGIC_BOARD_REPAIR_SLUGS.has(canonicalRepairSlug)) {
+    return targetDecision(
+      input,
+      'shared-only',
+      'device-category',
+      input.category === 'phone' ? 'available' : 'missing',
+      'logic-board-shared-only',
+      canonicalBrandSlug,
+      canonicalRepairSlug,
+    );
+  }
+
+  if (canonicalRepairSlug === 'water-damage-repair') {
+    return targetDecision(
+      input,
+      'shared-only',
+      'global',
+      'available',
+      'water-damage-shared-only',
+      canonicalBrandSlug,
+      canonicalRepairSlug,
+    );
+  }
+
+  if (input.category !== 'phone') {
+    return targetDecision(input, 'hidden', null, 'not-required', 'unsupported-device-category', canonicalBrandSlug, canonicalRepairSlug);
+  }
+
+  const brandClass = classifyPhoneBrand(canonicalBrandSlug);
+  const isCoreModelRepair = TARGET_CORE_MODEL_REPAIR_SLUGS.has(canonicalRepairSlug);
+  const isPeripheralRepair = TARGET_PERIPHERAL_REPAIR_SLUGS.has(canonicalRepairSlug);
+
+  if (!isCoreModelRepair && !isPeripheralRepair) {
+    return targetDecision(input, 'hidden', null, 'not-required', 'unknown-repair-taxonomy', canonicalBrandSlug, canonicalRepairSlug);
+  }
+
+  if (brandClass === 'iphone') {
+    return targetDecision(input, 'independent', 'model', 'not-required', 'iphone-normal-repair', canonicalBrandSlug, canonicalRepairSlug);
+  }
+
+  if (brandClass === 'core-android') {
+    if (isCoreModelRepair) {
+      return targetDecision(input, 'independent', 'model', 'not-required', 'core-android-model-repair', canonicalBrandSlug, canonicalRepairSlug);
+    }
+
+    const currentBrandMasterExists = !['front-camera-replacement', 'back-camera-replacement'].includes(canonicalRepairSlug);
+    return targetDecision(
+      input,
+      'brand-shared',
+      'brand',
+      currentBrandMasterExists ? 'available' : 'missing',
+      'core-android-brand-shared',
+      canonicalBrandSlug,
+      canonicalRepairSlug,
+    );
+  }
+
+  return targetDecision(
+    input,
+    'generic-shared',
+    'global',
+    isPeripheralRepair ? 'available' : 'missing',
+    'secondary-generic-shared',
+    canonicalBrandSlug,
+    canonicalRepairSlug,
+  );
+}
 
 export type NonIphonePublicRepairPageModeInput = {
   category: string;
