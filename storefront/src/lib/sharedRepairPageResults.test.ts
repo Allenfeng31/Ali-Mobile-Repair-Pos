@@ -103,6 +103,21 @@ describe('Shared Page V2 Repair Result selection', () => {
     expect(selected.map((seed) => seed.id)).toEqual(['earpiece-pixel-9a', 'earpiece-pixel-8']);
   });
 
+  it.each([
+    ['power-button-replacement', 'Power Button Replacement'],
+    ['volume-button-replacement', 'Volume Button Replacement'],
+  ] as const)('matches and prioritizes selected Google Pixel %s proof by exact repair identity', (repairTypeSlug, repairType) => {
+    const selected = selectSharedRepairPageResultSeeds([
+      result({ id: `${repairTypeSlug}-pixel-8`, repair_type: repairType, repair_type_slug: repairTypeSlug, published_at: '2026-09-06T09:00:00.000Z' }),
+      result({ id: `${repairTypeSlug}-pixel-9a`, model: 'Pixel 9a', model_slug: 'pixel-9a', repair_type: repairType, repair_type_slug: repairTypeSlug, published_at: '2026-09-01T09:00:00.000Z' }),
+      result({ id: `${repairTypeSlug}-wrong-earpiece`, repair_type_slug: 'earpiece-speaker-replacement' }),
+    ], {
+      category: 'phone', brandSlug: 'google-pixel', repairTypeSlug, selectedModelSlug: 'pixel-9a',
+    });
+
+    expect(selected.map((seed) => seed.id)).toEqual([`${repairTypeSlug}-pixel-9a`, `${repairTypeSlug}-pixel-8`]);
+  });
+
   it('prioritizes a selected catalogue-only Pixel 10a result without a price candidate', () => {
     const selected = selectSharedRepairPageResultSeeds([
       result({ id: 'pixel-8-newer', model_slug: 'pixel-8', published_at: '2026-09-06T09:00:00.000Z' }),

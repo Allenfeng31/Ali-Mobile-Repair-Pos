@@ -93,6 +93,35 @@ const earpieceGoogleBrand: BrandEntry = {
   ],
 };
 
+function googleButtonBrand(repairSlug: 'power-button-replacement' | 'volume-button-replacement', repairName: string): BrandEntry {
+  return {
+    ...googleBrand,
+    models: [
+      {
+        model: 'Pixel 8',
+        slug: 'pixel-8',
+        repairTypes: [{
+          slug: repairSlug,
+          name: repairName,
+          price: 109,
+          repairOrigin: 'pos',
+          variants: [
+            { quality_grade: 'Standard', price: 109, is_recommended: true },
+            { quality_grade: 'Premium', price: 139, is_recommended: false },
+          ],
+        }],
+      },
+      {
+        model: 'Pixel 9',
+        slug: 'pixel-9',
+        repairTypes: [{ slug: repairSlug, name: repairName, price: 129, repairOrigin: 'pos' }],
+      },
+      { model: 'Pixel 9a', slug: 'pixel-9a', repairTypes: [] },
+      { model: 'Pixel 10a', slug: 'pixel-10a', repairTypes: [] },
+    ],
+  };
+}
+
 describe('Shared Page V2 candidate and destination foundation', () => {
   it('includes a catalogue-only Pixel 10a in shared loudspeaker context without hardware enrichment', () => {
     expect(getGooglePixelHardwareConfig('pixel-10a')).toBeNull();
@@ -168,6 +197,22 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$129');
   });
 
+  it.each([
+    ['power-button-replacement', 'Power Button Replacement'],
+    ['volume-button-replacement', 'Volume Button Replacement'],
+  ] as const)('uses catalogue-only eligibility and exact POS pricing for %s', (repairSlug, repairName) => {
+    const brand = googleButtonBrand(repairSlug, repairName);
+    const supportedModels = buildSharedRepairPageSupportedModels({ brands: [brand], canonicalBrandSlug: 'google-pixel', repairSlug });
+    const candidates = buildSharedRepairPageCandidates({ brands: [brand], canonicalBrandSlug: 'google-pixel', repairSlug });
+
+    expect(getGooglePixelHardwareConfig('pixel-10a')).toBeNull();
+    expect(isSharedRepairPageModelEligible({ category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-10a', repairSlug })).toBe(true);
+    expect(supportedModels.map((model) => model.modelSlug)).toEqual(['pixel-8', 'pixel-9', 'pixel-9a', 'pixel-10a']);
+    expect(candidates.map((candidate) => candidate.modelSlug)).toEqual(['pixel-8', 'pixel-9']);
+    expect(getSharedRepairCandidatePriceLabel(candidates[0]!)).toBe('From $109');
+    expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$129');
+  });
+
   it('does not retain the Google hardware registry as a V2 visibility gate', () => {
     const routeSource = readFileSync(resolve(process.cwd(), 'src/lib/virtualPhoneRepairRoute.tsx'), 'utf8');
 
@@ -187,6 +232,12 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     })).toMatchObject({ href: '/repairs/phone/google/earpiece-speaker-replacement' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'power-button-replacement',
+    })).toMatchObject({ href: '/repairs/phone/google/power-button-replacement' });
+    expect(resolveFutureRepairResultDestination({
+      category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'volume-button-replacement',
+    })).toMatchObject({ href: '/repairs/phone/google/volume-button-replacement' });
+    expect(resolveFutureRepairResultDestination({
+      category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'camera-lens-replacement',
     })).toBeNull();
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'huawei', modelSlug: 'p30-pro', repairSlug: 'screen-replacement',
@@ -196,6 +247,8 @@ describe('Shared Page V2 candidate and destination foundation', () => {
   it.each([
     ['loudspeaker-replacement', '/repairs/phone/google/loudspeaker-replacement'],
     ['earpiece-speaker-replacement', '/repairs/phone/google/earpiece-speaker-replacement'],
+    ['power-button-replacement', '/repairs/phone/google/power-button-replacement'],
+    ['volume-button-replacement', '/repairs/phone/google/volume-button-replacement'],
   ] as const)('keeps completed Google V2 canonical metadata query-free and without virtual $50 for %s', (repairSlug, canonicalPath) => {
     const metadata = createVirtualPhoneRepairMetadata('google', repairSlug);
 
@@ -204,18 +257,24 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(metadata.description).not.toContain('$50');
   });
 
-  it('limits Google Pixel V2 activation to Loudspeaker and Earpiece Speaker with route-specific quick answers', () => {
+  it('limits Google Pixel V2 activation to four completed routes with route-specific quick answers', () => {
     expect(getGooglePixelSharedPageV2Config('loudspeaker-replacement')).toMatchObject({
       quickAnswers: { repairTime: '30–60 minutes', warranty: '6 months warranty' },
     });
     expect(getGooglePixelSharedPageV2Config('earpiece-speaker-replacement')).toMatchObject({
       quickAnswers: { repairTime: 'Contact us to confirm repair time.' },
     });
-    expect(getGooglePixelSharedPageV2Config('power-button-replacement')).toBeNull();
-    expect(getGooglePixelSharedPageV2Config('volume-button-replacement')).toBeNull();
+    expect(getGooglePixelSharedPageV2Config('power-button-replacement')).toMatchObject({
+      quickAnswers: { repairTime: 'Contact us to confirm repair time.' },
+    });
+    expect(getGooglePixelSharedPageV2Config('volume-button-replacement')).toMatchObject({
+      quickAnswers: { repairTime: 'Contact us to confirm repair time.' },
+    });
     expect(Object.keys(GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG)).toEqual([
       'loudspeaker-replacement',
       'earpiece-speaker-replacement',
+      'power-button-replacement',
+      'volume-button-replacement',
     ]);
   });
 
@@ -227,5 +286,18 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(routeSource).toContain('searchParams');
     expect(routeSource).toContain('selectedModelSlug={typeof model === \'string\' ? model : null}');
     expect(routeSource).not.toContain('/repairs/phone/google-pixel/pixel-9a/earpiece-speaker-replacement');
+  });
+
+  it.each([
+    ['power-button-replacement', 'power-button-replacement'],
+    ['volume-button-replacement', 'volume-button-replacement'],
+  ] as const)('keeps %s on its shared canonical owner with model state rather than a Detail URL', (repairSlug, routeSlug) => {
+    const routeSource = readFileSync(resolve(process.cwd(), `src/app/(public)/repairs/phone/google/${routeSlug}/page.tsx`), 'utf8');
+
+    expect(getVirtualPhoneRepairLandingHref('phone', 'google-pixel', 'pixel-9a', repairSlug))
+      .toBe(`/repairs/phone/google/${routeSlug}?model=pixel-9a`);
+    expect(routeSource).toContain('searchParams');
+    expect(routeSource).toContain('selectedModelSlug={typeof model === \'string\' ? model : null}');
+    expect(routeSource).not.toContain(`/repairs/phone/google-pixel/pixel-9a/${routeSlug}`);
   });
 });

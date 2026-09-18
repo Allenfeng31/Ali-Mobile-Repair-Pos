@@ -58,6 +58,12 @@ type GooglePixelSharedPageV2Config = Readonly<{
   quickAnswers: SharedRepairPageV2QuickAnswers;
 }>;
 
+const CONSERVATIVE_SHARED_REPAIR_QUICK_ANSWERS: SharedRepairPageV2QuickAnswers = Object.freeze({
+  repairTime: 'Contact us to confirm repair time.',
+  partsSameDay: 'Call to confirm parts availability.',
+  warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
+});
+
 export const GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG: Readonly<Partial<Record<VirtualPhoneRepairSlug, GooglePixelSharedPageV2Config>>> = Object.freeze({
   'loudspeaker-replacement': Object.freeze({
     quickAnswers: Object.freeze({
@@ -67,11 +73,13 @@ export const GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG: Readonly<Partial<Record<Virtual
     }),
   }),
   'earpiece-speaker-replacement': Object.freeze({
-    quickAnswers: Object.freeze({
-      repairTime: 'Contact us to confirm repair time.',
-      partsSameDay: 'Call to confirm parts availability.',
-      warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
-    }),
+    quickAnswers: CONSERVATIVE_SHARED_REPAIR_QUICK_ANSWERS,
+  }),
+  'power-button-replacement': Object.freeze({
+    quickAnswers: CONSERVATIVE_SHARED_REPAIR_QUICK_ANSWERS,
+  }),
+  'volume-button-replacement': Object.freeze({
+    quickAnswers: CONSERVATIVE_SHARED_REPAIR_QUICK_ANSWERS,
   }),
 });
 

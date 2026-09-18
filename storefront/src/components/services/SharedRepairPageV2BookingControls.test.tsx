@@ -115,6 +115,34 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
   });
 
+  it.each([
+    ['power-button-replacement', 'Power Button Replacement'],
+    ['volume-button-replacement', 'Volume Button Replacement'],
+  ] as const)('uses conservative %s quick answers with selected-model booking', (repairSlug, repairName) => {
+    state.search = 'model=pixel-9a';
+    render(<SharedRepairPageV2BookingControls
+      basePath={`/repairs/phone/google/${repairSlug}`}
+      brandSlug="google-pixel"
+      brandName="Google Pixel"
+      repairName={repairName}
+      supportedModels={supportedModels}
+      priceCandidates={[]}
+      quickAnswers={{
+        repairTime: 'Contact us to confirm repair time.',
+        partsSameDay: 'Call to confirm parts availability.',
+        warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
+      }}
+    />);
+
+    expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('pixel-9a');
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.getByText('Contact us to confirm repair time.')).toBeInTheDocument();
+    expect(screen.queryByText('30–60 minutes')).toBeNull();
+    const booking = new URL(screen.getByRole('link', { name: /Book Repair Now/ }).getAttribute('href')!, 'https://www.alimobile.com.au');
+    expect(booking.searchParams.get('service')).toBe(repairName);
+    expect(booking.searchParams.get('model')).toBe('Pixel 9a');
+  });
+
   it('keeps no or invalid model query unselected', () => {
     state.search = 'model=not-a-model';
     const { rerender } = render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
@@ -154,6 +182,13 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Earpiece Speaker Replacement' })).toBe('Google Pixel Earpiece Speaker Replacement');
     expect(screen.getByRole('heading', { name: 'Google Pixel Earpiece Speaker Replacement by Model' })).toBeInTheDocument();
     expect(screen.getByText('Earpiece speaker replacement for Google Pixel 9a.')).toBeInTheDocument();
+  });
+
+  it.each(['Power Button Replacement', 'Volume Button Replacement'] as const)('renders natural server-side model copy for %s', (repairName) => {
+    render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={[]} repairName={repairName} />);
+
+    expect(screen.getByRole('heading', { name: `Google Pixel ${repairName} by Model` })).toBeInTheDocument();
+    expect(screen.getByText(`${repairName.replace(' Button Replacement', ' button replacement')} for Google Pixel 9a.`)).toBeInTheDocument();
   });
 
   it('removes the old top booking pills for the V2 page while preserving them for unchanged shared pages', () => {
