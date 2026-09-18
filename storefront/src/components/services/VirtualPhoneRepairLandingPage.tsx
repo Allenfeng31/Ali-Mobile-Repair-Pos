@@ -4,7 +4,7 @@ import { ArrowLeft, BadgeCheck, CheckCircle2, ClipboardCheck, Ear, PhoneCall, Po
 import ReviewsSection from '@/components/ReviewsSection';
 import CommonRepairProblemsSection from '@/components/services/CommonRepairProblemsSection';
 import SharedRepairBookingControls from '@/components/services/SharedRepairBookingControls';
-import SharedRepairPageV2BookingControls from '@/components/services/SharedRepairPageV2BookingControls';
+import SharedRepairPageV2BookingControls, { type SharedRepairPageV2QuickAnswers } from '@/components/services/SharedRepairPageV2BookingControls';
 import SharedRepairPageV2ModelSections from '@/components/services/SharedRepairPageV2ModelSections';
 import SharedRepairPageResultsSection from '@/components/repair-results/SharedRepairPageResultsSection';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
@@ -44,6 +44,7 @@ interface VirtualPhoneRepairLandingPageProps {
     priceCandidates: SharedRepairPageCandidate[];
     initialResults: RepairResultMatchingItem[];
     selectedModelSlug: string | null;
+    quickAnswers: SharedRepairPageV2QuickAnswers;
   };
 }
 
@@ -148,6 +149,7 @@ export default function VirtualPhoneRepairLandingPage({
               repairName={repair.name}
               supportedModels={sharedPageV2.supportedModels}
               priceCandidates={sharedPageV2.priceCandidates}
+              quickAnswers={sharedPageV2.quickAnswers}
             />
           ) : <div className="mt-8 flex w-full flex-col items-center">
             <div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">

@@ -3,7 +3,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { resolveFutureRepairResultDestination } from './futureRepairResultDestination';
-import { createVirtualPhoneRepairMetadata } from './virtualPhoneRepairRoute';
+import {
+  createVirtualPhoneRepairMetadata,
+  GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG,
+  getGooglePixelSharedPageV2Config,
+} from './virtualPhoneRepairRoute';
 import { getGooglePixelHardwareConfig } from './seo/content/google-pixel/config';
 import {
   buildSharedRepairPageCandidates,
@@ -11,6 +15,7 @@ import {
   getSharedRepairCandidatePriceLabel,
   isSharedRepairPageModelEligible,
 } from './sharedRepairPageV2';
+import { getVirtualPhoneRepairLandingHref } from './virtualPhoneRepairs';
 import type { BrandEntry } from './publicRepairCataloguePolicy';
 
 const googleBrand: BrandEntry = {
@@ -53,6 +58,38 @@ const googleBrand: BrandEntry = {
       slug: 'pixel-10a',
       repairTypes: [],
     },
+  ],
+};
+
+const earpieceGoogleBrand: BrandEntry = {
+  ...googleBrand,
+  models: [
+    {
+      model: 'Pixel 8',
+      slug: 'pixel-8',
+      repairTypes: [{
+        slug: 'earpiece-speaker-replacement',
+        name: 'Earpiece Speaker Replacement',
+        price: 109,
+        repairOrigin: 'pos',
+        variants: [
+          { quality_grade: 'Standard', price: 109, is_recommended: true },
+          { quality_grade: 'Premium', price: 139, is_recommended: false },
+        ],
+      }],
+    },
+    {
+      model: 'Pixel 9',
+      slug: 'pixel-9',
+      repairTypes: [{
+        slug: 'earpiece-speaker-replacement',
+        name: 'Earpiece Speaker Replacement',
+        price: 129,
+        repairOrigin: 'pos',
+      }],
+    },
+    { model: 'Pixel 9a', slug: 'pixel-9a', repairTypes: [] },
+    { model: 'Pixel 10a', slug: 'pixel-10a', repairTypes: [] },
   ],
 };
 
@@ -108,6 +145,29 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(candidates.map((candidate) => candidate.modelSlug)).not.toContain('pixel-virtual');
   });
 
+  it('uses the same catalogue-only eligibility and exact POS pricing rules for Earpiece Speaker', () => {
+    expect(getGooglePixelHardwareConfig('pixel-10a')).toBeNull();
+    expect(isSharedRepairPageModelEligible({
+      category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-10a', repairSlug: 'earpiece-speaker-replacement',
+    })).toBe(true);
+
+    const supportedModels = buildSharedRepairPageSupportedModels({
+      brands: [earpieceGoogleBrand],
+      canonicalBrandSlug: 'google-pixel',
+      repairSlug: 'earpiece-speaker-replacement',
+    });
+    const candidates = buildSharedRepairPageCandidates({
+      brands: [earpieceGoogleBrand],
+      canonicalBrandSlug: 'google-pixel',
+      repairSlug: 'earpiece-speaker-replacement',
+    });
+
+    expect(supportedModels.map((model) => model.modelSlug)).toEqual(['pixel-8', 'pixel-9', 'pixel-9a', 'pixel-10a']);
+    expect(candidates.map((candidate) => candidate.modelSlug)).toEqual(['pixel-8', 'pixel-9']);
+    expect(getSharedRepairCandidatePriceLabel(candidates[0]!)).toBe('From $109');
+    expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$129');
+  });
+
   it('does not retain the Google hardware registry as a V2 visibility gate', () => {
     const routeSource = readFileSync(resolve(process.cwd(), 'src/lib/virtualPhoneRepairRoute.tsx'), 'utf8');
 
@@ -115,7 +175,7 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(routeSource).not.toContain('supportedModel: supportedGooglePixelModel');
   });
 
-  it('uses the authoritative target policy to resolve only the completed Google shared master', () => {
+  it('resolves only completed Google Pixel V2 masters for future Repair Results', () => {
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-8', repairSlug: 'loudspeaker-replacement',
     })).toMatchObject({ href: '/repairs/phone/google/loudspeaker-replacement' });
@@ -123,15 +183,49 @@ describe('Shared Page V2 candidate and destination foundation', () => {
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-8', repairSlug: 'front-camera-replacement',
     })).toBeNull();
     expect(resolveFutureRepairResultDestination({
+      category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'earpiece-speaker-replacement',
+    })).toMatchObject({ href: '/repairs/phone/google/earpiece-speaker-replacement' });
+    expect(resolveFutureRepairResultDestination({
+      category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'power-button-replacement',
+    })).toBeNull();
+    expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'huawei', modelSlug: 'p30-pro', repairSlug: 'screen-replacement',
     })).toBeNull();
   });
 
-  it('keeps the Google shared canonical query-free without a virtual $50 metadata claim', () => {
-    const metadata = createVirtualPhoneRepairMetadata('google', 'loudspeaker-replacement');
+  it.each([
+    ['loudspeaker-replacement', '/repairs/phone/google/loudspeaker-replacement'],
+    ['earpiece-speaker-replacement', '/repairs/phone/google/earpiece-speaker-replacement'],
+  ] as const)('keeps completed Google V2 canonical metadata query-free and without virtual $50 for %s', (repairSlug, canonicalPath) => {
+    const metadata = createVirtualPhoneRepairMetadata('google', repairSlug);
 
-    expect(metadata.alternates?.canonical).toBe('/repairs/phone/google/loudspeaker-replacement');
-    expect(metadata.openGraph?.url).toBe('/repairs/phone/google/loudspeaker-replacement');
+    expect(metadata.alternates?.canonical).toBe(canonicalPath);
+    expect(metadata.openGraph?.url).toBe(canonicalPath);
     expect(metadata.description).not.toContain('$50');
+  });
+
+  it('limits Google Pixel V2 activation to Loudspeaker and Earpiece Speaker with route-specific quick answers', () => {
+    expect(getGooglePixelSharedPageV2Config('loudspeaker-replacement')).toMatchObject({
+      quickAnswers: { repairTime: '30–60 minutes', warranty: '6 months warranty' },
+    });
+    expect(getGooglePixelSharedPageV2Config('earpiece-speaker-replacement')).toMatchObject({
+      quickAnswers: { repairTime: 'Contact us to confirm repair time.' },
+    });
+    expect(getGooglePixelSharedPageV2Config('power-button-replacement')).toBeNull();
+    expect(getGooglePixelSharedPageV2Config('volume-button-replacement')).toBeNull();
+    expect(Object.keys(GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG)).toEqual([
+      'loudspeaker-replacement',
+      'earpiece-speaker-replacement',
+    ]);
+  });
+
+  it('keeps Earpiece Speaker on its shared canonical owner with model state rather than a Detail URL', () => {
+    const routeSource = readFileSync(resolve(process.cwd(), 'src/app/(public)/repairs/phone/google/earpiece-speaker-replacement/page.tsx'), 'utf8');
+
+    expect(getVirtualPhoneRepairLandingHref('phone', 'google-pixel', 'pixel-9a', 'earpiece-speaker-replacement'))
+      .toBe('/repairs/phone/google/earpiece-speaker-replacement?model=pixel-9a');
+    expect(routeSource).toContain('searchParams');
+    expect(routeSource).toContain('selectedModelSlug={typeof model === \'string\' ? model : null}');
+    expect(routeSource).not.toContain('/repairs/phone/google-pixel/pixel-9a/earpiece-speaker-replacement');
   });
 });

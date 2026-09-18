@@ -8,6 +8,13 @@ const FUTURE_SHARED_MASTER_ROUTES = [
     targetMode: 'brand-shared',
     href: '/repairs/phone/google/loudspeaker-replacement',
   },
+  {
+    category: 'phone',
+    canonicalBrandSlug: 'google-pixel',
+    repairSlug: 'earpiece-speaker-replacement',
+    targetMode: 'brand-shared',
+    href: '/repairs/phone/google/earpiece-speaker-replacement',
+  },
 ] as const;
 
 export function resolveFutureRepairResultDestination(input: {

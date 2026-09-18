@@ -91,6 +91,18 @@ describe('Shared Page V2 Repair Result selection', () => {
     expect(selected[0]?.id).toBe('pixel-9a');
   });
 
+  it('matches and prioritizes selected Google Pixel Earpiece Speaker proof by exact repair identity', () => {
+    const selected = selectSharedRepairPageResultSeeds([
+      result({ id: 'earpiece-pixel-8', repair_type: 'Earpiece Speaker Replacement', repair_type_slug: 'earpiece-speaker-replacement', published_at: '2026-09-06T09:00:00.000Z' }),
+      result({ id: 'earpiece-pixel-9a', model: 'Pixel 9a', model_slug: 'pixel-9a', repair_type: 'Earpiece Speaker Replacement', repair_type_slug: 'earpiece-speaker-replacement', published_at: '2026-09-01T09:00:00.000Z' }),
+      result({ id: 'wrong-loudspeaker', repair_type_slug: 'loudspeaker-replacement' }),
+    ], {
+      category: 'phone', brandSlug: 'google-pixel', repairTypeSlug: 'earpiece-speaker-replacement', selectedModelSlug: 'pixel-9a',
+    });
+
+    expect(selected.map((seed) => seed.id)).toEqual(['earpiece-pixel-9a', 'earpiece-pixel-8']);
+  });
+
   it('prioritizes a selected catalogue-only Pixel 10a result without a price candidate', () => {
     const selected = selectSharedRepairPageResultSeeds([
       result({ id: 'pixel-8-newer', model_slug: 'pixel-8', published_at: '2026-09-06T09:00:00.000Z' }),

@@ -6,6 +6,12 @@ import { ArrowRight, Clock3, PackageCheck, PhoneCall, ShieldCheck } from 'lucide
 import { getSharedRepairCandidateModelLabel, getSharedRepairCandidatePriceLabel, type SharedRepairPageCandidate, type SharedRepairPageSupportedModel } from '@/lib/sharedRepairPageV2';
 import { getSharedRepairBookingHref, getValidatedSharedRepairModel } from '@/lib/sharedRepairBooking';
 
+export type SharedRepairPageV2QuickAnswers = Readonly<{
+  repairTime: string;
+  partsSameDay: string;
+  warranty: string;
+}>;
+
 interface SharedRepairPageV2BookingControlsProps {
   basePath: string;
   brandSlug: string;
@@ -13,6 +19,7 @@ interface SharedRepairPageV2BookingControlsProps {
   repairName: string;
   supportedModels: SharedRepairPageSupportedModel[];
   priceCandidates: SharedRepairPageCandidate[];
+  quickAnswers: SharedRepairPageV2QuickAnswers;
 }
 
 export default function SharedRepairPageV2BookingControls({
@@ -22,6 +29,7 @@ export default function SharedRepairPageV2BookingControls({
   repairName,
   supportedModels,
   priceCandidates,
+  quickAnswers,
 }: SharedRepairPageV2BookingControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -71,18 +79,18 @@ export default function SharedRepairPageV2BookingControls({
         <article className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5">
           <Clock3 className="mx-auto text-blue-600" size={22} aria-hidden="true" />
           <h2 className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-slate-600">Repair Time</h2>
-          <p className="mt-2 text-xl font-black text-slate-950">30–60 minutes</p>
+          <p className="mt-2 text-xl font-black text-slate-950">{quickAnswers.repairTime}</p>
         </article>
         <article className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5">
           <PackageCheck className="mx-auto text-blue-600" size={22} aria-hidden="true" />
           <h2 className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-slate-600">Parts / Same-Day</h2>
-          <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Call to confirm parts availability and same-day repair. Parts usually need to be ordered 1 day in advance.</p>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{quickAnswers.partsSameDay}</p>
           <a href="tel:0481058514" className="mt-3 inline-flex items-center gap-2 font-black text-blue-700 hover:underline"><PhoneCall size={16} aria-hidden="true" />0481 058 514</a>
         </article>
         <article className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5">
           <ShieldCheck className="mx-auto text-blue-600" size={22} aria-hidden="true" />
           <h2 className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-slate-600">Warranty</h2>
-          <p className="mt-2 text-xl font-black text-slate-950">6 months warranty</p>
+          <p className="mt-2 text-xl font-black text-slate-950">{quickAnswers.warranty}</p>
         </article>
       </section>
     </div>

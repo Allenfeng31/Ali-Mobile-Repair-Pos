@@ -44,13 +44,19 @@ const candidates: SharedRepairPageCandidate[] = [
   },
 ];
 
+const loudspeakerQuickAnswers = {
+  repairTime: '30–60 minutes',
+  partsSameDay: 'Call to confirm parts availability and same-day repair. Parts usually need to be ordered 1 day in advance.',
+  warranty: '6 months warranty',
+};
+
 describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
   beforeEach(() => {
     state.search = 'model=pixel-8';
   });
 
   it('keeps exact pricing, model selection, and booking central before the three supporting boxes', () => {
-    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} />);
+    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
 
     expect(screen.getByText('$129')).toBeInTheDocument();
     expect(screen.getByLabelText('Choose your Google Pixel model')).toBeInTheDocument();
@@ -68,7 +74,7 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
 
   it('keeps a supported Pixel 9a selected with quote-safe pricing and model-aware booking without a POS price candidate', () => {
     state.search = 'model=pixel-9a';
-    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} />);
+    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
 
     expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('pixel-9a');
     expect(screen.getByText('Quote on Request')).toBeInTheDocument();
@@ -77,21 +83,46 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
 
   it('keeps a catalogue-only Pixel 10a selected, quote-safe, and model-aware without a price candidate', () => {
     state.search = 'model=pixel-10a';
-    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} />);
+    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
 
     expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('pixel-10a');
     expect(screen.getByText('Quote on Request')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('model=Pixel+10a'));
   });
 
+  it('uses conservative Earpiece Speaker quick answers without inheriting Loudspeaker timing', () => {
+    state.search = 'model=pixel-9a';
+    render(<SharedRepairPageV2BookingControls
+      basePath="/repairs/phone/google/earpiece-speaker-replacement"
+      brandSlug="google-pixel"
+      brandName="Google Pixel"
+      repairName="Earpiece Speaker Replacement"
+      supportedModels={supportedModels}
+      priceCandidates={[]}
+      quickAnswers={{
+        repairTime: 'Contact us to confirm repair time.',
+        partsSameDay: 'Call to confirm parts availability.',
+        warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
+      }}
+    />);
+
+    expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('pixel-9a');
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.getByText('Contact us to confirm repair time.')).toBeInTheDocument();
+    expect(screen.getByText('Call to confirm parts availability.')).toBeInTheDocument();
+    expect(screen.getByText('Warranty applies to eligible standard repairs and the completed repair scope.')).toBeInTheDocument();
+    expect(screen.queryByText('30–60 minutes')).toBeNull();
+    expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
+  });
+
   it('keeps no or invalid model query unselected', () => {
     state.search = 'model=not-a-model';
-    const { rerender } = render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} />);
+    const { rerender } = render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
     expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('');
     expect(screen.getByText('Select your model for exact pricing')).toBeInTheDocument();
 
     state.search = '';
-    rerender(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} />);
+    rerender(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
     expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('');
   });
 
@@ -115,6 +146,14 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(screen.getAllByRole('link', { name: 'Book Repair' })[0]).toHaveAttribute('href', expect.stringContaining('model=Pixel+8'));
     expect(screen.getAllByRole('link', { name: 'Book Repair' })[2]).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
     expect(screen.queryByRole('link', { name: /google-pixel\/pixel-8/i })).toBeNull();
+  });
+
+  it('renders natural server-side model copy for Earpiece Speaker', () => {
+    render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={[]} repairName="Earpiece Speaker Replacement" />);
+
+    expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Earpiece Speaker Replacement' })).toBe('Google Pixel Earpiece Speaker Replacement');
+    expect(screen.getByRole('heading', { name: 'Google Pixel Earpiece Speaker Replacement by Model' })).toBeInTheDocument();
+    expect(screen.getByText('Earpiece speaker replacement for Google Pixel 9a.')).toBeInTheDocument();
   });
 
   it('removes the old top booking pills for the V2 page while preserving them for unchanged shared pages', () => {
