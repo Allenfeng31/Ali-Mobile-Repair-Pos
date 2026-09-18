@@ -4,9 +4,14 @@ import { ArrowLeft, BadgeCheck, CheckCircle2, ClipboardCheck, Ear, PhoneCall, Po
 import ReviewsSection from '@/components/ReviewsSection';
 import CommonRepairProblemsSection from '@/components/services/CommonRepairProblemsSection';
 import SharedRepairBookingControls from '@/components/services/SharedRepairBookingControls';
+import SharedRepairPageV2BookingControls from '@/components/services/SharedRepairPageV2BookingControls';
+import SharedRepairPageV2ModelSections from '@/components/services/SharedRepairPageV2ModelSections';
+import SharedRepairPageResultsSection from '@/components/repair-results/SharedRepairPageResultsSection';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { getVirtualPhoneRepair, type VirtualPhoneRepairModelOption, type VirtualPhoneRepairSlug } from '@/lib/virtualPhoneRepairs';
 import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
+import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel } from '@/lib/sharedRepairPageV2';
+import type { RepairResultMatchingItem } from '@/lib/repair-results';
 
 export interface SharedVirtualRepairContent {
   diagnosis: string;
@@ -34,6 +39,12 @@ interface VirtualPhoneRepairLandingPageProps {
   models: VirtualPhoneRepairModelOption[];
   isGeneric?: boolean;
   sharedContent?: SharedVirtualRepairContent;
+  sharedPageV2?: {
+    supportedModels: SharedRepairPageSupportedModel[];
+    priceCandidates: SharedRepairPageCandidate[];
+    initialResults: RepairResultMatchingItem[];
+    selectedModelSlug: string | null;
+  };
 }
 
 function RepairIcon({ icon, size, strokeWidth }: { icon: string; size: number; strokeWidth: number }) {
@@ -55,6 +66,7 @@ export default function VirtualPhoneRepairLandingPage({
   models,
   isGeneric,
   sharedContent,
+  sharedPageV2,
 }: VirtualPhoneRepairLandingPageProps) {
   const repair = getVirtualPhoneRepair(repairSlug);
   if (!repair) return null;
@@ -128,7 +140,16 @@ export default function VirtualPhoneRepairLandingPage({
           <span className="repair-kicker mx-auto mb-5"><RepairIcon icon={repair.icon} size={14} strokeWidth={2.6} />{repair.eyebrow}</span>
           <h1 id="virtual-phone-repair-heading">{pageTitle}</h1>
           <p className="repair-detail-subtitle">{repair.summary} Ali Mobile & Repair in Ringwood confirms final pricing after inspection if additional damage or parts are involved.</p>
-          <div className="mt-8 flex w-full flex-col items-center">
+          {sharedPageV2 ? (
+            <SharedRepairPageV2BookingControls
+              basePath={canonicalPath}
+              brandSlug={brandSlug ?? ''}
+              brandName={brandName ?? 'Phone'}
+              repairName={repair.name}
+              supportedModels={sharedPageV2.supportedModels}
+              priceCandidates={sharedPageV2.priceCandidates}
+            />
+          ) : <div className="mt-8 flex w-full flex-col items-center">
             <div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">
               <span className="w-full text-center text-xs font-black uppercase tracking-[0.16em] text-blue-600">Inspection first</span>
               <h2 className="mt-3 w-full text-center text-xl font-black leading-tight text-slate-950">{repair.name}</h2>
@@ -148,23 +169,25 @@ export default function VirtualPhoneRepairLandingPage({
               </Suspense>
               <a href="tel:0481058514" className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-center text-lg font-bold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"><PhoneCall size={19} strokeWidth={2.6} aria-hidden="true" />Call 0481 058 514</a>
             </div>
-          </div>
-          <div className="trust-badges mt-8">
+          </div>}
+          {!sharedPageV2 ? <div className="trust-badges mt-8">
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>Inspection Before Work</div>
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span>Clear Quote First</div>
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>Repair Warranty</div>
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><BadgeCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>Ringwood Repair Desk</div>
-          </div>
+          </div> : null}
         </section>
+        {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={repair.name} /> : null}
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="repair-guidance-heading">
           <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>We inspect the device condition first, then provide a clear quote for the suitable repair path.</p></div>
           <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6">{contentCards.map(({ title, body, icon }) => <article key={title} className="flex h-full min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><RepairIcon icon={icon} size={20} strokeWidth={2.5} /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">{title}</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">{body}</p></article>)}</div>
         </section>
-        <CommonRepairProblemsSection modelName={brandName ?? 'Phone'} repairType={repair.slug} problems={[{ title: 'Inspection before replacement', description: 'We check the relevant speaker or button area and explain the repair options before work begins.' }, { title: 'Clear quote first', description: 'The $50 figure is a starting price. Final pricing depends on the device condition and suitable repair path.' }]} />
+        <CommonRepairProblemsSection modelName={brandName ?? 'Phone'} repairType={repair.slug} problems={[{ title: 'Inspection before replacement', description: 'We check the relevant speaker or button area and explain the repair options before work begins.' }, { title: 'Clear quote first', description: sharedPageV2 ? 'Model-specific pricing depends on the current repair option, device condition and suitable repair path.' : 'The $50 figure is a starting price. Final pricing depends on the device condition and suitable repair path.' }]} />
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="why-heading">
           <div className="repair-workbench-heading"><span>Why choose us</span><h2 id="why-heading" className="scroll-mt-32">Why choose Ali Mobile & Repair</h2><p>Our Ringwood repair desk keeps phone repairs inspection-led, quote-first and focused on supported models.</p>{sharedContent ? <p className="mx-auto mt-4 max-w-3xl text-pretty">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}</div>
           <div className="grid w-full grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-3 lg:gap-6">{['Clear quote before work begins.', 'Available for supported phone models.', 'Repair time depends on diagnosis and part availability.'].map((item) => <article key={item} className="rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center text-sm font-semibold leading-6 text-slate-700">{item}</article>)}</div>
         </section>
+        {sharedPageV2 ? <SharedRepairPageResultsSection key={sharedPageV2.selectedModelSlug ?? 'all-models'} initialResults={sharedPageV2.initialResults} repairName={repair.name} /> : null}
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="links-heading">
           <div className="mx-auto flex w-full flex-col gap-6 rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center"><div className="repair-workbench-heading"><span>Helpful links</span><h2 id="links-heading" className="scroll-mt-32">Explore related repair pages</h2><p>Compare relevant phone repairs or return to the appropriate repair hub.</p></div><div className="flex flex-col items-center justify-center gap-3 sm:flex-row"><Link href="/repairs/phone" className="inline-flex min-h-12 items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-extrabold !text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">Phone Repair Services</Link><Link href={relatedHref} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">{related.name}</Link><Link href={repairHubHref} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">{brandName ? `${brandName} Repair Hub` : 'Phone Repair Hub'}</Link>{isGeneric && [['Samsung repair', '/repairs/phone/samsung'], ['Google Pixel repair', '/repairs/phone/google-pixel'], ['OPPO repair', '/repairs/phone/oppo']].map(([label, href]) => <Link key={href} href={href} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">{label}</Link>)}</div></div>
         </section>

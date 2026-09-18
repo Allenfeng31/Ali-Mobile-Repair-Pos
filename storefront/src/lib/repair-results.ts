@@ -179,6 +179,7 @@ export const PUBLIC_REPAIR_RESULT_SELECT = [
 const PUBLIC_REPAIR_RESULTS_FETCH_TIMEOUT_MS = 3500;
 export const MAX_SERVER_REPAIR_RESULT_PROOFS = 4;
 export const MAX_DETAIL_INITIAL_REPAIR_RESULTS = 1;
+export const MAX_SHARED_REPAIR_PAGE_RESULTS = 5;
 export const MAX_HOMEPAGE_REPAIR_RESULT_QUERY_ROWS = 24;
 export const MAX_HUB_REPAIR_RESULT_QUERY_ROWS = 50;
 
@@ -313,6 +314,52 @@ export function selectDetailRepairResultInitialSeeds(
       short_description: result.short_description,
       related_repair_url: result.related_repair_url,
     }));
+}
+
+/**
+ * Shared pages own a brand-and-repair scope, not a historical detail URL.
+ * A selected model only changes result order; it never changes the primary
+ * identity used to include relevant public proof.
+ */
+export function selectSharedRepairPageResultSeeds(
+  results: readonly PublicRepairResult[],
+  {
+    category,
+    brandSlug,
+    repairTypeSlug,
+    selectedModelSlug,
+  }: {
+    category: RepairResultDeviceCategory;
+    brandSlug: string;
+    repairTypeSlug: string;
+    selectedModelSlug?: string | null;
+  },
+  limit = MAX_SHARED_REPAIR_PAGE_RESULTS,
+): RepairResultMatchingItem[] {
+  const aliases = getRepairResultBrandAliases(brandSlug);
+  const seenIds = new Set<string>();
+
+  return results
+    .filter((result) => (
+      !seenIds.has(result.id)
+      && isPublicRepairResult(result)
+      && aliases.includes(result.brand_slug)
+      && result.device_category === category
+      && result.repair_type_slug === repairTypeSlug
+      && (seenIds.add(result.id), true)
+    ))
+    .sort((left, right) => {
+      const leftSelected = left.model_slug === selectedModelSlug;
+      const rightSelected = right.model_slug === selectedModelSlug;
+      if (leftSelected !== rightSelected) return leftSelected ? -1 : 1;
+
+      const leftPublished = left.published_at || left.created_at;
+      const rightPublished = right.published_at || right.created_at;
+      if (leftPublished !== rightPublished) return leftPublished > rightPublished ? -1 : 1;
+      return left.id.localeCompare(right.id);
+    })
+    .slice(0, Math.min(Math.max(0, limit), MAX_SHARED_REPAIR_PAGE_RESULTS))
+    .map(toRepairResultMatchingItem);
 }
 
 /**

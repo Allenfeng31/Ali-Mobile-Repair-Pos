@@ -14,6 +14,8 @@ import {
   selectRepairTypeHubRepairResultSeeds,
   selectModelRepairResultInitialSeeds,
   selectDetailRepairResultInitialSeeds,
+  selectSharedRepairPageResultSeeds,
+  MAX_SHARED_REPAIR_PAGE_RESULTS,
   selectServerRepairResultProofs,
   type PublicRepairResult,
   type HomepageRepairResultSeed,
@@ -39,6 +41,13 @@ export interface ModelRepairResultSeedRequest {
 export interface RepairTypeHubRepairResultSeedRequest {
   category: RepairResultDeviceCategory;
   repairTypeSlug: string;
+}
+
+export interface SharedRepairPageResultSeedRequest {
+  category: RepairResultDeviceCategory;
+  brandSlug: string;
+  repairTypeSlug: string;
+  selectedModelSlug?: string | null;
 }
 
 const MAX_MODEL_INITIAL_REPAIR_RESULT_QUERY_ROWS = 12;
@@ -250,6 +259,50 @@ export async function fetchRepairDetailInitialResults(
     return selectDetailRepairResultInitialSeeds(records);
   } catch (error) {
     console.error('[repair-results] Unexpected Detail initial result failure:', error);
+    return [];
+  }
+}
+
+/**
+ * Reads public, privacy-approved proof by canonical taxonomy identity for a
+ * Shared Page. Placement flags and related_repair_url remain independent.
+ */
+export async function fetchSharedRepairPageResultSeeds(
+  request: SharedRepairPageResultSeedRequest,
+): Promise<RepairResultMatchingItem[]> {
+  const supabase = createPublicRepairResultsClient();
+  if (!supabase) return [];
+
+  const records: PublicRepairResult[] = [];
+
+  try {
+    for (const brandSlug of getRepairResultBrandAliases(request.brandSlug)) {
+      const { data, error } = await supabase
+        .from('repair_results')
+        .select(PUBLIC_REPAIR_RESULT_SELECT)
+        .eq('status', 'published')
+        .eq('privacy_checked', true)
+        .eq('device_category', request.category)
+        .eq('brand_slug', brandSlug)
+        .eq('repair_type_slug', request.repairTypeSlug)
+        .neq('before_image_path', '')
+        .neq('after_image_path', '')
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(MAX_SHARED_REPAIR_PAGE_RESULTS * 4);
+
+      if (error) {
+        console.error('[repair-results] Failed to fetch Shared Page initial results:', error);
+        return [];
+      }
+
+      records.push(...((data || []) as unknown as PublicRepairResult[]));
+    }
+
+    return selectSharedRepairPageResultSeeds(records, request);
+  } catch (error) {
+    console.error('[repair-results] Unexpected Shared Page initial result failure:', error);
     return [];
   }
 }

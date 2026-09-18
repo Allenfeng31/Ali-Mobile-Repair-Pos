@@ -8,6 +8,8 @@ import {
 } from "@/lib/virtualPhoneRepairs";
 import { getGooglePixelHardwareConfig } from "@/lib/seo/content/google-pixel/config";
 import { getOppoModelConfig } from "@/lib/seo/content/oppo/shared";
+import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels } from '@/lib/sharedRepairPageV2';
+import { fetchSharedRepairPageResultSeeds } from '@/lib/repair-results.server';
 
 const SAMSUNG_REPAIR_CONTENT: Record<VirtualPhoneRepairSlug, { diagnosis: string; testing: string }> = {
   "loudspeaker-replacement": {
@@ -57,7 +59,9 @@ export function createVirtualPhoneRepairMetadata(brand: VirtualPhoneRepairRouteB
   const label = config?.brandName ?? "Phone";
   const canonical = `/repairs/phone/${config ? `${config.routeSegment}/` : ""}${repair.slug}`;
   const title = `${label} ${repair.name} in Ringwood | Ali Mobile`;
-  const description = `${label} ${repair.name.toLowerCase()} in Ringwood for common symptoms. Starting from $50, with inspection and a clear quote before work begins.`;
+  const description = brand === 'google' && repairSlug === 'loudspeaker-replacement'
+    ? `${label} ${repair.name.toLowerCase()} in Ringwood with model-specific pricing, inspection and a clear quote before work begins.`
+    : `${label} ${repair.name.toLowerCase()} in Ringwood for common symptoms. Starting from $50, with inspection and a clear quote before work begins.`;
 
   return {
     title,
@@ -71,9 +75,10 @@ export function createVirtualPhoneRepairMetadata(brand: VirtualPhoneRepairRouteB
 interface VirtualPhoneRepairRoutePageProps {
   brand: VirtualPhoneRepairRouteBrand;
   repairSlug: VirtualPhoneRepairSlug;
+  selectedModelSlug?: string | null;
 }
 
-export default async function VirtualPhoneRepairRoutePage({ brand, repairSlug }: VirtualPhoneRepairRoutePageProps) {
+export default async function VirtualPhoneRepairRoutePage({ brand, repairSlug, selectedModelSlug }: VirtualPhoneRepairRoutePageProps) {
   const repair = getVirtualPhoneRepair(repairSlug)!;
   const catalog = await fetchRepairCatalog();
   const config = brand === "other" ? null : BRAND_CONFIG[brand];
@@ -93,8 +98,34 @@ export default async function VirtualPhoneRepairRoutePage({ brand, repairSlug }:
     config?.catalogSlug === "google-pixel" ? Boolean(getGooglePixelHardwareConfig(model.modelSlug)) :
     config?.catalogSlug === "oppo" ? Boolean(getOppoModelConfig(model.modelSlug)) : true
   ));
+  const isGoogleLoudspeakerPrototype = brand === 'google' && repairSlug === 'loudspeaker-replacement';
+  const sharedPageV2SupportedModels = isGoogleLoudspeakerPrototype
+    ? buildSharedRepairPageSupportedModels({
+        brands: catalog.brands,
+        canonicalBrandSlug: 'google-pixel',
+        repairSlug,
+      })
+    : [];
+  const sharedPageV2Candidates = isGoogleLoudspeakerPrototype
+    ? buildSharedRepairPageCandidates({
+        brands: catalog.brands,
+        canonicalBrandSlug: 'google-pixel',
+        repairSlug,
+      })
+    : [];
+  const selectedSharedPageV2ModelSlug = sharedPageV2SupportedModels.some((model) => model.modelSlug === selectedModelSlug)
+    ? selectedModelSlug ?? null
+    : null;
+  const sharedPageV2Results = isGoogleLoudspeakerPrototype
+    ? await fetchSharedRepairPageResultSeeds({
+        category: 'phone',
+        brandSlug: 'google-pixel',
+        repairTypeSlug: repairSlug,
+        selectedModelSlug: selectedSharedPageV2ModelSlug,
+      })
+    : [];
   const canonicalPath = `/repairs/phone/${config ? `${config.routeSegment}/` : ""}${repair.slug}`;
 
   const sharedContent = brand === "samsung" ? SAMSUNG_REPAIR_CONTENT[repairSlug] : brand === "google" ? GOOGLE_PIXEL_REPAIR_CONTENT[repairSlug] : brand === "oppo" ? OPPO_REPAIR_CONTENT[repairSlug] : undefined;
-  return <VirtualPhoneRepairLandingPage brandName={config?.brandName} brandSlug={config?.catalogSlug} repairSlug={repair.slug} canonicalPath={canonicalPath} models={models} isGeneric={!config} sharedContent={sharedContent} />;
+  return <VirtualPhoneRepairLandingPage brandName={config?.brandName} brandSlug={config?.catalogSlug} repairSlug={repair.slug} canonicalPath={canonicalPath} models={models} isGeneric={!config} sharedContent={sharedContent} sharedPageV2={isGoogleLoudspeakerPrototype ? { supportedModels: sharedPageV2SupportedModels, priceCandidates: sharedPageV2Candidates, initialResults: sharedPageV2Results, selectedModelSlug: selectedSharedPageV2ModelSlug } : undefined} />;
 }
