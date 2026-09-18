@@ -114,7 +114,7 @@ describe('Samsung shared repair metadata and model state', () => {
   });
 
   it('keeps Google Pixel and OPPO selectors limited to their configured model sets and preserves their Booking brands', () => {
-    expect(Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG)).toHaveLength(27);
+    expect(Object.keys(GOOGLE_PIXEL_HARDWARE_CONFIG)).toHaveLength(28);
     expect(Object.keys(OPPO_ENHANCED_CONFIG.models)).toHaveLength(55);
 
     const pixel = { brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8 Pro', modelSlug: 'pixel-8-pro' };
