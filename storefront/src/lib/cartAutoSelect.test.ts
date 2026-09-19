@@ -122,4 +122,67 @@ describe('cartAutoSelect', () => {
       shouldAutoConfirm: true,
     });
   });
+
+  const googleCameraLensInventory: ParsedItem[] = [{
+    id: 20,
+    category: 'phone',
+    brand: 'P Google Pixel',
+    deviceModel: 'Pixel 10a',
+    service: 'Screen Replacement',
+    price: 120,
+    deviceType: 'phone',
+    quality_grade: 'Standard',
+    is_recommended: false,
+    name: 'Google Pixel Pixel 10a Screen Replacement',
+  }];
+
+  it('books Google Camera Lens at the fixed $50 price when no exact POS service exists', () => {
+    const result = resolveInitialCartState(
+      'Google Pixel',
+      'Pixel 10a',
+      'Camera Lens Replacement',
+      googleCameraLensInventory,
+      null,
+    );
+
+    expect(result.serviceToSelect).toMatchObject({ name: 'Camera Lens Replacement', price: 50 });
+    expect(result.serviceToExpand).toBeNull();
+    expect(result.shouldAutoConfirm).toBe(true);
+  });
+
+  it('retains an exact POS Camera Lens identity at the owner-approved fixed price', () => {
+    const result = resolveInitialCartState(
+      'Google Pixel',
+      'Pixel 10a',
+      'Camera Lens Replacement',
+      [...googleCameraLensInventory, {
+        id: 21,
+        category: 'phone',
+        brand: 'P Google Pixel',
+        deviceModel: 'Pixel 10a',
+        service: 'Camera Lens Replacement',
+        price: 129,
+        deviceType: 'phone',
+        quality_grade: 'Standard',
+        is_recommended: false,
+        name: 'Google Pixel Pixel 10a Camera Lens Replacement',
+      }],
+      null,
+    );
+
+    expect(result.serviceToSelect).toMatchObject({ id: 21, name: 'Camera Lens Replacement', price: 50 });
+    expect(result.shouldAutoConfirm).toBe(true);
+  });
+
+  it('preserves the legacy virtual $50 Camera Lens fallback', () => {
+    const result = resolveInitialCartState(
+      'Google Pixel',
+      'Pixel 10a',
+      'Camera Lens Replacement',
+      googleCameraLensInventory,
+    );
+
+    expect(result.serviceToSelect).toMatchObject({ name: 'Camera Lens Replacement', price: 50 });
+    expect(result.shouldAutoConfirm).toBe(true);
+  });
 });

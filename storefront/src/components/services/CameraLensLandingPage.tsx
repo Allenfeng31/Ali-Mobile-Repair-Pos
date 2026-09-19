@@ -13,6 +13,9 @@ import {
 import ReviewsSection from "@/components/ReviewsSection";
 import CommonRepairProblemsSection from "@/components/services/CommonRepairProblemsSection";
 import SharedRepairBookingControls from "@/components/services/SharedRepairBookingControls";
+import SharedRepairPageV2BookingControls, { type SharedRepairPageV2QuickAnswers } from "@/components/services/SharedRepairPageV2BookingControls";
+import SharedRepairPageV2ModelSections from "@/components/services/SharedRepairPageV2ModelSections";
+import SharedRepairPageResultsSection from "@/components/repair-results/SharedRepairPageResultsSection";
 import {
   CAMERA_LENS_REPAIR_NAME,
   CAMERA_LENS_REPAIR_SLUG,
@@ -21,6 +24,8 @@ import {
 } from "@/lib/virtualCameraLens";
 import { formatScopedRepairPriceLabel } from "@/lib/scopedRepairPriceLabel";
 import { getSharedRepairBookingHref } from "@/lib/sharedRepairBooking";
+import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy } from "@/lib/sharedRepairPageV2";
+import type { RepairResultMatchingItem } from "@/lib/repair-results";
 
 interface CameraLensLandingPageProps {
   brandName?: string;
@@ -31,6 +36,13 @@ interface CameraLensLandingPageProps {
   models: CameraLensModelOption[];
   isGeneric?: boolean;
   showSharedRepairControls?: boolean;
+  sharedPageV2?: {
+    supportedModels: SharedRepairPageSupportedModel[];
+    priceCandidates: SharedRepairPageCandidate[];
+    initialResults: RepairResultMatchingItem[];
+    quickAnswers: SharedRepairPageV2QuickAnswers;
+    pricingStrategy: SharedRepairPageV2PricingStrategy;
+  };
 }
 
 function getDisplayPrice(brandName: string | undefined) {
@@ -47,8 +59,9 @@ export default function CameraLensLandingPage({
   models,
   isGeneric,
   showSharedRepairControls = false,
+  sharedPageV2,
 }: CameraLensLandingPageProps) {
-  const hasSharedRepairControls = showSharedRepairControls || brandSlug === "samsung";
+  const hasSharedRepairControls = Boolean(sharedPageV2) || showSharedRepairControls || brandSlug === "samsung";
   const price = getDisplayPrice(brandName);
   const isStartingPriceOnly = price === "Starting from";
   const fallbackBookingHref = getSharedRepairBookingHref({ repairName: CAMERA_LENS_REPAIR_NAME, fallbackBrandName: brandName });
@@ -123,7 +136,18 @@ export default function CameraLensLandingPage({
           {intro}
         </p>
 
-        <div className="mt-8 flex w-full flex-col items-center">
+        {sharedPageV2 ? (
+          <SharedRepairPageV2BookingControls
+            basePath={canonicalPath}
+            brandSlug={brandSlug ?? ""}
+            brandName={brandName ?? "Phone"}
+            repairName={CAMERA_LENS_REPAIR_NAME}
+            supportedModels={sharedPageV2.supportedModels}
+            priceCandidates={sharedPageV2.priceCandidates}
+            quickAnswers={sharedPageV2.quickAnswers}
+            pricingStrategy={sharedPageV2.pricingStrategy}
+          />
+        ) : <div className="mt-8 flex w-full flex-col items-center">
           <div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">
             <span className="w-full text-center text-xs font-black uppercase tracking-[0.16em] text-blue-600">
               Inspection first
@@ -158,9 +182,9 @@ export default function CameraLensLandingPage({
               Call 0481 058 514
             </a>
           </div>
-        </div>
+        </div>}
 
-        <div className="trust-badges mt-8">
+        {!sharedPageV2 ? <div className="trust-badges mt-8">
           <div className="trust-badge">
             <span className="trust-badge-icon text-blue-600"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
             Inspection Before Work
@@ -177,8 +201,10 @@ export default function CameraLensLandingPage({
             <span className="trust-badge-icon text-blue-600"><BadgeCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
             Ringwood Repair Desk
           </div>
-        </div>
+        </div> : null}
       </section>
+
+      {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={CAMERA_LENS_REPAIR_NAME} pricingStrategy={sharedPageV2.pricingStrategy} /> : null}
 
       <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="camera-lens-guidance-heading">
         <div className="repair-workbench-heading">
@@ -261,6 +287,8 @@ export default function CameraLensLandingPage({
           </div>
         </div>
       </section>
+
+      {sharedPageV2 ? <SharedRepairPageResultsSection initialResults={sharedPageV2.initialResults} repairName={CAMERA_LENS_REPAIR_NAME} /> : null}
 
       <section
         className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"

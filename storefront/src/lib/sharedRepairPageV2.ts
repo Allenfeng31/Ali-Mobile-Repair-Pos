@@ -4,7 +4,18 @@ import {
 } from './repairDetailPricing';
 import type { BrandEntry, RepairOption } from './publicRepairCataloguePolicy';
 import { evaluateNonIphonePublicRepairPageMode } from './publicRepairPageModePolicy';
-import { getVirtualPhoneRepair } from './virtualPhoneRepairs';
+
+export type SharedRepairPageV2PricingStrategy =
+  | Readonly<{ mode: 'pos-derived' }>
+  | Readonly<{ mode: 'fixed'; fixedPrice: number }>;
+
+const SHARED_REPAIR_PAGE_V2_ACTIVATIONS = Object.freeze([
+  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'loudspeaker-replacement' },
+  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'earpiece-speaker-replacement' },
+  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'power-button-replacement' },
+  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'volume-button-replacement' },
+  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'camera-lens-replacement' },
+] as const);
 
 export interface SharedRepairPageSupportedModel {
   category: 'phone';
@@ -47,7 +58,12 @@ export function isSharedRepairPageModelEligible({
   modelSlug: string;
   repairSlug: string;
 }) {
-  if (!getVirtualPhoneRepair(repairSlug)) return false;
+  const activation = SHARED_REPAIR_PAGE_V2_ACTIVATIONS.find((entry) => (
+    entry.category === category
+    && entry.brandSlug === brandSlug
+    && entry.repairSlug === repairSlug
+  ));
+  if (!activation) return false;
 
   const decision = evaluateNonIphonePublicRepairPageMode({
     category,
@@ -59,7 +75,9 @@ export function isSharedRepairPageModelEligible({
     legacyStatus: 'none',
   });
 
-  return decision.mode === 'shared' && decision.routeAvailable;
+  return decision.mode === 'shared'
+    && decision.routeAvailable
+    && decision.target?.scope === 'brand';
 }
 
 export function buildSharedRepairPageSupportedModels({

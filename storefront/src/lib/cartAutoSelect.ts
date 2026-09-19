@@ -1,5 +1,5 @@
-import { ParsedItem, groupServicesByBaseName } from './inventoryUtils';
-import { CAMERA_LENS_REPAIR_NAME, withVirtualCameraLensGroupedService } from './virtualCameraLens';
+import { ParsedItem, displayBrand, groupServicesByBaseName } from './inventoryUtils';
+import { CAMERA_LENS_REPAIR_NAME, withGoogleCameraLensFixedPrice, withVirtualCameraLensGroupedService } from './virtualCameraLens';
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from './virtualPhoneRepairs';
 import { APPLE_WATCH_CHARGING_REPAIR_NAME, withAppleWatchChargingRepairGroupedService } from './seo/content/apple-watch';
 
@@ -17,7 +17,7 @@ export function resolveInitialCartState(
   modelParam: string | null,
   serviceParam: string | null,
   inventory: ParsedItem[],
-  tierParam?: string | null
+  tierParam?: string | null,
 ): AutoSelectResult {
   if (!brandParam || !modelParam) {
     return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
@@ -28,10 +28,7 @@ export function resolveInitialCartState(
   const decodedModel = decodeURIComponent(modelParam).toLowerCase();
 
   const matchedItems = inventory.filter(i => {
-    // Standardize brand by removing prefix for comparison
-    const itemBrand = (i.brand.includes(' ') && /^[PTCW] /i.test(i.brand)) 
-      ? i.brand.split(' ')[1].toLowerCase() 
-      : i.brand.toLowerCase();
+    const itemBrand = displayBrand(i.brand).toLowerCase();
       
     const isAppleWatchBrandMatch = decodedBrand === 'apple' && itemBrand === 'apple watch';
     return (itemBrand === decodedBrand || isAppleWatchBrandMatch) && i.deviceModel.toLowerCase() === decodedModel;
@@ -52,8 +49,12 @@ export function resolveInitialCartState(
   const decodedService = decodeURIComponent(serviceParam).toLowerCase();
   
   // Group services
-  const grouped = withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
+  const cameraLensServices = withGoogleCameraLensFixedPrice(
     withVirtualCameraLensGroupedService(groupServicesByBaseName(matchedItems), brand, model, category),
+    brand,
+  );
+  const grouped = withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
+    cameraLensServices,
     brand,
     model,
     category

@@ -129,6 +129,18 @@ describe('Shared Page V2 Repair Result selection', () => {
     expect(selected[0]?.id).toBe('pixel-10a');
   });
 
+  it('matches Camera Lens proof by its exact slug, prioritizes the selected model, and excludes Back Camera proof', () => {
+    const selected = selectSharedRepairPageResultSeeds([
+      result({ id: 'lens-pixel-8', repair_type: 'Camera Lens Replacement', repair_type_slug: 'camera-lens-replacement', published_at: '2026-09-06T09:00:00.000Z' }),
+      result({ id: 'lens-pixel-10a', model: 'Pixel 10a', model_slug: 'pixel-10a', repair_type: 'Camera Lens Replacement', repair_type_slug: 'camera-lens-replacement', published_at: '2026-09-01T09:00:00.000Z' }),
+      result({ id: 'back-camera-pixel-10a', model: 'Pixel 10a', model_slug: 'pixel-10a', repair_type: 'Back Camera Replacement', repair_type_slug: 'back-camera-replacement' }),
+    ], {
+      category: 'phone', brandSlug: 'google-pixel', repairTypeSlug: 'camera-lens-replacement', selectedModelSlug: 'pixel-10a',
+    });
+
+    expect(selected.map((seed) => seed.id)).toEqual(['lens-pixel-10a', 'lens-pixel-8']);
+  });
+
   it('does not reinterpret independent placement flags or migrate historical records', () => {
     const homepage = result({ id: 'homepage', featured_on_homepage: true, featured_on_repair_hub: false, featured_on_brand_hub: false });
     const brandHub = result({ id: 'brand-hub', featured_on_homepage: false, featured_on_repair_hub: false, featured_on_brand_hub: true });

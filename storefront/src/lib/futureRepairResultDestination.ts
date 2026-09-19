@@ -29,6 +29,13 @@ const FUTURE_SHARED_MASTER_ROUTES = [
     targetMode: 'brand-shared',
     href: '/repairs/phone/google/volume-button-replacement',
   },
+  {
+    category: 'phone',
+    canonicalBrandSlug: 'google-pixel',
+    repairSlug: 'camera-lens-replacement',
+    targetMode: 'brand-shared',
+    href: '/repairs/phone/google/camera-lens-replacement',
+  },
 ] as const;
 
 export function resolveFutureRepairResultDestination(input: {

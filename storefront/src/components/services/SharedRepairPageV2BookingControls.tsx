@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Clock3, PackageCheck, PhoneCall, ShieldCheck } from 'lucide-react';
-import { getSharedRepairCandidateModelLabel, getSharedRepairCandidatePriceLabel, type SharedRepairPageCandidate, type SharedRepairPageSupportedModel } from '@/lib/sharedRepairPageV2';
+import { getSharedRepairCandidateModelLabel, getSharedRepairCandidatePriceLabel, type SharedRepairPageCandidate, type SharedRepairPageSupportedModel, type SharedRepairPageV2PricingStrategy } from '@/lib/sharedRepairPageV2';
 import { getSharedRepairBookingHref, getValidatedSharedRepairModel } from '@/lib/sharedRepairBooking';
 
 export type SharedRepairPageV2QuickAnswers = Readonly<{
@@ -20,6 +20,7 @@ interface SharedRepairPageV2BookingControlsProps {
   supportedModels: SharedRepairPageSupportedModel[];
   priceCandidates: SharedRepairPageCandidate[];
   quickAnswers: SharedRepairPageV2QuickAnswers;
+  pricingStrategy?: SharedRepairPageV2PricingStrategy;
 }
 
 export default function SharedRepairPageV2BookingControls({
@@ -30,6 +31,7 @@ export default function SharedRepairPageV2BookingControls({
   supportedModels,
   priceCandidates,
   quickAnswers,
+  pricingStrategy,
 }: SharedRepairPageV2BookingControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,6 +42,11 @@ export default function SharedRepairPageV2BookingControls({
     selectedModel,
     fallbackBrandName: brandName,
   });
+  const priceLabel = pricingStrategy?.mode === 'fixed'
+    ? `$${pricingStrategy.fixedPrice}`
+    : selectedCandidate
+      ? getSharedRepairCandidatePriceLabel(selectedCandidate)
+      : selectedModel ? 'Quote on Request' : 'Select your model for exact pricing';
 
   const updateModel = (modelSlug: string) => {
     router.replace(modelSlug ? `${basePath}?model=${encodeURIComponent(modelSlug)}` : basePath, { scroll: false });
@@ -51,7 +58,7 @@ export default function SharedRepairPageV2BookingControls({
         <div className="w-full rounded-2xl border border-blue-200 bg-blue-50 p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6">
           <span className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">Price</span>
           <p className="mt-2 text-3xl font-black leading-tight text-blue-700">
-            {selectedCandidate ? getSharedRepairCandidatePriceLabel(selectedCandidate) : selectedModel ? 'Quote on Request' : 'Select your model for exact pricing'}
+            {priceLabel}
           </p>
           {selectedCandidate ? <p className="mt-3 text-sm font-semibold text-slate-600">{getSharedRepairCandidateModelLabel(selectedCandidate)}</p> : null}
         </div>

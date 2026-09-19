@@ -50,6 +50,14 @@ const loudspeakerQuickAnswers = {
   warranty: '6 months warranty',
 };
 
+const cameraLensCandidates: SharedRepairPageCandidate[] = [
+  {
+    category: 'phone', canonicalBrandSlug: 'google-pixel', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8', modelSlug: 'pixel-8', repairSlug: 'camera-lens-replacement', repairName: 'Camera Lens Replacement',
+    repair: { slug: 'camera-lens-replacement', name: 'Camera Lens Replacement', price: 89, repairOrigin: 'pos' },
+    pricing: { resolvedPrice: 89, validVariants: [{ quality_grade: 'Standard', price: 89 }, { quality_grade: 'Premium', price: 109 }], source: 'variant', isQuoteOnly: false, canEmitOffer: true },
+  },
+];
+
 describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
   beforeEach(() => {
     state.search = 'model=pixel-8';
@@ -88,6 +96,72 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('pixel-10a');
     expect(screen.getByText('Quote on Request')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('model=Pixel+10a'));
+  });
+
+  it('uses the fixed Camera Lens price regardless of the exact POS candidate', () => {
+    state.search = 'model=pixel-8';
+    render(<SharedRepairPageV2BookingControls
+      basePath="/repairs/phone/google/camera-lens-replacement"
+      brandSlug="google-pixel"
+      brandName="Google Pixel"
+      repairName="Camera Lens Replacement"
+      supportedModels={supportedModels}
+      priceCandidates={cameraLensCandidates}
+      pricingStrategy={{ mode: 'fixed', fixedPrice: 50 }}
+      quickAnswers={{
+        repairTime: 'Contact us to confirm repair time.',
+        partsSameDay: 'Call to confirm parts availability.',
+        warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
+      }}
+    />);
+
+    expect(screen.getByText('$50')).toBeInTheDocument();
+    expect(screen.queryByText('From $50')).toBeNull();
+    const booking = new URL(screen.getByRole('link', { name: /Book Repair Now/ }).getAttribute('href')!, 'https://www.alimobile.com.au');
+    expect(booking.searchParams.get('category')).toBe('phone');
+    expect(booking.searchParams.get('brand')).toBe('Google Pixel');
+    expect(booking.searchParams.get('model')).toBe('Pixel 8');
+    expect(booking.searchParams.get('service')).toBe('Camera Lens Replacement');
+  });
+
+  it('keeps a catalogue-only Camera Lens model selected at the fixed price', () => {
+    state.search = 'model=pixel-10a';
+    render(<SharedRepairPageV2BookingControls
+      basePath="/repairs/phone/google/camera-lens-replacement"
+      brandSlug="google-pixel"
+      brandName="Google Pixel"
+      repairName="Camera Lens Replacement"
+      supportedModels={supportedModels}
+      priceCandidates={cameraLensCandidates}
+      pricingStrategy={{ mode: 'fixed', fixedPrice: 50 }}
+      quickAnswers={{
+        repairTime: 'Contact us to confirm repair time.',
+        partsSameDay: 'Call to confirm parts availability.',
+        warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
+      }}
+    />);
+
+    expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('pixel-10a');
+    expect(screen.getByText('$50')).toBeInTheDocument();
+    const booking = new URL(screen.getByRole('link', { name: /Book Repair Now/ }).getAttribute('href')!, 'https://www.alimobile.com.au');
+    expect(booking.searchParams.get('model')).toBe('Pixel 10a');
+  });
+
+  it('shows the Camera Lens fixed price before a model is selected', () => {
+    state.search = '';
+    render(<SharedRepairPageV2BookingControls
+      basePath="/repairs/phone/google/camera-lens-replacement"
+      brandSlug="google-pixel"
+      brandName="Google Pixel"
+      repairName="Camera Lens Replacement"
+      supportedModels={supportedModels}
+      priceCandidates={[]}
+      pricingStrategy={{ mode: 'fixed', fixedPrice: 50 }}
+      quickAnswers={{ repairTime: 'Contact us to confirm repair time.', partsSameDay: 'Call to confirm parts availability.', warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.' }}
+    />);
+
+    expect(screen.getByText('$50')).toBeInTheDocument();
+    expect(screen.queryByText('Quote on Request')).toBeNull();
   });
 
   it('uses conservative Earpiece Speaker quick answers without inheriting Loudspeaker timing', () => {
@@ -182,6 +256,15 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Earpiece Speaker Replacement' })).toBe('Google Pixel Earpiece Speaker Replacement');
     expect(screen.getByRole('heading', { name: 'Google Pixel Earpiece Speaker Replacement by Model' })).toBeInTheDocument();
     expect(screen.getByText('Earpiece speaker replacement for Google Pixel 9a.')).toBeInTheDocument();
+  });
+
+  it('renders natural server-side Camera Lens model copy without a Detail link', () => {
+    render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={cameraLensCandidates} repairName="Camera Lens Replacement" pricingStrategy={{ mode: 'fixed', fixedPrice: 50 }} />);
+
+    expect(screen.getByRole('heading', { name: 'Google Pixel Camera Lens Replacement by Model' })).toBeInTheDocument();
+    expect(screen.getByText('Camera lens replacement for Google Pixel 9a.')).toBeInTheDocument();
+    expect(screen.getAllByText('$50')).toHaveLength(supportedModels.length);
+    expect(screen.queryByRole('link', { name: /google-pixel\/pixel-9a/i })).toBeNull();
   });
 
   it.each(['Power Button Replacement', 'Volume Button Replacement'] as const)('renders natural server-side model copy for %s', (repairName) => {

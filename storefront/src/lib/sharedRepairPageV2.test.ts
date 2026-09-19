@@ -122,6 +122,38 @@ function googleButtonBrand(repairSlug: 'power-button-replacement' | 'volume-butt
   };
 }
 
+const cameraLensGoogleBrand: BrandEntry = {
+  ...googleBrand,
+  models: [
+    {
+      model: 'Pixel 8',
+      slug: 'pixel-8',
+      repairTypes: [{
+        slug: 'camera-lens-replacement',
+        name: 'Camera Lens Replacement',
+        price: 89,
+        repairOrigin: 'pos',
+        variants: [
+          { quality_grade: 'Standard', price: 89, is_recommended: true },
+          { quality_grade: 'Premium', price: 109, is_recommended: false },
+        ],
+      }],
+    },
+    {
+      model: 'Pixel 9',
+      slug: 'pixel-9',
+      repairTypes: [{
+        slug: 'camera-lens-replacement',
+        name: 'Camera Lens Replacement',
+        price: 99,
+        repairOrigin: 'pos',
+      }],
+    },
+    { model: 'Pixel 9a', slug: 'pixel-9a', repairTypes: [] },
+    { model: 'Pixel 10a', slug: 'pixel-10a', repairTypes: [] },
+  ],
+};
+
 describe('Shared Page V2 candidate and destination foundation', () => {
   it('includes a catalogue-only Pixel 10a in shared loudspeaker context without hardware enrichment', () => {
     expect(getGooglePixelHardwareConfig('pixel-10a')).toBeNull();
@@ -213,6 +245,31 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$129');
   });
 
+  it('activates Google Pixel Camera Lens V2 by exact identity without a hardware gate or virtual price', () => {
+    expect(getGooglePixelHardwareConfig('pixel-10a')).toBeNull();
+    expect(isSharedRepairPageModelEligible({
+      category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-10a', repairSlug: 'camera-lens-replacement',
+    })).toBe(true);
+    expect(isSharedRepairPageModelEligible({
+      category: 'phone', brandSlug: 'samsung', modelSlug: 'galaxy-s25', repairSlug: 'camera-lens-replacement',
+    })).toBe(false);
+    expect(isSharedRepairPageModelEligible({
+      category: 'phone', brandSlug: 'oppo', modelSlug: 'find-x8-pro', repairSlug: 'camera-lens-replacement',
+    })).toBe(false);
+
+    const supportedModels = buildSharedRepairPageSupportedModels({
+      brands: [cameraLensGoogleBrand], canonicalBrandSlug: 'google-pixel', repairSlug: 'camera-lens-replacement',
+    });
+    const candidates = buildSharedRepairPageCandidates({
+      brands: [cameraLensGoogleBrand], canonicalBrandSlug: 'google-pixel', repairSlug: 'camera-lens-replacement',
+    });
+
+    expect(supportedModels.map((model) => model.modelSlug)).toEqual(['pixel-8', 'pixel-9', 'pixel-9a', 'pixel-10a']);
+    expect(candidates.map((candidate) => candidate.modelSlug)).toEqual(['pixel-8', 'pixel-9']);
+    expect(getSharedRepairCandidatePriceLabel(candidates[0]!)).toBe('From $89');
+    expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$99');
+  });
+
   it('does not retain the Google hardware registry as a V2 visibility gate', () => {
     const routeSource = readFileSync(resolve(process.cwd(), 'src/lib/virtualPhoneRepairRoute.tsx'), 'utf8');
 
@@ -238,7 +295,7 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     })).toMatchObject({ href: '/repairs/phone/google/volume-button-replacement' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'camera-lens-replacement',
-    })).toBeNull();
+    })).toMatchObject({ href: '/repairs/phone/google/camera-lens-replacement' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'huawei', modelSlug: 'p30-pro', repairSlug: 'screen-replacement',
     })).toBeNull();

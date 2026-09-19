@@ -125,7 +125,10 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: pixel }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('Google Pixel');
     expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: oppo }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('OPPO');
 
-    const cameraBooking = new URL(getSharedRepairBookingHref({ repairName: 'Camera Lens Replacement', selectedModel: pixel }), 'https://www.alimobile.com.au');
+    const cameraBooking = new URL(getSharedRepairBookingHref({
+      repairName: 'Camera Lens Replacement',
+      selectedModel: pixel,
+    }), 'https://www.alimobile.com.au');
     expect(cameraBooking.searchParams.get('category')).toBe('phone');
     expect(cameraBooking.searchParams.get('brand')).toBe('Google Pixel');
     expect(cameraBooking.searchParams.get('model')).toBe('Pixel 8 Pro');
@@ -217,13 +220,19 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(oppoCamera).toContain('openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH');
     expect(oppoCamera).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
     expect(googleCamera).toContain('const PAGE_PATH = "/repairs/phone/google/camera-lens-replacement";');
-    expect(googleCamera).toContain('getGooglePixelHardwareConfig(model.slug)');
+    expect(googleCamera).not.toContain('getGooglePixelHardwareConfig(model.slug)');
+    expect(googleCamera).toContain('buildSharedRepairPageSupportedModels');
+    expect(googleCamera).toContain('buildSharedRepairPageCandidates');
+    expect(googleCamera).toContain('getCameraLensPrice("Google Pixel")');
+    expect(googleCamera).toContain('GOOGLE_CAMERA_LENS_FIXED_PRICE');
+    expect(googleCamera).not.toContain('sharedRepairV2');
     expect(googleCamera).toContain('title="Google Pixel Camera Lens Replacement"');
-    expect(googleCamera).toContain('showSharedRepairControls');
+    expect(googleCamera).toContain('sharedPageV2');
     expect(googleCamera).toContain('openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH');
     expect(googleCamera).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
     expect(cameraPage).toContain('const repairHubLabel = brandName ? `${brandName} Repairs` : null;');
     expect(cameraPage).toContain('showModelControls={hasSharedRepairControls}');
+    expect(cameraPage).toContain('SharedRepairPageV2BookingControls');
     expect(cameraPage).toContain('photo and video clarity');
     expect(googleCamera).not.toContain('/repairs/phone/google-pixel/camera-lens-replacement');
   });

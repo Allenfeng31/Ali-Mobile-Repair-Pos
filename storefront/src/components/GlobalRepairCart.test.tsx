@@ -136,4 +136,28 @@ describe('GlobalRepairCart Hydration Logic', () => {
     const priceText = await screen.findByText(/\$199/);
     expect(priceText).toBeTruthy();
   });
+
+  it('renders the fixed $50 Camera Lens service for a Google booking without an exact POS product', async () => {
+    mockInventory = [{
+      id: 3,
+      name: 'Google Pixel Pixel 10a Screen Replacement',
+      model: 'P Google Pixel||Pixel 10a',
+      price: 120,
+      category: 'phone',
+      quality_grade: 'Standard',
+    }];
+    mockSearchParams.set('brand', 'Google Pixel');
+    mockSearchParams.set('model', 'Pixel 10a');
+    mockSearchParams.set('service', 'Camera Lens Replacement');
+
+    render(
+      <CartProvider>
+        <GlobalRepairCart />
+      </CartProvider>
+    );
+
+    await screen.findByText('Google Pixel Pixel 10a');
+    expect(screen.getByText('Camera Lens Replacement')).toBeTruthy();
+    expect(screen.getByText('$50.00')).toBeTruthy();
+  });
 });

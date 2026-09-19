@@ -140,6 +140,32 @@ export function withVirtualCameraLensGroupedService(
   ];
 }
 
+/**
+ * Google Camera Lens is a fixed-price business service. A real POS record may
+ * supply the service identity, but must not override the customer-facing price.
+ */
+export function withGoogleCameraLensFixedPrice(services: GroupedService[], brand: string) {
+  if (getCameraLensBrandKind(brand) !== 'google') return services;
+
+  const fixedPrice = getCameraLensPrice(brand);
+  return services.map((service) => {
+    if (slugify(service.service) !== CAMERA_LENS_REPAIR_SLUG) return service;
+
+    return {
+      ...service,
+      price: fixedPrice,
+      variants: service.variants.map((variant) => ({
+        ...variant,
+        price: fixedPrice,
+        originalItem: {
+          ...variant.originalItem,
+          price: fixedPrice,
+        },
+      })),
+    };
+  });
+}
+
 export function buildCameraLensModelOptions(models: CameraLensModelOption[]) {
   return models
     .filter((model) => model.brandSlug !== 'iphone')

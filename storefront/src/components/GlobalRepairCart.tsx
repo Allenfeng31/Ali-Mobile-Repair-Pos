@@ -22,7 +22,7 @@ import {
 } from '@/lib/inventoryUtils';
 import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
 import { smartSortModels } from '@/lib/modelSortConfig';
-import { withVirtualCameraLensGroupedService } from '@/lib/virtualCameraLens';
+import { withGoogleCameraLensFixedPrice, withVirtualCameraLensGroupedService } from '@/lib/virtualCameraLens';
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from '@/lib/virtualPhoneRepairs';
 import { withAppleWatchChargingRepairGroupedService } from '@/lib/seo/content/apple-watch';
 import { Pencil, Trash2 } from 'lucide-react';
@@ -173,7 +173,7 @@ const CartContent = () => {
         modelParam,
         serviceParam,
         inventory,
-        tierParam
+        tierParam,
       );
 
       if (brand && model && category) {
@@ -300,7 +300,7 @@ interface DeviceSelectorProps {
 }
 
 const DeviceSelector: React.FC<DeviceSelectorProps> = ({ 
-  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst, upsells, tierDescriptions 
+  device, inventory, brands, onRemove, onUpdate, onConfirm, onEdit, onUpdateInfo, isFirst, upsells, tierDescriptions
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<ParsedItem["deviceType"]>((device.category || "phone").toLowerCase() as ParsedItem["deviceType"]);
@@ -359,8 +359,12 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const availableServices = useMemo(() => {
     if (!selectedBrand || !selectedModel) return [];
     const filtered = inventory.filter(i => i.brand === selectedBrand && i.deviceModel === selectedModel);
-    return withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
+    const cameraLensServices = withGoogleCameraLensFixedPrice(
       withVirtualCameraLensGroupedService(groupServicesByBaseName(filtered), selectedBrand, selectedModel, selectedCategory),
+      selectedBrand,
+    );
+    return withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
+      cameraLensServices,
       selectedBrand,
       selectedModel,
       selectedCategory
