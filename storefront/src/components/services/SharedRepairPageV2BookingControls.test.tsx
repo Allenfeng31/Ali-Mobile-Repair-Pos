@@ -228,7 +228,7 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(screen.getByLabelText('Choose your Google Pixel model')).toHaveValue('');
   });
 
-  it('keeps the main heading shared while rendering centred, concise model cards with crawlable model-plus-repair text', () => {
+  it('renders compact whole-card booking links with crawlable model-plus-repair text and only approved prices', () => {
     render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={candidates} repairName="Loudspeaker Replacement" />);
 
     expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Loudspeaker Replacement' })).toBe('Google Pixel Loudspeaker Replacement');
@@ -238,15 +238,19 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(screen.getByRole('heading', { name: 'Google Pixel 10a' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Google Pixel 6 Pro' })).toBeInTheDocument();
     expect(screen.queryByText('Google Pixel Pixel 6 Pro')).toBeNull();
-    expect(screen.getByText('Loudspeaker replacement for Google Pixel 8.')).toBeInTheDocument();
-    expect(screen.getByText('Loudspeaker replacement for Google Pixel 9a.')).toBeInTheDocument();
-    expect(screen.getByText('Loudspeaker replacement for Google Pixel 10a.')).toBeInTheDocument();
+    expect(screen.getAllByText('Loudspeaker Replacement')).toHaveLength(supportedModels.length);
+    expect(screen.queryByText('Loudspeaker replacement for Google Pixel 8.')).toBeNull();
+    expect(screen.queryByText('Call to confirm parts availability.')).toBeNull();
     expect(screen.getByText('$129')).toBeInTheDocument();
     expect(screen.getByText('From $149')).toBeInTheDocument();
-    expect(screen.getAllByText('Quote on Request')).not.toHaveLength(0);
-    expect(screen.getAllByRole('link', { name: 'Book Repair' })).toHaveLength(supportedModels.length);
-    expect(screen.getAllByRole('link', { name: 'Book Repair' })[0]).toHaveAttribute('href', expect.stringContaining('model=Pixel+8'));
-    expect(screen.getAllByRole('link', { name: 'Book Repair' })[2]).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
+    expect(screen.queryByText('Quote on Request')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Book Repair' })).toBeNull();
+    expect(screen.queryByText('+')).toBeNull();
+    const pixel8Card = screen.getByRole('link', { name: /Google Pixel 8.*Loudspeaker Replacement.*\$129/ });
+    const pixel9aCard = screen.getByRole('link', { name: /Google Pixel 9a.*Loudspeaker Replacement/ });
+    expect(pixel8Card).toHaveAttribute('href', expect.stringContaining('model=Pixel+8'));
+    expect(pixel9aCard).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
+    expect(pixel9aCard).not.toHaveTextContent('Quote on Request');
     expect(screen.queryByRole('link', { name: /google-pixel\/pixel-8/i })).toBeNull();
   });
 
@@ -255,15 +259,20 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
 
     expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Earpiece Speaker Replacement' })).toBe('Google Pixel Earpiece Speaker Replacement');
     expect(screen.getByRole('heading', { name: 'Google Pixel Earpiece Speaker Replacement by Model' })).toBeInTheDocument();
-    expect(screen.getByText('Earpiece speaker replacement for Google Pixel 9a.')).toBeInTheDocument();
+    expect(screen.getAllByText('Earpiece Speaker Replacement')).toHaveLength(supportedModels.length);
+    expect(screen.queryByText('Earpiece speaker replacement for Google Pixel 9a.')).toBeNull();
+    expect(screen.queryByText('Quote on Request')).toBeNull();
   });
 
   it('renders natural server-side Camera Lens model copy without a Detail link', () => {
     render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={cameraLensCandidates} repairName="Camera Lens Replacement" pricingStrategy={{ mode: 'fixed', fixedPrice: 50 }} />);
 
     expect(screen.getByRole('heading', { name: 'Google Pixel Camera Lens Replacement by Model' })).toBeInTheDocument();
-    expect(screen.getByText('Camera lens replacement for Google Pixel 9a.')).toBeInTheDocument();
+    expect(screen.getAllByText('Camera Lens Replacement')).toHaveLength(supportedModels.length);
     expect(screen.getAllByText('$50')).toHaveLength(supportedModels.length);
+    expect(screen.queryByText('From $50')).toBeNull();
+    expect(screen.queryByText('Quote on Request')).toBeNull();
+    expect(screen.getByRole('link', { name: /Google Pixel 9a.*Camera Lens Replacement.*\$50/ })).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
     expect(screen.queryByRole('link', { name: /google-pixel\/pixel-9a/i })).toBeNull();
   });
 
@@ -271,7 +280,9 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={[]} repairName={repairName} />);
 
     expect(screen.getByRole('heading', { name: `Google Pixel ${repairName} by Model` })).toBeInTheDocument();
-    expect(screen.getByText(`${repairName.replace(' Button Replacement', ' button replacement')} for Google Pixel 9a.`)).toBeInTheDocument();
+    expect(screen.getAllByText(repairName)).toHaveLength(supportedModels.length);
+    expect(screen.queryByText(`${repairName.replace(' Button Replacement', ' button replacement')} for Google Pixel 9a.`)).toBeNull();
+    expect(screen.queryByText('Quote on Request')).toBeNull();
   });
 
   it('removes the old top booking pills for the V2 page while preserving them for unchanged shared pages', () => {
@@ -281,9 +292,13 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(controls).toContain('mx-auto flex w-full max-w-md flex-col items-center');
     expect(controls).toContain('mt-5 flex w-full max-w-sm flex-col gap-4');
     const modelSections = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairPageV2ModelSections.tsx'), 'utf8');
-    expect(modelSections).toContain('grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3');
-    expect(modelSections).toContain('flex flex-col items-center text-center');
-    expect(modelSections).toContain('Call to confirm parts availability.');
+    expect(modelSections).toContain("@/components/repair-type-hubs/RepairTypeHub.module.css");
+    expect(modelSections).toContain('styles.brandAccordionItem');
+    expect(modelSections).toContain('styles.brandToggle');
+    expect(modelSections).toContain('grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3');
+    expect(modelSections).not.toContain('Book Repair');
+    expect(modelSections).not.toContain('Call to confirm parts availability.');
+    expect(modelSections).not.toContain('Quote on Request');
     expect(modelSections).not.toContain('whether same-day repair is possible');
     for (const oldPill of ['Inspection Before Work', 'Clear Quote First', 'Repair Warranty', 'Ringwood Repair Desk']) {
       expect(controls).not.toContain(oldPill);
