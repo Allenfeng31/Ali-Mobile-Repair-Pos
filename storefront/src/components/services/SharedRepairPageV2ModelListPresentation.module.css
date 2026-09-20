@@ -1,0 +1,42 @@
+.modelGrid[data-expanded='false'] > .modelCard:nth-child(n + 6) {
+  display: none;
+}
+
+.moreControl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 0 18px;
+  border: 2px solid rgba(37, 99, 235, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+}
+
+.moreControl:hover {
+  border-color: rgba(37, 99, 235, 0.55);
+}
+
+.moreControl:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.32);
+  outline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .modelGrid[data-expanded='false'] > .modelCard:nth-child(n + 6) {
+    display: block;
+  }
+
+  .modelGrid[data-expanded='false'] > .modelCard:nth-child(n + 17) {
+    display: none;
+  }
+
+  .moreControl[data-desktop-more='false'] {
+    display: none;
+  }
+}

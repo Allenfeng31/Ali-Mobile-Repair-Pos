@@ -53,6 +53,7 @@ export default async function GoogleCameraLensReplacementPage({ searchParams }: 
         supportedModels,
         priceCandidates,
         initialResults,
+        selectedModelSlug,
         quickAnswers: {
           repairTime: "Contact us to confirm repair time.",
           partsSameDay: "Call to confirm parts availability.",

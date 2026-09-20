@@ -1,10 +1,11 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const state = vi.hoisted(() => ({ search: 'model=pixel-8' }));
@@ -19,6 +20,7 @@ vi.mock('next/link', () => ({
 }));
 
 import SharedRepairPageV2BookingControls from './SharedRepairPageV2BookingControls';
+import SharedRepairPageV2ModelListPresentation from './SharedRepairPageV2ModelListPresentation';
 import SharedRepairPageV2ModelSections from './SharedRepairPageV2ModelSections';
 import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel } from '@/lib/sharedRepairPageV2';
 import { getVirtualPhoneRepairHeading } from './VirtualPhoneRepairLandingPage';
@@ -57,6 +59,43 @@ const cameraLensCandidates: SharedRepairPageCandidate[] = [
     pricing: { resolvedPrice: 89, validVariants: [{ quality_grade: 'Standard', price: 89 }, { quality_grade: 'Premium', price: 109 }], source: 'variant', isQuoteOnly: false, canEmitOffer: true },
   },
 ];
+
+function createSupportedModels(count: number): SharedRepairPageSupportedModel[] {
+  return Array.from({ length: count }, (_, index) => {
+    const modelNumber = index + 1;
+    return {
+      category: 'phone' as const,
+      canonicalBrandSlug: 'google-pixel',
+      brand: 'Google Pixel',
+      brandSlug: 'google-pixel',
+      model: `Pixel ${modelNumber}`,
+      modelSlug: `pixel-${modelNumber}`,
+    };
+  });
+}
+
+function createCandidate(model: SharedRepairPageSupportedModel, price: number | null, variantCount = 0): SharedRepairPageCandidate {
+  return {
+    category: 'phone',
+    canonicalBrandSlug: 'google-pixel',
+    brand: 'Google Pixel',
+    brandSlug: 'google-pixel',
+    model: model.model,
+    modelSlug: model.modelSlug,
+    repairSlug: 'loudspeaker-replacement',
+    repairName: 'Loudspeaker Replacement',
+    repair: { slug: 'loudspeaker-replacement', name: 'Loudspeaker Replacement', price: price ?? 0, repairOrigin: 'pos' },
+    pricing: {
+      resolvedPrice: price,
+      validVariants: variantCount > 0 && price !== null
+        ? Array.from({ length: variantCount }, (_, index) => ({ quality_grade: `Tier ${index + 1}`, price: price + index * 10 }))
+        : [],
+      source: price === null ? 'none' : 'base',
+      isQuoteOnly: price === null,
+      canEmitOffer: price !== null,
+    },
+  };
+}
 
 describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
   beforeEach(() => {
@@ -292,10 +331,13 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     expect(controls).toContain('mx-auto flex w-full max-w-md flex-col items-center');
     expect(controls).toContain('mt-5 flex w-full max-w-sm flex-col gap-4');
     const modelSections = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairPageV2ModelSections.tsx'), 'utf8');
+    const listPresentation = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairPageV2ModelListPresentation.tsx'), 'utf8');
     expect(modelSections).toContain("@/components/repair-type-hubs/RepairTypeHub.module.css");
-    expect(modelSections).toContain('styles.brandAccordionItem');
-    expect(modelSections).toContain('styles.brandToggle');
-    expect(modelSections).toContain('grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3');
+    expect(modelSections).toContain('hubStyles.brandAccordionItem');
+    expect(modelSections).toContain('hubStyles.brandToggle');
+    expect(modelSections).not.toContain("'use client'");
+    expect(modelSections).toContain('SharedRepairPageV2ModelListPresentation');
+    expect(listPresentation).toContain('grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3');
     expect(modelSections).not.toContain('Book Repair');
     expect(modelSections).not.toContain('Call to confirm parts availability.');
     expect(modelSections).not.toContain('Quote on Request');
@@ -304,5 +346,115 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
       expect(controls).not.toContain(oldPill);
     }
     expect(landingPage).toContain('{!sharedPageV2 ? <div className="trust-badges mt-8">');
+  });
+});
+
+describe('Shared Page V2 model list scaling presentation', () => {
+  it('keeps one server-rendered card collection while the client wrapper controls disclosure state', () => {
+    const models = createSupportedModels(17);
+    const markup = renderToStaticMarkup(
+      <SharedRepairPageV2ModelSections
+        supportedModels={models}
+        priceCandidates={[]}
+        repairName="Loudspeaker Replacement"
+      />,
+    );
+
+    for (const modelNumber of [1, 5, 6, 16, 17]) {
+      expect(markup).toContain(`Pixel ${modelNumber}`);
+      expect(markup).toContain(`model=Pixel+${modelNumber}`);
+    }
+    expect((markup.match(/<article\b/g) ?? [])).toHaveLength(17);
+    expect(markup).toContain('Show More Models');
+  });
+
+  it('uses one accessible More/Fewer control only when mobile disclosure is needed', () => {
+    const presentation = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairPageV2ModelListPresentation.tsx'), 'utf8');
+    const presentationStyles = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairPageV2ModelListPresentation.module.css'), 'utf8');
+    const children = Array.from({ length: 6 }, (_, index) => (
+      <article key={index} data-shared-repair-model-card>Pixel {index + 1}</article>
+    ));
+    const { container } = render(
+      <SharedRepairPageV2ModelListPresentation regionId="pixel-model-list" initiallyExpanded={false} modelCount={6}>
+        {children}
+      </SharedRepairPageV2ModelListPresentation>,
+    );
+
+    const more = screen.getByRole('button', { name: 'Show More Models' });
+    expect(more).toHaveAttribute('type', 'button');
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    expect(more).toHaveAttribute('aria-controls', 'pixel-model-list');
+    expect(container.querySelectorAll('[data-shared-repair-model-card]')).toHaveLength(6);
+    expect(container.querySelector('noscript')).toBeInTheDocument();
+    expect(presentation).toContain('<noscript>');
+    expect(presentation).not.toContain('next/navigation');
+    expect(presentationStyles).toContain(".modelGrid[data-expanded='false'] > .modelCard:nth-child(n + 6)");
+    expect(presentationStyles).toContain(".modelGrid[data-expanded='false'] > .modelCard:nth-child(n + 17)");
+    expect(presentationStyles).toContain(".moreControl[data-desktop-more='false']");
+
+    fireEvent.click(more);
+    expect(screen.getByRole('button', { name: 'Show Fewer Models' })).toHaveAttribute('aria-expanded', 'true');
+    expect(container.querySelector('#pixel-model-list')).toHaveAttribute('data-expanded', 'true');
+  });
+
+  it('does not render a disclosure control for five or fewer models and only needs desktop disclosure after sixteen', () => {
+    const { rerender } = render(
+      <SharedRepairPageV2ModelListPresentation regionId="five-model-list" initiallyExpanded={false} modelCount={5}>
+        <article data-shared-repair-model-card>Pixel 1</article>
+      </SharedRepairPageV2ModelListPresentation>,
+    );
+    expect(screen.queryByRole('button', { name: /Show More Models/ })).toBeNull();
+
+    rerender(
+      <SharedRepairPageV2ModelListPresentation regionId="sixteen-model-list" initiallyExpanded={false} modelCount={16}>
+        <article data-shared-repair-model-card>Pixel 16</article>
+      </SharedRepairPageV2ModelListPresentation>,
+    );
+    expect(screen.getByRole('button', { name: 'Show More Models' })).toHaveAttribute('data-desktop-more', 'false');
+
+    rerender(
+      <SharedRepairPageV2ModelListPresentation regionId="seventeen-model-list" initiallyExpanded={false} modelCount={17}>
+        <article data-shared-repair-model-card>Pixel 17</article>
+      </SharedRepairPageV2ModelListPresentation>,
+    );
+    expect(screen.getByRole('button', { name: 'Show More Models' })).toHaveAttribute('data-desktop-more', 'true');
+  });
+
+  it('auto-expands only when the validated selected model is after the first five without changing card order', () => {
+    const models = createSupportedModels(6);
+    const { rerender } = render(
+      <SharedRepairPageV2ModelSections supportedModels={models} priceCandidates={[]} repairName="Loudspeaker Replacement" selectedModelSlug="pixel-5" />,
+    );
+    expect(screen.getByRole('button', { name: 'Show More Models' })).toHaveAttribute('aria-expanded', 'false');
+
+    rerender(
+      <SharedRepairPageV2ModelSections supportedModels={models} priceCandidates={[]} repairName="Loudspeaker Replacement" selectedModelSlug="pixel-6" />,
+    );
+    expect(screen.getByRole('button', { name: 'Show Fewer Models' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toEqual(models.map((model) => `Google ${model.model}`));
+  });
+
+  it('preserves valid prices and leaves missing or unresolved candidate prices blank while Camera Lens remains fixed', () => {
+    const models = createSupportedModels(4);
+    const normalCandidates = [
+      createCandidate(models[0]!, 129),
+      createCandidate(models[1]!, 149, 2),
+      createCandidate(models[2]!, null),
+    ];
+    const { rerender } = render(
+      <SharedRepairPageV2ModelSections supportedModels={models} priceCandidates={normalCandidates} repairName="Loudspeaker Replacement" />,
+    );
+    expect(screen.getByText('$129')).toBeInTheDocument();
+    expect(screen.getByText('From $149')).toBeInTheDocument();
+    expect(screen.queryByText('Quote on Request')).toBeNull();
+    expect(screen.getByRole('link', { name: /Google Pixel 3.*Loudspeaker Replacement/ })).not.toHaveTextContent('$');
+    expect(screen.getByRole('link', { name: /Google Pixel 4.*Loudspeaker Replacement/ })).not.toHaveTextContent('$');
+
+    rerender(
+      <SharedRepairPageV2ModelSections supportedModels={models} priceCandidates={normalCandidates} repairName="Camera Lens Replacement" pricingStrategy={{ mode: 'fixed', fixedPrice: 50 }} />,
+    );
+    expect(screen.getAllByText('$50')).toHaveLength(4);
+    expect(screen.queryByText('From $50')).toBeNull();
+    expect(screen.queryByText('Quote on Request')).toBeNull();
   });
 });
