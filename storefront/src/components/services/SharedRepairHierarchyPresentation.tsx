@@ -37,7 +37,7 @@ function ModelCards({
     >
       {models.map((model) => (
         <article
-          id={model.modelSlug}
+          id={hierarchyId('model', model.brandSlug, model.modelSlug)}
           key={model.modelSlug}
           data-shared-repair-model-card
           className={`scroll-mt-28 ${listStyles.modelCard} ${hubStyles.brandAccordionItem}`}

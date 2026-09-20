@@ -28,7 +28,7 @@ describe('buildSharedRepairHierarchy', () => {
         bookingHref: `/book/s${index + 1}`,
         priceLabel: index === 0 ? '$99' : null,
       })),
-      { selectedModelSlug: 'galaxy-s6' },
+      { selectedBrandSlug: 'samsung', selectedModelSlug: 'galaxy-s6' },
     );
 
     const brand = hierarchy.brands[0]!;
@@ -52,5 +52,18 @@ describe('buildSharedRepairHierarchy', () => {
 
     expect(hierarchy.brands[0]?.series.map((series) => series.seriesKey)).toEqual(['s', 'a', 'z', 'note', 'other']);
     expect(hierarchy.brands[0]?.series.at(-1)?.models.map((model) => model.modelSlug)).toEqual(['unknown']);
+  });
+
+  it('resolves a selected model by its exact brand and model pair when slugs are duplicated', () => {
+    const hierarchy = buildSharedRepairHierarchy([
+      { brandSlug: 'brand-a', brandLabel: 'Brand A', modelSlug: 'shared-model', modelLabel: 'A Shared', repairLabel: 'Front Camera Replacement', bookingHref: '/book/a-shared', priceLabel: null },
+      { brandSlug: 'brand-b', brandLabel: 'Brand B', modelSlug: 'shared-model', modelLabel: 'B Shared', repairLabel: 'Front Camera Replacement', bookingHref: '/book/b-shared', priceLabel: '$99' },
+    ], { selectedBrandSlug: 'brand-b', selectedModelSlug: 'shared-model' });
+
+    expect(hierarchy.brands.map((brand) => ({ slug: brand.brandSlug, open: brand.initiallyExpanded }))).toEqual([
+      { slug: 'brand-a', open: false },
+      { slug: 'brand-b', open: true },
+    ]);
+    expect(hierarchy.brands.flatMap((brand) => brand.models).map((model) => model.bookingHref)).toEqual(['/book/a-shared', '/book/b-shared']);
   });
 });

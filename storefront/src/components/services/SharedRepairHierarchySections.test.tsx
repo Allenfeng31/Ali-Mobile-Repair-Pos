@@ -75,15 +75,35 @@ describe('SharedRepairHierarchySections', () => {
 
   it('supports selected model visibility without changing its caller order', () => {
     const { container } = render(
-      <SharedRepairHierarchySections models={hierarchyModels} selectedModelSlug="galaxy-s6" />,
+      <SharedRepairHierarchySections models={hierarchyModels} selectedBrandSlug="samsung" selectedModelSlug="galaxy-s6" />,
     );
 
     expect(screen.getByRole('button', { name: /Samsung/ })).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('button', { name: /Galaxy S Series/ })).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('button', { name: 'Show Fewer Models' })).toHaveAttribute('aria-expanded', 'true');
     expect(Array.from(container.querySelectorAll('[data-shared-repair-model-card]')).map((card) => card.id)).toEqual([
-      'galaxy-s1', 'galaxy-s2', 'galaxy-s3', 'galaxy-s4', 'galaxy-s5', 'galaxy-s6', 'galaxy-a55', 'u24',
+      'shared-repair-hierarchy-model-samsung-galaxy-s1', 'shared-repair-hierarchy-model-samsung-galaxy-s2', 'shared-repair-hierarchy-model-samsung-galaxy-s3', 'shared-repair-hierarchy-model-samsung-galaxy-s4', 'shared-repair-hierarchy-model-samsung-galaxy-s5', 'shared-repair-hierarchy-model-samsung-galaxy-s6', 'shared-repair-hierarchy-model-samsung-galaxy-a55', 'shared-repair-hierarchy-model-htc-u24',
     ]);
+  });
+
+  it('keeps duplicate model slugs brand-scoped for selected state, DOM IDs, and booking links', () => {
+    const duplicateModels = [
+      { ...model('brand-a', 'Brand A', 'shared-model', 'A Shared Model', null), bookingHref: '/book/a-shared' },
+      { ...model('brand-b', 'Brand B', 'shared-model', 'B Shared Model', '$99'), bookingHref: '/book/b-shared' },
+    ];
+    const { container } = render(
+      <SharedRepairHierarchySections models={duplicateModels} selectedBrandSlug="brand-b" selectedModelSlug="shared-model" />,
+    );
+
+    expect(screen.getByRole('button', { name: /Brand A/ })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('button', { name: /Brand B/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(Array.from(container.querySelectorAll('[data-shared-repair-model-card]')).map((card) => card.id)).toEqual([
+      'shared-repair-hierarchy-model-brand-a-shared-model',
+      'shared-repair-hierarchy-model-brand-b-shared-model',
+    ]);
+    expect(new Set(Array.from(container.querySelectorAll('[id]')).map((element) => element.id)).size).toBe(container.querySelectorAll('[id]').length);
+    expect(screen.getByRole('link', { name: /A Shared Model/ })).toHaveAttribute('href', '/book/a-shared');
+    expect(screen.getByRole('link', { name: /B Shared Model/ })).toHaveAttribute('href', '/book/b-shared');
   });
 
   it('opens an explicitly selected brand, omits a redundant single-brand control, and keeps flat brands direct', () => {

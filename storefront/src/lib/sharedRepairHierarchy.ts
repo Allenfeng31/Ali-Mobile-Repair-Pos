@@ -40,25 +40,34 @@ export interface BuildSharedRepairHierarchyOptions {
 }
 
 function modelListInitiallyExpanded(
+  brandSlug: string,
   models: readonly SharedRepairHierarchyModel[],
+  selectedBrandSlug: string | null | undefined,
   selectedModelSlug: string | null | undefined,
 ) {
-  const selectedIndex = selectedModelSlug
+  const selectedIndex = selectedBrandSlug === brandSlug && selectedModelSlug
     ? models.findIndex((model) => model.modelSlug === selectedModelSlug)
     : -1;
   return selectedIndex >= 5;
 }
 
 function hasSelectedModel(
+  brandSlug: string,
   models: readonly SharedRepairHierarchyModel[],
+  selectedBrandSlug: string | null | undefined,
   selectedModelSlug: string | null | undefined,
 ) {
-  return Boolean(selectedModelSlug && models.some((model) => model.modelSlug === selectedModelSlug));
+  return Boolean(
+    selectedBrandSlug === brandSlug
+      && selectedModelSlug
+      && models.some((model) => model.modelSlug === selectedModelSlug),
+  );
 }
 
 function buildSeries(
   brandSlug: string,
   models: SharedRepairHierarchyModel[],
+  selectedBrandSlug: string | null | undefined,
   selectedModelSlug: string | null | undefined,
 ): SharedRepairHierarchySeries[] {
   const groups = groupSharedRepairModelsBySeries(brandSlug, models.map((model) => ({
@@ -72,8 +81,8 @@ function buildSeries(
     seriesKey: group.seriesKey,
     seriesLabel: group.seriesLabel,
     models: group.models,
-    initiallyExpanded: hasSelectedModel(group.models, selectedModelSlug),
-    initiallyExpandedModelList: modelListInitiallyExpanded(group.models, selectedModelSlug),
+    initiallyExpanded: hasSelectedModel(brandSlug, group.models, selectedBrandSlug, selectedModelSlug),
+    initiallyExpandedModelList: modelListInitiallyExpanded(brandSlug, group.models, selectedBrandSlug, selectedModelSlug),
   }));
 }
 
@@ -93,8 +102,8 @@ export function buildSharedRepairHierarchy(
 
   return {
     brands: Array.from(modelsByBrand, ([brandSlug, brandModels]) => {
-      const series = buildSeries(brandSlug, brandModels, options.selectedModelSlug);
-      const ownsSelectedModel = hasSelectedModel(brandModels, options.selectedModelSlug);
+      const series = buildSeries(brandSlug, brandModels, options.selectedBrandSlug, options.selectedModelSlug);
+      const ownsSelectedModel = hasSelectedModel(brandSlug, brandModels, options.selectedBrandSlug, options.selectedModelSlug);
       return {
         brandSlug,
         brandLabel: labelsByBrand.get(brandSlug) ?? brandSlug,
@@ -103,7 +112,7 @@ export function buildSharedRepairHierarchy(
         series,
         initiallyExpanded: brandSlug === options.selectedBrandSlug || ownsSelectedModel,
         initiallyExpandedModelList: series.length === 0
-          ? modelListInitiallyExpanded(brandModels, options.selectedModelSlug)
+          ? modelListInitiallyExpanded(brandSlug, brandModels, options.selectedBrandSlug, options.selectedModelSlug)
           : false,
       };
     }),
