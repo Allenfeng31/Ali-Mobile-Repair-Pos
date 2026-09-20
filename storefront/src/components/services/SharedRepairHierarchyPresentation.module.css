@@ -1,0 +1,17 @@
+.brandList,
+.seriesList {
+  display: grid;
+  gap: 12px;
+}
+
+.panel[data-expanded='false'] {
+  display: none;
+}
+
+.brandPanel {
+  padding: 0 16px 16px;
+}
+
+.seriesPanel {
+  margin-top: 12px;
+}
