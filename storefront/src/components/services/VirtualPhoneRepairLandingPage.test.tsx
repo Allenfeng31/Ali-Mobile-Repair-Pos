@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('./SharedRepairBookingControls', () => ({ default: () => <div data-testid="generic-booking-cta" /> }));
 vi.mock('./SharedRepairHierarchySections', () => ({
-  default: ({ models, selectedBrandSlug, selectedModelSlug }: { models: Array<{ modelLabel: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null }) => (
-    <div data-testid="generic-peripheral-hierarchy" data-brand={selectedBrandSlug} data-model={selectedModelSlug}>{models.map((model) => model.modelLabel).join(', ')}</div>
+  default: ({ models, selectedBrandSlug, selectedModelSlug, ariaLabel }: { models: Array<{ modelLabel: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null; ariaLabel: string }) => (
+    <div data-testid="generic-peripheral-hierarchy" data-brand={selectedBrandSlug} data-model={selectedModelSlug} aria-label={ariaLabel}>{models.map((model) => model.modelLabel).join(', ')}</div>
   ),
 }));
 
@@ -26,9 +26,25 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.getByText('Starting from $50')).toBeTruthy();
     expect(screen.getByTestId('generic-booking-cta')).toBeTruthy();
     expect(screen.getByTestId('generic-peripheral-hierarchy').getAttribute('data-brand')).toBe('huawei');
+    expect(screen.getByTestId('generic-peripheral-hierarchy').getAttribute('aria-label')).toBe('Supported Loudspeaker Replacement models');
     expect(screen.getByTestId('generic-peripheral-hierarchy').textContent).toContain('Huawei Mate 20');
     expect(container.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(1);
     expect(container.textContent).not.toContain('Repair Results');
+  });
+
+  it.each([
+    ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
+    ['power-button-replacement', 'Power Button Replacement'],
+  ] as const)('derives hierarchy accessibility semantics for %s without Loudspeaker leakage', (repairSlug, repairName) => {
+    render(<VirtualPhoneRepairLandingPage
+      repairSlug={repairSlug}
+      canonicalPath={`/repairs/phone/${repairSlug}`}
+      models={[]}
+      hierarchy={{ models: [{ brandSlug: 'huawei', brandLabel: 'Huawei', modelSlug: 'p30', modelLabel: 'Huawei P30', repairLabel: repairName, priceLabel: null, bookingHref: '/book-repair' }], selectedBrandSlug: null, selectedModelSlug: null }}
+    />);
+    const hierarchy = screen.getByTestId('generic-peripheral-hierarchy');
+    expect(hierarchy.getAttribute('aria-label')).toBe(`Supported ${repairName} models`);
+    expect(hierarchy.getAttribute('aria-label')).not.toContain('Loudspeaker');
   });
 
   it('does not alter legacy Virtual Phone pages when no hierarchy is supplied', () => {
