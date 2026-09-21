@@ -46,7 +46,7 @@ describe('global camera module routes', () => {
     expect((backMetadata.twitter as { card?: string } | undefined)?.card).toBe('summary');
   });
 
-  it('keeps the routes server-first and activates hierarchy only for Front Camera', async () => {
+  it('keeps both camera routes server-first and supplies only their exact repair hierarchies', async () => {
     fetchRepairCatalogMock.mockResolvedValue(catalog);
     const frontProps = (await FrontCameraReplacementPage({ searchParams: Promise.resolve({ brand: 'samsung', model: 'galaxy-s25' }) }) as ReactElement<LandingPageProps>).props;
     expect(frontProps.canonicalPath).toBe('/repairs/phone/front-camera-replacement');
@@ -64,20 +64,34 @@ describe('global camera module routes', () => {
       selectedModelSlug: 'galaxy-s25',
     });
 
-    const backProps = (await BackCameraReplacementPage() as ReactElement<LandingPageProps>).props;
+    const backProps = (await BackCameraReplacementPage({ searchParams: Promise.resolve({ brand: 'google-pixel', model: 'pixel-8-pro' }) }) as ReactElement<LandingPageProps>).props;
     expect(backProps.candidates).toEqual([
       { canonicalBrandSlug: 'google-pixel', modelSlug: 'pixel-8-pro', displayBrand: 'Google Pixel', displayModel: 'Pixel 8 Pro' },
     ]);
     expect(backProps.config.relatedHref).toBe('/repairs/phone/camera-lens-replacement');
     expect(backProps.config.distinctionBody).toMatch(/Cracked outer lens glass/);
     expect(backProps.config.inspectionBody).toMatch(/cannot be guaranteed/);
-    expect(backProps.hierarchy).toBeUndefined();
+    expect(backProps.hierarchy).toEqual({
+      models: [
+        { brandSlug: 'google-pixel', brandLabel: 'Google Pixel', modelSlug: 'pixel-8-pro', modelLabel: 'Google Pixel 8 Pro', repairLabel: 'Back Camera Replacement', priceLabel: '$149', bookingHref: '/book-repair?category=phone&service=Back+Camera+Replacement&brand=Google+Pixel&model=Pixel+8+Pro' },
+      ],
+      selectedBrandSlug: 'google-pixel',
+      selectedModelSlug: 'pixel-8-pro',
+    });
   });
 
   it('fails closed for invalid Front Camera hierarchy query pairs without changing the canonical route', async () => {
     fetchRepairCatalogMock.mockResolvedValue(catalog);
     const props = (await FrontCameraReplacementPage({ searchParams: Promise.resolve({ brand: 'google-pixel', model: 'galaxy-s25' }) }) as ReactElement<LandingPageProps>).props;
     expect(props.canonicalPath).toBe('/repairs/phone/front-camera-replacement');
+    expect(props.hierarchy?.selectedBrandSlug).toBeNull();
+    expect(props.hierarchy?.selectedModelSlug).toBeNull();
+  });
+
+  it('fails closed for invalid Back Camera query pairs without changing the canonical route', async () => {
+    fetchRepairCatalogMock.mockResolvedValue(catalog);
+    const props = (await BackCameraReplacementPage({ searchParams: Promise.resolve({ brand: 'samsung', model: 'pixel-8-pro' }) }) as ReactElement<LandingPageProps>).props;
+    expect(props.canonicalPath).toBe('/repairs/phone/back-camera-replacement');
     expect(props.hierarchy?.selectedBrandSlug).toBeNull();
     expect(props.hierarchy?.selectedModelSlug).toBeNull();
   });

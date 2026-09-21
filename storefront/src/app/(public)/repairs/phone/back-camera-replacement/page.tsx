@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import { fetchRepairCatalog } from '@/lib/api';
 import CameraModuleRepairLandingPage, { type CameraModuleRepairLandingConfig } from '@/components/services/CameraModuleRepairLandingPage';
 import { compareDeterministicStrings } from '@/lib/deterministicStrings';
+import {
+  buildCameraModuleRepairHierarchyModels,
+  resolveCameraModuleRepairHierarchySelection,
+} from '@/lib/cameraModuleRepairHierarchy';
 
 const PAGE_PATH = '/repairs/phone/back-camera-replacement';
 
@@ -37,14 +41,51 @@ const config: CameraModuleRepairLandingConfig = {
   relatedLabel: 'Camera lens glass repair',
 };
 
-export default async function BackCameraReplacementPage() {
+type BackCameraSearchParams = Readonly<{
+  brand?: string | readonly string[];
+  model?: string | readonly string[];
+  service?: string | readonly string[];
+}>;
+
+export default async function BackCameraReplacementPage({
+  searchParams,
+}: {
+  searchParams: Promise<BackCameraSearchParams>;
+}) {
   const catalog = await fetchRepairCatalog();
   const candidates = catalog.brands
     .filter((brand) => brand.category === 'phone' && brand.slug !== 'iphone' && brand.slug !== 'apple')
     .flatMap((brand) => brand.models
-      .filter((model) => model.repairTypes.some((repair) => repair.slug === config.repairSlug))
-      .map((model) => ({ canonicalBrandSlug: brand.slug, modelSlug: model.slug, displayBrand: brand.brand, displayModel: model.model })))
+      .flatMap((model) => {
+        const repair = model.repairTypes.find((entry) => entry.slug === config.repairSlug);
+        return repair
+          ? [{ canonicalBrandSlug: brand.slug, modelSlug: model.slug, displayBrand: brand.brand, displayModel: model.model, repair }]
+          : [];
+      }))
     .sort((left, right) => compareDeterministicStrings(`${left.canonicalBrandSlug}/${left.modelSlug}`, `${right.canonicalBrandSlug}/${right.modelSlug}`));
 
-  return <CameraModuleRepairLandingPage config={config} canonicalPath={PAGE_PATH} candidates={candidates} />;
+  const hierarchyModels = buildCameraModuleRepairHierarchyModels({
+    repairSlug: config.repairSlug,
+    bookingService: config.bookingService,
+    candidates,
+  });
+  const selection = resolveCameraModuleRepairHierarchySelection({
+    repairSlug: config.repairSlug,
+    bookingService: config.bookingService,
+    candidates,
+    query: await searchParams,
+  });
+  const landingCandidates = candidates.map((candidate) => ({
+    canonicalBrandSlug: candidate.canonicalBrandSlug,
+    modelSlug: candidate.modelSlug,
+    displayBrand: candidate.displayBrand,
+    displayModel: candidate.displayModel,
+  }));
+
+  return <CameraModuleRepairLandingPage
+    config={config}
+    canonicalPath={PAGE_PATH}
+    candidates={landingCandidates}
+    hierarchy={{ models: hierarchyModels, ...selection }}
+  />;
 }

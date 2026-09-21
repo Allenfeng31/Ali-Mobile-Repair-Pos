@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   buildCameraModuleRepairHierarchyModels,
   resolveCameraModuleRepairHierarchySelection,
@@ -14,6 +16,7 @@ function candidate({
   price,
   variants,
   repairOrigin = 'pos',
+  repairSlug = 'front-camera-replacement',
 }: {
   brandSlug: string;
   brand: string;
@@ -22,6 +25,7 @@ function candidate({
   price: number;
   variants?: Array<{ quality_grade: string; price: number; is_recommended: boolean }>;
   repairOrigin?: 'pos' | 'synthetic-backfill' | 'virtual';
+  repairSlug?: 'front-camera-replacement' | 'back-camera-replacement';
 }): CameraModuleRepairHierarchyCandidate {
   return {
     canonicalBrandSlug: brandSlug,
@@ -29,8 +33,8 @@ function candidate({
     modelSlug,
     displayModel: model,
     repair: {
-      slug: 'front-camera-replacement',
-      name: 'Front Camera Replacement',
+      slug: repairSlug,
+      name: repairSlug === 'front-camera-replacement' ? 'Front Camera Replacement' : 'Back Camera Replacement',
       price,
       variants,
       repairOrigin,
@@ -46,6 +50,22 @@ const candidates = [
   ] }),
   candidate({ brandSlug: 'htc', brand: 'HTC', modelSlug: 'u24', model: 'U24', price: 0 }),
   candidate({ brandSlug: 'future', brand: 'Future', modelSlug: 'one', model: 'One', price: 120, repairOrigin: 'synthetic-backfill' }),
+];
+
+const missingBackPriceCandidate = candidate({ brandSlug: 'nokia', brand: 'Nokia', modelSlug: 'g60', model: 'G60', price: 0, repairSlug: 'back-camera-replacement' });
+missingBackPriceCandidate.repair.price = undefined as unknown as number;
+
+const backCandidates = [
+  candidate({ brandSlug: 'huawei', brand: 'Huawei', modelSlug: 'p60-pro', model: 'P60 Pro', price: 129, repairSlug: 'back-camera-replacement' }),
+  candidate({ brandSlug: 'oppo', brand: 'OPPO', modelSlug: 'find-x8-pro', model: 'Find X8 Pro', price: 0, repairSlug: 'back-camera-replacement' }),
+  candidate({ brandSlug: 'oppo', brand: 'OPPO', modelSlug: 'reno-12', model: 'Reno 12', price: 159, repairSlug: 'back-camera-replacement', variants: [
+    { quality_grade: 'Standard', price: 159, is_recommended: true },
+    { quality_grade: 'Premium', price: 189, is_recommended: false },
+  ] }),
+  candidate({ brandSlug: 'motorola', brand: 'Motorola', modelSlug: 'edge-50', model: 'Edge 50', price: Number.NaN, repairSlug: 'back-camera-replacement' }),
+  candidate({ brandSlug: 'future', brand: 'Future', modelSlug: 'one', model: 'One', price: 120, repairOrigin: 'synthetic-backfill', repairSlug: 'back-camera-replacement' }),
+  candidate({ brandSlug: 'virtual', brand: 'Virtual', modelSlug: 'one', model: 'One', price: 50, repairOrigin: 'virtual', repairSlug: 'back-camera-replacement' }),
+  missingBackPriceCandidate,
 ];
 
 describe('camera module hierarchy adapter', () => {
@@ -91,6 +111,66 @@ describe('camera module hierarchy adapter', () => {
     expect(hierarchy.brands[0]?.series.flatMap((series) => series.models).map((model) => model.modelSlug)).toEqual(['mate-20', 'p30-pro']);
     expect(hierarchy.brands[1]?.series).toEqual([]);
     expect(hierarchy.brands[1]?.models.map((model) => model.modelSlug)).toEqual(['u24']);
+  });
+
+  it('uses only exact trusted Back Camera prices and never a model-hub starting-price fallback', () => {
+    const models = buildCameraModuleRepairHierarchyModels({
+      repairSlug: 'back-camera-replacement',
+      bookingService: 'Back Camera Replacement',
+      candidates: backCandidates,
+    });
+
+    expect(models.map((model) => model.priceLabel)).toEqual(['$129', null, 'From $159', null, null, null, null]);
+    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Back+Camera+Replacement&brand=Huawei&model=P60+Pro');
+    expect(models.map((model) => model.priceLabel).join(' ')).not.toMatch(/Quote on Request|Starting from \$50|\$50/);
+    expect(readFileSync(resolve(process.cwd(), 'src/lib/cameraModuleRepairHierarchy.ts'), 'utf8')).not.toContain('getStartingPrice');
+  });
+
+  it('uses B1 grouping for Back Camera while flat and unknown eligible brands remain direct', () => {
+    const hierarchy = buildSharedRepairHierarchy(buildCameraModuleRepairHierarchyModels({
+      repairSlug: 'back-camera-replacement',
+      bookingService: 'Back Camera Replacement',
+      candidates: backCandidates,
+    }));
+
+    expect(hierarchy.brands.map((brand) => brand.brandSlug)).toEqual(['huawei', 'oppo', 'motorola', 'future', 'virtual', 'nokia']);
+    expect(hierarchy.brands[1]?.series.map((series) => series.seriesKey)).toEqual(['find', 'reno']);
+    expect(hierarchy.brands[2]?.series).toEqual([]);
+    expect(hierarchy.brands[2]?.models.map((model) => model.modelSlug)).toEqual(['edge-50']);
+    expect(hierarchy.brands[3]?.series).toEqual([]);
+  });
+
+  it('opens a selected Back Camera model after five without reordering its flat model list', () => {
+    const longCandidates = Array.from({ length: 6 }, (_, index) => candidate({
+      brandSlug: 'motorola', brand: 'Motorola', modelSlug: `edge-${index + 1}`, model: `Edge ${index + 1}`, price: 100 + index, repairSlug: 'back-camera-replacement',
+    }));
+    const hierarchy = buildSharedRepairHierarchy(buildCameraModuleRepairHierarchyModels({
+      repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: longCandidates,
+    }), { selectedBrandSlug: 'motorola', selectedModelSlug: 'edge-6' });
+
+    expect(hierarchy.brands[0]?.initiallyExpandedModelList).toBe(true);
+    expect(hierarchy.brands[0]?.models.map((model) => model.modelSlug)).toEqual(['edge-1', 'edge-2', 'edge-3', 'edge-4', 'edge-5', 'edge-6']);
+  });
+
+  it('applies the same fail-closed Back Camera query contract', () => {
+    expect(resolveCameraModuleRepairHierarchySelection({
+      repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: backCandidates, query: { brand: 'oppo' },
+    })).toEqual({ selectedBrandSlug: 'oppo', selectedModelSlug: null });
+    expect(resolveCameraModuleRepairHierarchySelection({
+      repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: backCandidates, query: { brand: 'oppo', model: 'reno-12' },
+    })).toEqual({ selectedBrandSlug: 'oppo', selectedModelSlug: 'reno-12' });
+
+    for (const query of [
+      { model: 'reno-12' },
+      { brand: 'huawei', model: 'reno-12' },
+      { brand: ['oppo', 'huawei'], model: 'reno-12' },
+      { brand: 'oppo', model: ['reno-12', 'find-x8-pro'] },
+      { brand: 'oppo', model: 'reno-12', service: 'Front Camera Replacement' },
+    ]) {
+      expect(resolveCameraModuleRepairHierarchySelection({
+        repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: backCandidates, query,
+      })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null });
+    }
   });
 
   it.each([

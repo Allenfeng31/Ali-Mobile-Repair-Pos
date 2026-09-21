@@ -20,6 +20,11 @@ const hierarchy = {
   selectedBrandSlug: 'huawei',
   selectedModelSlug: 'p30-pro',
 };
+const backHierarchy = {
+  models: [{ brandSlug: 'oppo', brandLabel: 'OPPO', modelSlug: 'find-x8-pro', modelLabel: 'OPPO Find X8 Pro', repairLabel: 'Back Camera Replacement', priceLabel: null, bookingHref: '/book/find-x8-pro' }],
+  selectedBrandSlug: 'oppo',
+  selectedModelSlug: 'find-x8-pro',
+};
 
 const front: CameraModuleRepairLandingConfig = {
   repairSlug: 'front-camera-replacement', bookingService: 'Front Camera Replacement', title: 'Phone Front Camera Replacement in Ringwood', description: 'Front module assessment.', eyebrow: 'Front camera module assessment', symptoms: ['Black preview'], distinctionTitle: 'Front camera module, not screen or biometric repair', distinctionBody: 'Face ID is not guaranteed.', inspectionBody: 'Inspection first.',
@@ -51,15 +56,19 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(screen.getByText(/Assessment before repair/i)).toBeTruthy();
   });
 
-  it('renders the back camera module/lens distinction and exactly one lens route link', () => {
-    render(<CameraModuleRepairLandingPage config={back} canonicalPath="/repairs/phone/back-camera-replacement" candidates={candidates} />);
+  it('replaces Back Camera’s legacy selector with its hierarchy while preserving camera-lens guidance', () => {
+    render(<CameraModuleRepairLandingPage config={back} canonicalPath="/repairs/phone/back-camera-replacement" candidates={candidates} hierarchy={backHierarchy} />);
     expect(screen.getByRole('heading', { level: 1, name: back.title })).toBeTruthy();
     const lensLink = screen.getByRole('link', { name: 'Camera lens glass repair' });
     expect(lensLink.getAttribute('href')).toBe('/repairs/phone/camera-lens-replacement');
     expect(back.distinctionTitle).toContain('lens glass');
     expect(back.distinctionBody).toContain('Lens glass');
-    expect(screen.getByTestId('camera-module-booking-controls')).toBeTruthy();
-    expect(screen.queryByTestId('camera-module-hierarchy')).toBeNull();
+    const hierarchyElement = screen.getByTestId('camera-module-hierarchy');
+    expect(hierarchyElement.getAttribute('data-brand')).toBe('oppo');
+    expect(hierarchyElement.getAttribute('data-model')).toBe('find-x8-pro');
+    expect(hierarchyElement.textContent).toContain('OPPO Find X8 Pro');
+    expect(screen.queryByTestId('camera-module-booking-controls')).toBeNull();
+    expect(screen.getByText(/Quote only/i)).toBeTruthy();
   });
 
   it('emits only query-free BreadcrumbList JSON-LD and no offer-bearing schema', () => {
