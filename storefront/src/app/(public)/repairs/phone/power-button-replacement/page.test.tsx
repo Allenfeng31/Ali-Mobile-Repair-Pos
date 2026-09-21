@@ -70,11 +70,11 @@ describe('generic Power Button shared hierarchy route', () => {
     expect(metadata.alternates?.canonical).toBe('/repairs/phone/power-button-replacement');
   });
 
-  it('keeps Loudspeaker and Earpiece migrated while Volume remains a legacy wrapper', () => {
+  it('keeps the completed Loudspeaker, Earpiece, Power and Volume hierarchy rollout active', () => {
     const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
     expect(source('src/app/(public)/repairs/phone/loudspeaker-replacement/page.tsx')).toContain('buildGenericPeripheralRepairHierarchyModels');
     expect(source('src/app/(public)/repairs/phone/earpiece-speaker-replacement/page.tsx')).toContain('buildGenericPeripheralRepairHierarchyModels');
-    expect(source('src/app/(public)/repairs/phone/volume-button-replacement/page.tsx')).toContain('VirtualPhoneRepairRoutePage');
+    expect(source('src/app/(public)/repairs/phone/volume-button-replacement/page.tsx')).toContain('buildGenericPeripheralRepairHierarchyModels');
     expect(source('src/app/(public)/repairs/phone/power-button-replacement/page.tsx')).not.toMatch(/getStartingPrice|RepairOptionsGrid|withVirtualPhoneRepairOptions|Quote on Request|Starting from \$50/);
   });
 });
