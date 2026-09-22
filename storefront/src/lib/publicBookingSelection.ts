@@ -1,5 +1,5 @@
 import type { RepairCatalog, RepairOption } from './publicRepairCataloguePolicy';
-import { withVirtualCameraLensRepairOption } from './virtualCameraLens';
+import { CAMERA_LENS_REPAIR_SLUG, getCameraLensPrice, withVirtualCameraLensRepairOption } from './virtualCameraLens';
 import { withVirtualPhoneRepairOptions } from './virtualPhoneRepairs';
 
 export interface PublicBookingSelectionInput {
@@ -21,7 +21,14 @@ export interface PublicBookingSelection {
   service: string;
   serviceSlug: string;
   price: number;
+  priceAuthority: PublicBookingPriceAuthority;
 }
+
+export type PublicBookingPriceAuthority =
+  | 'exact-pos'
+  | 'exact-pos-variant'
+  | 'fixed-camera-lens'
+  | 'quote-only';
 
 function repairOptions(category: string, brandSlug: string, repairs: RepairOption[]) {
   return withVirtualPhoneRepairOptions(
@@ -29,6 +36,39 @@ function repairOptions(category: string, brandSlug: string, repairs: RepairOptio
     category,
     brandSlug,
   );
+}
+
+function positivePrice(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function resolvePriceAuthority(repair: RepairOption, brandSlug: string): Pick<PublicBookingSelection, 'price' | 'priceAuthority'> {
+  const cameraLensPrice = repair.slug === CAMERA_LENS_REPAIR_SLUG ? getCameraLensPrice(brandSlug) : 0;
+  if (cameraLensPrice > 0) {
+    return { price: cameraLensPrice, priceAuthority: 'fixed-camera-lens' };
+  }
+
+  if (repair.repairOrigin !== 'pos') {
+    return { price: repair.price, priceAuthority: 'quote-only' };
+  }
+
+  const validVariants = (repair.variants ?? []).flatMap((variant) => {
+    const price = positivePrice(variant.price);
+    return price === null ? [] : [price];
+  });
+
+  if (validVariants.length === 1) {
+    return { price: validVariants[0], priceAuthority: 'exact-pos-variant' };
+  }
+
+  if (validVariants.length > 1) {
+    return { price: repair.price, priceAuthority: 'quote-only' };
+  }
+
+  const price = positivePrice(repair.price);
+  return price === null
+    ? { price: repair.price, priceAuthority: 'quote-only' }
+    : { price, priceAuthority: 'exact-pos' };
 }
 
 function resolvedSelection(
@@ -45,7 +85,7 @@ function resolvedSelection(
     modelSlug: model.slug,
     service: repair.name,
     serviceSlug: repair.slug,
-    price: repair.price,
+    ...resolvePriceAuthority(repair, brand.slug),
   };
 }
 

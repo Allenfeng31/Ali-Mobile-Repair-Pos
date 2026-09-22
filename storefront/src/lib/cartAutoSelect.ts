@@ -13,12 +13,17 @@ export interface AutoSelectResult {
   shouldAutoConfirm: boolean;
 }
 
+interface ResolveInitialCartStateOptions {
+  includeVirtualServices?: boolean;
+}
+
 export function resolveInitialCartState(
   brandParam: string | null,
   modelParam: string | null,
   serviceParam: string | null,
   inventory: ParsedItem[],
   tierParam?: string | null,
+  options: ResolveInitialCartStateOptions = {},
 ): AutoSelectResult {
   if (!brandParam || !modelParam) {
     return { brand: null, model: null, category: null, serviceToSelect: null, serviceToExpand: null, shouldAutoConfirm: false };
@@ -49,17 +54,20 @@ export function resolveInitialCartState(
 
   const decodedService = decodeURIComponent(serviceParam).toLowerCase();
   
-  // Group services
-  const cameraLensServices = withGoogleCameraLensFixedPrice(
-    withVirtualCameraLensGroupedService(groupServicesByBaseName(matchedItems), brand, model, category),
-    brand,
-  );
-  const grouped = withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
-    cameraLensServices,
-    brand,
-    model,
-    category
-  ), brand, model, category);
+  // Public booking selections may only enrich from exact raw inventory. Legacy
+  // cart entry points retain their existing virtual-service behavior.
+  const groupedServices = groupServicesByBaseName(matchedItems);
+  const grouped = options.includeVirtualServices === false
+    ? groupedServices
+    : withAppleWatchChargingRepairGroupedService(withVirtualPhoneRepairGroupedServices(
+      withGoogleCameraLensFixedPrice(
+        withVirtualCameraLensGroupedService(groupedServices, brand, model, category),
+        brand,
+      ),
+      brand,
+      model,
+      category,
+    ), brand, model, category);
   const matchedGroup = grouped.find(g => g.service.toLowerCase() === decodedService);
 
   if (!matchedGroup) {
@@ -125,19 +133,41 @@ export function resolvePublicBookingCartState(
   inventory: ParsedItem[],
   tierParam?: string | null,
 ): AutoSelectResult {
+  if (selection.priceAuthority === 'fixed-camera-lens') {
+    return {
+      brand: selection.brand,
+      model: selection.model,
+      category: selection.category,
+      serviceToSelect: {
+        id: `public-booking:${selection.category}:${selection.brandSlug}:${selection.modelSlug}:${selection.serviceSlug}`,
+        name: selection.service,
+        price: 50,
+      },
+      serviceToExpand: null,
+      shouldAutoConfirm: true,
+    };
+  }
+
   const rawResult = resolveInitialCartState(
     selection.brand,
     selection.model,
     selection.service,
     inventory,
     tierParam,
+    { includeVirtualServices: false },
   );
 
-  if (rawResult.brand && rawResult.model && (rawResult.serviceToSelect || rawResult.serviceToExpand)) {
+  if (rawResult.serviceToExpand || (rawResult.serviceToSelect?.price ?? 0) > 0) {
     return rawResult;
   }
 
-  const hasApprovedFixedPrice = selection.serviceSlug === 'camera-lens-replacement' || isVirtualPhoneRepairName(selection.service);
+  const rawModelAndServiceExist = Boolean(rawResult.brand && rawResult.model && rawResult.serviceToSelect);
+  const trustedPublicPrice = (
+    selection.priceAuthority === 'exact-pos' || selection.priceAuthority === 'exact-pos-variant'
+  ) && rawModelAndServiceExist
+    ? selection.price
+    : 0;
+
   return {
     brand: selection.brand,
     model: selection.model,
@@ -145,7 +175,7 @@ export function resolvePublicBookingCartState(
     serviceToSelect: {
       id: `public-booking:${selection.category}:${selection.brandSlug}:${selection.modelSlug}:${selection.serviceSlug}`,
       name: selection.service,
-      price: hasApprovedFixedPrice ? selection.price : 0,
+      price: trustedPublicPrice,
     },
     serviceToExpand: null,
     shouldAutoConfirm: true,

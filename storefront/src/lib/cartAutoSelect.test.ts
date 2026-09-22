@@ -174,6 +174,28 @@ describe('cartAutoSelect', () => {
     expect(result.shouldAutoConfirm).toBe(true);
   });
 
+  it('applies the fixed Camera Lens price to a secondary-brand exact service too', () => {
+    const result = resolveInitialCartState(
+      'Huawei',
+      'Mate 20',
+      'Camera Lens Replacement',
+      [{
+        id: 22,
+        category: 'phone',
+        brand: 'P Huawei',
+        deviceModel: 'Mate 20',
+        service: 'Camera Lens Replacement',
+        price: 129,
+        deviceType: 'phone',
+        quality_grade: 'Standard',
+        is_recommended: false,
+        name: 'Huawei Mate 20 Camera Lens Replacement',
+      }],
+    );
+
+    expect(result.serviceToSelect).toMatchObject({ id: 22, name: 'Camera Lens Replacement', price: 50 });
+  });
+
   it('preserves the legacy virtual $50 Camera Lens fallback', () => {
     const result = resolveInitialCartState(
       'Google Pixel',
@@ -189,7 +211,7 @@ describe('cartAutoSelect', () => {
   it('uses the exact current raw service when an approved public selection is present', () => {
     const result = resolvePublicBookingCartState({
       category: 'phone', brand: 'iPhone', brandSlug: 'iphone', model: 'iPhone 14 Pro Max', modelSlug: 'iphone-14-pro-max',
-      service: 'Battery Replacement', serviceSlug: 'battery-replacement', price: 150,
+      service: 'Battery Replacement', serviceSlug: 'battery-replacement', price: 150, priceAuthority: 'exact-pos',
     }, mockInventory);
 
     expect(result.serviceToSelect).toMatchObject({ id: 3, name: 'Battery Replacement', price: 150 });
@@ -198,7 +220,7 @@ describe('cartAutoSelect', () => {
   it('keeps an approved selection as a deterministic custom quote when its raw model or service is absent', () => {
     const selection = {
       category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 9a', modelSlug: 'pixel-9a',
-      service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 199,
+      service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 199, priceAuthority: 'exact-pos' as const,
     };
     const result = resolvePublicBookingCartState(selection, []);
 
@@ -211,7 +233,7 @@ describe('cartAutoSelect', () => {
   it('keeps the approved Google Pixel Camera Lens fixed price when raw inventory is absent', () => {
     const result = resolvePublicBookingCartState({
       category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 9a', modelSlug: 'pixel-9a',
-      service: 'Camera Lens Replacement', serviceSlug: 'camera-lens-replacement', price: 50,
+      service: 'Camera Lens Replacement', serviceSlug: 'camera-lens-replacement', price: 50, priceAuthority: 'fixed-camera-lens',
     }, []);
 
     expect(result.serviceToSelect).toMatchObject({ price: 50, id: 'public-booking:phone:google-pixel:pixel-9a:camera-lens-replacement' });
@@ -223,11 +245,80 @@ describe('cartAutoSelect', () => {
   ])('keeps an approved %s selection bookable without a raw service', (service, serviceSlug) => {
     const result = resolvePublicBookingCartState({
       category: 'phone', brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24',
-      service, serviceSlug, price: 120,
+      service, serviceSlug, price: 120, priceAuthority: 'quote-only' as const,
     }, []);
 
     expect(result.serviceToSelect).toMatchObject({
       id: `public-booking:phone:samsung:galaxy-s24:${serviceSlug}`, name: service, price: 0,
     });
+  });
+
+  it.each([
+    ['Google Pixel', 'google-pixel', 'Pixel 9a', 'pixel-9a'],
+    ['Samsung', 'samsung', 'Galaxy S24', 'galaxy-s24'],
+    ['OPPO', 'oppo', 'Find X8', 'find-x8'],
+    ['Huawei', 'huawei', 'Mate 20', 'mate-20'],
+  ])('keeps fixed Camera Lens at $50 for %s without a raw service', (brand, brandSlug, model, modelSlug) => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand, brandSlug, model, modelSlug,
+      service: 'Camera Lens Replacement', serviceSlug: 'camera-lens-replacement', price: 50, priceAuthority: 'fixed-camera-lens',
+    }, []);
+
+    expect(result.serviceToSelect).toMatchObject({
+      id: `public-booking:phone:${brandSlug}:${modelSlug}:camera-lens-replacement`, price: 50,
+    });
+  });
+
+  it.each([
+    ['Front Camera Replacement', 'front-camera-replacement'],
+    ['Back Camera Replacement', 'back-camera-replacement'],
+  ])('uses an exact raw %s price but quotes when it is missing', (service, serviceSlug) => {
+    const selection = {
+      category: 'phone', brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24',
+      service, serviceSlug, price: 120, priceAuthority: 'exact-pos' as const,
+    };
+    const raw = [{
+      id: 40, category: 'phone', brand: 'P Samsung', deviceModel: 'Galaxy S24', service, price: 135,
+      deviceType: 'phone' as const, quality_grade: 'Standard', is_recommended: false, name: `Samsung Galaxy S24 ${service}`,
+    }];
+
+    expect(resolvePublicBookingCartState(selection, raw).serviceToSelect).toMatchObject({ id: 40, price: 135 });
+    expect(resolvePublicBookingCartState({ ...selection, priceAuthority: 'quote-only' }, []).serviceToSelect).toMatchObject({ price: 0 });
+  });
+
+  it.each([
+    ['Google Pixel', 'google-pixel', 'Pixel Future', 'pixel-future'],
+    ['Samsung', 'samsung', 'Galaxy Future', 'galaxy-future'],
+    ['OPPO', 'oppo', 'Find Future', 'find-future'],
+    ['Huawei', 'huawei', 'Mate Future', 'mate-future'],
+  ])('keeps a virtual-only %s peripheral bookable as a custom quote', (brand, brandSlug, model, modelSlug) => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand, brandSlug, model, modelSlug,
+      service: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement', price: 50, priceAuthority: 'quote-only',
+    }, []);
+
+    expect(result).toMatchObject({
+      brand, model, serviceToSelect: {
+        id: `public-booking:phone:${brandSlug}:${modelSlug}:loudspeaker-replacement`, price: 0,
+      },
+    });
+  });
+
+  it('keeps exact raw multi-variant selection expanded instead of silently choosing a minimum', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'OPPO', brandSlug: 'oppo', model: 'Find Future', modelSlug: 'find-future',
+      service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 100, priceAuthority: 'quote-only',
+    }, [
+      {
+        id: 51, category: 'phone', brand: 'P Oppo', deviceModel: 'Find Future', service: 'Screen Replacement', price: 100,
+        deviceType: 'phone', quality_grade: 'Standard', is_recommended: false, name: 'OPPO Find Future Screen Replacement Standard',
+      },
+      {
+        id: 52, category: 'phone', brand: 'P Oppo', deviceModel: 'Find Future', service: 'Screen Replacement', price: 150,
+        deviceType: 'phone', quality_grade: 'Premium', is_recommended: false, name: 'OPPO Find Future Screen Replacement Premium',
+      },
+    ]);
+
+    expect(result).toMatchObject({ serviceToSelect: null, serviceToExpand: 'Screen Replacement', shouldAutoConfirm: false });
   });
 });

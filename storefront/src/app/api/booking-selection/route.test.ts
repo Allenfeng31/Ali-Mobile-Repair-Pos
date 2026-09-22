@@ -24,7 +24,7 @@ describe('GET /api/booking-selection', () => {
     expect(await response.json()).toEqual({
       selection: {
         category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8', modelSlug: 'pixel-8',
-        service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 199,
+        service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 199, priceAuthority: 'exact-pos',
       },
     });
   });

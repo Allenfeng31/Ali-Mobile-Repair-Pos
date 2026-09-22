@@ -34,8 +34,7 @@ export function getCameraLensBrandKind(brand: string): CameraLensBrandKind | nul
 export function getCameraLensPrice(brand: string): number {
   const kind = getCameraLensBrandKind(brand);
 
-  if (kind === 'google' || kind === 'samsung' || kind === 'oppo') return 50;
-  return 0;
+  return kind === null ? 0 : 50;
 }
 
 export function getCameraLensPriceLabel(brand: string) {
@@ -141,11 +140,11 @@ export function withVirtualCameraLensGroupedService(
 }
 
 /**
- * Google Camera Lens is a fixed-price business service. A real POS record may
- * supply the service identity, but must not override the customer-facing price.
+ * Camera Lens is a fixed-price business service. A real POS record may supply
+ * the service identity, but must not override the customer-facing price.
  */
 export function withGoogleCameraLensFixedPrice(services: GroupedService[], brand: string) {
-  if (getCameraLensBrandKind(brand) !== 'google') return services;
+  if (getCameraLensBrandKind(brand) === null) return services;
 
   const fixedPrice = getCameraLensPrice(brand);
   return services.map((service) => {

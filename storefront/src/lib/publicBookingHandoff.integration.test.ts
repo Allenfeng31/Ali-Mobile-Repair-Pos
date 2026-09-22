@@ -88,15 +88,18 @@ describe('public booking full handoff', () => {
     ['Power Button Replacement', 'power-button-replacement'],
     ['Volume Button Replacement', 'volume-button-replacement'],
     ['Camera Lens Replacement', 'camera-lens-replacement'],
-  ])('carries Pixel %s through the real resolver and virtual cart fallback', (repairName, repairSlug) => {
+  ])('carries Pixel %s through the resolver without letting a virtual price reach the cart', (repairName, repairSlug) => {
     const { selection, cart } = handoff(getSharedRepairBookingHref({
       repairName,
       repairSlug,
       selectedModel: { brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8', modelSlug: 'pixel-8' },
     }));
 
-    expect(selection).toMatchObject({ brand: 'Google Pixel', model: 'Pixel 8', service: repairName, serviceSlug: repairSlug, price: 50 });
-    expect(cart).toMatchObject({ brand: 'Google Pixel', model: 'Pixel 8', serviceToSelect: { name: repairName, price: 50 } });
+    const expectedPrice = repairSlug === 'camera-lens-replacement' ? 50 : 0;
+    const expectedAuthority = repairSlug === 'camera-lens-replacement' ? 'fixed-camera-lens' : 'quote-only';
+
+    expect(selection).toMatchObject({ brand: 'Google Pixel', model: 'Pixel 8', service: repairName, serviceSlug: repairSlug, price: 50, priceAuthority: expectedAuthority });
+    expect(cart).toMatchObject({ brand: 'Google Pixel', model: 'Pixel 8', serviceToSelect: { name: repairName, price: expectedPrice } });
   });
 
   it.each([
@@ -110,7 +113,7 @@ describe('public booking full handoff', () => {
     const href = buildCameraModuleRepairHierarchyModels({ repairSlug, bookingService: repairName, candidates })[0]!.bookingHref;
     const { selection, cart } = handoff(href);
 
-    expect(selection).toMatchObject({ brand, model, service: repairName, serviceSlug: repairSlug });
+    expect(selection).toMatchObject({ brand, model, service: repairName, serviceSlug: repairSlug, priceAuthority: 'exact-pos' });
     expect(cart).toMatchObject({
       brand, model,
       serviceToSelect: { id: `public-booking:phone:${brandSlug}:${modelSlug}:${repairSlug}`, name: repairName, price: 0 },
