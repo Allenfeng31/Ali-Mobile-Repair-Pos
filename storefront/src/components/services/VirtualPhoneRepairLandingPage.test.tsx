@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('./SharedRepairBookingControls', () => ({ default: () => <div data-testid="generic-booking-cta" /> }));
@@ -20,6 +21,11 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
       hierarchy={{
         models: [{ brandSlug: 'huawei', brandLabel: 'Huawei', modelSlug: 'mate-20', modelLabel: 'Huawei Mate 20', repairLabel: 'Loudspeaker Replacement', priceLabel: '$79', bookingHref: '/book-repair?category=phone' }],
         selectedBrandSlug: 'huawei', selectedModelSlug: 'mate-20',
+        selectedDevice: {
+          selectedDevice: { brand: 'Huawei', brandSlug: 'huawei', model: 'Mate 20', modelSlug: 'mate-20' },
+          selectedRepair: { name: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement' },
+          booking: { href: '/book-repair?category=phone&brandSlug=huawei&modelSlug=mate-20&serviceSlug=loudspeaker-replacement', isAvailable: true },
+        },
       }}
     />);
     expect(screen.getByRole('heading', { level: 1, name: 'Phone Loudspeaker Replacement in Ringwood' })).toBeTruthy();
@@ -28,6 +34,9 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.getByTestId('generic-peripheral-hierarchy').getAttribute('data-brand')).toBe('huawei');
     expect(screen.getByTestId('generic-peripheral-hierarchy').getAttribute('aria-label')).toBe('Supported Loudspeaker Replacement models');
     expect(screen.getByTestId('generic-peripheral-hierarchy').textContent).toContain('Huawei Mate 20');
+    expect(screen.getByRole('heading', { level: 2, name: 'Huawei Mate 20' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', '/book-repair?category=phone&brandSlug=huawei&modelSlug=mate-20&serviceSlug=loudspeaker-replacement');
+    expect(screen.getByRole('link', { name: /Change model/ })).toHaveAttribute('href', '#shared-repair-model-selection');
     expect(container.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(1);
     expect(container.textContent).not.toContain('Repair Results');
   });

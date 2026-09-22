@@ -32,7 +32,7 @@ function catalogue() {
   ] };
 }
 
-type LandingProps = { canonicalPath: string; models: Array<{ brandSlug: string }>; hierarchy: { models: Array<{ brandSlug: string; brandLabel: string; modelSlug: string; modelLabel: string; repairLabel: string; priceLabel: string | null; bookingHref: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null } };
+type LandingProps = { canonicalPath: string; models: Array<{ brandSlug: string }>; hierarchy: { models: Array<{ brandSlug: string; brandLabel: string; modelSlug: string; modelLabel: string; repairLabel: string; priceLabel: string | null; bookingHref: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null; selectedDevice: { selectedDevice: { brand: string; model: string } } | null } };
 
 async function renderRoute(query: Record<string, string | string[] | undefined> = {}) {
   fetchRepairCatalogMock.mockResolvedValue(catalogue());
@@ -48,6 +48,7 @@ describe('generic Power Button shared hierarchy route', () => {
     expect(props.hierarchy.models.every((model) => model.repairLabel === 'Power Button Replacement')).toBe(true);
     expect(props.hierarchy.models.find((model) => model.modelSlug === 'p30')?.bookingHref).toBe('/book-repair?category=phone&service=Power+Button+Replacement&brand=Huawei&model=P30&brandSlug=huawei&modelSlug=p30&serviceSlug=power-button-replacement');
     expect(props.hierarchy).toMatchObject({ selectedBrandSlug: 'huawei', selectedModelSlug: 'p30' });
+    expect(props.hierarchy.selectedDevice).toMatchObject({ selectedDevice: { brand: 'Huawei', model: 'P30' } });
   });
 
   it('reuses B1/B2 grouping and selected-after-five ordering', async () => {

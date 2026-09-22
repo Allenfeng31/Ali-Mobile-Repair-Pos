@@ -40,7 +40,7 @@ describe('generic loudspeaker shared hierarchy route', () => {
     const props = element.props as {
       canonicalPath: string;
       models: Array<{ brandSlug: string; modelSlug: string }>;
-      hierarchy: { models: Array<{ modelSlug: string; priceLabel: string | null; bookingHref: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null };
+      hierarchy: { models: Array<{ modelSlug: string; priceLabel: string | null; bookingHref: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null; selectedDevice: { selectedDevice: { brand: string; model: string }; booking: { href: string } } | null };
     };
 
     expect(props.canonicalPath).toBe('/repairs/phone/loudspeaker-replacement');
@@ -50,6 +50,10 @@ describe('generic loudspeaker shared hierarchy route', () => {
     expect(props.hierarchy.models.find((model) => model.modelSlug === 'mate-20')?.bookingHref).toContain('service=Loudspeaker+Replacement');
     expect(props.hierarchy.selectedBrandSlug).toBe('huawei');
     expect(props.hierarchy.selectedModelSlug).toBe('p30');
+    expect(props.hierarchy.selectedDevice).toMatchObject({
+      selectedDevice: { brand: 'Huawei', model: 'P30' },
+      booking: { href: '/book-repair?category=phone&service=Loudspeaker+Replacement&brand=Huawei&model=P30&brandSlug=huawei&modelSlug=p30&serviceSlug=loudspeaker-replacement' },
+    });
   });
 
   it('fails closed for model-only, mismatched, duplicate and service-override query input without changing canonical metadata', async () => {

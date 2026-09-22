@@ -48,6 +48,7 @@ type LandingProps = {
     models: Array<{ brandSlug: string; brandLabel: string; modelSlug: string; modelLabel: string; repairLabel: string; priceLabel: string | null; bookingHref: string }>;
     selectedBrandSlug: string | null;
     selectedModelSlug: string | null;
+    selectedDevice: { selectedDevice: { brand: string; model: string } } | null;
   };
 };
 
@@ -67,6 +68,7 @@ describe('generic Earpiece shared hierarchy route', () => {
     expect(props.hierarchy.models.find((model) => model.modelSlug === 'p30')?.bookingHref).toBe('/book-repair?category=phone&service=Earpiece+Speaker+Replacement&brand=Huawei&model=P30&brandSlug=huawei&modelSlug=p30&serviceSlug=earpiece-speaker-replacement');
     expect(props.hierarchy.selectedBrandSlug).toBe('huawei');
     expect(props.hierarchy.selectedModelSlug).toBe('p30');
+    expect(props.hierarchy.selectedDevice).toMatchObject({ selectedDevice: { brand: 'Huawei', model: 'P30' } });
   });
 
   it('uses existing B1/B2 hierarchy behavior without moving a selected late model', async () => {

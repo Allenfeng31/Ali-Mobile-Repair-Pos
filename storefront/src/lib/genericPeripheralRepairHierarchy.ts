@@ -1,4 +1,5 @@
 import { getSharedRepairBookingHref } from './sharedRepairBooking';
+import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
 import { getSharedRepairCandidateModelLabel } from './sharedRepairPageV2';
 import { resolveRepairDetailPricing } from './repairDetailPricing';
 import { resolveSharedRepairContext, type SharedRepairModelCandidate } from './sharedRepairContext';
@@ -84,10 +85,43 @@ export function resolveGenericPeripheralRepairHierarchySelection({
     candidates,
   });
 
+  const selectedDevice = context.reason === 'model-context'
+    && context.canonicalBrandSlug
+    && context.modelSlug
+    && context.displayBrand
+    && context.displayModel
+    ? {
+        selectedDevice: {
+          brand: context.displayBrand,
+          brandSlug: context.canonicalBrandSlug,
+          model: context.displayModel,
+          modelSlug: context.modelSlug,
+        },
+        selectedRepair: {
+          name: bookingService,
+          serviceSlug: repairSlug,
+        },
+        booking: {
+          href: getSharedRepairBookingHref({
+            repairName: bookingService,
+            repairSlug,
+            selectedModel: {
+              brand: context.displayBrand,
+              brandSlug: context.canonicalBrandSlug,
+              model: context.displayModel,
+              modelSlug: context.modelSlug,
+            },
+          }),
+          isAvailable: true,
+        },
+      } satisfies SharedRepairSelectedDeviceViewModel
+    : null;
+
   return context.isValid
     ? {
         selectedBrandSlug: context.canonicalBrandSlug,
         selectedModelSlug: context.modelSlug,
+        selectedDevice,
       }
-    : { selectedBrandSlug: null, selectedModelSlug: null };
+    : { selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null };
 }

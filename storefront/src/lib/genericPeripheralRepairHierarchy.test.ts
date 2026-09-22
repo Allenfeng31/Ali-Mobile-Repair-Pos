@@ -58,15 +58,36 @@ describe('generic peripheral hierarchy adapter', () => {
 
   it('uses paired, server-trusted query identity and fails closed for untrusted query shapes', () => {
     const input = { repairSlug: 'loudspeaker-replacement' as const, bookingService: 'Loudspeaker Replacement', candidates };
-    expect(resolveGenericPeripheralRepairHierarchySelection({ ...input, query: { brand: 'huawei' } })).toEqual({ selectedBrandSlug: 'huawei', selectedModelSlug: null });
-    expect(resolveGenericPeripheralRepairHierarchySelection({ ...input, query: { brand: 'huawei', model: 'p30' } })).toEqual({ selectedBrandSlug: 'huawei', selectedModelSlug: 'p30' });
+    expect(resolveGenericPeripheralRepairHierarchySelection({ ...input, query: { brand: 'huawei' } })).toEqual({ selectedBrandSlug: 'huawei', selectedModelSlug: null, selectedDevice: null });
+    expect(resolveGenericPeripheralRepairHierarchySelection({ ...input, query: { brand: 'huawei', model: 'p30' } })).toMatchObject({
+      selectedBrandSlug: 'huawei',
+      selectedModelSlug: 'p30',
+      selectedDevice: {
+        selectedDevice: { brand: 'Huawei', brandSlug: 'huawei', model: 'P30', modelSlug: 'p30' },
+        selectedRepair: { name: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement' },
+        booking: { href: '/book-repair?category=phone&service=Loudspeaker+Replacement&brand=Huawei&model=P30&brandSlug=huawei&modelSlug=p30&serviceSlug=loudspeaker-replacement', isAvailable: true },
+      },
+    });
     for (const query of [
       { model: 'p30' }, { brand: 'invalid' }, { brand: 'huawei', model: 'u24' },
       { brand: ['huawei', 'htc'] }, { brand: 'huawei', model: ['p30', 'mate-20'] },
       { brand: 'huawei', service: 'Logic Board Repair' },
     ]) {
-      expect(resolveGenericPeripheralRepairHierarchySelection({ ...input, query })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null });
+      expect(resolveGenericPeripheralRepairHierarchySelection({ ...input, query })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null });
     }
+  });
+
+  it('gives future eligible models the same selected-device contract without hardcoding them', () => {
+    expect(resolveGenericPeripheralRepairHierarchySelection({
+      repairSlug: 'loudspeaker-replacement',
+      bookingService: 'Loudspeaker Replacement',
+      candidates: [candidate({ brandSlug: 'future', brand: 'Future', modelSlug: 'one', model: 'One' })],
+      query: { brand: 'future', model: 'one' },
+    })).toMatchObject({
+      selectedDevice: {
+        selectedDevice: { brand: 'Future', brandSlug: 'future', model: 'One', modelSlug: 'one' },
+      },
+    });
   });
 
   it('expands a selected sixth model without moving it and avoids virtual/model-hub price paths', () => {

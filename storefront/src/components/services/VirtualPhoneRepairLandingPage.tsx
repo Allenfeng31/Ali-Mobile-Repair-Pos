@@ -7,6 +7,7 @@ import SharedRepairBookingControls from '@/components/services/SharedRepairBooki
 import SharedRepairPageV2BookingControls, { type SharedRepairPageV2QuickAnswers } from '@/components/services/SharedRepairPageV2BookingControls';
 import SharedRepairPageV2ModelSections from '@/components/services/SharedRepairPageV2ModelSections';
 import SharedRepairHierarchySections from '@/components/services/SharedRepairHierarchySections';
+import SharedRepairSelectedDevice, { type SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
 import SharedRepairPageResultsSection from '@/components/repair-results/SharedRepairPageResultsSection';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { getVirtualPhoneRepair, type VirtualPhoneRepairModelOption, type VirtualPhoneRepairSlug } from '@/lib/virtualPhoneRepairs';
@@ -52,6 +53,7 @@ interface VirtualPhoneRepairLandingPageProps {
     models: SharedRepairHierarchyModel[];
     selectedBrandSlug: string | null;
     selectedModelSlug: string | null;
+    selectedDevice?: SharedRepairSelectedDeviceViewModel | null;
   };
 }
 
@@ -181,6 +183,7 @@ export default function VirtualPhoneRepairLandingPage({
               <a href="tel:0481058514" className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-center text-lg font-bold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"><PhoneCall size={19} strokeWidth={2.6} aria-hidden="true" />Call 0481 058 514</a>
             </div>
           </div>}
+          {hierarchy?.selectedDevice ? <SharedRepairSelectedDevice selection={hierarchy.selectedDevice} changeModelHref="#shared-repair-model-selection" /> : null}
           {!sharedPageV2 ? <div className="trust-badges mt-8">
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>Inspection Before Work</div>
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span>Clear Quote First</div>
@@ -189,7 +192,7 @@ export default function VirtualPhoneRepairLandingPage({
           </div> : null}
         </section>
         {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={repair.name} repairSlug={repair.slug} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
-        {hierarchy ? <SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${repair.name} models`} /> : null}
+        {hierarchy ? <SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} genericSelectionPath={isGeneric ? canonicalPath : undefined} ariaLabel={`Supported ${repair.name} models`} /> : null}
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="repair-guidance-heading">
           <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>We inspect the device condition first, then provide a clear quote for the suitable repair path.</p></div>
           <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6">{contentCards.map(({ title, body, icon }) => <article key={title} className="flex h-full min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><RepairIcon icon={icon} size={20} strokeWidth={2.5} /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">{title}</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">{body}</p></article>)}</div>

@@ -53,6 +53,17 @@ describe('SharedRepairHierarchySections', () => {
     expect(markup).toContain('<noscript>');
   });
 
+  it('uses canonical generic selected-query links only when explicitly scoped for a migrated page', () => {
+    const markup = renderToStaticMarkup(
+      <SharedRepairHierarchySections models={hierarchyModels} genericSelectionPath="/repairs/phone/front-camera-replacement" />,
+    );
+
+    expect(markup).toContain('id="shared-repair-model-selection"');
+    expect(markup).toContain('href="/repairs/phone/front-camera-replacement?brand=samsung&amp;model=galaxy-s1"');
+    expect(markup).toContain('href="/repairs/phone/front-camera-replacement?brand=htc&amp;model=u24"');
+    expect(markup).not.toContain('href="/book/galaxy-s1"');
+  });
+
   it('uses accessible local disclosure state without URL mutation and keeps collapsed content in the DOM', () => {
     const { container } = render(<SharedRepairHierarchySections models={hierarchyModels} />);
     const samsung = screen.getByRole('button', { name: /Samsung/ });
