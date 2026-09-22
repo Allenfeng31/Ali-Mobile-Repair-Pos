@@ -17,6 +17,7 @@ interface SharedRepairPageV2BookingControlsProps {
   brandSlug: string;
   brandName: string;
   repairName: string;
+  repairSlug?: string;
   supportedModels: SharedRepairPageSupportedModel[];
   priceCandidates: SharedRepairPageCandidate[];
   quickAnswers: SharedRepairPageV2QuickAnswers;
@@ -28,6 +29,7 @@ export default function SharedRepairPageV2BookingControls({
   brandSlug,
   brandName,
   repairName,
+  repairSlug,
   supportedModels,
   priceCandidates,
   quickAnswers,
@@ -39,6 +41,7 @@ export default function SharedRepairPageV2BookingControls({
   const selectedCandidate = priceCandidates.find((candidate) => candidate.modelSlug === selectedModel?.modelSlug) ?? null;
   const bookingHref = getSharedRepairBookingHref({
     repairName,
+    repairSlug,
     selectedModel,
     fallbackBrandName: brandName,
   });

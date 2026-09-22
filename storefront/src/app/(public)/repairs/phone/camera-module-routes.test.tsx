@@ -57,8 +57,8 @@ describe('global camera module routes', () => {
     expect(JSON.stringify(frontProps.candidates)).not.toMatch(/price|variants|inventory|repairTypes/i);
     expect(frontProps.hierarchy).toEqual({
       models: [
-        { brandSlug: 'google-pixel', brandLabel: 'Google Pixel', modelSlug: 'pixel-8-pro', modelLabel: 'Google Pixel 8 Pro', repairLabel: 'Front Camera Replacement', priceLabel: '$129', bookingHref: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Google+Pixel&model=Pixel+8+Pro' },
-        { brandSlug: 'samsung', brandLabel: 'Samsung', modelSlug: 'galaxy-s25', modelLabel: 'Samsung Galaxy S25', repairLabel: 'Front Camera Replacement', priceLabel: '$99', bookingHref: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Samsung&model=Galaxy+S25' },
+        { brandSlug: 'google-pixel', brandLabel: 'Google Pixel', modelSlug: 'pixel-8-pro', modelLabel: 'Google Pixel 8 Pro', repairLabel: 'Front Camera Replacement', priceLabel: '$129', bookingHref: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Google+Pixel&model=Pixel+8+Pro&brandSlug=google-pixel&modelSlug=pixel-8-pro&serviceSlug=front-camera-replacement' },
+        { brandSlug: 'samsung', brandLabel: 'Samsung', modelSlug: 'galaxy-s25', modelLabel: 'Samsung Galaxy S25', repairLabel: 'Front Camera Replacement', priceLabel: '$99', bookingHref: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Samsung&model=Galaxy+S25&brandSlug=samsung&modelSlug=galaxy-s25&serviceSlug=front-camera-replacement' },
       ],
       selectedBrandSlug: 'samsung',
       selectedModelSlug: 'galaxy-s25',
@@ -73,7 +73,7 @@ describe('global camera module routes', () => {
     expect(backProps.config.inspectionBody).toMatch(/cannot be guaranteed/);
     expect(backProps.hierarchy).toEqual({
       models: [
-        { brandSlug: 'google-pixel', brandLabel: 'Google Pixel', modelSlug: 'pixel-8-pro', modelLabel: 'Google Pixel 8 Pro', repairLabel: 'Back Camera Replacement', priceLabel: '$149', bookingHref: '/book-repair?category=phone&service=Back+Camera+Replacement&brand=Google+Pixel&model=Pixel+8+Pro' },
+        { brandSlug: 'google-pixel', brandLabel: 'Google Pixel', modelSlug: 'pixel-8-pro', modelLabel: 'Google Pixel 8 Pro', repairLabel: 'Back Camera Replacement', priceLabel: '$149', bookingHref: '/book-repair?category=phone&service=Back+Camera+Replacement&brand=Google+Pixel&model=Pixel+8+Pro&brandSlug=google-pixel&modelSlug=pixel-8-pro&serviceSlug=back-camera-replacement' },
       ],
       selectedBrandSlug: 'google-pixel',
       selectedModelSlug: 'pixel-8-pro',

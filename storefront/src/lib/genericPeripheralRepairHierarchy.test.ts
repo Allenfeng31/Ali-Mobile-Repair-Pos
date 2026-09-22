@@ -45,7 +45,7 @@ describe('generic peripheral hierarchy adapter', () => {
 
     expect(models.map((model) => model.modelSlug)).toEqual(candidates.map((candidate) => candidate.modelSlug));
     expect(models.map((model) => model.priceLabel)).toEqual(['$79', null, 'From $149', null, null, null, null, null]);
-    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Loudspeaker+Replacement&brand=Huawei&model=Mate+20');
+    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Loudspeaker+Replacement&brand=Huawei&model=Mate+20&brandSlug=huawei&modelSlug=mate-20&serviceSlug=loudspeaker-replacement');
     expect(models.map((model) => model.priceLabel).join(' ')).not.toMatch(/Quote on Request|Starting from \$50|\$50/);
   });
 

@@ -9,12 +9,14 @@ export default function SharedRepairPageV2ModelSections({
   supportedModels,
   priceCandidates,
   repairName,
+  repairSlug,
   pricingStrategy,
   selectedModelSlug,
 }: {
   supportedModels: SharedRepairPageSupportedModel[];
   priceCandidates: SharedRepairPageCandidate[];
   repairName: string;
+  repairSlug?: string;
   pricingStrategy?: SharedRepairPageV2PricingStrategy;
   selectedModelSlug?: string | null;
 }) {
@@ -39,7 +41,7 @@ export default function SharedRepairPageV2ModelSections({
       >
         {supportedModels.map((model) => {
           const priceCandidate = priceCandidates.find((candidate) => candidate.modelSlug === model.modelSlug) ?? null;
-          const bookingHref = getSharedRepairBookingHref({ repairName, selectedModel: model });
+          const bookingHref = getSharedRepairBookingHref({ repairName, repairSlug, selectedModel: model });
           const modelLabel = getSharedRepairCandidateModelLabel(model);
           const priceLabel = pricingStrategy?.mode === 'fixed'
             ? `$${pricingStrategy.fixedPrice}`

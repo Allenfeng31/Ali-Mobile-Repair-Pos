@@ -103,11 +103,13 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
   });
 
   it('keeps exact pricing, model selection, and booking central before the three supporting boxes', () => {
-    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
+    render(<SharedRepairPageV2BookingControls basePath="/repairs/phone/google/loudspeaker-replacement" brandSlug="google-pixel" brandName="Google Pixel" repairName="Loudspeaker Replacement" repairSlug="loudspeaker-replacement" supportedModels={supportedModels} priceCandidates={candidates} quickAnswers={loudspeakerQuickAnswers} />);
 
     expect(screen.getByText('$129')).toBeInTheDocument();
     expect(screen.getByLabelText('Choose your Google Pixel model')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('model=Pixel+8'));
+    expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('brandSlug=google-pixel'));
+    expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', expect.stringContaining('serviceSlug=loudspeaker-replacement'));
     expect(screen.getByRole('heading', { name: 'Repair Time' })).toBeInTheDocument();
     expect(screen.getByText('30–60 minutes')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Parts / Same-Day' })).toBeInTheDocument();
@@ -268,7 +270,7 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
   });
 
   it('renders compact whole-card booking links with crawlable model-plus-repair text and only approved prices', () => {
-    render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={candidates} repairName="Loudspeaker Replacement" />);
+    render(<SharedRepairPageV2ModelSections supportedModels={supportedModels} priceCandidates={candidates} repairName="Loudspeaker Replacement" repairSlug="loudspeaker-replacement" />);
 
     expect(getVirtualPhoneRepairHeading({ brandName: 'Google Pixel', brandSlug: 'google-pixel', repairName: 'Loudspeaker Replacement' })).toBe('Google Pixel Loudspeaker Replacement');
     expect(screen.getByRole('heading', { name: 'Google Pixel Loudspeaker Replacement by Model' })).toBeInTheDocument();
@@ -288,6 +290,8 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     const pixel8Card = screen.getByRole('link', { name: /Google Pixel 8.*Loudspeaker Replacement.*\$129/ });
     const pixel9aCard = screen.getByRole('link', { name: /Google Pixel 9a.*Loudspeaker Replacement/ });
     expect(pixel8Card).toHaveAttribute('href', expect.stringContaining('model=Pixel+8'));
+    expect(pixel8Card).toHaveAttribute('href', expect.stringContaining('modelSlug=pixel-8'));
+    expect(pixel8Card).toHaveAttribute('href', expect.stringContaining('serviceSlug=loudspeaker-replacement'));
     expect(pixel9aCard).toHaveAttribute('href', expect.stringContaining('model=Pixel+9a'));
     expect(pixel9aCard).not.toHaveTextContent('Quote on Request');
     expect(screen.queryByRole('link', { name: /google-pixel\/pixel-8/i })).toBeNull();

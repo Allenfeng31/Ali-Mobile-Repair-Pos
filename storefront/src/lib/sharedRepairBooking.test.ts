@@ -103,6 +103,7 @@ describe('Samsung shared repair metadata and model state', () => {
     }), 'https://www.alimobile.com.au');
     const selectedBooking = new URL(getSharedRepairBookingHref({
       repairName: 'Earpiece Speaker Replacement',
+      repairSlug: 'earpiece-speaker-replacement',
       selectedModel: selected,
       fallbackBrandName: 'Samsung',
     }), 'https://www.alimobile.com.au');
@@ -111,6 +112,9 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(cleanBooking.searchParams.get('model')).toBeNull();
     expect(selectedBooking.searchParams.get('brand')).toBe('Samsung');
     expect(selectedBooking.searchParams.get('model')).toBe('Galaxy S22 Ultra');
+    expect(selectedBooking.searchParams.get('brandSlug')).toBe('samsung');
+    expect(selectedBooking.searchParams.get('modelSlug')).toBe('galaxy-s22-ultra');
+    expect(selectedBooking.searchParams.get('serviceSlug')).toBe('earpiece-speaker-replacement');
   });
 
   it('keeps Google Pixel and OPPO selectors limited to their configured model sets and preserves their Booking brands', () => {
@@ -122,18 +126,40 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(getValidatedSharedRepairModel([pixel], pixel.modelSlug, 'google-pixel')).toEqual(pixel);
     expect(getValidatedSharedRepairModel([pixel], 'pixel-fixture-unconfigured', 'google-pixel')).toBeNull();
     expect(getValidatedSharedRepairModel([oppo], oppo.modelSlug, 'oppo')).toEqual(oppo);
-    expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: pixel }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('Google Pixel');
+    const pixelBooking = new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', repairSlug: 'loudspeaker-replacement', selectedModel: pixel }), 'https://www.alimobile.com.au');
+    expect(pixelBooking.searchParams.get('brand')).toBe('Google Pixel');
+    expect(pixelBooking.searchParams.get('brandSlug')).toBe('google-pixel');
+    expect(pixelBooking.searchParams.get('modelSlug')).toBe('pixel-8-pro');
+    expect(pixelBooking.searchParams.get('serviceSlug')).toBe('loudspeaker-replacement');
     expect(new URL(getSharedRepairBookingHref({ repairName: 'Loudspeaker Replacement', selectedModel: oppo }), 'https://www.alimobile.com.au').searchParams.get('brand')).toBe('OPPO');
 
     const cameraBooking = new URL(getSharedRepairBookingHref({
       repairName: 'Camera Lens Replacement',
+      repairSlug: 'camera-lens-replacement',
       selectedModel: pixel,
     }), 'https://www.alimobile.com.au');
     expect(cameraBooking.searchParams.get('category')).toBe('phone');
     expect(cameraBooking.searchParams.get('brand')).toBe('Google Pixel');
     expect(cameraBooking.searchParams.get('model')).toBe('Pixel 8 Pro');
     expect(cameraBooking.searchParams.get('service')).toBe('Camera Lens Replacement');
+    expect(cameraBooking.searchParams.get('serviceSlug')).toBe('camera-lens-replacement');
     expect(getCameraLensPrice('Google Pixel')).toBe(50);
+  });
+
+  it('emits the canonical handoff for every Google Pixel V2 shared service', () => {
+    const pixel = { brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8 Pro', modelSlug: 'pixel-8-pro' };
+    for (const [repairName, repairSlug] of [
+      ['Loudspeaker Replacement', 'loudspeaker-replacement'],
+      ['Earpiece Speaker Replacement', 'earpiece-speaker-replacement'],
+      ['Power Button Replacement', 'power-button-replacement'],
+      ['Volume Button Replacement', 'volume-button-replacement'],
+      ['Camera Lens Replacement', 'camera-lens-replacement'],
+    ]) {
+      const booking = new URL(getSharedRepairBookingHref({ repairName, repairSlug, selectedModel: pixel }), 'https://www.alimobile.com.au');
+      expect(booking.searchParams.get('brandSlug')).toBe('google-pixel');
+      expect(booking.searchParams.get('modelSlug')).toBe('pixel-8-pro');
+      expect(booking.searchParams.get('serviceSlug')).toBe(repairSlug);
+    }
   });
 
   it('keeps primary page content server-rendered and scopes interactivity to the client island', () => {

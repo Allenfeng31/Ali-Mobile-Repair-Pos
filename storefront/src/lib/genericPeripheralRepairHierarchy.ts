@@ -59,6 +59,7 @@ export function buildGenericPeripheralRepairHierarchyModels({
     priceLabel: priceLabel(candidate.repair, repairSlug),
     bookingHref: getSharedRepairBookingHref({
       repairName: bookingService,
+      repairSlug,
       selectedModel: {
         brand: candidate.displayBrand,
         brandSlug: candidate.canonicalBrandSlug,

@@ -155,6 +155,7 @@ export default function VirtualPhoneRepairLandingPage({
               brandSlug={brandSlug ?? ''}
               brandName={brandName ?? 'Phone'}
               repairName={repair.name}
+              repairSlug={repair.slug}
               supportedModels={sharedPageV2.supportedModels}
               priceCandidates={sharedPageV2.priceCandidates}
               quickAnswers={sharedPageV2.quickAnswers}
@@ -187,7 +188,7 @@ export default function VirtualPhoneRepairLandingPage({
             <div className="trust-badge"><span className="trust-badge-icon text-blue-600"><BadgeCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>Ringwood Repair Desk</div>
           </div> : null}
         </section>
-        {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={repair.name} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
+        {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={repair.name} repairSlug={repair.slug} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
         {hierarchy ? <SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${repair.name} models`} /> : null}
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="repair-guidance-heading">
           <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>We inspect the device condition first, then provide a clear quote for the suitable repair path.</p></div>

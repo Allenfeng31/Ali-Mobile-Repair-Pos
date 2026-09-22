@@ -5,6 +5,8 @@ import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import GlobalRepairCart from './GlobalRepairCart';
 import { CartProvider } from '@/context/CartContext';
+import { resolvePublicBookingSelection } from '@/lib/publicBookingSelection';
+import type { RepairCatalog } from '@/lib/publicRepairCataloguePolicy';
 import React from 'react';
 
 // Mock Next.js navigation
@@ -29,7 +31,26 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 // Mock inventory data
-let mockInventory: any[] = [];
+let mockInventory: Array<Record<string, unknown>> = [];
+
+const bookingCatalog = {
+  brands: [
+    {
+      category: 'phone', brand: 'iPhone', slug: 'iphone', icon: '', models: [{
+        model: 'iPhone 14 Plus', slug: 'iphone-14-plus', repairTypes: [{
+          slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos',
+        }],
+      }],
+    },
+    {
+      category: 'phone', brand: 'Google Pixel', slug: 'google-pixel', icon: '', models: [{
+        model: 'Pixel 10a', slug: 'pixel-10a', repairTypes: [{
+          slug: 'screen-replacement', name: 'Screen Replacement', price: 120, repairOrigin: 'pos',
+        }],
+      }],
+    },
+  ],
+} as Pick<RepairCatalog, 'brands'>;
 
 describe('GlobalRepairCart Hydration Logic', () => {
   beforeEach(() => {
@@ -46,6 +67,17 @@ describe('GlobalRepairCart Hydration Logic', () => {
     ];
 
     vi.stubGlobal('fetch', vi.fn((url) => {
+      if (url.includes('/api/booking-selection')) {
+        const params = new URL(url, 'https://example.test').searchParams;
+        const selection = resolvePublicBookingSelection(bookingCatalog, Object.fromEntries(params.entries()));
+        if (!selection) {
+          return Promise.resolve({ ok: false, json: () => Promise.resolve({ error: 'Invalid booking selection.' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ selection }),
+        });
+      }
       if (url.includes('/api/proxy/inventory')) {
         return Promise.resolve({
           ok: true,
@@ -159,5 +191,36 @@ describe('GlobalRepairCart Hydration Logic', () => {
     await screen.findByText('Google Pixel Pixel 10a');
     expect(screen.getByText('Camera Lens Replacement')).toBeTruthy();
     expect(screen.getByText('$50.00')).toBeTruthy();
+  });
+
+  it('does not insert a device when canonical booking validation fails closed', async () => {
+    mockSearchParams.set('category', 'phone');
+    mockSearchParams.set('brandSlug', 'google-pixel');
+    mockSearchParams.set('modelSlug', 'pixel-8');
+    mockSearchParams.set('serviceSlug', 'invalid-repair');
+
+    render(<CartProvider><GlobalRepairCart /></CartProvider>);
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/booking-selection?')));
+    expect(screen.queryByText(/Google Pixel Pixel 8/)).toBeNull();
+  });
+
+  it('does not duplicate a real resolved booking after cart reinitialisation', async () => {
+    mockSearchParams.set('category', 'phone');
+    mockSearchParams.set('brandSlug', 'iphone');
+    mockSearchParams.set('modelSlug', 'iphone-14-plus');
+    mockSearchParams.set('serviceSlug', 'screen-replacement');
+    mockSearchParams.set('brand', 'iPhone');
+    mockSearchParams.set('model', 'iPhone 14 Plus');
+    mockSearchParams.set('service', 'Screen Replacement');
+
+    const firstRender = render(<CartProvider><GlobalRepairCart /></CartProvider>);
+    await screen.findByText('Screen Replacement');
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('repair_cart') ?? '[]')).toHaveLength(1));
+    firstRender.unmount();
+
+    render(<CartProvider><GlobalRepairCart /></CartProvider>);
+    await screen.findByText('Screen Replacement');
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('repair_cart') ?? '[]')).toHaveLength(1));
   });
 });

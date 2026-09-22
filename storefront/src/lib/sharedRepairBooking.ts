@@ -19,10 +19,12 @@ export function getValidatedSharedRepairModel(
 
 export function getSharedRepairBookingHref({
   repairName,
+  repairSlug,
   selectedModel,
   fallbackBrandName,
 }: {
   repairName: string;
+  repairSlug?: string;
   selectedModel?: SharedRepairModelOption | null;
   fallbackBrandName?: string;
 }) {
@@ -31,6 +33,11 @@ export function getSharedRepairBookingHref({
   if (selectedModel) {
     params.set('brand', selectedModel.brand);
     params.set('model', selectedModel.model);
+    if (repairSlug) {
+      params.set('brandSlug', selectedModel.brandSlug);
+      params.set('modelSlug', selectedModel.modelSlug);
+      params.set('serviceSlug', repairSlug);
+    }
   } else if (fallbackBrandName) {
     params.set('brand', fallbackBrandName);
   }

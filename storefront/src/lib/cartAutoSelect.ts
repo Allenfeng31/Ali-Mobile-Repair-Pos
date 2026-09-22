@@ -2,6 +2,7 @@ import { ParsedItem, displayBrand, groupServicesByBaseName } from './inventoryUt
 import { CAMERA_LENS_REPAIR_NAME, withGoogleCameraLensFixedPrice, withVirtualCameraLensGroupedService } from './virtualCameraLens';
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from './virtualPhoneRepairs';
 import { APPLE_WATCH_CHARGING_REPAIR_NAME, withAppleWatchChargingRepairGroupedService } from './seo/content/apple-watch';
+import type { PublicBookingSelection } from './publicBookingSelection';
 
 export interface AutoSelectResult {
   brand: string | null;
@@ -112,5 +113,41 @@ export function resolveInitialCartState(
     serviceToSelect,
     serviceToExpand,
     shouldAutoConfirm: !hasMultipleVariants
+  };
+}
+
+/**
+ * Public shared-page selection is authoritative for eligibility. Inventory is
+ * used only to enrich that approved identity with a current service record.
+ */
+export function resolvePublicBookingCartState(
+  selection: PublicBookingSelection,
+  inventory: ParsedItem[],
+  tierParam?: string | null,
+): AutoSelectResult {
+  const rawResult = resolveInitialCartState(
+    selection.brand,
+    selection.model,
+    selection.service,
+    inventory,
+    tierParam,
+  );
+
+  if (rawResult.brand && rawResult.model && (rawResult.serviceToSelect || rawResult.serviceToExpand)) {
+    return rawResult;
+  }
+
+  const hasApprovedFixedPrice = selection.serviceSlug === 'camera-lens-replacement' || isVirtualPhoneRepairName(selection.service);
+  return {
+    brand: selection.brand,
+    model: selection.model,
+    category: selection.category,
+    serviceToSelect: {
+      id: `public-booking:${selection.category}:${selection.brandSlug}:${selection.modelSlug}:${selection.serviceSlug}`,
+      name: selection.service,
+      price: hasApprovedFixedPrice ? selection.price : 0,
+    },
+    serviceToExpand: null,
+    shouldAutoConfirm: true,
   };
 }

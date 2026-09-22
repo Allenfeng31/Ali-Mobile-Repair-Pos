@@ -86,9 +86,9 @@ const CartContent = () => {
       try {
         const res = await fetch('/api/proxy/quality-tiers');
         if (res.ok) {
-          const tiers = await res.json();
+          const tiers: Array<{ name: string; description: string }> = await res.json();
           const map: Record<string, string> = {};
-          tiers.forEach((t: any) => { map[t.name] = t.description; });
+          tiers.forEach((t) => { map[t.name] = t.description; });
           setTierDescriptions(map);
         }
       } catch (err) {
@@ -121,20 +121,61 @@ const CartContent = () => {
 
   // ── SEO Intent Auto-Populate (One-time Consume & Clear) ───────────────────
   useEffect(() => {
-    if (loading || inventory.length === 0) return;
+    if (loading) return;
 
     const brandParam = searchParams.get('brand');
     const modelParam = searchParams.get('model');
     const serviceParam = searchParams.get('service');
     const tierParam = searchParams.get('tier');
     
+    const canonicalBookingParam = searchParams.get('brandSlug') || searchParams.get('modelSlug') || searchParams.get('serviceSlug');
+    if (brandParam && modelParam && serviceParam || canonicalBookingParam) {
+      const bookingParams = new URLSearchParams();
+      for (const key of ['category', 'brandSlug', 'modelSlug', 'serviceSlug', 'brand', 'model', 'service']) {
+        const value = searchParams.get(key);
+        if (value !== null) bookingParams.set(key, value);
+      }
+
+      let cancelled = false;
+      fetch(`/api/booking-selection?${bookingParams.toString()}`)
+        .then(async (response) => response.ok ? response.json() : null)
+        .then((payload: { selection?: import('@/lib/publicBookingSelection').PublicBookingSelection } | null) => {
+          if (cancelled || !payload?.selection) return;
+          import('@/lib/cartAutoSelect').then(({ resolvePublicBookingCartState }) => {
+            if (cancelled) return;
+            const state = resolvePublicBookingCartState(payload.selection!, inventory, tierParam);
+            if (!state.brand || !state.model || !state.category) return;
+
+            const serviceId = state.serviceToSelect?.id;
+            const alreadyInCart = devices.some((device) =>
+              device.brand === state.brand && device.model === state.model &&
+              (serviceId === undefined || device.services.some((service) => service.id === serviceId)),
+            );
+            if (!alreadyInCart) {
+              addDevice(
+                state.brand,
+                state.model,
+                state.category as ParsedItem['deviceType'],
+                state.serviceToSelect || undefined,
+                state.shouldAutoConfirm,
+                state.serviceToExpand,
+              );
+            }
+            window.history.replaceState({}, '', window.location.pathname);
+          });
+        })
+        .catch(() => undefined);
+
+      return () => { cancelled = true; };
+    }
+
     if (!brandParam || !modelParam) {
       // Check for legacy params
       const legacyModel = searchParams.get('model');
       const legacyRepair = searchParams.get('repair');
       if (!legacyModel) return;
 
-      import('@/lib/cartAutoSelect').then(({ resolveInitialCartState }) => {
+      import('@/lib/cartAutoSelect').then(() => {
         const decodedModel = legacyModel.replace(/-/g, ' ').toLowerCase();
         const matchedItem = inventory.find(i => 
           i.deviceModel.toLowerCase() === decodedModel || 

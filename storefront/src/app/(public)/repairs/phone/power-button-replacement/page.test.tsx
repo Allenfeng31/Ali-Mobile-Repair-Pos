@@ -46,7 +46,7 @@ describe('generic Power Button shared hierarchy route', () => {
     expect(props.models.map((model) => model.brandSlug)).toEqual(['future', 'htc', 'huawei', 'huawei', 'motorola', 'nokia', 'vivo', 'xiaomi']);
     expect(props.hierarchy.models.map((model) => model.priceLabel)).toEqual([null, null, '$79', null, null, null, null, 'From $129']);
     expect(props.hierarchy.models.every((model) => model.repairLabel === 'Power Button Replacement')).toBe(true);
-    expect(props.hierarchy.models.find((model) => model.modelSlug === 'p30')?.bookingHref).toBe('/book-repair?category=phone&service=Power+Button+Replacement&brand=Huawei&model=P30');
+    expect(props.hierarchy.models.find((model) => model.modelSlug === 'p30')?.bookingHref).toBe('/book-repair?category=phone&service=Power+Button+Replacement&brand=Huawei&model=P30&brandSlug=huawei&modelSlug=p30&serviceSlug=power-button-replacement');
     expect(props.hierarchy).toMatchObject({ selectedBrandSlug: 'huawei', selectedModelSlug: 'p30' });
   });
 

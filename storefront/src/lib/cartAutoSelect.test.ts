@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveInitialCartState } from './cartAutoSelect';
+import { resolveInitialCartState, resolvePublicBookingCartState } from './cartAutoSelect';
 import { ParsedItem } from './inventoryUtils';
 
 describe('cartAutoSelect', () => {
@@ -184,5 +184,50 @@ describe('cartAutoSelect', () => {
 
     expect(result.serviceToSelect).toMatchObject({ name: 'Camera Lens Replacement', price: 50 });
     expect(result.shouldAutoConfirm).toBe(true);
+  });
+
+  it('uses the exact current raw service when an approved public selection is present', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'iPhone', brandSlug: 'iphone', model: 'iPhone 14 Pro Max', modelSlug: 'iphone-14-pro-max',
+      service: 'Battery Replacement', serviceSlug: 'battery-replacement', price: 150,
+    }, mockInventory);
+
+    expect(result.serviceToSelect).toMatchObject({ id: 3, name: 'Battery Replacement', price: 150 });
+  });
+
+  it('keeps an approved selection as a deterministic custom quote when its raw model or service is absent', () => {
+    const selection = {
+      category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 9a', modelSlug: 'pixel-9a',
+      service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 199,
+    };
+    const result = resolvePublicBookingCartState(selection, []);
+
+    expect(result).toMatchObject({
+      brand: 'Google Pixel', model: 'Pixel 9a', category: 'phone', shouldAutoConfirm: true,
+      serviceToSelect: { id: 'public-booking:phone:google-pixel:pixel-9a:screen-replacement', price: 0 },
+    });
+  });
+
+  it('keeps the approved Google Pixel Camera Lens fixed price when raw inventory is absent', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 9a', modelSlug: 'pixel-9a',
+      service: 'Camera Lens Replacement', serviceSlug: 'camera-lens-replacement', price: 50,
+    }, []);
+
+    expect(result.serviceToSelect).toMatchObject({ price: 50, id: 'public-booking:phone:google-pixel:pixel-9a:camera-lens-replacement' });
+  });
+
+  it.each([
+    ['Front Camera Replacement', 'front-camera-replacement'],
+    ['Back Camera Replacement', 'back-camera-replacement'],
+  ])('keeps an approved %s selection bookable without a raw service', (service, serviceSlug) => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24',
+      service, serviceSlug, price: 120,
+    }, []);
+
+    expect(result.serviceToSelect).toMatchObject({
+      id: `public-booking:phone:samsung:galaxy-s24:${serviceSlug}`, name: service, price: 0,
+    });
   });
 });

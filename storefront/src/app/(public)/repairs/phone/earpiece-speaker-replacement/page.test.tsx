@@ -64,7 +64,7 @@ describe('generic Earpiece shared hierarchy route', () => {
     expect(props.hierarchy.models.map((model) => model.modelSlug)).toEqual(['one', 'u24', 'mate-20', 'p30', 'edge-50', 'g60', 'x100', 'redmi-note-12']);
     expect(props.hierarchy.models.map((model) => model.priceLabel)).toEqual([null, null, '$79', null, null, null, null, 'From $129']);
     expect(props.hierarchy.models.every((model) => model.repairLabel === 'Earpiece Speaker Replacement')).toBe(true);
-    expect(props.hierarchy.models.find((model) => model.modelSlug === 'p30')?.bookingHref).toBe('/book-repair?category=phone&service=Earpiece+Speaker+Replacement&brand=Huawei&model=P30');
+    expect(props.hierarchy.models.find((model) => model.modelSlug === 'p30')?.bookingHref).toBe('/book-repair?category=phone&service=Earpiece+Speaker+Replacement&brand=Huawei&model=P30&brandSlug=huawei&modelSlug=p30&serviceSlug=earpiece-speaker-replacement');
     expect(props.hierarchy.selectedBrandSlug).toBe('huawei');
     expect(props.hierarchy.selectedModelSlug).toBe('p30');
   });

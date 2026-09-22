@@ -143,6 +143,7 @@ export default function CameraLensLandingPage({
             brandSlug={brandSlug ?? ""}
             brandName={brandName ?? "Phone"}
             repairName={CAMERA_LENS_REPAIR_NAME}
+            repairSlug={CAMERA_LENS_REPAIR_SLUG}
             supportedModels={sharedPageV2.supportedModels}
             priceCandidates={sharedPageV2.priceCandidates}
             quickAnswers={sharedPageV2.quickAnswers}
@@ -205,7 +206,7 @@ export default function CameraLensLandingPage({
         </div> : null}
       </section>
 
-      {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={CAMERA_LENS_REPAIR_NAME} pricingStrategy={sharedPageV2.pricingStrategy} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
+      {sharedPageV2 ? <SharedRepairPageV2ModelSections supportedModels={sharedPageV2.supportedModels} priceCandidates={sharedPageV2.priceCandidates} repairName={CAMERA_LENS_REPAIR_NAME} repairSlug={CAMERA_LENS_REPAIR_SLUG} pricingStrategy={sharedPageV2.pricingStrategy} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
 
       <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="camera-lens-guidance-heading">
         <div className="repair-workbench-heading">

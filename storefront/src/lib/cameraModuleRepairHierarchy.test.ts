@@ -79,7 +79,7 @@ describe('camera module hierarchy adapter', () => {
     expect(models.map((model) => model.modelSlug)).toEqual(['p30-pro', 'mate-20', 'u24', 'one']);
     expect(models.map((model) => model.priceLabel)).toEqual(['$99', 'From $149', null, null]);
     expect(models.every((model) => model.repairLabel === 'Front Camera Replacement')).toBe(true);
-    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Front+Camera+Replacement&brand=Huawei&model=P30+Pro');
+    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Front+Camera+Replacement&brand=Huawei&model=P30+Pro&brandSlug=huawei&modelSlug=p30-pro&serviceSlug=front-camera-replacement');
     expect(models.map((model) => model.priceLabel).join(' ')).not.toMatch(/Quote on Request|Starting from \$50/);
   });
 
@@ -121,7 +121,7 @@ describe('camera module hierarchy adapter', () => {
     });
 
     expect(models.map((model) => model.priceLabel)).toEqual(['$129', null, 'From $159', null, null, null, null]);
-    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Back+Camera+Replacement&brand=Huawei&model=P60+Pro');
+    expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Back+Camera+Replacement&brand=Huawei&model=P60+Pro&brandSlug=huawei&modelSlug=p60-pro&serviceSlug=back-camera-replacement');
     expect(models.map((model) => model.priceLabel).join(' ')).not.toMatch(/Quote on Request|Starting from \$50|\$50/);
     expect(readFileSync(resolve(process.cwd(), 'src/lib/cameraModuleRepairHierarchy.ts'), 'utf8')).not.toContain('getStartingPrice');
   });
