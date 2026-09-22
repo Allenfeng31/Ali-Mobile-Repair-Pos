@@ -78,4 +78,19 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(schema).toContain('/repairs/phone/back-camera-replacement');
     expect(schema).not.toMatch(/Offer|Product|AggregateOffer|priceCurrency|availability|\?/);
   });
+
+  it.each([
+    ['Front Camera', front, hierarchy],
+    ['Back Camera', back, backHierarchy],
+  ] as const)('%s uses the shared presentation rhythm while keeping its assessment-first semantics', (_, config, pageHierarchy) => {
+    const { container } = render(
+      <CameraModuleRepairLandingPage config={config} canonicalPath={`/repairs/phone/${config.repairSlug}`} candidates={candidates} hierarchy={pageHierarchy} />,
+    );
+
+    expect(container.querySelector('[data-camera-module-hero]')?.className).toContain('repair-detail-hero');
+    expect(container.querySelector('[data-camera-module-assessment]')?.textContent).toMatch(/assessment before repair/i);
+    expect(container.querySelector('[data-camera-module-guidance-grid]')).toBeTruthy();
+    expect(container.textContent).toMatch(/inspect|inspection/i);
+    expect(container.textContent).not.toMatch(/starting from \$50/i);
+  });
 });
