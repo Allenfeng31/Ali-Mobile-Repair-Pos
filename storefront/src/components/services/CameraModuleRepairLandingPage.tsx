@@ -4,6 +4,7 @@ import { Camera, CheckCircle2, ClipboardCheck, PhoneCall, Wrench } from 'lucide-
 import type { SharedRepairModelCandidate } from '@/lib/sharedRepairContext';
 import CameraModuleRepairBookingControls from '@/components/services/CameraModuleRepairBookingControls';
 import SharedRepairHierarchySections from '@/components/services/SharedRepairHierarchySections';
+import SharedRepairSelectedDevice, { type SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
 import type { SharedRepairHierarchyModel } from '@/lib/sharedRepairHierarchy';
 
 export type CameraModuleRepairLandingConfig = Readonly<{
@@ -28,6 +29,7 @@ type CameraModuleRepairLandingPageProps = Readonly<{
     models: readonly SharedRepairHierarchyModel[];
     selectedBrandSlug: string | null;
     selectedModelSlug: string | null;
+    selectedDevice?: SharedRepairSelectedDeviceViewModel | null;
   }>;
 }>;
 
@@ -65,13 +67,14 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
           <p className="mt-3 max-w-[32rem] text-sm font-semibold leading-6 text-slate-600">We confirm the suitable repair path and quote after inspecting the model, fault and parts availability.</p>
           <p className="mt-4 text-sm font-bold text-slate-700">Choose a supported model below to view its current repair option.</p>
         </div>
+        {hierarchy?.selectedDevice ? <SharedRepairSelectedDevice selection={hierarchy.selectedDevice} changeModelHref="#shared-repair-model-selection" /> : null}
         {!hierarchy ? <div className="mt-6 flex w-full justify-center">
           <Suspense fallback={<Link href={`/book-repair?category=phone&service=${encodeURIComponent(config.bookingService)}`} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-blue-600 px-6 py-3 font-bold !text-white">Request an assessment</Link>}>
             <CameraModuleRepairBookingControls basePath={canonicalPath} repairSlug={config.repairSlug} bookingService={config.bookingService} candidates={candidates} />
           </Suspense>
         </div> : null}
       </section>
-      {hierarchy ? <div className="relative z-10"><SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} /></div> : null}
+      {hierarchy ? <div className="relative z-10"><SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} genericSelectionPath={canonicalPath} /></div> : null}
       <section data-camera-module-guidance-grid className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="symptoms-heading">
         <div className="repair-workbench-heading"><span>Common symptoms</span><h2 id="symptoms-heading">When to arrange a camera assessment</h2><p>Camera faults can share symptoms with connectors, board faults, liquid damage or app behaviour, so inspection comes first.</p></div>
         <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:grid-cols-3 lg:gap-6">{config.symptoms.map((symptom) => <article key={symptom} data-camera-module-content-card className="flex h-full min-h-[160px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center text-sm font-semibold leading-6 text-slate-700 md:p-8"><span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} aria-hidden="true" /></span>{symptom}</article>)}</div>

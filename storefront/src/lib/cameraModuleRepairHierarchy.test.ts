@@ -89,14 +89,22 @@ describe('camera module hierarchy adapter', () => {
       bookingService: 'Front Camera Replacement',
       candidates,
       query: { brand: 'huawei' },
-    })).toEqual({ selectedBrandSlug: 'huawei', selectedModelSlug: null });
+    })).toEqual({ selectedBrandSlug: 'huawei', selectedModelSlug: null, selectedDevice: null });
 
     expect(resolveCameraModuleRepairHierarchySelection({
       repairSlug: 'front-camera-replacement',
       bookingService: 'Front Camera Replacement',
       candidates,
       query: { brand: 'huawei', model: 'p30-pro' },
-    })).toEqual({ selectedBrandSlug: 'huawei', selectedModelSlug: 'p30-pro' });
+    })).toMatchObject({
+      selectedBrandSlug: 'huawei',
+      selectedModelSlug: 'p30-pro',
+      selectedDevice: {
+        selectedDevice: { brand: 'Huawei', brandSlug: 'huawei', model: 'P30 Pro', modelSlug: 'p30-pro' },
+        selectedRepair: { name: 'Front Camera Replacement', serviceSlug: 'front-camera-replacement' },
+        booking: { href: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Huawei&model=P30+Pro&brandSlug=huawei&modelSlug=p30-pro&serviceSlug=front-camera-replacement' },
+      },
+    });
   });
 
   it('feeds exact Front Camera models into the approved B1 grouping while unknown brands remain flat', () => {
@@ -111,6 +119,22 @@ describe('camera module hierarchy adapter', () => {
     expect(hierarchy.brands[0]?.series.flatMap((series) => series.models).map((model) => model.modelSlug)).toEqual(['mate-20', 'p30-pro']);
     expect(hierarchy.brands[1]?.series).toEqual([]);
     expect(hierarchy.brands[1]?.models.map((model) => model.modelSlug)).toEqual(['u24']);
+  });
+
+  it('promotes a future supported Camera model only after the same exact brand and model validation', () => {
+    expect(resolveCameraModuleRepairHierarchySelection({
+      repairSlug: 'front-camera-replacement',
+      bookingService: 'Front Camera Replacement',
+      candidates,
+      query: { brand: 'future', model: 'one' },
+    })).toMatchObject({
+      selectedBrandSlug: 'future',
+      selectedModelSlug: 'one',
+      selectedDevice: {
+        selectedDevice: { brand: 'Future', model: 'One' },
+        booking: { href: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Future&model=One&brandSlug=future&modelSlug=one&serviceSlug=front-camera-replacement' },
+      },
+    });
   });
 
   it('uses only exact trusted Back Camera prices and never a model-hub starting-price fallback', () => {
@@ -155,10 +179,18 @@ describe('camera module hierarchy adapter', () => {
   it('applies the same fail-closed Back Camera query contract', () => {
     expect(resolveCameraModuleRepairHierarchySelection({
       repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: backCandidates, query: { brand: 'oppo' },
-    })).toEqual({ selectedBrandSlug: 'oppo', selectedModelSlug: null });
+    })).toEqual({ selectedBrandSlug: 'oppo', selectedModelSlug: null, selectedDevice: null });
     expect(resolveCameraModuleRepairHierarchySelection({
       repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: backCandidates, query: { brand: 'oppo', model: 'reno-12' },
-    })).toEqual({ selectedBrandSlug: 'oppo', selectedModelSlug: 'reno-12' });
+    })).toMatchObject({
+      selectedBrandSlug: 'oppo',
+      selectedModelSlug: 'reno-12',
+      selectedDevice: {
+        selectedDevice: { brand: 'OPPO', brandSlug: 'oppo', model: 'Reno 12', modelSlug: 'reno-12' },
+        selectedRepair: { name: 'Back Camera Replacement', serviceSlug: 'back-camera-replacement' },
+        booking: { href: '/book-repair?category=phone&service=Back+Camera+Replacement&brand=OPPO&model=Reno+12&brandSlug=oppo&modelSlug=reno-12&serviceSlug=back-camera-replacement' },
+      },
+    });
 
     for (const query of [
       { model: 'reno-12' },
@@ -169,7 +201,7 @@ describe('camera module hierarchy adapter', () => {
     ]) {
       expect(resolveCameraModuleRepairHierarchySelection({
         repairSlug: 'back-camera-replacement', bookingService: 'Back Camera Replacement', candidates: backCandidates, query,
-      })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null });
+      })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null });
     }
   });
 
@@ -186,6 +218,6 @@ describe('camera module hierarchy adapter', () => {
       bookingService: 'Front Camera Replacement',
       candidates,
       query,
-    })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null });
+    })).toEqual({ selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null });
   });
 });
