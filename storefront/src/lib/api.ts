@@ -28,6 +28,10 @@ import {
   readCurrentPublicRepairCatalogueSnapshot,
   writeCurrentPublicRepairCatalogueSnapshot,
 } from './publicRepairCatalogueSnapshot.server';
+import {
+  getLocalRepairCatalogueFixture,
+  isLocalRepairCatalogueOnly,
+} from './localRepairCatalogueFixture';
 
 export type {
   BrandEntry,
@@ -533,6 +537,8 @@ function buildFallbackCatalog(): BrandEntry[] {
  * small development fallback.
  */
 function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
+  if (isLocalRepairCatalogueOnly()) return Promise.resolve(getLocalRepairCatalogueFixture());
+
   return resolvePublicRepairCatalogue({
     mode: getPublicRepairCatalogueMode(),
     fetchLiveInventory: () => fetchPOSInventory({ forceLive: forceRefresh }),

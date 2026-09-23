@@ -10,6 +10,10 @@ vi.mock('./repair-results', async (importOriginal) => ({
 import { fetchModelRepairResultSeeds } from './repair-results.server';
 import type { PublicRepairResult } from './repair-results';
 
+const originalLocalOnly = process.env.ALI_MOBILE_LOCAL_CATALOG_ONLY;
+const originalNodeEnv = process.env.NODE_ENV;
+const mutableEnvironment = process.env as Record<string, string | undefined>;
+
 function result(overrides: Partial<PublicRepairResult> = {}): PublicRepairResult {
   return {
     id: 'exact-screen',
@@ -64,7 +68,22 @@ function queryFor(rows: PublicRepairResult[]) {
 }
 
 describe('server Model Hub initial result reader', () => {
-  afterEach(() => createPublicRepairResultsClient.mockReset());
+  afterEach(() => {
+    if (originalLocalOnly === undefined) delete process.env.ALI_MOBILE_LOCAL_CATALOG_ONLY;
+    else process.env.ALI_MOBILE_LOCAL_CATALOG_ONLY = originalLocalOnly;
+    mutableEnvironment.NODE_ENV = originalNodeEnv;
+    createPublicRepairResultsClient.mockReset();
+  });
+
+  it('returns no Repair Results without constructing Supabase in local-only mode', async () => {
+    process.env.ALI_MOBILE_LOCAL_CATALOG_ONLY = 'true';
+    mutableEnvironment.NODE_ENV = 'development';
+    createPublicRepairResultsClient.mockImplementation(() => { throw new Error('Supabase must not run'); });
+
+    await expect(fetchModelRepairResultSeeds({ category: 'phone', brandSlug: 'huawei', modelSlug: 'p30' })).resolves.toEqual([]);
+
+    expect(createPublicRepairResultsClient).not.toHaveBeenCalled();
+  });
 
   it('uses exact category, alias brand, and model equality with ordered bounded safe visual seeds', async () => {
     const query = queryFor([

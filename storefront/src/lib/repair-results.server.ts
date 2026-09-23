@@ -24,6 +24,7 @@ import {
   type ServerRepairResultProof,
   type ServerRepairResultProofRequest,
 } from './repair-results';
+import { isLocalRepairCatalogueOnly } from './localRepairCatalogueFixture';
 
 export interface RepairDetailInitialResultSeedRequest {
   category: RepairResultDeviceCategory;
@@ -177,6 +178,8 @@ export async function fetchHomepageRepairResultSeed(): Promise<HomepageRepairRes
 export async function fetchModelRepairResultSeeds(
   request: ModelRepairResultSeedRequest,
 ): Promise<RepairResultMatchingItem[]> {
+  if (isLocalRepairCatalogueOnly()) return [];
+
   const supabase = createPublicRepairResultsClient();
   if (!supabase) return [];
 
