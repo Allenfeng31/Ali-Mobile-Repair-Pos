@@ -341,7 +341,7 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(getVirtualPhoneRepairLandingHref('phone', 'google-pixel', 'pixel-9a', 'earpiece-speaker-replacement'))
       .toBe('/repairs/phone/google/earpiece-speaker-replacement?model=pixel-9a');
     expect(routeSource).toContain('searchParams');
-    expect(routeSource).toContain('selectedModelSlug={typeof model === \'string\' ? model : null}');
+    expect(routeSource).toContain('query={await searchParams}');
     expect(routeSource).not.toContain('/repairs/phone/google-pixel/pixel-9a/earpiece-speaker-replacement');
   });
 
@@ -354,7 +354,7 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(getVirtualPhoneRepairLandingHref('phone', 'google-pixel', 'pixel-9a', repairSlug))
       .toBe(`/repairs/phone/google/${routeSlug}?model=pixel-9a`);
     expect(routeSource).toContain('searchParams');
-    expect(routeSource).toContain('selectedModelSlug={typeof model === \'string\' ? model : null}');
+    expect(routeSource).toContain('query={await searchParams}');
     expect(routeSource).not.toContain(`/repairs/phone/google-pixel/pixel-9a/${routeSlug}`);
   });
 });

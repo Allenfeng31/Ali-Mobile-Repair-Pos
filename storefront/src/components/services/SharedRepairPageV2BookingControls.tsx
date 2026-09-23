@@ -6,6 +6,13 @@ import { ArrowRight, Clock3, PackageCheck, PhoneCall, ShieldCheck } from 'lucide
 import { getSharedRepairCandidateModelLabel, getSharedRepairCandidatePriceLabel, type SharedRepairPageCandidate, type SharedRepairPageSupportedModel, type SharedRepairPageV2PricingStrategy } from '@/lib/sharedRepairPageV2';
 import { getSharedRepairBookingHref, getValidatedSharedRepairModel } from '@/lib/sharedRepairBooking';
 
+const SERVER_SELECTED_DEVICE_REPAIRS = new Set([
+  'loudspeaker-replacement',
+  'earpiece-speaker-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+]);
+
 export type SharedRepairPageV2QuickAnswers = Readonly<{
   repairTime: string;
   partsSameDay: string;
@@ -37,7 +44,10 @@ export default function SharedRepairPageV2BookingControls({
 }: SharedRepairPageV2BookingControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedModel = getValidatedSharedRepairModel(supportedModels, searchParams.get('model'), brandSlug);
+  const usesServerSelectedDevice = repairSlug !== undefined && SERVER_SELECTED_DEVICE_REPAIRS.has(repairSlug);
+  const selectedModel = usesServerSelectedDevice
+    ? null
+    : getValidatedSharedRepairModel(supportedModels, searchParams.get('model'), brandSlug);
   const selectedCandidate = priceCandidates.find((candidate) => candidate.modelSlug === selectedModel?.modelSlug) ?? null;
   const bookingHref = getSharedRepairBookingHref({
     repairName,
@@ -54,6 +64,8 @@ export default function SharedRepairPageV2BookingControls({
   const updateModel = (modelSlug: string) => {
     router.replace(modelSlug ? `${basePath}?model=${encodeURIComponent(modelSlug)}` : basePath, { scroll: false });
   };
+
+  if (usesServerSelectedDevice && searchParams.has('model')) return null;
 
   return (
     <div className="mt-8 w-full">

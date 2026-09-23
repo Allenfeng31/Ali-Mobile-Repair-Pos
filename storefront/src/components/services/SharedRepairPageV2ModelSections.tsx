@@ -5,6 +5,13 @@ import SharedRepairPageV2ModelListPresentation from './SharedRepairPageV2ModelLi
 import listStyles from './SharedRepairPageV2ModelListPresentation.module.css';
 import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 
+const SERVER_SELECTED_DEVICE_REPAIRS = new Set([
+  'loudspeaker-replacement',
+  'earpiece-speaker-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+]);
+
 export default function SharedRepairPageV2ModelSections({
   supportedModels,
   priceCandidates,
@@ -41,7 +48,9 @@ export default function SharedRepairPageV2ModelSections({
       >
         {supportedModels.map((model) => {
           const priceCandidate = priceCandidates.find((candidate) => candidate.modelSlug === model.modelSlug) ?? null;
-          const bookingHref = getSharedRepairBookingHref({ repairName, repairSlug, selectedModel: model });
+          const bookingHref = repairSlug && SERVER_SELECTED_DEVICE_REPAIRS.has(repairSlug)
+            ? `?model=${encodeURIComponent(model.modelSlug)}`
+            : getSharedRepairBookingHref({ repairName, repairSlug, selectedModel: model });
           const modelLabel = getSharedRepairCandidateModelLabel(model);
           const priceLabel = pricingStrategy?.mode === 'fixed'
             ? `$${pricingStrategy.fixedPrice}`
