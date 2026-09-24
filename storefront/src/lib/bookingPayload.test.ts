@@ -3,6 +3,35 @@ import { buildBookingPayload } from './bookingPayload';
 import { OTHER_REPAIR_SERVICE_ID, OTHER_REPAIR_SERVICE_NAME } from './otherRepairBooking';
 
 describe('buildBookingPayload', () => {
+  it('preserves a canonical Custom Quote identity and its non-price status', () => {
+    const payload = buildBookingPayload({
+      customerName: 'Test Customer',
+      phone: '0400000000',
+      devices: [{
+        id: 'quote', brand: 'Samsung', model: 'Galaxy S21', category: 'phone', isConfirmed: true,
+        services: [{
+          id: 'public-booking:phone:samsung:galaxy-s21:loudspeaker-replacement',
+          name: 'Loudspeaker Replacement',
+          price: 0,
+        }],
+      }],
+      total: 0,
+      hasCustomQuote: true,
+      pricing: { subtotal: 0, discountRate: 0, discountAmount: 0, qualifyingRepairItemCount: 1, total: 0 },
+      datetime: '2026-07-15T10:00:00.000Z',
+      displayDate: '15/07/2026 10:00',
+      notes: '',
+      sessionToken: null,
+    });
+
+    expect(payload.hasCustomQuote).toBe(true);
+    expect(payload.devices[0].services).toEqual([{
+      id: 'public-booking:phone:samsung:galaxy-s21:loudspeaker-replacement',
+      name: 'Loudspeaker Replacement',
+      price: 0,
+    }]);
+  });
+
   it('keeps Other Repair description separate from its base service name across devices', () => {
     const payload = buildBookingPayload({
       customerName: 'Test Customer',

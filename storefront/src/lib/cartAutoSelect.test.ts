@@ -215,6 +215,7 @@ describe('cartAutoSelect', () => {
     }, mockInventory);
 
     expect(result.serviceToSelect).toMatchObject({ id: 3, name: 'Battery Replacement', price: 150 });
+    expect(result.shouldAutoConfirm).toBe(true);
   });
 
   it('keeps an approved selection as a deterministic custom quote when its raw model or service is absent', () => {
@@ -287,21 +288,43 @@ describe('cartAutoSelect', () => {
   });
 
   it.each([
-    ['Google Pixel', 'google-pixel', 'Pixel Future', 'pixel-future'],
-    ['Samsung', 'samsung', 'Galaxy Future', 'galaxy-future'],
-    ['OPPO', 'oppo', 'Find Future', 'find-future'],
-    ['Huawei', 'huawei', 'Mate Future', 'mate-future'],
-  ])('keeps a virtual-only %s peripheral bookable as a custom quote', (brand, brandSlug, model, modelSlug) => {
+    ['Google Pixel', 'google-pixel', 'Pixel Future', 'pixel-future', 'Loudspeaker Replacement', 'loudspeaker-replacement'],
+    ['Samsung', 'samsung', 'Galaxy S21', 'galaxy-s21', 'Loudspeaker Replacement', 'loudspeaker-replacement'],
+    ['OPPO', 'oppo', 'Find Future', 'find-future', 'Volume Button Replacement', 'volume-button-replacement'],
+    ['Huawei', 'huawei', 'Mate Future', 'mate-future', 'Power Button Replacement', 'power-button-replacement'],
+    ['Asus', 'asus', 'ROG Phone 5', 'rog-phone-5', 'Earpiece Speaker Replacement', 'earpiece-speaker-replacement'],
+  ])('keeps a virtual-only %s %s bookable as a custom quote', (brand, brandSlug, model, modelSlug, service, serviceSlug) => {
     const result = resolvePublicBookingCartState({
       category: 'phone', brand, brandSlug, model, modelSlug,
-      service: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement', price: 50, priceAuthority: 'quote-only',
-    }, []);
+      service, serviceSlug, price: 50, priceAuthority: 'quote-only',
+    }, [{
+      id: 60, category: 'phone', brand: `P ${brand}`, deviceModel: model, service: 'Screen Replacement', price: 120,
+      deviceType: 'phone', quality_grade: 'Standard', is_recommended: false, name: `${brand} ${model} Screen Replacement`,
+    }]);
 
     expect(result).toMatchObject({
-      brand, model, serviceToSelect: {
-        id: `public-booking:phone:${brandSlug}:${modelSlug}:loudspeaker-replacement`, price: 0,
+      brand, model, shouldAutoConfirm: true, serviceToExpand: null, serviceToSelect: {
+        id: `public-booking:phone:${brandSlug}:${modelSlug}:${serviceSlug}`, name: service, price: 0,
       },
     });
+  });
+
+  it('keeps a real multi-variant Loudspeaker repair in the editor', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24',
+      service: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement', price: 50, priceAuthority: 'quote-only',
+    }, [
+      {
+        id: 61, category: 'phone', brand: 'P Samsung', deviceModel: 'Galaxy S24', service: 'Loudspeaker Replacement', price: 80,
+        deviceType: 'phone', quality_grade: 'Standard', is_recommended: false, name: 'Samsung Galaxy S24 Loudspeaker Replacement Standard',
+      },
+      {
+        id: 62, category: 'phone', brand: 'P Samsung', deviceModel: 'Galaxy S24', service: 'Loudspeaker Replacement', price: 100,
+        deviceType: 'phone', quality_grade: 'Premium', is_recommended: false, name: 'Samsung Galaxy S24 Loudspeaker Replacement Premium',
+      },
+    ]);
+
+    expect(result).toMatchObject({ serviceToSelect: null, serviceToExpand: 'Loudspeaker Replacement', shouldAutoConfirm: false });
   });
 
   it('keeps exact raw multi-variant selection expanded instead of silently choosing a minimum', () => {

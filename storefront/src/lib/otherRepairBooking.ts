@@ -1,4 +1,5 @@
 import type { CartDevice, MultiDiscountConfig, RepairService } from '@/context/CartContext';
+import { isVirtualPhoneRepairName } from './virtualPhoneRepairs';
 
 export const OTHER_REPAIR_SERVICE_ID = 'booking-only-other-repair';
 export const OTHER_REPAIR_SERVICE_NAME = 'Other Repair';
@@ -11,6 +12,9 @@ export type OtherRepairDescriptionValidation =
 
 export const isOtherRepairService = (service: RepairService) =>
   service.id === OTHER_REPAIR_SERVICE_ID && service.name === OTHER_REPAIR_SERVICE_NAME;
+
+export const isCanonicalPublicBookingQuote = (service: RepairService | undefined) =>
+  service !== undefined && String(service.id).startsWith('public-booking:') && service.price === 0;
 
 export function validateOtherRepairDescription(value: unknown): OtherRepairDescriptionValidation {
   const trimmed = typeof value === 'string' ? value.trim() : '';
@@ -43,6 +47,9 @@ export const getOtherRepairPriceLabel = () => 'Quote on Request';
 export const isDiscountQualifyingService = (service: RepairService) =>
   !String(service.id).startsWith('upsell-') && !isOtherRepairService(service);
 
+const isVirtualPhoneStartingPriceService = (service: RepairService) =>
+  String(service.id).startsWith('virtual-') && isVirtualPhoneRepairName(service.name);
+
 const priceToCents = (value: number | undefined) => Math.round((Number(value) || 0) * 100);
 const centsToPrice = (cents: number) => Number((cents / 100).toFixed(2));
 
@@ -74,8 +81,31 @@ export function calculateCartPricing(devices: CartDevice[], discountConfig: Mult
   };
 }
 
-export const updateCartDeviceServices = (devices: CartDevice[], deviceId: string, services: RepairService[]) =>
-  devices.map((device) => device.id === deviceId ? { ...device, services } : device);
+export const updateCartDeviceServices = (
+  devices: CartDevice[], deviceId: string, services: RepairService[],
+  { clearValidatedPublicBookingService = false }: { clearValidatedPublicBookingService?: boolean } = {},
+) => devices.map((device) => {
+  if (device.id !== deviceId) return device;
+
+  const validatedPublicBookingService = isCanonicalPublicBookingQuote(device.validatedPublicBookingService)
+    ? device.validatedPublicBookingService
+    : device.services.find(isCanonicalPublicBookingQuote);
+  const keepsValidatedService = validatedPublicBookingService && services.some((service) => (
+    service.id === validatedPublicBookingService.id ||
+    (service.name === validatedPublicBookingService.name && service.price === 0)
+  ));
+  const retainValidatedService = !clearValidatedPublicBookingService && validatedPublicBookingService && (
+    services.length === 0 || keepsValidatedService
+  );
+  const deviceWithoutValidatedService = { ...device };
+  delete deviceWithoutValidatedService.validatedPublicBookingService;
+
+  return {
+    ...deviceWithoutValidatedService,
+    services,
+    ...(retainValidatedService ? { validatedPublicBookingService } : {}),
+  };
+});
 
 export function normalizeCartDevices(value: unknown): CartDevice[] {
   if (!Array.isArray(value)) return [];
@@ -83,14 +113,23 @@ export function normalizeCartDevices(value: unknown): CartDevice[] {
   return value.flatMap((candidate) => {
     if (!candidate || typeof candidate !== 'object' || !Array.isArray((candidate as CartDevice).services)) return [];
     const device = candidate as CartDevice;
+    const { validatedPublicBookingService } = device;
+    const deviceWithoutValidatedService = { ...device };
+    delete deviceWithoutValidatedService.validatedPublicBookingService;
+    const services = device.services.flatMap((service) => {
+      if (!service || typeof service !== 'object') return [];
+      if (isVirtualPhoneStartingPriceService(service)) return [{ ...service, price: 0 }];
+      if (!isOtherRepairService(service)) return [service];
+      const { customDescription, ...rest } = service;
+      return [{ ...rest, price: 0, ...(typeof customDescription === 'string' ? { customDescription } : {}) }];
+    });
+    const canonicalQuote = isCanonicalPublicBookingQuote(validatedPublicBookingService)
+      ? validatedPublicBookingService
+      : services.find(isCanonicalPublicBookingQuote);
     return [{
-      ...device,
-      services: device.services.flatMap((service) => {
-        if (!service || typeof service !== 'object') return [];
-        if (!isOtherRepairService(service)) return [service];
-        const { customDescription, ...rest } = service;
-        return [{ ...rest, price: 0, ...(typeof customDescription === 'string' ? { customDescription } : {}) }];
-      }),
+      ...deviceWithoutValidatedService,
+      services,
+      ...(canonicalQuote ? { validatedPublicBookingService: canonicalQuote } : {}),
     }];
   });
 }

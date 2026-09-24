@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
 import { resolveServerSupabaseKey } from '@/utils/supabase/service-role';
+import { isLocalRepairCatalogueOnly } from '@/lib/localRepairCatalogueFixture';
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -13,6 +14,10 @@ const supabaseServiceKey = resolveServerSupabaseKey();
 
 export async function POST(request: Request) {
   try {
+    if (isLocalRepairCatalogueOnly()) {
+      return NextResponse.json({ error: 'Chat alerts are disabled in local-only mode.' }, { status: 503 });
+    }
+
     const { message, customerName, customerPhone } = await request.json();
 
     if (!message) {
@@ -56,7 +61,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending chat alert SMS:', error);
     return NextResponse.json({ error: 'Failed to send alert' }, { status: 500 });
   }

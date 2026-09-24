@@ -19,6 +19,11 @@ import {
 
 const discountConfig = { multi_discount_tier_2: 0.1, multi_discount_tier_3: 0.15 };
 const standardRepair: RepairService = { id: 101, name: 'Screen Replacement', price: 100 };
+const customQuoteRepair: RepairService = {
+  id: 'public-booking:phone:samsung:galaxy-s21:loudspeaker-replacement',
+  name: 'Loudspeaker Replacement',
+  price: 0,
+};
 const device = (id: string, services: RepairService[]): CartDevice => ({
   id,
   brand: 'Samsung',
@@ -94,6 +99,43 @@ describe('booking-only Other Repair cart service', () => {
     expect(formatOtherRepairServiceName(malformed[0].services[0])).toBe(OTHER_REPAIR_SERVICE_NAME);
   });
 
+  it('normalizes a persisted virtual phone starting price into a Custom Quote', () => {
+    const restored = normalizeCartDevices([device('legacy-virtual', [{
+      id: 'virtual-loudspeaker-samsung-galaxy-s21',
+      name: 'Loudspeaker Replacement',
+      price: 50,
+    }])]);
+
+    expect(restored[0].services).toEqual([{
+      id: 'virtual-loudspeaker-samsung-galaxy-s21',
+      name: 'Loudspeaker Replacement',
+      price: 0,
+    }]);
+  });
+
+  it('keeps a manually selected virtual repair as a manual identity', () => {
+    const manualVirtualRepair: RepairService = {
+      id: 'virtual-loudspeaker-samsung-galaxy-s21',
+      name: 'Loudspeaker Replacement',
+      price: 0,
+    };
+
+    const updated = updateCartDeviceServices([device('manual', [])], 'manual', [manualVirtualRepair]);
+
+    expect(updated[0].services).toEqual([manualVirtualRepair]);
+    expect(updated[0].validatedPublicBookingService).toBeUndefined();
+  });
+
+  it('does not change the fixed Camera Lens cart price during normalization', () => {
+    const restored = normalizeCartDevices([device('camera-lens', [{
+      id: 'virtual-camera-lens-google-pixel-pixel-10a',
+      name: 'Camera Lens Replacement',
+      price: 50,
+    }])]);
+
+    expect(restored[0].services[0]).toMatchObject({ price: 50 });
+  });
+
   it('excludes Other Repair from discount qualification while preserving paid-repair totals', () => {
     const onePaid = calculateCartPricing([device('one', [standardRepair])], discountConfig);
     const oneOther = calculateCartPricing([device('other', appendOtherRepairOption([]))], discountConfig);
@@ -118,6 +160,22 @@ describe('booking-only Other Repair cart service', () => {
       hasCustomQuote: true,
     });
     expect(twoOthers).toMatchObject({ subtotalPrice: 0, discountAmount: 0, totalPrice: 0, qualifyingRepairItemCount: 0 });
+  });
+
+  it('counts a confirmed Custom Quote toward the existing multi-repair discount without pricing the quote', () => {
+    const pricing = calculateCartPricing([
+      device('paid', [standardRepair]),
+      device('quote', [customQuoteRepair]),
+    ], discountConfig);
+
+    expect(pricing).toMatchObject({
+      subtotalPrice: 100,
+      discountRate: 0.1,
+      discountAmount: 10,
+      totalPrice: 90,
+      qualifyingRepairItemCount: 2,
+      hasCustomQuote: true,
+    });
   });
 
   it('keeps standard repairs unchanged and resolves the production quote label', () => {

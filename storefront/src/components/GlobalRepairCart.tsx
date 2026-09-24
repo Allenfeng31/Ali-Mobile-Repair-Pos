@@ -15,7 +15,6 @@ import {
   RepairService,
   CartDevice,
 } from '@/context/CartContext';
-import { supabase } from '@/lib/supabase';
 import { 
   RawItem, ParsedItem, parseItem, displayBrand, TABS, MANUAL_MODELS, detectDeviceType, formatDeviceTitle,
   groupServicesByBaseName, GroupedService, slugify
@@ -100,18 +99,13 @@ const CartContent = () => {
     fetchTierDescriptions();
   }, []);
 
-  // Fetch active upsells from Supabase
+  // Fetch active upsells through the server-side local-only boundary.
   useEffect(() => {
     const fetchUpsells = async () => {
       try {
-        const { data, error } = await supabase
-          .from('storefront_upsells')
-          .select('id, name, description, regular_price, bundle_price')
-          .eq('is_active', true);
-
-        if (!error && data) {
-          setUpsells(data);
-        }
+        const res = await fetch('/api/storefront-upsells');
+        if (!res.ok) return;
+        setUpsells(await res.json());
       } catch (err) {
         console.error('Failed to load upsells', err);
       }
@@ -331,7 +325,7 @@ interface DeviceSelectorProps {
   inventory: ParsedItem[];
   brands: string[];
   onRemove: () => void;
-  onUpdate: (services: RepairService[]) => void;
+  onUpdate: (services: RepairService[], options?: { clearValidatedPublicBookingService?: boolean }) => void;
   onConfirm: () => void;
   onEdit: () => void;
   onUpdateInfo: (brand: string, model: string, category: string) => void;
@@ -412,8 +406,23 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     ), selectedBrand, selectedModel, selectedCategory);
   }, [inventory, selectedBrand, selectedModel, selectedCategory]);
 
-  const hasVariantInCart = (s: GroupedService) => 
-    s.variants.some(v => device.services.some(ds => ds.id === v.id));
+  const isCanonicalQuoteForService = (service: RepairService, s: GroupedService) =>
+    String(service.id).startsWith('public-booking:') && service.price === 0 && service.name === s.service;
+
+  const isVirtualPhoneRepairGroup = (s: GroupedService) =>
+    isVirtualPhoneRepairName(s.service) && s.variants.some(v => v.originalItem?.sourceType === 'virtual');
+
+  const isServiceInGroup = (service: RepairService, s: GroupedService) =>
+    s.variants.some(v => v.id === service.id) || isCanonicalQuoteForService(service, s);
+
+  const hasVariantInCart = (s: GroupedService) =>
+    device.services.some(service => isServiceInGroup(service, s));
+
+  const hasSelectedCustomQuote = (s: GroupedService) =>
+    device.services.some((service) => (
+      isCanonicalQuoteForService(service, s) ||
+      (isVirtualPhoneRepairGroup(s) && s.variants.some(v => v.id === service.id) && service.price === 0)
+    ));
 
   const isGroupSelected = (s: GroupedService) => 
     !localCollapsedGroups[s.service] && (hasVariantInCart(s) || s.service === device.pendingExpandedService);
@@ -439,15 +448,23 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const toggleService = (s: GroupedService) => {
     const inCart = hasVariantInCart(s);
     if (inCart) {
-      const variantIds = s.variants.map(v => v.id);
-      onUpdate(device.services.filter(item => !variantIds.includes(item.id)));
+      onUpdate(device.services.filter(item => !isServiceInGroup(item, s)));
     } else if (s.service === device.pendingExpandedService && !localCollapsedGroups[s.service]) {
       setLocalCollapsedGroups({ ...localCollapsedGroups, [s.service]: true });
     } else {
       setLocalCollapsedGroups({ ...localCollapsedGroups, [s.service]: false });
       const defaultVariant = s.variants.find(v => v.quality_grade === 'Standard') || s.variants[0];
       const name = s.variants.length > 1 ? `${s.service} - ${defaultVariant.quality_grade}` : s.service;
-      onUpdate([...device.services, { id: defaultVariant.id, name, price: defaultVariant.price }]);
+      const restoredCanonicalQuote = device.validatedPublicBookingService?.name === s.service
+        && device.validatedPublicBookingService.price === 0
+        && String(device.validatedPublicBookingService.id).startsWith('public-booking:')
+        ? device.validatedPublicBookingService
+        : null;
+      onUpdate([...device.services, {
+        id: restoredCanonicalQuote?.id ?? defaultVariant.id,
+        name,
+        price: restoredCanonicalQuote ? 0 : (isVirtualPhoneRepairGroup(s) ? 0 : defaultVariant.price),
+      }]);
     }
   };
 
@@ -577,7 +594,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               setSelectedCategory(tab.key);
               setSelectedBrand("");
               setSelectedModel("");
-              onUpdate([]);
+              onUpdate([], { clearValidatedPublicBookingService: true });
             }}
           >
             <span className="tab-emoji">{tab.emoji}</span>
@@ -595,7 +612,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
             onChange={(e) => {
               setSelectedBrand(e.target.value);
               setSelectedModel("");
-              onUpdate([]);
+              onUpdate([], { clearValidatedPublicBookingService: true });
             }}
           >
             <option value="">-- Brand --</option>
@@ -622,7 +639,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
             disabled={!selectedBrand}
             onChange={(e) => {
               setSelectedModel(e.target.value);
-              onUpdate([]);
+              onUpdate([], { clearValidatedPublicBookingService: true });
             }}
           >
             <option value="">-- Model --</option>
@@ -637,6 +654,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
             {availableServices.length > 0 ? (
               availableServices.map(s => {
                 const isSelected = isGroupSelected(s);
+                const isSelectedCustomQuote = hasSelectedCustomQuote(s);
                 const selectedVariantId = isSelected 
                   ? device.services.find(ds => s.variants.some(v => v.id === ds.id))?.id 
                   : null;
@@ -652,7 +670,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
                       <div className="service-name-price">
                         <span className="service-name">{getCartDisplayServiceName(selectedCategory, selectedBrand, s.service)}</span>
                         <span className="service-price">
-                          {formatScopedRepairPriceLabel(
+                          {isSelectedCustomQuote ? 'Custom Quote' : formatScopedRepairPriceLabel(
                             slugify(s.service),
                             s.price,
                             s.price > 0 ? (s.variants.length > 1 || isVirtualPhoneRepairName(s.service) ? `From $${s.price.toFixed(2)}` : `$${s.price.toFixed(2)}`) : "Quote on Request",

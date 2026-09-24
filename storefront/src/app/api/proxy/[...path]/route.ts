@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-export const runtime = 'edge';
+import { getLocalRepairInventoryFixture, isLocalRepairCatalogueOnly } from '@/lib/localRepairCatalogueFixture';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   return handleProxyRequest(request, await params);
@@ -19,8 +20,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 async function handleProxyRequest(request: NextRequest, params: { path: string[] }) {
   try {
+    const path = params.path.join('/');
+    if (isLocalRepairCatalogueOnly()) {
+      if (path === 'inventory') return NextResponse.json(getLocalRepairInventoryFixture());
+      if (path === 'quality-tiers') return NextResponse.json([]);
+      if (path === 'store-configs') {
+        return NextResponse.json({ multi_discount_tier_2: 0.1, multi_discount_tier_3: 0.15 });
+      }
+      return NextResponse.json({ error: 'Proxy endpoint unavailable in local-only mode.' }, { status: 503 });
+    }
+
     const backendUrl = process.env.NEXT_PUBLIC_POS_API_URL || "https://api.alimobile.com.au";
-    const path = params.path.join("/");
     
     const searchParams = request.nextUrl.search;
     const targetUrl = `${backendUrl}/api/${path}${searchParams}`;
@@ -47,9 +57,9 @@ async function handleProxyRequest(request: NextRequest, params: { path: string[]
         "content-type": response.headers.get("content-type") || "application/json",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: "Internal Server Proxy Error", details: error.message },
+      { error: "Internal Server Proxy Error", details: error instanceof Error ? error.message : 'Unknown proxy error' },
       { status: 500 }
     );
   }

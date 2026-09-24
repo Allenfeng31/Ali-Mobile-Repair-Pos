@@ -157,7 +157,20 @@ export function resolvePublicBookingCartState(
     { includeVirtualServices: false },
   );
 
-  if (rawResult.serviceToExpand || (rawResult.serviceToSelect?.price ?? 0) > 0) {
+  const hasExactRawService = rawResult.brand !== null && rawResult.model !== null && inventory.some((item) => (
+    item.brand === rawResult.brand &&
+    item.deviceModel === rawResult.model &&
+    item.service.trim().toLowerCase() === selection.service.trim().toLowerCase()
+  ));
+
+  // A virtual service is deliberately absent from the raw POS groups. Its
+  // editor expansion is only a legacy selection affordance, not a reason to
+  // discard a validated public quote identity. A real raw multi-variant group
+  // still must be expanded so its authoritative tier can be chosen.
+  if (
+    (rawResult.serviceToExpand && (!isVirtualPhoneRepairName(selection.service) || hasExactRawService)) ||
+    (rawResult.serviceToSelect?.price ?? 0) > 0
+  ) {
     return rawResult;
   }
 

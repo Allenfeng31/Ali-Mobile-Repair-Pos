@@ -9,6 +9,7 @@ import {
   type RepairCatalog,
   type RepairOption,
 } from './publicRepairCataloguePolicy';
+import type { RawItem } from './inventoryUtils';
 
 const LOCAL_REPAIR_CATALOGUE_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
@@ -94,4 +95,29 @@ export function isLocalRepairCatalogueOnly() {
 
 export function getLocalRepairCatalogueFixture(): RepairCatalog {
   return structuredClone(LOCAL_REPAIR_CATALOGUE_FIXTURE);
+}
+
+const LOCAL_INVENTORY_PREFIX_BY_CATEGORY: Record<string, string> = {
+  phone: 'P',
+  tablet: 'T',
+  laptop: 'C',
+  watch: 'W',
+};
+
+/** Deterministic local catalogue identities for the legacy Book Repair inventory response. */
+export function getLocalRepairInventoryFixture(): RawItem[] {
+  let id = 1;
+  return LOCAL_REPAIR_CATALOGUE_FIXTURE.brands.flatMap((brand) =>
+    brand.models.flatMap((model) =>
+      model.repairTypes.map((repair) => ({
+        id: id++,
+        name: `${model.model} ${repair.name}`,
+        model: `${LOCAL_INVENTORY_PREFIX_BY_CATEGORY[brand.category] ?? 'P'} ${brand.brand}||${model.model}`,
+        price: 0,
+        category: 'Repair',
+        quality_grade: 'Quote Only',
+        is_active: true,
+      })),
+    ),
+  );
 }

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   calculateCartPricing,
+  isCanonicalPublicBookingQuote,
   normalizeCartDevices,
   updateCartDeviceServices,
 } from '@/lib/otherRepairBooking';
@@ -37,6 +38,7 @@ export interface CartDevice {
   services: RepairService[];
   isConfirmed: boolean;
   pendingExpandedService?: string;
+  validatedPublicBookingService?: RepairService;
 }
 
 export interface MultiDiscountConfig {
@@ -48,7 +50,7 @@ interface CartContextType {
   devices: CartDevice[];
   addDevice: (brand: string, model: string, category: string, service?: RepairService, autoConfirm?: boolean, pendingExpandedService?: string | null) => void;
   removeDevice: (deviceId: string) => void;
-  updateServices: (deviceId: string, services: RepairService[]) => void;
+  updateServices: (deviceId: string, services: RepairService[], options?: { clearValidatedPublicBookingService?: boolean }) => void;
   updateDeviceInfo: (deviceId: string, brand: string, model: string, category: string) => void;
   confirmDevice: (deviceId: string) => void;
   editDevice: (deviceId: string) => void;
@@ -124,6 +126,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       category,
       services: service ? [service] : [],
       isConfirmed: autoConfirm,
+      ...(isCanonicalPublicBookingQuote(service) ? { validatedPublicBookingService: service } : {}),
       ...(pendingExpandedService ? { pendingExpandedService } : {})
     };
     setDevices(prev => [...prev, newDevice]);
@@ -133,8 +136,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDevices(prev => prev.filter(d => d.id !== deviceId));
   };
 
-  const updateServices = (deviceId: string, services: RepairService[]) => {
-    setDevices(prev => updateCartDeviceServices(prev, deviceId, services));
+  const updateServices = (deviceId: string, services: RepairService[], options?: { clearValidatedPublicBookingService?: boolean }) => {
+    setDevices(prev => updateCartDeviceServices(prev, deviceId, services, options));
   };
 
   const updateDeviceInfo = (deviceId: string, brand: string, model: string, category: string) => {
