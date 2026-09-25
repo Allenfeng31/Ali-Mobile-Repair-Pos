@@ -30,6 +30,25 @@ export type PublicBookingPriceAuthority =
   | 'fixed-camera-lens'
   | 'quote-only';
 
+const GENERIC_CAMERA_MODULE_SERVICES = {
+  'front-camera-replacement': 'Front Camera Replacement',
+  'back-camera-replacement': 'Back Camera Replacement',
+} as const;
+
+const GENERIC_CAMERA_MODULE_EXCLUDED_BRANDS = new Set([
+  'iphone',
+  'apple',
+  'samsung',
+  'google-pixel',
+  'google',
+  'pixel',
+  'oppo',
+]);
+
+export function isGenericCameraModuleBookingEligible(category: string, brandSlug: string) {
+  return category === 'phone' && !GENERIC_CAMERA_MODULE_EXCLUDED_BRANDS.has(brandSlug);
+}
+
 function repairOptions(category: string, brandSlug: string, repairs: RepairOption[]) {
   return withVirtualPhoneRepairOptions(
     withVirtualCameraLensRepairOption(repairs, category, brandSlug),
@@ -89,6 +108,30 @@ function resolvedSelection(
   };
 }
 
+function resolveGenericCameraModuleQuote(
+  category: string,
+  brand: { brand: string; slug: string },
+  model: { model: string; slug: string },
+  serviceSlug: string,
+): PublicBookingSelection | null {
+  if (!isGenericCameraModuleBookingEligible(category, brand.slug)) return null;
+
+  const service = GENERIC_CAMERA_MODULE_SERVICES[serviceSlug as keyof typeof GENERIC_CAMERA_MODULE_SERVICES];
+  if (!service) return null;
+
+  return {
+    category,
+    brand: brand.brand,
+    brandSlug: brand.slug,
+    model: model.model,
+    modelSlug: model.slug,
+    service,
+    serviceSlug,
+    price: 0,
+    priceAuthority: 'quote-only',
+  };
+}
+
 function hasAny(values: Array<string | null | undefined>) {
   return values.some((value) => value !== null && value !== undefined);
 }
@@ -123,9 +166,10 @@ export function resolvePublicBookingSelection(
     const repair = repairOptions(brand.category, brand.slug, model.repairTypes).find(
       (candidate) => candidate.slug === input.serviceSlug,
     );
-    if (!repair) return null;
-
-    const selection = resolvedSelection(brand.category, brand, model, repair);
+    const selection = repair
+      ? resolvedSelection(brand.category, brand, model, repair)
+      : resolveGenericCameraModuleQuote(brand.category, brand, model, input.serviceSlug!);
+    if (!selection) return null;
     if (
       (input.brand !== null && input.brand !== undefined && input.brand !== selection.brand) ||
       (input.model !== null && input.model !== undefined && input.model !== selection.model) ||

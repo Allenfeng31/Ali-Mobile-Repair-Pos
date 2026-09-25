@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolvePublicBookingSelection } from './publicBookingSelection';
+import { getPublicBookingServiceKey, resolvePublicBookingSelection } from './publicBookingSelection';
 import type { RepairCatalog } from './publicRepairCataloguePolicy';
 import { getSharedRepairBookingHref } from './sharedRepairBooking';
 import { resolvePublicBookingCartState } from './cartAutoSelect';
+import { calculateCartPricing } from './otherRepairBooking';
 
 const catalog = {
   brands: [
@@ -26,6 +27,10 @@ const catalog = {
         model: 'Galaxy S24', slug: 'galaxy-s24', repairTypes: [{
           slug: 'front-camera-replacement', name: 'Front Camera Replacement', price: 120, repairOrigin: 'pos',
         }],
+      }, {
+        model: 'Galaxy S21', slug: 'galaxy-s21', repairTypes: [{
+          slug: 'screen-replacement', name: 'Screen Replacement', price: 189, repairOrigin: 'pos',
+        }],
       }],
     },
     {
@@ -33,6 +38,19 @@ const catalog = {
         model: 'Mate 20', slug: 'mate-20', repairTypes: [{
           slug: 'battery-replacement', name: 'Battery Replacement', price: 0, repairOrigin: 'pos', variants: [
             { quality_grade: 'Standard', price: 95, is_recommended: false },
+          ],
+        }],
+      }, {
+        model: 'P30', slug: 'p30', repairTypes: [{
+          slug: 'screen-replacement', name: 'Screen Replacement', price: 129, repairOrigin: 'pos',
+        }],
+      }, {
+        model: 'P40', slug: 'p40', repairTypes: [{
+          slug: 'front-camera-replacement', name: 'Front Camera Replacement', price: 179, repairOrigin: 'pos',
+        }, {
+          slug: 'back-camera-replacement', name: 'Back Camera Replacement', price: 159, repairOrigin: 'pos', variants: [
+            { quality_grade: 'Standard', price: 159, is_recommended: true },
+            { quality_grade: 'Premium', price: 219, is_recommended: false },
           ],
         }],
       }],
@@ -131,6 +149,66 @@ describe('resolvePublicBookingSelection', () => {
     expect(resolvePublicBookingSelection(multipleVariantCatalog, {
       category: 'phone', brandSlug: 'oppo', modelSlug: 'find-x8', serviceSlug: 'screen-replacement',
     })).toMatchObject({ priceAuthority: 'quote-only' });
+  });
+
+  it.each([
+    ['front-camera-replacement', 'Front Camera Replacement'],
+    ['back-camera-replacement', 'Back Camera Replacement'],
+  ])('accepts an eligible model without a %s POS record as a canonical Custom Quote', (serviceSlug, service) => {
+    const selection = resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'huawei', modelSlug: 'p30', serviceSlug,
+      brand: 'Huawei', model: 'P30', service,
+    });
+
+    expect(selection).toEqual({
+      category: 'phone', brand: 'Huawei', brandSlug: 'huawei', model: 'P30', modelSlug: 'p30',
+      service, serviceSlug, price: 0, priceAuthority: 'quote-only',
+    });
+    expect(getPublicBookingServiceKey(selection!)).toBe(`public-booking:phone:huawei:p30:${serviceSlug}`);
+
+    const cartState = resolvePublicBookingCartState(selection!, []);
+    expect(cartState).toMatchObject({
+      brand: 'Huawei', model: 'P30', shouldAutoConfirm: true,
+      serviceToSelect: { id: `public-booking:phone:huawei:p30:${serviceSlug}`, name: service, price: 0 },
+    });
+    expect(calculateCartPricing([{
+      id: 'camera-quote', brand: 'Huawei', model: 'P30', category: 'phone', isConfirmed: true,
+      services: [cartState.serviceToSelect!],
+    }], { multi_discount_tier_2: 0.1, multi_discount_tier_3: 0.15 })).toMatchObject({
+      subtotalPrice: 0, totalPrice: 0, hasCustomQuote: true,
+    });
+  });
+
+  it('keeps trusted Camera POS pricing authoritative and leaves real variants for tier selection', () => {
+    expect(resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'huawei', modelSlug: 'p40', serviceSlug: 'front-camera-replacement',
+    })).toMatchObject({ price: 179, priceAuthority: 'exact-pos' });
+
+    const variantSelection = resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'huawei', modelSlug: 'p40', serviceSlug: 'back-camera-replacement',
+    });
+    expect(variantSelection).toMatchObject({ priceAuthority: 'quote-only' });
+    expect(resolvePublicBookingCartState(variantSelection!, [{
+      id: 1, name: 'Huawei P40 Back Camera Replacement', brand: 'Huawei', deviceModel: 'P40',
+      service: 'Back Camera Replacement', price: 159, category: 'phone', deviceType: 'phone',
+      quality_grade: 'Standard', is_recommended: true,
+    }, {
+      id: 2, name: 'Huawei P40 Back Camera Replacement', brand: 'Huawei', deviceModel: 'P40',
+      service: 'Back Camera Replacement', price: 219, category: 'phone', deviceType: 'phone',
+      quality_grade: 'Premium', is_recommended: false,
+    }])).toMatchObject({ serviceToSelect: null, serviceToExpand: 'Back Camera Replacement', shouldAutoConfirm: false });
+  });
+
+  it('does not extend generic Camera quote authority to excluded or invalid canonical identities', () => {
+    expect(resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'samsung', modelSlug: 'galaxy-s21', serviceSlug: 'front-camera-replacement',
+    })).toBeNull();
+    expect(resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'huawei', modelSlug: 'unknown', serviceSlug: 'front-camera-replacement',
+    })).toBeNull();
+    expect(resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'huawei', modelSlug: 'p30', serviceSlug: 'unknown-camera-replacement',
+    })).toBeNull();
   });
 
   it('carries a generated shared-page href through validation into an unresolved cart item', () => {

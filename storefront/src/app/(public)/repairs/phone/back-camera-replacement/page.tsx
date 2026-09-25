@@ -7,9 +7,9 @@ import {
   buildCameraModuleRepairHierarchyModels,
   resolveCameraModuleRepairHierarchySelection,
 } from '@/lib/cameraModuleRepairHierarchy';
+import { isGenericCameraModuleBookingEligible } from '@/lib/publicBookingSelection';
 
 const PAGE_PATH = '/repairs/phone/back-camera-replacement';
-const GENERIC_EXCLUDED_BRANDS = new Set(['iphone', 'apple', 'samsung', 'google-pixel', 'oppo']);
 
 export const metadata: Metadata = {
   title: 'Phone Back Camera Repair Melbourne | Ali Mobile',
@@ -57,7 +57,7 @@ export default async function BackCameraReplacementPage({
   const catalog = await fetchRepairCatalog();
   const query = await searchParams;
   const candidates = catalog.brands
-    .filter((brand) => brand.category === 'phone' && !GENERIC_EXCLUDED_BRANDS.has(brand.slug))
+    .filter((brand) => isGenericCameraModuleBookingEligible(brand.category, brand.slug))
     .flatMap((brand) => brand.models
       .flatMap((model) => {
         const repair = model.repairTypes.find((entry) => entry.slug === config.repairSlug);

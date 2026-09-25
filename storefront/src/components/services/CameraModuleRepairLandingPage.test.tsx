@@ -1,17 +1,17 @@
 import '@testing-library/jest-dom/vitest';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('./CameraModuleRepairBookingControls', () => ({
   default: () => <div data-testid="camera-module-booking-controls" />,
 }));
 vi.mock('./SharedRepairHierarchySections', () => ({
   default: ({ models, selectedBrandSlug, selectedModelSlug, genericSelectionPath }: {
-    models: Array<{ modelLabel: string }>;
+    models: Array<{ modelLabel: string; bookingHref: string }>;
     selectedBrandSlug?: string | null;
     selectedModelSlug?: string | null;
     genericSelectionPath?: string;
-  }) => <div data-testid="camera-module-hierarchy" data-brand={selectedBrandSlug} data-model={selectedModelSlug} data-selection-path={genericSelectionPath}>{models.map((model) => model.modelLabel).join(', ')}</div>,
+  }) => <div data-testid="camera-module-hierarchy" data-brand={selectedBrandSlug} data-model={selectedModelSlug} data-selection-path={genericSelectionPath}>{models.map((model) => <a key={model.bookingHref} href={model.bookingHref}>{model.modelLabel}</a>)}</div>,
 }));
 vi.mock('@/components/repair-results/SharedRepairPageResultsSection', () => ({
   default: ({ repairName, initialResults }: { repairName: string; initialResults: Array<{ id: string }> }) => initialResults.length > 0
@@ -56,6 +56,10 @@ const back: CameraModuleRepairLandingConfig = {
 };
 
 describe('CameraModuleRepairLandingPage', () => {
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
   it('orders the hierarchy, matching repair proof, practical camera content, local links, and reviews after the hero', () => {
     const { container } = render(<CameraModuleRepairLandingPage
       config={front}
@@ -123,7 +127,7 @@ describe('CameraModuleRepairLandingPage', () => {
   });
 
   it('renders Front Camera selected state in the centered Hero stack without the retired assessment card', () => {
-    render(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={hierarchy} />);
+    const { container } = render(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={hierarchy} />);
     const hierarchyElement = screen.getByTestId('camera-module-hierarchy');
     expect(hierarchyElement.getAttribute('data-brand')).toBe('huawei');
     expect(hierarchyElement.getAttribute('data-model')).toBe('p30-pro');
@@ -131,12 +135,15 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(hierarchyElement.textContent).toContain('Huawei P30 Pro');
     expect(screen.getByRole('heading', { name: 'Huawei P30 Pro' })).toBeTruthy();
     expect(screen.getByRole('link', { name: /book repair now/i })).toHaveAttribute('href', hierarchy.selectedDevice.booking.href);
-    expect(screen.getByRole('link', { name: /change model/i })).toHaveAttribute('href', '#shared-repair-model-selection');
+    expect(screen.getByRole('button', { name: /change model/i })).toBeTruthy();
     expect(screen.getByText('$99')).toBeTruthy();
-    expect(screen.queryByRole('link', { name: 'Select your model' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Select your model' })).toBeNull();
     expect(screen.queryByTestId('camera-module-booking-controls')).toBeNull();
     expect(screen.queryByText(/Quote only/i)).toBeNull();
     expect(screen.queryByText(/Assessment before repair/i)).toBeNull();
+    expect(container.querySelector('[data-shared-repair-selected-device]')).toBeNull();
+    expect(container.querySelector('[data-camera-module-model-selector]')).toHaveAttribute('hidden');
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
   });
 
   it('replaces Back Camera’s legacy selector with its hierarchy while preserving camera-lens guidance', () => {
@@ -155,17 +162,81 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(hierarchyElement.getAttribute('data-selection-path')).toBeNull();
     expect(hierarchyElement.textContent).toContain('OPPO Find X8 Pro');
     expect(screen.getByRole('link', { name: /book repair now/i })).toHaveAttribute('href', backHierarchy.selectedDevice.booking.href);
-    expect(screen.getByRole('link', { name: /change model/i })).toHaveAttribute('href', '#shared-repair-model-selection');
-    expect(screen.queryByRole('link', { name: 'Select your model' })).toBeNull();
+    expect(screen.getByRole('button', { name: /change model/i })).toBeTruthy();
+    expect(screen.getByText('Quote on Request')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Select your model' })).toBeNull();
     expect(screen.queryByTestId('camera-module-booking-controls')).toBeNull();
     expect(screen.queryByText(/Quote only/i)).toBeNull();
   });
 
-  it('does not render a selected-device module without a valid full selection', () => {
-    render(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={{ ...hierarchy, selectedModelSlug: null, selectedDevice: null }} />);
+  it('renders the generic repair price card and smoothly opens the model selector without a valid full selection', () => {
+    const { container } = render(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={{ ...hierarchy, selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null }} />);
     expect(screen.queryByRole('link', { name: /book repair now/i })).toBeNull();
-    expect(screen.queryByRole('link', { name: /change model/i })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Select your model' })).toHaveAttribute('href', '#shared-repair-model-selection');
+    expect(screen.queryByRole('button', { name: /change model/i })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Front Camera Replacement' })).toBeTruthy();
+    expect(screen.getByText('Starting from $99')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Huawei P30 Pro' })).toHaveAttribute('href', '/repairs/phone/front-camera-replacement?brand=huawei&model=p30-pro');
+    expect(screen.getByRole('link', { name: 'Huawei P30 Pro' }).getAttribute('href')).not.toContain('/book-repair');
+    expect(container.querySelector('[data-camera-module-model-selector]')).not.toHaveAttribute('hidden');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Select your model' }));
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
+  it('keeps generic and selected Hero pricing inside the existing trusted-price rules', () => {
+    const { rerender } = render(<CameraModuleRepairLandingPage config={back} canonicalPath="/repairs/phone/back-camera-replacement" candidates={candidates} hierarchy={{ ...backHierarchy, selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null }} />);
+    expect(screen.getByText('Quote on Request')).toBeTruthy();
+    expect(screen.queryByText('Starting from $50')).toBeNull();
+
+    rerender(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={{
+      ...hierarchy,
+      models: hierarchy.models.map((model) => ({ ...model, priceLabel: 'From $149' })),
+    }} />);
+    expect(screen.getByText('From $149')).toBeTruthy();
+  });
+
+  it('keeps the main CTA stable while using a compact price card and revealing the existing hierarchy on Change model', () => {
+    const genericHierarchy = { ...hierarchy, selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null };
+    const { container, rerender } = render(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={genericHierarchy} />);
+    const genericPrimaryActionClass = screen.getByRole('button', { name: 'Select your model' }).className;
+    const genericHeroCard = container.querySelector('[data-camera-module-hero-price-card]');
+
+    expect(genericHeroCard?.className).not.toMatch(/min-h-/);
+
+    rerender(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={hierarchy} />);
+    const heroCard = container.querySelector('[data-camera-module-hero-price-card]');
+    const primaryAction = screen.getByRole('link', { name: /book repair now/i });
+    const phoneAction = screen.getByRole('link', { name: /call 0481 058 514/i });
+    const changeModel = screen.getByRole('button', { name: /change model/i });
+
+    expect(heroCard).toHaveClass('max-w-md');
+    expect(heroCard?.className).not.toMatch(/min-h-/);
+    expect(primaryAction).toHaveClass('min-h-14', 'w-full', 'text-lg');
+    expect(primaryAction.className).toBe(genericPrimaryActionClass);
+    expect(primaryAction).toHaveAttribute('href', hierarchy.selectedDevice.booking.href);
+    expect(phoneAction.compareDocumentPosition(changeModel)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(changeModel).toHaveClass('mt-4');
+
+    fireEvent.click(changeModel);
+
+    const openSelector = container.querySelector('[data-camera-module-model-selector]');
+    const genericCardAfterChange = container.querySelector('[data-camera-module-hero-price-card]');
+
+    expect(screen.getByRole('button', { name: 'Select your model' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /book repair now/i })).toBeNull();
+    expect(within(genericCardAfterChange as HTMLElement).queryByText('Selected device')).toBeNull();
+    expect(within(genericCardAfterChange as HTMLElement).getByRole('heading', { name: 'Front Camera Replacement' })).toBeTruthy();
+    expect(openSelector).not.toHaveAttribute('hidden');
+    expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ behavior: 'smooth', block: 'start' });
+
+    const replacementModel = screen.getByRole('link', { name: 'Huawei P30 Pro' });
+    replacementModel.addEventListener('click', (event) => event.preventDefault(), { once: true });
+    fireEvent.click(replacementModel);
+
+    expect(screen.getByRole('link', { name: /book repair now/i })).toBeTruthy();
+    expect(container.querySelector('[data-camera-module-model-selector]')).toHaveAttribute('hidden');
+    expect(within(container.querySelector('[data-camera-module-hero-price-card]') as HTMLElement).getByRole('heading', { name: 'Huawei P30 Pro' })).toBeTruthy();
+    expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ behavior: 'smooth', block: 'start' });
   });
 
   it('emits query-free BreadcrumbList and Service JSON-LD without FAQ or offer-bearing schema', () => {
@@ -188,7 +259,7 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(screen.getByText('Why is my front camera black, blurry or not opening?')).toBeTruthy();
     expect(screen.getByText(/usually takes around 30–45 minutes/i)).toBeTruthy();
     expect(screen.getByText(/include a 6-month warranty/i)).toBeTruthy();
-    expect(screen.getByText(/0481 058 514/)).toBeTruthy();
+    expect(screen.getAllByText(/0481 058 514/).length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: 'Back Camera Repair' })).toHaveAttribute('href', '/repairs/phone/back-camera-replacement');
     expect(container.textContent?.match(/Ringwood/g)).toHaveLength(1);
     expect(container.textContent).not.toMatch(/water resistance|resealing/i);
@@ -221,7 +292,8 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(heroStack).not.toHaveClass('mx-auto');
     expect(heroStack?.querySelector('h1')?.textContent).toBe(config.title);
     expect(heroStack?.textContent).toContain(config.description);
-    expect(heroStack?.querySelector('[data-shared-repair-selected-device]')).toBeTruthy();
+    expect(heroStack?.querySelector('[data-camera-module-hero-price-card]')).toBeTruthy();
+    expect(heroStack?.querySelector('[data-shared-repair-selected-device]')).toBeNull();
     expect(container.querySelector('[data-camera-module-assessment]')).toBeNull();
     expect(container.querySelector('[data-camera-module-guidance-grid]')).toBeTruthy();
     expect(container.textContent).toMatch(/inspect|inspection/i);

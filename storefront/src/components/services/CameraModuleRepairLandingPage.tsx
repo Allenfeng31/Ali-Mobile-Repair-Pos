@@ -7,9 +7,8 @@ import SharedRepairPageResultsSection from '@/components/repair-results/SharedRe
 import type { RepairResultMatchingItem } from '@/lib/repair-results';
 import type { SharedRepairModelCandidate } from '@/lib/sharedRepairContext';
 import CameraModuleRepairBookingControls from '@/components/services/CameraModuleRepairBookingControls';
-import SharedRepairHierarchySections from '@/components/services/SharedRepairHierarchySections';
 import { type SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
-import SharedRepairHeroSelection from '@/components/services/SharedRepairHeroSelection';
+import CameraModuleRepairSelectionExperience from '@/components/services/CameraModuleRepairSelectionExperience';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import type { SharedRepairHierarchyModel } from '@/lib/sharedRepairHierarchy';
 import styles from './CameraModuleRepairLandingPage.module.css';
@@ -138,9 +137,6 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: breadcrumbs.map((item, index) => ({ '@type': 'ListItem', position: index + 1, name: item.label, item: `https://www.alimobile.com.au${item.href ?? canonicalPath}` })),
   };
-  const selectedPriceLabel = hierarchy?.selectedDevice
-    ? hierarchy.models.find((model) => model.brandSlug === hierarchy.selectedDevice?.selectedDevice.brandSlug && model.modelSlug === hierarchy.selectedDevice?.selectedDevice.modelSlug)?.priceLabel ?? null
-    : null;
   const isBackCamera = config.repairSlug === 'back-camera-replacement';
   const faqs = isBackCamera ? BACK_CAMERA_FAQS : FRONT_CAMERA_FAQS;
   const reciprocalHref = isBackCamera ? '/repairs/phone/front-camera-replacement' : '/repairs/phone/back-camera-replacement';
@@ -152,17 +148,23 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600"><ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2">{breadcrumbs.map((item, index) => <li key={item.label} className="flex items-center gap-2">{index > 0 ? <span aria-hidden="true">›</span> : null}{item.href ? <Link href={item.href} className="font-semibold transition-colors hover:text-blue-700 hover:underline">{item.label}</Link> : <span aria-current="page" className="font-bold text-blue-600">{item.label}</span>}</li>)}</ol></nav>
       <div className="repair-detail-topbar"><Link href="/repairs/phone" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:border-blue-300 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"><ArrowLeft size={17} aria-hidden="true" />Back to phone repairs</Link></div>
-      <section className="repair-hero repair-detail-hero relative" data-camera-module-hero aria-labelledby="camera-module-heading">
+      {hierarchy ? <CameraModuleRepairSelectionExperience
+        key={hierarchy.selectedDevice ? `${hierarchy.selectedDevice.selectedDevice.brandSlug}/${hierarchy.selectedDevice.selectedDevice.modelSlug}` : 'generic'}
+        title={config.title}
+        description={config.description}
+        eyebrow={config.eyebrow}
+        bookingService={config.bookingService}
+        canonicalPath={canonicalPath}
+        hierarchy={hierarchy}
+      /> : <section className="repair-hero repair-detail-hero relative" data-camera-module-hero aria-labelledby="camera-module-heading">
         <span className="repair-detail-icon text-blue-600"><Camera size={34} strokeWidth={2.4} aria-hidden="true" /></span>
         <div data-camera-module-hero-stack className="flex w-full flex-col items-center text-center">
           <span className="repair-kicker mx-auto mb-5"><Camera size={14} strokeWidth={2.6} aria-hidden="true" />{config.eyebrow}</span>
           <h1 id="camera-module-heading">{config.title}</h1><p className="repair-detail-subtitle">{config.description}</p>
-          {hierarchy ? <SharedRepairHeroSelection selectedDevice={hierarchy.selectedDevice} priceLabel={selectedPriceLabel} changeModelHref="#shared-repair-model-selection" /> : <div className="mt-6 flex w-full justify-center"><Suspense fallback={<Link href={`/book-repair?category=phone&service=${encodeURIComponent(config.bookingService)}`} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-blue-600 px-6 py-3 font-bold !text-white">Request an assessment</Link>}><CameraModuleRepairBookingControls basePath={canonicalPath} repairSlug={config.repairSlug} bookingService={config.bookingService} candidates={candidates} /></Suspense></div>}
+          <div className="mt-6 flex w-full justify-center"><Suspense fallback={<Link href={`/book-repair?category=phone&service=${encodeURIComponent(config.bookingService)}`} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-blue-600 px-6 py-3 font-bold !text-white">Request an assessment</Link>}><CameraModuleRepairBookingControls basePath={canonicalPath} repairSlug={config.repairSlug} bookingService={config.bookingService} candidates={candidates} /></Suspense></div>
         </div>
         <RepairTrustBadges />
-      </section>
-
-      {hierarchy ? <div data-camera-module-model-selector className={`${styles.modelSelector} relative z-10`}><p data-camera-module-price-guide className="mx-auto mb-6 w-full max-w-3xl px-4 text-center text-sm font-semibold leading-6 text-slate-600 sm:px-6">Choose your supported model to view its current repair option. A model with one trusted price shows the exact $X amount, models with valid repair variants show “From $X”, and models without a trusted exact price show “Custom Quote” before work begins.</p><SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${config.bookingService} models`} /></div> : null}
+      </section>}
       <SharedRepairPageResultsSection initialResults={initialResults} repairName={config.bookingService} />
 
       <div data-camera-module-content>

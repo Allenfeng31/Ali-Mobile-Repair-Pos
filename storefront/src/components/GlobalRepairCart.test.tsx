@@ -39,6 +39,13 @@ const bookingCatalog = {
         }],
       }],
     },
+    {
+      category: 'phone', brand: 'Huawei', slug: 'huawei', icon: '', models: [{
+        model: 'P30', slug: 'p30', repairTypes: [{
+          slug: 'screen-replacement', name: 'Screen Replacement', price: 129, repairOrigin: 'pos',
+        }],
+      }],
+    },
   ],
 } as Pick<RepairCatalog, 'brands'>;
 
@@ -208,6 +215,30 @@ describe('GlobalRepairCart Hydration Logic', () => {
     expect(screen.queryByRole('button', { name: 'Confirm Selection' })).toBeNull();
     expect(screen.queryByText('Starting from $50')).toBeNull();
     expect(screen.queryByText('$50.00')).toBeNull();
+  });
+
+  it.each([
+    ['front-camera-replacement', 'Front Camera Replacement'],
+    ['back-camera-replacement', 'Back Camera Replacement'],
+  ])('confirms Huawei P30 %s as a canonical Custom Quote without an empty cart', async (serviceSlug, service) => {
+    mockSearchParams.set('category', 'phone');
+    mockSearchParams.set('brandSlug', 'huawei');
+    mockSearchParams.set('modelSlug', 'p30');
+    mockSearchParams.set('serviceSlug', serviceSlug);
+    mockSearchParams.set('brand', 'Huawei');
+    mockSearchParams.set('model', 'P30');
+    mockSearchParams.set('service', service);
+
+    render(<CartProvider><GlobalRepairCart /></CartProvider>);
+
+    await screen.findByText('Huawei P30');
+    expect(screen.getByText(service)).toBeTruthy();
+    expect(screen.getByText('Custom Quote')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Confirm Selection' })).toBeNull();
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('repair_cart') ?? '[]')[0]).toMatchObject({
+      isConfirmed: true,
+      services: [{ id: `public-booking:phone:huawei:p30:${serviceSlug}`, name: service, price: 0 }],
+    }));
   });
 
   it('displays the discount on known repairs alongside a pending Custom Quote', async () => {
