@@ -53,15 +53,14 @@ describe('SharedRepairHierarchySections', () => {
     expect(markup).toContain('<noscript>');
   });
 
-  it('uses canonical generic selected-query links only when explicitly scoped for a migrated page', () => {
-    const markup = renderToStaticMarkup(
-      <SharedRepairHierarchySections models={hierarchyModels} genericSelectionPath="/repairs/phone/front-camera-replacement" />,
-    );
+  it('keeps canonical booking links for all shared-page model cards regardless of price display', () => {
+    const markup = renderToStaticMarkup(<SharedRepairHierarchySections models={hierarchyModels} />);
 
     expect(markup).toContain('id="shared-repair-model-selection"');
-    expect(markup).toContain('href="/repairs/phone/front-camera-replacement?brand=samsung&amp;model=galaxy-s1"');
-    expect(markup).toContain('href="/repairs/phone/front-camera-replacement?brand=htc&amp;model=u24"');
-    expect(markup).not.toContain('href="/book/galaxy-s1"');
+    expect(markup).toContain('href="/book/galaxy-s1"');
+    expect(markup).toContain('href="/book/galaxy-s2"');
+    expect(markup).toContain('href="/book/u24"');
+    expect(markup).not.toContain('/repairs/phone/front-camera-replacement?brand=');
   });
 
   it('uses accessible local disclosure state without URL mutation and keeps collapsed content in the DOM', () => {
