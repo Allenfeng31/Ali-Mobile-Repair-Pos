@@ -1,0 +1,41 @@
+.modelSelector {
+  margin-top: 3.5rem;
+}
+
+.layoutSection {
+  width: 100%;
+  max-width: 1180px;
+  margin: 3.5rem auto 0;
+}
+
+.contentCard {
+  padding: 3.125rem;
+}
+
+.symptomCard {
+  min-height: 8.75rem;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.linksPanel {
+  padding: 3.125rem;
+}
+
+@media (max-width: 1023px) {
+  .modelSelector,
+  .layoutSection {
+    margin-top: 2.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .contentCard,
+  .linksPanel {
+    padding: 1.5rem;
+  }
+
+  .symptomCard {
+    min-height: 0;
+  }
+}

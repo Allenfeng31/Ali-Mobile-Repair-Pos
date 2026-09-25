@@ -9,7 +9,8 @@ import type { SharedRepairHierarchyModel } from './sharedRepairHierarchy';
 export type CameraModuleRepairSlug = 'front-camera-replacement' | 'back-camera-replacement';
 
 export interface CameraModuleRepairHierarchyCandidate extends SharedRepairModelCandidate {
-  repair: RepairOption;
+  /** Model visibility is independent of whether a trusted Camera price exists. */
+  repair?: RepairOption;
 }
 
 interface CameraModuleRepairHierarchyInput {
@@ -26,8 +27,8 @@ interface CameraModuleRepairHierarchySelectionInput extends CameraModuleRepairHi
   }>;
 }
 
-function priceLabel(repair: RepairOption, repairSlug: CameraModuleRepairSlug) {
-  if (repair.slug !== repairSlug || repair.repairOrigin !== 'pos') return null;
+function priceLabel(repair: RepairOption | undefined, repairSlug: CameraModuleRepairSlug) {
+  if (!repair || repair.slug !== repairSlug || repair.repairOrigin !== 'pos') return null;
 
   const pricing = resolveRepairDetailPricing({ basePrice: repair.price, variants: repair.variants });
   if (pricing.resolvedPrice === null) return null;

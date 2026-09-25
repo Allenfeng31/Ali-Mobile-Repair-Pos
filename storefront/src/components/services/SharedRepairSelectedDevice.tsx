@@ -12,6 +12,7 @@ export type SharedRepairSelectedDeviceViewModel = Readonly<{
     name: string;
     serviceSlug: string;
   }>;
+  priceLabel?: string | null;
   booking: Readonly<{
     href: string;
     isAvailable: boolean;
@@ -32,6 +33,7 @@ export default function SharedRepairSelectedDevice({
         {selection.selectedDevice.brand} {selection.selectedDevice.model}
       </h2>
       <p className="mt-2 text-sm font-semibold text-slate-600">{selection.selectedRepair.name}</p>
+      {selection.priceLabel ? <p data-shared-repair-selected-price className="mt-3 text-lg font-extrabold text-blue-700">{selection.priceLabel}</p> : null}
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
         {selection.booking.isAvailable ? <Link href={selection.booking.href} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold !text-white shadow-md shadow-blue-200 transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
           Book Repair Now <ArrowRight size={18} strokeWidth={2.6} aria-hidden="true" />

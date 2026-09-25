@@ -22,7 +22,7 @@ function candidate({
   brand: string;
   modelSlug: string;
   model: string;
-  price: number;
+  price?: number;
   variants?: Array<{ quality_grade: string; price: number; is_recommended: boolean }>;
   repairOrigin?: 'pos' | 'synthetic-backfill' | 'virtual';
   repairSlug?: 'front-camera-replacement' | 'back-camera-replacement';
@@ -35,7 +35,7 @@ function candidate({
     repair: {
       slug: repairSlug,
       name: repairSlug === 'front-camera-replacement' ? 'Front Camera Replacement' : 'Back Camera Replacement',
-      price,
+      price: price as number,
       variants,
       repairOrigin,
     },
@@ -50,10 +50,16 @@ const candidates = [
   ] }),
   candidate({ brandSlug: 'htc', brand: 'HTC', modelSlug: 'u24', model: 'U24', price: 0 }),
   candidate({ brandSlug: 'future', brand: 'Future', modelSlug: 'one', model: 'One', price: 120, repairOrigin: 'synthetic-backfill' }),
+  {
+    canonicalBrandSlug: 'huawei',
+    displayBrand: 'Huawei',
+    modelSlug: 'nova-12',
+    displayModel: 'Nova 12',
+  } as CameraModuleRepairHierarchyCandidate,
 ];
 
 const missingBackPriceCandidate = candidate({ brandSlug: 'nokia', brand: 'Nokia', modelSlug: 'g60', model: 'G60', price: 0, repairSlug: 'back-camera-replacement' });
-missingBackPriceCandidate.repair.price = undefined as unknown as number;
+missingBackPriceCandidate.repair!.price = undefined as unknown as number;
 
 const backCandidates = [
   candidate({ brandSlug: 'huawei', brand: 'Huawei', modelSlug: 'p60-pro', model: 'P60 Pro', price: 129, repairSlug: 'back-camera-replacement' }),
@@ -69,17 +75,18 @@ const backCandidates = [
 ];
 
 describe('camera module hierarchy adapter', () => {
-  it('maps already eligible exact camera candidates to server hierarchy records without changing order', () => {
+  it('keeps every in-scope camera model bookable while showing prices only from trusted POS records', () => {
     const models = buildCameraModuleRepairHierarchyModels({
       repairSlug: 'front-camera-replacement',
       bookingService: 'Front Camera Replacement',
       candidates,
     });
 
-    expect(models.map((model) => model.modelSlug)).toEqual(['p30-pro', 'mate-20', 'u24', 'one']);
-    expect(models.map((model) => model.priceLabel)).toEqual(['$99', 'From $149', null, null]);
+    expect(models.map((model) => model.modelSlug)).toEqual(['p30-pro', 'mate-20', 'u24', 'one', 'nova-12']);
+    expect(models.map((model) => model.priceLabel)).toEqual(['$99', 'From $149', null, null, null]);
     expect(models.every((model) => model.repairLabel === 'Front Camera Replacement')).toBe(true);
     expect(models[0]?.bookingHref).toBe('/book-repair?category=phone&service=Front+Camera+Replacement&brand=Huawei&model=P30+Pro&brandSlug=huawei&modelSlug=p30-pro&serviceSlug=front-camera-replacement');
+    expect(models.at(-1)?.bookingHref).toBe('/book-repair?category=phone&service=Front+Camera+Replacement&brand=Huawei&model=Nova+12&brandSlug=huawei&modelSlug=nova-12&serviceSlug=front-camera-replacement');
     expect(models.map((model) => model.priceLabel).join(' ')).not.toMatch(/Quote on Request|Starting from \$50/);
   });
 
@@ -115,8 +122,8 @@ describe('camera module hierarchy adapter', () => {
     }));
 
     expect(hierarchy.brands.map((brand) => brand.brandSlug)).toEqual(['huawei', 'htc', 'future']);
-    expect(hierarchy.brands[0]?.series.map((series) => series.seriesKey)).toEqual(['mate', 'p']);
-    expect(hierarchy.brands[0]?.series.flatMap((series) => series.models).map((model) => model.modelSlug)).toEqual(['mate-20', 'p30-pro']);
+    expect(hierarchy.brands[0]?.series.map((series) => series.seriesKey)).toEqual(['mate', 'p', 'nova']);
+    expect(hierarchy.brands[0]?.series.flatMap((series) => series.models).map((model) => model.modelSlug)).toEqual(['mate-20', 'p30-pro', 'nova-12']);
     expect(hierarchy.brands[1]?.series).toEqual([]);
     expect(hierarchy.brands[1]?.models.map((model) => model.modelSlug)).toEqual(['u24']);
   });
@@ -133,6 +140,22 @@ describe('camera module hierarchy adapter', () => {
       selectedDevice: {
         selectedDevice: { brand: 'Future', model: 'One' },
         booking: { href: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Future&model=One&brandSlug=future&modelSlug=one&serviceSlug=front-camera-replacement' },
+      },
+    });
+  });
+
+  it('creates a selected-device handoff for a model without a Camera repair record', () => {
+    expect(resolveCameraModuleRepairHierarchySelection({
+      repairSlug: 'front-camera-replacement',
+      bookingService: 'Front Camera Replacement',
+      candidates,
+      query: { brand: 'huawei', model: 'nova-12' },
+    })).toMatchObject({
+      selectedBrandSlug: 'huawei',
+      selectedModelSlug: 'nova-12',
+      selectedDevice: {
+        selectedDevice: { brand: 'Huawei', model: 'Nova 12' },
+        booking: { href: '/book-repair?category=phone&service=Front+Camera+Replacement&brand=Huawei&model=Nova+12&brandSlug=huawei&modelSlug=nova-12&serviceSlug=front-camera-replacement' },
       },
     });
   });

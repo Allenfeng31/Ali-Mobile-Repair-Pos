@@ -26,4 +26,20 @@ describe('SharedRepairSelectedDevice', () => {
     expect(screen.getByRole('link', { name: /Change model/ })).toHaveAttribute('href', '#shared-repair-model-selection');
     expect(screen.queryByText(/\$\d/)).toBeNull();
   });
+
+  it.each([
+    ['$70'],
+    ['From $89'],
+  ])('renders the supplied trusted display price label %s without deriving a fallback', (priceLabel) => {
+    render(<SharedRepairSelectedDevice selection={{ ...selection, priceLabel }} changeModelHref="#shared-repair-model-selection" />);
+
+    expect(screen.getByText(priceLabel)).toBeInTheDocument();
+  });
+
+  it('renders no price row when the supplied display label is null', () => {
+    const { container } = render(<SharedRepairSelectedDevice selection={{ ...selection, priceLabel: null }} changeModelHref="#shared-repair-model-selection" />);
+
+    expect(container.querySelector('[data-shared-repair-selected-price]')).toBeNull();
+    expect(screen.queryByText(/Starting from|Custom Quote|Quote on Request/)).toBeNull();
+  });
 });
