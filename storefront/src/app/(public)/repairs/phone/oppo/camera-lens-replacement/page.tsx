@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { fetchRepairCatalog } from "@/lib/api";
-import CameraLensLandingPage from "@/components/services/CameraLensLandingPage";
+import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from "@/components/services/CameraLensLandingPage";
 import { buildCameraLensModelOptions } from "@/lib/virtualCameraLens";
 import { getOppoModelConfig } from "@/lib/seo/content/oppo/shared";
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION },
 };
 
-export default async function OppoCameraLensReplacementPage() {
+export default async function OppoCameraLensReplacementPage({ searchParams }: { searchParams: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }> }) {
   const catalog = await fetchRepairCatalog();
   const brand = catalog.brands.find((entry) => entry.category === "phone" && entry.slug === "oppo");
   const models = buildCameraLensModelOptions((brand?.models ?? []).filter((model) => getOppoModelConfig(model.slug)).map((model) => ({
@@ -25,6 +25,11 @@ export default async function OppoCameraLensReplacementPage() {
     model: model.model,
     modelSlug: model.slug,
   })));
+  const selection = resolveCameraLensSelectedDevice({
+    route: { scope: "brand", canonicalBrandSlug: "oppo", routeBrandSegment: "oppo" },
+    models,
+    query: await searchParams,
+  });
 
   return (
     <CameraLensLandingPage
@@ -35,6 +40,7 @@ export default async function OppoCameraLensReplacementPage() {
       canonicalPath={PAGE_PATH}
       models={models}
       showSharedRepairControls
+      selectedDevice={selection.selectedDevice}
     />
   );
 }

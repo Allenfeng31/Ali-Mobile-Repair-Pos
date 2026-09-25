@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { fetchRepairCatalog } from "@/lib/api";
-import CameraLensLandingPage from "@/components/services/CameraLensLandingPage";
+import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from "@/components/services/CameraLensLandingPage";
 import { buildCameraLensModelOptions } from "@/lib/virtualCameraLens";
 
 const PAGE_PATH = "/repairs/phone/camera-lens-replacement";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   alternates: { canonical: PAGE_PATH },
 };
 
-export default async function GenericCameraLensReplacementPage() {
+export default async function GenericCameraLensReplacementPage({ searchParams }: { searchParams: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }> }) {
   const catalog = await fetchRepairCatalog();
   const models = buildCameraLensModelOptions(
     catalog.brands
@@ -26,6 +26,7 @@ export default async function GenericCameraLensReplacementPage() {
         }))
       )
   );
+  const selection = resolveCameraLensSelectedDevice({ route: { scope: "global" }, models, query: await searchParams });
 
   return (
     <CameraLensLandingPage
@@ -34,6 +35,7 @@ export default async function GenericCameraLensReplacementPage() {
       canonicalPath={PAGE_PATH}
       models={models}
       isGeneric
+      selectedDevice={selection.selectedDevice}
     />
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { fetchRepairCatalog } from "@/lib/api";
-import CameraLensLandingPage from "@/components/services/CameraLensLandingPage";
+import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from "@/components/services/CameraLensLandingPage";
 import { fetchSharedRepairPageResultSeeds } from "@/lib/repair-results.server";
 import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels } from "@/lib/sharedRepairPageV2";
 import { getCameraLensPrice } from "@/lib/virtualCameraLens";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION },
 };
 
-export default async function GoogleCameraLensReplacementPage({ searchParams }: { searchParams: Promise<{ model?: string | string[] }> }) {
+export default async function GoogleCameraLensReplacementPage({ searchParams }: { searchParams: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }> }) {
   const catalog = await fetchRepairCatalog();
   const supportedModels = buildSharedRepairPageSupportedModels({
     brands: catalog.brands,
@@ -30,10 +30,12 @@ export default async function GoogleCameraLensReplacementPage({ searchParams }: 
     canonicalBrandSlug: "google-pixel",
     repairSlug: "camera-lens-replacement",
   });
-  const model = (await searchParams).model;
-  const selectedModelSlug = typeof model === "string" && supportedModels.some((entry) => entry.modelSlug === model)
-    ? model
-    : null;
+  const selection = resolveCameraLensSelectedDevice({
+    route: { scope: "brand", canonicalBrandSlug: "google-pixel", routeBrandSegment: "google" },
+    models: supportedModels,
+    query: await searchParams,
+  });
+  const selectedModelSlug = selection.selectedModelSlug;
   const initialResults = await fetchSharedRepairPageResultSeeds({
     category: "phone",
     brandSlug: "google-pixel",
@@ -49,6 +51,7 @@ export default async function GoogleCameraLensReplacementPage({ searchParams }: 
       intro="Camera lens glass replacement for supported Google Pixel models at Ali Mobile & Repair in Ringwood. We inspect model fitment before confirming the suitable repair path."
       canonicalPath={PAGE_PATH}
       models={supportedModels}
+      selectedDevice={selection.selectedDevice}
       sharedPageV2={{
         supportedModels,
         priceCandidates,
