@@ -50,7 +50,7 @@ describe('Samsung shared repair metadata and model state', () => {
       }
     }
     expect(getVirtualPhoneRepairHeading({ repairName: 'Loudspeaker Replacement' }))
-      .toBe('Phone Loudspeaker Replacement in Ringwood');
+      .toBe('Phone Loudspeaker Replacement');
   });
 
   it('keeps the five clean Samsung URLs as their own social and canonical identities', () => {
@@ -86,7 +86,11 @@ describe('Samsung shared repair metadata and model state', () => {
       expect(metadata.openGraph?.url).toBe(path);
       expect(`${metadata.alternates?.canonical}${metadata.openGraph?.url}`).not.toContain('?');
     }
-    expect(createVirtualPhoneRepairMetadata('other', 'loudspeaker-replacement').title).toContain('Phone Loudspeaker');
+    const genericMetadata = createVirtualPhoneRepairMetadata('other', 'loudspeaker-replacement');
+    expect(genericMetadata.title).toBe('Phone Loudspeaker Replacement Melbourne | Ali Mobile');
+    expect(genericMetadata.description).toContain('Melbourne');
+    expect(`${genericMetadata.title}${genericMetadata.description}`).not.toContain('$50');
+    expect(genericMetadata.alternates?.canonical).toBe('/repairs/phone/loudspeaker-replacement');
     expect(getVirtualPhoneRepairHeading({ repairName: 'Loudspeaker Replacement' })).not.toContain('Samsung');
   });
 

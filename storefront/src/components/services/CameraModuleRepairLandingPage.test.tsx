@@ -173,8 +173,10 @@ describe('CameraModuleRepairLandingPage', () => {
     const { container } = render(<CameraModuleRepairLandingPage config={front} canonicalPath="/repairs/phone/front-camera-replacement" candidates={candidates} hierarchy={{ ...hierarchy, selectedBrandSlug: null, selectedModelSlug: null, selectedDevice: null }} />);
     expect(screen.queryByRole('link', { name: /book repair now/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /change model/i })).toBeNull();
-    expect(screen.getByRole('heading', { name: 'Front Camera Replacement' })).toBeTruthy();
-    expect(screen.getByText('Starting from $99')).toBeTruthy();
+    expect(screen.getByText('STARTING FROM')).toBeTruthy();
+    expect(screen.getByText('$99')).toBeTruthy();
+    expect(screen.getByText('Final quote depends on parts, model and device condition.')).toBeTruthy();
+    expect(screen.getByText('Quote on Request')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Huawei P30 Pro' })).toHaveAttribute('href', '/repairs/phone/front-camera-replacement?brand=huawei&model=p30-pro');
     expect(screen.getByRole('link', { name: 'Huawei P30 Pro' }).getAttribute('href')).not.toContain('/book-repair');
     expect(container.querySelector('[data-camera-module-model-selector]')).not.toHaveAttribute('hidden');
@@ -225,7 +227,7 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(screen.getByRole('button', { name: 'Select your model' })).toBeTruthy();
     expect(screen.queryByRole('link', { name: /book repair now/i })).toBeNull();
     expect(within(genericCardAfterChange as HTMLElement).queryByText('Selected device')).toBeNull();
-    expect(within(genericCardAfterChange as HTMLElement).getByRole('heading', { name: 'Front Camera Replacement' })).toBeTruthy();
+    expect(within(genericCardAfterChange as HTMLElement).getByText('STARTING FROM')).toBeTruthy();
     expect(openSelector).not.toHaveAttribute('hidden');
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ behavior: 'smooth', block: 'start' });
 

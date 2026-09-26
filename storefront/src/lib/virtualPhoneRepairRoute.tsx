@@ -95,9 +95,11 @@ export function createVirtualPhoneRepairMetadata(brand: VirtualPhoneRepairRouteB
   const config = brand === "other" ? null : BRAND_CONFIG[brand];
   const label = config?.brandName ?? "Phone";
   const canonical = `/repairs/phone/${config ? `${config.routeSegment}/` : ""}${repair.slug}`;
-  const title = `${label} ${repair.name} in Ringwood | Ali Mobile`;
+  const title = config ? `${label} ${repair.name} in Ringwood | Ali Mobile` : `${label} ${repair.name} Melbourne | Ali Mobile`;
   const isGooglePixelSharedPageV2 = brand === 'google' && Boolean(getGooglePixelSharedPageV2Config(repairSlug));
-  const description = isGooglePixelSharedPageV2
+  const description = !config
+    ? `${label} ${repair.name.toLowerCase()} in Melbourne. Choose a supported model for current repair options and an inspection-led quote before work begins.`
+    : isGooglePixelSharedPageV2
     ? `${label} ${repair.name.toLowerCase()} in Ringwood with model-specific pricing, inspection and a clear quote before work begins.`
     : `${label} ${repair.name.toLowerCase()} in Ringwood for common symptoms. Starting from $50, with inspection and a clear quote before work begins.`;
 

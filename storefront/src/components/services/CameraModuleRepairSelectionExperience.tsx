@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type MouseEvent } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, Camera, CheckCircle2, ClipboardCheck, PhoneCall, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Camera, CheckCircle2, ClipboardCheck, Ear, PhoneCall, Power, ShieldCheck, Volume2 } from 'lucide-react';
 import SharedRepairHierarchySections from './SharedRepairHierarchySections';
 import type { SharedRepairSelectedDeviceViewModel } from './SharedRepairSelectedDevice';
 import type { SharedRepairHierarchyModel } from '@/lib/sharedRepairHierarchy';
@@ -12,6 +12,7 @@ type CameraModuleRepairSelectionExperienceProps = Readonly<{
   title: string;
   description: string;
   eyebrow: string;
+  icon?: 'camera' | 'loudspeaker' | 'earpiece' | 'power' | 'volume';
   bookingService: string;
   canonicalPath: string;
   hierarchy: Readonly<{
@@ -28,10 +29,12 @@ const HERO_PRIMARY_ACTION_CLASS = 'inline-flex min-h-14 w-full items-center just
 const HERO_SECONDARY_ACTION_CLASS = 'inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-center text-lg font-bold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2';
 
 function scrollTo(element: Element | null) {
-  element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (element && typeof element.scrollIntoView === 'function') {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
-export function getCameraModuleStartingPriceLabel(models: readonly SharedRepairHierarchyModel[]) {
+export function getCameraModuleStartingPrice(models: readonly SharedRepairHierarchyModel[]) {
   const trustedAmounts = models.flatMap((model) => {
     const match = model.priceLabel?.match(/^(?:From )?\$(\d+(?:\.\d{1,2})?)$/);
     if (!match) return [];
@@ -40,10 +43,15 @@ export function getCameraModuleStartingPriceLabel(models: readonly SharedRepairH
     return Number.isFinite(amount) && amount > 0 ? [amount] : [];
   });
 
-  if (trustedAmounts.length === 0) return 'Quote on Request';
+  if (trustedAmounts.length === 0) return null;
 
   const amount = Math.min(...trustedAmounts);
-  return `Starting from $${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
+  return `$${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
+}
+
+export function getCameraModuleStartingPriceLabel(models: readonly SharedRepairHierarchyModel[]) {
+  const price = getCameraModuleStartingPrice(models);
+  return price ? `Starting from ${price}` : 'Quote on Request';
 }
 
 function RepairTrustBadges() {
@@ -55,10 +63,19 @@ function RepairTrustBadges() {
   </div>;
 }
 
+function HeroIcon({ icon, size, strokeWidth }: { icon: CameraModuleRepairSelectionExperienceProps['icon']; size: number; strokeWidth: number }) {
+  const props = { size, strokeWidth, 'aria-hidden': true } as const;
+  if (icon === 'earpiece') return <Ear {...props} />;
+  if (icon === 'power') return <Power {...props} />;
+  if (icon === 'volume' || icon === 'loudspeaker') return <Volume2 {...props} />;
+  return <Camera {...props} />;
+}
+
 export default function CameraModuleRepairSelectionExperience({
   title,
   description,
   eyebrow,
+  icon = 'camera',
   bookingService,
   canonicalPath,
   hierarchy,
@@ -70,6 +87,7 @@ export default function CameraModuleRepairSelectionExperience({
   const selectedPriceLabel = displayedSelectedDevice
     ? hierarchy.models.find((model) => model.brandSlug === displayedSelectedDevice.selectedDevice.brandSlug && model.modelSlug === displayedSelectedDevice.selectedDevice.modelSlug)?.priceLabel ?? null
     : null;
+  const genericStartingPrice = getCameraModuleStartingPrice(hierarchy.models);
   const selectorModels = hierarchy.models.map((model) => ({
     ...model,
     bookingHref: `${canonicalPath}?${new URLSearchParams({
@@ -108,9 +126,9 @@ export default function CameraModuleRepairSelectionExperience({
 
   return <>
     <section id={HERO_ID} className="repair-hero repair-detail-hero relative scroll-mt-28" data-camera-module-hero aria-labelledby="camera-module-heading">
-      <span className="repair-detail-icon text-blue-600"><Camera size={34} strokeWidth={2.4} aria-hidden="true" /></span>
+      <span className="repair-detail-icon text-blue-600"><HeroIcon icon={icon} size={34} strokeWidth={2.4} /></span>
       <div data-camera-module-hero-stack className="flex w-full flex-col items-center text-center">
-        <span className="repair-kicker mx-auto mb-5"><Camera size={14} strokeWidth={2.6} aria-hidden="true" />{eyebrow}</span>
+        <span className="repair-kicker mx-auto mb-5"><HeroIcon icon={icon} size={14} strokeWidth={2.6} />{eyebrow}</span>
         <h1 id="camera-module-heading">{title}</h1>
         <p className="repair-detail-subtitle">{description}</p>
 
@@ -120,9 +138,14 @@ export default function CameraModuleRepairSelectionExperience({
             <h2 className="mt-3 text-xl font-black leading-tight text-slate-950">{displayedSelectedDevice.selectedDevice.brand} {displayedSelectedDevice.selectedDevice.model}</h2>
             <p className="mt-2 text-sm font-semibold text-slate-600">{displayedSelectedDevice.selectedRepair.name}</p>
             <p data-camera-module-hero-price className="mt-4 text-3xl font-extrabold text-blue-600">{selectedPriceLabel ?? 'Quote on Request'}</p>
+          </> : genericStartingPrice ? <>
+            <span className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">STARTING FROM</span>
+            <p data-camera-module-hero-price className="mt-3 text-3xl font-extrabold text-blue-600">{genericStartingPrice}</p>
+            <p className="mt-3 max-w-[32rem] text-pretty text-sm font-semibold leading-6 text-slate-500">Final quote depends on parts, model and device condition.</p>
+            <p className="mt-3 text-sm font-bold text-slate-700">Quote on Request</p>
           </> : <>
             <h2 className="text-xl font-black leading-tight text-slate-950">{bookingService}</h2>
-            <p data-camera-module-hero-price className="mt-4 text-3xl font-extrabold text-blue-600">{getCameraModuleStartingPriceLabel(hierarchy.models)}</p>
+            <p data-camera-module-hero-price className="mt-4 text-3xl font-extrabold text-blue-600">Quote on Request</p>
           </>}
         </div>
 

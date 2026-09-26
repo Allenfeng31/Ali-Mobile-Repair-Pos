@@ -103,6 +103,10 @@ describe('generic Earpiece shared hierarchy route', () => {
     expect(source('src/app/(public)/repairs/phone/loudspeaker-replacement/page.tsx')).toContain('buildGenericPeripheralRepairHierarchyModels');
     expect(source('src/app/(public)/repairs/phone/power-button-replacement/page.tsx')).toContain('buildGenericPeripheralRepairHierarchyModels');
     expect(source('src/app/(public)/repairs/phone/volume-button-replacement/page.tsx')).toContain('buildGenericPeripheralRepairHierarchyModels');
+    expect(source('src/app/(public)/repairs/phone/loudspeaker-replacement/page.tsx')).toContain('fetchSharedRepairPageResultSeeds');
+    expect(source('src/app/(public)/repairs/phone/earpiece-speaker-replacement/page.tsx')).toContain('fetchSharedRepairPageResultSeeds');
+    expect(source('src/app/(public)/repairs/phone/power-button-replacement/page.tsx')).toContain('fetchSharedRepairPageResultSeeds');
+    expect(source('src/app/(public)/repairs/phone/volume-button-replacement/page.tsx')).toContain('fetchSharedRepairPageResultSeeds');
     expect(source('src/app/(public)/repairs/phone/earpiece-speaker-replacement/page.tsx')).not.toMatch(/getStartingPrice|RepairOptionsGrid|withVirtualPhoneRepairOptions|Quote on Request|Starting from \$50/);
   });
 });
