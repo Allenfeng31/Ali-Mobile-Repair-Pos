@@ -395,7 +395,7 @@ export default function RepairTypeModelGrid({
   }
 
   return (
-    <section aria-labelledby="repair-type-hub-models" className={`repair-content-band ${styles.sectionCard}`}>
+    <section id="repair-type-model-finder" aria-labelledby="repair-type-hub-models" className={`repair-content-band ${styles.sectionCard}`}>
       <div className={styles.sectionHeader}>
         <div>
           <p className={styles.sectionEyebrow}>Choose your device path</p>

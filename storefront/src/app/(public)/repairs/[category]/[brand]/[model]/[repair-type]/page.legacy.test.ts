@@ -16,7 +16,7 @@ vi.mock('@/lib/repair-results.server', () => ({ fetchRepairDetailInitialResults 
 vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({ default: RepairResultsMatchingSection }));
 vi.mock('next/navigation', () => ({ notFound, permanentRedirect }));
 
-import RepairServicePage from './page';
+import RepairServicePage, { generateStaticParams } from './page';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 
@@ -175,6 +175,54 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(permanentRedirect).not.toHaveBeenCalled();
   });
 
+  it('fails closed for a non-grandfathered secondary protected-service detail route', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{
+          model: 'Future Phone', slug: 'future-phone', repairTypes: [
+            { name: 'Battery Replacement', slug: 'battery-replacement', price: 99, variants: [] },
+          ],
+        }],
+      }],
+      retiredRepairs: [],
+    });
+
+    await expect(RepairServicePage({ params: Promise.resolve(params({
+      model: 'future-phone', 'repair-type': 'battery-replacement',
+    })) })).rejects.toThrow('NEXT_NOT_FOUND_TEST');
+    expect(fetchRepairDetailInitialResults).not.toHaveBeenCalled();
+  });
+
+  it('emits only grandfathered secondary protected-service static params', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [
+        {
+          category: 'phone', brand: 'Asus', slug: 'asus', models: [{
+            model: 'ROG Phone 3', slug: 'rog-phone-3', repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 0, variants: [] }],
+          }],
+        },
+        {
+          category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{
+            model: 'Future Phone', slug: 'future-phone', repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 99, variants: [] }],
+          }],
+        },
+        {
+          category: 'phone', brand: 'Samsung', slug: 'samsung', models: [{
+            model: 'Galaxy S24', slug: 'galaxy-s24', repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 99, variants: [] }],
+          }],
+        },
+      ],
+    });
+
+    await expect(generateStaticParams()).resolves.toEqual(expect.arrayContaining([
+      { category: 'phone', brand: 'asus', model: 'rog-phone-3', 'repair-type': 'screen-replacement' },
+      { category: 'phone', brand: 'samsung', model: 'galaxy-s24', 'repair-type': 'battery-replacement' },
+    ]));
+    await expect(generateStaticParams()).resolves.not.toEqual(expect.arrayContaining([
+      { category: 'phone', brand: 'motorola', model: 'future-phone', 'repair-type': 'battery-replacement' },
+    ]));
+  });
+
   it('returns page data only for the exact retired legacy identity', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [activeModelWithoutScreenRepair], retiredRepairs: [retired] });
     await expect(RepairServicePage({ params: Promise.resolve(params()) })).resolves.toBeTruthy();
@@ -199,7 +247,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(notFound).toHaveBeenCalledTimes(3);
   });
 
-  it('keeps a renamed old tombstone renderable while the new active identity works', async () => {
+  it('keeps a grandfathered tombstone renderable while rejecting a renamed non-grandfathered identity', async () => {
     fetchRepairCatalog.mockResolvedValue({
       brands: [{
         ...active,
@@ -210,7 +258,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       }],
       retiredRepairs: [retired],
     });
-    await expect(RepairServicePage({ params: Promise.resolve(params({ model: 'moto-g24-5g' })) })).resolves.toBeTruthy();
+    await expect(RepairServicePage({ params: Promise.resolve(params({ model: 'moto-g24-5g' })) })).rejects.toThrow('NEXT_NOT_FOUND_TEST');
     await expect(RepairServicePage({ params: Promise.resolve(params()) })).resolves.toBeTruthy();
   });
 

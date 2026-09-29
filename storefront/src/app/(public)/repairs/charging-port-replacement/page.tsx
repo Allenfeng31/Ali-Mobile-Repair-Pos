@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
 import { fetchRepairTypeHubRepairResultSeeds } from '@/lib/repair-results.server';
-import { buildRepairTypeHubCatalog } from '@/lib/repair-type-hubs';
+import { buildRepairTypeHubCatalog, resolveRepairTypeHubSelectedState } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
 import RepairTypeSupportingBrandHubLinks from '@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks';
@@ -78,16 +78,22 @@ function buildHeroHighlights() {
   ];
 }
 
-export default async function ChargingPortReplacementPage() {
+export default async function ChargingPortReplacementPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }>;
+}) {
+  const query = await (searchParams ?? Promise.resolve({}));
   const [catalog, repairResultSeeds] = await Promise.all([
     fetchRepairCatalog(),
     fetchRepairTypeHubRepairResultSeeds({ category: 'phone', repairTypeSlug: 'charging-port-replacement' }),
   ]);
-  const data = buildRepairTypeHubCatalog(catalog, 'charging-port-replacement');
+  const data = buildRepairTypeHubCatalog(catalog, 'charging-port-replacement', { enableSecondaryPhoneHybridFallback: true });
 
   if (!data || data.categories.length === 0) {
     notFound();
   }
+  const selectedDevice = resolveRepairTypeHubSelectedState({ catalog, data, query });
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -128,6 +134,8 @@ export default async function ChargingPortReplacementPage() {
 
       <RepairTypeHubPage
         data={data}
+        selectedDevice={selectedDevice}
+        changeModelHref="/repairs/charging-port-replacement#repair-type-model-finder"
         title="Charging Port Repair Services in Ringwood"
         description="Choose your supported phone model for charging port repair at Ali Mobile & Repair in Ringwood Square. We check whether the issue is debris, port damage, charging accessories, battery condition, or a broader charging fault before confirming the repair."
         heroKicker="Phone Charging Repairs"

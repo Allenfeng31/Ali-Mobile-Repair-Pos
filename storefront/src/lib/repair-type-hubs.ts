@@ -1,4 +1,10 @@
 import type { RepairCatalog } from '@/lib/api';
+import type { RepairOption, RepairOrigin, RepairVariant } from './publicRepairCataloguePolicy';
+import { classifyPhoneBrand } from './publicRepairPageModePolicy';
+import { resolveModelHubRepairPageMode } from './modelHubRepairPageMode';
+import { resolveSharedRepairContext, type SharedRepairContextInput } from './sharedRepairContext';
+import { resolvePublicBookingSelection, type PublicBookingPriceAuthority } from './publicBookingSelection';
+import { getSharedRepairBookingHref } from './sharedRepairBooking';
 
 export type RepairTypeHubSlug =
   | 'screen-replacement'
@@ -28,6 +34,10 @@ export interface RepairTypeHubModelLink {
   repairSlug: string;
   price: number;
   href: string;
+  /** Present only when the opted-in protected Hub hybrid adapter is active. */
+  destination?: 'detail' | 'hub-selected';
+  variants?: RepairVariant[];
+  repairOrigin?: RepairOrigin;
 }
 
 export interface RepairTypeHubBrandGroup {
@@ -49,6 +59,11 @@ export interface RepairTypeHubCatalogResult {
   categories: RepairTypeHubCategoryGroup[];
   totalBrands: number;
   totalModels: number;
+}
+
+export interface RepairTypeHubCatalogOptions {
+  /** Enables the secondary-phone fallback only for explicitly opted-in Repair Type Hubs. */
+  enableSecondaryPhoneHybridFallback?: boolean;
 }
 
 const DEVICE_CATEGORY_ORDER: RepairTypeHubCategory[] = ['phone', 'tablet', 'laptop', 'watch'];
@@ -190,9 +205,61 @@ function sortBrandGroups(category: RepairTypeHubCategory, brands: RepairTypeHubB
   });
 }
 
+function detailHref(category: RepairTypeHubCategory, brandSlug: string, modelSlug: string, repairSlug: string) {
+  return `/repairs/${category}/${brandSlug}/${modelSlug}/${repairSlug}`;
+}
+
+function resolveModelDestination({
+  catalog,
+  hub,
+  category,
+  brandSlug,
+  modelSlug,
+  repairSlug,
+  repairTypes,
+  enabled,
+}: {
+  catalog: RepairCatalog;
+  hub: RepairTypeHubDefinition;
+  category: RepairTypeHubCategory;
+  brandSlug: string;
+  modelSlug: string;
+  repairSlug: string;
+  repairTypes: RepairOption[];
+  enabled: boolean;
+}) {
+  const fallbackHref = detailHref(category, brandSlug, modelSlug, repairSlug);
+  if (!enabled) return { href: fallbackHref } as const;
+  if (category !== 'phone' || classifyPhoneBrand(brandSlug) !== 'secondary-phone') {
+    return { href: fallbackHref, destination: 'detail' as const };
+  }
+
+  const resolution = resolveModelHubRepairPageMode({
+    category,
+    brandSlug,
+    modelSlug,
+    catalogueSource: catalog.catalogueSource,
+    repairTypes,
+  });
+  const decision = resolution.decisions.find((entry) => entry.repairSlug === repairSlug);
+  const option = resolution.options.find((entry) => entry.slug === repairSlug);
+
+  if (decision?.mode === 'independent' && option?.href) {
+    return { href: option.href, destination: 'detail' as const };
+  }
+
+  const hubPrefix = `/repairs/${hub.slug}?`;
+  if (decision?.mode === 'shared' && option?.href?.startsWith(hubPrefix)) {
+    return { href: option.href, destination: 'hub-selected' as const };
+  }
+
+  return null;
+}
+
 export function buildRepairTypeHubCatalog(
   catalog: RepairCatalog,
-  slug: string
+  slug: string,
+  options: RepairTypeHubCatalogOptions = {},
 ): RepairTypeHubCatalogResult | null {
   const hub = getRepairTypeHubDefinition(slug);
 
@@ -237,6 +304,18 @@ export function buildRepairTypeHubCatalog(
         continue;
       }
 
+      const destination = resolveModelDestination({
+        catalog,
+        hub,
+        category,
+        brandSlug: browserBrandSlug,
+        modelSlug: modelEntry.slug,
+        repairSlug: matchingRepair.slug,
+        repairTypes: modelEntry.repairTypes,
+        enabled: options.enableSecondaryPhoneHybridFallback === true,
+      });
+      if (!destination) continue;
+
       models.push({
         category,
         categoryLabel: DEVICE_CATEGORY_LABELS[category],
@@ -248,7 +327,12 @@ export function buildRepairTypeHubCatalog(
         repairName: matchingRepair.name,
         repairSlug: matchingRepair.slug,
         price: matchingRepair.price,
-        href: `/repairs/${category}/${browserBrandSlug}/${modelEntry.slug}/${matchingRepair.slug}`,
+        href: destination.href,
+        ...(destination.destination ? { destination: destination.destination } : {}),
+        ...(options.enableSecondaryPhoneHybridFallback ? {
+          variants: matchingRepair.variants,
+          repairOrigin: matchingRepair.repairOrigin,
+        } : {}),
       });
     }
 
@@ -320,4 +404,107 @@ export function buildRepairTypeHubCatalog(
     totalBrands,
     totalModels,
   };
+}
+
+export function resolveRepairTypeHubSelectedModel(
+  data: RepairTypeHubCatalogResult,
+  query: SharedRepairContextInput['query'],
+): RepairTypeHubModelLink | null {
+  const candidates = data.categories.flatMap((category) => category.brands.flatMap((brand) =>
+    brand.models.filter((model) => model.destination === 'hub-selected').map((model) => ({
+      canonicalBrandSlug: model.brandSlug,
+      modelSlug: model.modelSlug,
+      displayBrand: model.brand,
+      displayModel: model.model,
+    })),
+  ));
+  const context = resolveSharedRepairContext({
+    route: { scope: 'global' },
+    repairSlug: data.hub.slug,
+    bookingService: data.hub.label,
+    query,
+    candidates,
+  });
+  if (!context.isValid || context.reason !== 'model-context') return null;
+
+  return data.categories
+    .flatMap((category) => category.brands.flatMap((brand) => brand.models))
+    .find((model) => model.destination === 'hub-selected'
+      && model.brandSlug === context.canonicalBrandSlug
+      && model.modelSlug === context.modelSlug) ?? null;
+}
+
+function formatPrice(price: number) {
+  return Number.isInteger(price) ? String(price) : price.toFixed(2);
+}
+
+export function getRepairTypeHubSelectedPriceLabel(
+  model: Pick<RepairTypeHubModelLink, 'variants' | 'repairOrigin'>,
+  selection: Readonly<{ priceAuthority: PublicBookingPriceAuthority; price: number }>,
+) {
+  if ((selection.priceAuthority === 'exact-pos' || selection.priceAuthority === 'exact-pos-variant')
+    && Number.isFinite(selection.price) && selection.price > 0) {
+    return `$${formatPrice(selection.price)}`;
+  }
+
+  const variantPrices = model.repairOrigin === 'pos'
+    ? (model.variants ?? []).flatMap((variant) => Number.isFinite(variant.price) && variant.price > 0 ? [variant.price] : [])
+    : [];
+  if (variantPrices.length > 1) return `From $${formatPrice(Math.min(...variantPrices))}`;
+
+  return 'Quote on Request';
+}
+
+export interface RepairTypeHubSelectedState {
+  brand: string;
+  model: string;
+  repairName: string;
+  priceLabel: string;
+  bookingHref: string;
+}
+
+/**
+ * Resolves only a server-authorized secondary-phone Hub selection into the
+ * canonical booking identity. Query state remains display-only until the
+ * customer explicitly follows the returned booking link.
+ */
+export function resolveRepairTypeHubSelectedState({
+  catalog,
+  data,
+  query,
+}: {
+  catalog: RepairCatalog;
+  data: RepairTypeHubCatalogResult;
+  query: SharedRepairContextInput['query'];
+}): RepairTypeHubSelectedState | null {
+  const selected = resolveRepairTypeHubSelectedModel(data, query);
+  if (!selected || selected.category !== 'phone') return null;
+
+  const booking = resolvePublicBookingSelection(catalog, {
+    category: selected.category,
+    brandSlug: selected.brandSlug,
+    modelSlug: selected.modelSlug,
+    serviceSlug: selected.repairSlug,
+    brand: selected.brand,
+    model: selected.model,
+    service: selected.repairName,
+  });
+  if (!booking) return null;
+
+  return Object.freeze({
+    brand: selected.brand,
+    model: selected.model,
+    repairName: selected.repairName,
+    priceLabel: getRepairTypeHubSelectedPriceLabel(selected, booking),
+    bookingHref: getSharedRepairBookingHref({
+      repairName: selected.repairName,
+      repairSlug: selected.repairSlug,
+      selectedModel: {
+        brand: selected.brand,
+        brandSlug: selected.brandSlug,
+        model: selected.model,
+        modelSlug: selected.modelSlug,
+      },
+    }),
+  });
 }

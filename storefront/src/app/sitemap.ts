@@ -11,12 +11,29 @@ import { getSortedPostsData } from '@/lib/blog';
 import { preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getWaterDamageSitemapPaths, isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
 import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
+import { classifyPhoneBrand } from '@/lib/publicRepairPageModePolicy';
+import {
+  GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS,
+  isGrandfatheredSecondaryPhoneDetailRepair,
+} from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 
 function getReliableBlogLastModified(updatedAt?: string): Date | undefined {
   if (!updatedAt) return undefined;
 
   const parsedDate = new Date(updatedAt);
   return Number.isNaN(parsedDate.getTime()) ? undefined : parsedDate;
+}
+
+function isNonGrandfatheredSecondaryPhoneProtectedRepair(
+  category: string,
+  brandSlug: string,
+  modelSlug: string,
+  repairSlug: string,
+) {
+  return category === 'phone'
+    && classifyPhoneBrand(brandSlug) === 'secondary-phone'
+    && (GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS as readonly string[]).includes(repairSlug)
+    && !isGrandfatheredSecondaryPhoneDetailRepair(category, brandSlug, modelSlug, repairSlug);
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -127,6 +144,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
           const repairPath = `/repairs/${safeSlugSegment(brand.category)}/${safeSlugSegment(brand.slug)}/${preserveRouteSegment(model.slug)}/${preserveRouteSegment(repair.slug)}`;
           if (getPhase1DniConsolidationDestination(repairPath)) continue;
+          if (isNonGrandfatheredSecondaryPhoneProtectedRepair(
+            brand.category,
+            brand.slug,
+            model.slug,
+            repair.slug,
+          )) continue;
 
           if (isExcludedOppo) continue;
           if (isExcludedPixel) continue;

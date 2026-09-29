@@ -14,7 +14,10 @@ vi.mock('next/navigation', () => ({ notFound: vi.fn() }));
 vi.mock('lucide-react', () => ({ ArrowRight: () => null, MapPin: () => null, PhoneCall: () => null }));
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog }));
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairTypeHubRepairResultSeeds }));
-vi.mock('@/lib/repair-type-hubs', () => ({ buildRepairTypeHubCatalog: vi.fn(() => ({ categories: [{}] })) }));
+vi.mock('@/lib/repair-type-hubs', () => ({
+  buildRepairTypeHubCatalog: vi.fn(() => ({ categories: [{}] })),
+  resolveRepairTypeHubSelectedState: vi.fn(() => null),
+}));
 vi.mock('@/components/repair-type-hubs/RepairTypeHubPage', () => ({ default: () => null }));
 vi.mock('@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks', () => ({ default: () => null }));
 vi.mock('@/components/repair-results/RepairTypeRepairResultsSection', () => ({ default: () => null }));
@@ -31,7 +34,7 @@ describe('ScreenReplacementPage service schema', () => {
     fetchRepairCatalog.mockResolvedValue({});
     fetchRepairTypeHubRepairResultSeeds.mockResolvedValue([]);
 
-    const { container } = render(await ScreenReplacementPage());
+    const { container } = render(await ScreenReplacementPage({ searchParams: Promise.resolve({}) }));
     const schemas = Array.from(container.querySelectorAll('script[type="application/ld+json"]'))
       .map((script) => JSON.parse(script.textContent || '{}'));
     const service = schemas.find((schema) => schema['@id'] === 'https://www.alimobile.com.au/repairs/screen-replacement#service');

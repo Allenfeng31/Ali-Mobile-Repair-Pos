@@ -126,6 +126,11 @@ import {
 } from '@/lib/waterDamageRouting';
 import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from '@/lib/logicBoardRouting';
 import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
+import { classifyPhoneBrand } from '@/lib/publicRepairPageModePolicy';
+import {
+  GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS,
+  isGrandfatheredSecondaryPhoneDetailRepair,
+} from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 
 import IpadEnhancedSeoSection from '@/components/services/IpadEnhancedSeoSection';
 import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTabletEnhancedSeoSection';
@@ -4409,6 +4414,12 @@ export async function generateStaticParams() {
         const publicRepairSlug = getPublicRepairSlug(brand.category, brand.slug, model.slug, repair.slug);
         if (!publicRepairSlug || !publicRepairSlug.trim()) continue;
         if (isWaterDamageRepairSlug(publicRepairSlug)) continue;
+        if (isNonGrandfatheredSecondaryPhoneProtectedRepair(
+          brand.category,
+          brand.slug,
+          model.slug,
+          publicRepairSlug,
+        )) continue;
 
         const dedupeKey = [
           brand.category,
@@ -4511,6 +4522,18 @@ function getPublicRepairSlug(category: string, brand: string, modelSlug: string,
   return repairSlug;
 }
 
+function isNonGrandfatheredSecondaryPhoneProtectedRepair(
+  category: string,
+  brandSlug: string,
+  modelSlug: string,
+  repairSlug: string,
+) {
+  return category === 'phone'
+    && classifyPhoneBrand(brandSlug) === 'secondary-phone'
+    && (GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS as readonly string[]).includes(repairSlug)
+    && !isGrandfatheredSecondaryPhoneDetailRepair(category, brandSlug, modelSlug, repairSlug);
+}
+
 function getRepairDisplayName(
   category: string,
   brand: string,
@@ -4574,6 +4597,14 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
   const canonicalRepairSlug = isWaterDamageRepairSlug(rawParams['repair-type'])
     ? 'water-damage-repair'
     : rawParams['repair-type'];
+  if (isNonGrandfatheredSecondaryPhoneProtectedRepair(
+    rawParams.category,
+    canonicalBrand,
+    rawParams.model,
+    canonicalRepairSlug,
+  )) {
+    notFound();
+  }
   const phase1Destination = getPhase1DniConsolidationDestination(
     buildCanonicalModelRepairPath(rawParams.category, canonicalBrand, rawParams.model, canonicalRepairSlug),
   );

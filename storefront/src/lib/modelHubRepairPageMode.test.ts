@@ -42,6 +42,39 @@ describe('resolveModelHubRepairPageMode', () => {
     ]);
   });
 
+  it('uses the secondary grandfather cutoff for protected core-service destinations', () => {
+    const grandfathered = resolve({
+      brandSlug: 'asus',
+      modelSlug: 'rog-phone-3',
+      catalogueSource: 'last-known-good',
+      repairTypes: [repair('screen-replacement')],
+    });
+    expect(grandfathered.options[0]).toMatchObject({
+      href: '/repairs/phone/asus/rog-phone-3/screen-replacement',
+    });
+    expect(grandfathered.decisions[0]).toMatchObject({
+      mode: 'independent', reason: 'independent-verified-grandfather',
+    });
+
+    const futurePosRepair = resolve({
+      brandSlug: 'motorola',
+      modelSlug: 'future-phone',
+      repairTypes: [repair('battery-replacement')],
+    });
+    expect(futurePosRepair.options[0]).toMatchObject({
+      href: '/repairs/battery-replacement?brand=motorola&model=future-phone',
+    });
+    expect(futurePosRepair.decisions[0]).toMatchObject({ mode: 'shared', reason: 'shared-global-route' });
+
+    const absentService = resolve({
+      brandSlug: 'asus',
+      modelSlug: 'rog-phone-3',
+      repairTypes: [],
+    });
+    expect(absentService.options).toEqual([]);
+    expect(absentService.decisions).toEqual([]);
+  });
+
   it.each([
     ['snapshot POS', 'last-known-good' as const, repair('screen-replacement', 'pos')],
     ['unknown legacy', 'last-known-good' as const, repair('screen-replacement', 'unknown-legacy')],
@@ -61,11 +94,22 @@ describe('resolveModelHubRepairPageMode', () => {
     ['front-camera-replacement', '/repairs/phone/front-camera-replacement'],
     ['back-camera-replacement', '/repairs/phone/back-camera-replacement'],
     ['logic-board-repair', '/repairs/phone/logic-board-repair'],
-  ])('uses registered global masters for synthetic %s', (slug, href) => {
-    const result = resolve({ repairTypes: [repair(slug, 'synthetic-backfill')] });
+  ])('uses registered global masters for secondary-brand synthetic %s', (slug, href) => {
+    const result = resolve({ brandSlug: 'motorola', modelSlug: 'moto-g04', repairTypes: [repair(slug, 'synthetic-backfill')] });
 
-    expect(result.options[0]?.href).toBe(`${href}?brand=oppo&model=find-x8-pro`);
+    expect(result.options[0]?.href).toBe(`${href}?brand=motorola&model=moto-g04`);
     expect(result.decisions[0]).toMatchObject({ mode: 'shared', reason: 'shared-global-route' });
+  });
+
+  it.each(['apple', 'iphone', 'samsung', 'google-pixel', 'oppo'])('does not route primary %s core services through Hybrid Hub query state', (brandSlug) => {
+    const result = resolve({
+      brandSlug,
+      modelSlug: `${brandSlug}-model`,
+      repairTypes: [repair('screen-replacement', 'synthetic-core')],
+    });
+
+    expect(result.options[0]?.href).toBe(`/repairs/phone/${brandSlug}/${brandSlug}-model/screen-replacement`);
+    expect(result.options[0]?.href).not.toContain('/repairs/screen-replacement?');
   });
 
   it.each([

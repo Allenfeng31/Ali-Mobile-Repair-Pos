@@ -51,6 +51,22 @@ describe('evaluateNonIphonePublicRepairPageMode', () => {
     }))).toMatchObject({ mode: 'independent', reason: 'independent-verified-grandfather' });
   });
 
+  it('uses the static secondary-detail authority instead of live POS alone for protected services', () => {
+    expect(evaluateNonIphonePublicRepairPageMode(baseInput({
+      brandSlug: 'asus', modelSlug: 'rog-phone-3', repairSlug: 'screen-replacement',
+    }))).toMatchObject({
+      mode: 'independent', reason: 'independent-verified-grandfather',
+      target: { scope: 'model', href: '/repairs/phone/asus/rog-phone-3/screen-replacement' },
+    });
+
+    expect(evaluateNonIphonePublicRepairPageMode(baseInput({
+      brandSlug: 'motorola', modelSlug: 'future-phone', repairSlug: 'battery-replacement',
+    }))).toMatchObject({
+      mode: 'shared', reason: 'shared-global-route',
+      target: { scope: 'global', href: '/repairs/battery-replacement' },
+    });
+  });
+
   it('keeps shared-only, Water Damage, and unknown taxonomy ahead of grandfather evidence', () => {
     const grandfather = {
       eligibilityEvidence: 'verified-independent-grandfather' as const,

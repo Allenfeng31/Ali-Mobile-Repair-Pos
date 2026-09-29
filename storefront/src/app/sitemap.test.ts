@@ -187,6 +187,34 @@ describe('Sitemap SEO Generation', () => {
     expect(paths).not.toContain('/repairs/phone/google-pixel/pixel-unconfigured/screen-replacement');
   });
 
+  it('emits only grandfathered secondary protected-service detail pages', async () => {
+    fetchRepairCatalogMock.mockResolvedValueOnce({
+      brands: [
+        {
+          category: 'phone', slug: 'asus', models: [{
+            slug: 'rog-phone-3', repairTypes: [{ slug: 'screen-replacement' }],
+          }],
+        },
+        {
+          category: 'phone', slug: 'motorola', models: [{
+            slug: 'future-phone', repairTypes: [{ slug: 'battery-replacement' }, { slug: 'back-glass-replacement' }],
+          }],
+        },
+        {
+          category: 'phone', slug: 'samsung', models: [{
+            slug: 'galaxy-s24', repairTypes: [{ slug: 'battery-replacement' }],
+          }],
+        },
+      ],
+    });
+
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+    expect(paths).toContain('/repairs/phone/asus/rog-phone-3/screen-replacement');
+    expect(paths).toContain('/repairs/phone/samsung/galaxy-s24/battery-replacement');
+    expect(paths).not.toContain('/repairs/phone/motorola/future-phone/battery-replacement');
+    expect(paths).not.toContain('/repairs/phone/motorola/future-phone/back-glass-replacement');
+  });
+
   it('suppresses only exact Phase 1 source paths while retaining held and outside-sample routes', async () => {
     fetchRepairCatalogMock.mockResolvedValueOnce({
       brands: [

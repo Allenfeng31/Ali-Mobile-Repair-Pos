@@ -4,6 +4,7 @@ import type {
   RepairOrigin,
 } from './publicRepairCataloguePolicy';
 import {
+  classifyPhoneBrand,
   evaluateNonIphonePublicRepairPageMode,
   type NonIphonePublicRepairPageModeDecision,
 } from './publicRepairPageModePolicy';
@@ -102,6 +103,24 @@ function resolvedHref(
   return decision.target?.href ?? fallbackHref;
 }
 
+const PROTECTED_REPAIR_TYPE_HUB_SLUGS = new Set([
+  'screen-replacement',
+  'battery-replacement',
+  'charging-port-replacement',
+  'back-glass-replacement',
+]);
+
+function preservesPrimaryPhoneHubRoute(
+  input: ModelHubRepairPageModeInput,
+  repairSlug: string,
+  decision: NonIphonePublicRepairPageModeDecision,
+) {
+  return input.category === 'phone'
+    && classifyPhoneBrand(input.brandSlug) !== 'secondary-phone'
+    && PROTECTED_REPAIR_TYPE_HUB_SLUGS.has(repairSlug)
+    && decision.mode === 'shared';
+}
+
 function freezeOption(repair: RepairOption, href: string | undefined): ModelHubResolvedRepairOption {
   const { repairOrigin: omittedRepairOrigin, ...uiRepair } = repair;
   void omittedRepairOrigin;
@@ -149,7 +168,11 @@ export function resolveModelHubRepairPageMode(
         routeAvailable: decision.routeAvailable,
       });
 
-      return { decision, report, option: freezeOption(selectedRepair, phase1Destination ?? resolvedHref(decision, fallbackHref, input.brandSlug, input.modelSlug)) };
+      const href = preservesPrimaryPhoneHubRoute(input, repairSlug, decision)
+        ? fallbackHref
+        : resolvedHref(decision, fallbackHref, input.brandSlug, input.modelSlug);
+
+      return { decision, report, option: freezeOption(selectedRepair, phase1Destination ?? href) };
     });
 
   return Object.freeze({

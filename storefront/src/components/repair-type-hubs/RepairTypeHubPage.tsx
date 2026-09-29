@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { RepairTypeHubCatalogResult } from '@/lib/repair-type-hubs';
 import RepairTypeHubBreadcrumbs from './RepairTypeHubBreadcrumbs';
 import RepairTypeModelGrid from './RepairTypeModelGrid';
+import RepairTypeHubSelectedDevice, { type RepairTypeHubSelectedDeviceViewModel } from './RepairTypeHubSelectedDevice';
 import styles from './RepairTypeHub.module.css';
 
 interface RepairTypeHubFaq {
@@ -47,6 +48,8 @@ interface RepairTypeHubPageProps {
   faqs?: RepairTypeHubFaq[];
   faqHeading?: string;
   repairResultsSlot?: ReactNode;
+  selectedDevice?: RepairTypeHubSelectedDeviceViewModel | null;
+  changeModelHref?: string;
 }
 
 export default function RepairTypeHubPage({
@@ -70,6 +73,8 @@ export default function RepairTypeHubPage({
   faqs,
   faqHeading,
   repairResultsSlot,
+  selectedDevice,
+  changeModelHref,
 }: RepairTypeHubPageProps) {
   const pageTitle = title ?? `${data.hub.label} Repair`;
   const pageDescription =
@@ -110,12 +115,16 @@ export default function RepairTypeHubPage({
           </div>
         </section>
 
-        <RepairTypeModelGrid
-          hubLabel={data.hub.label}
-          categories={data.categories}
-          title={modelGridTitle}
-          description={modelGridDescription}
-        />
+        {selectedDevice && changeModelHref ? (
+          <RepairTypeHubSelectedDevice selected={selectedDevice} changeModelHref={changeModelHref} />
+        ) : (
+          <RepairTypeModelGrid
+            hubLabel={data.hub.label}
+            categories={data.categories}
+            title={modelGridTitle}
+            description={modelGridDescription}
+          />
+        )}
 
         {symptoms && symptoms.length > 0 ? (
           <section className={`repair-content-band ${styles.sectionCard}`}>

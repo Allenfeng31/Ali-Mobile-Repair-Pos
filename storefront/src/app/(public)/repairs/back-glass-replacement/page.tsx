@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
 import { fetchRepairTypeHubRepairResultSeeds } from '@/lib/repair-results.server';
-import { buildRepairTypeHubCatalog } from '@/lib/repair-type-hubs';
+import { buildRepairTypeHubCatalog, resolveRepairTypeHubSelectedState } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
 import RepairTypeSupportingBrandHubLinks from '@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks';
@@ -93,16 +93,22 @@ function buildHeroHighlights() {
   ];
 }
 
-export default async function BackGlassReplacementPage() {
+export default async function BackGlassReplacementPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }>;
+}) {
+  const query = await (searchParams ?? Promise.resolve({}));
   const [catalog, repairResultSeeds] = await Promise.all([
     fetchRepairCatalog(),
     fetchRepairTypeHubRepairResultSeeds({ category: 'phone', repairTypeSlug: 'back-glass-replacement' }),
   ]);
-  const data = buildRepairTypeHubCatalog(catalog, 'back-glass-replacement');
+  const data = buildRepairTypeHubCatalog(catalog, 'back-glass-replacement', { enableSecondaryPhoneHybridFallback: true });
 
   if (!data || data.categories.length === 0) {
     notFound();
   }
+  const selectedDevice = resolveRepairTypeHubSelectedState({ catalog, data, query });
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -143,6 +149,8 @@ export default async function BackGlassReplacementPage() {
 
       <RepairTypeHubPage
         data={data}
+        selectedDevice={selectedDevice}
+        changeModelHref="/repairs/back-glass-replacement#repair-type-model-finder"
         title="Back Glass & Housing Repair in Ringwood"
         description="Choose your supported phone model for back glass or housing repair at Ali Mobile & Repair in Ringwood Square. We assess rear-glass damage, housing condition, frame impact, and related component risk before confirming the repair method."
         heroKicker="Phone Rear Damage Repairs"

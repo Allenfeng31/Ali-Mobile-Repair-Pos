@@ -1,6 +1,10 @@
 import type { RepairOrigin } from './publicRepairCataloguePolicy';
 import { compareDeterministicStrings } from './deterministicStrings';
 import { getCanonicalBrandSlug, isWaterDamageRepairSlug } from './waterDamageRouting';
+import {
+  GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS,
+  isGrandfatheredSecondaryPhoneDetailRepair,
+} from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 
 export type PhoneBrandClass = 'iphone' | 'core-android' | 'secondary-phone';
 
@@ -400,6 +404,27 @@ export function evaluateNonIphonePublicRepairPageMode(
   if ((input.eligibilityEvidence === 'current-live-pos-exact' && input.repairOrigin !== 'pos')
     || (input.eligibilityEvidence === 'verified-independent-grandfather' && input.legacyStatus !== 'independent-verified')) {
     return unresolvedForEvidence('conflicting-evidence');
+  }
+
+  const isSecondaryProtectedService = input.category === 'phone'
+    && classifyPhoneBrand(input.brandSlug) === 'secondary-phone'
+    && (GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS as readonly string[]).includes(input.repairSlug);
+  if (isSecondaryProtectedService && input.repairOrigin === 'pos') {
+    if (isGrandfatheredSecondaryPhoneDetailRepair(
+      input.category,
+      input.brandSlug,
+      input.modelSlug,
+      input.repairSlug,
+    )) {
+      return freezeDecision(
+        'independent',
+        'independent-verified-grandfather',
+        { scope: 'model', href: `/repairs/phone/${input.brandSlug}/${input.modelSlug}/${input.repairSlug}` },
+        true,
+      );
+    }
+
+    return sharedDecision(input.brandSlug, input.repairSlug);
   }
 
   const currentLivePos = input.repairOrigin === 'pos'

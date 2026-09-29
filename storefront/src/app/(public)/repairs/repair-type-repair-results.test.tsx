@@ -1,18 +1,27 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const state = vi.hoisted(() => ({ repairResultProps: [] as Array<Record<string, unknown>> }));
+const state = vi.hoisted(() => ({
+  repairResultProps: [] as Array<Record<string, unknown>>,
+  hubProps: [] as Array<Record<string, unknown>>,
+}));
 const fetchRepairCatalog = vi.hoisted(() => vi.fn());
 const fetchRepairTypeHubRepairResultSeeds = vi.hoisted(() => vi.fn());
+const buildRepairTypeHubCatalog = vi.hoisted(() => vi.fn(() => ({ categories: [{}] })));
+const resolveRepairTypeHubSelectedState = vi.hoisted(() => vi.fn<() => unknown>(() => null));
 
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog }));
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairTypeHubRepairResultSeeds }));
 vi.mock('@/lib/repair-type-hubs', () => ({
-  buildRepairTypeHubCatalog: vi.fn(() => ({ categories: [{}] })),
+  buildRepairTypeHubCatalog,
+  resolveRepairTypeHubSelectedState,
 }));
 vi.mock('@/components/services/ServiceSchema', () => ({ ServiceSchema: () => null }));
 vi.mock('@/components/repair-type-hubs/RepairTypeHubPage', () => ({
-  default: ({ repairResultsSlot }: { repairResultsSlot: React.ReactNode }) => <>{repairResultsSlot}</>,
+  default: (props: { repairResultsSlot: React.ReactNode }) => {
+    state.hubProps.push(props);
+    return <>{props.repairResultsSlot}</>;
+  },
 }));
 vi.mock('@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks', () => ({ default: () => null }));
 vi.mock('@/components/repair-results/RepairTypeRepairResultsSection', () => ({
@@ -43,6 +52,7 @@ const pages = [
 
 afterEach(() => {
   state.repairResultProps = [];
+  state.hubProps = [];
   fetchRepairCatalog.mockReset();
   fetchRepairTypeHubRepairResultSeeds.mockReset();
 });
@@ -52,10 +62,12 @@ describe('generic phone repair-type page Repair Results SSR integration', () => 
     fetchRepairCatalog.mockResolvedValue({});
     fetchRepairTypeHubRepairResultSeeds.mockResolvedValue(seed);
 
-    renderToStaticMarkup(await Page());
+    renderToStaticMarkup(await Page({ searchParams: Promise.resolve({}) }));
 
     expect(fetchRepairCatalog).toHaveBeenCalledTimes(1);
     expect(fetchRepairTypeHubRepairResultSeeds).toHaveBeenCalledWith({ category: 'phone', repairTypeSlug });
+    expect(buildRepairTypeHubCatalog).toHaveBeenCalledWith(expect.anything(), repairTypeSlug, { enableSecondaryPhoneHybridFallback: true });
+    expect(resolveRepairTypeHubSelectedState).toHaveBeenCalledWith(expect.objectContaining({ query: {} }));
     expect(state.repairResultProps).toEqual([expect.objectContaining({
       category: 'phone', repairType: repairTypeSlug, initialResults: seed,
     })]);
@@ -65,10 +77,25 @@ describe('generic phone repair-type page Repair Results SSR integration', () => 
     fetchRepairCatalog.mockResolvedValue({});
     fetchRepairTypeHubRepairResultSeeds.mockResolvedValue([]);
 
-    renderToStaticMarkup(await Page());
+    renderToStaticMarkup(await Page({ searchParams: Promise.resolve({}) }));
 
     expect(state.repairResultProps).toEqual([expect.objectContaining({
       category: 'phone', repairType: repairTypeSlug, initialResults: undefined,
     })]);
+  });
+
+  it.each(pages)('passes a valid selected-device state only through the existing %s Hub adapter', async (repairTypeSlug, Page) => {
+    fetchRepairCatalog.mockResolvedValue({});
+    fetchRepairTypeHubRepairResultSeeds.mockResolvedValue([]);
+    resolveRepairTypeHubSelectedState.mockReturnValueOnce({
+      brand: 'Huawei', model: 'P30', repairName: 'Screen Replacement', priceLabel: 'Quote on Request', bookingHref: '/book-repair',
+    });
+
+    renderToStaticMarkup(await Page({ searchParams: Promise.resolve({ brand: 'huawei', model: 'p30' }) }));
+
+    expect(state.hubProps.at(-1)).toEqual(expect.objectContaining({
+      selectedDevice: expect.objectContaining({ brand: 'Huawei', model: 'P30' }),
+      changeModelHref: `/repairs/${repairTypeSlug}#repair-type-model-finder`,
+    }));
   });
 });
