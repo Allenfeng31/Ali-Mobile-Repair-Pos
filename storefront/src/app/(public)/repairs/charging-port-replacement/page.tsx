@@ -39,6 +39,21 @@ const FAQS = [
     answer:
       'Charging port repair cost depends on the phone model, part availability and whether the issue is limited to the port or connected to another fault. We confirm the model and symptoms before giving the final quote.',
   },
+  {
+    question: 'How long does charging port repair take?',
+    answer:
+      'Phone charging port repair time depends on the model and the fault found during diagnosis. Timing can vary with parts availability, whether cleaning or replacement is suitable, and whether the charging issue involves the battery or board-level components.',
+  },
+  {
+    question: 'Will charging port repair affect my data?',
+    answer:
+      'Charging port repair does not normally erase phone data, but backing up important information before any repair is sensible. We explain if diagnosis identifies a broader fault that changes the practical repair path.',
+  },
+  {
+    question: 'What should I check before booking charging port repair?',
+    answer:
+      'Before booking, try another known-good cable and charger or power source, and look only for obvious external debris around the charging port. Do not insert metal or sharp tools into the port; diagnosis determines whether cleaning, port replacement, battery work, or broader repair is appropriate.',
+  },
 ];
 
 export const metadata: Metadata = {
@@ -136,7 +151,7 @@ export default async function ChargingPortReplacementPage({
         data={data}
         selectedDevice={selectedDevice}
         changeModelHref="/repairs/charging-port-replacement#repair-type-model-finder"
-        title="Charging Port Repair Services in Ringwood"
+        title="Phone Charging Port Repair"
         description="Choose your supported phone model for charging port repair at Ali Mobile & Repair in Ringwood Square. We check whether the issue is debris, port damage, charging accessories, battery condition, or a broader charging fault before confirming the repair."
         heroKicker="Phone Charging Repairs"
         heroProof={
@@ -286,7 +301,7 @@ export default async function ChargingPortReplacementPage({
                   <h2 className={styles.sectionTitle}>Visit Ali Mobile &amp; Repair in Ringwood Square</h2>
                 </div>
                 <p className={styles.sectionBody}>
-                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre. Call ahead if you want us to check likely charging-part availability for your model before you travel.
+                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre, with charging help for customers travelling from Ringwood, Mitcham, Croydon, Heathmont, Nunawading, and Melbourne&apos;s eastern suburbs. Call ahead if you want us to check likely charging-part availability for your model before you travel.
                 </p>
               </div>
               <div className={styles.infoGrid}>

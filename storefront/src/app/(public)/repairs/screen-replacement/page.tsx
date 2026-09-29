@@ -35,6 +35,11 @@ const FAQS = [
       'If the phone vibrates, rings or makes sounds but the screen stays black, the display may be damaged even though the phone is still running. A technician can check the screen, connectors and internal condition before confirming the repair path.',
   },
   {
+    question: 'Can my phone need a screen replacement if the glass is not cracked?',
+    answer:
+      'Yes. A phone can need a screen replacement with intact outer glass when the internal LCD or OLED display, touch layer, or screen/display assembly has failed. A black or blank display, vertical or coloured lines, flickering, black spots or display bleed, or an image that shows but does not respond to touch can all need diagnosis before the repair path is confirmed.',
+  },
+  {
     question: 'Will screen replacement affect my data?',
     answer:
       'A standard screen replacement normally does not require access to personal photos, messages or apps. If a function test requires the phone to be unlocked, we explain why and can ask you to unlock it or test it with us at the counter.',
@@ -141,7 +146,7 @@ export default async function ScreenReplacementPage({
         data={data}
         selectedDevice={selectedDevice}
         changeModelHref="/repairs/screen-replacement#repair-type-model-finder"
-        title="Screen Replacement Services in Ringwood"
+        title="Phone Screen & Display Replacement"
         description="Choose your supported phone model for screen replacement at Ali Mobile & Repair in Ringwood Square. Parts, timing, and screen options can vary by model."
         heroKicker="Phone Screen Repairs"
         heroProof={
@@ -197,7 +202,12 @@ export default async function ScreenReplacementPage({
           {
             question: 'What screen options might be available for my phone?',
             answer:
-              'Depending on the model and current stock, the practical repair path may involve LCD, OLED, Soft OLED, or another premium-quality assembly.',
+              'Depending on the model and current stock, the practical repair path may involve an LCD or OLED display, Soft OLED, or another premium-quality screen/display assembly.',
+          },
+          {
+            question: 'What is the difference between cracked outer glass and a damaged display or touch assembly?',
+            answer:
+              'Cracked outer glass is visible surface damage, while a damaged display or touch assembly can cause black display, lines, flicker, display bleed, or touch failure even when the glass is intact. Diagnosis confirms whether the complete screen/display assembly needs replacement.',
           },
           {
             question: 'Why can two screen options feel different in use?',
@@ -255,7 +265,7 @@ export default async function ScreenReplacementPage({
                   <h2 className={styles.sectionTitle}>Visit Ali Mobile &amp; Repair in Ringwood Square</h2>
                 </div>
                 <p className={styles.sectionBody}>
-                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre. Call ahead if you want us to check likely screen availability and expected timing for your model before you travel.
+                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre. From Ringwood Square, we serve Ringwood, Mitcham, Croydon, Heathmont, Nunawading, and Melbourne&apos;s eastern suburbs; if you are looking for phone repair near Mitcham, our kiosk is a convenient nearby option. Call ahead if you want us to check likely screen availability and expected timing for your model before you travel.
                 </p>
               </div>
               <div className={styles.infoGrid}>

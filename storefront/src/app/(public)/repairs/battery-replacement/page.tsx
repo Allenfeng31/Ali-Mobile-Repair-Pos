@@ -35,6 +35,16 @@ const FAQS = [
       'Same-day battery replacement may be available for many common phone models when the correct battery is in stock and the phone has no extra damage. Timing depends on the model, part availability, repair queue and device condition.',
   },
   {
+    question: 'How much does a phone battery replacement cost?',
+    answer:
+      'Phone battery replacement cost depends on the exact model and the available battery option. Choose your phone model to see current pricing where available or request a quote for the inspected repair path.',
+  },
+  {
+    question: 'Will battery replacement change battery warnings or calibration?',
+    answer:
+      'Battery replacement can involve normal device-specific calibration or warning behaviour after repair, and the outcome depends on the phone model and its condition. We test the phone and explain the applicable expectations at handover without promising a particular system reading or warning result.',
+  },
+  {
     question: 'Will battery replacement delete my data?',
     answer:
       'A standard battery replacement normally does not erase phone data, but it is always best to back up important information before any repair. We do not access personal photos, messages or apps as part of a standard battery repair.',
@@ -136,7 +146,7 @@ export default async function BatteryReplacementPage({
         data={data}
         selectedDevice={selectedDevice}
         changeModelHref="/repairs/battery-replacement#repair-type-model-finder"
-        title="Battery Replacement Services in Ringwood"
+        title="Phone Battery Replacement"
         description="Choose your supported phone model for battery replacement at Ali Mobile & Repair in Ringwood Square. Battery availability, price, and timing can vary by model."
         heroKicker="Phone Battery Repairs"
         heroProof={
@@ -261,7 +271,7 @@ export default async function BatteryReplacementPage({
                   <h2 className={styles.sectionTitle}>Visit Ali Mobile &amp; Repair in Ringwood Square</h2>
                 </div>
                 <p className={styles.sectionBody}>
-                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre. Call ahead if you want us to check likely battery availability and expected timing for your model before you travel.
+                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre, serving nearby Ringwood, Croydon, Heathmont, Nunawading, Mitcham, and Melbourne eastern-suburbs customers. Call ahead if you want us to check likely battery availability and expected timing for your model before you travel.
                 </p>
               </div>
               <div className={styles.infoGrid}>

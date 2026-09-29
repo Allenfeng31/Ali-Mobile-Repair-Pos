@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { RepairTypeHubCatalogResult } from '@/lib/repair-type-hubs';
 import RepairTypeHubBreadcrumbs from './RepairTypeHubBreadcrumbs';
+import RepairTypeHubCrawlerLinkIndex from './RepairTypeHubCrawlerLinkIndex';
 import RepairTypeModelGrid from './RepairTypeModelGrid';
 import RepairTypeHubSelectedDevice, { type RepairTypeHubSelectedDeviceViewModel } from './RepairTypeHubSelectedDevice';
 import styles from './RepairTypeHub.module.css';
@@ -118,12 +119,15 @@ export default function RepairTypeHubPage({
         {selectedDevice && changeModelHref ? (
           <RepairTypeHubSelectedDevice selected={selectedDevice} changeModelHref={changeModelHref} />
         ) : (
-          <RepairTypeModelGrid
-            hubLabel={data.hub.label}
-            categories={data.categories}
-            title={modelGridTitle}
-            description={modelGridDescription}
-          />
+          <>
+            <RepairTypeModelGrid
+              hubLabel={data.hub.label}
+              categories={data.categories}
+              title={modelGridTitle}
+              description={modelGridDescription}
+            />
+            <RepairTypeHubCrawlerLinkIndex categories={data.categories} />
+          </>
         )}
 
         {symptoms && symptoms.length > 0 ? (

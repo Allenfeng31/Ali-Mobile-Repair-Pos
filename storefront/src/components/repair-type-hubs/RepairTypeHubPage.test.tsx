@@ -6,6 +6,7 @@ import '@testing-library/jest-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('./RepairTypeModelGrid', () => ({ default: () => <section data-repair-type-finder>Finder</section> }));
+vi.mock('./RepairTypeHubCrawlerLinkIndex', () => ({ default: () => <section data-repair-type-crawler-index>Browse</section> }));
 vi.mock('./RepairTypeHubSelectedDevice', () => ({ default: ({ selected }: { selected: { model: string } }) => <section data-repair-type-selected>{selected.model}</section> }));
 vi.mock('next/link', () => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('lucide-react', () => ({ ArrowLeft: () => null }));
@@ -18,6 +19,7 @@ describe('RepairTypeHubPage hybrid selected state', () => {
   it('keeps the established finder for generic state', () => {
     const { container } = render(<RepairTypeHubPage data={data} />);
     expect(container.querySelector('[data-repair-type-finder]')).toBeInTheDocument();
+    expect(container.querySelector('[data-repair-type-crawler-index]')).toBeInTheDocument();
     expect(container.querySelector('[data-repair-type-selected]')).toBeNull();
   });
 
@@ -28,6 +30,7 @@ describe('RepairTypeHubPage hybrid selected state', () => {
       changeModelHref="/repairs/screen-replacement#repair-type-model-finder"
     />);
     expect(container.querySelector('[data-repair-type-finder]')).toBeNull();
+    expect(container.querySelector('[data-repair-type-crawler-index]')).toBeNull();
     expect(container.querySelector('[data-repair-type-selected]')).toHaveTextContent('P30');
   });
 });

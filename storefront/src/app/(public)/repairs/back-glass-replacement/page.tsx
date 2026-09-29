@@ -54,6 +54,21 @@ const FAQS = [
     answer:
       'We assess the exact model, rear construction, frame condition, and any related component damage before confirming whether the practical repair is back glass, back cover, or housing replacement.',
   },
+  {
+    question: 'How much does back glass repair cost?',
+    answer:
+      'Back glass repair cost depends on the phone model and whether the suitable repair is rear glass, back cover, or a housing assembly. Choose the exact model for current pricing where available or a quote for the confirmed repair method.',
+  },
+  {
+    question: 'How long does back glass or housing repair take?',
+    answer:
+      'Back glass or housing repair time depends on the exact model, the repair method, part availability, and any related frame or camera-area damage found during inspection. We confirm expected timing before work begins.',
+  },
+  {
+    question: 'Will back glass repair affect my data or should I back up first?',
+    answer:
+      'Back glass repair does not normally erase phone data, but backing up important information before any repair is recommended. We explain if inspection identifies broader damage that affects the practical repair path.',
+  },
 ];
 
 export const metadata: Metadata = {
@@ -151,7 +166,7 @@ export default async function BackGlassReplacementPage({
         data={data}
         selectedDevice={selectedDevice}
         changeModelHref="/repairs/back-glass-replacement#repair-type-model-finder"
-        title="Back Glass & Housing Repair in Ringwood"
+        title="Phone Back Glass & Housing Repair"
         description="Choose your supported phone model for back glass or housing repair at Ali Mobile & Repair in Ringwood Square. We assess rear-glass damage, housing condition, frame impact, and related component risk before confirming the repair method."
         heroKicker="Phone Rear Damage Repairs"
         heroProof={
@@ -295,7 +310,7 @@ export default async function BackGlassReplacementPage({
                   <h2 className={styles.sectionTitle}>Visit Ali Mobile &amp; Repair in Ringwood Square</h2>
                 </div>
                 <p className={styles.sectionBody}>
-                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre. Call ahead if you want us to check likely rear-part availability for your model before you travel.
+                  Walk-ins are welcome at Kiosk C1 inside Ringwood Square Shopping Centre, serving nearby Ringwood, Mitcham, Croydon, Heathmont, Nunawading, and Melbourne eastern-suburbs customers. Call ahead if you want us to check likely rear-part availability for your model before you travel.
                 </p>
               </div>
               <div className={styles.infoGrid}>

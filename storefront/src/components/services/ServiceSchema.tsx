@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 interface ServiceSchemaProps {
   serviceName: string;
   description: string;
@@ -20,7 +18,7 @@ export function ServiceSchema({ serviceName, description, url }: ServiceSchemaPr
   };
 
   return (
-    <Script
+    <script
       id="service-schema"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
