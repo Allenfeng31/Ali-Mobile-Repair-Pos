@@ -4,10 +4,11 @@
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, expect, it } from 'vitest';
+import type { RepairTypeHubCategoryGroup } from '@/lib/repair-type-hubs';
 
 import RepairTypeHubCrawlerLinkIndex from './RepairTypeHubCrawlerLinkIndex';
 
-const categories = [
+const categories: RepairTypeHubCategoryGroup[] = [
   {
     category: 'phone',
     categoryLabel: 'Phone',
@@ -54,7 +55,7 @@ const categories = [
       }],
     }],
   },
-] as const;
+];
 
 describe('RepairTypeHubCrawlerLinkIndex', () => {
   it('renders every already-authorized destination as a server-visible anchor', () => {
