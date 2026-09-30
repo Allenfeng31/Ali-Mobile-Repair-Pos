@@ -88,6 +88,15 @@ describe('Reports range loading', () => {
     expect(screen.getByText('11 Verified Records')).toBeInTheDocument();
   });
 
+  it('labels stored historical surcharge as customer surcharge', async () => {
+    apiMocks.getOrders.mockResolvedValue([{ ...order('HISTORICAL', 101.5), surcharge: 1.5, paymentMethod: 'eftpos' }]);
+    render(<ReportsHarness />);
+
+    await waitFor(() => expect(screen.getByText('Customer Surcharges')).toBeInTheDocument());
+    expect(screen.getByText('Historical customer charges')).toBeInTheDocument();
+    expect(screen.queryByText('1.5% Applied')).not.toBeInTheDocument();
+  });
+
   it('uses range parameters for custom dates and explicit All Time history', async () => {
     renderReports();
     await waitFor(() => expect(apiMocks.getOrders).toHaveBeenCalledTimes(1));

@@ -177,11 +177,11 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
           .leftRight('Cash Payment:', '$' + (order.mixedCash || 0).toFixed(2))
           .leftRight('Card Payment:', '$' + ((order.mixedEftpos || 0) + (order.surcharge || 0)).toFixed(2));
         if ((order.surcharge || 0) > 0) {
-          receipt.leftRight('  - Surcharge (1.5%):', '$' + (order.surcharge || 0).toFixed(2));
+          receipt.leftRight('  - Customer Surcharge (1.5%):', '$' + (order.surcharge || 0).toFixed(2));
         }
       } else if ((order.surcharge || 0) > 0) {
         receipt.leftRight(
-          'Surcharge (' + (order.paymentMethod || '').toUpperCase() + '):',
+          'Customer Surcharge (' + (order.paymentMethod || '').toUpperCase() + '):',
           '$' + (order.surcharge || 0).toFixed(2)
         );
       }
@@ -385,14 +385,14 @@ export function InvoiceModal({ isOpen, onClose, order, t }: InvoiceModalProps) {
                       </div>
                       {order.surcharge > 0 && (
                         <div className="flex justify-between text-[8px] italic opacity-70">
-                          <span>- Card Surcharge (1.5%):</span>
+                          <span>- Customer Surcharge (1.5%):</span>
                           <span>${(order.surcharge || 0).toFixed(2)}</span>
                         </div>
                       )}
                     </>
                   ) : order.surcharge > 0 && (
                     <div className="flex justify-between">
-                      <span>Surcharge ({order.paymentMethod?.toUpperCase()}):</span>
+                      <span>Customer Surcharge ({order.paymentMethod?.toUpperCase()}):</span>
                       <span>${order.surcharge.toFixed(2)}</span>
                     </div>
                   )}

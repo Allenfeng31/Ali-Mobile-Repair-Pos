@@ -17,6 +17,7 @@ const { deliverCatalogueOutboxEvent } = require('./catalogueRevalidation.js');
 const { runCatalogueOutboxProcessor } = require('./catalogueOutbox.js');
 const { createAnnouncementHandlers } = require('./announcementHandlers.js');
 const { createOrdersHandlers } = require('./ordersHandlers.js');
+const { insertOrderRecord } = require('./orderPersistence.js');
 const {
   calculateMultiItemPricing,
   formatBookingServiceName,
@@ -823,23 +824,7 @@ app.post('/api/orders', async (req, res) => {
     }
   }
 
-  // Insert Order - if new columns don't exist yet, retry with only legacy ones
-  let order, orderError;
-  ({ data: order, error: orderError } = await supabase.from('orders').insert([orderData]).select());
-
-  if (orderError && orderError.message && (
-    orderError.message.includes("surcharge") ||
-    orderError.message.includes("status") ||
-    orderError.message.includes("mixedCash") ||
-    orderError.message.includes("mixedEftpos")
-  )) {
-    console.warn(`⚠️ [Database Fallback] One or more new 'orders' columns missing. Retrying with essential columns only.`);
-    const essentialColumns = ['id', 'timestamp', 'subtotal', 'tax', 'total', 'profit', 'type', 'paymentMethod'];
-    const safeOrderData = {};
-    essentialColumns.forEach(key => { if (orderData[key] !== undefined) safeOrderData[key] = orderData[key]; });
-
-    ({ data: order, error: orderError } = await supabase.from('orders').insert([safeOrderData]).select());
-  }
+  const { order, error: orderError } = await insertOrderRecord(supabase, orderData);
 
   if (orderError) return res.status(500).json({ error: orderError.message });
 
@@ -851,7 +836,7 @@ app.post('/api/orders', async (req, res) => {
   }
 
   // Always return the full order including surcharge to the frontend
-  res.json({ ...order[0], surcharge: fullOrderData.surcharge || 0, items });
+  res.json({ ...order, surcharge: fullOrderData.surcharge || 0, items });
 });
 
 // ----------------------------------------------------------------------

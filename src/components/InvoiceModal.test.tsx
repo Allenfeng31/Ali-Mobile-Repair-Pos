@@ -1,9 +1,9 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { InvoiceModal } from './InvoiceModal';
 import type { Order } from '../types';
@@ -11,6 +11,8 @@ import type { Order } from '../types';
 vi.mock('../lib/api', () => ({
   api: { getSettings: vi.fn().mockResolvedValue({}) },
 }));
+
+afterEach(() => cleanup());
 
 const historicalOrder: Order = {
   id: 'TK-1770',
@@ -43,7 +45,19 @@ describe('InvoiceModal historical line items', () => {
     expect(within(table).getAllByText('1')).toHaveLength(2);
     expect(screen.getByText('Subtotal:').nextElementSibling).toHaveTextContent('$200.00');
     expect(screen.getByText('Tax (GST):').nextElementSibling).toHaveTextContent('$20.00');
-    expect(screen.getByText('Surcharge (EFTPOS):').nextElementSibling).toHaveTextContent('$3.30');
+    expect(screen.getByText('Customer Surcharge (EFTPOS):').nextElementSibling).toHaveTextContent('$3.30');
     expect(screen.getByText('TOTAL:').nextElementSibling).toHaveTextContent('$223.30');
+  });
+
+  it('omits a zero surcharge row for a post-cutoff payment', () => {
+    render(<InvoiceModal
+      isOpen
+      onClose={vi.fn()}
+      order={{ ...historicalOrder, timestamp: '2026-09-30T14:00:00.000Z', surcharge: 0, total: 220 }}
+      t={(_section, key) => key}
+    />);
+
+    expect(screen.queryByText(/surcharge/i)).not.toBeInTheDocument();
+    expect(screen.getByText('TOTAL:').nextElementSibling).toHaveTextContent('$220.00');
   });
 });

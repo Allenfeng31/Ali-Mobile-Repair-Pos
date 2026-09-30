@@ -36,6 +36,7 @@ import { api } from '../lib/api';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { matchesTerminalSearch, terminalCategoryOptions } from '../lib/terminalSearch';
+import { calculateCustomerCardSurcharge, getMixedPaymentAllocation } from '../lib/paymentAccounting';
 
 interface TerminalViewProps {
   inventory: InventoryItem[];
@@ -281,6 +282,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
     setError(null);
     setIsProcessing(true);
     setSuccessMessage(null);
+    const paymentTimestamp = new Date();
 
     try {
       // Calculate totals
@@ -323,12 +325,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
       const gst = baseTotal / 11;
 
-      let surcharge = 0;
-      if (paymentMethod === 'eftpos') {
-        surcharge = baseTotal * 0.015;
-      } else if (paymentMethod === 'mixed') {
-        surcharge = mixedEftpos * 0.015;
-      }
+      const cardPaymentAmount = paymentMethod === 'eftpos'
+        ? baseTotal
+        : paymentMethod === 'mixed' ? mixedEftpos : 0;
+      const surcharge = calculateCustomerCardSurcharge(cardPaymentAmount, paymentTimestamp);
 
       const finalTotal = baseTotal + surcharge;
 
@@ -372,7 +372,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
 
       const newOrder: Order = {
         id: `TK-${Math.floor(1000 + Math.random() * 9000)}`,
-        timestamp: new Date().toISOString(),
+        timestamp: paymentTimestamp.toISOString(),
         items: orderItems,
         subtotal: baseTotal - gst,
         tax: gst,
@@ -470,12 +470,10 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
   const baseTotal = rawTotal - percentDiscountAmount;
   const gst = baseTotal / 11;
 
-  let surcharge = 0;
-  if (paymentMethod === 'eftpos') {
-    surcharge = baseTotal * 0.015;
-  } else if (paymentMethod === 'mixed') {
-    surcharge = mixedEftpos * 0.015;
-  }
+  const previewCardPaymentAmount = paymentMethod === 'eftpos'
+    ? baseTotal
+    : paymentMethod === 'mixed' ? mixedEftpos : 0;
+  const surcharge = calculateCustomerCardSurcharge(previewCardPaymentAmount, new Date());
 
   const finalTotal = baseTotal + surcharge;
 
@@ -752,7 +750,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                 <span className="text-neu-text-secondary text-sm font-medium">{t('term', 'tax')}</span>
                 <span className="font-bold text-sm">${gst.toFixed(2)}</span>
               </div>
-              {paymentMethod === 'eftpos' && (
+              {paymentMethod === 'eftpos' && surcharge > 0 && (
                 <div className="flex justify-between animate-in fade-in slide-in-from-right-2">
                   <span className="text-neu-accent text-sm font-bold">EFTPOS Surcharge (1.5%)</span>
                   <span className="text-neu-accent font-bold text-sm">+${surcharge.toFixed(2)}</span>
@@ -876,7 +874,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                           : "bg-neu-bg/50 border-transparent text-neu-text-secondary hover:bg-neu-bg shadow-neu-flat"
                       )}
                     >
-                      {t('term', 'eftpos')}
+                      {surcharge > 0 ? t('term', 'eftposWithSurcharge') : t('term', 'eftpos')}
                     </button>
                     <button
                       onClick={() => {
@@ -911,9 +909,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                             type="number"
                             value={mixedCash || ''}
                             onChange={(e) => {
-                              const val = Math.min(baseTotal, Math.max(0, Number(e.target.value)));
-                              setMixedCash(val);
-                              setMixedEftpos(Number((baseTotal - val).toFixed(2)));
+                              const allocation = getMixedPaymentAllocation(baseTotal, 'cash', Number(e.target.value));
+                              setMixedCash(allocation.mixedCash);
+                              setMixedEftpos(allocation.mixedEftpos);
                             }}
                             className="w-full bg-neu-bg/50 border border-transparent rounded-2xl py-3 pl-7 pr-3 text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                           />
@@ -927,9 +925,9 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                             type="number"
                             value={mixedEftpos || ''}
                             onChange={(e) => {
-                              const val = Math.min(baseTotal, Math.max(0, Number(e.target.value)));
-                              setMixedEftpos(val);
-                              setMixedCash(Number((baseTotal - val).toFixed(2)));
+                              const allocation = getMixedPaymentAllocation(baseTotal, 'eftpos', Number(e.target.value));
+                              setMixedCash(allocation.mixedCash);
+                              setMixedEftpos(allocation.mixedEftpos);
                             }}
                             className="w-full bg-neu-bg/50 border border-transparent rounded-2xl py-3 pl-7 pr-3 text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                           />
@@ -944,7 +942,7 @@ export function TerminalView({ inventory, setInventory, orders, setOrders, cart,
                     <span>{t('term', 'subtotalInclGST')}</span>
                     <span className="text-black">${baseTotal.toFixed(2)}</span>
                   </div>
-                  {paymentMethod === 'eftpos' && (
+                  {paymentMethod === 'eftpos' && surcharge > 0 && (
                     <div className="flex justify-between items-center text-xs font-bold text-neu-accent">
                       <span>EFTPOS Surcharge (1.5%)</span>
                       <span className="text-black">${surcharge.toFixed(2)}</span>

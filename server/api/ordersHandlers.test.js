@@ -209,6 +209,20 @@ describe('historical order range retrieval', () => {
     expect(res.body.find((entry) => entry.id === 'TK-EMPTY').items).toEqual([]);
   });
 
+  it('normalizes legacy lowercase mixed-payment columns without rewriting stored history', async () => {
+    const historicalMixedOrder = {
+      ...order('TK-MIXED'),
+      paymentMethod: 'mixed',
+      mixedcash: 30,
+      mixedeftpos: 190,
+    };
+    const { supabase } = createSupabase({ orders: [historicalMixedOrder] });
+
+    const res = await get(supabase);
+
+    expect(res.body[0]).toMatchObject({ mixedCash: 30, mixedEftpos: 190 });
+  });
+
   it('returns generic failures and never returns partial financial data when parent or item pages fail', async () => {
     const parentFailure = createSupabase({ orders: [order('TK-1')], parentErrorAt: 0 });
     const parentRes = await get(parentFailure.supabase);

@@ -3,6 +3,7 @@ const DEFAULT_ORDER_ID_BATCH_SIZE = 100;
 const DEFAULT_ITEM_PAGE_SIZE = 1000;
 const MELBOURNE_TIME_ZONE = 'Australia/Melbourne';
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const { normalizeOrderPaymentFields } = require('./orderPersistence.js');
 
 function chunk(values, size) {
   const chunks = [];
@@ -154,7 +155,7 @@ function createOrdersHandlers({
       }
 
       return res.json(currentOrders.map((order) => ({
-        ...order,
+        ...normalizeOrderPaymentFields(order),
         items: itemsByOrderId.get(order.id) || [],
       })));
     },

@@ -482,9 +482,9 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
             onClick={() => { setBreakdownType('accessory'); setShowRevenueModal(true); }}
           />
           <StatCard
-            label="Card Surcharges"
+            label="Customer Surcharges"
             value={`$${stats.surchargeTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-            trend="1.5% Applied"
+            trend="Historical customer charges"
             icon={CreditCard}
             color="secondary"
             onClick={() => setShowSurchargeModal(true)}
@@ -966,7 +966,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-black">
-                      {showSurchargeModal ? 'Surcharge Audit' : 'Tax Liability Log'}
+                      {showSurchargeModal ? 'Customer Surcharge Audit' : 'Tax Liability Log'}
                     </h3>
                     <p className="text-xs font-black text-gray-600 uppercase tracking-widest">Financial Transparency</p>
                   </div>
@@ -979,7 +979,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                 <div className="grid grid-cols-12 text-[10px] font-black uppercase tracking-widest text-gray-600 px-4 mb-2">
                   <div className="col-span-5">Order ID</div>
                   <div className="col-span-3 text-center">Net Amount</div>
-                  <div className="col-span-4 text-right">{showSurchargeModal ? 'Fee (1.5%)' : 'GST (1/11th)'}</div>
+                  <div className="col-span-4 text-right">{showSurchargeModal ? 'Customer Surcharge' : 'GST (1/11th)'}</div>
                 </div>
                 {validOrders.filter(o => showSurchargeModal ? (o.surcharge || 0) > 0 : true).map((order, i) => (
                   <div key={i} className="grid grid-cols-12 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] p-5 rounded-2xl items-center border border-white/10">
@@ -1049,7 +1049,7 @@ export function ReportsView({ orders, setOrders, t }: ReportsViewProps) {
                     </div>
                     {selectedOrder.surcharge > 0 && (
                       <div className="flex justify-between text-xs font-black text-blue-600 uppercase tracking-widest">
-                        <span>Card Fee</span>
+                        <span>Customer Surcharge</span>
                         <span>+${selectedOrder.surcharge.toFixed(2)}</span>
                       </div>
                     )}
