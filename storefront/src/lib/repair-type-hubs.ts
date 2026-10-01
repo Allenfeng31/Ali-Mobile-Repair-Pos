@@ -17,6 +17,7 @@ export type RepairTypeHubCategory = 'phone' | 'tablet' | 'laptop' | 'watch';
 export interface RepairTypeHubDefinition {
   slug: RepairTypeHubSlug;
   label: string;
+  startingPriceLabel: string;
   aliases: string[];
   supportedCategories: RepairTypeHubCategory[];
   enabledCategories: RepairTypeHubCategory[];
@@ -119,6 +120,7 @@ export const REPAIR_TYPE_HUBS: Record<RepairTypeHubSlug, RepairTypeHubDefinition
   'screen-replacement': {
     slug: 'screen-replacement',
     label: 'Screen Replacement',
+    startingPriceLabel: 'From $60',
     aliases: ['screen-replacement', 'screen-repair'],
     supportedCategories: DEVICE_CATEGORY_ORDER,
     enabledCategories: DEVICE_CATEGORY_ORDER,
@@ -126,6 +128,7 @@ export const REPAIR_TYPE_HUBS: Record<RepairTypeHubSlug, RepairTypeHubDefinition
   'battery-replacement': {
     slug: 'battery-replacement',
     label: 'Battery Replacement',
+    startingPriceLabel: 'From $50',
     aliases: ['battery-replacement', 'battery-service', 'battery-repair'],
     supportedCategories: DEVICE_CATEGORY_ORDER,
     enabledCategories: DEVICE_CATEGORY_ORDER,
@@ -133,6 +136,7 @@ export const REPAIR_TYPE_HUBS: Record<RepairTypeHubSlug, RepairTypeHubDefinition
   'charging-port-replacement': {
     slug: 'charging-port-replacement',
     label: 'Charging Port Replacement',
+    startingPriceLabel: 'From $50',
     aliases: ['charging-port-replacement', 'charging-port-repair', 'charging-port'],
     supportedCategories: DEVICE_CATEGORY_ORDER,
     enabledCategories: DEVICE_CATEGORY_ORDER,
@@ -140,6 +144,7 @@ export const REPAIR_TYPE_HUBS: Record<RepairTypeHubSlug, RepairTypeHubDefinition
   'back-glass-replacement': {
     slug: 'back-glass-replacement',
     label: 'Back Glass Replacement',
+    startingPriceLabel: 'From $50',
     aliases: ['back-glass-replacement', 'back-housing-replacement', 'back-glass', 'back-housing'],
     supportedCategories: DEVICE_CATEGORY_ORDER,
     enabledCategories: DEVICE_CATEGORY_ORDER,
@@ -436,6 +441,10 @@ export function resolveRepairTypeHubSelectedModel(
 
 function formatPrice(price: number) {
   return Number.isInteger(price) ? String(price) : price.toFixed(2);
+}
+
+export function getRepairTypeHubStartingPriceLabel(data: RepairTypeHubCatalogResult) {
+  return data.hub.startingPriceLabel;
 }
 
 export function getRepairTypeHubSelectedPriceLabel(

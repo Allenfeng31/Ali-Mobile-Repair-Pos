@@ -2,12 +2,19 @@
  * @vitest-environment jsdom
  */
 import { render } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import '@testing-library/jest-dom';
+import type { ReactElement, ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const fetchRepairCatalog = vi.hoisted(() => vi.fn());
 const fetchRepairTypeHubRepairResultSeeds = vi.hoisted(() => vi.fn());
 const capturedProps = vi.hoisted(() => [] as Array<Record<string, unknown>>);
+const heroFactsByRepairSlug = vi.hoisted(() => ({
+  'screen-replacement': { startingPriceLabel: 'From $60' },
+  'battery-replacement': { startingPriceLabel: 'From $50' },
+  'charging-port-replacement': { startingPriceLabel: 'From $50' },
+  'back-glass-replacement': { startingPriceLabel: 'From $50' },
+} as const));
 
 vi.mock('next/link', () => ({ default: () => null }));
 vi.mock('next/navigation', () => ({ notFound: vi.fn() }));
@@ -15,7 +22,11 @@ vi.mock('lucide-react', () => ({ ArrowRight: () => null, MapPin: () => null, Pho
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog }));
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairTypeHubRepairResultSeeds }));
 vi.mock('@/lib/repair-type-hubs', () => ({
-  buildRepairTypeHubCatalog: vi.fn(() => ({ categories: [{}] })),
+  buildRepairTypeHubCatalog: vi.fn((_catalog, repairSlug: keyof typeof heroFactsByRepairSlug) => ({
+    hub: heroFactsByRepairSlug[repairSlug],
+    categories: [{}],
+  })),
+  getRepairTypeHubStartingPriceLabel: vi.fn((data) => data.hub.startingPriceLabel),
   resolveRepairTypeHubSelectedState: vi.fn(() => null),
 }));
 vi.mock('@/components/services/ServiceSchema', () => ({ ServiceSchema: () => null }));
@@ -55,6 +66,46 @@ describe('Repair Type Hub intent content', () => {
     await expect(pageProps(BatteryReplacementPage)).resolves.toMatchObject({ title: 'Phone Battery Replacement' });
     await expect(pageProps(ChargingPortReplacementPage)).resolves.toMatchObject({ title: 'Phone Charging Port Repair' });
     await expect(pageProps(BackGlassReplacementPage)).resolves.toMatchObject({ title: 'Phone Back Glass & Housing Repair' });
+  });
+
+  it.each([
+    ['Screen', ScreenReplacementPage],
+    ['Battery', BatteryReplacementPage],
+    ['Charging Port', ChargingPortReplacementPage],
+    ['Back Glass', BackGlassReplacementPage],
+  ] as const)('uses the fixed %s commercial Hero facts independently of the fallback catalogue', async (_service, page) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [] });
+    fetchRepairTypeHubRepairResultSeeds.mockResolvedValue([]);
+
+    await expect(pageProps(page)).resolves.toMatchObject({
+      heroHighlights: expect.arrayContaining([
+        expect.objectContaining({ title: 'Price' }),
+        expect.objectContaining({ title: 'Repair Time' }),
+        expect.objectContaining({ title: 'Ringwood Square', description: 'Walk-ins welcome at Kiosk C1 inside Ringwood Square.' }),
+      ]),
+    });
+  });
+
+  it.each([
+    ['Screen', ScreenReplacementPage, 'Screen replacement starts from $60.', '$60', 'Most screen replacements take around 30 minutes.'],
+    ['Battery', BatteryReplacementPage, 'Battery replacement starts from $50.', '$50', 'Most battery replacements take around 30 minutes.'],
+    ['Charging Port', ChargingPortReplacementPage, 'Charging port replacement starts from $50.', '$50', 'Most charging port replacements take around 30 minutes.'],
+    ['Back Glass', BackGlassReplacementPage, 'Back glass replacement starts from $50.', '$50', 'Most back glass replacements take around 30 minutes.'],
+  ] as const)('uses approved %s card body copy with semantic emphasis', async (_service, page, priceCopy, price, timeCopy) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [] });
+    fetchRepairTypeHubRepairResultSeeds.mockResolvedValue([]);
+
+    const props = await pageProps(page);
+    const highlights = props.heroHighlights as Array<{ title: string; description?: ReactNode }>;
+    const priceHighlight = highlights.find((highlight) => highlight.title === 'Price')!;
+    const timeHighlight = highlights.find((highlight) => highlight.title === 'Repair Time')!;
+    const priceCard = render(<>{priceHighlight.description}</>);
+    const timeCard = render(<>{timeHighlight.description}</>);
+
+    expect(priceCard.container).toHaveTextContent(priceCopy);
+    expect(priceCard.container.querySelector('strong')).toHaveTextContent(price);
+    expect(timeCard.container).toHaveTextContent(timeCopy);
+    expect(timeCard.container.querySelector('strong')).toHaveTextContent('30 minutes');
   });
 
   it('provides direct, diagnosis-first answers for the newly covered repair questions', async () => {

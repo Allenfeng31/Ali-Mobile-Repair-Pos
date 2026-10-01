@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildRepairTypeHubCatalog,
+  getRepairTypeHubDefinition,
+  getRepairTypeHubStartingPriceLabel,
   getRepairTypeHubSelectedPriceLabel,
   resolveRepairTypeHubSelectedState,
   resolveRepairTypeHubSelectedModel,
@@ -86,6 +88,31 @@ describe('Repair Type Hub secondary-phone hybrid routing', () => {
       { quality_grade: 'Premium', price: 189, is_recommended: true },
     ], repairOrigin: 'pos' }, { priceAuthority: 'quote-only', price: 0 })).toBe('From $119');
     expect(getRepairTypeHubSelectedPriceLabel(selected, { priceAuthority: 'exact-pos', price: 129 })).toBe('$129');
+  });
+
+  it.each([
+    ['screen-replacement', 'From $60'],
+    ['battery-replacement', 'From $50'],
+    ['charging-port-replacement', 'From $50'],
+    ['back-glass-replacement', 'From $50'],
+  ] as const)('uses the explicit category-level Hero price for %s without POS pricing', (repairSlug, priceLabel) => {
+    const commercialData = {
+      ...data,
+      categories: [{
+        ...data.categories[0]!,
+        brands: [{
+          ...data.categories[0]!.brands[0]!,
+          models: [
+            { ...data.categories[0]!.brands[0]!.models[0]!, price: 50, repairOrigin: 'synthetic-core' as const },
+            { ...data.categories[0]!.brands[0]!.models[1]!, price: 119, repairOrigin: 'pos' as const, variants: [{ quality_grade: 'Standard', price: 60, is_recommended: false }] },
+          ],
+        }],
+      }],
+    };
+
+    const hub = getRepairTypeHubDefinition(repairSlug)!;
+    expect(hub.startingPriceLabel).toBe(priceLabel);
+    expect(getRepairTypeHubStartingPriceLabel({ ...commercialData, hub })).toBe(priceLabel);
   });
 
   it('keeps booking explicit and carries canonical secondary phone identity only after a valid selected query', () => {

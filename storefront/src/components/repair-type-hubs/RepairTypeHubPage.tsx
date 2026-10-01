@@ -20,7 +20,7 @@ interface RepairTypeHubReason {
 
 interface RepairTypeHubHeroHighlight {
   title: string;
-  description?: string;
+  description?: ReactNode;
 }
 
 interface RepairTypeHubProcessStep {

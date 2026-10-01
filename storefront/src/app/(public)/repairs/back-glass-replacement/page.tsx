@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowRight, MapPin, PhoneCall } from 'lucide-react';
 import { fetchRepairCatalog } from '@/lib/api';
 import { fetchRepairTypeHubRepairResultSeeds } from '@/lib/repair-results.server';
-import { buildRepairTypeHubCatalog, resolveRepairTypeHubSelectedState } from '@/lib/repair-type-hubs';
+import { buildRepairTypeHubCatalog, getRepairTypeHubStartingPriceLabel, resolveRepairTypeHubSelectedState, type RepairTypeHubCatalogResult } from '@/lib/repair-type-hubs';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import RepairTypeHubPage from '@/components/repair-type-hubs/RepairTypeHubPage';
 import RepairTypeSupportingBrandHubLinks from '@/components/repair-type-hubs/RepairTypeSupportingBrandHubLinks';
@@ -91,19 +91,21 @@ export const metadata: Metadata = {
   },
 };
 
-function buildHeroHighlights() {
+function buildHeroHighlights(data: RepairTypeHubCatalogResult) {
+  const startingPrice = getRepairTypeHubStartingPriceLabel(data).replace(/^From\s+/, '');
+
   return [
+    {
+      title: 'Price',
+      description: <>Back glass replacement starts from <strong>{startingPrice}</strong>.</>,
+    },
+    {
+      title: 'Repair Time',
+      description: <>Most back glass replacements take around <strong>30 minutes</strong>.</>,
+    },
     {
       title: 'Ringwood Square',
       description: 'Walk-ins welcome at Kiosk C1 inside Ringwood Square.',
-    },
-    {
-      title: 'Find the right model',
-      description: 'Search by model name or code and open the correct rear-glass or housing repair page directly.',
-    },
-    {
-      title: 'Model-specific method',
-      description: 'We confirm whether the practical repair is back glass, back cover, or housing replacement before work begins.',
     },
   ];
 }
@@ -186,7 +188,7 @@ export default async function BackGlassReplacementPage({
             </a>
           </>
         }
-        heroHighlights={buildHeroHighlights()}
+        heroHighlights={buildHeroHighlights(data)}
         symptoms={[
           {
             title: 'Shattered rear glass',
