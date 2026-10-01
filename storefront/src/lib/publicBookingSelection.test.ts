@@ -211,6 +211,43 @@ describe('resolvePublicBookingSelection', () => {
     })).toBeNull();
   });
 
+  it('forces Motherboard booking to the canonical quote-only identity even when a POS Logic Board row exists', () => {
+    const motherboardCatalog = {
+      brands: [
+        {
+          category: 'phone', brand: 'Samsung', slug: 'samsung', icon: '', models: [{
+            model: 'Galaxy S21', slug: 'galaxy-s21', repairTypes: [{
+              slug: 'logic-board-repair', name: 'Logic Board Repair', price: 499, repairOrigin: 'pos',
+            }],
+          }],
+        },
+        {
+          category: 'laptop', brand: 'MacBook', slug: 'macbook', icon: '', models: [{
+            model: 'MacBook Air (M3)', slug: 'macbook-air-m3', repairTypes: [],
+          }],
+        },
+      ],
+    } as Pick<RepairCatalog, 'brands'>;
+
+    for (const selection of [
+      resolvePublicBookingSelection(motherboardCatalog, {
+        category: 'phone', brandSlug: 'samsung', modelSlug: 'galaxy-s21', serviceSlug: 'logic-board-repair',
+        brand: 'Samsung', model: 'Galaxy S21', service: 'Logic Board Repair',
+      }),
+      resolvePublicBookingSelection(motherboardCatalog, {
+        category: 'laptop', brandSlug: 'macbook', modelSlug: 'macbook-air-m3', serviceSlug: 'logic-board-repair',
+        brand: 'MacBook', model: 'MacBook Air (M3)', service: 'Logic Board Repair',
+      }),
+    ]) {
+      expect(selection).toMatchObject({ serviceSlug: 'logic-board-repair', price: 0, priceAuthority: 'quote-only' });
+      expect(getPublicBookingServiceKey(selection!)).toBe(`public-booking:${selection!.category}:${selection!.brandSlug}:${selection!.modelSlug}:logic-board-repair`);
+      expect(calculateCartPricing([{
+        id: 'motherboard-quote', brand: selection!.brand, model: selection!.model, category: selection!.category, isConfirmed: true,
+        services: [resolvePublicBookingCartState(selection!, []).serviceToSelect!],
+      }], { multi_discount_tier_2: 0.1, multi_discount_tier_3: 0.15 })).toMatchObject({ hasCustomQuote: true });
+    }
+  });
+
   it('carries a generated shared-page href through validation into an unresolved cart item', () => {
     const href = getSharedRepairBookingHref({
       repairName: 'Loudspeaker Replacement',

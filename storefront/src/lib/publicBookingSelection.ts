@@ -1,6 +1,11 @@
 import type { RepairCatalog, RepairOption } from './publicRepairCataloguePolicy';
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensPrice, withVirtualCameraLensRepairOption } from './virtualCameraLens';
 import { withVirtualPhoneRepairOptions } from './virtualPhoneRepairs';
+import {
+  MOTHERBOARD_BOOKING_SERVICE_NAME,
+  MOTHERBOARD_REPAIR_SLUG,
+  isMotherboardEligibleCategory,
+} from './motherboardRepair';
 
 export interface PublicBookingSelectionInput {
   category?: string | null;
@@ -132,6 +137,27 @@ function resolveGenericCameraModuleQuote(
   };
 }
 
+function resolveMotherboardQuote(
+  category: string,
+  brand: { brand: string; slug: string },
+  model: { model: string; slug: string },
+  serviceSlug: string,
+): PublicBookingSelection | null {
+  if (serviceSlug !== MOTHERBOARD_REPAIR_SLUG || !isMotherboardEligibleCategory(category, brand.slug)) return null;
+
+  return {
+    category,
+    brand: brand.brand,
+    brandSlug: brand.slug,
+    model: model.model,
+    modelSlug: model.slug,
+    service: MOTHERBOARD_BOOKING_SERVICE_NAME,
+    serviceSlug,
+    price: 0,
+    priceAuthority: 'quote-only',
+  };
+}
+
 function hasAny(values: Array<string | null | undefined>) {
   return values.some((value) => value !== null && value !== undefined);
 }
@@ -166,9 +192,11 @@ export function resolvePublicBookingSelection(
     const repair = repairOptions(brand.category, brand.slug, model.repairTypes).find(
       (candidate) => candidate.slug === input.serviceSlug,
     );
-    const selection = repair
-      ? resolvedSelection(brand.category, brand, model, repair)
-      : resolveGenericCameraModuleQuote(brand.category, brand, model, input.serviceSlug!);
+    const motherboardSelection = resolveMotherboardQuote(brand.category, brand, model, input.serviceSlug!);
+    const selection = motherboardSelection
+      ?? (repair
+        ? resolvedSelection(brand.category, brand, model, repair)
+        : resolveGenericCameraModuleQuote(brand.category, brand, model, input.serviceSlug!));
     if (!selection) return null;
     if (
       (input.brand !== null && input.brand !== undefined && input.brand !== selection.brand) ||
