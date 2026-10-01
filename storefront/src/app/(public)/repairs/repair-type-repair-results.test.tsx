@@ -14,6 +14,7 @@ vi.mock('@/lib/api', () => ({ fetchRepairCatalog }));
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairTypeHubRepairResultSeeds }));
 vi.mock('@/lib/repair-type-hubs', () => ({
   buildRepairTypeHubCatalog,
+  getRepairTypeHubStartingPriceLabel: vi.fn(() => 'Quote on Request'),
   resolveRepairTypeHubSelectedState,
 }));
 vi.mock('@/components/services/ServiceSchema', () => ({ ServiceSchema: () => null }));
