@@ -34,7 +34,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Pow
   const bookingService = 'Power Button Replacement';
   const hierarchyModels = buildGenericPeripheralRepairHierarchyModels({ repairSlug: 'power-button-replacement', bookingService, candidates });
   const selection = resolveGenericPeripheralRepairHierarchySelection({ repairSlug: 'power-button-replacement', bookingService, candidates, query: await searchParams });
-  const initialResults = Array.from(new Map((await Promise.all(Array.from(new Set(candidates.map((candidate) => candidate.canonicalBrandSlug))).map((brandSlug) => fetchSharedRepairPageResultSeeds({
+  const resultBrandSlugs = selection.selectedBrandSlug && selection.selectedModelSlug ? [selection.selectedBrandSlug] : Array.from(new Set(candidates.map((candidate) => candidate.canonicalBrandSlug)));
+  const initialResults = Array.from(new Map((await Promise.all(resultBrandSlugs.map((brandSlug) => fetchSharedRepairPageResultSeeds({
     category: 'phone', brandSlug, repairTypeSlug: 'power-button-replacement',
     selectedModelSlug: selection.selectedBrandSlug === brandSlug ? selection.selectedModelSlug : null,
   })))).flat().map((result) => [result.id, result])).values());

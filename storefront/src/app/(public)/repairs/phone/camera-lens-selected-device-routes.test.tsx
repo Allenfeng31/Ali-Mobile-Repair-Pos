@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { fetchRepairCatalogMock, fetchResultsMock } = vi.hoisted(() => ({
   fetchRepairCatalogMock: vi.fn(),
@@ -27,6 +27,10 @@ const catalog = {
 };
 
 describe('Camera Lens route server selection', () => {
+  beforeEach(() => {
+    fetchResultsMock.mockClear();
+  });
+
   it.each([
     ['generic', () => GenericCameraLensReplacementPage({ searchParams: Promise.resolve({ brand: 'huawei', model: 'p30-pro' }) }), 'huawei', 'p30-pro'],
     ['Google Pixel', () => GoogleCameraLensReplacementPage({ searchParams: Promise.resolve({ model: 'pixel-8-pro' }) }), 'google-pixel', 'pixel-8-pro'],
@@ -50,5 +54,15 @@ describe('Camera Lens route server selection', () => {
     fetchRepairCatalogMock.mockResolvedValue(catalog);
     const element = await renderPage();
     expect(element.props.selectedDevice).toBeNull();
+  });
+
+  it('fetches generic selected-device proof only for the selected brand and model context', async () => {
+    fetchRepairCatalogMock.mockResolvedValue(catalog);
+
+    await GenericCameraLensReplacementPage({ searchParams: Promise.resolve({ brand: 'huawei', model: 'p30-pro' }) });
+
+    expect(fetchResultsMock).toHaveBeenCalledWith({
+      category: 'phone', brandSlug: 'huawei', repairTypeSlug: 'camera-lens-replacement', selectedModelSlug: 'p30-pro',
+    });
   });
 });

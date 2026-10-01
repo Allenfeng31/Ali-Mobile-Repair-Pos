@@ -80,6 +80,37 @@ describe('Shared Page V2 Repair Result selection', () => {
     expect(selected.map((seed) => seed.id)).toContain('other-newest');
   });
 
+  it('uses same-brand, same-service evidence when the selected model has no exact result', () => {
+    const selected = selectSharedRepairPageResultSeeds([
+      result({ id: 'galaxy-s23-power', brand: 'Samsung', brand_slug: 'samsung', model: 'Galaxy S23', model_slug: 'galaxy-s23', repair_type: 'Power Button Replacement', repair_type_slug: 'power-button-replacement' }),
+    ], {
+      category: 'phone', brandSlug: 'samsung', repairTypeSlug: 'power-button-replacement', selectedModelSlug: 'galaxy-s24',
+    });
+
+    expect(selected.map((seed) => seed.id)).toEqual(['galaxy-s23-power']);
+    expect(selected[0]).toMatchObject({ brand: 'Samsung', model: 'Galaxy S23', repair_type: 'Power Button Replacement' });
+  });
+
+  it('does not use another brand when a selected model has no same-brand proof', () => {
+    const selected = selectSharedRepairPageResultSeeds([
+      result({ id: 'galaxy-s24-power', brand: 'Samsung', brand_slug: 'samsung', model: 'Galaxy S24', model_slug: 'galaxy-s24', repair_type: 'Power Button Replacement', repair_type_slug: 'power-button-replacement' }),
+    ], {
+      category: 'phone', brandSlug: 'google-pixel', repairTypeSlug: 'power-button-replacement', selectedModelSlug: 'pixel-8-pro',
+    });
+
+    expect(selected).toEqual([]);
+  });
+
+  it('does not use a different service for the selected brand and model', () => {
+    const selected = selectSharedRepairPageResultSeeds([
+      result({ id: 'galaxy-s24-volume', brand: 'Samsung', brand_slug: 'samsung', model: 'Galaxy S24', model_slug: 'galaxy-s24', repair_type: 'Volume Button Replacement', repair_type_slug: 'volume-button-replacement' }),
+    ], {
+      category: 'phone', brandSlug: 'samsung', repairTypeSlug: 'power-button-replacement', selectedModelSlug: 'galaxy-s24',
+    });
+
+    expect(selected).toEqual([]);
+  });
+
   it('prioritizes a selected supported model independently of price-candidate membership', () => {
     const selected = selectSharedRepairPageResultSeeds([
       result({ id: 'pixel-8-newer', model_slug: 'pixel-8', published_at: '2026-09-06T09:00:00.000Z' }),

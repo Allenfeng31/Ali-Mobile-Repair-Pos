@@ -2,6 +2,7 @@ import type { BrandEntry, RepairCatalog, RepairOption } from './publicRepairCata
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref, withVirtualCameraLensRepairOption } from './virtualCameraLens';
 import { getModelHubRepairHref } from './waterDamageRouting';
 import { getVirtualPhoneRepair, getVirtualPhoneRepairLandingHref, withVirtualPhoneRepairOptions } from './virtualPhoneRepairs';
+import { resolveFutureRepairResultDestination } from './futureRepairResultDestination';
 
 export type RepairResultDeviceCategory = 'phone' | 'tablet' | 'laptop' | 'watch';
 
@@ -115,6 +116,14 @@ export function buildRepairResultTaxonomy(catalog: Pick<RepairCatalog, 'brands'>
 }
 
 function getRelatedRepairUrl(selection: ResolvedRepairResultTaxonomy) {
+  const brandSharedDestination = resolveFutureRepairResultDestination({
+    category: selection.deviceCategory,
+    brandSlug: selection.brandSlug,
+    modelSlug: selection.modelSlug,
+    repairSlug: selection.repairTypeSlug,
+  });
+  if (brandSharedDestination) return brandSharedDestination.href;
+
   if (selection.repairTypeSlug === CAMERA_LENS_REPAIR_SLUG) {
     const cameraLensHref = getCameraLensLandingHref(selection.deviceCategory, selection.brandSlug, selection.modelSlug);
     if (cameraLensHref) return cameraLensHref;

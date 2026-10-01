@@ -219,13 +219,14 @@ export function getRepairResultImageSrc(result: Pick<RepairResultHomepageItem, '
 }
 
 export function getRepairResultAltText(
-  result: Pick<RepairResultHomepageItem, 'image_pair_alt_text' | 'model' | 'repair_type'>,
+  result: Pick<RepairResultHomepageItem, 'image_pair_alt_text' | 'model' | 'repair_type'> & { brand?: string | null },
   side: 'before' | 'after'
 ) {
   const explicitAlt = result.image_pair_alt_text?.trim();
   if (explicitAlt) return `${explicitAlt} - ${side}`;
 
-  return `${side === 'before' ? 'Before' : 'After'} ${result.model} ${result.repair_type} completed at Ali Mobile & Repair in Ringwood Square`;
+  const identity = [result.brand?.trim(), result.model, result.repair_type].filter(Boolean).join(' ');
+  return `${identity} by Ali Mobile & Repair - ${side}`;
 }
 
 export function getRepairResultAspectRatio(value?: string | null) {

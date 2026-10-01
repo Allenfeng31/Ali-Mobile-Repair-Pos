@@ -165,7 +165,7 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
         </div>
         <RepairTrustBadges />
       </section>}
-      <SharedRepairPageResultsSection initialResults={initialResults} repairName={config.bookingService} />
+      <SharedRepairPageResultsSection initialResults={initialResults} repairName={config.bookingService} selectedModelSlug={hierarchy?.selectedModelSlug ?? null} />
 
       <div data-camera-module-content>
         <section data-camera-module-layout-section className={styles.layoutSection} aria-labelledby="camera-preparation-heading">

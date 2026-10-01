@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import {
   getRepairResultAltText,
@@ -12,9 +13,11 @@ import styles from './RepairResultsMatchingSection.module.css';
 export default function SharedRepairPageResultsSection({
   initialResults,
   repairName,
+  selectedModelSlug = null,
 }: {
   initialResults: RepairResultMatchingItem[];
   repairName: string;
+  selectedModelSlug?: string | null;
 }) {
   const results = initialResults;
   const [activeIndex, setActiveIndex] = useState(0);
@@ -22,6 +25,9 @@ export default function SharedRepairPageResultsSection({
   if (results.length === 0) return null;
 
   const activeResult = results[Math.min(activeIndex, results.length - 1)];
+  const isSameBrandFallback = selectedModelSlug !== null && activeResult.model_slug !== selectedModelSlug;
+  const repairLabel = activeResult.repair_type.replace(/\s+(?:Replacement|Repair)$/i, '');
+  const modelFamily = activeResult.brand === 'Samsung' ? 'Samsung Galaxy' : activeResult.brand;
   return (
     <section className={styles.section} aria-labelledby="shared-repair-results-heading">
       <div className={styles.copy}>
@@ -34,9 +40,12 @@ export default function SharedRepairPageResultsSection({
           </div>
         ) : null}
         <div className={styles.resultMeta}>
-          <strong>{activeResult.model} {activeResult.repair_type}</strong>
+          {isSameBrandFallback ? <strong>Similar {activeResult.brand} {repairLabel} Repair</strong> : null}
+          <strong>{activeResult.brand} {activeResult.model} · {activeResult.repair_type}</strong>
+          {isSameBrandFallback ? <span>Example from another {modelFamily} model repaired by Ali Mobile &amp; Repair.</span> : null}
           <span>{activeResult.title}</span>
           {activeResult.short_description ? <span>{activeResult.short_description}</span> : null}
+          {activeResult.related_repair_url ? <Link href={activeResult.related_repair_url} className={styles.relatedLink}>View matching repair page</Link> : null}
         </div>
       </div>
       <div className={styles.visual}>

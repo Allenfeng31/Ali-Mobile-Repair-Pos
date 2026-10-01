@@ -85,4 +85,10 @@ describe('repair result taxonomy', () => {
       repairTypeSlug: 'screen-replacement',
     })).toBeNull();
   });
+
+  it('uses the actual Samsung model in a brand-shared peripheral Repair Result destination', () => {
+    expect(resolveRepairResultTaxonomy(catalog, {
+      deviceCategory: 'phone', brandSlug: 'samsung', modelSlug: 'galaxy-s24', repairTypeSlug: 'power-button-replacement',
+    })?.relatedRepairUrl).toBe('/repairs/phone/samsung/power-button-replacement?model=galaxy-s24');
+  });
 });

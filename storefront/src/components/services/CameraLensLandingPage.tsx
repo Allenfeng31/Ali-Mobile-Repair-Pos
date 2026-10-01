@@ -45,6 +45,8 @@ interface CameraLensLandingPageProps {
   isGeneric?: boolean;
   showSharedRepairControls?: boolean;
   selectedDevice?: SharedRepairSelectedDeviceViewModel | null;
+  initialResults?: RepairResultMatchingItem[];
+  selectedModelSlug?: string | null;
   sharedPageV2?: {
     supportedModels: SharedRepairPageSupportedModel[];
     priceCandidates: SharedRepairPageCandidate[];
@@ -128,6 +130,8 @@ export default function CameraLensLandingPage({
   isGeneric,
   showSharedRepairControls = false,
   selectedDevice = null,
+  initialResults,
+  selectedModelSlug = null,
   sharedPageV2,
 }: CameraLensLandingPageProps) {
   const hasSharedRepairControls = Boolean(sharedPageV2) || showSharedRepairControls || brandSlug === "samsung";
@@ -291,7 +295,7 @@ export default function CameraLensLandingPage({
         </div>}
       </section>}
 
-      {sharedPageV2 ? <SharedRepairPageResultsSection initialResults={sharedPageV2.initialResults} repairName={CAMERA_LENS_REPAIR_NAME} /> : null}
+      {sharedPageV2 ? <SharedRepairPageResultsSection initialResults={sharedPageV2.initialResults} repairName={CAMERA_LENS_REPAIR_NAME} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : initialResults ? <SharedRepairPageResultsSection initialResults={initialResults} repairName={CAMERA_LENS_REPAIR_NAME} selectedModelSlug={selectedModelSlug} /> : null}
 
       <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="camera-lens-guidance-heading">
         <div className="repair-workbench-heading">

@@ -76,7 +76,8 @@ export default async function BackCameraReplacementPage({
     candidates,
     query,
   });
-  const initialResults = Array.from(new Map((await Promise.all(Array.from(new Set(candidates.map((candidate) => candidate.canonicalBrandSlug))).map((brandSlug) => fetchSharedRepairPageResultSeeds({
+  const resultBrandSlugs = selection.selectedBrandSlug && selection.selectedModelSlug ? [selection.selectedBrandSlug] : Array.from(new Set(candidates.map((candidate) => candidate.canonicalBrandSlug)));
+  const initialResults = Array.from(new Map((await Promise.all(resultBrandSlugs.map((brandSlug) => fetchSharedRepairPageResultSeeds({
     category: 'phone', brandSlug, repairTypeSlug: config.repairSlug,
     selectedModelSlug: selection.selectedBrandSlug === brandSlug ? selection.selectedModelSlug : null,
   })))).flat().map((result) => [result.id, result])).values());

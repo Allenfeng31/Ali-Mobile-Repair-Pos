@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { fetchRepairCatalog } from "@/lib/api";
 import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from "@/components/services/CameraLensLandingPage";
 import { buildCameraLensModelOptions } from "@/lib/virtualCameraLens";
+import { fetchSharedRepairPageResultSeeds } from "@/lib/repair-results.server";
 
 const PAGE_PATH = "/repairs/phone/camera-lens-replacement";
 const EXCLUDED_BRANDS = new Set(["iphone", "samsung", "google-pixel", "oppo"]);
@@ -27,6 +28,15 @@ export default async function GenericCameraLensReplacementPage({ searchParams }:
       )
   );
   const selection = resolveCameraLensSelectedDevice({ route: { scope: "global" }, models, query: await searchParams });
+  const selectedBrandSlug = selection.selectedDevice?.selectedDevice.brandSlug ?? null;
+  const initialResults = selectedBrandSlug && selection.selectedModelSlug
+    ? await fetchSharedRepairPageResultSeeds({
+        category: 'phone',
+        brandSlug: selectedBrandSlug,
+        repairTypeSlug: 'camera-lens-replacement',
+        selectedModelSlug: selection.selectedModelSlug,
+      })
+    : [];
 
   return (
     <CameraLensLandingPage
@@ -36,6 +46,8 @@ export default async function GenericCameraLensReplacementPage({ searchParams }:
       models={models}
       isGeneric
       selectedDevice={selection.selectedDevice}
+      initialResults={initialResults}
+      selectedModelSlug={selection.selectedModelSlug}
     />
   );
 }

@@ -1,42 +1,4 @@
-import { evaluateTargetPublicRepairPageMode } from './publicRepairPageModePolicy';
-
-const FUTURE_SHARED_MASTER_ROUTES = [
-  {
-    category: 'phone',
-    canonicalBrandSlug: 'google-pixel',
-    repairSlug: 'loudspeaker-replacement',
-    targetMode: 'brand-shared',
-    href: '/repairs/phone/google/loudspeaker-replacement',
-  },
-  {
-    category: 'phone',
-    canonicalBrandSlug: 'google-pixel',
-    repairSlug: 'earpiece-speaker-replacement',
-    targetMode: 'brand-shared',
-    href: '/repairs/phone/google/earpiece-speaker-replacement',
-  },
-  {
-    category: 'phone',
-    canonicalBrandSlug: 'google-pixel',
-    repairSlug: 'power-button-replacement',
-    targetMode: 'brand-shared',
-    href: '/repairs/phone/google/power-button-replacement',
-  },
-  {
-    category: 'phone',
-    canonicalBrandSlug: 'google-pixel',
-    repairSlug: 'volume-button-replacement',
-    targetMode: 'brand-shared',
-    href: '/repairs/phone/google/volume-button-replacement',
-  },
-  {
-    category: 'phone',
-    canonicalBrandSlug: 'google-pixel',
-    repairSlug: 'camera-lens-replacement',
-    targetMode: 'brand-shared',
-    href: '/repairs/phone/google/camera-lens-replacement',
-  },
-] as const;
+import { evaluateTargetPublicRepairPageMode, PUBLIC_REPAIR_SHARED_ROUTE_REGISTRY } from './publicRepairPageModePolicy';
 
 export function resolveFutureRepairResultDestination(input: {
   category: string;
@@ -45,14 +7,14 @@ export function resolveFutureRepairResultDestination(input: {
   repairSlug: string;
 }) {
   const decision = evaluateTargetPublicRepairPageMode(input);
-  const route = FUTURE_SHARED_MASTER_ROUTES.find((candidate) => (
-    candidate.category === input.category
-    && candidate.canonicalBrandSlug === decision.canonicalBrandSlug
-    && candidate.repairSlug === decision.canonicalRepairSlug
-    && candidate.targetMode === decision.targetMode
-  ));
+  const route = decision.targetMode === 'brand-shared'
+    ? PUBLIC_REPAIR_SHARED_ROUTE_REGISTRY.find((candidate) => (
+      candidate.catalogueBrandSlug === decision.canonicalBrandSlug
+      && candidate.repairSlug === decision.canonicalRepairSlug
+    ))
+    : null;
 
   return route && decision.sharedMasterAvailability === 'available'
-    ? { href: route.href, decision }
+    ? { href: `${route.href}?model=${encodeURIComponent(input.modelSlug)}`, decision }
     : null;
 }
