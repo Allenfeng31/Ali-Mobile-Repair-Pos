@@ -9,13 +9,20 @@ export type SharedRepairPageV2PricingStrategy =
   | Readonly<{ mode: 'pos-derived' }>
   | Readonly<{ mode: 'fixed'; fixedPrice: number }>;
 
-const SHARED_REPAIR_PAGE_V2_ACTIVATIONS = Object.freeze([
-  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'loudspeaker-replacement' },
-  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'earpiece-speaker-replacement' },
-  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'power-button-replacement' },
-  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'volume-button-replacement' },
-  { category: 'phone', brandSlug: 'google-pixel', repairSlug: 'camera-lens-replacement' },
-] as const);
+const BRAND_SHARED_REPAIR_BRANDS = ['samsung', 'google-pixel', 'oppo'] as const;
+const BRAND_SHARED_REPAIR_SLUGS = [
+  'camera-lens-replacement',
+  'loudspeaker-replacement',
+  'earpiece-speaker-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+] as const;
+
+const SHARED_REPAIR_PAGE_V2_ACTIVATIONS = Object.freeze(
+  BRAND_SHARED_REPAIR_BRANDS.flatMap((brandSlug) => (
+    BRAND_SHARED_REPAIR_SLUGS.map((repairSlug) => ({ category: 'phone' as const, brandSlug, repairSlug }))
+  )),
+);
 
 export interface SharedRepairPageSupportedModel {
   category: 'phone';

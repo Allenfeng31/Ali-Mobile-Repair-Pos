@@ -14,6 +14,7 @@ import type {
 
 interface SharedRepairHierarchyPresentationProps {
   hierarchy: SharedRepairHierarchy;
+  showModelsImmediately?: boolean;
 }
 
 function hierarchyId(...parts: string[]) {
@@ -66,7 +67,7 @@ function BrandModels({ brand }: { brand: SharedRepairHierarchyBrand }) {
   );
 }
 
-export default function SharedRepairHierarchyPresentation({ hierarchy }: SharedRepairHierarchyPresentationProps) {
+export default function SharedRepairHierarchyPresentation({ hierarchy, showModelsImmediately = false }: SharedRepairHierarchyPresentationProps) {
   const isMultiBrand = hierarchy.brands.length > 1;
   const initialBrandSlug = hierarchy.brands.find((brand) => brand.initiallyExpanded)?.brandSlug ?? null;
   const initialSeriesId = hierarchy.brands.flatMap((brand) => brand.series.map((series) => ({
@@ -75,6 +76,14 @@ export default function SharedRepairHierarchyPresentation({ hierarchy }: SharedR
   }))).find((series) => series.initiallyExpanded)?.id ?? null;
   const [openBrandSlug, setOpenBrandSlug] = useState(initialBrandSlug);
   const [openSeriesId, setOpenSeriesId] = useState(initialSeriesId);
+
+  if (showModelsImmediately && hierarchy.brands.length === 1) {
+    const brand = hierarchy.brands[0];
+    const models = brand.series.length > 0 ? brand.series.flatMap((series) => series.models) : brand.models;
+    return <div className={styles.brandList} data-shared-repair-hierarchy>
+      <ModelCards models={models} regionId={hierarchyId(brand.brandSlug, 'models')} initiallyExpanded={false} />
+    </div>;
+  }
 
   return (
     <div className={styles.brandList} data-shared-repair-hierarchy>

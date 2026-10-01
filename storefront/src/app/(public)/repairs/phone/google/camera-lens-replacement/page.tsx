@@ -4,11 +4,12 @@ import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from "@/compon
 import { fetchSharedRepairPageResultSeeds } from "@/lib/repair-results.server";
 import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels } from "@/lib/sharedRepairPageV2";
 import { getCameraLensPrice } from "@/lib/virtualCameraLens";
+import { GOOGLE_PIXEL_CAMERA_LENS_CONTENT } from "@/data/googlePixelSharedRepairContent";
 
 const PAGE_PATH = "/repairs/phone/google/camera-lens-replacement";
-const PAGE_TITLE = "Google Pixel Camera Lens Replacement in Ringwood | Ali Mobile";
+const PAGE_TITLE = GOOGLE_PIXEL_CAMERA_LENS_CONTENT.title;
 const GOOGLE_CAMERA_LENS_FIXED_PRICE = getCameraLensPrice("Google Pixel");
-const PAGE_DESCRIPTION = `Google Pixel outer camera lens glass replacement in Ringwood for $${GOOGLE_CAMERA_LENS_FIXED_PRICE}. We inspect model fitment before work begins.`;
+const PAGE_DESCRIPTION = GOOGLE_PIXEL_CAMERA_LENS_CONTENT.metadataDescription;
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -48,7 +49,7 @@ export default async function GoogleCameraLensReplacementPage({ searchParams }: 
       brandName="Google Pixel"
       brandSlug="google-pixel"
       title="Google Pixel Camera Lens Replacement"
-      intro="Camera lens glass replacement for supported Google Pixel models at Ali Mobile & Repair in Ringwood. We inspect model fitment before confirming the suitable repair path."
+      intro={GOOGLE_PIXEL_CAMERA_LENS_CONTENT.intro}
       canonicalPath={PAGE_PATH}
       models={supportedModels}
       selectedDevice={selection.selectedDevice}

@@ -245,17 +245,17 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$129');
   });
 
-  it('activates Google Pixel Camera Lens V2 by exact identity without a hardware gate or virtual price', () => {
+  it('activates brand-shared Camera Lens V2 by exact identity without a hardware gate or virtual price', () => {
     expect(getGooglePixelHardwareConfig('pixel-10a')).toBeNull();
     expect(isSharedRepairPageModelEligible({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-10a', repairSlug: 'camera-lens-replacement',
     })).toBe(true);
     expect(isSharedRepairPageModelEligible({
       category: 'phone', brandSlug: 'samsung', modelSlug: 'galaxy-s25', repairSlug: 'camera-lens-replacement',
-    })).toBe(false);
+    })).toBe(true);
     expect(isSharedRepairPageModelEligible({
       category: 'phone', brandSlug: 'oppo', modelSlug: 'find-x8-pro', repairSlug: 'camera-lens-replacement',
-    })).toBe(false);
+    })).toBe(true);
 
     const supportedModels = buildSharedRepairPageSupportedModels({
       brands: [cameraLensGoogleBrand], canonicalBrandSlug: 'google-pixel', repairSlug: 'camera-lens-replacement',
@@ -268,6 +268,24 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(candidates.map((candidate) => candidate.modelSlug)).toEqual(['pixel-8', 'pixel-9']);
     expect(getSharedRepairCandidatePriceLabel(candidates[0]!)).toBe('From $89');
     expect(getSharedRepairCandidatePriceLabel(candidates[1]!)).toBe('$99');
+  });
+
+  it.each([
+    ['samsung', 'galaxy-s25'],
+    ['oppo', 'find-x8-pro'],
+  ])('activates the same brand-shared V2 contract for %s', (brandSlug, modelSlug) => {
+    expect(isSharedRepairPageModelEligible({
+      category: 'phone',
+      brandSlug,
+      modelSlug,
+      repairSlug: 'loudspeaker-replacement',
+    })).toBe(true);
+    expect(isSharedRepairPageModelEligible({
+      category: 'phone',
+      brandSlug,
+      modelSlug,
+      repairSlug: 'camera-lens-replacement',
+    })).toBe(true);
   });
 
   it('does not retain the Google hardware registry as a V2 visibility gate', () => {

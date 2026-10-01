@@ -352,7 +352,8 @@ describe('Shared Page V2 Google Pixel Loudspeaker controls', () => {
     for (const oldPill of ['Inspection Before Work', 'Clear Quote First', 'Repair Warranty', 'Ringwood Repair Desk']) {
       expect(controls).not.toContain(oldPill);
     }
-    expect(landingPage).toContain('{!sharedPageV2 ? <div className="trust-badges mt-8">');
+    expect(landingPage).toContain('brandOnlySelection={Boolean(sharedPageV2)}');
+    expect(landingPage).toContain('useMasterFacts');
   });
 });
 

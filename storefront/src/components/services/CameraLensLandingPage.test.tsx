@@ -1,8 +1,9 @@
 import '@testing-library/jest-dom/vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('./SharedRepairPageV2BookingControls', () => ({ default: () => <div data-testid="shared-page-v2-booking-controls" /> }));
+vi.mock('./SharedRepairBookingControls', () => ({ default: () => <div data-testid="shared-repair-booking-controls" /> }));
 import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from './CameraLensLandingPage';
 
 const models = [
@@ -60,9 +61,24 @@ describe('Camera Lens selected-device normalization', () => {
     expect(screen.getByText('Selected device')).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Huawei P30 Pro' })).toBeTruthy();
     expect(screen.getByRole('link', { name: /book repair now/i })).toHaveAttribute('href', selection.selectedDevice?.booking.href);
-    expect(screen.getByRole('link', { name: /change model/i })).toHaveAttribute('href', '/repairs/phone/camera-lens-replacement');
+    expect(screen.getByRole('link', { name: /change model/i })).toHaveAttribute('href', '/repairs/phone/camera-lens-replacement#shared-repair-model-selection');
     expect(screen.queryByLabelText(/choose your/i)).toBeNull();
-    expect(screen.getByText('$50')).toBeTruthy();
+    expect(screen.getAllByText('$50').length).toBeGreaterThan(0);
+    const facts = screen.getByLabelText('Repair facts');
+    for (const text of ['$50', '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(within(facts).getByText(text)).toBeInTheDocument();
+    expect(screen.queryByText('From $50')).toBeNull();
+    expect(screen.queryByText('Inspection Before Work')).toBeNull();
+    expect(facts.compareDocumentPosition(screen.getByRole('heading', { level: 1 })) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+  });
+
+  it('shows generic Camera Lens fixed pricing in the compact facts without a selected card or a separate large price card', () => {
+    render(<CameraLensLandingPage title="Phone Camera Lens Replacement" intro="Inspection first." canonicalPath="/repairs/phone/camera-lens-replacement" models={models} isGeneric />);
+    const facts = screen.getByLabelText('Repair facts');
+    for (const text of ['$50', '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(within(facts).getByText(text)).toBeInTheDocument();
+    expect(screen.getAllByText('$50')).toHaveLength(1);
+    expect(screen.queryByText('Selected device')).toBeNull();
+    expect(screen.queryByText('Inspection first')).toBeNull();
+    expect(screen.queryByLabelText('Commercial repair facts')).toBeNull();
   });
 
   it('keeps Pixel Camera Lens model cards as real selected-query links and preserves their natural order', () => {
@@ -70,8 +86,28 @@ describe('Camera Lens selected-device normalization', () => {
     render(<CameraLensLandingPage brandName="Google Pixel" brandSlug="google-pixel" title="Google Pixel Camera Lens Replacement" intro="Inspection first." canonicalPath="/repairs/phone/google/camera-lens-replacement" models={pixelModels} sharedPageV2={{ supportedModels: pixelModels.map((model) => ({ category: 'phone', canonicalBrandSlug: model.brandSlug, ...model })), priceCandidates: [], initialResults: [], selectedModelSlug: null, quickAnswers: { repairTime: 'Contact us.', partsSameDay: 'Call us.', warranty: 'Warranty.' }, pricingStrategy: { mode: 'fixed', fixedPrice: 50 } }} />);
 
     const card = screen.getByRole('link', { name: /pixel 8 pro/i });
-    expect(card).toHaveAttribute('href', '?model=pixel-8-pro');
+    expect(card).toHaveAttribute('href', '/repairs/phone/google/camera-lens-replacement?model=pixel-8-pro');
     expect(card.getAttribute('href')).not.toContain('/book-repair');
-    expect(screen.getByText('$50')).toBeTruthy();
+    expect(screen.getAllByText('$50').length).toBeGreaterThan(0);
+  });
+
+  it('renders the fixed Camera Lens price in the selected Master card and compact facts after the H1', () => {
+    const pixelModels = models.filter((model) => model.brandSlug === 'google-pixel');
+    const selection = resolveCameraLensSelectedDevice({
+      route: { scope: 'brand', canonicalBrandSlug: 'google-pixel', routeBrandSegment: 'google' },
+      models: pixelModels,
+      query: { model: 'pixel-8-pro' },
+    });
+    render(<CameraLensLandingPage brandName="Google Pixel" brandSlug="google-pixel" title="Google Pixel Camera Lens Replacement" intro="Inspection first." canonicalPath="/repairs/phone/google/camera-lens-replacement" models={pixelModels} selectedDevice={selection.selectedDevice} sharedPageV2={{ supportedModels: pixelModels.map((model) => ({ category: 'phone', canonicalBrandSlug: model.brandSlug, ...model })), priceCandidates: [], initialResults: [], selectedModelSlug: 'pixel-8-pro', quickAnswers: { repairTime: 'Contact us.', partsSameDay: 'Call us.', warranty: 'Warranty.' }, pricingStrategy: { mode: 'fixed', fixedPrice: 50 } }} />);
+
+    const heading = screen.getByRole('heading', { level: 1, name: 'Google Pixel Camera Lens Replacement' });
+    const facts = screen.getByLabelText('Repair facts');
+    expect(facts).toHaveTextContent('From $50');
+    expect(facts).toHaveTextContent('30 Minutes');
+    expect(facts).toHaveTextContent('6 Months Warranty');
+    expect(facts).toHaveTextContent('Ringwood Square');
+    expect(screen.getByText('$50', { selector: '[data-camera-module-hero-price]' })).toBeInTheDocument();
+    expect(heading.compareDocumentPosition(facts) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Change model/ })).toHaveAttribute('href', '/repairs/phone/google/camera-lens-replacement');
   });
 });

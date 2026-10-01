@@ -6,14 +6,15 @@ import {
   getVirtualPhoneRepair,
   type VirtualPhoneRepairSlug,
 } from "@/lib/virtualPhoneRepairs";
-import { getGooglePixelHardwareConfig } from "@/lib/seo/content/google-pixel/config";
-import { getOppoModelConfig } from "@/lib/seo/content/oppo/shared";
-import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels } from '@/lib/sharedRepairPageV2';
+import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels, getSharedRepairCandidatePriceLabel, type SharedRepairPageV2PricingStrategy } from '@/lib/sharedRepairPageV2';
 import { fetchSharedRepairPageResultSeeds } from '@/lib/repair-results.server';
 import type { SharedRepairPageV2QuickAnswers } from '@/components/services/SharedRepairPageV2BookingControls';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { resolveSharedRepairContext } from '@/lib/sharedRepairContext';
 import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
+import { SAMSUNG_SHARED_REPAIR_CONTENT } from '@/data/samsungSharedRepairContent';
+import { GOOGLE_PIXEL_SHARED_REPAIR_CONTENT } from '@/data/googlePixelSharedRepairContent';
+import { OPPO_SHARED_REPAIR_CONTENT } from '@/data/oppoSharedRepairContent';
 
 const SAMSUNG_REPAIR_CONTENT: Record<VirtualPhoneRepairSlug, { diagnosis: string; testing: string }> = {
   "loudspeaker-replacement": {
@@ -57,7 +58,7 @@ const BRAND_CONFIG = {
 } as const;
 const GENERIC_EXCLUDED_BRANDS = new Set(["iphone", "apple", "samsung", "google-pixel", "oppo"]);
 
-type GooglePixelSharedPageV2Config = Readonly<{
+type BrandSharedPageV2Config = Readonly<{
   quickAnswers: SharedRepairPageV2QuickAnswers;
 }>;
 
@@ -67,7 +68,7 @@ const CONSERVATIVE_SHARED_REPAIR_QUICK_ANSWERS: SharedRepairPageV2QuickAnswers =
   warranty: 'Warranty applies to eligible standard repairs and the completed repair scope.',
 });
 
-export const GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG: Readonly<Partial<Record<VirtualPhoneRepairSlug, GooglePixelSharedPageV2Config>>> = Object.freeze({
+export const GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG: Readonly<Partial<Record<VirtualPhoneRepairSlug, BrandSharedPageV2Config>>> = Object.freeze({
   'loudspeaker-replacement': Object.freeze({
     quickAnswers: Object.freeze({
       repairTime: '30–60 minutes',
@@ -90,18 +91,30 @@ export function getGooglePixelSharedPageV2Config(repairSlug: VirtualPhoneRepairS
   return GOOGLE_PIXEL_SHARED_PAGE_V2_CONFIG[repairSlug] ?? null;
 }
 
+function getBrandSharedPageV2Config(brand: VirtualPhoneRepairRouteBrand, repairSlug: VirtualPhoneRepairSlug) {
+  if (brand === 'google') return getGooglePixelSharedPageV2Config(repairSlug);
+  if (brand === 'samsung' || brand === 'oppo') {
+    return { quickAnswers: CONSERVATIVE_SHARED_REPAIR_QUICK_ANSWERS } satisfies BrandSharedPageV2Config;
+  }
+  return null;
+}
+
 export function createVirtualPhoneRepairMetadata(brand: VirtualPhoneRepairRouteBrand, repairSlug: VirtualPhoneRepairSlug): Metadata {
   const repair = getVirtualPhoneRepair(repairSlug)!;
   const config = brand === "other" ? null : BRAND_CONFIG[brand];
   const label = config?.brandName ?? "Phone";
   const canonical = `/repairs/phone/${config ? `${config.routeSegment}/` : ""}${repair.slug}`;
-  const title = config ? `${label} ${repair.name} in Ringwood | Ali Mobile` : `${label} ${repair.name} Melbourne | Ali Mobile`;
-  const isGooglePixelSharedPageV2 = brand === 'google' && Boolean(getGooglePixelSharedPageV2Config(repairSlug));
-  const description = !config
+  const samsungContent = brand === 'samsung' ? SAMSUNG_SHARED_REPAIR_CONTENT[repairSlug] : null;
+  const googlePixelContent = brand === 'google' ? GOOGLE_PIXEL_SHARED_REPAIR_CONTENT[repairSlug] : null;
+  const oppoContent = brand === 'oppo' ? OPPO_SHARED_REPAIR_CONTENT[repairSlug] : null;
+  const brandContent = samsungContent ?? googlePixelContent ?? oppoContent;
+  const title = brandContent?.title ?? (config ? `${label} ${repair.name} in Ringwood | Ali Mobile` : `${label} ${repair.name} Melbourne | Ali Mobile`);
+  const isBrandSharedPageV2 = Boolean(getBrandSharedPageV2Config(brand, repairSlug));
+  const description = brandContent?.metadataDescription ?? (!config
     ? `${label} ${repair.name.toLowerCase()} in Melbourne. Choose a supported model for current repair options and an inspection-led quote before work begins.`
-    : isGooglePixelSharedPageV2
+    : isBrandSharedPageV2
     ? `${label} ${repair.name.toLowerCase()} in Ringwood with model-specific pricing, inspection and a clear quote before work begins.`
-    : `${label} ${repair.name.toLowerCase()} in Ringwood for common symptoms. Starting from $50, with inspection and a clear quote before work begins.`;
+    : `${label} ${repair.name.toLowerCase()} in Ringwood for common symptoms. Starting from $50, with inspection and a clear quote before work begins.`);
 
   return {
     title,
@@ -124,19 +137,22 @@ interface VirtualPhoneRepairRoutePageProps {
 
 export type VirtualPhoneRepairRouteQuery = NonNullable<VirtualPhoneRepairRoutePageProps['query']>;
 
-export function resolveGooglePixelSharedPageV2Selection({
+export function resolveBrandSharedPageV2Selection({
+  brand,
   repairSlug,
   repairName,
   supportedModels,
   query,
 }: {
+  brand: Exclude<VirtualPhoneRepairRouteBrand, 'other'>;
   repairSlug: VirtualPhoneRepairSlug;
   repairName: string;
   supportedModels: ReturnType<typeof buildSharedRepairPageSupportedModels>;
   query: VirtualPhoneRepairRouteQuery;
 }) {
+  const config = BRAND_CONFIG[brand];
   const context = resolveSharedRepairContext({
-    route: { scope: 'brand', canonicalBrandSlug: 'google-pixel', routeBrandSegment: 'google' },
+    route: { scope: 'brand', canonicalBrandSlug: config.catalogSlug, routeBrandSegment: config.routeSegment },
     repairSlug,
     bookingService: repairName,
     query,
@@ -180,6 +196,10 @@ export function resolveGooglePixelSharedPageV2Selection({
   return { context, selectedModelSlug, selectedDevice };
 }
 
+export function resolveGooglePixelSharedPageV2Selection(input: Omit<Parameters<typeof resolveBrandSharedPageV2Selection>[0], 'brand'>) {
+  return resolveBrandSharedPageV2Selection({ ...input, brand: 'google' });
+}
+
 export default async function VirtualPhoneRepairRoutePage({ brand, repairSlug, query = {} }: VirtualPhoneRepairRoutePageProps) {
   const repair = getVirtualPhoneRepair(repairSlug)!;
   const catalog = await fetchRepairCatalog();
@@ -196,40 +216,44 @@ export default async function VirtualPhoneRepairRoutePage({ brand, repairSlug, q
           .filter((entry) => entry.category === "phone" && !GENERIC_EXCLUDED_BRANDS.has(entry.slug))
           .flatMap((entry) => entry.models.map((model) => ({ brand: entry.brand, brandSlug: entry.slug, model: model.model, modelSlug: model.slug })))
     );
-  const models = buildVirtualPhoneRepairModelOptions(candidateModels.filter((model) =>
-    config?.catalogSlug === "google-pixel" ? Boolean(getGooglePixelHardwareConfig(model.modelSlug)) :
-    config?.catalogSlug === "oppo" ? Boolean(getOppoModelConfig(model.modelSlug)) : true
-  ));
-  const sharedPageV2Config = brand === 'google' ? getGooglePixelSharedPageV2Config(repairSlug) : null;
+  const models = buildVirtualPhoneRepairModelOptions(candidateModels);
+  const sharedPageV2Config = getBrandSharedPageV2Config(brand, repairSlug);
   const sharedPageV2SupportedModels = sharedPageV2Config
     ? buildSharedRepairPageSupportedModels({
         brands: catalog.brands,
-        canonicalBrandSlug: 'google-pixel',
+        canonicalBrandSlug: config!.catalogSlug,
         repairSlug,
       })
     : [];
   const sharedPageV2Candidates = sharedPageV2Config
     ? buildSharedRepairPageCandidates({
         brands: catalog.brands,
-        canonicalBrandSlug: 'google-pixel',
+        canonicalBrandSlug: config!.catalogSlug,
         repairSlug,
       })
     : [];
-  const sharedPageV2Selection = sharedPageV2Config
-    ? resolveGooglePixelSharedPageV2Selection({ repairSlug, repairName: repair.name, supportedModels: sharedPageV2SupportedModels, query })
+  const sharedPageV2Selection = sharedPageV2Config && config
+    ? resolveBrandSharedPageV2Selection({ brand: brand as Exclude<VirtualPhoneRepairRouteBrand, 'other'>, repairSlug, repairName: repair.name, supportedModels: sharedPageV2SupportedModels, query })
     : null;
   const selectedSharedPageV2ModelSlug = sharedPageV2Selection?.selectedModelSlug ?? null;
-  const selectedSharedPageV2Device = sharedPageV2Selection?.selectedDevice ?? null;
   const sharedPageV2Results = sharedPageV2Config
     ? await fetchSharedRepairPageResultSeeds({
         category: 'phone',
-        brandSlug: 'google-pixel',
+        brandSlug: config!.catalogSlug,
         repairTypeSlug: repairSlug,
         selectedModelSlug: selectedSharedPageV2ModelSlug,
       })
     : [];
+  const sharedPageV2PricingStrategy: SharedRepairPageV2PricingStrategy = { mode: 'pos-derived' };
+  const selectedPriceCandidate = sharedPageV2Candidates.find((candidate) => candidate.modelSlug === selectedSharedPageV2ModelSlug);
+  const selectedSharedPageV2Device = sharedPageV2Selection?.selectedDevice
+    ? {
+        ...sharedPageV2Selection.selectedDevice,
+        priceLabel: selectedPriceCandidate ? getSharedRepairCandidatePriceLabel(selectedPriceCandidate) : 'Quote on Request',
+      }
+    : null;
   const canonicalPath = `/repairs/phone/${config ? `${config.routeSegment}/` : ""}${repair.slug}`;
 
   const sharedContent = brand === "samsung" ? SAMSUNG_REPAIR_CONTENT[repairSlug] : brand === "google" ? GOOGLE_PIXEL_REPAIR_CONTENT[repairSlug] : brand === "oppo" ? OPPO_REPAIR_CONTENT[repairSlug] : undefined;
-  return <VirtualPhoneRepairLandingPage brandName={config?.brandName} brandSlug={config?.catalogSlug} repairSlug={repair.slug} canonicalPath={canonicalPath} models={models} isGeneric={!config} sharedContent={sharedContent} sharedPageV2={sharedPageV2Config ? { supportedModels: sharedPageV2SupportedModels, priceCandidates: sharedPageV2Candidates, initialResults: sharedPageV2Results, selectedModelSlug: selectedSharedPageV2ModelSlug, quickAnswers: sharedPageV2Config.quickAnswers } : undefined} hierarchy={selectedSharedPageV2Device ? { models: [], selectedBrandSlug: 'google-pixel', selectedModelSlug: selectedSharedPageV2ModelSlug, selectedDevice: selectedSharedPageV2Device } : undefined} />;
+  return <VirtualPhoneRepairLandingPage brandName={config?.brandName} brandSlug={config?.catalogSlug} repairSlug={repair.slug} canonicalPath={canonicalPath} models={models} isGeneric={!config} sharedContent={sharedContent} sharedPageV2={sharedPageV2Config ? { supportedModels: sharedPageV2SupportedModels, priceCandidates: sharedPageV2Candidates, initialResults: sharedPageV2Results ?? [], selectedModelSlug: selectedSharedPageV2ModelSlug, quickAnswers: sharedPageV2Config.quickAnswers, pricingStrategy: sharedPageV2PricingStrategy } : undefined} hierarchy={selectedSharedPageV2Device ? { models: [], selectedBrandSlug: config?.catalogSlug ?? null, selectedModelSlug: selectedSharedPageV2ModelSlug, selectedDevice: selectedSharedPageV2Device } : undefined} />;
 }

@@ -11,11 +11,14 @@ import {
   Wrench,
 } from "lucide-react";
 import ReviewsSection from "@/components/ReviewsSection";
+import FaqAccordion from "@/components/FaqAccordion";
 import CommonRepairProblemsSection from "@/components/services/CommonRepairProblemsSection";
+import { ServiceSchema } from "@/components/services/ServiceSchema";
 import SharedRepairBookingControls from "@/components/services/SharedRepairBookingControls";
-import SharedRepairPageV2BookingControls, { type SharedRepairPageV2QuickAnswers } from "@/components/services/SharedRepairPageV2BookingControls";
-import SharedRepairPageV2ModelListPresentation from "@/components/services/SharedRepairPageV2ModelListPresentation";
+import type { SharedRepairPageV2QuickAnswers } from "@/components/services/SharedRepairPageV2BookingControls";
 import SharedRepairSelectedDevice, { type SharedRepairSelectedDeviceViewModel } from "@/components/services/SharedRepairSelectedDevice";
+import CameraModuleRepairSelectionExperience from "@/components/services/CameraModuleRepairSelectionExperience";
+import SharedRepairHeroFacts from "@/components/services/SharedRepairHeroFacts";
 import SharedRepairPageResultsSection from "@/components/repair-results/SharedRepairPageResultsSection";
 import {
   CAMERA_LENS_REPAIR_NAME,
@@ -24,11 +27,13 @@ import {
   getCameraLensPrice,
 } from "@/lib/virtualCameraLens";
 import { getSharedRepairBookingHref } from "@/lib/sharedRepairBooking";
-import { getSharedRepairCandidateModelLabel, type SharedRepairPageCandidate, type SharedRepairPageSupportedModel, type SharedRepairPageV2PricingStrategy } from "@/lib/sharedRepairPageV2";
+import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy } from "@/lib/sharedRepairPageV2";
+import { buildBrandSharedMasterModels } from "@/lib/brandSharedMasterModels";
+import { SAMSUNG_CAMERA_LENS_CONTENT } from "@/data/samsungSharedRepairContent";
+import { GOOGLE_PIXEL_CAMERA_LENS_CONTENT } from "@/data/googlePixelSharedRepairContent";
+import { OPPO_CAMERA_LENS_CONTENT } from "@/data/oppoSharedRepairContent";
 import { resolveSharedRepairContext, type SharedRepairRouteContext } from "@/lib/sharedRepairContext";
 import type { RepairResultMatchingItem } from "@/lib/repair-results";
-import listStyles from "./SharedRepairPageV2ModelListPresentation.module.css";
-import hubStyles from "@/components/repair-type-hubs/RepairTypeHub.module.css";
 
 interface CameraLensLandingPageProps {
   brandName?: string;
@@ -108,45 +113,6 @@ export function resolveCameraLensSelectedDevice({
   return { context, selectedModelSlug, selectedDevice };
 }
 
-function CameraLensGoogleModelSections({
-  sharedPageV2,
-}: {
-  sharedPageV2: NonNullable<CameraLensLandingPageProps["sharedPageV2"]>;
-}) {
-  if (sharedPageV2.supportedModels.length === 0) return null;
-
-  const regionId = "shared-repair-model-list-camera-lens-replacement";
-  const selectedModelIndex = sharedPageV2.supportedModels.findIndex((model) => model.modelSlug === sharedPageV2.selectedModelSlug);
-
-  return (
-    <section id="shared-repair-model-selection" className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="shared-repair-models-heading">
-      <div className="repair-workbench-heading">
-        <span>Supported models</span>
-        <h2 id="shared-repair-models-heading" className="scroll-mt-32">Google Pixel {CAMERA_LENS_REPAIR_NAME} by Model</h2>
-        <p>Choose your model for its current repair option and booking details.</p>
-      </div>
-      <SharedRepairPageV2ModelListPresentation
-        key={sharedPageV2.selectedModelSlug ?? "no-selected-model"}
-        regionId={regionId}
-        initiallyExpanded={selectedModelIndex >= 5}
-        modelCount={sharedPageV2.supportedModels.length}
-      >
-        {sharedPageV2.supportedModels.map((model) => (
-          <article id={model.modelSlug} key={model.modelSlug} data-shared-repair-model-card className={`scroll-mt-28 ${listStyles.modelCard} ${hubStyles.brandAccordionItem}`}>
-            <Link href={`?model=${encodeURIComponent(model.modelSlug)}`} prefetch={false} className={hubStyles.brandToggle}>
-              <div className={hubStyles.brandToggleCopy}>
-                <h3 className={hubStyles.brandHeading}>{getSharedRepairCandidateModelLabel(model)}</h3>
-                <p className={hubStyles.brandCount}>{CAMERA_LENS_REPAIR_NAME}</p>
-              </div>
-              <span className={hubStyles.modelCardArrow}>${sharedPageV2.pricingStrategy.mode === "fixed" ? sharedPageV2.pricingStrategy.fixedPrice : 50}</span>
-            </Link>
-          </article>
-        ))}
-      </SharedRepairPageV2ModelListPresentation>
-    </section>
-  );
-}
-
 function getDisplayPrice(brandName: string | undefined) {
   const price = getCameraLensPrice(brandName ?? "");
   return price > 0 ? `$${price}` : "Quote on Request";
@@ -165,12 +131,35 @@ export default function CameraLensLandingPage({
   sharedPageV2,
 }: CameraLensLandingPageProps) {
   const hasSharedRepairControls = Boolean(sharedPageV2) || showSharedRepairControls || brandSlug === "samsung";
+  const samsungContent = brandSlug === "samsung" && sharedPageV2 ? SAMSUNG_CAMERA_LENS_CONTENT : null;
+  const googlePixelContent = brandSlug === "google-pixel" && sharedPageV2 ? GOOGLE_PIXEL_CAMERA_LENS_CONTENT : null;
+  const oppoContent = brandSlug === "oppo" && sharedPageV2 ? OPPO_CAMERA_LENS_CONTENT : null;
+  const brandContent = samsungContent ?? googlePixelContent ?? oppoContent;
   const price = getDisplayPrice(brandName);
+  const selectedLensDevice = selectedDevice && price.startsWith('$')
+    ? { ...selectedDevice, priceLabel: price }
+    : selectedDevice;
+  const brandMasterHierarchy = sharedPageV2 ? {
+    models: buildBrandSharedMasterModels({
+      supportedModels: sharedPageV2.supportedModels,
+      priceCandidates: sharedPageV2.priceCandidates,
+      repairName: CAMERA_LENS_REPAIR_NAME,
+      fixedPrice: sharedPageV2.pricingStrategy.mode === 'fixed' ? sharedPageV2.pricingStrategy.fixedPrice : 50,
+    }),
+    selectedBrandSlug: selectedDevice ? brandSlug ?? null : null,
+    selectedModelSlug: selectedDevice ? sharedPageV2.selectedModelSlug : null,
+    selectedDevice: selectedLensDevice,
+  } : null;
   const isStartingPriceOnly = price === "Starting from";
   const fallbackBookingHref = getSharedRepairBookingHref({ repairName: CAMERA_LENS_REPAIR_NAME, fallbackBrandName: brandName });
   const repairHubHref = brandSlug
     ? `/repairs/phone/${brandSlug === "google" ? "google-pixel" : brandSlug}`
     : "/repairs/phone";
+  const brandCameraHubHref = brandSlug === 'google-pixel'
+    ? '/repairs/phone/google-pixel'
+    : brandSlug === 'oppo'
+      ? '/repairs/phone/oppo'
+      : '/repairs/phone/samsung';
   const forceWhiteButtonText = brandSlug === "samsung" || brandSlug === "oppo" || brandSlug === "google";
   const repairHubLabel = brandName ? `${brandName} Repairs` : null;
   const breadcrumbItems = [
@@ -198,6 +187,7 @@ export default function CameraLensLandingPage({
 
   return (
     <>
+    {brandName ? <ServiceSchema serviceName={`${brandName} ${CAMERA_LENS_REPAIR_NAME}`} description={intro} url={`https://www.alimobile.com.au${canonicalPath}`} /> : null}
     <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600">
@@ -222,7 +212,17 @@ export default function CameraLensLandingPage({
         </Link>
       </div>
 
-      <section className="repair-hero repair-detail-hero relative" aria-labelledby="camera-lens-heading">
+      {brandMasterHierarchy ? <CameraModuleRepairSelectionExperience
+        useMasterFacts
+        brandOnlySelection
+        title={title}
+        description={intro}
+        eyebrow="Camera lens glass repair"
+        icon="camera"
+        bookingService={CAMERA_LENS_REPAIR_NAME}
+        canonicalPath={canonicalPath}
+        hierarchy={brandMasterHierarchy}
+      /> : <section className="repair-hero repair-detail-hero relative" aria-labelledby="camera-lens-heading">
         <span className="repair-detail-icon text-blue-600">
           <Camera size={34} strokeWidth={2.4} aria-hidden="true" />
         </span>
@@ -239,20 +239,8 @@ export default function CameraLensLandingPage({
           {intro}
         </p>
 
-        {sharedPageV2 && !selectedDevice ? (
-          <SharedRepairPageV2BookingControls
-            basePath={canonicalPath}
-            brandSlug={brandSlug ?? ""}
-            brandName={brandName ?? "Phone"}
-            repairName={CAMERA_LENS_REPAIR_NAME}
-            repairSlug={CAMERA_LENS_REPAIR_SLUG}
-            supportedModels={sharedPageV2.supportedModels}
-            priceCandidates={sharedPageV2.priceCandidates}
-            quickAnswers={sharedPageV2.quickAnswers}
-            pricingStrategy={sharedPageV2.pricingStrategy}
-          />
-        ) : !sharedPageV2 ? <div className="mt-8 flex w-full flex-col items-center">
-          <div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">
+        {!selectedDevice ? <div className="mt-8 flex w-full flex-col items-center">
+          {!isGeneric ? <div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm shadow-blue-950/5 sm:p-6 md:p-8">
             <span className="w-full text-center text-xs font-black uppercase tracking-[0.16em] text-blue-600">
               Inspection first
             </span>
@@ -265,7 +253,7 @@ export default function CameraLensLandingPage({
             <p className="mt-3 w-full max-w-[32rem] text-center text-pretty text-sm font-semibold leading-6 text-slate-500">
               Final quote depends on parts, model and device condition.
             </p>
-          </div>
+          </div> : null}
 
           {!selectedDevice ? <div id="shared-repair-model-selection" className="mt-6 flex w-full max-w-sm flex-col items-center justify-center gap-4">
             <Suspense fallback={<Link href={fallbackBookingHref} className="inline-flex min-h-14 w-full items-center justify-center rounded-2xl bg-blue-600 px-8 py-4 text-center text-lg font-bold !text-white shadow-lg shadow-blue-200">Book Repair Now</Link>}>
@@ -281,9 +269,9 @@ export default function CameraLensLandingPage({
           </div> : null}
         </div> : null}
 
-        {selectedDevice ? <SharedRepairSelectedDevice selection={selectedDevice} changeModelHref={sharedPageV2 ? "#shared-repair-model-selection" : canonicalPath} /> : null}
+        {selectedLensDevice ? <SharedRepairSelectedDevice selection={selectedLensDevice} changeModelHref={`${canonicalPath}#shared-repair-model-selection`} /> : null}
 
-        {!sharedPageV2 ? <div className="trust-badges mt-8">
+        {isGeneric ? <SharedRepairHeroFacts priceLabel={price} /> : <div className="trust-badges mt-8">
           <div className="trust-badge">
             <span className="trust-badge-icon text-blue-600"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
             Inspection Before Work
@@ -300,10 +288,10 @@ export default function CameraLensLandingPage({
             <span className="trust-badge-icon text-blue-600"><BadgeCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
             Ringwood Repair Desk
           </div>
-        </div> : null}
-      </section>
+        </div>}
+      </section>}
 
-      {sharedPageV2 ? <CameraLensGoogleModelSections sharedPageV2={sharedPageV2} /> : null}
+      {sharedPageV2 ? <SharedRepairPageResultsSection initialResults={sharedPageV2.initialResults} repairName={CAMERA_LENS_REPAIR_NAME} /> : null}
 
       <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="camera-lens-guidance-heading">
         <div className="repair-workbench-heading">
@@ -311,13 +299,11 @@ export default function CameraLensLandingPage({
           <h2 id="camera-lens-guidance-heading" className="scroll-mt-32">
             Camera lens glass repair, explained clearly
           </h2>
-          <p>
-            We inspect the camera area first, confirm model fitment, then quote the lens glass repair before work begins.
-          </p>
+          <p>{brandContent?.guidanceIntro ?? "We inspect the camera area first, confirm model fitment, then quote the lens glass repair before work begins."}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6">
-          {[
+          {(brandContent ? Array.from(brandContent.cards.slice(0, 2), (card: { title: string; body: string }) => ({ ...card, Icon: card.title.startsWith('Protective') ? Camera : Wrench })) : [
             {
               title: "Camera lens glass or camera module?",
               body: "This service is for damaged outer camera lens glass. If the internal camera module is affected, we confirm that separately before work begins.",
@@ -328,7 +314,7 @@ export default function CameraLensLandingPage({
               body: "We inspect the camera area, confirm model fitment and price, replace the outer lens glass where suitable, then check camera output before handover.",
               Icon: Wrench,
             },
-          ].map(({ title: cardTitle, body, Icon }) => (
+          ]).map(({ title: cardTitle, body, Icon }) => (
             <article
               key={cardTitle}
               className="flex h-full min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center"
@@ -342,10 +328,11 @@ export default function CameraLensLandingPage({
               <p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">
                 {body}
               </p>
+              {brandContent && cardTitle === brandContent.cards[0].title ? <Link href={brandCameraHubHref} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 hover:text-blue-800">Explore {brandName} back camera repair options</Link> : null}
             </article>
           ))}
         </div>
-        {hasSharedRepairControls ? <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6"><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Lens glass or a deeper camera fault?</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check the protective lens glass, camera opening, frame or housing condition and camera output. Blurry images, focus failure, shake or a black preview can involve the camera module instead of lens glass alone.</p></article><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">Checks after suitable repair</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">We check camera image output, focus, photo and video clarity, plus whether the lens opening is clean and correctly positioned.</p></article></div> : null}
+        {hasSharedRepairControls ? <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6"><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">{brandContent?.cards[2].title ?? 'Lens glass or a deeper camera fault?'}</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">{brandContent?.cards[2].body ?? 'We check the protective lens glass, camera opening, frame or housing condition and camera output. Blurry images, focus failure, shake or a black preview can involve the camera module instead of lens glass alone.'}</p></article><article className="flex min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">{brandContent?.cards[3].title ?? 'Checks after suitable repair'}</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">{brandContent?.cards[3].body ?? 'We check camera image output, focus, photo and video clarity, plus whether the lens opening is clean and correctly positioned.'}</p></article></div> : null}
       </section>
 
       <CommonRepairProblemsSection
@@ -387,7 +374,22 @@ export default function CameraLensLandingPage({
         </div>
       </section>
 
-      {sharedPageV2 ? <SharedRepairPageResultsSection initialResults={sharedPageV2.initialResults} repairName={CAMERA_LENS_REPAIR_NAME} /> : null}
+      {brandName ? <FaqAccordion
+        density="comfortable"
+        layout="repair-detail"
+        faqs={brandContent ? [...brandContent.faqs] : [
+          { question: `How much is ${brandName} camera lens replacement?`, answer: `${brandName} outer camera lens glass replacement is $50 where the protective lens-glass repair is suitable. We inspect model fitment and camera-area damage before work begins.` },
+          { question: 'Can scratched or foggy photos need camera lens repair?', answer: 'They can when damaged outer lens glass, residue, or contamination is affecting the camera opening, but focus failure, shake, or a black preview can indicate a camera-module fault instead.' },
+          { question: 'Will camera lens replacement delete my data?', answer: 'Camera lens glass repair does not normally erase data, but backing up important information before any repair is recommended.' },
+          { question: 'How long does camera lens repair take?', answer: 'Timing depends on the exact model, lens fitment, part availability, and whether inspection finds deeper camera-area damage. We confirm timing before work begins.' },
+        ]}
+      /> : null}
+      {brandName ? <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="camera-lens-location-heading">
+        <div className="mx-auto rounded-[28px] border-[2px] border-slate-800 p-6 text-center md:p-[50px]">
+          <h2 id="camera-lens-location-heading" className="text-2xl font-black text-slate-950">{brandName} camera lens repair in Ringwood</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-600">Ali Mobile &amp; Repair is at Ringwood Square Shopping Centre, Kiosk C1, Ringwood VIC, serving nearby Mitcham, Croydon, Heathmont, Nunawading, and Melbourne&apos;s eastern suburbs.</p>
+        </div>
+      </section> : null}
 
       <section
         className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"

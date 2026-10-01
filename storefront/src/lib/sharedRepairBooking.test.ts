@@ -9,6 +9,7 @@ import { getVirtualPhoneRepair } from './virtualPhoneRepairs';
 import { getCameraLensPrice } from './virtualCameraLens';
 import { GOOGLE_PIXEL_HARDWARE_CONFIG } from '@/lib/seo/content/google-pixel/config';
 import { OPPO_ENHANCED_CONFIG } from '@/lib/seo/content/oppo/config';
+import { SAMSUNG_SHARED_REPAIR_CONTENT } from '@/data/samsungSharedRepairContent';
 
 const samsungModels = [
   { brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S22 Ultra', modelSlug: 'galaxy-s22-ultra' },
@@ -54,17 +55,18 @@ describe('Samsung shared repair metadata and model state', () => {
   });
 
   it('keeps the five clean Samsung URLs as their own social and canonical identities', () => {
-    for (const [slug, repairName] of [
-      ['loudspeaker-replacement', 'Loudspeaker Replacement'],
-      ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
-      ['power-button-replacement', 'Power Button Replacement'],
-      ['volume-button-replacement', 'Volume Button Replacement'],
+    for (const slug of [
+      'loudspeaker-replacement',
+      'earpiece-speaker-replacement',
+      'power-button-replacement',
+      'volume-button-replacement',
     ] as const) {
       const metadata = createVirtualPhoneRepairMetadata('samsung', slug);
       const canonical = `/repairs/phone/samsung/${slug}`;
 
-      expect(metadata.title).toBe(`Samsung ${repairName} in Ringwood | Ali Mobile`);
-      expect(metadata.description).toContain('Starting from $50');
+      expect(metadata.title).toBe(SAMSUNG_SHARED_REPAIR_CONTENT[slug].title);
+      expect(metadata.description).toBe(SAMSUNG_SHARED_REPAIR_CONTENT[slug].metadataDescription);
+      expect(metadata.description).not.toContain('$50');
       expect(metadata.alternates?.canonical).toBe(canonical);
       expect(metadata.openGraph?.url).toBe(canonical);
       expect(canonical).not.toContain('?');
@@ -187,8 +189,8 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(cameraRoute).toContain('title="Samsung Camera Lens Replacement"');
     expect(controls).toContain("'use client'");
     expect(controls).toContain('useSearchParams');
-    expect(virtualRoute).toContain('getGooglePixelHardwareConfig(model.modelSlug)');
-    expect(virtualRoute).toContain('getOppoModelConfig(model.modelSlug)');
+    expect(virtualRoute).toContain("getBrandSharedPageV2Config(brand, repairSlug)");
+    expect(virtualRoute).toContain("pricingStrategy: sharedPageV2PricingStrategy");
     expect(virtualRoute).toContain('speakerphone audio');
     expect(virtualRoute).toContain('ordinary calls near your ear');
     expect(virtualRoute).toContain('battery, charging and board-level no-power symptoms');
@@ -232,8 +234,8 @@ describe('Samsung shared repair metadata and model state', () => {
     const homepage = readFileSync(resolve(process.cwd(), 'src/app/(public)/page.tsx'), 'utf8');
 
     expect(cameraRoute).toContain('const PAGE_PATH = "/repairs/phone/samsung/camera-lens-replacement";');
-    expect(cameraRoute).toContain('const PAGE_TITLE = "Samsung Camera Lens Replacement in Ringwood | Ali Mobile";');
-    expect(cameraRoute).toContain('const PAGE_DESCRIPTION = "Samsung outer camera lens glass replacement in Ringwood. We inspect model fitment before confirming the listed $50 repair.";');
+    expect(cameraRoute).toContain('const PAGE_TITLE = SAMSUNG_CAMERA_LENS_CONTENT.title;');
+    expect(cameraRoute).toContain('const PAGE_DESCRIPTION = SAMSUNG_CAMERA_LENS_CONTENT.metadataDescription;');
     expect(cameraRoute).toContain('alternates: { canonical: PAGE_PATH }');
     expect(cameraRoute).toContain('openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH');
     expect(cameraRoute).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');

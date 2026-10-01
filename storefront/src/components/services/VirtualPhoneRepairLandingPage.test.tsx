@@ -1,10 +1,12 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { ComponentProps } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/script', () => ({ default: (props: ComponentProps<'script'>) => <script {...props} /> }));
 vi.mock('./SharedRepairBookingControls', () => ({ default: () => <div data-testid="generic-booking-cta" /> }));
+vi.mock('./SharedRepairPageV2BookingControls', () => ({ default: () => <div data-testid="shared-page-v2-booking-cta" /> }));
 vi.mock('./SharedRepairHierarchySections', () => ({
   default: ({ models, selectedBrandSlug, selectedModelSlug, ariaLabel }: { models: Array<{ modelLabel: string; bookingHref: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null; ariaLabel: string }) => (
     <div data-testid="generic-peripheral-hierarchy" data-brand={selectedBrandSlug} data-model={selectedModelSlug} aria-label={ariaLabel}>{models.map((model) => <a key={model.modelLabel} href={model.bookingHref}>{model.modelLabel}</a>)}</div>
@@ -14,6 +16,99 @@ vi.mock('./SharedRepairHierarchySections', () => ({
 import VirtualPhoneRepairLandingPage from './VirtualPhoneRepairLandingPage';
 
 describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
+  it.each([
+    ['Samsung', 'samsung', '/repairs/phone/samsung/loudspeaker-replacement'],
+    ['Google Pixel', 'google-pixel', '/repairs/phone/google/loudspeaker-replacement'],
+    ['OPPO', 'oppo', '/repairs/phone/oppo/loudspeaker-replacement'],
+  ])('renders the centered Master and four compact facts after the %s brand-shared H1', (brandName, brandSlug, canonicalPath) => {
+    render(<VirtualPhoneRepairLandingPage
+      repairSlug="loudspeaker-replacement"
+      canonicalPath={canonicalPath}
+      brandName={brandName}
+      brandSlug={brandSlug}
+      models={[]}
+      sharedPageV2={{
+        supportedModels: [{ category: 'phone', canonicalBrandSlug: brandSlug, brand: brandName, brandSlug, model: 'Galaxy S24', modelSlug: 'galaxy-s24' }],
+        priceCandidates: [],
+        initialResults: [],
+        selectedModelSlug: null,
+        quickAnswers: { repairTime: '30–60 minutes', partsSameDay: 'Call us.', warranty: '6 months' },
+        pricingStrategy: { mode: 'pos-derived' },
+      }}
+    />);
+
+    const heading = screen.getByRole('heading', { level: 1, name: `${brandName} Loudspeaker Replacement` });
+    const facts = screen.getByLabelText('Repair facts');
+    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
+    expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
+    expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();
+    expect(heading.compareDocumentPosition(facts) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Galaxy S24/ })).toHaveAttribute('href', `${canonicalPath}?model=galaxy-s24`);
+    expect(screen.queryByText('Selected device')).toBeNull();
+    expect(screen.queryByLabelText('Commercial repair facts')).toBeNull();
+  });
+
+  it('includes the commercial price and 30-minute facts in initial server HTML after the H1', () => {
+    const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+      repairSlug="loudspeaker-replacement"
+      canonicalPath="/repairs/phone/samsung/loudspeaker-replacement"
+      brandName="Samsung"
+      brandSlug="samsung"
+      models={[]}
+      sharedPageV2={{
+        supportedModels: [],
+        priceCandidates: [],
+        initialResults: [], selectedModelSlug: null,
+        quickAnswers: { repairTime: '30–60 minutes', partsSameDay: 'Call us.', warranty: '6 months' },
+        pricingStrategy: { mode: 'pos-derived' },
+      }}
+    />);
+
+    expect(html).toContain('From $50');
+    expect(html).toContain('30 Minutes');
+    expect(html.indexOf('From $50')).toBeGreaterThan(html.indexOf('<h1'));
+    expect(html.indexOf('30 Minutes')).toBeGreaterThan(html.indexOf('<h1'));
+  });
+
+  it.each(['$129', 'From $149', 'Quote on Request'])('renders selected %s in the centered card while the facts stay From $50', (selectedPriceLabel) => {
+    const { container } = render(<VirtualPhoneRepairLandingPage
+      repairSlug="loudspeaker-replacement"
+      canonicalPath="/repairs/phone/samsung/loudspeaker-replacement"
+      brandName="Samsung"
+      brandSlug="samsung"
+      models={[]}
+      hierarchy={{
+        models: [], selectedBrandSlug: 'samsung', selectedModelSlug: 'galaxy-s24',
+        selectedDevice: {
+          selectedDevice: { brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24' },
+          selectedRepair: { name: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement' },
+          priceLabel: selectedPriceLabel,
+          booking: { href: '/book-repair?category=phone', isAvailable: true },
+        },
+      }}
+      sharedPageV2={{
+        supportedModels: [], priceCandidates: [], initialResults: [], selectedModelSlug: 'galaxy-s24',
+        quickAnswers: { repairTime: '30–60 minutes', partsSameDay: 'Call us.', warranty: '6 months' },
+        pricingStrategy: { mode: 'pos-derived' },
+      }}
+    />);
+
+    const heading = screen.getByRole('heading', { level: 1, name: 'Samsung Loudspeaker Replacement' });
+    const card = container.querySelector('[data-camera-module-hero-price-card]') as HTMLElement;
+    const facts = screen.getByLabelText('Repair facts');
+    expect(within(card).getByText(selectedPriceLabel)).toBeInTheDocument();
+    expect(heading.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
+    expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
+    expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', '/book-repair?category=phone');
+    expect(screen.getByRole('link', { name: /Change model/ })).toHaveAttribute('href', '/repairs/phone/samsung/loudspeaker-replacement');
+    expect(container.querySelector('[data-camera-module-model-selector]')).toHaveAttribute('hidden');
+    expect(container.querySelector('[data-shared-repair-selected-price]')).toBeNull();
+  });
+
   it('uses the Camera master selected state without a virtual fallback price or duplicate selected-device card', () => {
     const { container } = render(<VirtualPhoneRepairLandingPage
       repairSlug="loudspeaker-replacement"
@@ -35,7 +130,8 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.queryByTestId('generic-booking-cta')).toBeNull();
     expect(screen.getByTestId('generic-peripheral-hierarchy').parentElement).toHaveAttribute('hidden');
     expect(screen.getByRole('heading', { level: 2, name: 'Huawei Mate 20' })).toBeTruthy();
-    expect(screen.getByText('$79')).toBeTruthy();
+    expect(screen.getAllByText('$79')).toHaveLength(1);
+    expect(within(screen.getByLabelText('Repair facts')).getByText('From $50')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /Book Repair Now/ })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', '/book-repair?category=phone&brandSlug=huawei&modelSlug=mate-20&serviceSlug=loudspeaker-replacement');
     expect(screen.getByRole('button', { name: /Change model/ })).toBeTruthy();

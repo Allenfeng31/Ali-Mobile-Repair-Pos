@@ -131,6 +131,21 @@ describe('SharedRepairHierarchySections', () => {
     expect(screen.getByRole('link', { name: /U24.*Front Camera Replacement/ })).toHaveAttribute('href', '/book/u24');
   });
 
+  it('shows one brand’s existing model cards immediately without a series disclosure, while retaining the responsive Show More control and server anchors', () => {
+    const samsungModels = hierarchyModels.slice(0, 7);
+    const { container } = render(<SharedRepairHierarchySections models={samsungModels} showModelsImmediately />);
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Samsung Front Camera Replacement by Model' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Galaxy S Series/ })).toBeNull();
+    expect(container.querySelectorAll('[data-shared-repair-model-card]')).toHaveLength(7);
+    expect(screen.getByRole('button', { name: 'Show More Models' })).toHaveAttribute('aria-expanded', 'false');
+    expect(container.querySelector('[data-shared-repair-hierarchy-panel][data-expanded="false"]')).toBeNull();
+
+    const markup = renderToStaticMarkup(<SharedRepairHierarchySections models={samsungModels} showModelsImmediately />);
+    expect((markup.match(/href="\/book\//g) ?? [])).toHaveLength(7);
+    expect(markup).not.toContain('href="/book/u24"');
+  });
+
   it('uses CSS-only collapsed panels with a no-JS reveal and no routing hooks', () => {
     const presentation = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairHierarchyPresentation.tsx'), 'utf8');
     const presentationStyles = readFileSync(resolve(process.cwd(), 'src/components/services/SharedRepairHierarchyPresentation.module.css'), 'utf8');

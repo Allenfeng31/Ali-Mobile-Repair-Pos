@@ -13,7 +13,7 @@ const models: SharedRepairPageSupportedModel[] = [
   { category: 'phone', canonicalBrandSlug: 'google-pixel', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Future Pixel', modelSlug: 'future-pixel' },
 ];
 
-describe('Google Pixel Shared Page V2 server selection', () => {
+describe('Brand-shared Page V2 server selection', () => {
   it.each([
     ['loudspeaker-replacement', 'Loudspeaker Replacement'],
     ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
@@ -65,10 +65,20 @@ describe('Google Pixel Shared Page V2 server selection', () => {
     });
   });
 
-  it.each(['samsung', 'oppo'] as const)('does not opt unmigrated %s callers into Pixel V2 selected-device state', async (brand) => {
-    fetchRepairCatalogMock.mockResolvedValue({ brands: [{ category: 'phone', brand: brand === 'samsung' ? 'Samsung' : 'OPPO', slug: brand, icon: '', models: [] }] });
-    const element = await VirtualPhoneRepairRoutePage({ brand, repairSlug: 'loudspeaker-replacement' });
-    expect(element.props.sharedPageV2).toBeUndefined();
-    expect(element.props.hierarchy).toBeUndefined();
+  it.each([
+    ['samsung', 'Samsung', 'galaxy-s25'],
+    ['oppo', 'OPPO', 'find-x8-pro'],
+  ] as const)('uses V2 server selection and canonical booking provenance for %s', async (brand, brandName, modelSlug) => {
+    fetchRepairCatalogMock.mockResolvedValue({ brands: [{ category: 'phone', brand: brandName, slug: brand, icon: '', models: [{ model: 'Current model', slug: modelSlug, repairTypes: [{ slug: 'loudspeaker-replacement', name: 'Loudspeaker Replacement', price: 129, repairOrigin: 'pos' }] }] }] });
+    const element = await VirtualPhoneRepairRoutePage({ brand, repairSlug: 'loudspeaker-replacement', query: { model: modelSlug } });
+    expect(element.props.sharedPageV2).toMatchObject({ pricingStrategy: { mode: 'pos-derived' }, selectedModelSlug: modelSlug });
+    expect(element.props.hierarchy).toMatchObject({
+      selectedModelSlug: modelSlug,
+      selectedDevice: {
+        selectedDevice: { brand: brandName, modelSlug },
+        priceLabel: '$129',
+        booking: { href: expect.stringContaining(`brandSlug=${brand}`) },
+      },
+    });
   });
 });

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { fetchRepairCatalog } from "@/lib/api";
 import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from "@/components/services/CameraLensLandingPage";
-import { buildCameraLensModelOptions } from "@/lib/virtualCameraLens";
+import { fetchSharedRepairPageResultSeeds } from "@/lib/repair-results.server";
+import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels } from "@/lib/sharedRepairPageV2";
+import { getCameraLensPrice } from "@/lib/virtualCameraLens";
+import { SAMSUNG_CAMERA_LENS_CONTENT } from "@/data/samsungSharedRepairContent";
 
 const PAGE_PATH = "/repairs/phone/samsung/camera-lens-replacement";
-const PAGE_TITLE = "Samsung Camera Lens Replacement in Ringwood | Ali Mobile";
-const PAGE_DESCRIPTION = "Samsung outer camera lens glass replacement in Ringwood. We inspect model fitment before confirming the listed $50 repair.";
+const PAGE_TITLE = SAMSUNG_CAMERA_LENS_CONTENT.title;
+const PAGE_DESCRIPTION = SAMSUNG_CAMERA_LENS_CONTENT.metadataDescription;
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -17,28 +20,32 @@ export const metadata: Metadata = {
 
 export default async function SamsungCameraLensReplacementPage({ searchParams }: { searchParams: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }> }) {
   const catalog = await fetchRepairCatalog();
-  const brand = catalog.brands.find((entry) => entry.category === "phone" && entry.slug === "samsung");
-  const models = buildCameraLensModelOptions((brand?.models ?? []).map((model) => ({
-    brand: "Samsung",
-    brandSlug: "samsung",
-    model: model.model,
-    modelSlug: model.slug,
-  })));
+  const models = buildSharedRepairPageSupportedModels({ brands: catalog.brands, canonicalBrandSlug: "samsung", repairSlug: "camera-lens-replacement" });
+  const priceCandidates = buildSharedRepairPageCandidates({ brands: catalog.brands, canonicalBrandSlug: "samsung", repairSlug: "camera-lens-replacement" });
   const selection = resolveCameraLensSelectedDevice({
     route: { scope: "brand", canonicalBrandSlug: "samsung", routeBrandSegment: "samsung" },
     models,
     query: await searchParams,
   });
+  const initialResults = await fetchSharedRepairPageResultSeeds({ category: "phone", brandSlug: "samsung", repairTypeSlug: "camera-lens-replacement", selectedModelSlug: selection.selectedModelSlug });
 
   return (
     <CameraLensLandingPage
       brandName="Samsung"
       brandSlug="samsung"
       title="Samsung Camera Lens Replacement"
-      intro="Camera lens glass replacement for supported Samsung models at Ali Mobile & Repair in Ringwood. The listed service is $50, with final fitment confirmed after inspection."
+      intro={SAMSUNG_CAMERA_LENS_CONTENT.intro}
       canonicalPath={PAGE_PATH}
       models={models}
       selectedDevice={selection.selectedDevice}
+      sharedPageV2={{
+        supportedModels: models,
+        priceCandidates,
+        initialResults: initialResults ?? [],
+        selectedModelSlug: selection.selectedModelSlug,
+        quickAnswers: { repairTime: "Contact us to confirm repair time.", partsSameDay: "Call to confirm parts availability.", warranty: "Warranty applies to eligible standard repairs and the completed repair scope." },
+        pricingStrategy: { mode: "fixed", fixedPrice: getCameraLensPrice("Samsung") },
+      }}
     />
   );
 }
