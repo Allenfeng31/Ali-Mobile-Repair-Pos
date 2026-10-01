@@ -114,6 +114,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "We are located at Kiosk C1 inside Ringwood Square Shopping Centre in Ringwood."
       },
       {
+        question: "What are your opening hours?",
+        answer: "Monday–Saturday: 9:00am–5:00pm. Sunday: Closed."
+      },
+      {
         question: "Can I walk in, or should I book before visiting?",
         answer: "Walk-ins are welcome. Booking online or calling ahead is still helpful if you want us to check likely timing, queue context or parts availability before you arrive."
       },
