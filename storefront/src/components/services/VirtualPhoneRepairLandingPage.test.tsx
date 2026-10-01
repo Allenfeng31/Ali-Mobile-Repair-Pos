@@ -6,7 +6,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/script', () => ({ default: (props: ComponentProps<'script'>) => <script {...props} /> }));
 vi.mock('./SharedRepairBookingControls', () => ({ default: () => <div data-testid="generic-booking-cta" /> }));
-vi.mock('./SharedRepairPageV2BookingControls', () => ({ default: () => <div data-testid="shared-page-v2-booking-cta" /> }));
 vi.mock('./SharedRepairHierarchySections', () => ({
   default: ({ models, selectedBrandSlug, selectedModelSlug, ariaLabel }: { models: Array<{ modelLabel: string; bookingHref: string }>; selectedBrandSlug: string | null; selectedModelSlug: string | null; ariaLabel: string }) => (
     <div data-testid="generic-peripheral-hierarchy" data-brand={selectedBrandSlug} data-model={selectedModelSlug} aria-label={ariaLabel}>{models.map((model) => <a key={model.modelLabel} href={model.bookingHref}>{model.modelLabel}</a>)}</div>

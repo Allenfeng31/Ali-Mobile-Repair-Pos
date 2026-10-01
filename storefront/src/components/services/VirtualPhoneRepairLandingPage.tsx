@@ -6,7 +6,6 @@ import FaqAccordion from '@/components/FaqAccordion';
 import CommonRepairProblemsSection from '@/components/services/CommonRepairProblemsSection';
 import CameraModuleRepairSelectionExperience from '@/components/services/CameraModuleRepairSelectionExperience';
 import SharedRepairBookingControls from '@/components/services/SharedRepairBookingControls';
-import type { SharedRepairPageV2QuickAnswers } from '@/components/services/SharedRepairPageV2BookingControls';
 import SharedRepairHierarchySections from '@/components/services/SharedRepairHierarchySections';
 import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
 import SharedRepairHeroSelection from '@/components/services/SharedRepairHeroSelection';
@@ -19,7 +18,7 @@ import { buildBrandSharedMasterModels } from '@/lib/brandSharedMasterModels';
 import { SAMSUNG_SHARED_REPAIR_CONTENT } from '@/data/samsungSharedRepairContent';
 import { GOOGLE_PIXEL_SHARED_REPAIR_CONTENT } from '@/data/googlePixelSharedRepairContent';
 import { OPPO_SHARED_REPAIR_CONTENT } from '@/data/oppoSharedRepairContent';
-import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy } from '@/lib/sharedRepairPageV2';
+import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy, SharedRepairPageV2QuickAnswers } from '@/lib/sharedRepairPageV2';
 import type { SharedRepairHierarchyModel } from '@/lib/sharedRepairHierarchy';
 import type { RepairResultMatchingItem } from '@/lib/repair-results';
 

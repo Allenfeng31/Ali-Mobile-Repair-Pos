@@ -2,7 +2,6 @@ import '@testing-library/jest-dom/vitest';
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('./SharedRepairPageV2BookingControls', () => ({ default: () => <div data-testid="shared-page-v2-booking-controls" /> }));
 vi.mock('./SharedRepairBookingControls', () => ({ default: () => <div data-testid="shared-repair-booking-controls" /> }));
 import CameraLensLandingPage, { resolveCameraLensSelectedDevice } from './CameraLensLandingPage';
 

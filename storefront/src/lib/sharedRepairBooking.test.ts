@@ -264,7 +264,7 @@ describe('Samsung shared repair metadata and model state', () => {
     expect(googleCamera).toContain('twitter: { card: "summary_large_image", title: PAGE_TITLE, description: PAGE_DESCRIPTION }');
     expect(cameraPage).toContain('const repairHubLabel = brandName ? `${brandName} Repairs` : null;');
     expect(cameraPage).toContain('showModelControls={hasSharedRepairControls}');
-    expect(cameraPage).toContain('SharedRepairPageV2BookingControls');
+    expect(cameraPage).toContain('SharedRepairBookingControls');
     expect(cameraPage).toContain('photo and video clarity');
     expect(googleCamera).not.toContain('/repairs/phone/google-pixel/camera-lens-replacement');
   });

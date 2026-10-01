@@ -6,9 +6,8 @@ import {
   getVirtualPhoneRepair,
   type VirtualPhoneRepairSlug,
 } from "@/lib/virtualPhoneRepairs";
-import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels, getSharedRepairCandidatePriceLabel, type SharedRepairPageV2PricingStrategy } from '@/lib/sharedRepairPageV2';
+import { buildSharedRepairPageCandidates, buildSharedRepairPageSupportedModels, getSharedRepairCandidatePriceLabel, type SharedRepairPageV2PricingStrategy, type SharedRepairPageV2QuickAnswers } from '@/lib/sharedRepairPageV2';
 import { fetchSharedRepairPageResultSeeds } from '@/lib/repair-results.server';
-import type { SharedRepairPageV2QuickAnswers } from '@/components/services/SharedRepairPageV2BookingControls';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { resolveSharedRepairContext } from '@/lib/sharedRepairContext';
 import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';

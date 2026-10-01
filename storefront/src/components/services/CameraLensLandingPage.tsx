@@ -15,7 +15,6 @@ import FaqAccordion from "@/components/FaqAccordion";
 import CommonRepairProblemsSection from "@/components/services/CommonRepairProblemsSection";
 import { ServiceSchema } from "@/components/services/ServiceSchema";
 import SharedRepairBookingControls from "@/components/services/SharedRepairBookingControls";
-import type { SharedRepairPageV2QuickAnswers } from "@/components/services/SharedRepairPageV2BookingControls";
 import SharedRepairSelectedDevice, { type SharedRepairSelectedDeviceViewModel } from "@/components/services/SharedRepairSelectedDevice";
 import CameraModuleRepairSelectionExperience from "@/components/services/CameraModuleRepairSelectionExperience";
 import SharedRepairHeroFacts from "@/components/services/SharedRepairHeroFacts";
@@ -27,7 +26,7 @@ import {
   getCameraLensPrice,
 } from "@/lib/virtualCameraLens";
 import { getSharedRepairBookingHref } from "@/lib/sharedRepairBooking";
-import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy } from "@/lib/sharedRepairPageV2";
+import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy, SharedRepairPageV2QuickAnswers } from "@/lib/sharedRepairPageV2";
 import { buildBrandSharedMasterModels } from "@/lib/brandSharedMasterModels";
 import { SAMSUNG_CAMERA_LENS_CONTENT } from "@/data/samsungSharedRepairContent";
 import { GOOGLE_PIXEL_CAMERA_LENS_CONTENT } from "@/data/googlePixelSharedRepairContent";

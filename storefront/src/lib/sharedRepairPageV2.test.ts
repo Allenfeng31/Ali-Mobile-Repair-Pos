@@ -295,25 +295,31 @@ describe('Shared Page V2 candidate and destination foundation', () => {
     expect(routeSource).not.toContain('supportedModel: supportedGooglePixelModel');
   });
 
-  it('resolves only completed Google Pixel V2 masters for future Repair Results', () => {
+  it('resolves each completed brand-shared master for future Repair Results from the shared route registry', () => {
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-8', repairSlug: 'loudspeaker-replacement',
-    })).toMatchObject({ href: '/repairs/phone/google/loudspeaker-replacement' });
+    })).toMatchObject({ href: '/repairs/phone/google/loudspeaker-replacement?model=pixel-8' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-8', repairSlug: 'front-camera-replacement',
     })).toBeNull();
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'earpiece-speaker-replacement',
-    })).toMatchObject({ href: '/repairs/phone/google/earpiece-speaker-replacement' });
+    })).toMatchObject({ href: '/repairs/phone/google/earpiece-speaker-replacement?model=pixel-9a' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'power-button-replacement',
-    })).toMatchObject({ href: '/repairs/phone/google/power-button-replacement' });
+    })).toMatchObject({ href: '/repairs/phone/google/power-button-replacement?model=pixel-9a' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'volume-button-replacement',
-    })).toMatchObject({ href: '/repairs/phone/google/volume-button-replacement' });
+    })).toMatchObject({ href: '/repairs/phone/google/volume-button-replacement?model=pixel-9a' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-9a', repairSlug: 'camera-lens-replacement',
-    })).toMatchObject({ href: '/repairs/phone/google/camera-lens-replacement' });
+    })).toMatchObject({ href: '/repairs/phone/google/camera-lens-replacement?model=pixel-9a' });
+    expect(resolveFutureRepairResultDestination({
+      category: 'phone', brandSlug: 'samsung', modelSlug: 'galaxy-s24', repairSlug: 'power-button-replacement',
+    })).toMatchObject({ href: '/repairs/phone/samsung/power-button-replacement?model=galaxy-s24' });
+    expect(resolveFutureRepairResultDestination({
+      category: 'phone', brandSlug: 'oppo', modelSlug: 'reno-12', repairSlug: 'camera-lens-replacement',
+    })).toMatchObject({ href: '/repairs/phone/oppo/camera-lens-replacement?model=reno-12' });
     expect(resolveFutureRepairResultDestination({
       category: 'phone', brandSlug: 'huawei', modelSlug: 'p30-pro', repairSlug: 'screen-replacement',
     })).toBeNull();

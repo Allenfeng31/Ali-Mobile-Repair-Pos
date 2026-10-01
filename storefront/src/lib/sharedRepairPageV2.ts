@@ -9,6 +9,12 @@ export type SharedRepairPageV2PricingStrategy =
   | Readonly<{ mode: 'pos-derived' }>
   | Readonly<{ mode: 'fixed'; fixedPrice: number }>;
 
+export type SharedRepairPageV2QuickAnswers = Readonly<{
+  repairTime: string;
+  partsSameDay: string;
+  warranty: string;
+}>;
+
 const BRAND_SHARED_REPAIR_BRANDS = ['samsung', 'google-pixel', 'oppo'] as const;
 const BRAND_SHARED_REPAIR_SLUGS = [
   'camera-lens-replacement',
