@@ -15,7 +15,8 @@ type BookingPayloadInput = {
   total: number;
   hasCustomQuote: boolean;
   pricing: Pricing;
-  datetime: string;
+  bookingDate: string;
+  bookingTime: string;
   displayDate: string;
   notes: string;
   sessionToken: string | null;
@@ -34,7 +35,8 @@ export function buildBookingPayload(input: BookingPayloadInput) {
     total: input.total,
     hasCustomQuote: input.hasCustomQuote,
     pricing: input.pricing,
-    datetime: input.datetime,
+    bookingDate: input.bookingDate,
+    bookingTime: input.bookingTime,
     displayDate: input.displayDate,
     notes: input.notes,
     session_token: input.sessionToken,

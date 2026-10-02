@@ -52,8 +52,9 @@ describe("business hours", () => {
     expect(aboutPage).toContain("[LOCAL_BUSINESS_OPENING_HOURS]");
     expect(aboutPage).not.toContain('opens: "10:00"');
     expect(bookingPage).toContain("const TIME_SLOTS = BUSINESS_HOURS.bookingStartSlots;");
-    expect(bookingPage).toContain("const isSunday = d.getDay() === 0;");
+    expect(bookingPage).toContain("const isSunday = getBookingCalendarWeekday(dayStr) === 0;");
     expect(bookingPage).toContain("const isHoliday = VIC_PUBLIC_HOLIDAYS.includes(dayStr);");
+    expect(bookingPage).not.toContain("d.toISOString().split('T')[0]");
     expect(bookingPage).toContain("60 * 60 * 1000");
     expect(worker).toContain("shop hours (9am-5pm)");
     expect(worker).not.toContain("shop hours (10am-5pm)");

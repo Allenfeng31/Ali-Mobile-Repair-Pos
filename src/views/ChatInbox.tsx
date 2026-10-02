@@ -22,6 +22,7 @@ import { getApiBaseUrl } from '@/lib/apiBase';
 import { supabase } from '@/lib/supabase';
 import { getStaffChatStatus, getStaffChatStatusMessage, type StaffChatStatus } from '@/lib/staffChatStatus';
 import { useAdaptivePoll, type PollOutcome } from '@/hooks/useAdaptivePoll';
+import { formatBookingRequestedTime, getBookingDisplayTotal } from '@/lib/bookingPresentation';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -64,11 +65,48 @@ interface BookingRecord {
   model: string;
   service: string;
   datetime: string;
+  booking_date?: string | null;
+  booking_time?: string | null;
+  booking_total?: number | null;
+  has_custom_quote?: boolean | null;
+  booking_items?: BookingDevice[] | null;
   notes?: string;
   status: 'pending' | 'confirmed' | 'declined' | string;
   created_at?: string;
   reminder_sent_at?: string | null;
   reminder_sms_sid?: string | null;
+}
+
+interface BookingService {
+  id: string;
+  name: string;
+  price: number;
+  customDescription?: string;
+  isUpsell?: boolean;
+  isQuoteOnRequest?: boolean;
+}
+
+interface BookingDevice {
+  category?: string;
+  brand?: string;
+  model?: string;
+  services?: BookingService[];
+}
+
+interface BookingChatData {
+  appointmentId?: string;
+  name?: string;
+  phone?: string;
+  device?: string;
+  service?: string;
+  bookingDate?: string | null;
+  bookingTime?: string | null;
+  bookingItems?: BookingDevice[] | null;
+  bookingTotal?: number | null;
+  total?: number | null;
+  hasCustomQuote?: boolean | null;
+  time?: string | null;
+  notes?: string | null;
 }
 
 const API_BASE = getApiBaseUrl();
@@ -478,15 +516,13 @@ export function ChatInbox() {
       : d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
   };
 
-  const formatBookingTime = (iso: string) => {
-    const d = new Date(iso);
-    return d.toLocaleString('en-AU', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
+  const formatBookingTime = (booking: Pick<BookingRecord, 'booking_date' | 'booking_time' | 'datetime'>) => {
+    const requested = formatBookingRequestedTime({
+      bookingDate: booking.booking_date,
+      bookingTime: booking.booking_time,
+      datetime: booking.datetime,
     });
+    return requested ? `${requested.date} · ${requested.time}` : 'Time to confirm';
   };
 
   const pendingBookings = bookings.filter(booking => booking.status === 'pending');
@@ -716,7 +752,17 @@ export function ChatInbox() {
                     try {
                       const startIndex = msg.content.indexOf('{');
                       const endIndex = msg.content.lastIndexOf('}');
-                      const data = JSON.parse(msg.content.substring(startIndex, endIndex + 1));
+                      const data = JSON.parse(msg.content.substring(startIndex, endIndex + 1)) as BookingChatData;
+                      const appointmentId = data.appointmentId || '';
+                      const requested = formatBookingRequestedTime({
+                        bookingDate: data.bookingDate,
+                        bookingTime: data.bookingTime,
+                        datetime: data.time,
+                      });
+                      const total = getBookingDisplayTotal({
+                        bookingTotal: data.bookingTotal ?? data.total,
+                        hasCustomQuote: data.hasCustomQuote,
+                      });
                       return (
                         <div className="bg-white/40 shadow-[var(--shadow-neu-pressed)] rounded-3xl p-6 mt-2 space-y-4 border border-black/5">
                           <div className="flex items-center gap-3 text-blue-600">
@@ -724,38 +770,60 @@ export function ChatInbox() {
                             <h4 className="text-[10px] font-black uppercase tracking-widest">Inbound Booking Data</h4>
                           </div>
                           <div className="grid grid-cols-1 gap-2 text-xs">
-                            <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Device:</span> <span className="text-black font-black">{data.device}</span></p>
-                            <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Service:</span> <span className="text-black font-black">{data.service}</span></p>
-                            <p className="flex justify-between"><span className="text-gray-500">Requested:</span> <span className="text-black font-black">{new Date(data.time).toLocaleString()}</span></p>
+                            {data.name && <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Customer:</span> <span className="text-black font-black">{data.name}</span></p>}
+                            {data.phone && <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Mobile:</span> <span className="text-black font-black">{data.phone}</span></p>}
+                            {data.bookingItems?.length ? data.bookingItems.map((device, deviceIndex) => (
+                              <div key={`${device.brand}-${device.model}-${deviceIndex}`} className="border-b border-black/5 pb-2">
+                                <p className="text-gray-500">Device: <span className="font-black text-black">{[device.brand, device.model].filter(Boolean).join(' ')}</span></p>
+                                {device.services?.map((service, serviceIndex) => {
+                                  const price = Number(service.price);
+                                  const priceLabel = service.isQuoteOnRequest || !Number.isFinite(price)
+                                    ? 'Quote on Request'
+                                    : `$${price.toFixed(2)}`;
+                                  return (
+                                    <p key={`${service.id}-${serviceIndex}`} className="mt-1 flex justify-between gap-3 pl-3">
+                                      <span className="text-gray-500">{service.name}{service.isUpsell ? ' (Add-on)' : ''}</span>
+                                      <span className="shrink-0 font-black text-black">{priceLabel}</span>
+                                    </p>
+                                  );
+                                })}
+                              </div>
+                            )) : <>
+                              {data.device && <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Device:</span> <span className="text-black font-black">{data.device}</span></p>}
+                              {data.service && <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Service:</span> <span className="text-black font-black">{data.service}</span></p>}
+                            </>}
+                            {total && <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Total:</span> <span className="text-black font-black">{total}</span></p>}
+                            {requested && <p className="flex justify-between border-b border-black/5 pb-1"><span className="text-gray-500">Requested:</span> <span className="text-right font-black text-black">{requested.date}<br />{requested.time}</span></p>}
+                            {data.notes?.trim() && <p className="border-b border-black/5 pb-1"><span className="text-gray-500">Remark:</span> <span className="mt-1 block font-black text-black">{data.notes.trim()}</span></p>}
                           </div>
 
-                          {(apptStatusCache[data.appointmentId] === 'confirmed' || apptStatusCache[data.appointmentId] === 'declined' || apptStatusCache[data.appointmentId] === 'arrived') ? (
+                          {(apptStatusCache[appointmentId] === 'confirmed' || apptStatusCache[appointmentId] === 'declined' || apptStatusCache[appointmentId] === 'arrived') ? (
                             <div className={cn(
                               "mt-4 py-3 rounded-xl text-center font-black text-[10px] uppercase tracking-widest shadow-[var(--shadow-neu-sm)]",
-                              apptStatusCache[data.appointmentId] === 'declined'
+                              apptStatusCache[appointmentId] === 'declined'
                                 ? "bg-red-100 text-red-600"
-                                : apptStatusCache[data.appointmentId] === 'arrived'
+                                : apptStatusCache[appointmentId] === 'arrived'
                                   ? "bg-blue-100 text-blue-600"
                                   : "bg-green-100 text-green-600"
                             )}>
-                              {apptStatusCache[data.appointmentId] === 'declined'
+                              {apptStatusCache[appointmentId] === 'declined'
                                 ? 'Request Refused'
-                                : apptStatusCache[data.appointmentId] === 'arrived'
+                                : apptStatusCache[appointmentId] === 'arrived'
                                   ? 'Arrived'
                                   : 'System Confirmed'}
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-4 pt-2">
                               <button
-                                onClick={() => updateAppointmentStatus(data.appointmentId, 'confirmed')}
-                                disabled={updatingBookingId === data.appointmentId}
+                                onClick={() => updateAppointmentStatus(appointmentId, 'confirmed')}
+                                disabled={!appointmentId || updatingBookingId === appointmentId}
                                 className="bg-green-500 text-white font-black py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-[0_5px_15px_rgba(34,197,94,0.3)] active:scale-95 transition-all"
                               >
                                 Accept
                               </button>
                               <button
-                                onClick={() => updateAppointmentStatus(data.appointmentId, 'declined')}
-                                disabled={updatingBookingId === data.appointmentId}
+                                onClick={() => updateAppointmentStatus(appointmentId, 'declined')}
+                                disabled={!appointmentId || updatingBookingId === appointmentId}
                                 className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-red-600 font-black py-3 rounded-xl text-[10px] uppercase tracking-widest active:shadow-[var(--shadow-neu-pressed)] transition-all"
                               >
                                 Refuse
@@ -851,7 +919,7 @@ export function ChatInbox() {
               <div className="rounded-[2rem] bg-blue-50 p-5 shadow-[var(--shadow-neu-sm)]">
                 <p className="text-[9px] font-black uppercase tracking-[0.22em] text-blue-600">Next Repair</p>
                 <p className="mt-2 truncate text-sm font-black text-black">
-                  {nextBooking ? `${nextBooking.customer_name} · ${formatBookingTime(nextBooking.datetime)}` : 'No upcoming bookings'}
+                  {nextBooking ? `${nextBooking.customer_name} · ${formatBookingTime(nextBooking)}` : 'No upcoming bookings'}
                 </p>
               </div>
             </div>
@@ -913,7 +981,7 @@ export function ChatInbox() {
                                 {statusLabel}
                               </span>
                               <span className="rounded-full bg-white/70 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-gray-600">
-                                {formatBookingTime(booking.datetime)}
+                                {formatBookingTime(booking)}
                               </span>
                             </div>
                             <ChevronDown

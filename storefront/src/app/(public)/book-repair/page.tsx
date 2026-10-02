@@ -8,6 +8,12 @@ import { formatOtherRepairServiceName, isOtherRepairService, useCart, type Repai
 import { formatDeviceTitle } from "@/lib/inventoryUtils";
 import { buildBookingPayload } from "@/lib/bookingPayload";
 import { BUSINESS_HOURS } from "@/lib/businessHours";
+import {
+  addBookingCalendarDays,
+  formatBookingCalendarDate,
+  getBookingCalendarWeekday,
+  getMelbourneBookingCalendarDate,
+} from "@/lib/bookingCalendar";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -39,7 +45,16 @@ function getBookingServiceDisplayName(category: string, brand: string, service: 
     : getCartDisplayServiceName(category, brand, service.name);
 }
 
-function generateICS(booking: any) {
+type BookingSuccessData = {
+  name: string;
+  brand: string;
+  model: string;
+  service: string;
+  datetime: string;
+  displayDate: string;
+};
+
+function generateICS(booking: BookingSuccessData) {
   const { name, brand, model, service, datetime } = booking;
   const start = new Date(datetime);
   const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour duration
@@ -74,7 +89,7 @@ function generateICS(booking: any) {
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function SuccessView({ booking, onReset }: { booking: any; onReset: () => void }) {
+function SuccessView({ booking, onReset }: { booking: BookingSuccessData; onReset: () => void }) {
   return (
     <div className="booking-page-shell booking-success-shell">
       <section className="booking-success-card">
@@ -169,7 +184,7 @@ export default function BookRepairPage() {
   const hasOtherRepair = confirmedDevices.some(device => device.services.some(isOtherRepairService));
   const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successBooking, setSuccessBooking] = useState<any>(null);
+  const [successBooking, setSuccessBooking] = useState<BookingSuccessData | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   // Date/Time Selection
@@ -177,6 +192,7 @@ export default function BookRepairPage() {
   const [selectedSlot, setSelectedSlot] = useState("");
 
   const TIME_SLOTS = BUSINESS_HOURS.bookingStartSlots;
+  const bookingCalendarStart = getMelbourneBookingCalendarDate();
 
   // ── VIC Public Holidays 2026/2027 ─────────────────────────────────────────
   const VIC_PUBLIC_HOLIDAYS = [
@@ -240,12 +256,7 @@ export default function BookRepairPage() {
     setShowDisclaimer(false);
     setIsSubmitting(true);
     try {
-      // Create a date object in local time
-      const datetime = `${selectedDay}T${selectedSlot}:00`;
-      const dateObj = new Date(datetime);
-
-      // Format as DD/MM/YYYY HH:mm for display
-      const displayDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${selectedSlot}`;
+      const displayDate = `${formatBookingCalendarDate(selectedDay, { day: '2-digit', month: '2-digit', year: 'numeric' })} ${selectedSlot}`;
 
       const payload = buildBookingPayload({
         customerName: formData.name,
@@ -260,7 +271,8 @@ export default function BookRepairPage() {
           qualifyingRepairItemCount,
           total: totalPrice,
         },
-        datetime: dateObj.toISOString(),
+        bookingDate: selectedDay,
+        bookingTime: selectedSlot,
         displayDate,
         notes: formData.notes,
         sessionToken: typeof window !== 'undefined' ? localStorage.getItem('chat_session_token') : null,
@@ -273,9 +285,11 @@ export default function BookRepairPage() {
       });
 
       if (!res.ok) throw new Error("Failed to book");
+      const result = await res.json();
 
       setSuccessBooking({
         ...payload,
+        datetime: result?.appointment?.datetime || '',
         name: formData.name,
         // Legacy fields for SuccessView compatibility
         brand: confirmedDevices[0].brand,
@@ -285,7 +299,7 @@ export default function BookRepairPage() {
           : getBookingServiceDisplayName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0] || { id: 'fallback', name: 'Repair', price: 0 })
       });
       clearCart();
-    } catch (err) {
+    } catch {
       alert("Something went wrong. Please try again or call us.");
     } finally {
       setIsSubmitting(false);
@@ -410,17 +424,15 @@ export default function BookRepairPage() {
                 <label>1. Select Date</label>
                 <div className="booking-date-strip no-scrollbar">
                   {Array.from({ length: 14 }).map((_, i) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() + i);
-                    const isSunday = d.getDay() === 0;
-                    const dayStr = d.toISOString().split('T')[0];
+                    const dayStr = addBookingCalendarDays(bookingCalendarStart, i);
+                    const isSunday = getBookingCalendarWeekday(dayStr) === 0;
                     const isHoliday = VIC_PUBLIC_HOLIDAYS.includes(dayStr);
                     const isDisabled = isSunday || isHoliday;
 
                     const isSelected = selectedDay === dayStr;
-                    const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-                    const dateNum = d.getDate();
-                    const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+                    const dayName = formatBookingCalendarDate(dayStr, { weekday: 'short' });
+                    const dateNum = formatBookingCalendarDate(dayStr, { day: 'numeric' });
+                    const monthName = formatBookingCalendarDate(dayStr, { month: 'short' });
 
                     return (
                       <button
@@ -442,7 +454,7 @@ export default function BookRepairPage() {
 
             {selectedDay && (
               <div className="form-group booking-time-group">
-                <label>2. Select Time ({new Date(selectedDay).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })})</label>
+                <label>2. Select Time ({formatBookingCalendarDate(selectedDay, { day: 'numeric', month: 'long' })})</label>
                 <div className="booking-time-grid">
                   {TIME_SLOTS.map(slot => (
                     <button

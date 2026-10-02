@@ -25,6 +25,13 @@ const {
   normaliseBookingDevices,
   validateBookingOtherRepairItems,
 } = require('../lib/otherRepairBooking.js');
+const {
+  buildBookingPersistence,
+  deriveMelbourneBookingDateTime,
+  filterPublicChatMessages,
+  formatBookingDateTimeForStaff,
+  getArrivalRepairPrice,
+} = require('../lib/bookingIntegrity.js');
 // Loading a local environment file is an explicit developer action, never an
 // import side effect. Hosted environments provide configuration directly.
 if (require.main === module && process.env.LOAD_LOCAL_ENV === 'true') {
@@ -923,16 +930,22 @@ const isMissingReminderColumnError = (error) => {
   return message.includes('reminder_sent_at') || message.includes('reminder_sms_sid');
 };
 
+const isMissingBookingIntegrityColumnError = (error) => {
+  const message = String(error?.message || '').toLowerCase();
+  return ['booking_date', 'booking_time', 'booking_total', 'has_custom_quote', 'booking_items']
+    .some((column) => message.includes(column));
+};
+
 const selectAppointmentForReminder = async (id) => {
   const withReminderFields = await supabase
     .from('appointments')
-    .select('id, customer_name, phone, brand, model, service, datetime, notes, status, reminder_sent_at, reminder_sms_sid')
+    .select('id, customer_name, phone, brand, model, service, datetime, booking_date, booking_time, booking_total, has_custom_quote, booking_items, notes, status, reminder_sent_at, reminder_sms_sid')
     .eq('id', id)
     .maybeSingle();
 
   if (!withReminderFields.error) return withReminderFields;
 
-  if (!isMissingReminderColumnError(withReminderFields.error)) {
+  if (!isMissingReminderColumnError(withReminderFields.error) && !isMissingBookingIntegrityColumnError(withReminderFields.error)) {
     return withReminderFields;
   }
 
@@ -992,7 +1005,10 @@ const markAppointmentReminderSent = async (appointment, sentAt, sid) => {
 };
 
 app.post('/api/book-repair', async (req, res) => {
-  const { customer_name, phone, devices, total, pricing, hasCustomQuote, datetime, notes, session_token } = req.body;
+  const { customer_name, phone, devices, total, pricing, bookingDate, bookingTime, datetime: legacyDatetime, notes, session_token } = req.body;
+  const datetime = bookingDate && bookingTime
+    ? deriveMelbourneBookingDateTime(bookingDate, bookingTime)
+    : legacyDatetime;
 
   if (!customer_name || !phone || !datetime || !Array.isArray(devices) || devices.length === 0) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -1006,6 +1022,7 @@ app.post('/api/book-repair', async (req, res) => {
 
   const storeConfig = await loadStoreConfig();
   const serverPricing = calculateMultiItemPricing(normalizedDevices, storeConfig);
+  const bookingPersistence = buildBookingPersistence({ devices: normalizedDevices, pricing: serverPricing });
   const submittedTotal = Number(total);
   const canonicalTotal = serverPricing.total;
   const totalMismatch = Number.isFinite(submittedTotal) && Math.abs(submittedTotal - canonicalTotal) >= 0.01;
@@ -1024,20 +1041,35 @@ app.post('/api/book-repair', async (req, res) => {
     : mainDeviceServiceSummary;
 
   // 1. Create Main Appointment Record
-  const { data: appointment, error: apptError } = await supabase
+  const appointmentInsert = {
+    customer_name,
+    phone,
+    brand: mainDevice.brand,
+    model: mainDevice.model,
+    service: hasOtherRepair ? appointmentServiceSummary : (normalizedDevices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair')),
+    datetime,
+    ...(bookingDate && bookingTime ? { booking_date: bookingDate, booking_time: bookingTime } : {}),
+    booking_total: bookingPersistence.booking_total,
+    has_custom_quote: bookingPersistence.has_custom_quote,
+    booking_items: bookingPersistence.booking_items,
+    notes: `[MULTI-DEVICE] Total: $${canonicalTotal.toFixed(2)}${discountSummary} ${bookingPersistence.has_custom_quote ? '(+Custom)' : ''}${totalMismatch ? ` | Submitted total was $${submittedTotal.toFixed(2)}` : ''} | Full Notes: ${notes}`,
+    status: 'pending',
+  };
+
+  let { data: appointment, error: apptError } = await supabase
     .from('appointments')
-    .insert([{
-      customer_name,
-      phone,
-      brand: mainDevice.brand,
-      model: mainDevice.model,
-      service: hasOtherRepair ? appointmentServiceSummary : (normalizedDevices.length > 1 ? `${mainDevice.services[0]?.name || 'Repair'} + more` : (mainDevice.services[0]?.name || 'Repair')),
-      datetime,
-      notes: `[MULTI-DEVICE] Total: $${canonicalTotal.toFixed(2)}${discountSummary} ${hasCustomQuote ? '(+Custom)' : ''}${totalMismatch ? ` | Submitted total was $${submittedTotal.toFixed(2)}` : ''} | Full Notes: ${notes}`,
-      status: 'pending'
-    }])
+    .insert([appointmentInsert])
     .select()
     .maybeSingle();
+
+  if (apptError && isMissingBookingIntegrityColumnError(apptError)) {
+    const { booking_date, booking_time, booking_total, has_custom_quote, booking_items, ...legacyAppointmentInsert } = appointmentInsert;
+    ({ data: appointment, error: apptError } = await supabase
+      .from('appointments')
+      .insert([legacyAppointmentInsert])
+      .select()
+      .maybeSingle());
+  }
 
   if (apptError) return res.status(500).json({ error: apptError.message });
 
@@ -1066,6 +1098,11 @@ app.post('/api/book-repair', async (req, res) => {
     device: mainDeviceTitle,
     service: mainServiceDescription,
     summary: bookingSummary,
+    bookingDate: bookingDate || null,
+    bookingTime: bookingTime || null,
+    bookingItems: bookingPersistence.booking_items,
+    bookingTotal: bookingPersistence.booking_total,
+    hasCustomQuote: bookingPersistence.has_custom_quote,
     total: canonicalTotal,
     pricing: {
       ...serverPricing,
@@ -1234,10 +1271,11 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
       const brand = appointment.brand || '';
       const model = appointment.model || '';
       const service = appointment.service || 'Repair';
-      const scheduledTime = appointment.datetime || '';
-
-      const dateObj = new Date(scheduledTime);
-      const displayTime = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+      const displayTime = formatBookingDateTimeForStaff({
+        bookingDate: appointment.booking_date,
+        bookingTime: appointment.booking_time,
+        datetime: appointment.datetime,
+      });
 
       const repairId = `R-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
       console.log(`🛠️ [Appointment] Creating linked repair record ${repairId} for ${brand} ${model}`);
@@ -1248,7 +1286,7 @@ app.patch('/api/appointments/:id/status', async (req, res) => {
         timestamp: new Date().toISOString(),
         repairItem: service,
         modelNumber: `${brand} ${model}`.trim(),
-        price: 0,
+        price: getArrivalRepairPrice(appointment.booking_total),
         status: 'In Processing',
         remark: `预约时间: ${displayTime}`,
         liquidDamage: false,
@@ -1330,14 +1368,14 @@ app.post('/api/appointments/:id/reminder', async (req, res) => {
 app.get('/api/appointments/upcoming', async (req, res) => {
   const withReminderFields = await supabase
     .from('appointments')
-    .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at, reminder_sent_at, reminder_sms_sid')
+    .select('id, customer_name, phone, brand, model, service, datetime, booking_date, booking_time, booking_total, has_custom_quote, booking_items, notes, status, created_at, reminder_sent_at, reminder_sms_sid')
     .in('status', ['pending', 'confirmed'])
     .order('datetime', { ascending: true });
 
   let data = withReminderFields.data;
   let error = withReminderFields.error;
 
-  if (error && isMissingReminderColumnError(error)) {
+  if (error && (isMissingReminderColumnError(error) || isMissingBookingIntegrityColumnError(error))) {
     const fallback = await supabase
       .from('appointments')
       .select('id, customer_name, phone, brand, model, service, datetime, notes, status, created_at')
@@ -1770,7 +1808,7 @@ app.get('/api/chat/session/:token/messages', async (req, res) => {
     .order('created_at', { ascending: true });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data || []);
+  res.json(filterPublicChatMessages(data || []));
 });
 
 // Customer: send a message

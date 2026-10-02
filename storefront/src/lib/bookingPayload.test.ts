@@ -18,13 +18,16 @@ describe('buildBookingPayload', () => {
       total: 0,
       hasCustomQuote: true,
       pricing: { subtotal: 0, discountRate: 0, discountAmount: 0, qualifyingRepairItemCount: 1, total: 0 },
-      datetime: '2026-07-15T10:00:00.000Z',
+      bookingDate: '2026-07-15',
+      bookingTime: '10:00',
       displayDate: '15/07/2026 10:00',
       notes: '',
       sessionToken: null,
     });
 
     expect(payload.hasCustomQuote).toBe(true);
+    expect(payload.bookingDate).toBe('2026-07-15');
+    expect(payload.bookingTime).toBe('10:00');
     expect(payload.devices[0].services).toEqual([{
       id: 'public-booking:phone:samsung:galaxy-s21:loudspeaker-replacement',
       name: 'Loudspeaker Replacement',
@@ -49,7 +52,8 @@ describe('buildBookingPayload', () => {
       total: 100,
       hasCustomQuote: true,
       pricing: { subtotal: 100, discountRate: 0, discountAmount: 0, qualifyingRepairItemCount: 1, total: 100 },
-      datetime: '2026-07-15T10:00:00.000Z',
+      bookingDate: '2026-07-15',
+      bookingTime: '10:00',
       displayDate: '15/07/2026 10:00',
       notes: '',
       sessionToken: null,
