@@ -13,6 +13,9 @@ const catalog = {
     { category: 'phone', brand: 'Asus', slug: 'asus', icon: '📱', models: [{ model: 'ROG Phone 5', slug: 'rog-phone-5', repairTypes: [] }] },
     { category: 'laptop', brand: 'MacBook', slug: 'macbook', icon: '💻', models: [{ model: 'MacBook Air (M3)', slug: 'macbook-air-m3', repairTypes: [] }] },
     { category: 'tablet', brand: 'iPad', slug: 'ipad', icon: '📟', models: [{ model: 'iPad Pro', slug: 'ipad-pro', repairTypes: [] }] },
+    { category: 'tablet', brand: 'Samsung', slug: 'samsung', icon: '📟', models: [{ model: 'Galaxy Tab S9', slug: 'galaxy-tab-s9', repairTypes: [] }] },
+    { category: 'tablet', brand: 'Lenovo', slug: 'lenovo', icon: '📟', models: [{ model: 'Tab P12', slug: 'tab-p12', repairTypes: [] }] },
+    { category: 'watch', brand: 'Apple Watch', slug: 'apple', icon: '⌚', models: [{ model: 'Series 9', slug: 'series-9', repairTypes: [] }] },
   ],
 };
 
@@ -40,7 +43,7 @@ describe('Motherboard Repair Master route', () => {
     }
   });
 
-  it('passes only Phase-1 eligible models and a server-validated selection to the Master UI', async () => {
+  it('passes every approved assessment category and a server-validated selection to the Master UI', async () => {
     fetchRepairCatalogMock.mockResolvedValue(catalog);
     const props = (await MotherboardRepairPage({
       searchParams: Promise.resolve({ category: 'laptop', brand: 'macbook', model: 'macbook-air-m3' }),
@@ -55,7 +58,12 @@ describe('Motherboard Repair Master route', () => {
       { category: 'phone', brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S21', modelSlug: 'galaxy-s21' },
       { category: 'laptop', brand: 'MacBook', brandSlug: 'macbook', model: 'MacBook Air (M3)', modelSlug: 'macbook-air-m3' },
     ]));
-    expect(props.eligibleDevices).not.toEqual(expect.arrayContaining([expect.objectContaining({ category: 'tablet' })]));
+    expect(props.eligibleDevices).toEqual(expect.arrayContaining([
+      { category: 'tablet', brand: 'iPad', brandSlug: 'ipad', model: 'iPad Pro', modelSlug: 'ipad-pro' },
+      { category: 'tablet', brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy Tab S9', modelSlug: 'galaxy-tab-s9' },
+      { category: 'tablet', brand: 'Lenovo', brandSlug: 'lenovo', model: 'Tab P12', modelSlug: 'tab-p12' },
+      { category: 'watch', brand: 'Apple Watch', brandSlug: 'apple', model: 'Series 9', modelSlug: 'series-9' },
+    ]));
     expect(props.selection).toEqual(expect.objectContaining({ category: 'laptop', brandSlug: 'macbook', modelSlug: 'macbook-air-m3' }));
   });
 

@@ -7,6 +7,7 @@ import { withVirtualCameraLensRepairOption } from "@/lib/virtualCameraLens";
 import { withVirtualPhoneRepairOptions } from "@/lib/virtualPhoneRepairs";
 import { getCanonicalBrandSlug, isGooglePixelAliasBrand } from "@/lib/waterDamageRouting";
 import { resolveModelHubRepairPageMode } from "@/lib/modelHubRepairPageMode";
+import { withMotherboardMasterModelHubOption } from "@/lib/motherboardRepair";
 import { getSelectedCrawledModelHubContent } from "@/lib/seo/content/selectedCrawledRepairPages";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import BackButton from "@/components/BackButton";
@@ -357,6 +358,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         repairTypes,
       }).options
     : repairTypes;
+  const modelHubRepairTypes = withMotherboardMasterModelHubOption(
+    gridRepairTypes,
+    categorySlug,
+    brandSlug,
+    modelSlug,
+  );
   const visibleRelatedModels = sameBrandModels.slice(0, RELATED_MODEL_LIMIT);
   const relatedModelHubLabel = isIPhoneModelPage
     ? "iPhone"
@@ -1943,7 +1950,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </h2>
         </div>
         <RepairOptionsGrid
-          repairTypes={gridRepairTypes}
+          repairTypes={modelHubRepairTypes}
           categorySlug={categorySlug}
           brandSlug={brandSlug}
           modelSlug={modelSlug}

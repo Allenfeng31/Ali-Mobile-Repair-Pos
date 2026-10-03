@@ -248,6 +248,30 @@ describe('resolvePublicBookingSelection', () => {
     }
   });
 
+  it.each([
+    ['phone', 'iphone', 'iphone-15', 'iPhone', 'iPhone 15'],
+    ['tablet', 'samsung', 'galaxy-tab-s9-sm-x710-sm-x716', 'Samsung', 'Galaxy Tab S9 (SM-X710 / SM-X716)'],
+    ['tablet', 'lenovo', 'lenovo-tab-p12-tb-370fu', 'Lenovo', 'Lenovo Tab P12 (TB-370FU)'],
+    ['laptop', 'macbook', 'macbook-air-m3-13-inch-2024', 'MacBook', 'MacBook Air M3 13-inch 2024'],
+    ['watch', 'apple', 'apple-watch-series-9-41mm', 'Apple Watch', 'Apple Watch Series 9 41mm'],
+  ])('resolves the canonical quote-only booking identity for a static Motherboard %s authority', (
+    category,
+    brandSlug,
+    modelSlug,
+    brand,
+    model,
+  ) => {
+    const selection = resolvePublicBookingSelection({ brands: [] }, {
+      category, brandSlug, modelSlug, serviceSlug: 'logic-board-repair',
+      brand, model, service: 'Logic Board Repair',
+    });
+
+    expect(selection).toMatchObject({
+      category, brandSlug, modelSlug, serviceSlug: 'logic-board-repair', price: 0, priceAuthority: 'quote-only',
+    });
+    expect(getPublicBookingServiceKey(selection!)).toBe(`public-booking:${category}:${brandSlug}:${modelSlug}:logic-board-repair`);
+  });
+
   it('carries a generated shared-page href through validation into an unresolved cart item', () => {
     const href = getSharedRepairBookingHref({
       repairName: 'Loudspeaker Replacement',

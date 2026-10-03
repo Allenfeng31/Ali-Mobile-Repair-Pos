@@ -24,6 +24,7 @@ vi.mock('@/components/ReviewsSection', () => ({
 vi.mock('next/script', () => ({ default: (props: React.ScriptHTMLAttributes<HTMLScriptElement>) => <script {...props} /> }));
 
 import CameraModuleRepairLandingPage, { type CameraModuleRepairLandingConfig } from './CameraModuleRepairLandingPage';
+import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 
 const candidates = [{ canonicalBrandSlug: 'google-pixel', modelSlug: 'pixel-8-pro', displayBrand: 'Google Pixel', displayModel: 'Pixel 8 Pro' }];
 const hierarchy = {
@@ -109,7 +110,7 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(container.querySelectorAll('[data-camera-module-layout-section]')).toHaveLength(5);
 
     const symptomGrid = container.querySelector('[data-camera-module-symptom-grid]');
-    expect(symptomGrid).toHaveClass('lg:grid-cols-3');
+    expect(symptomGrid).toHaveClass(hubStyles.reasonGrid);
     const symptomCards = container.querySelectorAll('[data-camera-module-symptom-card]');
     expect(symptomCards).toHaveLength(5);
     symptomCards.forEach((card) => expect(card).not.toHaveClass('min-h-[188px]'));

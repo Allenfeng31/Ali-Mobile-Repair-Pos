@@ -96,6 +96,31 @@ describe("RepairOptionsGrid", () => {
     );
   });
 
+  it('renders the Master-provided Motherboard quote label instead of a POS price', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[{
+          slug: 'logic-board-repair',
+          name: 'Motherboard & Logic Board Repair',
+          price: 499,
+          priceLabel: 'Quote on Request',
+          href: '/repairs/motherboard-repair?category=phone&brand=samsung&model=galaxy-s21',
+        }]}
+        categorySlug="phone"
+        brandSlug="samsung"
+        modelSlug="galaxy-s21"
+        modelName="Galaxy S21"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /motherboard & logic board repair/i })).toHaveAttribute(
+      'href',
+      '/repairs/motherboard-repair?category=phone&brand=samsung&model=galaxy-s21',
+    );
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.queryByText(/499/)).not.toBeInTheDocument();
+  });
+
   it('uses existing special route helpers only when the Server leaves unresolved repairs without href', () => {
     render(
       <RepairOptionsGrid

@@ -402,6 +402,13 @@ export function isConfiguredAppleWatchModel(value: string): value is AppleWatchM
   return Object.prototype.hasOwnProperty.call(MODEL_CONFIGS, value);
 }
 
+/** Canonical model identity shared by Apple Watch route consumers. */
+export function getAppleWatchModelDefinition(modelSlug: string) {
+  if (!isConfiguredAppleWatchModel(modelSlug)) return null;
+  const config = MODEL_CONFIGS[modelSlug];
+  return { modelSlug: config.slug, modelName: config.modelName } as const;
+}
+
 function isAppleWatchRepairSlug(value: string): value is AppleWatchRepairSlug {
   return APPLE_WATCH_REPAIRS.includes(value as AppleWatchRepairSlug);
 }

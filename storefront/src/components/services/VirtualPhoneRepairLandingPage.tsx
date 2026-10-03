@@ -11,6 +11,7 @@ import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/
 import SharedRepairHeroSelection from '@/components/services/SharedRepairHeroSelection';
 import SharedRepairPageResultsSection from '@/components/repair-results/SharedRepairPageResultsSection';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
+import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { getVirtualPhoneRepair, type VirtualPhoneRepair, type VirtualPhoneRepairModelOption, type VirtualPhoneRepairSlug } from '@/lib/virtualPhoneRepairs';
 import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
@@ -147,10 +148,10 @@ function GenericRepairContent({ repair }: { repair: VirtualPhoneRepair }) {
   ];
 
   return <>
-    <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="repair-guidance-heading">
+    <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="repair-guidance-heading">
       <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>{repair.summary}</p></div>
-      <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6">
-        {content.cards.map((card) => <article key={card.title} className="flex h-full min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 text-center md:p-[50px]"><h3 className="text-[1rem] font-black text-slate-950">{card.title}</h3><p className="mt-4 text-[0.95rem] font-medium leading-[1.62] text-slate-500">{card.body}</p>{card.link ? <Link href={card.link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 transition-colors hover:text-blue-800">{card.link.label}</Link> : null}</article>)}
+      <div className={hubStyles.reasonGrid}>
+        {content.cards.map((card) => <article key={card.title} className={`${hubStyles.reasonCard} flex h-full flex-col items-center text-center`}><h3>{card.title}</h3><p>{card.body}</p>{card.link ? <Link href={card.link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 transition-colors hover:text-blue-800">{card.link.label}</Link> : null}</article>)}
       </div>
     </section>
     <FaqAccordion faqs={faqs} density="comfortable" layout="repair-detail" />
@@ -310,14 +311,14 @@ export default function VirtualPhoneRepairLandingPage({
         {isGenericHierarchy ? <GenericRepairContent repair={repair} /> : <>
         {hierarchy && !usesSharedMaster ? <SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${repair.name} models`} /> : null}
         {sharedPageV2 ? <SharedRepairPageResultsSection key={sharedPageV2.selectedModelSlug ?? 'all-models'} initialResults={sharedPageV2.initialResults} repairName={repair.name} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
-        <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="repair-guidance-heading">
+        <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="repair-guidance-heading">
           <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>{brandContent?.guidanceIntro ?? 'We inspect the device condition first, then provide a clear quote for the suitable repair path.'}</p></div>
-          <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6">{contentCards.map(({ title, body, icon, link }) => <article key={title} className="flex h-full min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center"><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><RepairIcon icon={icon} size={20} strokeWidth={2.5} /></span><h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] tracking-normal text-slate-950">{title}</h3><p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">{body}</p>{link ? <Link href={link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 hover:text-blue-800">{link.label}</Link> : null}</article>)}</div>
+          <div className={hubStyles.reasonGrid}>{contentCards.map(({ title, body, icon, link }) => <article key={title} className={`${hubStyles.reasonCard} flex h-full flex-col items-center text-center`}><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><RepairIcon icon={icon} size={20} strokeWidth={2.5} /></span><h3>{title}</h3><p>{body}</p>{link ? <Link href={link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 hover:text-blue-800">{link.label}</Link> : null}</article>)}</div>
         </section>
         <CommonRepairProblemsSection modelName={brandName ?? 'Phone'} repairType={repair.slug} problems={[{ title: 'Inspection before replacement', description: 'We check the relevant speaker or button area and explain the repair options before work begins.' }, { title: 'Clear quote first', description: sharedPageV2 ? 'Model-specific pricing depends on the current repair option, device condition and suitable repair path.' : 'The $50 figure is a starting price. Final pricing depends on the device condition and suitable repair path.' }]} />
-        <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="why-heading">
+        <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="why-heading">
           <div className="repair-workbench-heading"><span>Why choose us</span><h2 id="why-heading" className="scroll-mt-32">Why choose Ali Mobile & Repair</h2><p>Our Ringwood repair desk keeps phone repairs inspection-led, quote-first and focused on supported models.</p>{sharedContent ? <p className="mx-auto mt-4 max-w-3xl text-pretty">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}</div>
-          <div className="grid w-full grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-3 lg:gap-6">{['Clear quote before work begins.', 'Available for supported phone models.', 'Repair time depends on diagnosis and part availability.'].map((item) => <article key={item} className="rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center text-sm font-semibold leading-6 text-slate-700">{item}</article>)}</div>
+          <div className={hubStyles.infoGrid}>{['Clear quote before work begins.', 'Available for supported phone models.', 'Repair time depends on diagnosis and part availability.'].map((item) => <article key={item} className={`${hubStyles.infoCard} flex h-full items-center justify-center text-center`}><p>{item}</p></article>)}</div>
         </section>
         </>}
         {!isGenericHierarchy ? <FaqAccordion faqs={brandContent ? [...brandContent.faqs] : GENERIC_REPAIR_CONTENT[repair.slug].faqs} density="comfortable" layout="repair-detail" /> : null}

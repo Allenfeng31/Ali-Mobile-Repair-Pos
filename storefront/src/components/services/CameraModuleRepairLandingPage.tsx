@@ -10,6 +10,7 @@ import CameraModuleRepairBookingControls from '@/components/services/CameraModul
 import { type SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
 import CameraModuleRepairSelectionExperience from '@/components/services/CameraModuleRepairSelectionExperience';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
+import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 import type { SharedRepairHierarchyModel } from '@/lib/sharedRepairHierarchy';
 import styles from './CameraModuleRepairLandingPage.module.css';
 
@@ -40,8 +41,8 @@ type CameraModuleRepairLandingPageProps = Readonly<{
   }>;
 }>;
 
-const CARD_CLASS = `${styles.contentCard} flex h-full min-h-[188px] flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent text-center`;
-const SYMPTOM_CARD_CLASS = `${styles.symptomCard} flex h-full flex-col items-center rounded-[28px] border-[2px] border-slate-800 bg-transparent text-center`;
+const CARD_CLASS = `${hubStyles.reasonCard} flex h-full flex-col items-center text-center`;
+const SYMPTOM_CARD_CLASS = `${hubStyles.reasonCard} flex h-full flex-col items-center justify-center text-center`;
 
 const FRONT_CAMERA_FAQS = [
   {
@@ -125,8 +126,8 @@ function RepairTrustBadges() {
 function ContentCard({ icon, title, body, children }: { icon: ReactNode; title: string; body: string; children?: ReactNode }) {
   return <article data-camera-module-content-card className={CARD_CLASS}>
     <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white">{icon}</span>
-    <h3 className="mt-5 text-balance text-[1rem] font-black leading-[1.14] text-slate-950">{title}</h3>
-    <p className="mt-4 text-pretty text-[0.95rem] font-medium leading-[1.62] text-slate-500">{body}</p>
+    <h3>{title}</h3>
+    <p>{body}</p>
     {children}
   </article>;
 }
@@ -174,19 +175,19 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
             <h2 id="camera-preparation-heading">{isBackCamera ? 'Camera Module or Camera Lens?' : 'Before a front camera repair'}</h2>
             <p>{isBackCamera ? 'Outer camera glass and the internal rear-camera module are different repair paths. We confirm which part is affected before work begins.' : 'A few practical checks and a clear repair boundary help us assess the front camera fault accurately.'}</p>
           </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">
+          <div className={hubStyles.reasonGrid}>
             {isBackCamera ? <><ContentCard icon={<Camera size={20} strokeWidth={2.5} aria-hidden="true" />} title="Cracked outer camera lens / glass" body={config.distinctionBody}>{config.relatedHref && config.relatedLabel ? <Link href={config.relatedHref} className="mt-5 inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100">{config.relatedLabel}</Link> : null}</ContentCard><ContentCard icon={<ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" />} title="Quick checks before repair" body="Clean the camera area, remove anything covering the lenses, restart the phone and compare the rear camera in more than one app. Persistent faults can then be assessed in person." /></> : <><ContentCard icon={<ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" />} title="Quick checks before repair" body="Clean the front camera area, remove an obstructing case or protector, restart the phone and compare front and rear cameras. Persistent faults can then be assessed in person." /><ContentCard icon={<Camera size={20} strokeWidth={2.5} aria-hidden="true" />} title="Front Camera vs Face ID / biometric boundary" body={config.distinctionBody} /></>}
           </div>
         </section>
 
         <section data-camera-module-layout-section data-camera-module-guidance-grid className={styles.layoutSection} aria-labelledby="symptoms-heading">
           <div className="repair-workbench-heading"><span>Common symptoms</span><h2 id="symptoms-heading">{isBackCamera ? 'Back camera symptoms we assess' : 'Front camera symptoms we assess'}</h2><p>Camera symptoms can involve software, accessories, connectors, liquid exposure or internal hardware, so we inspect before recommending a repair.</p></div>
-          <div data-camera-module-symptom-grid className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:grid-cols-3 lg:gap-6">{config.symptoms.map((symptom) => <article key={symptom} data-camera-module-content-card data-camera-module-symptom-card className={SYMPTOM_CARD_CLASS}><span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} aria-hidden="true" /></span><h3 className="text-balance text-[1rem] font-black leading-[1.14] text-slate-950">{symptom}</h3></article>)}</div>
+          <div data-camera-module-symptom-grid className={hubStyles.reasonGrid}>{config.symptoms.map((symptom) => <article key={symptom} data-camera-module-content-card data-camera-module-symptom-card className={SYMPTOM_CARD_CLASS}><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><CheckCircle2 size={20} aria-hidden="true" /></span><h3>{symptom}</h3></article>)}</div>
         </section>
 
         <section data-camera-module-layout-section className={styles.layoutSection} aria-labelledby="camera-process-heading">
           <div className="repair-workbench-heading"><span>Repair process</span><h2 id="camera-process-heading">{isBackCamera ? 'Inspection and testing' : 'Diagnosis and preparation'}</h2><p>We confirm the fault and suitable repair scope before work, then check the functions relevant to the completed repair.</p></div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6"><ContentCard icon={<Wrench size={20} strokeWidth={2.5} aria-hidden="true" />} title={isBackCamera ? 'What we inspect before recommending replacement' : 'How we diagnose the problem'} body={config.inspectionBody} /><ContentCard icon={<CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" />} title={isBackCamera ? 'What we test after repair' : 'Before bringing your phone in'} body={isBackCamera ? 'After a suitable repair, we check camera opening, image output, focus and the practical photo or video behaviour relevant to the repair scope.' : 'Back up important information before service where possible. Bring the device charged if practical, and tell us which apps, camera and symptoms are affected.'} /></div>
+          <div className={hubStyles.reasonGrid}><ContentCard icon={<Wrench size={20} strokeWidth={2.5} aria-hidden="true" />} title={isBackCamera ? 'What we inspect before recommending replacement' : 'How we diagnose the problem'} body={config.inspectionBody} /><ContentCard icon={<CheckCircle2 size={20} strokeWidth={2.5} aria-hidden="true" />} title={isBackCamera ? 'What we test after repair' : 'Before bringing your phone in'} body={isBackCamera ? 'After a suitable repair, we check camera opening, image output, focus and the practical photo or video behaviour relevant to the repair scope.' : 'Back up important information before service where possible. Bring the device charged if practical, and tell us which apps, camera and symptoms are affected.'} /></div>
         </section>
         <div data-camera-module-layout-section className={styles.layoutSection}>
           <FaqAccordion faqs={[...faqs]} density="comfortable" layout="repair-detail" />

@@ -4,7 +4,7 @@ import { withVirtualPhoneRepairOptions } from './virtualPhoneRepairs';
 import {
   MOTHERBOARD_BOOKING_SERVICE_NAME,
   MOTHERBOARD_REPAIR_SLUG,
-  isMotherboardEligibleCategory,
+  resolveMotherboardSelection,
 } from './motherboardRepair';
 
 export interface PublicBookingSelectionInput {
@@ -138,21 +138,16 @@ function resolveGenericCameraModuleQuote(
 }
 
 function resolveMotherboardQuote(
-  category: string,
-  brand: { brand: string; slug: string },
-  model: { model: string; slug: string },
-  serviceSlug: string,
+  selection: { category: string; brand: string; brandSlug: string; model: string; modelSlug: string },
 ): PublicBookingSelection | null {
-  if (serviceSlug !== MOTHERBOARD_REPAIR_SLUG || !isMotherboardEligibleCategory(category, brand.slug)) return null;
-
   return {
-    category,
-    brand: brand.brand,
-    brandSlug: brand.slug,
-    model: model.model,
-    modelSlug: model.slug,
+    category: selection.category,
+    brand: selection.brand,
+    brandSlug: selection.brandSlug,
+    model: selection.model,
+    modelSlug: selection.modelSlug,
     service: MOTHERBOARD_BOOKING_SERVICE_NAME,
-    serviceSlug,
+    serviceSlug: MOTHERBOARD_REPAIR_SLUG,
     price: 0,
     priceAuthority: 'quote-only',
   };
@@ -167,9 +162,10 @@ function hasAll(values: Array<string | null | undefined>) {
 }
 
 /**
- * Resolves a booking query against the public repair catalogue only. Canonical
- * identity is authoritative; display-only links are accepted only when they
- * describe exactly one public catalogue repair.
+ * Resolves a booking query against the public repair catalogue, plus the
+ * explicit Motherboard assessment device authorities. Canonical identity is
+ * authoritative; display-only links are accepted only when they describe
+ * exactly one public catalogue repair.
  */
 export function resolvePublicBookingSelection(
   catalog: Pick<RepairCatalog, 'brands'>,
@@ -180,6 +176,21 @@ export function resolvePublicBookingSelection(
 
   if (hasCanonical) {
     if (!hasAll([input.category, ...canonical])) return null;
+
+    const motherboardSelection = input.serviceSlug === MOTHERBOARD_REPAIR_SLUG
+      ? resolveMotherboardSelection(catalog.brands, {
+        category: input.category!, brand: input.brandSlug!, model: input.modelSlug!,
+      })
+      : null;
+    if (motherboardSelection) {
+      const selection = resolveMotherboardQuote(motherboardSelection)!;
+      if (
+        (input.brand !== null && input.brand !== undefined && input.brand !== selection.brand) ||
+        (input.model !== null && input.model !== undefined && input.model !== selection.model) ||
+        (input.service !== null && input.service !== undefined && input.service !== selection.service)
+      ) return null;
+      return selection;
+    }
 
     const brand = catalog.brands.find((candidate) =>
       candidate.category === input.category && candidate.slug === input.brandSlug,
@@ -192,11 +203,9 @@ export function resolvePublicBookingSelection(
     const repair = repairOptions(brand.category, brand.slug, model.repairTypes).find(
       (candidate) => candidate.slug === input.serviceSlug,
     );
-    const motherboardSelection = resolveMotherboardQuote(brand.category, brand, model, input.serviceSlug!);
-    const selection = motherboardSelection
-      ?? (repair
+    const selection = repair
         ? resolvedSelection(brand.category, brand, model, repair)
-        : resolveGenericCameraModuleQuote(brand.category, brand, model, input.serviceSlug!));
+        : resolveGenericCameraModuleQuote(brand.category, brand, model, input.serviceSlug!);
     if (!selection) return null;
     if (
       (input.brand !== null && input.brand !== undefined && input.brand !== selection.brand) ||

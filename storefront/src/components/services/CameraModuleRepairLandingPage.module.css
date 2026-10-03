@@ -3,8 +3,7 @@
 }
 
 .layoutSection {
-  width: 100%;
-  max-width: 1180px;
+  width: min(1120px, calc(100% - 32px));
   margin: 3.5rem auto 0;
 }
 
@@ -30,6 +29,10 @@
 }
 
 @media (max-width: 767px) {
+  .layoutSection {
+    width: min(100%, calc(100% - 24px));
+  }
+
   .contentCard,
   .linksPanel {
     padding: 1.5rem;

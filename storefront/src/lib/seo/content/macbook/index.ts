@@ -6212,6 +6212,17 @@ export function isAliMobileEnhancedMacBookRepairPage({
   );
 }
 
+/** Canonical public model identity shared by MacBook route consumers. */
+export function getMacBookModelDefinition(modelSlug: string) {
+  const contentModelSlug = resolveMacBookContentModelSlug(modelSlug);
+  if (!contentModelSlug) return null;
+  const config = MODEL_CONFIGS[contentModelSlug];
+  return {
+    modelSlug: PUBLIC_MACBOOK_MODEL_SLUGS_BY_CONTENT_KEY[contentModelSlug],
+    modelName: config.modelName,
+  } as const;
+}
+
 export function getAliMobileEnhancedMacBookRepairType(params: {
   category: string;
   brand: string;

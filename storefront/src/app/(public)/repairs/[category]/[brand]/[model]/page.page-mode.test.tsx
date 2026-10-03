@@ -105,7 +105,7 @@ describe('Model Hub page-mode Server consumer', () => {
     ]));
   });
 
-  it('leaves iPhone options without a Server policy href', async () => {
+  it('keeps iPhone repairs unchanged while server-rendering one selected Motherboard Master card', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'iPhone',
       model: 'iPhone 15',
@@ -116,8 +116,37 @@ describe('Model Hub page-mode Server consumer', () => {
 
     renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'phone', brand: 'iphone', model: 'iphone-15' }) }));
 
-    expect(state.gridProps?.repairTypes).toEqual([expect.objectContaining({ slug: 'screen-replacement' })]);
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'screen-replacement' }),
+      expect.objectContaining({
+        slug: 'logic-board-repair',
+        name: 'Motherboard & Logic Board Repair',
+        price: 0,
+        href: '/repairs/motherboard-repair?category=phone&brand=iphone&model=iphone-15',
+      }),
+    ]));
+    expect(state.gridProps?.repairTypes.filter((repair) => repair.slug === 'logic-board-repair')).toHaveLength(1);
     expect(state.gridProps?.repairTypes[0]).not.toHaveProperty('href');
+  });
+
+  it('server-renders the category-aware Motherboard Master card for MacBook without phone query leakage', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'MacBook',
+      model: 'MacBook Air M3',
+      catalogueSource: 'live-pos',
+      repairTypes: [{ slug: 'keyboard-repair', name: 'Keyboard Repair', price: 249, repairOrigin: 'pos' }],
+      brandModels: [{ slug: 'macbook-air-m3', model: 'MacBook Air M3', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'laptop', brand: 'macbook', model: 'macbook-air-m3' }) }));
+
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'keyboard-repair', name: 'Keyboard Repair', price: 249 }),
+      expect.objectContaining({
+        slug: 'logic-board-repair',
+        href: '/repairs/motherboard-repair?category=laptop&brand=macbook&model=macbook-air-m3',
+      }),
+    ]));
   });
 
   it('passes canonical exact-model server seeds to the one enhanced-branch Repair Results module', async () => {

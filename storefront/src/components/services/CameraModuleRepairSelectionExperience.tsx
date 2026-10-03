@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, Camera, CheckCircle2, ClipboardCheck, Ear, PhoneCall, Power, ShieldCheck, Volume2 } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Camera, CheckCircle2, ClipboardCheck, Cpu, Ear, PhoneCall, Power, ShieldCheck, Volume2 } from 'lucide-react';
 import SharedRepairHierarchySections from './SharedRepairHierarchySections';
 import SharedRepairHeroFacts from './SharedRepairHeroFacts';
 import type { SharedRepairSelectedDeviceViewModel } from './SharedRepairSelectedDevice';
@@ -13,11 +13,15 @@ type CameraModuleRepairSelectionExperienceProps = Readonly<{
   title: string;
   description: string;
   eyebrow: string;
-  icon?: 'camera' | 'loudspeaker' | 'earpiece' | 'power' | 'volume';
+  icon?: 'camera' | 'cpu' | 'loudspeaker' | 'earpiece' | 'power' | 'volume';
   bookingService: string;
   canonicalPath: string;
   useMasterFacts?: boolean;
   brandOnlySelection?: boolean;
+  heroFacts?: ReactNode;
+  selectorContent?: ReactNode;
+  selectActionLabel?: string;
+  selectorGuide?: string;
   hierarchy: Readonly<{
     models: readonly SharedRepairHierarchyModel[];
     selectedBrandSlug: string | null;
@@ -69,6 +73,7 @@ function RepairTrustBadges() {
 function HeroIcon({ icon, size, strokeWidth }: { icon: CameraModuleRepairSelectionExperienceProps['icon']; size: number; strokeWidth: number }) {
   const props = { size, strokeWidth, 'aria-hidden': true } as const;
   if (icon === 'earpiece') return <Ear {...props} />;
+  if (icon === 'cpu') return <Cpu {...props} />;
   if (icon === 'power') return <Power {...props} />;
   if (icon === 'volume' || icon === 'loudspeaker') return <Volume2 {...props} />;
   return <Camera {...props} />;
@@ -88,6 +93,10 @@ function SelectionExperience({
   canonicalPath,
   useMasterFacts = false,
   brandOnlySelection = false,
+  heroFacts,
+  selectorContent,
+  selectActionLabel = 'Select your model',
+  selectorGuide,
   hierarchy,
 }: CameraModuleRepairSelectionExperienceProps) {
   const selectedDevice = hierarchy.selectedDevice ?? null;
@@ -162,7 +171,7 @@ function SelectionExperience({
           {displayedSelectedDevice?.booking.isAvailable ? <Link href={displayedSelectedDevice.booking.href} className={HERO_PRIMARY_ACTION_CLASS}>
             Book Repair Now <ArrowRight size={19} strokeWidth={2.6} aria-hidden="true" />
           </Link> : <button type="button" className={HERO_PRIMARY_ACTION_CLASS} aria-controls={MODEL_SELECTOR_REGION_ID} onClick={showModelSelector}>
-            Select your model
+            {selectActionLabel}
           </button>}
           <a href="tel:0481058514" className={HERO_SECONDARY_ACTION_CLASS}><PhoneCall size={19} strokeWidth={2.6} aria-hidden="true" />Call 0481 058 514</a>
           {displayedSelectedDevice && brandOnlySelection ? <Link href={canonicalPath}
@@ -180,7 +189,7 @@ function SelectionExperience({
           </button> : null}
         </div>
       </div>
-      {useMasterFacts ? <SharedRepairHeroFacts priceLabel="From $50" /> : <RepairTrustBadges />}
+      {heroFacts ?? (useMasterFacts ? <SharedRepairHeroFacts priceLabel="From $50" /> : <RepairTrustBadges />)}
     </section>
 
     <div
@@ -190,8 +199,8 @@ function SelectionExperience({
       hidden={!isModelSelectorOpen}
       onClick={selectModel}
     >
-      <p data-camera-module-price-guide className="mx-auto mb-6 w-full max-w-3xl px-4 text-center text-sm font-semibold leading-6 text-slate-600 sm:px-6">Choose your supported model to view its current repair option. A model with one trusted price shows the exact $X amount, models with valid repair variants show “From $X”, and models without a trusted exact price show “Custom Quote” before work begins.</p>
-      <SharedRepairHierarchySections models={selectorModels} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${bookingService} models`} showModelsImmediately={brandOnlySelection} />
+      <p data-camera-module-price-guide className="mx-auto mb-6 w-full max-w-3xl px-4 text-center text-sm font-semibold leading-6 text-slate-600 sm:px-6">{selectorGuide ?? 'Choose your supported model to view its current repair option. A model with one trusted price shows the exact $X amount, models with valid repair variants show “From $X”, and models without a trusted exact price show “Custom Quote” before work begins.'}</p>
+      {selectorContent ?? <SharedRepairHierarchySections models={selectorModels} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${bookingService} models`} showModelsImmediately={brandOnlySelection} />}
     </div>
     {brandOnlySelection && displayedSelectedDevice ? null : <noscript><style>{`#${MODEL_SELECTOR_REGION_ID}[hidden] { display: block !important; }`}</style></noscript>}
   </>;

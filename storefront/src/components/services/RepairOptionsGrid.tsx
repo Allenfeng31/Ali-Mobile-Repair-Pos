@@ -20,9 +20,10 @@ interface RepairOption {
   slug: string;
   name: string;
   price: number;
-  variants?: RepairVariant[];
+  variants?: readonly RepairVariant[];
   sourceType?: 'real' | 'virtual' | 'diagnostic';
   href?: string;
+  priceLabel?: string;
 }
 
 interface RepairOptionsGridProps {
@@ -72,6 +73,8 @@ export default function RepairOptionsGrid({
   };
 
   const getDisplayPrice = (rt: RepairOption) => {
+    if (rt.priceLabel) return rt.priceLabel;
+
     let unscopedLabel: string;
     if (rt.price > 0) {
       unscopedLabel = `From $${rt.price}`;

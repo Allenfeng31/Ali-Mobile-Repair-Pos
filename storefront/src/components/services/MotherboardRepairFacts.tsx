@@ -2,7 +2,7 @@ import { ClipboardCheck, Clock3, MapPin, MessageSquareQuote } from 'lucide-react
 
 const FACTS = [
   { label: 'Pricing', value: 'Quote on Request', icon: MessageSquareQuote },
-  { label: 'Repair Time', value: 'Turnaround Varies', icon: Clock3 },
+  { label: 'Repair Time', value: 'Around 2–3 Weeks', icon: Clock3 },
   { label: 'Assessment', value: 'Board-Level Diagnosis', icon: ClipboardCheck },
   { label: 'Location', value: 'Ringwood Square', icon: MapPin },
 ] as const;

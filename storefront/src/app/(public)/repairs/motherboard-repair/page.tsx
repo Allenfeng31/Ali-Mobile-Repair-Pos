@@ -6,7 +6,7 @@ import MotherboardRepairLandingPage from '@/components/services/MotherboardRepai
 
 const PAGE_PATH = '/repairs/motherboard-repair';
 const PAGE_TITLE = 'Motherboard & Logic Board Repair | Ali Mobile';
-const PAGE_DESCRIPTION = 'Quote-first motherboard and logic board diagnosis for supported phones and MacBooks in Ringwood. We assess board-level faults before confirming repair options.';
+const PAGE_DESCRIPTION = 'Quote-first motherboard and logic board assessment for supported phones, tablets, MacBooks and Apple Watch models in Ringwood. We assess board-level faults before confirming repair options.';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

@@ -403,10 +403,16 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.reasonGrid,
+.infoGrid,
+.processGrid {
+  gap: 16px;
+}
+
 .reasonCard,
 .processCard,
 .infoCard {
-  padding: 1.2rem;
+  padding: 1.5rem;
   border-radius: 22px;
   border: 1px solid transparent;
   background:
@@ -440,7 +446,7 @@
 
 .reasonCard h3,
 .infoCard h3 {
-  margin: 2px 0 8px;
+  margin: 4px 0 10px;
   color: #020617;
   font-size: 1rem;
   font-weight: 900;
@@ -1495,6 +1501,18 @@
 
   .reasonGrid {
     grid-template-columns: 1fr;
+  }
+
+  .reasonGrid,
+  .infoGrid,
+  .processGrid {
+    gap: 12px;
+  }
+
+  .reasonCard,
+  .processCard,
+  .infoCard {
+    padding: 1.25rem;
   }
 
   .brandAccordion {
