@@ -33,7 +33,6 @@ const removedModelNames = [
   "Galaxy S24 Ultra",
   "Galaxy S23 Ultra",
   "iPad 9th Generation",
-  "MacBook Pro 13 M1 2020",
 ];
 
 const removedModelHrefs = [
@@ -42,7 +41,6 @@ const removedModelHrefs = [
   "/repairs/phone/samsung/galaxy-s24-ultra",
   "/repairs/phone/samsung/galaxy-s23-ultra",
   "/repairs/tablet/ipad/ipad-9th-generation",
-  "/repairs/laptop/macbook/macbook-pro-13-m1-2020",
 ];
 
 async function renderLocation(suburb: string) {
@@ -66,7 +64,6 @@ describe("Location Page Model Shortcuts", () => {
     expect(markup).toContain('href="/repairs/phone/iphone"');
     expect(markup).toContain('href="/repairs/phone/samsung"');
     expect(markup).toContain('href="/repairs/tablet/ipad"');
-    expect(markup).toContain('href="/repairs/laptop/macbook"');
     expect(markup).toContain('href="/repairs/screen-replacement"');
     expect(markup).toContain('href="/repairs/battery-replacement"');
     expect(markup).toContain(`href=\"${nearbyHref}\"`);

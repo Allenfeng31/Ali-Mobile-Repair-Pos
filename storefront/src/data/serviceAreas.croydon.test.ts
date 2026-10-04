@@ -15,17 +15,16 @@ describe('Croydon service area', () => {
     });
   });
 
-  it('uses the approved Phone, iPhone, iPad and MacBook title and H1', () => {
-    expect(area?.metaTitle).toBe('Phone, iPhone, iPad & MacBook Repair Near Croydon | Ali Mobile');
-    expect(area?.customH1).toBe('Phone, iPhone, iPad & MacBook Repair Near Croydon');
-    for (const device of ['Phone', 'iPhone', 'iPad', 'MacBook']) {
+  it('uses phone-first title and H1', () => {
+    expect(area?.metaTitle).toBe('Phone & iPhone Repair Near Croydon | Ali Mobile');
+    expect(area?.customH1).toBe('Phone & iPhone Repair Near Croydon');
+    for (const device of ['Phone', 'iPhone']) {
       expect(area?.metaTitle).toContain(device);
       expect(area?.customH1).toContain(device);
     }
     expect(area?.metaDescription).toContain('Phone');
     expect(area?.metaDescription).toContain('iPhone');
     expect(area?.metaDescription).toContain('Samsung');
-    expect(area?.metaDescription).toContain('MacBook');
     expect(area?.metaDescription).toContain('Croydon');
     expect(area?.metaDescription).toContain('Ringwood Square Kiosk C1');
   });
@@ -60,8 +59,8 @@ describe('Croydon service area', () => {
 
     expect(glenWaverley).toMatchObject({
       slug: 'glenwaverley',
-      metaTitle: 'MacBook & Phone Repair Near Glen Waverley & Syndal | Ali Mobile',
-      customH1: 'MacBook, Laptop & Phone Repair Near Glen Waverley and Syndal',
+      metaTitle: 'Phone & iPhone Repair Near Glen Waverley & Syndal | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Glen Waverley and Syndal',
     });
   });
 });

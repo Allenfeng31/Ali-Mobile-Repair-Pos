@@ -17,9 +17,9 @@ describe('Heathmont service area', () => {
   it('keeps the established Heathmont metadata and one matching slug', () => {
     expect(SERVICE_AREAS.filter((serviceArea) => serviceArea.slug === 'heathmont')).toHaveLength(1);
     expect(area).toMatchObject({
-      metaTitle: 'Phone, Apple & MacBook Repair Near Heathmont | Ali Mobile Ringwood',
-      customH1: 'Phone, Apple & MacBook Repair Near Heathmont',
-      metaDescription: 'Need phone, iPhone, Apple, MacBook or screen repair near Heathmont? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.',
+      metaTitle: 'Phone & iPhone Repair Near Heathmont | Ali Mobile Ringwood',
+      customH1: 'Phone & iPhone Repair Near Heathmont',
+      metaDescription: 'Need phone, iPhone, Samsung or screen repair near Heathmont? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.',
     });
   });
 
@@ -27,7 +27,7 @@ describe('Heathmont service area', () => {
     for (const term of ['Heathmont', 'Kiosk C1', 'opposite Bunnings Warehouse Ringwood', 'phone', 'iPhone', 'Samsung', 'Google Pixel', 'iPad', 'MacBook', 'screen', 'glass', 'battery', 'charging', 'camera', 'no-power']) {
       expect(visibleContent).toContain(term);
     }
-    expect(visibleContent).toContain('MacBook repair near Heathmont');
+    expect(visibleContent).toContain('MacBook hardware assessment');
     expect(visibleContent).toContain('hardware issues');
   });
 
@@ -51,8 +51,8 @@ describe('Heathmont service area', () => {
     ]);
   });
 
-  it('keeps explicit business-boundary denials while excluding unsupported guarantees', () => {
-    expect(visibleContent).toContain('this service does not include general computer repair, managed IT, networking, software administration, remote support or on-site IT service.');
+  it('keeps MacBook secondary without computer-service intent', () => {
+    expect(visibleContent).not.toMatch(/computer|IT support|managed IT|network support|on-site computer/i);
     expect(visibleContent).not.toMatch(/15[–-]45|same-day|No Fix No Charge|in stock for your visit|ensure we have|hold|price guarantee|authorized|data recovery|near Coles|inside Bunnings|near Bunnings/i);
   });
 });

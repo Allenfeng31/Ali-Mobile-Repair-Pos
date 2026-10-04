@@ -6,13 +6,13 @@ describe('Blackburn service area', () => {
   const area = getServiceAreaBySlug('blackburn');
   const content = JSON.stringify(area);
 
-  it('keeps one Blackburn area with the approved Apple and MacBook metadata', () => {
+  it('keeps one Blackburn area with phone-first metadata', () => {
     expect(SERVICE_AREAS.filter((serviceArea) => serviceArea.slug === 'blackburn')).toHaveLength(1);
-    expect(area?.metaTitle).toBe('Apple, MacBook & Phone Repair Near Blackburn | Ali Mobile');
-    expect(area?.customH1).toBe('Apple, MacBook & Phone Repair Near Blackburn');
-    expect(area?.metaDescription).toBe('Apple, MacBook, iPhone and phone repair near Blackburn, Blackburn South and Blackburn North at Ringwood Square Kiosk C1, with confirmed quotes.');
+    expect(area?.metaTitle).toBe('Phone & iPhone Repair Near Blackburn | Ali Mobile');
+    expect(area?.customH1).toBe('Phone & iPhone Repair Near Blackburn');
+    expect(area?.metaDescription).toBe('Phone, iPhone, Samsung and tablet repair near Blackburn, Blackburn South and Blackburn North at Ringwood Square Kiosk C1, with confirmed quotes.');
 
-    for (const term of ['Apple', 'MacBook', 'Phone', 'Blackburn']) {
+    for (const term of ['Phone', 'iPhone', 'Blackburn']) {
       expect(area?.metaTitle).toContain(term);
       expect(area?.customH1).toContain(term);
     }
@@ -23,7 +23,7 @@ describe('Blackburn service area', () => {
   });
 
   it('covers the supporting device range and Blackburn travel area without irrelevant locations', () => {
-    for (const term of ['iPhone', 'Samsung', 'Google Pixel', 'iPad', 'laptop hardware', 'Blackburn South', 'Blackburn North']) {
+    for (const term of ['iPhone', 'Samsung', 'Google Pixel', 'iPad', 'Blackburn South', 'Blackburn North']) {
       expect(content).toContain(term);
     }
     expect(content).not.toMatch(/Hawksburn|Craigieburn|Preston/i);
@@ -39,41 +39,39 @@ describe('Blackburn service area', () => {
 
   it('uses the four approved device links in order without duplicates', () => {
     expect(area?.customLinks).toEqual([
-      { href: '/repairs/laptop/macbook', label: 'MacBook repair assessment options for Blackburn customers' },
       { href: '/repairs/phone/iphone', label: 'iPhone repair options for Blackburn customers' },
       { href: '/repairs/phone/samsung', label: 'Samsung phone repair options for Blackburn customers' },
       { href: '/repairs/tablet/ipad', label: 'iPad repair assessment options for Blackburn customers' },
+      { href: '/repairs/laptop/macbook', label: 'MacBook repair assessment options for Blackburn customers' },
     ]);
     expect(new Set(area?.customLinks?.map((link) => link.href)).size).toBe(4);
   });
 
-  it('keeps hardware-only and quote-first boundaries without unsupported promises', () => {
-    const itAnswer = area?.customFaqs?.find((faq) => faq.question.includes('general IT'))?.answer;
-
-    expect(itAnswer).toContain('we do not provide general IT, managed IT, networking, software administration or on-site computer service.');
+  it('keeps MacBook secondary without computer-service intent', () => {
+    expect(content).not.toMatch(/computer|IT support|managed IT|network support|on-site computer/i);
     expect(content).not.toMatch(/same-day|same-visit|15 minutes|in stock|hold (?:a )?part|reserve (?:a )?part|lowest price|price guarantee|guaranteed result|guaranteed data recovery|authorized service centre/i);
   });
 
   it('does not change protected nearby-area title and H1 positioning', () => {
     expect(getServiceAreaBySlug('burwood')).toMatchObject({
-      metaTitle: 'Phone, iPhone, iPad & MacBook Repair Near Burwood | Ali Mobile',
-      customH1: 'Phone, iPhone, iPad & MacBook Repair Near Burwood',
+      metaTitle: 'Phone & iPhone Repair Near Burwood | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Burwood',
     });
     expect(getServiceAreaBySlug('glenwaverley')).toMatchObject({
-      metaTitle: 'MacBook & Phone Repair Near Glen Waverley & Syndal | Ali Mobile',
-      customH1: 'MacBook, Laptop & Phone Repair Near Glen Waverley and Syndal',
+      metaTitle: 'Phone & iPhone Repair Near Glen Waverley & Syndal | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Glen Waverley and Syndal',
     });
     expect(getServiceAreaBySlug('croydon')).toMatchObject({
-      metaTitle: 'Phone, iPhone, iPad & MacBook Repair Near Croydon | Ali Mobile',
-      customH1: 'Phone, iPhone, iPad & MacBook Repair Near Croydon',
+      metaTitle: 'Phone & iPhone Repair Near Croydon | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Croydon',
     });
     expect(getServiceAreaBySlug('nunawading')).toMatchObject({
-      metaTitle: 'Apple, MacBook & Phone Repair Near Nunawading | Ali Mobile Ringwood',
-      customH1: 'Apple, MacBook & Phone Repair Near Nunawading',
+      metaTitle: 'Phone & iPhone Repair Near Nunawading | Ali Mobile Ringwood',
+      customH1: 'Phone & iPhone Repair Near Nunawading',
     });
     expect(getServiceAreaBySlug('doncaster')).toMatchObject({
-      metaTitle: 'Apple, MacBook & Phone Repair Near Doncaster | Ali Mobile',
-      customH1: 'Apple, MacBook & Phone Repair Near Doncaster',
+      metaTitle: 'Phone & iPhone Repair Near Doncaster | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Doncaster',
     });
   });
 });

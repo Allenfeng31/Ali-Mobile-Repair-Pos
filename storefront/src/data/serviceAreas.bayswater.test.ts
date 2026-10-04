@@ -6,13 +6,13 @@ describe('Bayswater service area', () => {
   const area = getServiceAreaBySlug('bayswater');
   const content = JSON.stringify(area);
 
-  it('keeps one Bayswater area with the approved dual-core metadata', () => {
+  it('keeps one Bayswater area with phone-first metadata', () => {
     expect(SERVICE_AREAS.filter((serviceArea) => serviceArea.slug === 'bayswater')).toHaveLength(1);
-    expect(area?.metaTitle).toBe('Phone, MacBook & Laptop Repair Near Bayswater | Ali Mobile');
-    expect(area?.customH1).toBe('Phone, MacBook & Laptop Repair Near Bayswater');
-    expect(area?.metaDescription).toBe('Phone, iPhone, MacBook and supported laptop repair near Bayswater at Ringwood Square Kiosk C1, with model checks and confirmed quotes before work.');
+    expect(area?.metaTitle).toBe('Phone & iPhone Repair Near Bayswater | Ali Mobile');
+    expect(area?.customH1).toBe('Phone & iPhone Repair Near Bayswater');
+    expect(area?.metaDescription).toBe('Phone, iPhone, Samsung and tablet repair near Bayswater at Ringwood Square Kiosk C1, with model checks and confirmed quotes before work.');
 
-    for (const term of ['Phone', 'MacBook', 'Laptop', 'Bayswater']) {
+    for (const term of ['Phone', 'iPhone', 'Bayswater']) {
       expect(area?.metaTitle).toContain(term);
       expect(area?.customH1).toContain(term);
     }
@@ -22,15 +22,12 @@ describe('Bayswater service area', () => {
     }
   });
 
-  it('covers Phone and MacBook or Laptop as equal hardware-focused scenarios', () => {
-    for (const term of ['iPhone', 'Samsung', 'Google Pixel', 'MacBook Air', 'MacBook Pro', 'supported laptop', 'iPad', 'screen', 'battery', 'charging', 'camera', 'no-power']) {
+  it('keeps phone and tablet repair primary while retaining a MacBook link-out', () => {
+    for (const term of ['iPhone', 'Samsung', 'Google Pixel', 'iPad', 'screen', 'battery', 'charging', 'camera', 'no-power']) {
       expect(content).toContain(term);
     }
-    expect(area?.customScenarioSection?.title).toContain('Phone and laptop');
-    expect(area?.customScenarioSection?.paragraphs.join(' ')).toContain('supported hardware repair');
-
-    const itAnswer = area?.customFaqs?.find((faq) => faq.question.includes('general computer repair'))?.answer;
-    expect(itAnswer).toContain('We do not provide general computer repair, general PC repair, IT support, managed IT, networking, software administration, remote support or on-site IT support.');
+    expect(area?.customLinks).toContainEqual({ href: '/repairs/laptop/macbook', label: 'MacBook hardware repair options' });
+    expect(content).not.toMatch(/computer|IT support|managed IT|network support|on-site computer/i);
   });
 
   it('keeps the one Ringwood Square location and original Bayswater travel fields', () => {
@@ -52,8 +49,8 @@ describe('Bayswater service area', () => {
     expect(area?.customLinks).toEqual([
       { href: '/repairs/phone/iphone', label: 'iPhone repair options by model' },
       { href: '/repairs/phone/samsung', label: 'Samsung repair options by model' },
-      { href: '/repairs/laptop/macbook', label: 'MacBook hardware repair options' },
       { href: '/repairs/tablet/ipad', label: 'iPad repair assessment options' },
+      { href: '/repairs/laptop/macbook', label: 'MacBook hardware repair options' },
     ]);
     expect(new Set(area?.customLinks?.map((link) => link.href)).size).toBe(4);
   });
@@ -63,14 +60,14 @@ describe('Bayswater service area', () => {
   });
 
   it('does not change protected nearby-area title and H1 positioning', () => {
-    expect(getServiceAreaBySlug('ringwood-east')).toMatchObject({ metaTitle: 'Phone, iPhone & MacBook Repair Near Ringwood East | Ali Mobile', customH1: 'Phone, iPhone & MacBook Repair Near Ringwood East' });
-    expect(getServiceAreaBySlug('mitcham')).toMatchObject({ metaTitle: 'Apple, MacBook & Phone Repair Near Mitcham | Ali Mobile', customH1: 'Apple, MacBook & Phone Repair Near Mitcham' });
-    expect(getServiceAreaBySlug('boronia')).toMatchObject({ metaTitle: 'Phone, iPhone & MacBook Repair Near Boronia | Ali Mobile', customH1: 'Phone, iPhone & MacBook Repair Near Boronia' });
-    expect(getServiceAreaBySlug('blackburn')).toMatchObject({ metaTitle: 'Apple, MacBook & Phone Repair Near Blackburn | Ali Mobile', customH1: 'Apple, MacBook & Phone Repair Near Blackburn' });
-    expect(getServiceAreaBySlug('burwood')).toMatchObject({ metaTitle: 'Phone, iPhone, iPad & MacBook Repair Near Burwood | Ali Mobile', customH1: 'Phone, iPhone, iPad & MacBook Repair Near Burwood' });
-    expect(getServiceAreaBySlug('doncaster')).toMatchObject({ metaTitle: 'Apple, MacBook & Phone Repair Near Doncaster | Ali Mobile', customH1: 'Apple, MacBook & Phone Repair Near Doncaster' });
-    expect(getServiceAreaBySlug('glenwaverley')).toMatchObject({ metaTitle: 'MacBook & Phone Repair Near Glen Waverley & Syndal | Ali Mobile', customH1: 'MacBook, Laptop & Phone Repair Near Glen Waverley and Syndal' });
-    expect(getServiceAreaBySlug('croydon')).toMatchObject({ metaTitle: 'Phone, iPhone, iPad & MacBook Repair Near Croydon | Ali Mobile', customH1: 'Phone, iPhone, iPad & MacBook Repair Near Croydon' });
-    expect(getServiceAreaBySlug('nunawading')).toMatchObject({ metaTitle: 'Apple, MacBook & Phone Repair Near Nunawading | Ali Mobile Ringwood', customH1: 'Apple, MacBook & Phone Repair Near Nunawading' });
+    expect(getServiceAreaBySlug('ringwood-east')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Ringwood East | Ali Mobile', customH1: 'Phone & iPhone Repair Near Ringwood East' });
+    expect(getServiceAreaBySlug('mitcham')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Mitcham | Ali Mobile', customH1: 'Phone & iPhone Repair Near Mitcham' });
+    expect(getServiceAreaBySlug('boronia')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Boronia | Ali Mobile', customH1: 'Phone & iPhone Repair Near Boronia' });
+    expect(getServiceAreaBySlug('blackburn')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Blackburn | Ali Mobile', customH1: 'Phone & iPhone Repair Near Blackburn' });
+    expect(getServiceAreaBySlug('burwood')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Burwood | Ali Mobile', customH1: 'Phone & iPhone Repair Near Burwood' });
+    expect(getServiceAreaBySlug('doncaster')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Doncaster | Ali Mobile', customH1: 'Phone & iPhone Repair Near Doncaster' });
+    expect(getServiceAreaBySlug('glenwaverley')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Glen Waverley & Syndal | Ali Mobile', customH1: 'Phone & iPhone Repair Near Glen Waverley and Syndal' });
+    expect(getServiceAreaBySlug('croydon')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Croydon | Ali Mobile', customH1: 'Phone & iPhone Repair Near Croydon' });
+    expect(getServiceAreaBySlug('nunawading')).toMatchObject({ metaTitle: 'Phone & iPhone Repair Near Nunawading | Ali Mobile Ringwood', customH1: 'Phone & iPhone Repair Near Nunawading' });
   });
 });

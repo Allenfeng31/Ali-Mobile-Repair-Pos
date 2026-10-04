@@ -70,8 +70,8 @@ describe('service area location directions', () => {
     const glenWaverley = getServiceAreaBySlug('glenwaverley');
 
     expect(glenWaverley).toMatchObject({
-      metaTitle: 'MacBook & Phone Repair Near Glen Waverley & Syndal | Ali Mobile',
-      customH1: 'MacBook, Laptop & Phone Repair Near Glen Waverley and Syndal',
+      metaTitle: 'Phone & iPhone Repair Near Glen Waverley & Syndal | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Glen Waverley and Syndal',
     });
   });
 
@@ -80,8 +80,8 @@ describe('service area location directions', () => {
     const content = JSON.stringify(croydon);
 
     expect(croydon).toMatchObject({
-      metaTitle: 'Phone, iPhone, iPad & MacBook Repair Near Croydon | Ali Mobile',
-      customH1: 'Phone, iPhone, iPad & MacBook Repair Near Croydon',
+      metaTitle: 'Phone & iPhone Repair Near Croydon | Ali Mobile',
+      customH1: 'Phone & iPhone Repair Near Croydon',
     });
     expect(croydon?.customLinks).toEqual([
       { href: '/repairs/phone/iphone', label: 'iPhone repair options by model' },

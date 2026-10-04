@@ -165,9 +165,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Ringwood East Station", "Maroondah Highway", "Ringwood Lake"],
     route: "Head west toward Ringwood Square and use the centre parking near Maroondah Highway.",
     localReason: "Ringwood East residents can contact the Ringwood Square team for model checks, fault assessment and a confirmed quote before supported work begins.",
-    metaTitle: "Phone, iPhone & MacBook Repair Near Ringwood East | Ali Mobile",
-    metaDescription: "Phone, iPhone and MacBook repair near Ringwood East at Ringwood Square Kiosk C1, with model checks and a confirmed quote before supported work.",
-    customH1: "Phone, iPhone & MacBook Repair Near Ringwood East",
+    metaTitle: "Phone & iPhone Repair Near Ringwood East | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair support near Ringwood East at Ringwood Square Kiosk C1, with model checks and a confirmed quote before supported work.",
+    customH1: "Phone & iPhone Repair Near Ringwood East",
     customIntro: "Ringwood East customers can visit Ali Mobile & Repair for phone repair near Ringwood East, iPhone repair and model identification. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phone assessment and repair, MacBook hardware assessment, supported Google Pixel models, and iPad or tablet faults after the exact device and issue are confirmed.",
     customLocalSection: {
       title: "Planning a repair visit from Ringwood East",
@@ -177,7 +177,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Phone-first assessment with MacBook hardware support",
+      title: "Phone-first repair assessment near Ringwood East",
       paragraphs: [
         "For phone and iPhone faults, the Ringwood team assesses screen damage, battery symptoms, charging problems, camera faults and no-power issues before confirming whether a supported repair path is available. Samsung phone assessment and repair follows the same model-and-fault process.",
         "MacBook Air and MacBook Pro enquiries are limited to hardware assessment and supported hardware repair. Supported Google Pixel models and iPad or tablet faults can also be assessed after the model, fault and practical repair scope are confirmed before a quote is provided."
@@ -201,8 +201,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "MacBook Air and MacBook Pro enquiries are limited to supported hardware assessment and repair after model and fault confirmation."
       },
       {
-        question: "Do you provide general computer repair or managed IT?",
-        answer: "No. Ali Mobile & Repair provides supported device hardware assessment and repair at Ringwood Square. We do not provide general computer repair, general PC repair, IT support, managed IT, networking, software administration, remote support or on-site IT support."
+        question: "How are supported device repairs assessed?",
+        answer: "Ali Mobile & Repair confirms the exact device, hardware fault and practical repair path at Ringwood Square before providing a quote."
       },
       {
         question: "What should I confirm before travelling from Ringwood East?",
@@ -295,9 +295,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Heathmont Station", "Canterbury Road", "Dandenong Creek Trail"],
     route: "Drive north toward Maroondah Highway and park at Ringwood Square Shopping Centre.",
     localReason: "Heathmont customers can get a quick quote before committing to screen, battery, or charging repairs.",
-    metaTitle: "Phone, Apple & MacBook Repair Near Heathmont | Ali Mobile Ringwood",
-    metaDescription: "Need phone, iPhone, Apple, MacBook or screen repair near Heathmont? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
-    customH1: "Phone, Apple & MacBook Repair Near Heathmont",
+    metaTitle: "Phone & iPhone Repair Near Heathmont | Ali Mobile Ringwood",
+    metaDescription: "Need phone, iPhone, Samsung or screen repair near Heathmont? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
+    customH1: "Phone & iPhone Repair Near Heathmont",
     customIntro: "Heathmont customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung, supported Google Pixel, iPad and MacBook hardware assessment and repair support. We confirm the exact model and fault, then provide a quote before supported work begins.",
     customLocalSection: {
       title: "Travelling for Repair Support from Heathmont",
@@ -307,10 +307,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Phone, Apple and MacBook Repair Support near Heathmont",
+      title: "Phone and iPhone Repair Support near Heathmont",
       paragraphs: [
         "For phone repair near Heathmont, we assess supported iPhone, Samsung and Google Pixel models for cracked screens or glass, battery symptoms, charging faults and camera issues. We inspect the device and confirm the supported repair path and quote before work begins.",
-        "For Apple repair and MacBook repair near Heathmont, we assess supported MacBook Air and MacBook Pro hardware issues such as display damage, battery symptoms, charging faults and no-power conditions. We confirm the exact model and hardware fault first; this service does not include general computer repair, managed IT, networking, software administration, remote support or on-site IT service."
+        "For supported MacBook hardware assessment, we confirm the exact MacBook Air or MacBook Pro model and fault before discussing a practical quote path."
       ]
     },
     customFaqs: [
@@ -332,7 +332,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       },
       {
         question: "Do you assess MacBook Air and MacBook Pro hardware faults?",
-        answer: "Yes. We assess supported MacBook Air and MacBook Pro models for hardware issues including display damage, battery symptoms, charging faults and no-power conditions. We do not provide managed IT, networking, software administration, remote support or on-site computer service."
+        answer: "Yes. We assess supported MacBook Air and MacBook Pro models for hardware issues including display damage, battery symptoms, charging faults and no-power conditions before discussing a quote path."
       },
       {
         question: "Can you confirm parts and timing before I travel from Heathmont?",
@@ -359,9 +359,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Croydon Central", "Croydon Station", "Mt Dandenong Road"],
     route: "Head west toward Ringwood, then turn into Ringwood Square for easy centre parking.",
     localReason: "Worth the short trip for careful diagnostics, transparent quoting, and No Fix No Charge on eligible jobs.",
-    metaTitle: "Phone, iPhone, iPad & MacBook Repair Near Croydon | Ali Mobile",
-    metaDescription: "Phone, iPhone, Samsung and MacBook repair near Croydon at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
-    customH1: "Phone, iPhone, iPad & MacBook Repair Near Croydon",
+    metaTitle: "Phone & iPhone Repair Near Croydon | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Croydon at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
+    customH1: "Phone & iPhone Repair Near Croydon",
     customIntro: "Croydon customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone and Samsung repair assessment, with MacBook repair as a clear second service focus. The same Ringwood desk also supports iPad and Apple Watch enquiries after model and fault confirmation.",
     customLocalSection: {
       title: "Travelling from Croydon to Ringwood Square",
@@ -371,7 +371,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Phone, iPhone, Samsung and MacBook Repairs near Croydon",
+      title: "Phone, iPhone and Samsung Repairs near Croydon",
       paragraphs: [
         "For phone, iPhone and Samsung faults, Croydon customers can bring cracked screens, battery symptoms and charging issues to Ringwood Square for model and fault assessment before a repair quote is confirmed.",
         "MacBook Air and MacBook Pro screen, battery, keyboard, charging and diagnostic assessment enquiries are also assessed at Ringwood Square. The exact model, fault and practical parts path guide the quote and timing discussion."
@@ -422,10 +422,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Mitcham Station", "EastLink", "Mitcham Shopping Centre"],
     route: "Follow Maroondah Highway east toward Ringwood Square.",
     localReason: "Mitcham residents can contact the Ringwood Square team for model checks, fault assessment and a confirmed quote before supported work begins.",
-    metaTitle: "Apple, MacBook & Phone Repair Near Mitcham | Ali Mobile",
-    metaDescription: "Apple, MacBook, iPhone and phone repair near Mitcham at Ringwood Square Kiosk C1, with model checks and a confirmed quote before supported work.",
-    customH1: "Apple, MacBook & Phone Repair Near Mitcham",
-    customIntro: "Mitcham customers can visit Ali Mobile & Repair for Apple device repair assessment near Mitcham, including MacBook hardware faults and iPhone repair support. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk also assesses Samsung phones, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed.",
+    metaTitle: "Phone & iPhone Repair Near Mitcham | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Mitcham at Ringwood Square Kiosk C1, with model checks and a confirmed quote before supported work.",
+    customH1: "Phone & iPhone Repair Near Mitcham",
+    customIntro: "Mitcham customers can visit Ali Mobile & Repair for phone and iPhone repair assessment near Mitcham. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same desk also assesses Samsung phones, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Planning a repair visit from Mitcham",
       paragraphs: [
@@ -434,10 +434,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Apple and MacBook hardware assessment near Mitcham",
+      title: "Phone and device repair assessment near Mitcham",
       paragraphs: [
-        "MacBook Air and MacBook Pro enquiries begin with model and hardware-fault confirmation. Screen, battery, charging, keyboard, camera and no-power symptoms are assessed to determine whether supported hardware repair is practical before a quote is confirmed.",
-        "Phone and iPhone repair support remains available for Mitcham customers, alongside Samsung phone assessment, supported Google Pixel models and iPad or tablet faults. The team checks the model, fault and suitable repair scope before any supported work begins."
+        "Phone and iPhone repair support remains available for Mitcham customers, alongside Samsung phone assessment, supported Google Pixel models and iPad or tablet faults. The team checks the model, fault and suitable repair scope before any supported work begins.",
+        "Supported MacBook hardware assessment begins with model and fault confirmation before a quote is discussed."
       ]
     },
     customFaqs: [
@@ -454,8 +454,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "Yes. The Ringwood Square desk can assess supported iPhone, Samsung phone, Google Pixel, iPad and tablet faults after identifying the model and issue."
       },
       {
-        question: "Do you provide general computer repair or IT support?",
-        answer: "No. Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square. We do not provide general computer repair, general PC repair, IT support, managed IT, business network support, networking, software administration, remote support or on-site computer service."
+        question: "How do you assess a device before repair?",
+        answer: "The Ringwood Square team confirms the exact model, fault and suitable repair scope before providing a quote."
       },
       {
         question: "What should I confirm before travelling from Mitcham?",
@@ -471,10 +471,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" },
       { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
       { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
-      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" }
     ],
     showChineseServiceCta: true,
   },
@@ -486,32 +486,28 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Brand Smart", "Nunawading Station", "Whitehorse Road"],
     route: "Continue east along Maroondah Highway until Ringwood Square.",
     localReason: "A convenient repair stop for customers comparing quick local service against larger shopping-centre queues.",
-    metaTitle: "Apple, MacBook & Phone Repair Near Nunawading | Ali Mobile Ringwood",
-    metaDescription: "Need Apple, MacBook, computer or phone repair near Nunawading? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
-    customH1: "Apple, MacBook & Phone Repair Near Nunawading",
-    customIntro: "Nunawading customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre for Apple repairs near Nunawading, MacBook repair near Nunawading, iPhone, Samsung, iPad and phone repair support. We are opposite Bunnings Warehouse Ringwood and confirm the quote path before repair.",
+    metaTitle: "Phone & iPhone Repair Near Nunawading | Ali Mobile Ringwood",
+    metaDescription: "Need phone, iPhone, Samsung or screen repair near Nunawading? Visit Kiosk C1 inside Ringwood Square for quote-first repair support.",
+    customH1: "Phone & iPhone Repair Near Nunawading",
+    customIntro: "Nunawading customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre for phone, iPhone, Samsung and iPad repair support. We are opposite Bunnings Warehouse Ringwood and confirm the quote path before repair. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
-      title: "Travelling for Apple and Phone Repair from Nunawading",
+      title: "Travelling for phone repair from Nunawading",
       paragraphs: [
         "If you are commuting from Nunawading, driving straight east along Maroondah Highway (Whitehorse Road) takes you past Mitcham directly to Ringwood Square in under 10 minutes. The centre offers easy parking access for in-person repair visits.",
         "If you prefer public transport, take the Belgrave or Lilydale train from Nunawading Station. The train ride is typically around 7 minutes to Ringwood Station. Our kiosk is located just across the road inside Ringwood Square Shopping Centre."
       ]
     },
     customScenarioSection: {
-      title: "MacBook, iPhone and Samsung Repairs near Nunawading",
+      title: "Phone, iPhone and Samsung Repairs near Nunawading",
       paragraphs: [
-        "Nunawading has a mix of residential and business offices, so customers often ask about Apple repairs near Nunawading, MacBook repair near Nunawading, computer repair assessment near Nunawading and laptop repair near Nunawading. We check power draw, display connections, battery condition and model-specific part paths before quoting.",
-        "For iPhone repair near Nunawading, Samsung phone, iPad, screen replacement and battery replacement enquiries near Nunawading, bring the device to Ringwood Square so we can confirm the model, fault and quote path before work begins."
+        "Nunawading customers can bring phone, iPhone, Samsung and tablet faults to Ringwood Square for model-specific assessment. We check the likely fault and practical part path before quoting.",
+        "Bring the device to Ringwood Square and we can confirm the model, fault and quote path before work begins."
       ]
     },
     customFaqs: [
       {
         question: "Is there an Ali Mobile kiosk inside Nunawading?",
         answer: "No. We operate exclusively from Kiosk C1 in Ringwood Square Shopping Centre. Nunawading is a direct 10-minute drive or train ride to our shop."
-      },
-      {
-        question: "Can Nunawading businesses bring multiple devices for inspection?",
-        answer: "Yes. Commercial clients frequently bring in several iPads or MacBooks for battery and screen diagnostics at our Ringwood Square bench."
       },
       {
         question: "Can I visit while commuting from Nunawading to the city?",
@@ -537,7 +533,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLinks: [
       { href: "/repairs/screen-replacement", label: "Screen repair support near Nunawading" },
       { href: "/repairs/phone", label: "Phone repair options near Nunawading" },
-      { href: "/repairs/tablet/ipad", label: "iPad display repair solutions close to Nunawading" }
+      { href: "/repairs/tablet/ipad", label: "iPad display repair solutions close to Nunawading" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware assessment options" }
     ]
   },
   {
@@ -548,24 +545,27 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Box Hill Central", "Box Hill Station", "Maroondah Highway"],
     route: "Take the Lilydale or Belgrave line to Ringwood Station, then walk to Ringwood Square Shopping Centre.",
     localReason: "Box Hill customers can use a direct train corridor to reach our Ringwood Square repair bench for clear quotes and warranty-backed service.",
-    metaTitle: "Phone, iPhone & Apple Repair Near Box Hill | Ali Mobile Ringwood",
-    metaDescription: "Need Apple, iPhone, iPad or MacBook repair near Box Hill or Kerrimuir? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
-    customH1: "Phone, iPhone & Apple Repair Near Box Hill",
-    customIntro: "Box Hill and Kerrimuir customers can visit Ali Mobile & Repair at Ringwood Square for Apple repairs near Box Hill, iPhone repair near Box Hill, iPad repair near Box Hill and MacBook repair near Box Hill. Box Hill is further from Ringwood than nearby suburbs, so calling ahead helps confirm the model, fault and parts availability before travelling.",
+    metaTitle: "Phone & iPhone Repair Near Box Hill | Ali Mobile Ringwood",
+    metaDescription: "Need phone, iPhone, Samsung or iPad repair near Box Hill or Kerrimuir? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
+    customH1: "Phone & iPhone Repair Near Box Hill",
+    customIntro: "Box Hill and Kerrimuir customers can visit Ali Mobile & Repair at Ringwood Square for phone, iPhone, Samsung and iPad repair support. Box Hill is further from Ringwood than nearby suburbs, so calling ahead helps confirm the model, fault and parts availability before travelling. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
-      title: "Travelling for Apple and iPhone Repair from Box Hill",
+      title: "Travelling for phone and iPhone repair from Box Hill",
       paragraphs: [
         "Box Hill customers can use the Lilydale or Belgrave train line from Box Hill Station to Ringwood Station, then walk across to Ringwood Square Shopping Centre. This keeps the route simple if you prefer not to drive.",
         "If travelling from Kerrimuir or nearby Box Hill streets by car, plan for a longer trip toward Ringwood Square. Call ahead first if you want us to check your iPhone, iPad, Apple device or MacBook model before you travel."
       ]
     },
     customScenarioSection: {
-      title: "Apple, iPhone and iPad Repairs near Box Hill",
+      title: "Phone, iPhone and iPad Repairs near Box Hill",
       paragraphs: [
-        "Box Hill customers often ask about Apple repairs near Box Hill, including iPhone screen, iPad display and MacBook assessment pathways. We confirm the exact model and part path before quoting.",
-        "For Kerrimuir customers, the same Ringwood Square repair desk can help with quote-first Apple, phone and tablet repair support after a model and fault check."
+        "Box Hill customers commonly bring iPhone screen, iPad display and other phone or tablet faults for a model and part-path check before a quote is confirmed.",
+        "For Kerrimuir customers, the same Ringwood Square repair desk provides quote-first phone and tablet support after a model and fault check."
       ]
     },
+    customLinks: [
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware assessment options" }
+    ],
     showChineseServiceCta: true,
   },
   {
@@ -576,22 +576,22 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Glen Waverley Station", "The Glen", "Springvale Road"],
     route: "Travel toward Ringwood by bus or drive through Canterbury Road and Wantirna Road for Ringwood Square parking.",
     localReason: "Glen Waverley customers can call first for model checks and visit only when the likely repair path is clear.",
-    metaTitle: "MacBook & Phone Repair Near Glen Waverley & Syndal | Ali Mobile",
-    metaDescription: "MacBook, laptop and phone repair near Glen Waverley and Syndal at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
-    customH1: "MacBook, Laptop & Phone Repair Near Glen Waverley and Syndal",
-    customIntro: "MacBook, supported laptop hardware and Apple device repair for Glen Waverley and Syndal is completed at Ali Mobile & Repair, Kiosk C1 inside Ringwood Square. The same Ringwood desk also supports phones, iPhone, Samsung and iPad after model and fault assessment.",
+    metaTitle: "Phone & iPhone Repair Near Glen Waverley & Syndal | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Glen Waverley and Syndal at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
+    customH1: "Phone & iPhone Repair Near Glen Waverley and Syndal",
+    customIntro: "Phone, iPhone, Samsung and iPad repair for Glen Waverley and Syndal is completed at Ali Mobile & Repair, Kiosk C1 inside Ringwood Square, after model and fault assessment. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Travelling from Glen Waverley and Syndal to Ringwood Square",
       paragraphs: [
         "From Glen Waverley, drive through Canterbury Road and Wantirna Road to Ringwood Square, typically about 25 minutes depending on traffic. Bus 742 connects Glen Waverley Station with Ringwood Station for customers travelling by public transport.",
-        "Customers near Syndal can use the same route to Kiosk C1 inside Ringwood Square. Calling ahead helps us confirm the MacBook or laptop model, likely fault, parts path and quote before you travel."
+        "Customers near Syndal can use the same route to Kiosk C1 inside Ringwood Square. Calling ahead helps us confirm the device model, likely fault, parts path and quote before you travel."
       ]
     },
     customScenarioSection: {
-      title: "MacBook, laptop and Apple device assessment near Glen Waverley and Syndal",
+      title: "Phone and device assessment near Glen Waverley and Syndal",
       paragraphs: [
-        "For MacBook, supported laptop hardware and Apple device faults, we use a device repair or diagnostic assessment to confirm the exact model, likely hardware issue and practical quote path before work is approved.",
-        "The same Ringwood Square desk also assesses iPhone, Samsung and iPad repairs. Phone support follows the same model, fault, parts and confirmed-quote process rather than a fixed-price or same-day promise."
+        "The same Ringwood Square desk also assesses iPhone, Samsung and iPad repairs. Phone support follows the same model, fault, parts and confirmed-quote process rather than a fixed-price or same-day promise.",
+        "Supported MacBook hardware assessment is available through the MacBook repair hub after the exact model and fault are confirmed."
       ]
     },
     customFaqs: [
@@ -612,8 +612,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "Yes. The Ringwood Square desk also assesses supported iPhone, Samsung and iPad faults after confirming the model, issue and likely parts path."
       },
       {
-        question: "Do you provide general IT support or on-site computer service?",
-        answer: "No. Ali Mobile & Repair focuses on device hardware repair assessment and supported repairs at Ringwood Square; we do not offer managed IT, network support or on-site computer service."
+        question: "How do I confirm the repair path before travelling?",
+        answer: "Contact the Ringwood Square team with the exact device and fault so they can explain the likely assessment and quote path before you travel."
       },
       {
         question: "What should I confirm before travelling from Glen Waverley or Syndal?",
@@ -621,10 +621,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" },
       { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
       { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
-      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" },
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" }
     ],
     showChineseServiceCta: true,
   },
@@ -636,10 +636,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Knox Private Hospital", "EastLink", "Stud Road"],
     route: "Take EastLink north, exit toward Ringwood, then park at Ringwood Square.",
     localReason: "Good for customers who want to call first, confirm pricing, then visit only when the repair path is clear.",
-    metaTitle: "Phone Screen, Apple & MacBook Repair Near Wantirna | Ali Mobile Ringwood",
-    metaDescription: "Need phone screen, Apple, iPhone or MacBook repair near Wantirna or Studfield? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
-    customH1: "Phone Screen, Apple & MacBook Repair Near Wantirna",
-    customIntro: "Wantirna and Studfield customers can visit Ali Mobile & Repair at Ringwood Square for phone screen repair near Wantirna, iPhone, Samsung, Apple, iPad and MacBook repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
+    metaTitle: "Phone Screen & iPhone Repair Near Wantirna | Ali Mobile Ringwood",
+    metaDescription: "Need phone screen, iPhone, Samsung or iPad repair near Wantirna or Studfield? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
+    customH1: "Phone Screen & iPhone Repair Near Wantirna",
+    customIntro: "Wantirna and Studfield customers can visit Ali Mobile & Repair at Ringwood Square for phone screen, iPhone, Samsung and iPad repair support. We are located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood.",
     customLocalSection: {
       title: "Travelling for Phone Screen Repair from Wantirna",
       paragraphs: [
@@ -648,10 +648,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Apple, iPhone and MacBook Repairs near Wantirna",
+      title: "Phone and iPhone Repairs near Wantirna",
       paragraphs: [
-        "Wantirna and Studfield customers often ask about phone screen repair near Wantirna, iPhone repair near Wantirna, Samsung phone repair and Apple repairs near Wantirna. We inspect cracked glass, touch faults, battery symptoms and charging issues before confirming the quote.",
-        "For MacBook repair near Wantirna, iPad repair, battery replacement and charging port repair near Wantirna, we check the exact model and likely parts path first so the repair remains assessment-led and quote-first."
+        "Wantirna and Studfield customers can bring cracked screens, touch faults, battery symptoms and charging issues to Ringwood Square for assessment before a quote is confirmed.",
+        "A separate MacBook hardware assessment option is available through the MacBook repair hub; iPad, battery and charging-port services follow the same model-first approach."
       ]
     },
     customFaqs: [
@@ -687,7 +687,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLinks: [
       { href: "/repairs/tablet/ipad", label: "Wantirna iPad repair diagnostics" },
       { href: "/repairs/screen-replacement", label: "Display checks near Wantirna" },
-      { href: "/repairs/charging-port-replacement", label: "Charging port repair options for Wantirna" }
+      { href: "/repairs/charging-port-replacement", label: "Charging port repair options for Wantirna" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware assessment options" }
     ]
   },
   {
@@ -698,10 +699,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Westfield Doncaster", "Doncaster Road", "Eastern Freeway"],
     route: "Drive through Springvale Road and Maroondah Highway or use EastLink toward Ringwood Square.",
     localReason: "Doncaster customers often compare repair options before travelling, so a quick phone check can confirm parts, price range, and timing.",
-    metaTitle: "Apple, MacBook & Phone Repair Near Doncaster | Ali Mobile",
-    metaDescription: "Apple, MacBook, iPhone, Samsung and iPad repair near Doncaster at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
-    customH1: "Apple, MacBook & Phone Repair Near Doncaster",
-    customIntro: "Doncaster, Doncaster East and Doncaster Heights customers can bring Apple devices and MacBooks to Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for model and hardware-fault assessment. The same Ringwood desk also supports iPhone, Samsung, supported Google Pixel models and iPad or tablet repairs, with the repair path and quote confirmed before work.",
+    metaTitle: "Phone & iPhone Repair Near Doncaster | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and iPad repair near Doncaster at Ringwood Square Kiosk C1, with model checks and a confirmed quote before work.",
+    customH1: "Phone & iPhone Repair Near Doncaster",
+    customIntro: "Doncaster, Doncaster East and Doncaster Heights customers can bring supported phones and tablets to Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for model and fault assessment. The Ringwood desk supports iPhone, Samsung, supported Google Pixel models and iPad or tablet repairs, with the repair path and quote confirmed before work. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Visiting from Doncaster, Doncaster East and Doncaster Heights",
       paragraphs: [
@@ -710,10 +711,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Apple and MacBook hardware assessment near Doncaster",
+      title: "Phone and device repair assessment near Doncaster",
       paragraphs: [
-        "For MacBook Air, MacBook Pro and other supported Apple device faults, the Ringwood desk checks the exact model, hardware symptoms and practical repair path before a quote is confirmed. This keeps laptop and computer enquiries within supported hardware assessment and repair scope.",
-        "The same assessment-first process supports iPhone, Samsung, supported Google Pixel models and iPad or tablet faults, including screen, battery, charging and camera symptoms where a repair is suitable."
+        "The same assessment-first process supports iPhone, Samsung, supported Google Pixel models and iPad or tablet faults, including screen, battery, charging and camera symptoms where a repair is suitable.",
+        "Supported MacBook hardware assessment is available through the MacBook repair hub after the exact model and fault are confirmed."
       ]
     },
     customFaqs: [
@@ -730,15 +731,15 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "Contact the Ringwood Square team with the model and symptom first. They can discuss the likely assessment, parts path, quote process and timing once the device has been checked."
       },
       {
-        question: "Do you provide general IT support or on-site computer service?",
-        answer: "No. Ali Mobile & Repair provides supported device hardware assessment and repair at Ringwood Square; we do not provide general or managed IT, network support or on-site computer service."
+        question: "How do I confirm the repair path before travelling?",
+        answer: "Contact the Ringwood Square team with the exact device and fault so they can explain the likely assessment and quote path before you travel."
       }
     ],
     customLinks: [
-      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" },
       { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
       { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
-      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" },
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options" }
     ],
     showChineseServiceCta: true,
   },
@@ -750,10 +751,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Bayswater Station", "Mountain Highway", "Bayswater Village"],
     route: "Travel west along Mountain Highway and continue toward Ringwood Square.",
     localReason: "A short drive for battery, screen, charging port, and tablet repairs with clear quote options.",
-    metaTitle: "Phone, MacBook & Laptop Repair Near Bayswater | Ali Mobile",
-    metaDescription: "Phone, iPhone, MacBook and supported laptop repair near Bayswater at Ringwood Square Kiosk C1, with model checks and confirmed quotes before work.",
-    customH1: "Phone, MacBook & Laptop Repair Near Bayswater",
-    customIntro: "Bayswater customers can visit Ali Mobile & Repair for phone and iPhone assessment alongside MacBook and supported laptop hardware repair. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phones, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed.",
+    metaTitle: "Phone & iPhone Repair Near Bayswater | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Bayswater at Ringwood Square Kiosk C1, with model checks and confirmed quotes before work.",
+    customH1: "Phone & iPhone Repair Near Bayswater",
+    customIntro: "Bayswater customers can visit Ali Mobile & Repair for phone and iPhone assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phones, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Planning a repair visit from Bayswater",
       paragraphs: [
@@ -763,10 +764,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Phone and laptop hardware assessment near Bayswater",
+      title: "Phone, iPhone and tablet assessment near Bayswater",
       paragraphs: [
         "Phone and iPhone faults are assessed for screen damage, battery symptoms, charging problems, camera faults and no-power issues before a supported repair path and quote are confirmed. Samsung phones and supported Google Pixel models follow the same model-and-fault process.",
-        "MacBook Air, MacBook Pro and supported laptop enquiries are limited to hardware assessment and supported hardware repair. iPad and tablet faults can also be assessed after confirming the exact model, hardware symptoms and practical repair scope."
+        "iPad and tablet faults can also be assessed after confirming the exact model, hardware symptoms and practical repair scope. MacBook hardware assessment is available through the MacBook repair hub."
       ]
     },
     customFaqs: [
@@ -775,20 +776,16 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "No. Ali Mobile & Repair operates only from Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. There is no Bayswater branch, shop, counter or collection point."
       },
       {
-        question: "Which phone, tablet and laptop faults can be assessed?",
-        answer: "The Ringwood Square desk can assess supported iPhone, Samsung phone, Google Pixel, iPad, tablet, MacBook and laptop hardware faults after identifying the exact model and issue."
+        question: "Which phone and tablet faults can be assessed?",
+        answer: "The Ringwood Square desk can assess supported iPhone, Samsung phone, Google Pixel, iPad and tablet faults after identifying the exact model and issue."
       },
       {
         question: "How are Bayswater phone and iPhone faults assessed?",
         answer: "Screen, battery, charging, camera and no-power symptoms are assessed against the exact model before a suitable repair path and quote can be confirmed."
       },
       {
-        question: "What MacBook and laptop work is within your support scope?",
-        answer: "MacBook Air, MacBook Pro and supported laptop enquiries are limited to hardware assessment and supported hardware repair after model and fault confirmation."
-      },
-      {
-        question: "Do you provide general computer repair or IT support?",
-        answer: "No. Ali Mobile & Repair provides supported device hardware assessment and repair at Ringwood Square. We do not provide general computer repair, general PC repair, IT support, managed IT, networking, software administration, remote support or on-site IT support."
+        question: "How do I confirm the repair path before travelling?",
+        answer: "Contact the Ringwood Square team with the exact device and fault so they can explain the likely assessment and quote path before you travel."
       },
       {
         question: "What should I confirm before travelling from Bayswater?",
@@ -806,8 +803,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customLinks: [
       { href: "/repairs/phone/iphone", label: "iPhone repair options by model" },
       { href: "/repairs/phone/samsung", label: "Samsung repair options by model" },
-      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" },
-      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware repair options" }
     ],
     showChineseServiceCta: true,
   },
@@ -819,9 +816,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Boronia Station", "Dorset Square", "Mountain Highway"],
     route: "Head north-west through Dorset Road or Mountain Highway toward Ringwood Square.",
     localReason: "Boronia customers can reach our bench without mailing a device away or waiting for a vague remote quote.",
-    metaTitle: "Phone, iPhone & MacBook Repair Near Boronia | Ali Mobile",
-    metaDescription: "Phone, iPhone and MacBook repair near Boronia at Ringwood Square Kiosk C1, with screen, battery and charging checks and confirmed quotes before work.",
-    customH1: "Phone, iPhone & MacBook Repair Near Boronia",
+    metaTitle: "Phone & iPhone Repair Near Boronia | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Boronia at Ringwood Square Kiosk C1, with screen, battery and charging checks and confirmed quotes before work.",
+    customH1: "Phone & iPhone Repair Near Boronia",
     customIntro: "Boronia customers can visit Ali Mobile & Repair for phone repair near Boronia, iPhone repair near Boronia and supported MacBook hardware assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The Ringwood desk also supports Samsung phone assessment and repair, supported Google Pixel models, and iPad or tablet faults after the exact model and issue are confirmed.",
     customLocalSection: {
       title: "Planning a repair visit from Boronia",
@@ -831,7 +828,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Phone-first assessment with MacBook hardware support",
+      title: "Phone-first repair assessment near Boronia",
       paragraphs: [
         "For phone and iPhone faults, the Ringwood team assesses screen damage, battery symptoms, charging problems, camera faults and no-power issues before confirming whether a supported repair path is available. Samsung phones and supported Google Pixel models follow the same model-and-fault assessment process.",
         "MacBook and laptop enquiries are limited to hardware assessment and supported hardware repair. iPad and tablet assessment is also available where the exact model and issue can be confirmed before a quote is provided."
@@ -851,8 +848,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "The team checks the exact model, symptoms and practical repair path before providing a quote. Camera and no-power faults can also be assessed where they are within the available repair scope."
       },
       {
-        question: "Do you provide MacBook repair or general IT support?",
-        answer: "Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square. We do not provide general computer repair, managed IT, business IT support, networking, software administration, remote IT support or on-site computer service."
+        question: "How do I confirm the repair path before travelling?",
+        answer: "Contact the Ringwood Square team with the exact device and fault so they can explain the likely assessment and quote path before you travel."
       },
       {
         question: "What should I confirm before travelling from Boronia?",
@@ -883,10 +880,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Burwood Highway", "Deakin University", "Vermont South"],
     route: "Drive east along Burwood Highway, then connect through Vermont South and Wantirna toward Ringwood.",
     localReason: "Burwood customers can phone ahead for repair pricing, model checks, and repair timing before making the trip.",
-    metaTitle: "Phone, iPhone, iPad & MacBook Repair Near Burwood | Ali Mobile",
-    metaDescription: "Phone, iPhone, iPad and MacBook repair near Burwood, Burwood East and Burwood Heights at Ringwood Square Kiosk C1, with model checks and confirmed quotes.",
-    customH1: "Phone, iPhone, iPad & MacBook Repair Near Burwood",
-    customIntro: "Burwood, Burwood East, Burwood Heights and Bennettswood customers can visit Ali Mobile & Repair for phone, iPhone, iPad and MacBook repair assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk supports Samsung and supported Google Pixel repairs, with the exact model, fault and quote confirmed before work.",
+    metaTitle: "Phone & iPhone Repair Near Burwood | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Burwood, Burwood East and Burwood Heights at Ringwood Square Kiosk C1, with model checks and confirmed quotes.",
+    customH1: "Phone & iPhone Repair Near Burwood",
+    customIntro: "Burwood, Burwood East, Burwood Heights and Bennettswood customers can visit Ali Mobile & Repair for phone, iPhone and iPad repair assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk supports Samsung and supported Google Pixel repairs, with the exact model, fault and quote confirmed before work. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Visiting from Burwood and nearby eastern suburbs",
       paragraphs: [
@@ -895,10 +892,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Multi-device hardware assessment near Burwood",
+      title: "Phone, iPhone and tablet assessment near Burwood",
       paragraphs: [
-        "MacBook and supported laptop hardware enquiries are assessed at Ringwood Square for screen, battery, charging, camera and no-power symptoms. The exact device, fault and practical repair path are checked before a quote is confirmed.",
-        "The same assessment-first process supports phone, iPhone, Samsung, supported Google Pixel and iPad or tablet repairs. It helps confirm whether a screen, battery, charging, camera or no-power fault is within the available repair scope."
+        "The assessment-first process supports phone, iPhone, Samsung, supported Google Pixel and iPad or tablet repairs. It helps confirm whether a screen, battery, charging, camera or no-power fault is within the available repair scope.",
+        "MacBook hardware assessment is available through the MacBook repair hub after the exact model and fault are confirmed."
       ]
     },
     customFaqs: [
@@ -915,8 +912,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "The Ringwood desk can assess supported iPhone, Samsung, Google Pixel, iPad and tablet faults after confirming the exact device and issue."
       },
       {
-        question: "Do you provide MacBook repair, general IT support or on-site computer service?",
-        answer: "Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square. We do not provide general IT, managed IT, networking, software administration or on-site computer service."
+        question: "How do I confirm the repair path before travelling?",
+        answer: "Contact the Ringwood Square team with the exact device and fault so they can explain the likely assessment and quote path before you travel."
       },
       {
         question: "Can screen, battery, charging, camera or no-power faults be assessed?",
@@ -956,7 +953,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "iPhone and Apple Repairs near Balwyn",
+      title: "Phone and iPhone Repairs near Balwyn",
       paragraphs: [
         "Many Balwyn clients travel to our kiosk for hands-on, face-to-face assessments of premium devices like MacBooks or higher-end iPhones. If a laptop keyboard fails or a phone screen flickers, we inspect the internal ribbon cables at our bench.",
         "We explain the difference between replacement tiers, check our inventory for immediate parts availability, and verify if same-visit servicing is practical before you authorize the repair."
@@ -1256,10 +1253,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     route: "Drive via Ferntree Gully Road and EastLink toward Ringwood Square.",
     localReason: "Clayton customers can call ahead to confirm whether repair assessment, quote support or parts availability is the smartest next step.",
     showChineseServiceCta: true,
-    metaTitle: "Phone, Apple & Laptop Repair Near Clayton | Ali Mobile Ringwood",
-    metaDescription: "Need mobile phone, Apple, MacBook, laptop or computer repair near Clayton? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
-    customH1: "Phone, Apple & Laptop Repair Near Clayton",
-    customIntro: "Clayton and Clayton South customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for mobile phone repair near Clayton, Apple repairs near Clayton, iPhone, Samsung, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
+    metaTitle: "Phone & iPhone Repair Near Clayton | Ali Mobile Ringwood",
+    metaDescription: "Need mobile phone, iPhone, Samsung or iPad repair near Clayton? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
+    customH1: "Phone & iPhone Repair Near Clayton",
+    customIntro: "Clayton and Clayton South customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for mobile phone, iPhone, Samsung and iPad repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Travelling for Repair from Clayton",
       paragraphs: [
@@ -1270,7 +1267,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     customScenarioSection: {
       title: "Phone and Device Repairs near Clayton",
       paragraphs: [
-        "If your laptop keyboard is sticking, your iPad screen is cracked, or your phone refuses to charge, we run a counter assessment to identify the exact fault. Clayton customers often ask about MacBook repair near Clayton, laptop repair near Clayton and computer repair assessment near Clayton.",
+        "If your iPad screen is cracked or your phone refuses to charge, we run a counter assessment to identify the exact fault. Supported MacBook hardware assessment is available through the MacBook repair hub when it is relevant to the device.",
         "For Clayton South customers, calling ahead is useful because the trip is longer. We discuss the available replacement components and expected timeframe, helping you confirm if a repair is worthwhile before approving the work."
       ]
     },
@@ -1305,9 +1302,9 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Clayton" },
       { href: "/repairs/tablet/ipad", label: "Clayton iPad screen and battery options" },
-      { href: "/repairs/charging-port-replacement", label: "USB-C charging diagnostics close to Clayton" }
+      { href: "/repairs/charging-port-replacement", label: "USB-C charging diagnostics close to Clayton" },
+      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Clayton" }
     ]
   },
   {
@@ -1318,10 +1315,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Lilydale Station", "Maroondah Highway", "Lilydale Marketplace"],
     route: "Drive west along Maroondah Highway through Chirnside Park and Croydon into Ringwood.",
     localReason: "Lilydale customers can reach us on the same rail and road corridor for model checks and warranty-backed repair work.",
-    metaTitle: "Phone & MacBook Repair Near Lilydale | Ali Mobile Ringwood",
-    metaDescription: "Need phone repair near Lilydale or MacBook repair near Lilydale? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
-    customH1: "Phone & MacBook Repair Near Lilydale",
-    customIntro: "Lilydale customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone repair near Lilydale, iPhone repair near Lilydale, Samsung phone repair near Lilydale, iPad and MacBook repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability.",
+    metaTitle: "Phone & iPhone Repair Near Lilydale | Ali Mobile Ringwood",
+    metaDescription: "Need phone, iPhone, Samsung or iPad repair near Lilydale? Visit Kiosk C1 inside Ringwood Square for quote-first support.",
+    customH1: "Phone & iPhone Repair Near Lilydale",
+    customIntro: "Lilydale customers can visit Ali Mobile & Repair at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood, for phone, iPhone, Samsung and iPad repair support. Quotes are confirmed before repair, and customers can call ahead to check model, fault and parts availability. MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Travelling for Repair from Lilydale",
       paragraphs: [
@@ -1330,10 +1327,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "MacBook and Phone Repairs near Lilydale",
+      title: "Phone and iPhone Repairs near Lilydale",
       paragraphs: [
-        "Because Lilydale is located further out, many customers call us before making the trip to confirm parts availability and coordinate their visit. Lilydale phone repairs near Ringwood Square work best when we confirm the model and likely fault before you travel.",
-        "For MacBook repair near Lilydale, phone screen issues or Samsung phone repair near Lilydale, we inspect the hardware, explain if a cracked screen is cosmetic or structural, and confirm the repair path so you do not make an unnecessary device replacement."
+        "Because Lilydale is further along the Maroondah Highway corridor, many customers call before making the trip to confirm parts availability and coordinate their visit. The journey works best when we confirm the model and likely fault before you travel.",
+        "For screen, battery, charging or other supported hardware concerns, we inspect the device, explain the likely repair path and help you decide whether repair is worthwhile."
       ]
     },
     customFaqs: [
@@ -1354,10 +1351,6 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "Warranty coverage depends on the repair type and replacement part selected. We will explain the applicable warranty before handover."
       },
       {
-        question: "Do you repair keyboards or screen issues on MacBooks?",
-        answer: "Yes, we diagnose display flickering, battery wear, and keyboard faults on MacBooks directly at our Ringwood Square bench."
-      },
-      {
         question: "What happens if my phone charging port is loose?",
         answer: "We test the current draw. If it simply has compacted pocket lint, we clean it for a fee; if it's physically damaged, we quote a port replacement."
       },
@@ -1368,8 +1361,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
     ],
     customLinks: [
       { href: "/repairs/screen-replacement", label: "Screen repair advice for Lilydale customers" },
-      { href: "/repairs/laptop/macbook", label: "MacBook diagnostics near Lilydale" },
-      { href: "/repairs/tablet/ipad", label: "Lilydale iPad screen replacement options" }
+      { href: "/repairs/tablet/ipad", label: "Lilydale iPad screen replacement options" },
+      { href: "/repairs/laptop/macbook", label: "MacBook hardware assessment options" }
     ]
   },
   {
@@ -1814,10 +1807,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
     landmarks: ["Blackburn Station", "Whitehorse Road", "Blackburn Square"],
     route: "Drive east via Whitehorse Road and Maroondah Highway through Nunawading and Mitcham.",
     localReason: "Blackburn customers have a direct train and road link to Ringwood Square for transparent quotes and warranty-backed repairs.",
-    metaTitle: "Apple, MacBook & Phone Repair Near Blackburn | Ali Mobile",
-    metaDescription: "Apple, MacBook, iPhone and phone repair near Blackburn, Blackburn South and Blackburn North at Ringwood Square Kiosk C1, with confirmed quotes.",
-    customH1: "Apple, MacBook & Phone Repair Near Blackburn",
-    customIntro: "Blackburn, Blackburn South and Blackburn North customers can visit Ali Mobile & Repair for Apple device hardware assessment, MacBook repair, iPhone repair and phone repair. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk also supports Samsung phones, supported Google Pixel repairs and iPad or tablet assessment after the exact model and fault are confirmed.",
+    metaTitle: "Phone & iPhone Repair Near Blackburn | Ali Mobile",
+    metaDescription: "Phone, iPhone, Samsung and tablet repair near Blackburn, Blackburn South and Blackburn North at Ringwood Square Kiosk C1, with confirmed quotes.",
+    customH1: "Phone & iPhone Repair Near Blackburn",
+    customIntro: "Blackburn, Blackburn South and Blackburn North customers can visit Ali Mobile & Repair for phone and iPhone repair assessment. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, opposite Bunnings Warehouse Ringwood. The same Ringwood desk also supports Samsung phones, supported Google Pixel repairs and iPad or tablet assessment after the exact model and fault are confirmed. Supported MacBook hardware assessment is available through the MacBook repair hub.",
     customLocalSection: {
       title: "Visiting from Blackburn and nearby areas",
       paragraphs: [
@@ -1826,10 +1819,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       ]
     },
     customScenarioSection: {
-      title: "Apple and MacBook hardware assessment near Blackburn",
+      title: "Phone and device repair assessment near Blackburn",
       paragraphs: [
-        "MacBook screen, battery, charging, keyboard and no-power symptoms are assessed at Ringwood Square using the exact model and fault. MacBook and laptop enquiries remain within supported laptop hardware assessment and repair scope before a quote is confirmed.",
-        "The same assessment-first process supports iPhone and phone screen, battery, charging and camera faults, as well as Samsung phones, supported Google Pixel repairs and iPad or tablet assessment where the issue is within the available repair scope."
+        "The same assessment-first process supports iPhone and phone screen, battery, charging and camera faults, as well as Samsung phones, supported Google Pixel repairs and iPad or tablet assessment where the issue is within the available repair scope.",
+        "Supported MacBook hardware assessment is available through the MacBook repair hub after the exact model and fault are confirmed."
       ]
     },
     customFaqs: [
@@ -1850,8 +1843,8 @@ export const SERVICE_AREAS: ServiceArea[] = [
         answer: "Yes. The Ringwood desk can assess supported iPhone, Samsung phone, Google Pixel, iPad and tablet faults after confirming the exact device and issue."
       },
       {
-        question: "Do you provide general IT or on-site computer service?",
-        answer: "No. Ali Mobile & Repair provides supported MacBook and laptop hardware assessment and repair at Ringwood Square; we do not provide general IT, managed IT, networking, software administration or on-site computer service."
+        question: "How do I confirm the repair path before travelling?",
+        answer: "Contact the Ringwood Square team with the exact device and fault so they can explain the likely assessment and quote path before you travel."
       },
       {
         question: "What should I confirm before travelling from Blackburn?",
@@ -1867,10 +1860,10 @@ export const SERVICE_AREAS: ServiceArea[] = [
       }
     ],
     customLinks: [
-      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options for Blackburn customers" },
       { href: "/repairs/phone/iphone", label: "iPhone repair options for Blackburn customers" },
       { href: "/repairs/phone/samsung", label: "Samsung phone repair options for Blackburn customers" },
-      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options for Blackburn customers" }
+      { href: "/repairs/tablet/ipad", label: "iPad repair assessment options for Blackburn customers" },
+      { href: "/repairs/laptop/macbook", label: "MacBook repair assessment options for Blackburn customers" }
     ],
     showChineseServiceCta: true,
   },

@@ -63,7 +63,6 @@ const FEATURED_BRAND_HUB_ORDER = [
   "phone:google-pixel",
   "phone:oppo",
   "tablet:ipad",
-  "laptop:macbook",
 ];
 
 function getNearbyServiceAreas(currentSlug: string) {
@@ -319,7 +318,7 @@ export async function generateMetadata({ params }: LocationPageProps): Promise<M
 
   return {
     title: area.metaTitle || `Device Repair near ${area.name} | Ali Mobile & Repair Ringwood`,
-    description: area.metaDescription || `Phone, tablet, laptop, and watch repairs for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for expert diagnostics, No Fix No Charge, and warranty-backed repairs.`,
+    description: area.metaDescription || `Phone, mobile, iPhone, Samsung, and tablet repair support for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for diagnostics, clear quotes, and warranty-backed repairs.`,
     alternates: {
       canonical: `${baseUrl}/locations/${area.slug}`,
     },
@@ -340,13 +339,13 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
   if (!area) notFound();
   const isRingwood = area.slug === "ringwood";
-  const pageHeading = area.customH1 || `Expert Device Repair for ${area.name} Residents`;
+  const pageHeading = area.customH1 || `Phone & Mobile Repair Support for ${area.name} Residents`;
   const heroDescription =
     area.customIntro ||
     `A practical ${area.driveTime.toLowerCase()} trip to Ringwood Square for careful diagnostics, transparent quotes, and warranty-backed repairs from a specialist local bench.`;
   const metaDescription =
     area.metaDescription ||
-    `Phone, tablet, laptop, and watch repairs for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for expert diagnostics, No Fix No Charge, and warranty-backed repairs.`;
+    `Phone, mobile, iPhone, Samsung, and tablet repair support for ${area.name} residents. Visit Ali Mobile & Repair at Ringwood Square for diagnostics, clear quotes, and warranty-backed repairs.`;
 
   const currentSuburb = suburb.toLowerCase().replace(/-/g, "");
   const transitSteps = suburbTransitGuide[currentSuburb] ?? [
@@ -405,7 +404,6 @@ export default async function LocationPage({ params }: LocationPageProps) {
     : [
         { href: "/repairs/phone", title: "Phone Repair", detail: "Screen, battery, charging, camera", Icon: Wrench },
         { href: "/repairs/tablet", title: "Tablet Repair", detail: "iPad and Samsung Tab support", Icon: Wrench },
-        { href: "/repairs/laptop", title: "Laptop Repair", detail: "MacBook and Windows diagnostics", Icon: Wrench },
         { href: "/repairs/watch", title: "Watch Repair", detail: "Screen and battery options", Icon: ShieldCheck },
       ];
 
@@ -541,7 +539,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
                   diagnostics when the device cannot be repaired as quoted.
                 </p>
                 <p>
-                  For common iPhone, Samsung, iPad, MacBook, and Apple Watch issues, the short trip to
+                  For common phone, iPhone, Samsung, and tablet issues, the short trip to
                   Ringwood Square can save the uncertainty of mailing a device away or accepting a vague
                   quote before anyone has inspected the hardware.
                 </p>
@@ -743,7 +741,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
                   <summary>Do you service customers from {area.name}?</summary>
                   <p>
                     Yes. We regularly help customers travelling from {area.name} to Ringwood Square
-                    for phone, tablet, laptop, and watch repair assessment.
+                    for phone, tablet, and watch repair assessment.
                   </p>
                 </details>
                 <details>
@@ -783,9 +781,9 @@ export default async function LocationPage({ params }: LocationPageProps) {
                   </p>
                 </details>
                 <details>
-                  <summary>Do you repair iPhone, Samsung, iPad, MacBook, and Apple Watch devices?</summary>
+                  <summary>Do you repair iPhone, Samsung, iPad, and Apple Watch devices?</summary>
                   <p>
-                    Yes. We handle phone, tablet, laptop, and watch repair enquiries at Ringwood Square,
+                    Yes. We handle phone, tablet, and watch repair enquiries at Ringwood Square,
                     including common screen, battery, charging, camera, and diagnostic repair paths.
                   </p>
                 </details>

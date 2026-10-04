@@ -4,7 +4,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import LocationPage from "./page";
+import { getServiceAreaBySlug } from "@/data/serviceAreas";
+import LocationPage, { generateMetadata } from "./page";
 
 const catalogueBrands = [
   { category: "phone", brand: "iPhone", slug: "iphone", models: [{ slug: "iphone-15", model: "iPhone 15", repairTypes: [] }] },
@@ -36,7 +37,6 @@ const expectedHrefs = [
   "/repairs/phone/google-pixel",
   "/repairs/phone/oppo",
   "/repairs/tablet/ipad",
-  "/repairs/laptop/macbook",
 ] as const;
 
 function getBrandGrid(markup: string) {
@@ -54,7 +54,7 @@ function getBrandGrid(markup: string) {
 function expectFeaturedBrandGrid(markup: string) {
   const { cards, markup: gridMarkup } = getBrandGrid(markup);
 
-  expect(cards).toHaveLength(6);
+  expect(cards).toHaveLength(5);
   expect(cards.map((card) => card.getAttribute("href"))).toEqual(expectedHrefs);
   expect(gridMarkup).not.toContain("Show more brand repairs");
   expect(gridMarkup).not.toMatch(/display\s*:\s*none/i);
@@ -63,9 +63,27 @@ function expectFeaturedBrandGrid(markup: string) {
   expect(gridMarkup).not.toContain("Xiaomi Phone Repair");
   expect(gridMarkup).not.toContain("Lenovo Tablet Repair");
   expect(gridMarkup).not.toContain("Dell Repair");
+  expect(gridMarkup).not.toContain("MacBook Repair");
 }
 
 describe("Location Page Brand Grid", () => {
+  it.each([
+    ["nunawading", "Phone & iPhone Repair Near Nunawading | Ali Mobile Ringwood", "Phone & iPhone Repair Near Nunawading"],
+    ["mitcham", "Phone & iPhone Repair Near Mitcham | Ali Mobile", "Phone & iPhone Repair Near Mitcham"],
+    ["glenwaverley", "Phone & iPhone Repair Near Glen Waverley & Syndal | Ali Mobile", "Phone & iPhone Repair Near Glen Waverley and Syndal"],
+    ["heathmont", "Phone & iPhone Repair Near Heathmont | Ali Mobile Ringwood", "Phone & iPhone Repair Near Heathmont"],
+    ["ringwood", "Visit Ali Mobile & Repair in Ringwood Square", "Visit Ali Mobile & Repair in Ringwood Square"],
+  ])("keeps %s metadata and H1 aligned to its phone-first or visit-first role", async (suburb, title, heading) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: catalogueBrands });
+
+    const metadata = await generateMetadata({ params: Promise.resolve({ suburb }) });
+    const markup = renderToStaticMarkup(await LocationPage({ params: Promise.resolve({ suburb }) }));
+    const document = new DOMParser().parseFromString(markup, "text/html");
+
+    expect(metadata.title).toBe(title);
+    expect(document.getElementById("location-heading")?.textContent).toBe(heading);
+  });
+
   it.each(["ringwood", "croydon"])("renders only the six featured catalogue Brand Hubs for %s", async (suburb) => {
     fetchRepairCatalog.mockResolvedValue({ brands: catalogueBrands });
 
@@ -80,11 +98,32 @@ describe("Location Page Brand Grid", () => {
     const markup = renderToStaticMarkup(await LocationPage({ params: Promise.resolve({ suburb: "ringwood-east" }) }));
     const { cards, markup: gridMarkup } = getBrandGrid(markup);
 
-    expect(cards).toHaveLength(5);
+    expect(cards).toHaveLength(4);
     expect(cards.map((card) => card.getAttribute("href"))).toEqual(expectedHrefs.filter((href) => href !== "/repairs/phone/oppo"));
     expect(gridMarkup).not.toContain("OPPO Phone Repair");
     expect(gridMarkup).not.toContain("Xiaomi Phone Repair");
     expect(gridMarkup).not.toContain("Lenovo Tablet Repair");
     expect(gridMarkup).not.toContain("Dell Repair");
+  });
+
+  it.each(["nunawading", "boxhill", "wantirna", "bayswater", "burwood", "lilydale"])("renders a secondary MacBook link-out for %s", async (suburb) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: catalogueBrands });
+
+    const markup = renderToStaticMarkup(await LocationPage({ params: Promise.resolve({ suburb }) }));
+    const document = new DOMParser().parseFromString(markup, "text/html");
+
+    expect(document.querySelector('a[href="/repairs/laptop/macbook"]')).not.toBeNull();
+  });
+
+  it("keeps the six corrected suburb scenarios phone-first without repeated local repair phrases", () => {
+    for (const suburb of ["nunawading", "boxhill", "wantirna", "bayswater", "burwood", "lilydale"]) {
+      const area = getServiceAreaBySlug(suburb);
+      const scenario = JSON.stringify(area?.customScenarioSection);
+
+      expect(scenario).not.toMatch(/laptop|MacBook repair near|phone repair near|iPhone repair near|mobile repair near/i);
+    }
+
+    expect(getServiceAreaBySlug("bayswater")?.customScenarioSection?.title).toBe("Phone, iPhone and tablet assessment near Bayswater");
+    expect(getServiceAreaBySlug("burwood")?.customScenarioSection?.title).toBe("Phone, iPhone and tablet assessment near Burwood");
   });
 });
