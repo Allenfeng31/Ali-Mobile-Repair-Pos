@@ -241,13 +241,15 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
       : isSamsungTabletModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+      : isIPhoneModelPage
+      ? `${modelName} Repair in Ringwood | Repair Options, Pricing & Booking | Ali Mobile`
       : isEnhancedPhoneModelPage
       ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking | Ali Mobile`
       : `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
     description: selectedCrawledModelHubContent
       ? selectedCrawledModelHubContent.metaDescription
       : isIPhoneModelPage
-      ? `Choose the available repairs for ${modelName}, view current pricing, check common timing, compare screen options where published, and book with Ali Mobile & Repair in Ringwood.`
+      ? `Choose the available repairs for ${modelName}, view current pricing, check model-level timing, and book with Ali Mobile & Repair in Ringwood.`
       : isSamsungModelPage
       ? `Choose the available Samsung repairs for ${modelName}, view current pricing, check screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
       : isGooglePixelModelPage
@@ -275,13 +277,15 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
         : isSamsungTabletModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+        : isIPhoneModelPage
+        ? `${modelName} Repair in Ringwood | Repair Options, Pricing & Booking`
         : isEnhancedPhoneModelPage
         ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking`
         : `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
       description: selectedCrawledModelHubContent
         ? selectedCrawledModelHubContent.metaDescription
         : isIPhoneModelPage
-        ? `Choose the available repairs for ${modelName}, view current pricing, check common timing, compare screen options where published, and book with Ali Mobile & Repair in Ringwood.`
+        ? `Choose the available repairs for ${modelName}, view current pricing, check model-level timing, and book with Ali Mobile & Repair in Ringwood.`
         : isSamsungModelPage
         ? `Choose the available Samsung repairs for ${modelName}, view current pricing, check screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
         : isGooglePixelModelPage
@@ -429,6 +433,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const hasScreenRepair = Boolean(screenRepair);
   const hasBatteryRepair = Boolean(batteryRepair);
   const hasWarrantyRepair = Boolean(screenRepair || batteryRepair || chargingRepair || backHousingRepair);
+  const iPhoneScreenDetailHref = isIPhoneModelPage && hasScreenRepair
+    ? `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/screen-replacement`
+    : null;
   const startingPrice = getStartingPrice(repairTypes);
   const hasPublishedScreenOptions = hasScreenRepair && isIPhone12OrNewer(modelName) && (screenRepair?.variants?.length || 0) > 0;
   const screenOptions = hasPublishedScreenOptions ? getIPhoneScreenOptions(screenRepair?.variants || []) : [];
@@ -464,10 +471,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         : `Choose the available repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
     {
-      title: "Fast screen & battery timing",
-      body: hasBatteryRepair
-        ? "Most iPhone screen replacements are usually completed in about 30 minutes once the correct part is available. Most battery replacements take less than 30 minutes once the correct battery is available."
-        : "Most iPhone screen replacements are usually completed in about 30 minutes once the correct part is available.",
+      title: "Repair timing by service",
+      body: "Timing depends on the selected repair, part availability and the device condition. Choose the exact repair below for its current service details.",
     },
     {
       title: "Same-day may be available",
@@ -485,8 +490,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     hasScreenRepair
       ? {
           number: "02",
-          title: "How long does a screen replacement take?",
-          body: "Most iPhone screen replacements, including Pro and Pro Max models from iPhone 6 through iPhone 16, can usually be completed in about 30 minutes once the correct part is available. Extra time may be required if the frame is bent, liquid damage is present, internal components are also damaged or additional diagnosis is needed.",
+          title: "How long does an iPhone repair take?",
+          body: "Timing depends on the selected repair, current part availability and the device condition. Choose the exact repair option for its current timing and service details.",
         }
       : null,
     hasBatteryRepair
@@ -578,8 +583,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     hasScreenRepair
       ? {
-          question: `How long does a ${modelName} screen replacement take?`,
-          answer: "Most iPhone screen replacements, including Pro and Pro Max models from iPhone 6 through iPhone 16, can usually be completed in about 30 minutes once the correct part is available. Extra time may be required if the frame is bent, liquid damage is present, internal components are also damaged or additional diagnosis is needed.",
+          question: `How long does a ${modelName} repair take?`,
+          answer: "Timing depends on the selected repair, current part availability and device condition. Choose the exact repair option for the current timing and service details.",
         }
       : null,
     hasBatteryRepair
@@ -594,8 +599,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     hasPublishedScreenOptions && screenOptions.length > 0
       ? {
-          question: "What screen replacement options are available?",
-          answer: `For this model, the currently published screen options may include ${screenOptions.map((option) => option.title).join(", ")} where available. Choose the exact screen repair below for the current option list, pricing and service notes.`,
+          question: `What repair options are available for my ${modelName}?`,
+          answer: `This Model Hub previews the available repair paths for ${modelName}. Choose Screen Replacement for the current screen option list, pricing and service notes.`,
         }
       : null,
     {
@@ -1882,7 +1887,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </span>
             <h1 id="model-repair-heading">{modelName} repair options</h1>
             <p>
-              {selectedCrawledModelHubContent?.heroIntro ?? `Choose the available repair for your exact ${modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.`}
+              {selectedCrawledModelHubContent?.heroIntro ?? (isIPhoneModelPage
+                ? `Choose the available repair for your exact ${modelName} to view current pricing, model-level timing and the repair path that best matches the device in front of you.`
+                : `Choose the available repair for your exact ${modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.`)}
             </p>
             <div className="repair-hero-actions">
               <a href="#repair-options" className="repair-primary-action">
@@ -2046,34 +2053,46 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </ScrollReveal>
           )}
 
-          {activeScreenOptions.length > 0 && (
+          {(activeScreenOptions.length > 0 || (isIPhoneModelPage && iPhoneScreenDetailHref)) && (
             <ScrollReveal>
               <section className="brand-hub-section" aria-labelledby="model-screen-options-heading">
                 <div className="brand-hub-section-header">
                   <span className="repair-kicker repair-kicker-muted">Screen options</span>
-                  <h2 id="model-screen-options-heading">Available {screenOptionsLabel} for this {enhancedBrandLabel} model</h2>
-                  <p>
-                    Choose the matching repair below for the detailed repair page. This model page summarises the available display choices and {isIPhoneModelPage ? "the calibration notes" : "the model-specific repair notes"} that matter before you book.
-                  </p>
+                  <h2 id="model-screen-options-heading">
+                    {isIPhoneModelPage
+                      ? `Screen replacement preview for this ${enhancedBrandLabel} model`
+                      : `Available ${screenOptionsLabel} for this ${enhancedBrandLabel} model`}
+                  </h2>
+                  {isIPhoneModelPage && iPhoneScreenDetailHref ? (
+                    <p>
+                      This Model Hub gives a short display preview. <Link href={iPhoneScreenDetailHref}>View screen replacement options</Link> for the exact screen price, tier availability, calibration and service-history guidance.
+                    </p>
+                  ) : (
+                    <p>
+                      Choose the matching repair below for the detailed repair page. This model page summarises the available display choices and the model-specific repair notes that matter before you book.
+                    </p>
+                  )}
                 </div>
-                <div className="repair-signal-grid">
-                  {activeScreenOptions.map((option, index) => (
-                    <article key={option.title} className="repair-signal-card">
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                      <h3>{option.title}</h3>
-                      <p>{option.body}</p>
-                    </article>
-                  ))}
-                </div>
-                {isIPhoneModelPage ? (
+                {activeScreenOptions.length > 0 && (
+                  <div className="repair-signal-grid">
+                    {activeScreenOptions.map((option, index) => (
+                      <article key={option.title} className="repair-signal-card">
+                        <span>{String(index + 1).padStart(2, "0")}</span>
+                        <h3>{option.title}</h3>
+                        <p>{option.body}</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
+                {isIPhoneModelPage && activeScreenOptions.length > 0 ? (
                   <div className="mt-8" aria-labelledby="iphone-service-history-heading">
                     <div className="brand-hub-section-header">
                       <span className="repair-kicker repair-kicker-muted">Apple service notes</span>
                       <h3 id="iphone-service-history-heading">
-                        Parts and Service History, diagnostics and calibration
+                        Parts and Service History overview
                       </h3>
                       <p>
-                        Some iPhone models may show Parts and Service History after a screen, battery, camera or other supported component has been replaced. The information displayed can vary according to the iPhone model, the selected part and the available Apple diagnostic or calibration process.
+                        Some iPhone models may show Parts and Service History after a supported component has been replaced. The exact Screen Replacement page covers screen-specific options, diagnostics and calibration guidance before booking.
                       </p>
                     </div>
                     <div className="repair-signal-grid">

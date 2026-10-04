@@ -42,7 +42,7 @@ vi.mock('@/lib/repair-results.server', () => ({ fetchModelRepairResultSeeds }));
 vi.mock('@/components/ScrollReveal', () => ({ default: ({ children }: { children: ReactNode }) => <>{children}</> }));
 vi.mock('@/components/FloatingJumpCTA', () => ({ default: () => null }));
 
-const { default: ModelHubPage } = await import('./page');
+const { default: ModelHubPage, generateMetadata } = await import('./page');
 
 const modelData = (overrides: Record<string, unknown> = {}) => ({
   brand: 'OPPO',
@@ -114,7 +114,9 @@ describe('Model Hub page-mode Server consumer', () => {
       brandModels: [{ slug: 'iphone-15', model: 'iPhone 15', repairTypes: [] }],
     }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
 
-    renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'phone', brand: 'iphone', model: 'iphone-15' }) }));
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'iphone', model: 'iphone-15' }),
+    }));
 
     expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
       expect.objectContaining({ slug: 'screen-replacement' }),
@@ -127,6 +129,43 @@ describe('Model Hub page-mode Server consumer', () => {
     ]));
     expect(state.gridProps?.repairTypes.filter((repair) => repair.slug === 'logic-board-repair')).toHaveLength(1);
     expect(state.gridProps?.repairTypes[0]).not.toHaveProperty('href');
+    expect(html).toContain('href="/repairs/phone/iphone/iphone-15/screen-replacement"');
+  });
+
+  it('keeps iPhone Model Hub metadata broad and sends screen-detail intent to the exact SSR link', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'iPhone',
+      model: 'iPhone 17 Pro Max',
+      catalogueSource: 'live-pos',
+      repairTypes: [
+        {
+          slug: 'screen-replacement',
+          name: 'Screen Replacement',
+          price: 199,
+          repairOrigin: 'pos',
+          variants: [{ quality_grade: 'Premium OLED', price: 249 }],
+        },
+      ],
+      brandModels: [{ slug: 'iphone-17-pro-max', model: 'iPhone 17 Pro Max', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'phone', brand: 'iphone', model: 'iphone-17-pro-max' }),
+    });
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'iphone', model: 'iphone-17-pro-max' }),
+    }));
+
+    expect(metadata.title).toBe('iPhone 17 Pro Max Repair in Ringwood | Repair Options, Pricing & Booking | Ali Mobile');
+    expect(metadata.openGraph?.title).toBe('iPhone 17 Pro Max Repair in Ringwood | Repair Options, Pricing & Booking');
+    expect(metadata.description).not.toContain('screen options where published');
+    expect(html).toContain('href="/repairs/phone/iphone/iphone-17-pro-max/screen-replacement"');
+    expect(html).toContain('View screen replacement options');
+    expect(html.match(/View screen replacement options/g)).toHaveLength(1);
+    expect(html).toContain('Screen replacement preview for this iPhone model');
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'screen-replacement' }),
+    ]));
   });
 
   it('server-renders the category-aware Motherboard Master card for MacBook without phone query leakage', async () => {
