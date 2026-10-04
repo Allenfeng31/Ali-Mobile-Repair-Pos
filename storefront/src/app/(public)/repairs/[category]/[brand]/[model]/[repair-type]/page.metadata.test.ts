@@ -7,6 +7,8 @@ import {
   fetchRepairDetails,
   type RepairCatalog,
 } from '@/lib/api';
+import { getSamsungHardwareConfig } from '@/lib/seo/content/samsung/config';
+import { getSamsungFoldableScreenDetailContext } from '@/lib/seo/content/samsung/screen-replacement';
 
 vi.mock('@/lib/api', () => ({
   fetchRepairCatalog: vi.fn(),
@@ -47,6 +49,29 @@ const catalog: RepairCatalog = {
             { slug: 'screen-replacement', name: 'Screen Replacement', price: 150 },
             { slug: 'battery-replacement', name: 'Battery Replacement', price: 100 },
           ],
+        },
+      ],
+    },
+    {
+      category: 'phone',
+      slug: 'samsung',
+      brand: 'Samsung',
+      icon: 'phone',
+      models: [
+        {
+          slug: 'galaxy-z-fold-7',
+          model: 'Galaxy Z Fold 7',
+          repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0 }],
+        },
+        {
+          slug: 'galaxy-z-flip-7',
+          model: 'Galaxy Z Flip 7',
+          repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0 }],
+        },
+        {
+          slug: 'galaxy-s23-ultra',
+          model: 'Galaxy S23 Ultra',
+          repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0 }],
         },
       ],
     },
@@ -144,6 +169,30 @@ const repairDetails: Record<string, RepairDetails> = {
     variants: [],
     source: 'fallback',
   },
+  'phone/samsung/galaxy-z-fold-7/screen-replacement': {
+    brand: 'Samsung',
+    model: 'Galaxy Z Fold 7',
+    repairType: 'Screen Replacement',
+    price: 0,
+    variants: [],
+    source: 'fallback',
+  },
+  'phone/samsung/galaxy-z-flip-7/screen-replacement': {
+    brand: 'Samsung',
+    model: 'Galaxy Z Flip 7',
+    repairType: 'Screen Replacement',
+    price: 0,
+    variants: [],
+    source: 'fallback',
+  },
+  'phone/samsung/galaxy-s23-ultra/screen-replacement': {
+    brand: 'Samsung',
+    model: 'Galaxy S23 Ultra',
+    repairType: 'Screen Replacement',
+    price: 0,
+    variants: [],
+    source: 'fallback',
+  },
   'laptop/macbook/macbook-air-m2-13-2022/screen-replacement': {
     brand: 'MacBook',
     model: 'MacBook Air M2 13 2022',
@@ -210,6 +259,39 @@ describe('repair detail metadata', () => {
     expect(metadata.description).toContain('cracked glass');
     expect(metadata.openGraph?.description).toBe(metadata.description);
     expect(metadata.twitter?.description).toBe(metadata.description);
+  });
+
+  it.each([
+    ['galaxy-z-fold-7', 'Galaxy Z Fold 7'],
+    ['galaxy-z-flip-7', 'Galaxy Z Flip 7'],
+  ])('uses foldable assessment-first metadata for %s without changing the exact title', async (model, modelName) => {
+    const metadata = await generateMetadata(params('phone', 'samsung', model, 'screen-replacement'));
+
+    expect(metadata.title).toBe(`${modelName} Screen Replacement in Ringwood | Ali Mobile`);
+    expect(metadata.description).toBe(
+      `${modelName} screen replacement in Ringwood. We assess inner foldable-display and outer cover-display issues separately, then confirm the repair path, parts availability and quote before work begins.`
+    );
+    expect(metadata.alternates?.canonical).toBe(
+      `https://www.alimobile.com.au/repairs/phone/samsung/${model}/screen-replacement`
+    );
+  });
+
+  it('keeps normal Samsung screen metadata on the existing generic description', async () => {
+    const metadata = await generateMetadata(
+      params('phone', 'samsung', 'galaxy-s23-ultra', 'screen-replacement')
+    );
+
+    expect(metadata.description).toContain('cracked glass, display faults or touch-screen problems');
+    expect(metadata.description).not.toContain('outer cover-display');
+  });
+
+  it('provides the Assessment First detail badge only for Samsung Fold and Flip hardware', () => {
+    expect(getSamsungFoldableScreenDetailContext(getSamsungHardwareConfig('galaxy-z-fold-7'))?.timingBadge)
+      .toBe('Assessment First');
+    expect(getSamsungFoldableScreenDetailContext(getSamsungHardwareConfig('galaxy-z-flip-7'))?.timingBadge)
+      .toBe('Assessment First');
+    expect(getSamsungFoldableScreenDetailContext(getSamsungHardwareConfig('galaxy-s23-ultra')))
+      .toBeNull();
   });
 
   it('uses canonical MacBook labels and a non-screen repair without hard-coding', async () => {

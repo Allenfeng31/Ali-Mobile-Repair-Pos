@@ -45,6 +45,7 @@ import {
   SAMSUNG_GALAXY_S_MODEL_ORDER,
   SAMSUNG_HARDWARE_CONFIG,
 } from '@/lib/seo/content/samsung/config';
+import { getSamsungFoldableScreenDetailContext } from '@/lib/seo/content/samsung/screen-replacement';
 import {
   getAliMobileEnhancedGooglePixelHubLinks,
   getAliMobileEnhancedGooglePixelRepairType,
@@ -4747,6 +4748,11 @@ export async function generateMetadata({ params }: RepairPageProps) {
     model: resolvedParams.model,
     repairType: resolvedParams['repair-type'],
   });
+  const samsungFoldableScreenDetailContext =
+    resolvedParams.category === 'phone' && resolvedParams.brand === 'samsung' &&
+    resolvedParams['repair-type'] === 'screen-replacement'
+      ? getSamsungFoldableScreenDetailContext(getSamsungHardwareConfig(resolvedParams.model))
+      : null;
   const priceStr = details?.price ? ` from $${details.price}` : '';
   const modelCode = details?.modelCode;
 
@@ -4777,6 +4783,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? enhancedMacBookSeoPocket.metaDescription
     : enhancedAppleWatchSeoPocket
     ? enhancedAppleWatchSeoPocket.metaDescription
+    : samsungFoldableScreenDetailContext
+    ? samsungFoldableScreenDetailContext.description
     : getRepairIntentDescription({
         model,
         repairName,
@@ -5119,6 +5127,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const samsungHardwareConfig = isAliMobileEnhancedSamsungPage
     ? getSamsungHardwareConfig(resolvedParams.model)
     : null;
+  const samsungFoldableScreenDetailContext =
+    samsungHardwareConfig && resolvedParams['repair-type'] === 'screen-replacement'
+      ? getSamsungFoldableScreenDetailContext(samsungHardwareConfig)
+      : null;
   const repairTypeHub = getRepairTypeHubDefinition(resolvedParams['repair-type']);
 
   const isNoteBackGlass = isSamsungNoteBackGlassPublicAlias(
@@ -5565,6 +5577,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             : selectedCrawledRepairContent?.schemaDescription ??
           enhancedSamsungTabletSeoPocket?.schemaDescription ??
           enhancedIpadSeoPocket?.schemaDescription ??
+          samsungFoldableScreenDetailContext?.description ??
           genericRepairIntentDescription
         }
         price={detailPricing.canEmitOffer ? String(detailPricing.resolvedPrice) : undefined}
@@ -5642,6 +5655,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
                   {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
                     ? 'Timeframe Varies'
+                    : samsungFoldableScreenDetailContext
+                    ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
                     ? 'Diagnostic Required'
                     : 'Fast Turnaround'}

@@ -18,6 +18,7 @@ import { fetchModelRepairResultSeeds } from "@/lib/repair-results.server";
 import ScrollReveal from "@/components/ScrollReveal";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
+import { getSamsungHardwareConfig } from "@/lib/seo/content/samsung/config";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -431,6 +432,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const chargingRepair = getRepairBySlugs(repairTypes, ["charging-repair", "charging-port-replacement", "charging-port-repair", "charging-port"]);
   const backHousingRepair = getRepairBySlugs(repairTypes, ["back-housing-replacement", "back-glass-replacement", "back-glass", "back-housing"]);
   const hasScreenRepair = Boolean(screenRepair);
+  const isFoldableSamsungScreenModelPage = Boolean(
+    hasScreenRepair && isSamsungModelPage && getSamsungHardwareConfig(modelSlug)?.displayForm === 'foldable'
+  );
   const hasBatteryRepair = Boolean(batteryRepair);
   const hasWarrantyRepair = Boolean(screenRepair || batteryRepair || chargingRepair || backHousingRepair);
   const iPhoneScreenDetailHref = isIPhoneModelPage && hasScreenRepair
@@ -664,7 +668,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       title: "Samsung screen repair timing",
       body: hasScreenRepair
-        ? "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available."
+        ? isFoldableSamsungScreenModelPage
+          ? "Timing depends on the confirmed display path, parts availability and assessment."
+          : "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available."
         : "Repair timing is confirmed after we identify the exact Samsung model, the fault and the required part.",
     },
     {
@@ -684,7 +690,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       ? {
           number: "02",
           title: "How long does a screen replacement take?",
-          body: "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available. Extra time may be required if the frame is bent, the phone has liquid or impact damage, or additional diagnosis is needed.",
+          body: isFoldableSamsungScreenModelPage
+            ? "Timing depends on the confirmed display path, parts availability and assessment."
+            : "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available. Extra time may be required if the frame is bent, the phone has liquid or impact damage, or additional diagnosis is needed.",
         }
       : null,
     hasBatteryRepair
@@ -696,8 +704,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       number: "04",
-      title: "Can it normally be repaired today?",
-      body: "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      title: isFoldableSamsungScreenModelPage ? "How is timing confirmed?" : "Can it normally be repaired today?",
+      body: isFoldableSamsungScreenModelPage
+        ? "Timing depends on the confirmed display path, parts availability and assessment."
+        : "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     {
       number: "05",
@@ -776,8 +786,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     hasScreenRepair
       ? {
-          question: `How long does a ${modelName} screen replacement take?`,
-          answer: "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available. Frame damage, liquid damage, folding-display construction or additional faults may require more time.",
+          question: isFoldableSamsungScreenModelPage
+            ? `How is ${modelName} screen repair timing confirmed?`
+            : `How long does a ${modelName} screen replacement take?`,
+          answer: isFoldableSamsungScreenModelPage
+            ? "Timing depends on the confirmed display path, parts availability and assessment."
+            : "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available. Frame damage, liquid damage, folding-display construction or additional faults may require more time.",
         }
       : null,
     hasBatteryRepair
@@ -787,8 +801,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         }
       : null,
     {
-      question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      question: isFoldableSamsungScreenModelPage
+        ? `What affects ${modelName} repair timing?`
+        : `Can my ${modelName} normally be repaired the same day?`,
+      answer: isFoldableSamsungScreenModelPage
+        ? "Timing depends on the confirmed display path, parts availability and assessment."
+        : "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
     activeScreenOptions.length > 0
       ? {

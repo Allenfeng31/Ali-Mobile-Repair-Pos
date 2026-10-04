@@ -168,6 +168,42 @@ describe('Model Hub page-mode Server consumer', () => {
     ]));
   });
 
+  it.each([
+    ['galaxy-z-fold-7', 'Galaxy Z Fold 7'],
+    ['galaxy-z-flip-7', 'Galaxy Z Flip 7'],
+  ])('uses foldable-safe screen timing for %s', async (model, modelName) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model: modelName,
+      repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' }],
+      brandModels: [{ slug: model, model: modelName, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'samsung', model }),
+    }));
+
+    expect(html).toContain('Timing depends on the confirmed display path, parts availability and assessment.');
+    expect(html).not.toContain('about 30 minutes');
+    expect(html).not.toContain('Same-day repair may be available');
+  });
+
+  it('keeps normal Samsung screen timing unchanged', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model: 'Galaxy S23 Ultra',
+      repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' }],
+      brandModels: [{ slug: 'galaxy-s23-ultra', model: 'Galaxy S23 Ultra', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'samsung', model: 'galaxy-s23-ultra' }),
+    }));
+
+    expect(html).toContain('about 30 minutes');
+    expect(html).toContain('Same-day repair may be available');
+  });
+
   it('server-renders the category-aware Motherboard Master card for MacBook without phone query leakage', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'MacBook',

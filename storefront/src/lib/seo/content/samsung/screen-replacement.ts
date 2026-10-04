@@ -7,6 +7,18 @@ import {
   SAMSUNG_WATER_RESISTANCE_NOTE,
 } from './shared';
 
+export function getSamsungFoldableScreenDetailContext(config: SamsungHardwareConfig | null) {
+  if (config?.displayForm !== 'foldable') {
+    return null;
+  }
+
+  return {
+    description:
+      `${config.modelName} screen replacement in Ringwood. We assess inner foldable-display and outer cover-display issues separately, then confirm the repair path, parts availability and quote before work begins.`,
+    timingBadge: 'Assessment First',
+  };
+}
+
 export function buildSamsungScreenReplacementPocket(
   config: SamsungHardwareConfig
 ): RepairTypeSeoPocket {
