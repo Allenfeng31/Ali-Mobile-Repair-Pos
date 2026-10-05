@@ -18,6 +18,7 @@ const { runCatalogueOutboxProcessor } = require('./catalogueOutbox.js');
 const { createAnnouncementHandlers } = require('./announcementHandlers.js');
 const { createOrdersHandlers } = require('./ordersHandlers.js');
 const { insertOrderRecord } = require('./orderPersistence.js');
+const { fetchCustomerRepairHistory } = require('./customerHistory.js');
 const {
   calculateMultiItemPricing,
   formatBookingServiceName,
@@ -850,34 +851,12 @@ app.post('/api/orders', async (req, res) => {
 // CUSTOMERS
 // ----------------------------------------------------------------------
 app.get('/api/customers', async (req, res) => {
-  // Selective fields — only fetch what the UI actually needs for the list view
-  const customerFields = 'id, name, phone, email, initials, totalSpent, status, statusColor, lastVisit, lastReviewSent, synced_to_google';
-  const repairFields = 'id, customer_id, timestamp, repairItem, modelNumber, price, status, liquidDamage, deposit, password, imei, remark';
-
-  // Run both queries in parallel for faster response
-  const [customersResult, repairsResult] = await Promise.all([
-    supabase.from('customers').select(customerFields).order('name', { ascending: true }),
-    supabase.from('repairs').select(repairFields)
-  ]);
-
-  if (customersResult.error) return res.status(500).json({ error: customersResult.error.message });
-  if (repairsResult.error) return res.status(500).json({ error: repairsResult.error.message });
-
-  // Use a Map for O(n) join instead of O(n*m) filter per customer
-  const repairsByCustomer = new Map();
-  for (const r of repairsResult.data) {
-    if (!repairsByCustomer.has(r.customer_id)) {
-      repairsByCustomer.set(r.customer_id, []);
-    }
-    repairsByCustomer.get(r.customer_id).push(r);
+  try {
+    res.json(await fetchCustomerRepairHistory({ supabase }));
+  } catch (error) {
+    console.error('[Customers API] Unable to load complete customer repair history:', error.message);
+    res.status(500).json({ error: 'Unable to load complete customer repair history.' });
   }
-
-  const customersWithRepairs = customersResult.data.map(customer => ({
-    ...customer,
-    repairs: repairsByCustomer.get(customer.id) || []
-  }));
-
-  res.json(customersWithRepairs);
 });
 
 app.post('/api/customers', async (req, res) => {
