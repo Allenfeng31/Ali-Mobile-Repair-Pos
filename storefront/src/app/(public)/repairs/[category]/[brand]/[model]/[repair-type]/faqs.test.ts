@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { generateFaqs, withResolvedTierPriceFaq } from './repairFaqs';
+import {
+  generateFaqs,
+  withApprovedTurnaroundFaq,
+  withResolvedTierPriceFaq,
+} from './repairFaqs';
 import type { RepairDetailPricing } from '@/lib/repairDetailPricing';
 import {
   STANDARD_WARRANTY_SUMMARY,
@@ -184,5 +188,51 @@ describe('withResolvedTierPriceFaq', () => {
 
     expect(faqs[0]).toEqual(existingFaqs[0]);
     expect(faqs[2]).toEqual(existingFaqs[2]);
+  });
+});
+
+describe('withApprovedTurnaroundFaq', () => {
+  const timingQuestion = 'How long does iPhone 16 Pro screen replacement usually take?';
+  const existingFaqs = [
+    { question: timingQuestion, answer: 'Timing depends on part availability and device condition.' },
+    { question: 'Will I lose my photos?', answer: 'Back up your phone first.' },
+  ];
+
+  it('uses the approved structured turnaround value for the timing answer', () => {
+    const faqs = withApprovedTurnaroundFaq({
+      faqs: existingFaqs,
+      question: timingQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      turnaroundMinutes: 30,
+    });
+
+    expect(faqs[0]?.answer).toBe(
+      'iPhone 16 Pro screen replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.'
+    );
+    expect(faqs[0]?.answer).not.toMatch(/same-day|same day|immediate|while you wait/i);
+    expect(faqs[1]).toEqual(existingFaqs[1]);
+  });
+
+  it('derives the numeric duration from the supplied turnaround value', () => {
+    const faqs = withApprovedTurnaroundFaq({
+      faqs: existingFaqs,
+      question: timingQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      turnaroundMinutes: 47,
+    });
+
+    expect(faqs[0]?.answer).toContain('around 47 minutes');
+    expect(faqs[0]?.answer).not.toContain('30 minutes');
+  });
+
+  it('preserves the existing generic timing FAQ when no approved turnaround exists', () => {
+    expect(withApprovedTurnaroundFaq({
+      faqs: existingFaqs,
+      question: timingQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+    })).toEqual(existingFaqs);
   });
 });

@@ -66,6 +66,8 @@ export type AliMobileEnhancedIphoneModelSlug =
 
 export interface RepairTypeSeoPocket {
   quickAnswer: string;
+  heroSubtitle?: string;
+  turnaroundMinutes?: number;
   workbenchHeadings?: {
     options: string;
     diagnostics: string;

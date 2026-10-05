@@ -15,6 +15,32 @@ interface RepairFaq {
   answer: string;
 }
 
+export function withApprovedTurnaroundFaq({
+  faqs,
+  question,
+  model,
+  repairName,
+  turnaroundMinutes,
+}: {
+  faqs: RepairFaq[];
+  question: string;
+  model: string;
+  repairName: string;
+  turnaroundMinutes?: number;
+}): RepairFaq[] {
+  if (
+    typeof turnaroundMinutes !== 'number' ||
+    !Number.isFinite(turnaroundMinutes) ||
+    turnaroundMinutes <= 0
+  ) {
+    return faqs;
+  }
+
+  const answer = `${model} ${repairName.toLowerCase()} usually takes around ${turnaroundMinutes} minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.`;
+
+  return faqs.map((faq) => faq.question === question ? { ...faq, answer } : faq);
+}
+
 export function withResolvedTierPriceFaq({
   faqs,
   question,

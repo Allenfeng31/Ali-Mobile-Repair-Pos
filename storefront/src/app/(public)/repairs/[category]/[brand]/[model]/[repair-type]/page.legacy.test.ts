@@ -1,4 +1,5 @@
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fetchRepairCatalog = vi.hoisted(() => vi.fn());
@@ -16,7 +17,12 @@ vi.mock('@/lib/api', async (importOriginal) => ({ ...(await importOriginal<typeo
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairDetailInitialResults }));
 vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({ default: RepairResultsMatchingSection }));
 vi.mock('@/components/FaqAccordion', () => ({ default: FaqAccordion }));
-vi.mock('next/navigation', () => ({ notFound, permanentRedirect }));
+vi.mock('next/navigation', () => ({
+  notFound,
+  permanentRedirect,
+  useParams: () => ({}),
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 import RepairServicePage, { generateStaticParams } from './page';
 import FaqAccordionComponent from '@/components/FaqAccordion';
@@ -305,7 +311,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     }));
   });
 
-  it('uses resolved iPhone 16 Pro screen tiers in only its opted-in cost FAQ', async () => {
+  it('uses resolved iPhone 16 Pro screen tiers and its approved turnaround in only its opted-in FAQs', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [iphone16ProScreen] });
 
     const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-16-pro' })) });
@@ -313,9 +319,51 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const faq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
       (entry) => entry.question === 'How much will my iPhone 16 Pro screen repair cost?'
     );
+    const timingFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How long does iPhone 16 Pro screen replacement usually take?'
+    );
 
     expect(faq?.answer).toBe(
       'Current iPhone 16 Pro screen replacement options are: Standard – $321. Industry-standard replacement part with reliable performance. Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability. Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance. Parts availability and device condition are confirmed, and we confirm the final quote before work begins.'
+    );
+    expect(timingFaq?.answer).toBe(
+      'iPhone 16 Pro screen replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.'
+    );
+  });
+
+  it('renders the approved iPhone 16 Pro Screen hero facts without changing its pricing cards', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone16ProScreen] });
+
+    const html = renderToStaticMarkup(
+      await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-16-pro' })) }),
+    );
+
+    expect(html).toContain('<h1>iPhone 16 Pro Screen Replacement</h1>');
+    expect(html).toContain('Screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.');
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('6-Month Warranty');
+    expect(html).not.toContain('Fast Turnaround');
+    expect(html).not.toMatch(/same-day|same day|immediate repair|while you wait/i);
+    expect(html).toContain('Select Standard tier at $321');
+    expect(html).toContain('Select Premium tier at $654');
+    expect(html).toContain('Select Genuine tier at $987');
+  });
+
+  it('keeps non-pilot Repair Detail hero copy and timing unchanged', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [active] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params()) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const timingFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How long does the Moto G24 Screen Replacement take?'
+    );
+
+    expect(html).toContain('Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.');
+    expect(html).toContain('Fast Turnaround');
+    expect(html).not.toContain('Screen replacement at Ali Mobile in Ringwood Square.');
+    expect(timingFaq?.answer).toBe(
+      'Many Moto G24 screen replacement jobs are completed quickly at Ringwood Square Shopping Centre when the correct part is in stock. Walk-ins are welcome on weekdays, and we confirm timing after checking the model, fault and queue.'
     );
   });
 

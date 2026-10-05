@@ -19,7 +19,11 @@ import WhyChooseUsSection from '@/components/services/WhyChooseUsSection';
 import ExploreRepairNetworkSection, { type ExploreRepairLink } from '@/components/services/ExploreRepairNetworkSection';
 import SameModelRepairLinks from '@/components/services/SameModelRepairLinks';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
-import { generateFaqs, withResolvedTierPriceFaq } from './repairFaqs';
+import {
+  generateFaqs,
+  withApprovedTurnaroundFaq,
+  withResolvedTierPriceFaq,
+} from './repairFaqs';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
 import { getRepairTypeHubDefinition } from '@/lib/repair-type-hubs';
 import {
@@ -4174,6 +4178,9 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
   },
   "phone/iphone/iphone-16-pro/screen-replacement": {
     useResolvedTierPriceFaq: true,
+    heroSubtitle:
+      "Screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.",
+    turnaroundMinutes: 30,
     quickAnswer:
       "Need iPhone 16 Pro screen replacement in Ringwood? We check display image faults, touch response, frame fit, and the front sensor area before confirming the screen repair path.",
     workbenchHeadings: {
@@ -5201,6 +5208,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     pocket: pixelSeoPocket,
   });
   const seoPocket = selectedCrawledRepairContent?.pocket ?? inheritedSeoPocket;
+  const approvedTurnaroundMinutes =
+    typeof seoPocket?.turnaroundMinutes === 'number' &&
+    Number.isFinite(seoPocket.turnaroundMinutes) &&
+    seoPocket.turnaroundMinutes > 0
+      ? seoPocket.turnaroundMinutes
+      : undefined;
   const seoDisplayModel =
     enhancedLenovoTabletSeoPocket?.modelName ??
     enhancedSamsungTabletSeoPocket?.modelName ??
@@ -5450,16 +5463,26 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       : finalRepairName;
 
   const baseFaqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
-  const costFaq = baseFaqs.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+  const timingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
+  const faqsWithApprovedTurnaround = timingFaq
+    ? withApprovedTurnaroundFaq({
+      faqs: baseFaqs,
+      question: timingFaq.question,
+      model: displayModel,
+      repairName: finalRepairName,
+      turnaroundMinutes: approvedTurnaroundMinutes,
+    })
+    : baseFaqs;
+  const costFaq = faqsWithApprovedTurnaround.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
   const faqs = seoPocket?.useResolvedTierPriceFaq && costFaq
     ? withResolvedTierPriceFaq({
-      faqs: baseFaqs,
+      faqs: faqsWithApprovedTurnaround,
       question: costFaq.question,
       model: displayModel,
       repairName: finalRepairName,
       pricing: detailPricing,
     })
-    : baseFaqs;
+    : faqsWithApprovedTurnaround;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
   const bookRepairUrl = `/book-repair?${new URLSearchParams({
@@ -5625,6 +5648,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             {selectedCrawledRepairContent?.heroSubtitle ??
               enhancedSamsungTabletSeoPocket?.heroSubtitle ??
               enhancedIpadSeoPocket?.heroSubtitle ??
+              seoPocket?.heroSubtitle ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>
 
@@ -5670,6 +5694,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
                     ? 'Diagnostic Required'
+                    : approvedTurnaroundMinutes
+                    ? `${approvedTurnaroundMinutes} Minutes`
                     : 'Fast Turnaround'}
                 </div>
                 <div className="trust-badge">
