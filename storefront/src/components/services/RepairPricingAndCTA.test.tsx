@@ -65,6 +65,29 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(buttons.length).toBe(3);
   });
 
+  it('renders known screen tiers in the approved customer-facing order', () => {
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        variants={[
+          { quality_grade: 'Premium', price: 190 },
+          { quality_grade: 'Standard', price: 170 },
+          { quality_grade: 'Genuine', price: 320 },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByRole('button', { name: /select .+ tier/i }).map((card) => card.getAttribute('aria-label'))).toEqual([
+      'Select Standard tier at $170',
+      'Select Premium tier at $190',
+      'Select Genuine tier at $320',
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: /select premium tier/i }));
+    fireEvent.click(screen.getByRole('button', { name: /book repair now/i }));
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('tier=Premium'));
+  });
+
   it('clicking a card selects it (sets aria-pressed to true)', () => {
     render(<RepairPricingAndCTA {...defaultProps} />);
     

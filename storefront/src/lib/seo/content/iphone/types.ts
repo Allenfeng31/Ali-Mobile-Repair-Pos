@@ -91,4 +91,5 @@ export interface RepairTypeSeoPocket {
     question: string;
     answer: string;
   }>;
+  useResolvedTierPriceFaq?: boolean;
 }

@@ -6,6 +6,44 @@ import {
   WATER_DAMAGE_WARRANTY_SUMMARY,
 } from '@/lib/repairPolicy';
 import { isWaterDamageRepairSlug } from '@/lib/waterDamageRouting';
+import type { RepairDetailPricing } from '@/lib/repairDetailPricing';
+import { getRepairTierDescription } from '@/lib/repairTierDescriptions';
+import { orderRepairVariantsForDisplay } from '@/lib/repairTierDisplayOrder';
+
+interface RepairFaq {
+  question: string;
+  answer: string;
+}
+
+export function withResolvedTierPriceFaq({
+  faqs,
+  question,
+  model,
+  repairName,
+  pricing,
+  getTierDescription = getRepairTierDescription,
+}: {
+  faqs: RepairFaq[];
+  question: string;
+  model: string;
+  repairName: string;
+  pricing: RepairDetailPricing;
+  getTierDescription?: (repairName: string, tierName: string) => string | undefined;
+}): RepairFaq[] {
+  const options = orderRepairVariantsForDisplay(repairName, pricing.validVariants).map((variant) => ({
+    ...variant,
+    description: getTierDescription(repairName, variant.quality_grade),
+  }));
+
+  if (options.length === 0 || options.some((option) => !option.description)) return faqs;
+
+  const repairLabel = repairName.toLowerCase();
+  const answer = options.length === 1
+    ? `The current ${model} ${repairLabel} price is $${options[0].price} for the ${options[0].quality_grade} option. ${options[0].description} Parts availability and device condition are confirmed, and we confirm the final quote before work begins.`
+    : `Current ${model} ${repairLabel} options are: ${options.map((option) => `${option.quality_grade} – $${option.price}. ${option.description}`).join(' ')} Parts availability and device condition are confirmed, and we confirm the final quote before work begins.`;
+
+  return faqs.map((faq) => faq.question === question ? { ...faq, answer } : faq);
+}
 
 export function getLSIForRepair(slug: string): { component?: string[]; issue?: string[] } {
   if (slug === 'screen-replacement') return { component: LSI_KEYWORDS.components.screen, issue: LSI_KEYWORDS.issues.screenDamage };

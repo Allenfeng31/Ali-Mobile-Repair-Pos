@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { generateFaqs } from './repairFaqs';
+import { generateFaqs, withResolvedTierPriceFaq } from './repairFaqs';
+import type { RepairDetailPricing } from '@/lib/repairDetailPricing';
 import {
   STANDARD_WARRANTY_SUMMARY,
   WATER_DAMAGE_WARRANTY_SUMMARY,
@@ -83,5 +84,105 @@ describe('generateFaqs', () => {
     expect(answers).not.toMatch(/guaranteed successful repair/i);
     expect(answers).not.toMatch(/guaranteed data recovery/i);
     expect(answers).not.toMatch(/unconditional whole[- ]device warranty/i);
+  });
+});
+
+describe('withResolvedTierPriceFaq', () => {
+  const priceQuestion = 'How much will my iPhone 16 Pro screen repair cost?';
+  const existingFaqs = [
+    { question: 'Will I lose my photos?', answer: 'Back up your phone first.' },
+    {
+      question: priceQuestion,
+      answer: 'The final quote depends on the display option, model, parts availability and device condition. We confirm the price with you before any repair work begins.',
+    },
+    { question: 'Will Face ID still work?', answer: 'We check the front sensor area.' },
+  ];
+
+  const pricing = (validVariants: RepairDetailPricing['validVariants']): RepairDetailPricing => ({
+    resolvedPrice: validVariants.length ? Math.min(...validVariants.map((variant) => variant.price)) : null,
+    validVariants,
+    source: validVariants.length ? 'variant' : 'none',
+    isQuoteOnly: validVariants.length === 0,
+    canEmitOffer: validVariants.length > 0,
+  });
+
+  it('keeps the existing price answer unchanged when no priced tier is available', () => {
+    expect(withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: pricing([]),
+    })).toEqual(existingFaqs);
+  });
+
+  it('answers one priced tier with its current price, name, and existing description', () => {
+    const faqs = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: pricing([{ quality_grade: 'Standard', price: 321 }]),
+    });
+
+    expect(faqs[1]?.answer).toContain('$321');
+    expect(faqs[1]?.answer).toContain('Standard option');
+    expect(faqs[1]?.answer).toContain('Industry-standard replacement part with reliable performance.');
+  });
+
+  it('lists every priced tier using the live resolved price and shared description', () => {
+    const faqs = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: pricing([
+        { quality_grade: 'Genuine', price: 987 },
+        { quality_grade: 'Premium', price: 654 },
+        { quality_grade: 'Standard', price: 321 },
+      ]),
+    });
+
+    expect(faqs[1]?.answer).toContain('Standard – $321. Industry-standard replacement part with reliable performance.');
+    expect(faqs[1]?.answer).toContain('Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability.');
+    expect(faqs[1]?.answer).toContain('Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance.');
+  });
+
+  it('changes the FAQ when the resolved price or shared tier description changes', () => {
+    const standardPricing = pricing([{ quality_grade: 'Standard', price: 321 }]);
+    const changedPricing = pricing([{ quality_grade: 'Standard', price: 654 }]);
+
+    const standard = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: standardPricing,
+    });
+    const changed = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: changedPricing,
+      getTierDescription: () => 'Updated source description.',
+    });
+
+    expect(standard[1]?.answer).toContain('$321');
+    expect(changed[1]?.answer).toContain('$654');
+    expect(changed[1]?.answer).toContain('Updated source description.');
+  });
+
+  it('leaves unrelated FAQ answers unchanged', () => {
+    const faqs = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: pricing([{ quality_grade: 'Standard', price: 321 }]),
+    });
+
+    expect(faqs[0]).toEqual(existingFaqs[0]);
+    expect(faqs[2]).toEqual(existingFaqs[2]);
   });
 });

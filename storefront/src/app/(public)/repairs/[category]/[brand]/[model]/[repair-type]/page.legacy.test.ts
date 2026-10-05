@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const fetchRepairCatalog = vi.hoisted(() => vi.fn());
 const fetchRepairDetailInitialResults = vi.hoisted(() => vi.fn());
 const RepairResultsMatchingSection = vi.hoisted(() => vi.fn(() => null));
+const FaqAccordion = vi.hoisted(() => vi.fn(() => null));
 const permanentRedirect = vi.hoisted(() => vi.fn((destination: string) => {
   throw new Error(`NEXT_REDIRECT_TEST:${destination}`);
 }));
@@ -14,9 +15,11 @@ const notFound = vi.hoisted(() => vi.fn(() => {
 vi.mock('@/lib/api', async (importOriginal) => ({ ...(await importOriginal<typeof import('@/lib/api')>()), fetchRepairCatalog }));
 vi.mock('@/lib/repair-results.server', () => ({ fetchRepairDetailInitialResults }));
 vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({ default: RepairResultsMatchingSection }));
+vi.mock('@/components/FaqAccordion', () => ({ default: FaqAccordion }));
 vi.mock('next/navigation', () => ({ notFound, permanentRedirect }));
 
 import RepairServicePage, { generateStaticParams } from './page';
+import FaqAccordionComponent from '@/components/FaqAccordion';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 
@@ -64,6 +67,25 @@ const lenovoYogaSmartTabWithWaterRepair = {
   models: [{ model: 'Lenovo Yoga Smart Tab', slug: 'lenovo-yoga-smart-tab-yt-x705f', repairTypes: [waterRepair] }],
 };
 const retired = { lifecycle: 'retired' as const, category: 'phone', brand: 'Motorola', brandSlug: 'motorola', model: 'Moto G24', modelSlug: 'moto-g24', repair: { name: 'Screen Replacement', slug: 'screen-replacement', price: 149, sourceType: 'real' as const } };
+const iphone16ProScreen = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 16 Pro',
+    slug: 'iphone-16-pro',
+    repairTypes: [{
+      name: 'Screen Replacement',
+      slug: 'screen-replacement',
+      price: 0,
+      variants: [
+        { quality_grade: 'Genuine', price: 987 },
+        { quality_grade: 'Premium', price: 654 },
+        { quality_grade: 'Standard', price: 321 },
+      ],
+    }],
+  }],
+};
 
 type DetailMatchingProps = { children?: ReactNode; initialResults?: unknown } & Record<string, unknown>;
 
@@ -281,6 +303,20 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(matchingElement?.props).toEqual(expect.objectContaining({
       category: 'phone', brand: 'motorola', model: 'moto-g24', repairType: 'screen-replacement', context: 'detail', initialResults,
     }));
+  });
+
+  it('uses resolved iPhone 16 Pro screen tiers in only its opted-in cost FAQ', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone16ProScreen] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-16-pro' })) });
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const faq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How much will my iPhone 16 Pro screen repair cost?'
+    );
+
+    expect(faq?.answer).toBe(
+      'Current iPhone 16 Pro screen replacement options are: Standard – $321. Industry-standard replacement part with reliable performance. Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability. Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance. Parts availability and device condition are confirmed, and we confirm the final quote before work begins.'
+    );
   });
 
   it('leaves the matching module unseeded when the server reader has no result', async () => {

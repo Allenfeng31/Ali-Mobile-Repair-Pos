@@ -19,7 +19,7 @@ import WhyChooseUsSection from '@/components/services/WhyChooseUsSection';
 import ExploreRepairNetworkSection, { type ExploreRepairLink } from '@/components/services/ExploreRepairNetworkSection';
 import SameModelRepairLinks from '@/components/services/SameModelRepairLinks';
 import TechnicianWorkbenchProcess from './TechnicianWorkbenchProcess';
-import { generateFaqs } from './repairFaqs';
+import { generateFaqs, withResolvedTierPriceFaq } from './repairFaqs';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
 import { getRepairTypeHubDefinition } from '@/lib/repair-type-hubs';
 import {
@@ -4173,6 +4173,7 @@ const PRIORITY_REPAIR_SEO_POCKETS: Record<string, RepairTypeSeoPocket> = {
     ],
   },
   "phone/iphone/iphone-16-pro/screen-replacement": {
+    useResolvedTierPriceFaq: true,
     quickAnswer:
       "Need iPhone 16 Pro screen replacement in Ringwood? We check display image faults, touch response, frame fit, and the front sensor area before confirming the screen repair path.",
     workbenchHeadings: {
@@ -5448,7 +5449,17 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         )
       : finalRepairName;
 
-  const faqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
+  const baseFaqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
+  const costFaq = baseFaqs.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+  const faqs = seoPocket?.useResolvedTierPriceFaq && costFaq
+    ? withResolvedTierPriceFaq({
+      faqs: baseFaqs,
+      question: costFaq.question,
+      model: displayModel,
+      repairName: finalRepairName,
+      pricing: detailPricing,
+    })
+    : baseFaqs;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
   const bookRepairUrl = `/book-repair?${new URLSearchParams({
