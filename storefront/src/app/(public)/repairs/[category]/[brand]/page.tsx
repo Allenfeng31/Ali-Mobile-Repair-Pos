@@ -1253,7 +1253,7 @@ function getBrandHubHeroDescription(
   if (categorySlug === "phone") {
     switch (brandSlug) {
       case "iphone":
-        return "Choose your exact iPhone model to view screen, battery, charging and back glass repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+        return "iPhone repair in Ringwood for common faults including damaged screens, battery problems, charging issues and back glass damage. Ali Mobile & Repair repairs a wide range of iPhone models at Ringwood Square, serving customers across Melbourne's eastern suburbs.";
       case "samsung":
         return "Choose your exact Samsung Galaxy model to view available screen, battery, charging and rear-cover repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
       case "google-pixel":
@@ -1754,12 +1754,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               : "Choose your exact iPhone model to view current repair options and pricing.",
           },
           {
-            title: "Fast Screen & Battery Repairs",
-            body: "Most iPhone screen replacements take about 30 minutes, while most iPhone battery replacements take less than 30 minutes once the correct part is available.",
+            title: "Timing Confirmed by Model",
+            body: "Timing depends on the exact iPhone model, repair path, parts availability and diagnosis. Choose your model to check the practical repair path before booking.",
           },
           {
-            title: "Same-day may be available",
-            body: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+            title: "Parts Checked Before Repair",
+            body: "We confirm the available part, quote and practical timing for the selected iPhone model before work begins.",
           },
         ]
       : [
@@ -3621,7 +3621,17 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                     </svg>
                   </summary>
                   <div className="faq-answer">
-                    <p>{faq.answer}</p>
+                    <p>
+                      {faq.answer}
+                      {isIPhoneHub && faq.modelSelectionLink ? (
+                        <>
+                          {" "}
+                          <Link href="#models-list" prefetch={false}>
+                            Choose your iPhone model to view the model-specific repair options.
+                          </Link>
+                        </>
+                      ) : null}
+                    </p>
                   </div>
                 </details>
               ))}

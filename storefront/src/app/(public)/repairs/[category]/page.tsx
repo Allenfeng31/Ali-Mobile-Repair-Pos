@@ -88,31 +88,27 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       pillType: 'primary',
       pillText: 'Phone Specialist',
       title: 'Mobile Phone Repair Services by Brand & Model',
-      intro1: 'Select your mobile phone brand and exact model to view supported smartphone repair pathways for screen, battery, charging, camera and housing issues.',
-      intro2: 'Check available service options and pricing for your specific phone model, then confirm parts availability and practical timing before your visit.',
+      intro1: 'Mobile phone repair for supported brands and common faults, including screen, battery, charging, camera and housing issues. Choose your exact model to view the available repair pathways.',
+      intro2: 'Pricing and timing depend on the model, repair type, parts availability and diagnosis, and are confirmed before work begins.',
     },
     schema: {
       serviceName: 'Mobile Phone Repair Services by Brand and Model',
-      description: "Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Same-day options may be available for common screen and battery repairs when parts are in stock.",
+      description: "Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Pricing and timing are confirmed after the model, repair type, parts availability and diagnosis are checked.",
     },
     features: [
-      { t: "Same-day may be available", d: "Contact us before visiting to confirm your model, issue, queue and parts availability." },
+      { t: "Timing confirmed by model and diagnosis", d: "Contact us before visiting to confirm your model, issue, parts availability and practical timing." },
       { t: "Premium Quality Screens & Parts Available", d: "" },
       { t: "Fast repair options for common screens and batteries", d: "" },
       { t: "No Fix, No Charge Policy", d: "" },
       { t: "6-Month Warranty on Standard Repairs", d: "" }
     ],
     pricing: {
-      title: "Popular Phone Repair Pricing",
+      title: "Phone Repair Pricing by Model",
       deviceType: "phone",
-      items: [
-        { model: "iPhone 17 / 17 Pro", service: "Premium Screen replacement", price: 499, search: "iphone 17 screen" },
-        { model: "iPhone 13 / 13 Pro", service: "Screen replacement", price: 189, search: "iphone 13 screen" },
-        { model: "iPhone 11", service: "Screen replacement", price: 149, search: "iphone 11 screen" }
-      ]
+      items: []
     },
     faqs: [
-      { question: "How long does a phone repair take?", answer: "Around 80% of common phone models can usually be handled same day when parts are in stock. Contact us before visiting if you want to confirm your model, issue, queue and parts availability." },
+      { question: "How long does a phone repair take?", answer: "Timing depends on the exact model, repair type, parts availability, diagnosis and repair queue. We confirm practical timing before the repair is approved." },
       { question: "Will I lose my data during phone repair?", answer: "Most screen, battery and charging port repairs do not require a data wipe. We still recommend backing up where possible, especially if the phone has liquid exposure, logic board symptoms or severe damage that may carry higher data risk." },
       { question: "What should I do if my phone gets wet?", answer: "Turn the phone off if possible, do not charge it, and avoid repeatedly testing it. Bring it in for assessment early so corrosion and internal damage can be checked. Liquid exposure outcomes depend on the damage found during inspection." },
       { question: "What if my phone will not charge?", answer: "Charging faults can be caused by the cable, charger, charging port, battery, liquid exposure or a board-level issue. We start with diagnosis before replacing parts and confirm the quote before proceeding." },
@@ -727,18 +723,18 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <div className="repair-signal-grid mt-5">
                   <article className="repair-signal-card">
                     <span>01</span>
-                    <h3>Common screen repairs</h3>
-                    <p>Most supported iPhone, Samsung and Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Many supported Oppo screens take about 30–45 minutes.</p>
+                    <h3>Repair timing by model</h3>
+                    <p>Timing depends on the exact phone model, repair type, parts availability and the diagnosis confirmed before work begins.</p>
                   </article>
                   <article className="repair-signal-card">
                     <span>02</span>
-                    <h3>Same-day may be available</h3>
-                    <p>Around 80% of common phone models can usually be handled same day when parts are in stock. Contact us before visiting if you want to confirm your model, issue, queue and parts availability.</p>
+                    <h3>Parts and diagnosis</h3>
+                    <p>Some common repairs may move faster once the correct part and repair path are confirmed, but practical timing is checked before approval.</p>
                   </article>
                   <article className="repair-signal-card">
                     <span>03</span>
                     <h3>Parts ordering</h3>
-                    <p>Less common models may require a part to be ordered, which usually takes around 1–2 days.</p>
+                    <p>Less common models may require a part to be ordered. We explain the availability and likely timing before the repair is approved.</p>
                   </article>
                 </div>
                 <p className="mt-4">
@@ -1100,6 +1096,18 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <span>Model-first pricing</span>
                 <h2 id="pricing-guidance-heading">{isWatch ? 'Select your Apple Watch model to view current pricing' : 'Select your brand and model to view current pricing'}</h2>
                 <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.'}</p>
+              </div>
+            </section>
+          </ScrollReveal>
+        ) : isPhone ? (
+          <ScrollReveal>
+            <section className="repair-content-band" aria-labelledby="phone-pricing-guidance-heading">
+              <div className="repair-section-header">
+                <span>Model-first pricing</span>
+                <h2 id="phone-pricing-guidance-heading">Phone repair pricing by brand and model</h2>
+                <p>
+                  Pricing depends on the phone brand, exact model and repair type. Choose your brand and model above to view the current repair option, price or Quote status before booking.
+                </p>
               </div>
             </section>
           </ScrollReveal>

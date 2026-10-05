@@ -47,13 +47,13 @@ const repairCategories = [
     detail: "Most iPad and tablet repairs",
   },
   {
-    href: "/repairs/laptop",
+    href: "/repairs/laptop/macbook",
     title: "Laptop & MacBook Repair",
     description:
-      "Screen, battery, keyboard, SSD, logic board, and data recovery support for MacBook and Windows laptops.",
+      "MacBook screen, battery, keyboard, charging and diagnostic repair pathways matched to the exact model.",
     image: "/images/services/laptop-repair.jpg",
     metric: "Fast turnaround",
-    detail: "When parts are in stock",
+    detail: "Model-specific repair options",
   },
   {
     href: "/repairs/watch",
@@ -140,13 +140,10 @@ export default function RepairsHubPage() {
       <section className={styles.hero} aria-labelledby="repairs-heading">
         <div className={styles.heroInner}>
           <span className={styles.kicker}>Repair Command Center</span>
-          <h1 id="repairs-heading">
-            Pick your device.
-            <span>Get a clean repair path.</span>
-          </h1>
+          <h1 id="repairs-heading">Device Repair Services</h1>
           <p>
-            Choose your device category, check repair options, and follow a clear quote path before
-            visiting our Ringwood Square kiosk.
+            Pick your device. Get a clean repair path. Repairs are provided from Ringwood Square for
+            customers across Melbourne&apos;s eastern suburbs.
           </p>
 
           <div className={styles.trustGrid} aria-label="Repair guarantees">

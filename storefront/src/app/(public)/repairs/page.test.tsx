@@ -49,10 +49,12 @@ describe("RepairsHubPage privacy FAQs", () => {
     expect(document.querySelector('script[type="application/ld+json"]')).toBeNull();
   });
 
-  it("keeps the existing metadata and primary heading unchanged", () => {
+  it("keeps metadata while using a semantic Device Repair Services heading", () => {
     render(<RepairsHubPage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Pick your device.Get a clean repair path." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Device Repair Services" })).toBeInTheDocument();
+    expect(screen.getByText(/Pick your device\. Get a clean repair path\./)).toBeInTheDocument();
+    expect(screen.getByText(/provided from Ringwood Square for customers across Melbourne's eastern suburbs/i)).toBeInTheDocument();
     expect(metadata.title).toBe("Professional Device Repair Services in Ringwood | Ali Mobile");
     expect(metadata.alternates?.canonical).toBe("/repairs");
     expect(metadata.openGraph?.url).toBe("/repairs");

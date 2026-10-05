@@ -12,6 +12,7 @@ export interface PhoneBrandHubContent {
   faqs: {
     question: string;
     answer: string;
+    modelSelectionLink?: boolean;
   }[];
 }
 
@@ -125,11 +126,11 @@ export const PHONE_BRAND_HUBS: Record<string, PhoneBrandHubContent> = {
     },
     faqs: [
       { question: "Which iPhone models do you repair?", answer: "This page lists the currently supported public iPhone models. If your exact model is not shown, contact the Ringwood Square store and we can confirm whether a repair path is available." },
-      { question: "What screen options are available for iPhone repairs?", answer: "Screen options may include aftermarket, premium aftermarket, Soft OLED, or genuine/pulled genuine options depending on the iPhone model and current availability. The quote explains which option you are choosing, and lower starting prices may refer to selected aftermarket options unless genuine or pulled genuine supply is clearly confirmed." },
-      { question: "What does Parts and Service History mean on iPhone?", answer: "Some iPhone models may show Parts and Service History, Unknown Part, or related display and battery messages after repair depending on part type, pairing, calibration and iOS behaviour. We explain possible messages before repair where they are relevant to the model and repair option." },
+      { question: "What screen options are available for iPhone repairs?", answer: "Screen options and availability depend on the exact iPhone model and current parts supply. The selected model and repair path show the available option before booking.", modelSelectionLink: true },
+      { question: "What does Parts and Service History mean on iPhone?", answer: "Parts and Service History or related messages can vary by iPhone model, part option, pairing and iOS behaviour. We explain any relevant effect once the model and repair path are selected.", modelSelectionLink: true },
       { question: "Will third-party iPhone repair affect Apple warranty?", answer: "Apple warranty and AppleCare decisions are controlled by Apple. Independent repair may affect how Apple handles related issues, and Ali Mobile is an independent repair shop rather than part of Apple's service-provider network. If your iPhone is still covered by Apple warranty or AppleCare, check with Apple first before choosing independent repair." },
       { question: "Will I lose my data during iPhone repair?", answer: "Most iPhone screen, battery and charging port repairs do not require a data wipe. Back up first where possible, especially if the iPhone has liquid damage, board faults or severe damage that can carry higher data risk." },
-      { question: "How long can an iPhone repair take?", answer: "Timing depends on the exact model, the fault, current stock and the device condition found during assessment. We confirm practical timing before the repair is approved." },
+      { question: "How long can an iPhone repair take?", answer: "Timing depends on the exact model, repair path, current stock and the device condition found during assessment. We confirm practical timing before the repair is approved.", modelSelectionLink: true },
       { question: "How much does an iPhone repair cost?", answer: "Cost depends on the exact iPhone model, repair type, fault and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
       { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific iPhone model." },
       { question: "Do you provide a repair warranty?", answer: "Eligible screen, battery, charging-port and back-housing repairs include a 6-month warranty on the fitted part and workmanship. Coverage has conditions and does not cover unrelated faults, later physical damage or later liquid exposure where applicable." },

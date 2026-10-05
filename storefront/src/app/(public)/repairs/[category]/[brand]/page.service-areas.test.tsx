@@ -116,6 +116,11 @@ describe("Phone and tablet Brand Hub local service areas", () => {
 
     expectApprovedLocalCards(container);
 
+    expect(container.textContent).toContain("iPhone repair in Ringwood for common faults including damaged screens, battery problems, charging issues and back glass damage.");
+    expect(container.textContent).toContain("Screen options and availability depend on the exact iPhone model and current parts supply.");
+    expect(container.textContent).toContain("Parts and Service History or related messages can vary by iPhone model, part option, pairing and iOS behaviour.");
+    expect(container.querySelectorAll('a[href="#models-list"]')).toHaveLength(5);
+
     const serviceSchema = Array.from(container.querySelectorAll('script[type="application/ld+json"]'))
       .map((script) => JSON.parse(script.textContent || "{}"))
       .find((schema) => schema["@id"] === "https://www.alimobile.com.au/repairs/phone/iphone#service");

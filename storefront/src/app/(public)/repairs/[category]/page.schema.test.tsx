@@ -39,7 +39,7 @@ describe('CategoryHubPage service schema', () => {
     expect(state.serviceProps).toEqual([{
       url: 'https://www.alimobile.com.au/repairs/phone',
       serviceName: 'Mobile Phone Repair Services by Brand and Model',
-      description: 'Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Same-day options may be available for common screen and battery repairs when parts are in stock.',
+      description: 'Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Pricing and timing are confirmed after the model, repair type, parts availability and diagnosis are checked.',
     }]);
   });
 });
