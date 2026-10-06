@@ -173,6 +173,21 @@ describe('withResolvedTierPriceFaq', () => {
     expect(answer.indexOf('Service Pack – $777')).toBeLessThan(answer.indexOf('Pulled Genuine – $654'));
   });
 
+  it('uses a supplied neutral fallback for non-screen repair tiers', () => {
+    const faqs = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Battery Replacement',
+      pricing: pricing([{ quality_grade: 'Service Pack', price: 199 }]),
+      getTierDescription: () => undefined,
+      unknownTierDescription: 'Current repair option for this model. We confirm the suitable option before work begins.',
+    });
+
+    expect(faqs[1]?.answer).toContain('Service Pack option. Current repair option for this model. We confirm the suitable option before work begins.');
+    expect(faqs[1]?.answer).not.toContain('Current screen option');
+  });
+
   it('changes the FAQ when the resolved price or shared tier description changes', () => {
     const standardPricing = pricing([{ quality_grade: 'Standard', price: 321 }]);
     const changedPricing = pricing([{ quality_grade: 'Standard', price: 654 }]);

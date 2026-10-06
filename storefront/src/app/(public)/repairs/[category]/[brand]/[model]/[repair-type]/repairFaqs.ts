@@ -50,6 +50,7 @@ export function withResolvedTierPriceFaq({
   repairName,
   pricing,
   getTierDescription = getRepairTierDescription,
+  unknownTierDescription = UNKNOWN_SCREEN_TIER_DESCRIPTION,
 }: {
   faqs: RepairFaq[];
   question: string;
@@ -57,10 +58,11 @@ export function withResolvedTierPriceFaq({
   repairName: string;
   pricing: RepairDetailPricing;
   getTierDescription?: (repairName: string, tierName: string) => string | undefined;
+  unknownTierDescription?: string;
 }): RepairFaq[] {
   const options = orderRepairVariantsForDisplay(repairName, pricing.validVariants).map((variant) => ({
     ...variant,
-    description: getTierDescription(repairName, variant.quality_grade) ?? UNKNOWN_SCREEN_TIER_DESCRIPTION,
+    description: getTierDescription(repairName, variant.quality_grade) ?? unknownTierDescription,
   }));
 
   if (options.length === 0) return faqs;

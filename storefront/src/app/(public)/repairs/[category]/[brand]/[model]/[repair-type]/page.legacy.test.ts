@@ -127,9 +127,58 @@ const iphone15Battery = {
   models: [{
     model: 'iPhone 15',
     slug: 'iphone-15',
-    repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 149, variants: [] }],
+    repairTypes: [{
+      name: 'Battery Replacement',
+      slug: 'battery-replacement',
+      price: 0,
+      variants: [
+        { quality_grade: 'Premium', price: 179 },
+        { quality_grade: 'Standard', price: 149 },
+        { quality_grade: 'Service Pack', price: 199 },
+      ],
+    }],
   }],
 };
+const iphone7Battery = {
+  ...iphone15Battery,
+  models: [{
+    ...iphone15Battery.models[0],
+    model: 'iPhone 7',
+    slug: 'iphone-7',
+  }],
+};
+const iphone15ChargingPort = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 15',
+    slug: 'iphone-15',
+    repairTypes: [{
+      name: 'Charging Port Replacement',
+      slug: 'charging-port-replacement',
+      price: 0,
+      variants: [{ quality_grade: 'Standard', price: 169 }],
+    }],
+  }],
+};
+const iphone7ChargingPort = {
+  ...iphone15ChargingPort,
+  models: [{
+    ...iphone15ChargingPort.models[0],
+    model: 'iPhone 7',
+    slug: 'iphone-7',
+  }],
+};
+const batteryQuoteOnlyModels = [
+  { model: 'iPhone 17', slug: 'iphone-17' },
+  { model: 'iPhone 17 Air', slug: 'iphone-17-air' },
+  { model: 'iPhone 17 Pro', slug: 'iphone-17-pro' },
+  { model: 'iPhone 17 Pro Max', slug: 'iphone-17-pro-max' },
+  { model: 'iPhone 17e', slug: 'iphone-17e' },
+  { model: 'iPhone SE 2', slug: 'iphone-se-2' },
+];
+const chargingPortQuoteOnlyModels = batteryQuoteOnlyModels.slice(0, 5);
 const iphone6Screen = {
   category: 'phone',
   brand: 'iPhone',
@@ -465,17 +514,119 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(priceFaq?.answer).toContain('$169');
   });
 
-  it('keeps iPhone battery pages outside the iPhone screen timing and price FAQ rollout', async () => {
+  it('uses the shared iPhone battery source for hero copy, timing, price FAQ, and warranty', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [iphone15Battery] });
 
     const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15', 'repair-type': 'battery-replacement' })) });
     const html = renderToStaticMarkup(page);
-    const faqElement = findElementByType(page, FaqAccordionComponent);
-    const faqAnswers = (faqElement?.props.faqs as Array<{ answer: string }>).map((entry) => entry.answer).join(' ');
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
+    const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
 
-    expect(html).toContain('Fast Turnaround');
-    expect(html).not.toContain('30 Minutes');
-    expect(faqAnswers).not.toContain('around 30 minutes');
+    expect(html).toContain('<h1>iPhone 15 Battery Replacement</h1>');
+    expect(html).toContain('iPhone 15 battery replacement at Ali Mobile in Ringwood Square. View the current repair options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct battery is available.');
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('6-Month Warranty');
+    expect(html).not.toContain('Fast Turnaround');
+    expect(timingFaq?.answer).toContain('around 30 minutes');
+    expect(priceFaq?.answer).toContain('Standard – $149. Reliable replacement battery selected for stable charging and everyday performance.');
+    expect(priceFaq?.answer).toContain('Premium – $179. High-quality replacement battery selected for stronger daily reliability and longer service life.');
+    expect(priceFaq?.answer).toContain('Service Pack – $199. Current repair option for this model. We confirm the suitable option before work begins.');
+  });
+
+  it('keeps legacy iPhone battery details on the same family rule without modern-device copy', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone7Battery] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-7', 'repair-type': 'battery-replacement' })) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('<h1>iPhone 7 Battery Replacement</h1>');
+    expect(html).toContain('30 Minutes');
+    expect(html).not.toContain('Face ID');
+    expect(html).not.toContain('USB-C');
+  });
+
+  it('keeps every current battery quote-only route quote-first and free of family price claims', async () => {
+    for (const quoteOnlyModel of batteryQuoteOnlyModels) {
+      const quoteOnlyBattery = {
+        ...iphone15Battery,
+        models: [{
+          ...iphone15Battery.models[0],
+          ...quoteOnlyModel,
+          repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 0, variants: [] }],
+        }],
+      };
+      fetchRepairCatalog.mockResolvedValue({ brands: [quoteOnlyBattery] });
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: quoteOnlyModel.slug, 'repair-type': 'battery-replacement' })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+      const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+      expect(html).toContain(`${quoteOnlyModel.model} battery replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct battery and quote before you visit.`);
+      expect(html).not.toContain('View the current repair options and prices below.');
+      expect(priceFaq?.answer).toMatch(/quote/i);
+      expect(priceFaq?.answer).not.toMatch(/Current .* battery replacement (options are|price is)/i);
+      expect(serviceSchema).not.toContain('"offers"');
+    }
+  });
+
+  it('uses the shared iPhone charging port source for USB-C copy, timing, and the resolved price FAQ', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone15ChargingPort] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15', 'repair-type': 'charging-port-replacement' })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
+    const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+
+    expect(html).toContain('<h1>iPhone 15 Charging Port Replacement</h1>');
+    expect(html).toContain('iPhone 15 charging port replacement at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.');
+    expect(html).toContain('USB-C');
+    expect(html).toContain('30 Minutes');
+    expect(timingFaq?.answer).toContain('around 30 minutes');
+    expect(priceFaq?.answer).toContain('Standard option');
+    expect(priceFaq?.answer).toContain('$169');
+  });
+
+  it('preserves legacy Lightning charging-port copy while using the shared timing rule', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone7ChargingPort] });
+
+    const html = renderToStaticMarkup(
+      await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-7', 'repair-type': 'charging-port-replacement' })) }),
+    );
+
+    expect(html).toContain('<h1>iPhone 7 Charging Port Replacement</h1>');
+    expect(html).toContain('Lightning');
+    expect(html).not.toContain('USB-C');
+    expect(html).toContain('30 Minutes');
+  });
+
+  it('keeps every current charging-port quote-only route quote-first and free of family price claims', async () => {
+    for (const quoteOnlyModel of chargingPortQuoteOnlyModels) {
+      const quoteOnlyChargingPort = {
+        ...iphone15ChargingPort,
+        models: [{
+          ...iphone15ChargingPort.models[0],
+          ...quoteOnlyModel,
+          repairTypes: [{ name: 'Charging Port Replacement', slug: 'charging-port-replacement', price: 0, variants: [] }],
+        }],
+      };
+      fetchRepairCatalog.mockResolvedValue({ brands: [quoteOnlyChargingPort] });
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: quoteOnlyModel.slug, 'repair-type': 'charging-port-replacement' })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+      const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+      expect(html).toContain(`${quoteOnlyModel.model} charging port replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`);
+      expect(html).not.toContain('View the current repair options and prices below.');
+      expect(priceFaq?.answer).toMatch(/quote/i);
+      expect(priceFaq?.answer).not.toMatch(/Current .* charging port replacement (options are|price is)/i);
+      expect(serviceSchema).not.toContain('"offers"');
+    }
   });
 
   it('keeps non-pilot Repair Detail hero copy and timing unchanged', async () => {

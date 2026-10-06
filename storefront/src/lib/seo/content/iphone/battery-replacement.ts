@@ -10,6 +10,8 @@ export function applyIphoneBatteryReplacementSeoPocket(
 
   return {
     ...pocket,
+    turnaroundMinutes: 30,
+    useResolvedTierPriceFaq: true,
     quickAnswer:
       `Need ${modelName} battery replacement in Ringwood? We check battery health symptoms, fast drain, battery-percentage instability, charging behaviour, swelling signs, and shutdown patterns before confirming whether battery replacement is the right path.`,
     repairOptions: appendUniqueRepairOptions(pocket.repairOptions, [
@@ -103,6 +105,16 @@ export function applyIphoneBatteryReplacementSeoPocket(
       },
     ]),
     faq: appendUniqueFaqs(pocket.faq, [
+      {
+        question: `How long does ${modelName} battery replacement usually take?`,
+        answer:
+          "Timing depends on the model, battery availability, device condition, and any additional faults found during inspection.",
+      },
+      {
+        question: `How much will my ${modelName} battery repair cost?`,
+        answer:
+          "The final quote depends on the repair option, model, parts availability and device condition. We confirm the price with you before any repair work begins.",
+      },
       {
         question: `Can Battery Health alone prove my ${modelName} needs a new battery?`,
         answer:

@@ -5222,6 +5222,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         ? `${displayModel} screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
         : `${displayModel} screen replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
       : undefined;
+  const iphoneBatteryOrChargingPortFamilyHeroSubtitle =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'iphone' &&
+    (resolvedParams['repair-type'] === 'battery-replacement' || resolvedParams['repair-type'] === 'charging-port-replacement')
+      ? detailPricing.validVariants.length > 0
+        ? `${displayModel} ${resolvedParams['repair-type'] === 'battery-replacement' ? 'battery' : 'charging port'} replacement at Ali Mobile in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct ${resolvedParams['repair-type'] === 'battery-replacement' ? 'battery' : 'part'} is available.`
+        : `${displayModel} ${resolvedParams['repair-type'] === 'battery-replacement' ? 'battery' : 'charging port'} replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct ${resolvedParams['repair-type'] === 'battery-replacement' ? 'battery' : 'part'} and quote before you visit.`
+      : undefined;
+  const iphoneBatteryOrChargingPortUnknownTierDescription =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'iphone' &&
+    (resolvedParams['repair-type'] === 'battery-replacement' || resolvedParams['repair-type'] === 'charging-port-replacement')
+      ? 'Current repair option for this model. We confirm the suitable option before work begins.'
+      : undefined;
   const seoDisplayModel =
     enhancedLenovoTabletSeoPocket?.modelName ??
     enhancedSamsungTabletSeoPocket?.modelName ??
@@ -5489,6 +5503,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       model: displayModel,
       repairName: finalRepairName,
       pricing: detailPricing,
+      unknownTierDescription: iphoneBatteryOrChargingPortUnknownTierDescription,
     })
     : faqsWithApprovedTurnaround;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -5658,6 +5673,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               enhancedIpadSeoPocket?.heroSubtitle ??
               seoPocket?.heroSubtitle ??
               iphoneScreenFamilyHeroSubtitle ??
+              iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>
 

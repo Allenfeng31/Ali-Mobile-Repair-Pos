@@ -122,6 +122,8 @@ export function applyIphoneChargingPortReplacementSeoPocket(
 
   return {
     ...adjustedPocket,
+    turnaroundMinutes: 30,
+    useResolvedTierPriceFaq: true,
     quickAnswer: copy.quickAnswer,
     workbenchHeadings: {
       options: "What do we check before replacing this charging port?",
@@ -155,6 +157,16 @@ export function applyIphoneChargingPortReplacementSeoPocket(
     ]),
     diagnosticSteps: appendUniqueDiagnosticSteps(adjustedPocket.diagnosticSteps, []),
     faq: appendUniqueFaqs(adjustedPocket.faq, [
+      {
+        question: `How long does ${config.modelName} charging port replacement usually take?`,
+        answer:
+          "Timing depends on the model, part availability, device condition, and any additional faults found during inspection.",
+      },
+      {
+        question: `How much will my ${config.modelName} charging port repair cost?`,
+        answer:
+          "The final quote depends on the repair option, model, parts availability and device condition. We confirm the price with you before any repair work begins.",
+      },
       {
         question: copy.angleFaqQuestion,
         answer:
