@@ -67,6 +67,8 @@ export function applyIphoneBackCameraReplacementSeoPocket(
 
   return {
     ...pocket,
+    turnaroundMinutes: 30,
+    useResolvedTierPriceFaq: true,
     quickAnswer:
       `Need ${modelName} back camera replacement in Ringwood? Ali Mobile & Repair checks rear camera focus, image failure, stabilisation symptoms, lens-glass damage, camera-area impact, housing fit, and ${copy.rearCameraModeLabel} before confirming whether back camera replacement is the right path.`,
     workbenchHeadings: {
@@ -220,29 +222,32 @@ export function applyIphoneBackCameraReplacementSeoPocket(
     ),
     faq: appendUniqueFaqs(
       pocket.faq.map((item) => {
+        if (/^Can you fix an .+ camera that is blurry or shaking\?$/.test(item.question)) {
+          return {
+            question: `Can you fix a ${modelName} back camera that is blurry or shaking?`,
+            answer: copy.shakyFaqAnswer,
+          };
+        }
+        if (/^Do you repair cracked .+ camera lens glass\?$/.test(item.question)) {
+          return {
+            question: `Do you separate ${modelName} rear lens-glass damage from back camera module faults?`,
+            answer:
+              "Yes. We inspect lens glass, camera rings, contamination, and housing condition first because cracked rear lens glass is not automatically the same repair as internal back camera replacement.",
+          };
+        }
+        if (/^Can .+ camera repair be done same day in Ringwood\?$/.test(item.question)) {
+          return {
+            question: `How long does ${modelName} back camera replacement usually take?`,
+            answer:
+              "Timing depends on part availability, device condition, and whether inspection identifies a lens-glass, housing, or board-level issue.",
+          };
+        }
         switch (item.question) {
-          case "Can you fix an iPhone 13 camera that is blurry or shaking?":
-            return {
-              question: `Can you fix a ${modelName} back camera that is blurry or shaking?`,
-              answer: copy.shakyFaqAnswer,
-            };
-          case "Do you repair cracked iPhone 13 camera lens glass?":
-            return {
-              question: `Do you separate ${modelName} rear lens-glass damage from back camera module faults?`,
-              answer:
-                "Yes. We inspect lens glass, camera rings, contamination, and housing condition first because cracked rear lens glass is not automatically the same repair as internal back camera replacement.",
-            };
           case "Will front camera repair affect Face ID?":
             return {
               question: `Can damage around the ${modelName} rear camera area change the repair path?`,
               answer:
                 "Yes. Impact around the rear camera area can affect housing fit, alignment, or surrounding parts, so we inspect that before confirming whether the back camera module alone is the right repair.",
-            };
-          case "Can iPhone 13 camera repair be done same day in Ringwood?":
-            return {
-              question: `Can ${modelName} back camera replacement be done the same day in Ringwood?`,
-              answer:
-                "Same-day back camera repair may be available when the correct part is in stock and no hidden lens-glass, housing, or board-level issue changes the scope.",
             };
           default:
             return item;
@@ -252,6 +257,11 @@ export function applyIphoneBackCameraReplacementSeoPocket(
         {
           question: copy.modeFaqQuestion,
           answer: copy.modeFaqAnswer,
+        },
+        {
+          question: `How much does ${modelName} back camera replacement cost?`,
+          answer:
+            "The final quote depends on the camera module, model, parts availability, and device condition. We confirm the price with you before any repair work begins.",
         },
         {
           question: `Does ${modelName} back camera replacement guarantee every image-quality issue will be solved?`,

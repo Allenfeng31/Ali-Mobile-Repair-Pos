@@ -170,6 +170,75 @@ const iphone7ChargingPort = {
     slug: 'iphone-7',
   }],
 };
+const iphone16ProFrontCamera = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 16 Pro',
+    slug: 'iphone-16-pro',
+    repairTypes: [{
+      name: 'Front Camera Replacement',
+      slug: 'front-camera-replacement',
+      price: 0,
+      variants: [
+        { quality_grade: 'Genuine', price: 289 },
+        { quality_grade: 'Standard', price: 219 },
+        { quality_grade: 'Service Pack', price: 249 },
+      ],
+    }],
+  }],
+};
+const iphone16ProBackCamera = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 16 Pro',
+    slug: 'iphone-16-pro',
+    repairTypes: [{
+      name: 'Back Camera Replacement',
+      slug: 'back-camera-replacement',
+      price: 0,
+      variants: [
+        { quality_grade: 'Genuine', price: 359 },
+        { quality_grade: 'Standard', price: 299 },
+      ],
+    }],
+  }],
+};
+const iphone17FrontCameraQuoteOnly = {
+  ...iphone16ProFrontCamera,
+  models: [{
+    ...iphone16ProFrontCamera.models[0],
+    model: 'iPhone 17',
+    slug: 'iphone-17',
+    repairTypes: [{ name: 'Front Camera Replacement', slug: 'front-camera-replacement', price: 0, variants: [] }],
+  }],
+};
+const iphone17BackCameraQuoteOnly = {
+  ...iphone16ProBackCamera,
+  models: [{
+    ...iphone16ProBackCamera.models[0],
+    model: 'iPhone 17',
+    slug: 'iphone-17',
+    repairTypes: [{ name: 'Back Camera Replacement', slug: 'back-camera-replacement', price: 0, variants: [] }],
+  }],
+};
+const iphone8BackCamera = {
+  ...iphone16ProBackCamera,
+  models: [{
+    ...iphone16ProBackCamera.models[0],
+    model: 'iPhone 8',
+    slug: 'iphone-8',
+    repairTypes: [{
+      name: 'Back Camera Replacement',
+      slug: 'back-camera-replacement',
+      price: 0,
+      variants: [{ quality_grade: 'Standard', price: 179 }],
+    }],
+  }],
+};
 const batteryQuoteOnlyModels = [
   { model: 'iPhone 17', slug: 'iphone-17' },
   { model: 'iPhone 17 Air', slug: 'iphone-17-air' },
@@ -627,6 +696,82 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       expect(priceFaq?.answer).not.toMatch(/Current .* charging port replacement (options are|price is)/i);
       expect(serviceSchema).not.toContain('"offers"');
     }
+  });
+
+  it('uses the shared Front Camera source for timing, family-safe hero copy, and resolved prices', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone16ProFrontCamera] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-16-pro', 'repair-type': 'front-camera-replacement' })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
+    const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+
+    expect(html).toContain('<h1>iPhone 16 Pro Front Camera Replacement</h1>');
+    expect(html).toContain('iPhone 16 Pro front camera replacement at Ali Mobile in Ringwood Square. View the current repair options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct camera part is available.');
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('6-Month Warranty');
+    expect(html).toContain('does not automatically guarantee Face ID restoration');
+    expect(html).not.toMatch(/same-day|same day|immediate repair|while you wait/i);
+    expect(timingFaq?.answer).toContain('around 30 minutes');
+    expect(priceFaq?.answer).toContain('Standard – $219. Reliable front camera replacement selected for clear selfies and video calls.');
+    expect(priceFaq?.answer).toContain('Genuine – $289. Original equipment front camera component where available.');
+    expect(priceFaq?.answer).toContain('Service Pack – $249. Current repair option for this model. We confirm the suitable option before work begins.');
+  });
+
+  it('uses the shared Back Camera source without collapsing lens, housing, or multi-camera semantics', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone16ProBackCamera] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-16-pro', 'repair-type': 'back-camera-replacement' })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
+    const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+
+    expect(html).toContain('<h1>iPhone 16 Pro Back Camera Replacement</h1>');
+    expect(html).toContain('iPhone 16 Pro back camera replacement at Ali Mobile in Ringwood Square. View the current repair options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct camera module is available.');
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('6-Month Warranty');
+    expect(html).toContain('rear camera switching');
+    expect(html).toContain('External camera lens glass damage is not automatically the same repair as internal back camera module replacement.');
+    expect(html).not.toContain('Camera Lens Replacement');
+    expect(html).not.toMatch(/same-day|same day|immediate repair|while you wait/i);
+    expect(timingFaq?.answer).toContain('around 30 minutes');
+    expect(priceFaq?.answer).toContain('Standard – $299. Reliable rear camera replacement selected for clear everyday photos and videos.');
+    expect(priceFaq?.answer).toContain('Genuine – $359. Original equipment rear camera component where available.');
+  });
+
+  it('keeps Front and Back Camera quote-only pages quote-first without an Offer', async () => {
+    for (const [catalogue, repairType, part] of [
+      [iphone17FrontCameraQuoteOnly, 'front-camera-replacement', 'camera part'],
+      [iphone17BackCameraQuoteOnly, 'back-camera-replacement', 'camera module'],
+    ] as const) {
+      fetchRepairCatalog.mockResolvedValue({ brands: [catalogue] });
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-17', 'repair-type': repairType })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+      const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+      expect(html).toContain(`iPhone 17 ${repairType === 'front-camera-replacement' ? 'front' : 'back'} camera replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct ${part} and quote before you visit.`);
+      expect(html).not.toContain('View the current repair options and prices below.');
+      expect(priceFaq?.answer).toMatch(/quote/i);
+      expect(serviceSchema).not.toContain('"offers"');
+    }
+  });
+
+  it('keeps legacy single-camera Back Camera copy model-safe while using the shared turnaround', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone8BackCamera] });
+
+    const html = renderToStaticMarkup(
+      await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-8', 'repair-type': 'back-camera-replacement' })) }),
+    );
+
+    expect(html).toContain('<h1>iPhone 8 Back Camera Replacement</h1>');
+    expect(html).toContain('30 Minutes');
+    expect(html).not.toContain('rear camera switching');
+    expect(html).not.toContain('supported rear camera modes');
   });
 
   it('keeps non-pilot Repair Detail hero copy and timing unchanged', async () => {

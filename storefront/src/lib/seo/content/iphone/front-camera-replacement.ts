@@ -69,6 +69,8 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
 
   return {
     ...pocket,
+    turnaroundMinutes: 30,
+    useResolvedTierPriceFaq: true,
     quickAnswer:
       `Need ${modelName} front camera replacement in Ringwood? Ali Mobile & Repair checks selfie image failure, blur, haze, portrait-camera problems, top sensor-area impact, front camera alignment, and ${copy.trueDepthRiskLabel} before confirming whether front camera replacement is the right path.`,
     workbenchHeadings: {
@@ -225,29 +227,32 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
     ),
     faq: appendUniqueFaqs(
       pocket.faq.map((item) => {
+        if (/^Can you fix an .+ camera that is blurry or shaking\?$/.test(item.question)) {
+          return {
+            question: `Can you fix a ${modelName} front camera that is blurry or not focusing properly?`,
+            answer:
+              "Yes. We test selfie image clarity, portrait-camera behaviour, and the front camera path before confirming whether the issue points to the module itself or another surrounding fault.",
+          };
+        }
+        if (/^Do you repair cracked .+ camera lens glass\?$/.test(item.question)) {
+          return {
+            question: `Can dust or haze in the ${modelName} top camera area affect selfies?`,
+            answer:
+              "Yes. Dust, haze, or moisture marks can affect front-camera images, so we inspect the front camera path before confirming whether cleaning, alignment, or replacement is needed.",
+          };
+        }
+        if (/^Can .+ camera repair be done same day in Ringwood\?$/.test(item.question)) {
+          return {
+            question: `How long does ${modelName} front camera replacement usually take?`,
+            answer:
+              "Timing depends on part availability, device condition, and whether inspection identifies another top-assembly or board-level issue.",
+          };
+        }
         switch (item.question) {
-          case "Can you fix an iPhone 13 camera that is blurry or shaking?":
-            return {
-              question: `Can you fix a ${modelName} front camera that is blurry or not focusing properly?`,
-              answer:
-                "Yes. We test selfie image clarity, portrait-camera behaviour, and the front camera path before confirming whether the issue points to the module itself or another surrounding fault.",
-            };
-          case "Do you repair cracked iPhone 13 camera lens glass?":
-            return {
-              question: `Can dust or haze in the ${modelName} top camera area affect selfies?`,
-              answer:
-                "Yes. Dust, haze, or moisture marks can affect front-camera images, so we inspect the front camera path before confirming whether cleaning, alignment, or replacement is needed.",
-            };
           case "Will front camera repair affect Face ID?":
             return {
               question: copy.faceIdFaqQuestion,
               answer: copy.faceIdFaqAnswer,
-            };
-          case "Can iPhone 13 camera repair be done same day in Ringwood?":
-            return {
-              question: `Can ${modelName} front camera replacement be done the same day in Ringwood?`,
-              answer:
-                "Same-day front camera repair may be available when the correct part is in stock and no hidden top-assembly or board-level issue changes the scope.",
             };
           default:
             return item;
@@ -258,6 +263,11 @@ export function applyIphoneFrontCameraReplacementSeoPocket(
           question: `Can a screen-area impact cause ${modelName} front camera problems?`,
           answer:
             "Yes. Damage near the top display and earpiece area can affect the front camera path, which is why we inspect the surrounding assembly before confirming replacement.",
+        },
+        {
+          question: `How much does ${modelName} front camera replacement cost?`,
+          answer:
+            "The final quote depends on the camera part, model, parts availability, and device condition. We confirm the price with you before any repair work begins.",
         },
         {
           question: copy.finalFaqQuestion,
