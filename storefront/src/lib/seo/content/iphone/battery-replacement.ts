@@ -104,12 +104,23 @@ export function applyIphoneBatteryReplacementSeoPocket(
           "After repair, we check startup, charging response, and practical power stability before handover.",
       },
     ]),
-    faq: appendUniqueFaqs(pocket.faq, [
-      {
-        question: `How long does ${modelName} battery replacement usually take?`,
-        answer:
-          "Timing depends on the model, battery availability, device condition, and any additional faults found during inspection.",
-      },
+    faq: appendUniqueFaqs(
+      pocket.faq.map((item) => {
+        if (/^how long does .+ battery replacement usually take\?$/i.test(item.question)) {
+          return {
+            question: `How long does ${modelName} battery replacement usually take?`,
+            answer:
+              "Timing depends on the model, battery availability, device condition, and any additional faults found during inspection.",
+          };
+        }
+        return item;
+      }),
+      [
+        {
+          question: `How long does ${modelName} battery replacement usually take?`,
+          answer:
+            "Timing depends on the model, battery availability, device condition, and any additional faults found during inspection.",
+        },
       {
         question: `How much will my ${modelName} battery repair cost?`,
         answer:

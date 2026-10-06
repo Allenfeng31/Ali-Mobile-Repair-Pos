@@ -1410,9 +1410,9 @@ const IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET: RepairTypeSeoPocket = {
         "We use premium, model-matched iPhone 13 battery cells selected for stable output and safe fit rather than exaggerated capacity labels. If a higher-capacity option is available, we explain the trade-offs before you approve the repair.",
     },
     {
-      question: "Can Ali Mobile replace my iPhone 13 battery the same day in Ringwood?",
+      question: "How long does iPhone 13 battery replacement usually take?",
       answer:
-        "Same-day battery replacement may be available at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 when the correct battery is in stock and there is no hidden liquid, charging-port, or board damage.",
+        "iPhone 13 battery replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.",
     },
     {
       question: "What battery symptoms should I check before visiting?",
@@ -1525,9 +1525,9 @@ const IPHONE_13_CHARGING_PORT_SEO_POCKET: RepairTypeSeoPocket = {
         "Not always. Many iPhone 13 charging issues are caused by compacted lint that stops the cable seating. We inspect and clean the port first where safe, then quote flex replacement only if the pins or assembly are damaged.",
     },
     {
-      question: "Can you replace an iPhone 13 charging port the same day in Ringwood?",
+      question: "How long does iPhone 13 charging port replacement usually take?",
       answer:
-        "Same-day charging port repair may be available when the correct part is in stock and the fault is limited to the lower port assembly.",
+        "iPhone 13 charging port replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.",
     },
     {
       question: "Do you test data connection after iPhone 13 charging port repair?",

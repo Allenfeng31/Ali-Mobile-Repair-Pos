@@ -79,6 +79,9 @@ export function applyIphoneChargingPortReplacementSeoPocket(
   config: IphoneHardwareConfig
 ): RepairTypeSeoPocket {
   const copy = getChargingPortCopy(config);
+  const timingQuestion = config.chargingPortType === 'usb-c'
+    ? `How long does ${config.modelName} USB-C port replacement usually take?`
+    : `How long does ${config.modelName} charging port replacement usually take?`;
   let adjustedPocket = pocket;
 
   if (config.chargingPortType === 'usb-c') {
@@ -156,12 +159,23 @@ export function applyIphoneChargingPortReplacementSeoPocket(
       },
     ]),
     diagnosticSteps: appendUniqueDiagnosticSteps(adjustedPocket.diagnosticSteps, []),
-    faq: appendUniqueFaqs(adjustedPocket.faq, [
-      {
-        question: `How long does ${config.modelName} charging port replacement usually take?`,
-        answer:
-          "Timing depends on the model, part availability, device condition, and any additional faults found during inspection.",
-      },
+    faq: appendUniqueFaqs(
+      adjustedPocket.faq.map((item) => {
+        if (/^how long does .+ (?:charging|usb-c) port replacement usually take\?$/i.test(item.question)) {
+          return {
+            question: timingQuestion,
+            answer:
+              "Timing depends on the model, part availability, device condition, and any additional faults found during inspection.",
+          };
+        }
+        return item;
+      }),
+      [
+        {
+          question: timingQuestion,
+          answer:
+            "Timing depends on the model, part availability, device condition, and any additional faults found during inspection.",
+        },
       {
         question: `How much will my ${config.modelName} charging port repair cost?`,
         answer:

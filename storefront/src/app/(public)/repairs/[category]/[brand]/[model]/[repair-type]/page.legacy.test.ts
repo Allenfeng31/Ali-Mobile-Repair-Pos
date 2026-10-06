@@ -801,4 +801,86 @@ describe('Repair Detail active and legacy page-data resolution', () => {
 
     expect(matchingElement?.props.initialResults).toBeUndefined();
   });
+
+  it('deduplicates battery timing FAQs and normalizes model casing across legacy and modern models', async () => {
+    const testCases = [
+      { slug: 'iphone-12-mini', model: 'iPhone 12 mini', expectedQuestion: 'How long does iPhone 12 mini battery replacement usually take?' },
+      { slug: 'iphone-13-mini', model: 'iPhone 13 mini', expectedQuestion: 'How long does iPhone 13 mini battery replacement usually take?' },
+      { slug: 'iphone-6s', model: 'iPhone 6S', expectedQuestion: 'How long does iPhone 6S battery replacement usually take?' },
+      { slug: 'iphone-6s-plus', model: 'iPhone 6S Plus', expectedQuestion: 'How long does iPhone 6S Plus battery replacement usually take?' },
+      { slug: 'iphone-14-pro-max', model: 'iPhone 14 Pro Max', expectedQuestion: 'How long does iPhone 14 Pro Max battery replacement usually take?' },
+    ];
+
+    for (const { slug, model, expectedQuestion } of testCases) {
+      fetchRepairCatalog.mockResolvedValue({
+        brands: [{
+          category: 'phone',
+          brand: 'iPhone',
+          slug: 'iphone',
+          models: [{
+            model,
+            slug,
+            repairTypes: [{
+              name: 'Battery Replacement',
+              slug: 'battery-replacement',
+              price: 0,
+              variants: [{ quality_grade: 'Standard', price: 149 }],
+            }],
+          }],
+        }],
+      });
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: slug, 'repair-type': 'battery-replacement' })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const timingFaqs = faqs.filter((entry) => /how long/i.test(entry.question));
+
+      expect(timingFaqs).toHaveLength(1);
+      expect(timingFaqs[0].question).toBe(expectedQuestion);
+      expect(timingFaqs[0].answer).toContain('around 30 minutes');
+      expect(html).not.toMatch(/same-day|same day|immediate repair|while you wait/i);
+    }
+  });
+
+  it('deduplicates charging port timing FAQs with connector-aware questions across USB-C and Lightning models', async () => {
+    const testCases = [
+      { slug: 'iphone-15-pro', model: 'iPhone 15 Pro', expectedQuestion: 'How long does iPhone 15 Pro USB-C port replacement usually take?' },
+      { slug: 'iphone-16', model: 'iPhone 16', expectedQuestion: 'How long does iPhone 16 USB-C port replacement usually take?' },
+      { slug: 'iphone-13', model: 'iPhone 13', expectedQuestion: 'How long does iPhone 13 charging port replacement usually take?' },
+      { slug: 'iphone-12-mini', model: 'iPhone 12 mini', expectedQuestion: 'How long does iPhone 12 mini charging port replacement usually take?' },
+      { slug: 'iphone-13-mini', model: 'iPhone 13 mini', expectedQuestion: 'How long does iPhone 13 mini charging port replacement usually take?' },
+      { slug: 'iphone-6s', model: 'iPhone 6S', expectedQuestion: 'How long does iPhone 6S charging port replacement usually take?' },
+      { slug: 'iphone-6s-plus', model: 'iPhone 6S Plus', expectedQuestion: 'How long does iPhone 6S Plus charging port replacement usually take?' },
+    ];
+
+    for (const { slug, model, expectedQuestion } of testCases) {
+      fetchRepairCatalog.mockResolvedValue({
+        brands: [{
+          category: 'phone',
+          brand: 'iPhone',
+          slug: 'iphone',
+          models: [{
+            model,
+            slug,
+            repairTypes: [{
+              name: 'Charging Port Replacement',
+              slug: 'charging-port-replacement',
+              price: 0,
+              variants: [{ quality_grade: 'Standard', price: 149 }],
+            }],
+          }],
+        }],
+      });
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: slug, 'repair-type': 'charging-port-replacement' })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const timingFaqs = faqs.filter((entry) => /how long/i.test(entry.question));
+
+      expect(timingFaqs).toHaveLength(1);
+      expect(timingFaqs[0].question).toBe(expectedQuestion);
+      expect(timingFaqs[0].answer).toContain('around 30 minutes');
+      expect(html).not.toMatch(/same-day|same day|immediate repair|while you wait/i);
+    }
+  });
 });
