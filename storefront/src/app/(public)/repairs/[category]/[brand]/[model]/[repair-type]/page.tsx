@@ -5238,6 +5238,22 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         ? `${displayModel} ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'front camera' : 'back camera'} replacement at Ali Mobile in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'camera part' : 'camera module'} is available.`
         : `${displayModel} ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'front camera' : 'back camera'} replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'camera part' : 'camera module'} and quote before you visit.`
       : undefined;
+  const iphoneStandardHardwareFamilyHeroSubtitle =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'iphone'
+      ? ({
+          'camera-lens-replacement': { repair: 'camera lens', part: 'lens part' },
+          'power-button-replacement': { repair: 'power button', part: 'button part' },
+          'volume-button-replacement': { repair: 'volume button', part: 'button part' },
+          'earpiece-speaker-replacement': { repair: 'earpiece speaker', part: 'earpiece part' },
+          'loudspeaker-replacement': { repair: 'loudspeaker', part: 'speaker part' },
+        } as const)[resolvedParams['repair-type']]
+      : undefined;
+  const iphoneStandardHardwareFamilyHero = iphoneStandardHardwareFamilyHeroSubtitle
+    ? detailPricing.validVariants.length > 0
+      ? `${displayModel} ${iphoneStandardHardwareFamilyHeroSubtitle.repair} replacement at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the correct ${iphoneStandardHardwareFamilyHeroSubtitle.part} is available.`
+      : `${displayModel} ${iphoneStandardHardwareFamilyHeroSubtitle.repair} replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct ${iphoneStandardHardwareFamilyHeroSubtitle.part} and quote before you visit.`
+    : undefined;
   const iphoneResolvedPriceUnknownTierDescription =
     resolvedParams.category === 'phone' &&
     resolvedParams.brand === 'iphone' &&
@@ -5688,6 +5704,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               iphoneScreenFamilyHeroSubtitle ??
               iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
               iphoneCameraModuleFamilyHeroSubtitle ??
+              iphoneStandardHardwareFamilyHero ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>
 

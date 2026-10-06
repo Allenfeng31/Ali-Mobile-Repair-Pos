@@ -14,6 +14,7 @@ type IphoneHardwareRepairType = Extract<
 
 type HardwareRepairContent = {
   label: string;
+  turnaroundMinutes?: number;
   quickAnswer: (modelName: string) => string;
   headings: RepairTypeSeoPocket['workbenchHeadings'];
   option: RepairTypeSeoPocket['repairOptions'][number];
@@ -22,9 +23,18 @@ type HardwareRepairContent = {
   faq: (modelName: string) => RepairTypeSeoPocket['faq'];
 };
 
+const STANDARD_HARDWARE_REPAIR_TYPES = new Set<IphoneHardwareRepairType>([
+  'camera-lens-replacement',
+  'power-button-replacement',
+  'volume-button-replacement',
+  'earpiece-speaker-replacement',
+  'loudspeaker-replacement',
+]);
+
 const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairContent> = {
   'earpiece-speaker-replacement': {
     label: 'earpiece speaker replacement',
+    turnaroundMinutes: 30,
     quickAnswer: (modelName) =>
       `Need ${modelName} earpiece speaker replacement in Ringwood? Ali Mobile & Repair checks low call volume, distorted call audio, loudspeaker-only audio, speaker mesh condition, software behaviour, the audio path, and part condition before confirming whether earpiece replacement is the right repair.`,
     headings: {
@@ -37,7 +47,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
       name: 'Call-audio diagnosis first',
       shortDescription: 'We compare normal calls, speakerphone behaviour, receiver output, and visible mesh condition before quoting earpiece speaker replacement.',
       bestFor: 'Phones with low call volume, distorted receiver sound, or calls that are only clear on loudspeaker.',
-      notes: 'Repair timing depends on the exact model, part availability, and whether the fault is limited to the earpiece path.',
+      notes: 'We confirm whether the receiver path, mesh, and related audio path support earpiece replacement before proceeding.',
     },
     problems: [
       {
@@ -68,7 +78,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
     faq: (modelName) => [
       {
         question: `Does low ${modelName} call volume always mean earpiece speaker replacement?`,
-        answer: 'No. We inspect the mesh, settings, software behaviour, and audio path first because some call-volume faults need cleaning or further diagnosis rather than immediate replacement.',
+        answer: 'No. We inspect the mesh, settings, software behaviour, and audio path first because some call-volume faults need cleaning or further diagnosis rather than replacement.',
       },
       {
         question: 'Can I get a quote before the earpiece repair starts?',
@@ -78,6 +88,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
   },
   'loudspeaker-replacement': {
     label: 'loudspeaker replacement',
+    turnaroundMinutes: 30,
     quickAnswer: (modelName) =>
       `Need ${modelName} loudspeaker replacement in Ringwood? Ali Mobile & Repair checks missing ringtone, no media sound, distorted bottom-speaker audio, settings, the speaker path, charging-port path overlap, and board-level fault signs before confirming replacement.`,
     headings: {
@@ -90,7 +101,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
       name: 'Bottom-speaker diagnosis first',
       shortDescription: 'We test ringtone, media playback, speaker output, settings, and related lower-path behaviour before assuming the loudspeaker has failed.',
       bestFor: 'Phones with no ringtone, no media sound, crackling audio, or distorted bottom-speaker output.',
-      notes: 'Repair timing depends on model, part availability, and whether diagnosis finds speaker, lower-assembly, or board-level involvement.',
+      notes: 'We confirm whether the fault is isolated to the loudspeaker or involves another lower-path issue before proceeding.',
     },
     problems: [
       {
@@ -184,6 +195,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
   },
   'power-button-replacement': {
     label: 'power button replacement',
+    turnaroundMinutes: 30,
     quickAnswer: (modelName) =>
       `Need ${modelName} power button replacement in Ringwood? Ali Mobile & Repair checks stuck buttons, hard-to-press response, unreliable wake or lock behaviour, button flex condition, housing damage, and internal connection issues before confirming replacement.`,
     headings: {
@@ -196,7 +208,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
       name: 'Button and housing diagnosis first',
       shortDescription: 'We inspect button movement, frame condition, button flex, and internal connection behaviour before quoting power button replacement.',
       bestFor: 'Phones with a stuck power button, hard press, intermittent wake or lock response, or impact around the side button area.',
-      notes: 'Repair timing depends on model, part availability, housing condition, and whether the fault is mechanical or connection-related.',
+      notes: 'We confirm whether button movement, housing condition, and internal connection findings support power button replacement.',
     },
     problems: [
       {
@@ -237,6 +249,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
   },
   'volume-button-replacement': {
     label: 'volume button replacement',
+    turnaroundMinutes: 30,
     quickAnswer: (modelName) =>
       `Need ${modelName} volume button replacement in Ringwood? Ali Mobile & Repair checks stuck buttons, missing or intermittent response, button flex condition, frame damage, and software settings before confirming replacement.`,
     headings: {
@@ -249,7 +262,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
       name: 'Button response diagnosis first',
       shortDescription: 'We test volume up and down response, button feel, software settings, frame condition, and flex behaviour before quoting replacement.',
       bestFor: 'Phones with stuck volume buttons, no response, intermittent response, or impact near the button rail.',
-      notes: 'Repair timing depends on model, part availability, frame condition, and whether the issue is mechanical, flex-related, or software-related.',
+      notes: 'We confirm whether button response, frame condition, internal connection, and settings checks support volume button replacement.',
     },
     problems: [
       {
@@ -290,6 +303,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
   },
   'camera-lens-replacement': {
     label: 'camera lens replacement',
+    turnaroundMinutes: 30,
     quickAnswer: (modelName) =>
       `Need ${modelName} camera lens replacement in Ringwood? Ali Mobile & Repair checks cracked rear camera lens glass, blurry camera output, dust risk, camera module condition, and whether only the outer lens glass is affected before confirming the repair scope.`,
     headings: {
@@ -302,7 +316,7 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
       name: 'Lens glass versus camera module diagnosis',
       shortDescription: 'We inspect the outer lens glass, image quality, dust risk, and camera module condition before confirming whether lens-only replacement is suitable.',
       bestFor: 'Phones with cracked rear camera lens glass, hazy photos, glare, or visible damage around the camera lens cover.',
-      notes: 'Repair timing depends on model, part availability, glass condition, and whether the camera module itself has also been damaged.',
+      notes: 'We confirm whether the outer lens glass can be repaired separately from any internal camera module damage before proceeding.',
     },
     problems: [
       {
@@ -343,6 +357,33 @@ const HARDWARE_REPAIR_CONTENT: Record<IphoneHardwareRepairType, HardwareRepairCo
   },
 };
 
+export function getIphoneStandardHardwareRepairBasePocket(
+  config: IphoneHardwareConfig,
+  repairType: AliMobileEnhancedIphoneRepairType,
+): RepairTypeSeoPocket | null {
+  if (!STANDARD_HARDWARE_REPAIR_TYPES.has(repairType as IphoneHardwareRepairType)) return null;
+
+  const content = HARDWARE_REPAIR_CONTENT[repairType as IphoneHardwareRepairType];
+
+  return {
+    quickAnswer: '',
+    turnaroundMinutes: content.turnaroundMinutes,
+    repairOptions: [],
+    commonProblems: [],
+    diagnosticSteps: [],
+    faq: [
+      {
+        question: `How long does ${config.modelName} ${content.label} usually take?`,
+        answer: 'We confirm the repair scope before work begins.',
+      },
+      {
+        question: `How much does a ${config.modelName} ${content.label} cost?`,
+        answer: `We confirm the available ${content.label} option, model compatibility, price, and repair requirements before work begins. The quote explains which part option is being used, and eligible fitted parts include our 6-month warranty.`,
+      },
+    ],
+  };
+}
+
 export function applyIphoneHardwareRepairSeoPocket(
   pocket: RepairTypeSeoPocket,
   config: IphoneHardwareConfig,
@@ -352,6 +393,7 @@ export function applyIphoneHardwareRepairSeoPocket(
 
   return {
     ...pocket,
+    ...(content.turnaroundMinutes ? { turnaroundMinutes: content.turnaroundMinutes } : {}),
     quickAnswer: content.quickAnswer(config.modelName),
     workbenchHeadings: content.headings,
     repairOptions: appendUniqueRepairOptions(pocket.repairOptions, [content.option]),

@@ -8,7 +8,7 @@ import {
   IPHONE_HARDWARE_CONFIG,
 } from './config';
 import { applyIphoneFrontCameraReplacementSeoPocket } from './front-camera-replacement';
-import { applyIphoneHardwareRepairSeoPocket } from './hardware-repairs';
+import { applyIphoneHardwareRepairSeoPocket, getIphoneStandardHardwareRepairBasePocket } from './hardware-repairs';
 import { applyIphoneScreenReplacementSeoPocket } from './screen-replacement';
 import type {
   AliMobileEnhancedIphoneModelSlug,
@@ -96,10 +96,6 @@ export function getAliMobileEnhancedIphoneSeoPocket({
   repairType,
   pocket,
 }: AliMobileEnhancedIphoneSeoPocketParams): RepairTypeSeoPocket | null {
-  if (!pocket) {
-    return pocket;
-  }
-
   const enhancedRepairType = getAliMobileEnhancedIphoneRepairType({
     category,
     brand,
@@ -116,27 +112,32 @@ export function getAliMobileEnhancedIphoneSeoPocket({
     return pocket;
   }
 
+  const basePocket = pocket ?? getIphoneStandardHardwareRepairBasePocket(hardwareConfig, enhancedRepairType);
+  if (!basePocket) {
+    return pocket;
+  }
+
   switch (enhancedRepairType) {
     case "screen-replacement":
-      return applyIphoneScreenReplacementSeoPocket(pocket, hardwareConfig);
+      return applyIphoneScreenReplacementSeoPocket(basePocket, hardwareConfig);
     case "battery-replacement":
-      return applyIphoneBatteryReplacementSeoPocket(pocket, hardwareConfig);
+      return applyIphoneBatteryReplacementSeoPocket(basePocket, hardwareConfig);
     case "charging-port-replacement":
-      return applyIphoneChargingPortReplacementSeoPocket(pocket, hardwareConfig);
+      return applyIphoneChargingPortReplacementSeoPocket(basePocket, hardwareConfig);
     case "back-glass-replacement":
-      return applyIphoneBackGlassReplacementSeoPocket(pocket, hardwareConfig);
+      return applyIphoneBackGlassReplacementSeoPocket(basePocket, hardwareConfig);
     case "front-camera-replacement":
-      return applyIphoneFrontCameraReplacementSeoPocket(pocket, hardwareConfig);
+      return applyIphoneFrontCameraReplacementSeoPocket(basePocket, hardwareConfig);
     case "back-camera-replacement":
-      return applyIphoneBackCameraReplacementSeoPocket(pocket, hardwareConfig);
+      return applyIphoneBackCameraReplacementSeoPocket(basePocket, hardwareConfig);
     case "earpiece-speaker-replacement":
     case "loudspeaker-replacement":
     case "microphone-replacement":
     case "power-button-replacement":
     case "volume-button-replacement":
     case "camera-lens-replacement":
-      return applyIphoneHardwareRepairSeoPocket(pocket, hardwareConfig, enhancedRepairType);
+      return applyIphoneHardwareRepairSeoPocket(basePocket, hardwareConfig, enhancedRepairType);
     default:
-      return pocket;
+      return basePocket;
   }
 }

@@ -28,6 +28,7 @@ import RepairServicePage, { generateStaticParams } from './page';
 import FaqAccordionComponent from '@/components/FaqAccordion';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
+import { getAliMobileEnhancedIphoneSeoPocket } from '@/lib/seo/content/iphone';
 
 const params = (overrides: Record<string, string> = {}) => ({ category: 'phone', brand: 'motorola', model: 'moto-g24', 'repair-type': 'screen-replacement', ...overrides });
 const active = { category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{ model: 'Moto G24', slug: 'moto-g24', repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 149, variants: [] }] }] };
@@ -263,6 +264,28 @@ const iphone6Screen = {
     }],
   }],
 };
+
+const iphoneHardwareRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  partTier: string,
+) => ({
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model,
+    slug,
+    repairTypes: [{
+      name: repairName,
+      slug: repairSlug,
+      price: 0,
+      variants: [{ quality_grade: partTier, price: 199 }],
+    }],
+  }],
+});
 
 type DetailMatchingProps = { children?: ReactNode; initialResults?: unknown } & Record<string, unknown>;
 
@@ -758,6 +781,103 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       expect(html).not.toContain('View the current repair options and prices below.');
       expect(priceFaq?.answer).toMatch(/quote/i);
       expect(serviceSchema).not.toContain('"offers"');
+    }
+  });
+
+  it.each([
+    ['camera-lens-replacement', 'Camera Lens Replacement', 'Premium', 'correct lens part', 'outer lens glass'],
+    ['power-button-replacement', 'Power Button Replacement', 'Genuine', 'correct button part', 'button flex'],
+    ['volume-button-replacement', 'Volume Button Replacement', 'Genuine', 'correct button part', 'volume up and down response'],
+    ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement', 'Genuine', 'correct earpiece part', 'receiver output'],
+    ['loudspeaker-replacement', 'Loudspeaker Replacement', 'Genuine', 'correct speaker part', 'ringtone, media playback'],
+  ])('renders the approved iPhone hardware family source for %s', async (repairSlug, repairName, partTier, partLabel, semanticCopy) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [iphoneHardwareRepairCatalogue('iPhone 15', 'iphone-15', repairName, repairSlug, partTier)],
+    });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15', 'repair-type': repairSlug })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((entry) => /how long/i.test(entry.question));
+    const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain(`<h1>iPhone 15 ${repairName}</h1>`);
+    expect(html).toContain(`iPhone 15 ${repairName.toLowerCase()} at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the ${partLabel} is available.`);
+    expect(html).toContain(semanticCopy);
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('6-Month Warranty');
+    expect(html).not.toContain('Fast Turnaround');
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0]?.answer).toContain('around 30 minutes');
+    expect(priceFaq?.answer).toContain('model compatibility, price, and repair requirements');
+    expect(priceFaq?.answer).not.toMatch(/current .* price is/i);
+    expect(serviceSchema).toContain('"offers"');
+    expect(html).not.toMatch(/same-day|same day|immediate|immediately|while you wait/i);
+  });
+
+  it.each([
+    ['iPhone 11', 'iphone-11', 'Power Button Replacement', 'power-button-replacement', 'correct button part'],
+    ['iPhone SE 2', 'iphone-se-2', 'Loudspeaker Replacement', 'loudspeaker-replacement', 'correct speaker part'],
+  ])('keeps approved quote-only hardware routes quote-first without an Offer', async (model, modelSlug, repairName, repairSlug, partLabel) => {
+    const quoteOnlyCatalogue = iphoneHardwareRepairCatalogue(model, modelSlug, repairName, repairSlug, 'Genuine');
+    quoteOnlyCatalogue.models[0].repairTypes[0].variants = [];
+    fetchRepairCatalog.mockResolvedValue({ brands: [quoteOnlyCatalogue] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: modelSlug, 'repair-type': repairSlug })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain(`${model} ${repairName.toLowerCase()} at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the ${partLabel} and quote before you visit.`);
+    expect(html).not.toContain('View the current repair price below.');
+    expect(priceFaq?.answer).toContain('model compatibility, price, and repair requirements');
+    expect(serviceSchema).not.toContain('"offers"');
+  });
+
+  it('keeps the exact iPhone 13 Power Button Repair Result on its canonical Detail route', async () => {
+    const initialResults = [{
+      id: 'power-button-result', device_category: 'phone' as const, brand: 'iPhone', brand_slug: 'iphone',
+      model: 'iPhone 13', model_slug: 'iphone-13', repair_type: 'Power Button Replacement', repair_type_slug: 'power-button-replacement',
+      image_pair_alt_text: 'Approved public repair result', title: 'iPhone 13 Power Button Replacement', short_description: 'Published proof.',
+      related_repair_url: '/repairs/phone/iphone/iphone-13/power-button-replacement',
+    }];
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [iphoneHardwareRepairCatalogue('iPhone 13', 'iphone-13', 'Power Button Replacement', 'power-button-replacement', 'Genuine')],
+    });
+    fetchRepairDetailInitialResults.mockResolvedValue(initialResults);
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-13', 'repair-type': 'power-button-replacement' })) });
+    const matchingElement = findElementByType(page, RepairResultsMatchingSection);
+
+    expect(fetchRepairDetailInitialResults).toHaveBeenCalledWith({
+      category: 'phone', brandSlug: 'iphone', modelSlug: 'iphone-13', repairTypeSlug: 'power-button-replacement',
+    });
+    expect(matchingElement?.props).toEqual(expect.objectContaining({
+      category: 'phone', brand: 'iphone', model: 'iphone-13', repairType: 'power-button-replacement', context: 'detail', initialResults,
+    }));
+  });
+
+  it('enables only the five approved null-pocket hardware families', () => {
+    const enabledRepairTypes = [
+      'camera-lens-replacement',
+      'power-button-replacement',
+      'volume-button-replacement',
+      'earpiece-speaker-replacement',
+      'loudspeaker-replacement',
+    ];
+
+    for (const repairType of enabledRepairTypes) {
+      expect(getAliMobileEnhancedIphoneSeoPocket({
+        category: 'phone', brand: 'iphone', model: 'iphone-15', repairType, pocket: null,
+      })).not.toBeNull();
+    }
+
+    for (const repairType of ['microphone-replacement', 'back-glass-replacement', 'logic-board-repair', 'water-damage-repair']) {
+      expect(getAliMobileEnhancedIphoneSeoPocket({
+        category: 'phone', brand: 'iphone', model: 'iphone-15', repairType, pocket: null,
+      })).toBeNull();
     }
   });
 
