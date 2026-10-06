@@ -94,6 +94,8 @@ export function applyIphoneScreenReplacementSeoPocket(
 
   return {
     ...adjustedPocket,
+    turnaroundMinutes: 30,
+    useResolvedTierPriceFaq: true,
     quickAnswer:
       `Need ${modelName} screen replacement in Ringwood? Ali Mobile & Repair checks cracked or damaged glass, touch-response faults, lines, flickering, ${displayOptionLabel}, frame condition, and ${frontSensorAreaLabel} before confirming the repair path.`,
     workbenchHeadings: {

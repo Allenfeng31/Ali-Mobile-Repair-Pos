@@ -15,6 +15,8 @@ interface RepairFaq {
   answer: string;
 }
 
+const UNKNOWN_SCREEN_TIER_DESCRIPTION = 'Current screen option for this model. We confirm the suitable option before work begins.';
+
 export function withApprovedTurnaroundFaq({
   faqs,
   question,
@@ -58,10 +60,10 @@ export function withResolvedTierPriceFaq({
 }): RepairFaq[] {
   const options = orderRepairVariantsForDisplay(repairName, pricing.validVariants).map((variant) => ({
     ...variant,
-    description: getTierDescription(repairName, variant.quality_grade),
+    description: getTierDescription(repairName, variant.quality_grade) ?? UNKNOWN_SCREEN_TIER_DESCRIPTION,
   }));
 
-  if (options.length === 0 || options.some((option) => !option.description)) return faqs;
+  if (options.length === 0) return faqs;
 
   const repairLabel = repairName.toLowerCase();
   const answer = options.length === 1

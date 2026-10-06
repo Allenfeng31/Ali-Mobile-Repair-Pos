@@ -152,6 +152,27 @@ describe('withResolvedTierPriceFaq', () => {
     expect(faqs[1]?.answer).toContain('Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance.');
   });
 
+  it('keeps unknown tiers with their current price and the neutral screen fallback', () => {
+    const faqs = withResolvedTierPriceFaq({
+      faqs: existingFaqs,
+      question: priceQuestion,
+      model: 'iPhone 16 Pro',
+      repairName: 'Screen Replacement',
+      pricing: pricing([
+        { quality_grade: 'Service Pack', price: 777 },
+        { quality_grade: 'Standard', price: 321 },
+        { quality_grade: 'Pulled Genuine', price: 654 },
+      ]),
+    });
+
+    const answer = faqs[1]?.answer ?? '';
+    expect(answer).toContain('Standard – $321. Industry-standard replacement part with reliable performance.');
+    expect(answer).toContain('Service Pack – $777. Current screen option for this model. We confirm the suitable option before work begins.');
+    expect(answer).toContain('Pulled Genuine – $654. Current screen option for this model. We confirm the suitable option before work begins.');
+    expect(answer.indexOf('Standard – $321')).toBeLessThan(answer.indexOf('Service Pack – $777'));
+    expect(answer.indexOf('Service Pack – $777')).toBeLessThan(answer.indexOf('Pulled Genuine – $654'));
+  });
+
   it('changes the FAQ when the resolved price or shared tier description changes', () => {
     const standardPricing = pricing([{ quality_grade: 'Standard', price: 321 }]);
     const changedPricing = pricing([{ quality_grade: 'Standard', price: 654 }]);

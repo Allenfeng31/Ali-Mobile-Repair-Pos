@@ -92,6 +92,59 @@ const iphone16ProScreen = {
     }],
   }],
 };
+const iphone15Screen = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 15',
+    slug: 'iphone-15',
+    repairTypes: [{
+      name: 'Screen Replacement',
+      slug: 'screen-replacement',
+      price: 0,
+      variants: [
+        { quality_grade: 'Premium', price: 654 },
+        { quality_grade: 'Standard', price: 321 },
+      ],
+    }],
+  }],
+};
+const iphone15ScreenWithoutPricedTiers = {
+  ...iphone15Screen,
+  models: [{
+    ...iphone15Screen.models[0],
+    repairTypes: [{
+      ...iphone15Screen.models[0].repairTypes[0],
+      variants: [],
+    }],
+  }],
+};
+const iphone15Battery = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 15',
+    slug: 'iphone-15',
+    repairTypes: [{ name: 'Battery Replacement', slug: 'battery-replacement', price: 149, variants: [] }],
+  }],
+};
+const iphone6Screen = {
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model: 'iPhone 6',
+    slug: 'iphone-6',
+    repairTypes: [{
+      name: 'Screen Replacement',
+      slug: 'screen-replacement',
+      price: 0,
+      variants: [{ quality_grade: 'Standard', price: 169 }],
+    }],
+  }],
+};
 
 type DetailMatchingProps = { children?: ReactNode; initialResults?: unknown } & Record<string, unknown>;
 
@@ -349,6 +402,82 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).toContain('Select Genuine tier at $987');
   });
 
+  it('uses the shared iPhone screen source for non-reference timing, price FAQ, and hero copy', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone15Screen] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15' })) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const timingFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How long does iPhone 15 screen replacement usually take?'
+    );
+    const priceFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How much will my iPhone 15 screen repair cost?'
+    );
+
+    expect(html).toContain('<h1>iPhone 15 Screen Replacement</h1>');
+    expect(html).toContain('iPhone 15 screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.');
+    expect(html).toContain('30 Minutes');
+    expect(timingFaq?.answer).toBe(
+      'iPhone 15 screen replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.'
+    );
+    expect(priceFaq?.answer).toContain('Standard – $321. Industry-standard replacement part with reliable performance.');
+    expect(priceFaq?.answer).toContain('Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability.');
+  });
+
+  it('keeps iPhone screen pages without priced tiers quote-first and free of price claims in the hero', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone15ScreenWithoutPricedTiers] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15' })) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const priceFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How much will my iPhone 15 screen repair cost?'
+    );
+
+    expect(html).toContain('iPhone 15 screen replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.');
+    expect(html).not.toContain('Choose from the current screen options and prices below.');
+    expect(priceFaq?.answer).toMatch(/quote/i);
+    expect(priceFaq?.answer).not.toMatch(/Current iPhone 15 screen replacement options are|Current iPhone 15 screen replacement price is/);
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    expect(serviceSchema).not.toContain('"offers"');
+  });
+
+  it('keeps legacy iPhone screen details on the shared screen family rule without modern-device copy', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone6Screen] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-6' })) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const timingFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How long does iPhone 6 screen replacement usually take?'
+    );
+    const priceFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
+      (entry) => entry.question === 'How much will my iPhone 6 screen repair cost?'
+    );
+
+    expect(html).toContain('<h1>iPhone 6 Screen Replacement</h1>');
+    expect(html).toContain('30 Minutes');
+    expect(html).not.toContain('Face ID');
+    expect(html).not.toContain('OLED');
+    expect(timingFaq?.answer).toContain('around 30 minutes');
+    expect(priceFaq?.answer).toContain('Standard option');
+    expect(priceFaq?.answer).toContain('$169');
+  });
+
+  it('keeps iPhone battery pages outside the iPhone screen timing and price FAQ rollout', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphone15Battery] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15', 'repair-type': 'battery-replacement' })) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const faqAnswers = (faqElement?.props.faqs as Array<{ answer: string }>).map((entry) => entry.answer).join(' ');
+
+    expect(html).toContain('Fast Turnaround');
+    expect(html).not.toContain('30 Minutes');
+    expect(faqAnswers).not.toContain('around 30 minutes');
+  });
+
   it('keeps non-pilot Repair Detail hero copy and timing unchanged', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [active] });
 
@@ -361,6 +490,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
 
     expect(html).toContain('Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.');
     expect(html).toContain('Fast Turnaround');
+    expect(html).not.toContain('30 Minutes');
     expect(html).not.toContain('Screen replacement at Ali Mobile in Ringwood Square.');
     expect(timingFaq?.answer).toBe(
       'Many Moto G24 screen replacement jobs are completed quickly at Ringwood Square Shopping Centre when the correct part is in stock. Walk-ins are welcome on weekdays, and we confirm timing after checking the model, fault and queue.'

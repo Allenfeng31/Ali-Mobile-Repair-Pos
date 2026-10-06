@@ -5214,6 +5214,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     seoPocket.turnaroundMinutes > 0
       ? seoPocket.turnaroundMinutes
       : undefined;
+  const iphoneScreenFamilyHeroSubtitle =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'iphone' &&
+    resolvedParams['repair-type'] === 'screen-replacement'
+      ? detailPricing.validVariants.length > 0
+        ? `${displayModel} screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
+        : `${displayModel} screen replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
+      : undefined;
   const seoDisplayModel =
     enhancedLenovoTabletSeoPocket?.modelName ??
     enhancedSamsungTabletSeoPocket?.modelName ??
@@ -5649,6 +5657,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               enhancedSamsungTabletSeoPocket?.heroSubtitle ??
               enhancedIpadSeoPocket?.heroSubtitle ??
               seoPocket?.heroSubtitle ??
+              iphoneScreenFamilyHeroSubtitle ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>
 
