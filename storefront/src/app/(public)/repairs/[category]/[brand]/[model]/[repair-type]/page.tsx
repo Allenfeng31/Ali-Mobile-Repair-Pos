@@ -31,6 +31,7 @@ import {
   getAliMobileEnhancedIphoneSeoPocket,
   isAliMobileEnhancedIphoneRepairPage,
 } from '@/lib/seo/content/iphone';
+import { getIphoneHardwareConfig } from '@/lib/seo/content/iphone/config';
 import type {
   AliMobileEnhancedIphoneRepairType,
   RepairTypeSeoPocket,
@@ -1907,6 +1908,7 @@ const IPHONE_REPAIR_POCKET_TEMPLATE_BY_TYPE: Record<string, RepairTypeSeoPocket>
   "battery-replacement": IPHONE_13_BATTERY_REPLACEMENT_SEO_POCKET,
   "charging-port-replacement": IPHONE_13_CHARGING_PORT_SEO_POCKET,
   "charging-port-repair": IPHONE_13_CHARGING_PORT_SEO_POCKET,
+  "back-glass-replacement": IPHONE_13_BACK_HOUSING_SEO_POCKET,
   "back-housing-replacement": IPHONE_13_BACK_HOUSING_SEO_POCKET,
   "back-glass-repair": IPHONE_13_BACK_HOUSING_SEO_POCKET,
   "rear-glass-repair": IPHONE_13_BACK_HOUSING_SEO_POCKET,
@@ -4460,17 +4462,6 @@ const PHONE_BACK_GLASS_PUBLIC_SLUG = "back-glass-replacement";
 const PHONE_BACK_HOUSING_INTERNAL_SLUG = "back-housing-replacement";
 const IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass / Back Housing Replacement";
 const NON_IPHONE_BACK_GLASS_DISPLAY_NAME = "Back Glass Replacement";
-const IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES = [
-  "iphone-8",
-  "iphone-x",
-  "iphone-xs",
-  "iphone-xr",
-  "iphone-11",
-  "iphone-12",
-  "iphone-13",
-  "iphone-14-pro",
-];
-
 function isIphoneBackGlassPublicAlias(category: string, brand: string, repairSlug: string) {
   return category === "phone" && brand === "iphone" && repairSlug === PHONE_BACK_GLASS_PUBLIC_SLUG;
 }
@@ -4570,8 +4561,7 @@ function shouldShowIphoneBackHousingNotice(category: string, brand: string, mode
   if (category !== "phone" || brand !== "iphone") return false;
   if (repairSlug !== PHONE_BACK_GLASS_PUBLIC_SLUG && repairSlug !== PHONE_BACK_HOUSING_INTERNAL_SLUG) return false;
 
-  const normalizedModel = slugify(modelSlug);
-  return IPHONE_BACK_HOUSING_NOTICE_MODEL_PREFIXES.some((prefix) => normalizedModel === prefix || normalizedModel.startsWith(`${prefix}-`));
+  return getIphoneHardwareConfig(modelSlug)?.rearRepairMethod === 'back-housing';
 }
 
 function isUnsupportedSamsungNoteRepairRoute(resolvedParams: Awaited<RepairPageProps['params']>) {
@@ -5214,6 +5204,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     seoPocket.turnaroundMinutes > 0
       ? seoPocket.turnaroundMinutes
       : undefined;
+  const iphoneRearRepairMethod =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'iphone' &&
+    resolvedParams['repair-type'] === 'back-glass-replacement'
+      ? getIphoneHardwareConfig(resolvedParams.model)?.rearRepairMethod
+      : undefined;
   const iphoneScreenFamilyHeroSubtitle =
     resolvedParams.category === 'phone' &&
     resolvedParams.brand === 'iphone' &&
@@ -5238,6 +5234,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         ? `${displayModel} ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'front camera' : 'back camera'} replacement at Ali Mobile in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'camera part' : 'camera module'} is available.`
         : `${displayModel} ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'front camera' : 'back camera'} replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct ${resolvedParams['repair-type'] === 'front-camera-replacement' ? 'camera part' : 'camera module'} and quote before you visit.`
       : undefined;
+  const iphoneBackGlassOrHousingFamilyHeroSubtitle = iphoneRearRepairMethod
+    ? detailPricing.validVariants.length > 0
+      ? `${displayModel} ${iphoneRearRepairMethod === 'back-housing' ? 'back housing' : 'back glass'} replacement at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the correct ${iphoneRearRepairMethod === 'back-housing' ? 'housing' : 'rear glass'} part is available.`
+      : `${displayModel} ${iphoneRearRepairMethod === 'back-housing' ? 'back housing' : 'back glass'} replacement at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
+    : undefined;
   const iphoneStandardHardwareFamilyHeroSubtitle =
     resolvedParams.category === 'phone' &&
     resolvedParams.brand === 'iphone'
@@ -5704,6 +5705,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               iphoneScreenFamilyHeroSubtitle ??
               iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
               iphoneCameraModuleFamilyHeroSubtitle ??
+              iphoneBackGlassOrHousingFamilyHeroSubtitle ??
               iphoneStandardHardwareFamilyHero ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>
@@ -5745,7 +5747,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
                   {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
-                    ? 'Timeframe Varies'
+                    ? approvedTurnaroundMinutes
+                      ? `${approvedTurnaroundMinutes} Minutes`
+                      : 'Timeframe Varies'
                     : samsungFoldableScreenDetailContext
                     ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')

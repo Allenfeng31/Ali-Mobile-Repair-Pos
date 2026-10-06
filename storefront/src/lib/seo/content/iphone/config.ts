@@ -9,6 +9,17 @@ export type IphoneRearCameraClass =
   | 'dual'
   | 'triple'
   | 'unknown';
+export type IphoneRearRepairMethod = 'back-glass' | 'back-housing';
+
+const IPHONE_BACK_HOUSING_MODEL_SLUGS = new Set<AliMobileEnhancedIphoneModelSlug>([
+  'iphone-se',
+  'iphone-6',
+  'iphone-6-plus',
+  'iphone-6s',
+  'iphone-6s-plus',
+  'iphone-7',
+  'iphone-7-plus',
+]);
 
 export interface IphoneHardwareConfig {
   modelSlug: AliMobileEnhancedIphoneModelSlug;
@@ -21,6 +32,7 @@ export interface IphoneHardwareConfig {
   hasMagSafe: boolean | 'unknown';
   rearCameraClass: IphoneRearCameraClass;
   supportsBackGlassContent: boolean;
+  rearRepairMethod: IphoneRearRepairMethod;
 }
 
 export const SIX_REPAIR_IPHONE_REPAIR_TYPES = [
@@ -53,13 +65,17 @@ export const FIVE_REPAIR_IPHONE_REPAIR_TYPES = [
 ] as const satisfies ReadonlyArray<AliMobileEnhancedIphoneRepairType>;
 
 function defineIphoneHardwareConfig(
-  config: Omit<IphoneHardwareConfig, 'supportedRepairTypes'> & {
+  config: Omit<IphoneHardwareConfig, 'supportedRepairTypes' | 'rearRepairMethod'> & {
     supportedRepairTypes?: ReadonlyArray<AliMobileEnhancedIphoneRepairType>;
+    rearRepairMethod?: IphoneRearRepairMethod;
   }
 ): IphoneHardwareConfig {
   return {
     ...config,
     supportedRepairTypes: config.supportedRepairTypes ?? SIX_REPAIR_IPHONE_REPAIR_TYPES,
+    rearRepairMethod: config.rearRepairMethod ?? (
+      IPHONE_BACK_HOUSING_MODEL_SLUGS.has(config.modelSlug) ? 'back-housing' : 'back-glass'
+    ),
   };
 }
 
@@ -437,7 +453,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-se': defineIphoneHardwareConfig({
     modelSlug: 'iphone-se',
     modelName: 'iPhone SE',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',
@@ -497,7 +513,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-7': defineIphoneHardwareConfig({
     modelSlug: 'iphone-7',
     modelName: 'iPhone 7',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',
@@ -509,7 +525,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-7-plus': defineIphoneHardwareConfig({
     modelSlug: 'iphone-7-plus',
     modelName: 'iPhone 7 Plus',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',
@@ -521,7 +537,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-6': defineIphoneHardwareConfig({
     modelSlug: 'iphone-6',
     modelName: 'iPhone 6',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',
@@ -533,7 +549,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-6-plus': defineIphoneHardwareConfig({
     modelSlug: 'iphone-6-plus',
     modelName: 'iPhone 6 Plus',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',
@@ -545,7 +561,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-6s': defineIphoneHardwareConfig({
     modelSlug: 'iphone-6s',
     modelName: 'iPhone 6S',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',
@@ -557,7 +573,7 @@ export const IPHONE_HARDWARE_CONFIG: Record<AliMobileEnhancedIphoneModelSlug, Ip
   'iphone-6s-plus': defineIphoneHardwareConfig({
     modelSlug: 'iphone-6s-plus',
     modelName: 'iPhone 6S Plus',
-    supportedRepairTypes: FIVE_REPAIR_IPHONE_REPAIR_TYPES,
+    supportedRepairTypes: SIX_REPAIR_IPHONE_REPAIR_TYPES,
     displayType: 'lcd',
     hasDynamicIsland: false,
     biometrics: 'touch-id',

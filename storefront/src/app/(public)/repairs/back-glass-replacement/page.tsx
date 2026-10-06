@@ -101,7 +101,7 @@ function buildHeroHighlights(data: RepairTypeHubCatalogResult) {
     },
     {
       title: 'Repair Time',
-      description: <>Most back glass replacements take around <strong>30 minutes</strong>.</>,
+      description: 'Turnaround varies by model, repair scope, damage found during inspection, and part availability. We confirm the expected turnaround before work begins.',
     },
     {
       title: 'Ringwood Square',

@@ -287,6 +287,26 @@ const iphoneHardwareRepairCatalogue = (
   }],
 });
 
+const iphoneBackRepairCatalogue = (
+  model: string,
+  slug: string,
+  variants: Array<{ quality_grade: string; price: number }> = [{ quality_grade: 'Premium', price: 199 }],
+) => ({
+  category: 'phone',
+  brand: 'iPhone',
+  slug: 'iphone',
+  models: [{
+    model,
+    slug,
+    repairTypes: [{
+      name: 'Back Glass Replacement',
+      slug: 'back-glass-replacement',
+      price: 0,
+      variants,
+    }],
+  }],
+});
+
 type DetailMatchingProps = { children?: ReactNode; initialResults?: unknown } & Record<string, unknown>;
 
 function findElementByType(node: ReactNode, type: unknown): ReactElement<DetailMatchingProps> | null {
@@ -879,6 +899,79 @@ describe('Repair Detail active and legacy page-data resolution', () => {
         category: 'phone', brand: 'iphone', model: 'iphone-15', repairType, pocket: null,
       })).toBeNull();
     }
+  });
+
+  it.each([
+    ['iPhone SE', 'iphone-se', [{ quality_grade: 'Genuine', price: 100 }]],
+    ['iPhone 7', 'iphone-7', []],
+    ['iPhone 7 Plus', 'iphone-7-plus', [{ quality_grade: 'Genuine', price: 100 }]],
+  ])('renders %s as a 60-minute Back Housing service', async (model, slug, variants) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphoneBackRepairCatalogue(model, slug, variants)] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: slug, 'repair-type': 'back-glass-replacement' })) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const faqs = faqElement?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+    expect(html).toContain(`<h1>${model} Back Glass / Back Housing Replacement</h1>`);
+    expect(html).toContain(`${model} back housing replacement at Ali Mobile in Ringwood Square.`);
+    expect(faqs[0]?.answer).toContain('rear housing or chassis assembly');
+    expect(html).toContain('60 Minutes');
+    expect(html).not.toContain('Timeframe Varies');
+    expect(html).toContain('6-Month Warranty');
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0]?.answer).toContain('usually takes around 60 minutes');
+    if (variants.length > 0) {
+      expect(html).toContain(`$${variants[0].price}`);
+      expect(html).toContain('"offers"');
+    }
+  });
+
+  it.each([
+    ['iPhone 8', 'iphone-8', []],
+    ['iPhone 14 Pro', 'iphone-14-pro', [{ quality_grade: 'Premium', price: 210 }]],
+    ['iPhone 15 Pro', 'iphone-15-pro', [{ quality_grade: 'Premium', price: 150 }]],
+    ['iPhone 17 Pro', 'iphone-17-pro', [{ quality_grade: 'Premium', price: 120 }]],
+  ])('renders %s as a variable-time Back Glass service', async (model, slug, variants) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphoneBackRepairCatalogue(model, slug, variants)] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: slug, 'repair-type': 'back-glass-replacement' })) });
+    const html = renderToStaticMarkup(page);
+    const faqElement = findElementByType(page, FaqAccordionComponent);
+    const faqs = faqElement?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+    expect(html).toContain(`<h1>${model} Back Glass / Back Housing Replacement</h1>`);
+    expect(html).toContain(`${model} back glass replacement at Ali Mobile in Ringwood Square.`);
+    expect(html).not.toContain('full rear housing replacement instead of back glass only');
+    expect(faqs[0]?.answer).toContain('rear glass component');
+    expect(html).toContain('Timeframe Varies');
+    expect(html).not.toContain('60 Minutes');
+    expect(html).toContain('6-Month Warranty');
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0]?.answer).toContain('varies depending on the repair scope');
+    expect(timingFaqs[0]?.answer).not.toMatch(/30|60|same-day|immediate|while you wait/i);
+    if (variants.length > 0) {
+      expect(html).toContain(`$${variants[0].price}`);
+      expect(html).toContain('"offers"');
+    }
+  });
+
+  it.each([
+    ['iPhone 7', 'iphone-7'],
+    ['iPhone 8', 'iphone-8'],
+    ['iPhone SE 2', 'iphone-se-2'],
+    ['iPhone 17 Pro Max', 'iphone-17-pro-max'],
+  ])('keeps quote-only %s Back Glass/Housing copy price-safe', async (model, slug) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphoneBackRepairCatalogue(model, slug, [])] });
+
+    const html = renderToStaticMarkup(
+      await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: slug, 'repair-type': 'back-glass-replacement' })) }),
+    );
+
+    expect(html).not.toContain('price below');
+    expect(html).not.toContain('"offers"');
   });
 
   it('keeps legacy single-camera Back Camera copy model-safe while using the shared turnaround', async () => {

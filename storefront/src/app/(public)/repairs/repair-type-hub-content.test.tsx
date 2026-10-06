@@ -90,7 +90,7 @@ describe('Repair Type Hub intent content', () => {
     ['Screen', ScreenReplacementPage, 'Screen replacement starts from $60.', '$60', 'Most screen replacements take around 30 minutes.'],
     ['Battery', BatteryReplacementPage, 'Battery replacement starts from $50.', '$50', 'Most battery replacements take around 30 minutes.'],
     ['Charging Port', ChargingPortReplacementPage, 'Charging port replacement starts from $50.', '$50', 'Most charging port replacements take around 30 minutes.'],
-    ['Back Glass', BackGlassReplacementPage, 'Back glass replacement starts from $50.', '$50', 'Most back glass replacements take around 30 minutes.'],
+    ['Back Glass', BackGlassReplacementPage, 'Back glass replacement starts from $50.', '$50', 'Turnaround varies by model, repair scope, damage found during inspection, and part availability. We confirm the expected turnaround before work begins.'],
   ] as const)('uses approved %s card body copy with semantic emphasis', async (_service, page, priceCopy, price, timeCopy) => {
     fetchRepairCatalog.mockResolvedValue({ brands: [] });
     fetchRepairTypeHubRepairResultSeeds.mockResolvedValue([]);
@@ -105,7 +105,11 @@ describe('Repair Type Hub intent content', () => {
     expect(priceCard.container).toHaveTextContent(priceCopy);
     expect(priceCard.container.querySelector('strong')).toHaveTextContent(price);
     expect(timeCard.container).toHaveTextContent(timeCopy);
-    expect(timeCard.container.querySelector('strong')).toHaveTextContent('30 minutes');
+    if (_service === 'Back Glass') {
+      expect(timeCard.container.querySelector('strong')).toBeNull();
+    } else {
+      expect(timeCard.container.querySelector('strong')).toHaveTextContent('30 minutes');
+    }
   });
 
   it('provides direct, diagnosis-first answers for the newly covered repair questions', async () => {
