@@ -17,7 +17,9 @@ vi.mock("next/link", () => ({
   ),
 }));
 vi.mock("@/components/ChatNowButton", () => ({ default: () => null }));
-vi.mock("@/components/seo/ServiceAreas", () => ({ default: () => null }));
+vi.mock("@/components/seo/ServiceAreas", () => ({
+  default: () => <section data-testid="service-areas">Local coverage</section>,
+}));
 
 afterEach(() => {
   cleanup();
@@ -58,5 +60,41 @@ describe("RepairsHubPage privacy FAQs", () => {
     expect(metadata.title).toBe("Professional Device Repair Services in Ringwood | Ali Mobile");
     expect(metadata.alternates?.canonical).toBe("/repairs");
     expect(metadata.openGraph?.url).toBe("/repairs");
+  });
+
+  it("keeps the hub chooser, policy wording, and phone timing guidance scoped to approved facts", () => {
+    render(<RepairsHubPage />);
+
+    expect(screen.getByTestId("service-areas")).toBeInTheDocument();
+
+    const phoneCard = screen.getByRole("link", { name: /Phone Repair/i });
+    expect(phoneCard).toHaveAttribute("href", "/repairs/phone");
+    expect(within(phoneCard).getByText("15–60 Minutes")).toBeInTheDocument();
+
+    const tabletCard = screen.getByRole("link", { name: /Tablet & iPad Repair/i });
+    expect(tabletCard).toHaveAttribute("href", "/repairs/tablet");
+    expect(within(tabletCard).getByText("1–2 Hours")).toBeInTheDocument();
+
+    const laptopCard = screen.getByRole("link", { name: /Laptop & MacBook Repair/i });
+    expect(laptopCard).toHaveAttribute("href", "/repairs/laptop");
+    expect(within(laptopCard).getByText("1–2 Hours")).toBeInTheDocument();
+    expect(within(laptopCard).queryByText("Fast turnaround")).not.toBeInTheDocument();
+
+    const watchCard = screen.getByRole("link", { name: /Smart Watch Repair/i });
+    expect(watchCard).toHaveAttribute("href", "/repairs/watch");
+    expect(within(watchCard).getByText("30–60 Minutes")).toBeInTheDocument();
+    expect(within(watchCard).queryByText("2-4 hrs")).not.toBeInTheDocument();
+
+    expect(screen.queryByText("6 mo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Warranty on Repairs")).not.toBeInTheDocument();
+    expect(screen.getByText("6-Month")).toBeInTheDocument();
+    expect(screen.getByText("Warranty on Standard Repairs")).toBeInTheDocument();
+
+    const timingDisclosure = screen.getByText("How long does a phone repair usually take?").closest("details");
+    expect(timingDisclosure).not.toBeNull();
+    expect(within(timingDisclosure!).getByText(/15–60 minutes/i)).toBeInTheDocument();
+    expect(within(timingDisclosure!).getByText(/model, repair type, part availability, device condition and current workload/i)).toBeInTheDocument();
+    expect(within(timingDisclosure!).getByText(/Choose your phone model for more specific repair information/i)).toBeInTheDocument();
+    expect(within(timingDisclosure!).queryByText(/80%|same day/i)).not.toBeInTheDocument();
   });
 });

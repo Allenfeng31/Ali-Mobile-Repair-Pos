@@ -34,7 +34,7 @@ const repairCategories = [
     description:
       "Broken screen, weak battery, charging fault, or water damage. We repair iPhone, Samsung, Oppo, Pixel, and more.",
     image: "/images/services/phone-repair.jpg",
-    metric: "15-60 min",
+    metric: "15–60 Minutes",
     detail: "Common screen and battery repairs",
   },
   {
@@ -43,16 +43,16 @@ const repairCategories = [
     description:
       "Fast iPad and Samsung tablet repairs with careful bonding, glass replacement, battery service, and charging fixes.",
     image: "/images/services/tablet-repair.jpg",
-    metric: "1-2 hrs",
+    metric: "1–2 Hours",
     detail: "Most iPad and tablet repairs",
   },
   {
-    href: "/repairs/laptop/macbook",
+    href: "/repairs/laptop",
     title: "Laptop & MacBook Repair",
     description:
       "MacBook screen, battery, keyboard, charging and diagnostic repair pathways matched to the exact model.",
     image: "/images/services/laptop-repair.jpg",
-    metric: "Fast turnaround",
+    metric: "1–2 Hours",
     detail: "Model-specific repair options",
   },
   {
@@ -61,14 +61,14 @@ const repairCategories = [
     description:
       "Precision Apple Watch and smart watch screen, battery, rear glass, and sealing repairs for everyday wear.",
     image: "/images/services/watch-repair.jpg",
-    metric: "2-4 hrs",
+    metric: "30–60 Minutes",
     detail: "Precision reseal process",
   },
 ];
 
 const trustSignals = [
   { value: "No Fix", label: "No Charge Policy" },
-  { value: "6 mo", label: "Warranty on Repairs" },
+  { value: "6-Month", label: "Warranty on Standard Repairs" },
   { value: "C1", label: "Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134" },
 ];
 
@@ -96,7 +96,7 @@ const faqs = [
   {
     question: "How long does a phone repair usually take?",
     answer:
-      "Many common phone repairs are fast. Around 80% of common phone models can usually be handled same day when parts are in stock. Timing depends on the exact model, repair queue, parts availability and fault condition.",
+      "Many common phone repairs take around 15–60 minutes, depending on the model, repair type, part availability, device condition and current workload. Choose your phone model for more specific repair information.",
   },
   {
     question: "What repair types can I choose from?",
