@@ -71,21 +71,21 @@ const SAMSUNG_GALAXY_NOTE_WHY_CHOOSE_SHARED_HIGHLIGHTS: SamsungWhyChooseHighligh
   { icon: Wrench, text: 'Seal limitations explained clearly' },
 ];
 
-function buildSamsungNoteTimingCards(
-  underHourPoints: [string, string],
-  fastTurnaroundPoints: [string, string],
+function buildSamsungNoteServiceCards(
+  repairPlanningPoints: [string, string],
+  repairScopePoints: [string, string],
   quoteFirstPoints: [string, string]
 ): WhyChooseConfig['cards'] {
   return [
     {
-      title: 'Fast Repair Timing',
+      title: 'Repair planning',
       icon: ClipboardCheck,
-      points: underHourPoints,
+      points: repairPlanningPoints,
     },
     {
-      title: 'Fast Turnaround',
+      title: 'Repair-scope checks',
       icon: Wrench,
-      points: fastTurnaroundPoints,
+      points: repairScopePoints,
     },
     {
       title: 'Clear Quote First',
@@ -132,10 +132,10 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} screen replacement`,
       intro:
         `Screen faults on this Note can overlap with ${biometricLabel} symptoms, ${displayEdgeDescriptor} condition, frame condition, and S Pen digitizer response, so we inspect the full display path before confirming the final repair outcome.`,
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward Note screen repairs can be completed in under an hour once the correct part and repair path are confirmed.',
-          `We still check the ${biometricLabel} path, frame fit, and S Pen input response before giving a timing estimate so the handover stays realistic.`,
+          'We confirm the correct screen part and repair path before work begins.',
+          `We check the ${biometricLabel} path, frame fit, and S Pen input response so the handover reflects the confirmed repair scope.`,
         ],
         [
           'We test the display, touch, fingerprint, and S Pen response before and after service so the repair follows the actual fault path.',
@@ -152,9 +152,9 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} battery replacement`,
       intro:
         'Battery complaints can overlap with charging-path or board-level faults, so we confirm the likely cause before treating the battery as the only answer.',
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward battery jobs are completed quickly once the correct battery and repair path are confirmed.',
+          'We confirm the battery fault path and correct replacement part before work begins.',
           'We still inspect runtime, charging, and swelling risks before handover so the handover remains practical.',
         ],
         [
@@ -172,10 +172,10 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} charging port replacement`,
       intro:
         'USB-C issues are diagnosed carefully because cable fit, contamination, battery symptoms, and board-level charging faults can all present similarly.',
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward USB-C repairs can be completed in under an hour once the fault is confirmed.',
-          'We still test cable fit, debris, and charge draw first so the timing matches the actual repair path.',
+          'We confirm the USB-C fault path and correct replacement part before work begins.',
+          'We test cable fit, debris, and charge draw first so the repair follows the actual fault path.',
         ],
         [
           'We check for dirt and debris before replacing the physical port.',
@@ -192,10 +192,10 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} back glass replacement`,
       intro:
         `Rear glass work can overlap with frame damage, camera-area impact, ${hasIntegratedSPen ? 'S Pen slot-area distortion, ' : ''}and wireless-charging behaviour, so the scope is reviewed carefully before work starts.`,
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward rear-glass jobs can move quickly once the right assembly is confirmed.',
-          'We still inspect the rear panel, frame fit, and slot-area condition before giving a timing estimate.',
+          'We confirm the rear-panel repair path before work begins.',
+          'We inspect the rear panel, frame fit, and slot-area condition before confirming the repair scope.',
         ],
         [
           'We check the frame and rear-panel seating to ensure the new assembly sits flush.',
@@ -207,15 +207,15 @@ function buildSamsungNoteWhyChooseContent(
         ]
       ),
     },
-    'back-housing-replacement': {
+    'back-glass-replacement': {
       kicker: 'Ali Mobile support',
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} back glass replacement`,
       intro:
         `Rear glass work can overlap with frame damage, camera-area impact, ${hasIntegratedSPen ? 'S Pen slot-area distortion, ' : ''}and wireless-charging behaviour, so the scope is reviewed carefully before work starts.`,
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward rear-glass jobs can move quickly once the right assembly is confirmed.',
-          'We still inspect the rear panel, frame fit, and slot-area condition before giving a timing estimate.',
+          'We confirm the rear-panel repair path before work begins.',
+          'We inspect the rear panel, frame fit, and slot-area condition before confirming the repair scope.',
         ],
         [
           'We check the frame and rear-panel seating to ensure the new assembly sits flush.',
@@ -232,10 +232,10 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} front camera replacement`,
       intro:
         `This model uses ${frontCameraLabel}, so we keep the diagnosis focused on that camera path and separate it from software, display, and broader board-level faults first.`,
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward front-camera jobs can move quickly once the camera path is confirmed.',
-          'We still check the camera opening, nearby impact, and preview behaviour before giving a timing estimate.',
+          'We confirm the front-camera repair path before work begins.',
+          'We check the camera opening, nearby impact, and preview behaviour before confirming the repair scope.',
         ],
         [
           'We perform camera-versus-software testing to confirm the physical module has failed.',
@@ -252,10 +252,10 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} back camera replacement`,
       intro:
         `This model has a ${rearCameraLabel}, so we identify the affected camera path first instead of treating every zoom, focus, or preview fault as if all rear cameras are replaced together.`,
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
-          'Many straightforward rear-camera jobs can move quickly once the affected module is identified.',
-          'We still test the supported camera modes and inspect lens glass and housing condition before giving a timing estimate.',
+          'We confirm the affected rear-camera module before work begins.',
+          'We test the supported camera modes and inspect lens glass and housing condition before confirming the repair scope.',
         ],
         [
           'We test focus and optical stability to confirm the internal camera is faulty.',
@@ -272,7 +272,7 @@ function buildSamsungNoteWhyChooseContent(
       heading: `Why choose Ali Mobile for ${hardwareConfig.modelName} logic board repair`,
       intro:
         'Board-level faults need disciplined diagnosis after simpler causes are excluded, so we keep the route quote-only and explain repair-versus-data priorities clearly.',
-      cards: buildSamsungNoteTimingCards(
+      cards: buildSamsungNoteServiceCards(
         [
           'Board-level work is only approved after we explain the likely scope, uncertainty, and limitations without fabricating a fixed price.',
           'That keeps the quote practical when no-power or restart symptoms may still be tied to simpler causes.',
@@ -392,18 +392,18 @@ export function getSamsungWhyChooseContent(
           },
         ],
       },
-      'back-housing-replacement': {
+      'back-glass-replacement': {
         kicker: 'Ali Mobile support',
-        heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+        heading: `Why choose Ali Mobile for ${modelName} back glass replacement`,
         intro:
-          'Rear housing work can overlap with frame damage, camera-area impact, wireless-charging behaviour, and S Pen slot-area distortion, so the scope is reviewed carefully before work starts.',
+          'Rear glass work can overlap with frame damage, camera-area impact, wireless-charging behaviour, and S Pen slot-area distortion, so the scope is reviewed carefully before work starts.',
         cards: [
           {
             title: 'Rear housing and frame review',
             icon: Smartphone,
             points: [
-              'We distinguish rear housing or rear-panel damage from broader frame deformation before confirming the repair path.',
-              'Severe frame damage stays subject to separate inspection rather than being assumed inside every housing repair.',
+              'We distinguish rear glass or rear-panel damage from broader frame deformation before confirming the repair path.',
+              'Severe frame damage stays subject to separate inspection rather than being assumed inside every back glass repair.',
             ],
           },
           {
@@ -418,7 +418,7 @@ export function getSamsungWhyChooseContent(
             title: 'Clear repair boundaries',
             icon: ClipboardCheck,
             points: [
-              'Back Housing Replacement does not automatically include cameras, charging components, or logic-board work, and opening the phone does not restore factory water resistance.',
+              'Back Glass Replacement does not automatically include cameras, charging components, or logic-board work, and opening the phone does not restore factory water resistance.',
             ],
           },
         ],
@@ -617,18 +617,18 @@ export function getSamsungWhyChooseContent(
           },
         ],
       },
-      'back-housing-replacement': {
+      'back-glass-replacement': {
         kicker: 'Ali Mobile support',
-        heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+        heading: `Why choose Ali Mobile for ${modelName} back glass replacement`,
         intro:
-          `Rear housing work can overlap with frame damage, camera-area impact, wireless-charging behaviour${hasSPenSlot ? ', and S Pen slot-area distortion' : ''}, so the scope is reviewed carefully before work starts.`,
+          `Rear glass work can overlap with frame damage, camera-area impact, wireless-charging behaviour${hasSPenSlot ? ', and S Pen slot-area distortion' : ''}, so the scope is reviewed carefully before work starts.`,
         cards: [
           {
             title: 'Rear housing and frame review',
             icon: Smartphone,
             points: [
-              'We distinguish rear housing or rear-panel damage from broader frame deformation before confirming the repair path.',
-              'Severe frame damage stays subject to separate inspection rather than being assumed inside every housing repair.',
+              'We distinguish rear glass or rear-panel damage from broader frame deformation before confirming the repair path.',
+              'Severe frame damage stays subject to separate inspection rather than being assumed inside every back glass repair.',
             ],
           },
           {
@@ -645,7 +645,7 @@ export function getSamsungWhyChooseContent(
             title: 'Clear repair boundaries',
             icon: ClipboardCheck,
             points: [
-              'Back Housing Replacement does not automatically include cameras, charging components, or logic-board work, and opening the phone does not restore factory water resistance.',
+              'Back Glass Replacement does not automatically include cameras, charging components, or logic-board work, and opening the phone does not restore factory water resistance.',
             ],
           },
         ],
@@ -759,11 +759,11 @@ export function getSamsungWhyChooseContent(
           `We test the display output, touch response, and ${biometricLabel} to ensure your ${modelName} functions as expected after screen repair. Screen damage, frame condition, and calibration requirements can overlap, so we confirm the repair path before promising the outcome.`,
         cards: [
           {
-            title: 'Fast Repair Timing',
+            title: 'Repair planning',
             icon: ClipboardCheck,
             points: [
-              `Many straightforward ${modelName} screen repairs can be completed quickly once the correct part and repair path are confirmed.`,
-              `We still inspect the ${displayLabel}, frame fit, and ${biometricLabel} before giving a timing estimate, so the quote stays realistic.`,
+              `We confirm the correct ${modelName} screen part and repair path before work begins.`,
+              `We inspect the ${displayLabel}, frame fit, and ${biometricLabel} before confirming the repair scope.`,
             ],
           },
           {
@@ -783,10 +783,10 @@ export function getSamsungWhyChooseContent(
           `We test your ${modelName} power path to confirm the battery is the main fault before replacing it. Battery wear, charging behaviour, and board-level faults can overlap, so we separate them before quoting.`,
         cards: [
           {
-            title: 'Fast Turnaround',
+            title: 'Repair planning',
             icon: ClipboardCheck,
             points: [
-              `Many straightforward battery jobs are completed quickly once the correct battery and repair path are confirmed.`,
+              'We confirm the battery fault path and correct replacement part before work begins.',
               `We keep the handover practical by checking runtime, charging, and swelling risks before handover.`,
             ],
           },
@@ -807,11 +807,11 @@ export function getSamsungWhyChooseContent(
           `We clear debris and test cables before quoting a full port replacement for your ${modelName}. USB-C faults can overlap with battery or board issues, so we check the full charging path first.`,
         cards: [
           {
-            title: 'Fast Repair Timing',
+            title: 'Repair planning',
             icon: ClipboardCheck,
             points: [
-              `Many straightforward ${chargingPortLabel} repairs can be completed quickly once the fault and part availability are confirmed.`,
-              `We still test cable fit, debris, and charge draw first so timing matches the actual repair path.`,
+              `We confirm the ${chargingPortLabel} fault and correct replacement part before work begins.`,
+              'We test cable fit, debris, and charge draw first so the repair follows the actual fault path.',
             ],
           },
           {
@@ -824,17 +824,17 @@ export function getSamsungWhyChooseContent(
           },
         ],
       },
-      'back-housing-replacement': {
+      'back-glass-replacement': {
         kicker: 'Ali Mobile support',
-        heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+        heading: `Why choose Ali Mobile for ${modelName} back glass replacement`,
         intro:
-          `We inspect the frame condition and rear-panel fit before confirming back housing work for your ${modelName}. Rear damage, button alignment, and charging behaviour can overlap, so we confirm the structural path first.`,
+          `We inspect the frame condition and rear-panel fit before confirming back glass work for your ${modelName}. Rear damage, button alignment, and charging behaviour can overlap, so we confirm the structural path first.`,
         cards: [
           {
             title: 'Frame inspection',
             icon: Search,
             points: [
-              `We check the frame and rear-panel seating to ensure the new housing sits flush.`,
+              'We check the frame and rear-panel seating so the repaired back glass sits flush.',
               `If deformation or swelling is present, we explain whether that needs separate attention before fitment.`,
             ],
           },
@@ -842,8 +842,8 @@ export function getSamsungWhyChooseContent(
             title: 'Seal protection',
             icon: ShieldCheck,
             points: [
-              `We replace the housing with a fresh seal where appropriate, though factory water resistance is not guaranteed.`,
-              `You get a clear explanation of what the housing work covers and what it does not.`,
+              'We replace the rear panel with a fresh seal where appropriate, though factory water resistance is not guaranteed.',
+              'You get a clear explanation of what the back glass work covers and what it does not.',
             ],
           },
         ],
@@ -1018,24 +1018,24 @@ export function getSamsungWhyChooseContent(
         },
       ],
     },
-    'back-housing-replacement': {
+    'back-glass-replacement': {
       kicker: 'Ali Mobile support',
-      heading: `Why choose Ali Mobile for ${modelName} back housing replacement`,
+      heading: `Why choose Ali Mobile for ${modelName} back glass replacement`,
       intro:
-        'Rear housing work on a foldable phone can overlap with hinge-enclosure damage, camera-area impact, and wireless-charging concerns, so the practical scope is checked before quoting.',
+        'Rear glass work on a foldable phone can overlap with hinge-enclosure damage, camera-area impact, and wireless-charging concerns, so the practical scope is checked before quoting.',
       cards: [
         {
           title: 'Rear housing and frame review',
           icon: Smartphone,
           points: [
-            'We inspect rear-panel damage, structural fit, and frame distortion before confirming housing work.',
+            'We inspect rear-panel damage, structural fit, and frame distortion before confirming back glass work.',
           ],
         },
         {
           title: 'Hinge and camera-area separation',
           icon: Search,
           points: [
-            'Hinge enclosure damage and camera-area impact are checked so housing work is not quoted as if it solves every related issue.',
+            'Hinge enclosure damage and camera-area impact are checked so back glass work is not quoted as if it solves every related issue.',
           ],
         },
         {

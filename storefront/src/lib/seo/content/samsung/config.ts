@@ -19,11 +19,21 @@ export const SAMSUNG_FOLDABLE_REPAIR_TYPES = [
   'screen-replacement',
   'battery-replacement',
   'charging-port-replacement',
-  'back-housing-replacement',
+  'back-glass-replacement',
   'front-camera-replacement',
   'back-camera-replacement',
   'logic-board-repair',
 ] as const satisfies ReadonlyArray<AliMobileEnhancedSamsungRepairType>;
+
+export const SAMSUNG_STANDARD_REPAIR_TURNAROUND_MINUTES = {
+  'screen-replacement': 30,
+  'battery-replacement': 30,
+  'charging-port-replacement': 30,
+  'back-glass-replacement': 20,
+  'front-camera-replacement': 30,
+  'back-camera-replacement': 30,
+  'logic-board-repair': 30,
+} as const satisfies Partial<Record<AliMobileEnhancedSamsungRepairType, number>>;
 
 export const SAMSUNG_GALAXY_S_REPAIR_TYPES = SAMSUNG_FOLDABLE_REPAIR_TYPES;
 export const SAMSUNG_GALAXY_S23_ULTRA_REPAIR_TYPES = SAMSUNG_GALAXY_S_REPAIR_TYPES;
@@ -424,7 +434,6 @@ const SAMSUNG_GALAXY_A_MODEL_CODES: Partial<
 
 function defineSamsungGalaxyAConfig(modelName: string): SamsungHardwareConfig {
   const modelSlug = slugify(modelName) as AliMobileEnhancedSamsungModelSlug;
-  const isLbSupported = ["galaxy-a20","galaxy-a21","galaxy-a30","galaxy-a31","galaxy-a32","galaxy-a40","galaxy-a50","galaxy-a51","galaxy-a52","galaxy-a53","galaxy-a54","galaxy-a55","galaxy-a70","galaxy-a71","galaxy-a72","galaxy-a73"].includes(modelSlug);
 
   let biometrics: SamsungBiometricClass = 'unknown';
   if (['galaxy-a11', 'galaxy-a20', 'galaxy-a21', 'galaxy-a21s', 'galaxy-a30', 'galaxy-a40'].includes(modelSlug)) biometrics = 'rear-fingerprint';
@@ -435,11 +444,11 @@ function defineSamsungGalaxyAConfig(modelName: string): SamsungHardwareConfig {
     'screen-replacement',
     'battery-replacement',
     'charging-port-replacement',
-    'back-housing-replacement',
+    'back-glass-replacement',
     'front-camera-replacement',
-    'back-camera-replacement'
+    'back-camera-replacement',
+    'logic-board-repair',
   ];
-  if (isLbSupported) supportedRepairTypes.push('logic-board-repair');
 
   return defineSamsungHardwareConfig({
     modelSlug,

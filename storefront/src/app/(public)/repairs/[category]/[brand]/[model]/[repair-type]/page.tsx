@@ -5266,6 +5266,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     )
       ? 'Current repair option for this model. We confirm the suitable option before work begins.'
       : undefined;
+  const samsungResolvedPriceUnknownTierDescription = isAliMobileEnhancedSamsungPage
+    ? 'Current repair option for this model. We confirm the suitable option before work begins.'
+    : undefined;
   const seoDisplayModel =
     enhancedLenovoTabletSeoPocket?.modelName ??
     enhancedSamsungTabletSeoPocket?.modelName ??
@@ -5490,6 +5493,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type'],
     knownRepair?.name || repairTypeDerived
   );
+  const samsungCommercialHeroSubtitle = isAliMobileEnhancedSamsungPage && samsungEnhancedRepairType
+    ? detailPricing.validVariants.length > 0
+      ? `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
+      : `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
+    : undefined;
   const genericRepairIntentDescription = getRepairIntentDescription({
     model: seoDisplayModel,
     repairName: finalRepairName,
@@ -5526,14 +5534,17 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     })
     : baseFaqs;
   const costFaq = faqsWithApprovedTurnaround.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
-  const faqs = seoPocket?.useResolvedTierPriceFaq && costFaq
+  const shouldUseResolvedTierPriceFaq = seoPocket?.useResolvedTierPriceFaq &&
+    (!isAliMobileEnhancedSamsungPage || detailPricing.validVariants.length >= 2);
+  const faqs = shouldUseResolvedTierPriceFaq && costFaq
     ? withResolvedTierPriceFaq({
       faqs: faqsWithApprovedTurnaround,
       question: costFaq.question,
       model: displayModel,
       repairName: finalRepairName,
       pricing: detailPricing,
-      unknownTierDescription: iphoneResolvedPriceUnknownTierDescription,
+      unknownTierDescription:
+        samsungResolvedPriceUnknownTierDescription ?? iphoneResolvedPriceUnknownTierDescription,
     })
     : faqsWithApprovedTurnaround;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
@@ -5702,6 +5713,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               enhancedSamsungTabletSeoPocket?.heroSubtitle ??
               enhancedIpadSeoPocket?.heroSubtitle ??
               seoPocket?.heroSubtitle ??
+              samsungCommercialHeroSubtitle ??
               iphoneScreenFamilyHeroSubtitle ??
               iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
               iphoneCameraModuleFamilyHeroSubtitle ??
@@ -5750,12 +5762,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                     ? approvedTurnaroundMinutes
                       ? `${approvedTurnaroundMinutes} Minutes`
                       : 'Timeframe Varies'
+                    : approvedTurnaroundMinutes
+                    ? `${approvedTurnaroundMinutes} Minutes`
                     : samsungFoldableScreenDetailContext
                     ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
                     ? 'Diagnostic Required'
-                    : approvedTurnaroundMinutes
-                    ? `${approvedTurnaroundMinutes} Minutes`
                     : 'Fast Turnaround'}
                 </div>
                 <div className="trust-badge">

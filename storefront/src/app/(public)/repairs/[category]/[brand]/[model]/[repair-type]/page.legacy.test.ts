@@ -1006,6 +1006,213 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     );
   });
 
+  it.each([
+    ['screen-replacement', 'Screen Replacement', 30],
+    ['battery-replacement', 'Battery Replacement', 30],
+    ['charging-port-replacement', 'Charging Port Replacement', 30],
+    ['back-glass-replacement', 'Back Glass Replacement', 20],
+    ['front-camera-replacement', 'Front Camera Replacement', 30],
+    ['back-camera-replacement', 'Back Camera Replacement', 30],
+    ['logic-board-repair', 'Logic Board Repair', 30],
+  ])('renders the approved Samsung semantic turnaround for %s', async (repairType, repairName, turnaroundMinutes) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model: 'Galaxy S25',
+          slug: 'galaxy-s25',
+          repairTypes: [{
+            name: repairName,
+            slug: repairType,
+            price: repairType === 'logic-board-repair' ? 0 : 199,
+            variants: repairType === 'logic-board-repair' ? [] : [{ quality_grade: 'Standard', price: 199 }],
+          }],
+        }],
+      }],
+    });
+
+    const page = await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-s25', 'repair-type': repairType })),
+    });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+    expect(html).toContain('6-Month Warranty');
+    expect(html).not.toContain('Fast Turnaround');
+    expect(html).not.toContain('Timeframe Varies');
+    expect(html).not.toMatch(/same-day|same day|immediate|while you wait/i);
+    expect(html).toContain(
+      repairType === 'logic-board-repair'
+        ? 'Galaxy S25 logic board repair at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.'
+        : `Galaxy S25 ${repairName.toLowerCase()} at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
+    );
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0]).toEqual(expect.objectContaining({
+      question: `How long does Galaxy S25 ${repairName} usually take?`,
+      answer: `Galaxy S25 ${repairName.toLowerCase()} usually takes around ${turnaroundMinutes} minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.`,
+    }));
+  });
+
+  it('keeps Samsung quote-only logic-board content quote-safe and out of Offer schema', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model: 'Galaxy S25',
+          slug: 'galaxy-s25',
+          repairTypes: [{ name: 'Logic Board Repair', slug: 'logic-board-repair', price: 0, variants: [] }],
+        }],
+      }],
+    });
+
+    const html = renderToStaticMarkup(await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-s25', 'repair-type': 'logic-board-repair' })),
+    }));
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain('Galaxy S25 logic board repair at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.');
+    expect(html).not.toContain('price below');
+    expect(serviceSchema).not.toContain('"offers"');
+  });
+
+  it.each([
+    ['screen-replacement', 'Screen Replacement', 30],
+    ['back-glass-replacement', 'Back Glass Replacement', 20],
+  ])('uses live Samsung tier pricing only for multi-tier %s FAQs', async (repairType, repairName, turnaroundMinutes) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model: 'Galaxy S24 Ultra',
+          slug: 'galaxy-s24-ultra',
+          repairTypes: [{
+            name: repairName,
+            slug: repairType,
+            price: 0,
+            variants: [
+              { quality_grade: 'Standard', price: 299 },
+              { quality_grade: 'Custom', price: 399 },
+            ],
+          }],
+        }],
+      }],
+    });
+
+    const page = await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-s24-ultra', 'repair-type': repairType })),
+    });
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const priceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+    const timingFaq = faqs.find((faq) => /how long/i.test(faq.question));
+
+    expect(timingFaq?.answer).toContain(`around ${turnaroundMinutes} minutes`);
+    expect(priceFaq?.answer).toContain('Standard – $299');
+    expect(priceFaq?.answer).toContain('Custom – $399. Current repair option for this model.');
+    expect(priceFaq?.answer).not.toContain('Current screen option for this model.');
+  });
+
+  it('server-renders all 42 approved Galaxy Note detail routes', async () => {
+    const noteModels = [
+      ['Galaxy Note 8', 'galaxy-note-8'],
+      ['Galaxy Note 9', 'galaxy-note-9'],
+      ['Galaxy Note 10', 'galaxy-note-10'],
+      ['Galaxy Note 10+', 'galaxy-note-10-plus'],
+      ['Galaxy Note 20', 'galaxy-note-20'],
+      ['Galaxy Note 20 Ultra', 'galaxy-note-20-ultra'],
+    ] as const;
+    const repairFamilies = [
+      ['screen-replacement', 'Screen Replacement', 30],
+      ['battery-replacement', 'Battery Replacement', 30],
+      ['charging-port-replacement', 'Charging Port Replacement', 30],
+      ['back-glass-replacement', 'Back Glass Replacement', 20],
+      ['front-camera-replacement', 'Front Camera Replacement', 30],
+      ['back-camera-replacement', 'Back Camera Replacement', 30],
+      ['logic-board-repair', 'Logic Board Repair', 30],
+    ] as const;
+
+    for (const [model, modelSlug] of noteModels) {
+      for (const [repairType, repairName, turnaroundMinutes] of repairFamilies) {
+        fetchRepairCatalog.mockResolvedValue({
+          brands: [{
+            category: 'phone',
+            brand: 'Samsung',
+            slug: 'samsung',
+            models: [{
+              model,
+              slug: modelSlug,
+              repairTypes: [{
+                name: repairName,
+                slug: repairType,
+                price: repairType === 'logic-board-repair' ? 0 : 199,
+                variants: repairType === 'logic-board-repair' ? [] : [{ quality_grade: 'Standard', price: 199 }],
+              }],
+            }],
+          }],
+        });
+
+        const page = await RepairServicePage({
+          params: Promise.resolve(params({ brand: 'samsung', model: modelSlug, 'repair-type': repairType })),
+        });
+        const html = renderToStaticMarkup(page);
+        const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{
+          question: string;
+          answer: string;
+        }>;
+
+        expect(html).toContain(`<h1>${model} ${repairName}</h1>`);
+        expect(html).toContain(`${turnaroundMinutes} Minutes`);
+        expect(html).toContain('6-Month Warranty');
+        expect(faqs.map((faq) => `${faq.question} ${faq.answer}`).join(' '))
+          .not.toMatch(/same-day|same day|immediate|while you wait/i);
+      }
+    }
+  });
+
+  it.each([
+    ['Galaxy S24 Ultra', 'galaxy-s24-ultra', 'Screen Replacement', 'screen-replacement', 30],
+    ['Galaxy S23 Ultra', 'galaxy-s23-ultra', 'Back Glass Replacement', 'back-glass-replacement', 20],
+    ['Galaxy Z Fold 6', 'galaxy-z-fold-6', 'Screen Replacement', 'screen-replacement', 30],
+  ])('keeps non-Note Samsung %s %s server-renderable', async (model, modelSlug, repairName, repairType, turnaroundMinutes) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model,
+          slug: modelSlug,
+          repairTypes: [{
+            name: repairName,
+            slug: repairType,
+            price: repairType === 'logic-board-repair' ? 0 : 199,
+            variants: repairType === 'logic-board-repair' ? [] : [{ quality_grade: 'Standard', price: 199 }],
+          }],
+        }],
+      }],
+    });
+
+    const html = renderToStaticMarkup(await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: modelSlug, 'repair-type': repairType })),
+    }));
+
+    expect(html).toContain(`<h1>${model} ${repairName}</h1>`);
+    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+  });
+
+  it('leaves Galaxy A16 Logic Board on its existing hub redirect', async () => {
+    await expect(RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-a16', 'repair-type': 'logic-board-repair' })),
+    })).rejects.toThrow('NEXT_REDIRECT_TEST:/repairs/phone/logic-board-repair');
+  });
+
   it('leaves the matching module unseeded when the server reader has no result', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [active] });
 
