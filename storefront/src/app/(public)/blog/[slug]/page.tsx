@@ -5,8 +5,9 @@ import { notFound } from "next/navigation";
 import { BlogImage } from "@/components/BlogImage";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
 import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
-import { IPHONE_SCREEN_REPAIR_COST_SLUG, IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA } from "@/data/iphoneScreenRepairCost";
+import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
 import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
+import { fetchRepairCatalog } from "@/lib/api";
 import { getPostData, isRemovedBlogSlug, type BlogPost } from "@/lib/blog";
 
 import styles from "./BlogPost.module.css";
@@ -106,15 +107,25 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     }
   }
 
+  let iphoneScreenPriceTable = null;
+  if (isIphoneScreenCostArticle) {
+    try {
+      iphoneScreenPriceTable = buildIphoneScreenRepairPriceTable(await fetchRepairCatalog());
+    } catch {
+      // The article must not substitute stale fixed prices when the catalogue is unavailable.
+      iphoneScreenPriceTable = null;
+    }
+  }
+
   const datePublished = isSamsungGalaxySScreenCostArticle
     ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.datePublished
     : isIphoneScreenCostArticle
-    ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.datePublished
+    ? IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA.datePublished
     : postData.date;
   const dateModified = isSamsungGalaxySScreenCostArticle
     ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified
     : isIphoneScreenCostArticle
-    ? IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.dateModified
+    ? IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA.dateModified
     : postData.updated_at || postData.date;
   const formatDate = (date: string) => new Date(date).toLocaleDateString("en-AU", {
     year: "numeric",
@@ -194,9 +205,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
 
         <article className={styles.articleCard}>
           {isSamsungGalaxySScreenCostArticle ? (
-            <SamsungGalaxySScreenRepairCostArticle />
+          <SamsungGalaxySScreenRepairCostArticle />
           ) : isIphoneScreenCostArticle ? (
-            <IphoneScreenRepairCostArticle />
+            <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
           ) : (
             <div
               className={styles.articleBody}

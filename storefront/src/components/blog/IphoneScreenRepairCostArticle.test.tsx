@@ -4,22 +4,52 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { IphoneScreenRepairCostArticle } from "./IphoneScreenRepairCostArticle";
-import { IPHONE_SCREEN_REPAIR_PRICES } from "@/data/iphoneScreenRepairCost";
+import { buildIphoneScreenRepairPriceTable } from "@/data/iphoneScreenRepairCost";
 
 const articleSource = readFileSync(resolve(process.cwd(), "src/components/blog/IphoneScreenRepairCostArticle.tsx"), "utf8");
 const articleStyles = readFileSync(resolve(process.cwd(), "src/components/blog/IphoneScreenRepairCostArticle.module.css"), "utf8");
+const priceTable = buildIphoneScreenRepairPriceTable({
+  fetchedAt: "2026-10-08T01:23:00.000Z",
+  brands: [{
+    category: "phone",
+    slug: "iphone",
+    models: [
+      { model: "iPhone 18", repairTypes: [{ slug: "screen-replacement", price: 0, variants: [{ quality_grade: "Premium", price: 0 }] }] },
+      { model: "iPhone 17 Pro Max", repairTypes: [{ slug: "screen-replacement", price: 190, variants: [{ quality_grade: "Standard", price: 190 }, { quality_grade: "Premium", price: 299 }, { quality_grade: "Genuine", price: 570 }] }] },
+      { model: "iPhone 15 Pro", repairTypes: [{ slug: "screen-replacement", price: 170, variants: [{ quality_grade: "Standard", price: 170 }, { quality_grade: "Premium", price: 230 }, { quality_grade: "Genuine", price: 390 }] }] },
+      { model: "iPhone 14 Pro", repairTypes: [{ slug: "screen-replacement", price: 170, variants: [{ quality_grade: "Standard", price: 170 }, { quality_grade: "Premium", price: 220 }, { quality_grade: "Genuine", price: 290 }] }] },
+      { model: "iPhone 13", repairTypes: [{ slug: "screen-replacement", price: 129, variants: [{ quality_grade: "Standard", price: 129 }, { quality_grade: "Premium", price: 169 }, { quality_grade: "Genuine", price: 240 }] }] },
+      { model: "iPhone 12", repairTypes: [{ slug: "screen-replacement", price: 129, variants: [{ quality_grade: "Standard", price: 129 }, { quality_grade: "Premium", price: 169 }, { quality_grade: "Genuine", price: 199 }] }] },
+      { model: "iPhone 11", repairTypes: [{ slug: "screen-replacement", price: 120, variants: [{ quality_grade: "Standard", price: 120 }, { quality_grade: "Genuine", price: 150 }] }] },
+      { model: "iPhone 8", repairTypes: [{ slug: "screen-replacement", price: 85, variants: [{ quality_grade: "Genuine", price: 85 }] }] },
+    ],
+  }],
+});
 
 describe("IphoneScreenRepairCostArticle", () => {
   it("renders the accessible price, image and sample evidence", () => {
-    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle priceTable={priceTable} />);
 
-    expect(html).toContain("Current Ali Mobile iPhone screen replacement prices by model and screen option");
+    expect(html).toContain("Current Ali Mobile iPhone screen replacement prices by model and available repair grade");
+    expect(html).toContain("current iPhone screen replacement prices range from $85 to $570");
+    expect(html).toContain("Catalogue snapshot refreshed 8 October 2026.");
+    expect(html).toContain("Prices may change as parts pricing changes.");
+    expect(html).not.toContain("$599");
+    expect(html).not.toContain("Prices checked");
     expect(html).toContain("<details");
-    expect(html).toContain("More iPhone models (13)");
-    expect(html).toContain("Earlier iPhone screen replacement prices by model and screen option");
-    expect(html.indexOf("iPhone 11")).toBeLessThan(html.indexOf("<details"));
-    expect(html.indexOf("iPhone XS Max")).toBeGreaterThan(html.indexOf("<details"));
-    expect(html).toContain("Not currently listed online. Contact us to confirm current screen options.");
+    expect(html).toContain("<summary>View iPhone 13 and older screen repair prices</summary>");
+    expect(html).not.toContain("<details open");
+    const detailsStart = html.indexOf("<details");
+    const currentTable = html.slice(0, detailsStart);
+    const olderTable = html.slice(detailsStart, html.indexOf("</details>", detailsStart));
+    expect(currentTable).toContain("iPhone 17 Pro Max");
+    expect(currentTable).toContain("iPhone 15 Pro");
+    expect(currentTable).toContain("iPhone 14 Pro");
+    expect(currentTable).not.toContain("iPhone 13</th>");
+    expect(olderTable).toContain('aria-label="iPhone 13, Standard, $129"');
+    expect(olderTable).toContain('aria-label="iPhone 12, Premium, $169"');
+    expect(olderTable).toContain('aria-label="iPhone 11, Genuine, $150"');
+    expect(olderTable).toContain('aria-label="iPhone 8, Genuine, $85"');
     expect(html).toContain("Side-by-side comparison of LCD in-cell, Soft OLED and Original iPhone screens");
     expect(html).toContain("LCD in-cell replacement screen fitted to an iPhone");
     expect(html).toContain("Soft OLED replacement screen fitted to an iPhone");
@@ -39,40 +69,41 @@ describe("IphoneScreenRepairCostArticle", () => {
     expect(html).not.toContain("Apple Official Cert");
     expect(html).not.toContain("Apple Certified");
     expect(html).not.toContain("Apple-authorised");
-    expect(html).toContain("7 September 2026");
+    expect(html).not.toContain("7 September 2026");
     expect(html).not.toContain("29 July 2026");
   });
 
   it("uses the single price data source in one responsive table rendering", () => {
-    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle priceTable={priceTable} />);
 
     expect(articleSource).toContain('from "@/data/iphoneScreenRepairCost"');
-    expect(articleSource).toContain("CURRENT_IPHONE_SCREEN_REPAIR_PRICES");
-    expect(articleSource).toContain("OLDER_IPHONE_SCREEN_REPAIR_PRICES");
+    expect(articleSource).toContain("priceTable?.rows.filter");
     expect(articleSource).toContain("rows.map");
     expect(articleSource).not.toMatch(/\bfetch\s*\(/);
+    expect(articleSource).not.toContain("useState");
+    expect(articleSource).not.toMatch(/userAgent|crawler|bot/i);
     expect(articleSource).not.toMatch(/\$\d+/);
-    expect(IPHONE_SCREEN_REPAIR_PRICES).toHaveLength(44);
-    IPHONE_SCREEN_REPAIR_PRICES.forEach(({ model }) => {
+    priceTable.rows.forEach(({ model }) => {
       expect(html.match(new RegExp(`>${model}</th>`, "g")) ?? []).toHaveLength(1);
     });
   });
 
   it("keeps each price cell labelled for the mobile card layout", () => {
-    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle priceTable={priceTable} />);
 
-    expect(html).toContain('aria-label="iPhone 17 Pro Max, LCD / In-cell, $190"');
-    expect(html).toContain('aria-label="iPhone 17 Pro Max, Soft OLED, $320"');
-    expect(html).toContain('aria-label="iPhone 17 Pro Max, Original, $599"');
-    expect(html).toContain('aria-hidden="true">LCD / In-cell</span>');
-    expect(html).toContain('aria-hidden="true">Soft OLED</span>');
-    expect(html).toContain('aria-hidden="true">Original</span>');
+    expect(html).toContain('aria-label="iPhone 17 Pro Max, Standard, $190"');
+    expect(html).toContain('aria-label="iPhone 17 Pro Max, Premium, $299"');
+    expect(html).toContain('aria-label="iPhone 17 Pro Max, Genuine, $570"');
+    expect(html).toContain('aria-label="iPhone 18, Premium, Quote"');
+    expect(html).toContain('aria-hidden="true">Standard</span>');
+    expect(html).toContain('aria-hidden="true">Premium</span>');
+    expect(html).toContain('aria-hidden="true">Genuine</span>');
     expect(articleStyles).toContain("@media (max-width: 640px)");
     expect(articleStyles).toContain("grid-template-columns: repeat(3, minmax(0, 1fr))");
   });
 
   it("keeps one semantic comparison table with labelled mobile values", () => {
-    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<IphoneScreenRepairCostArticle priceTable={priceTable} />);
     const comparisonTableStart = html.indexOf("How the three public screen options differ");
     const comparisonTable = html.slice(comparisonTableStart, html.indexOf("</table>", comparisonTableStart));
     const comparisonRows = comparisonTable.match(/<tr><th scope="row">[\s\S]*?<\/tr>/g) ?? [];

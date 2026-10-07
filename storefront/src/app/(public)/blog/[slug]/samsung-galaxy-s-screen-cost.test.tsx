@@ -1,12 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-const { getPostDataMock } = vi.hoisted(() => ({ getPostDataMock: vi.fn() }));
+const { getPostDataMock, fetchRepairCatalogMock } = vi.hoisted(() => ({ getPostDataMock: vi.fn(), fetchRepairCatalogMock: vi.fn() }));
 
 vi.mock("@/lib/blog", () => ({
   getPostData: getPostDataMock,
   isRemovedBlogSlug: vi.fn(() => false),
 }));
+
+vi.mock("@/lib/api", () => ({ fetchRepairCatalog: fetchRepairCatalogMock }));
 
 import BlogArticlePage, { generateMetadata } from "./page";
 
@@ -41,7 +43,26 @@ describe("Samsung Galaxy S screen cost blog route", () => {
       contentHtml: "",
       source: "markdown",
       author_name: "Ali Mobile & Repair",
-      updated_at: "2026-09-07",
+      updated_at: "2026-10-08",
+    });
+    fetchRepairCatalogMock.mockResolvedValue({
+      fetchedAt: "2026-10-08T01:23:00.000Z",
+      brands: [{
+        category: "phone",
+        slug: "iphone",
+        models: [{
+          model: "iPhone 17 Pro Max",
+          repairTypes: [{
+            slug: "screen-replacement",
+            price: 190,
+            variants: [
+              { quality_grade: "Standard", price: 190 },
+              { quality_grade: "Premium", price: 299 },
+              { quality_grade: "Genuine", price: 570 },
+            ],
+          }],
+        }],
+      }],
     });
 
     const html = renderToStaticMarkup(await BlogArticlePage({
@@ -49,8 +70,12 @@ describe("Samsung Galaxy S screen cost blog route", () => {
     }));
 
     expect(html).toContain("Published 29 July 2026");
-    expect(html).toContain("Updated 7 September 2026");
+    expect(html).toContain("Updated 8 October 2026");
     expect(html).toContain('"datePublished":"2026-07-29"');
-    expect(html).toContain('"dateModified":"2026-09-07"');
+    expect(html).toContain('"dateModified":"2026-10-08"');
+    expect(fetchRepairCatalogMock).toHaveBeenCalledOnce();
+    expect(html).toContain("current iPhone screen replacement prices range from $190 to $570");
+    expect(html).toContain('aria-label="iPhone 17 Pro Max, Premium, $299"');
+    expect(html).not.toContain("$599");
   });
 });

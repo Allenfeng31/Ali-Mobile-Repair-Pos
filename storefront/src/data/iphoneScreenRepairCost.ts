@@ -1,79 +1,122 @@
+import { resolveRepairDetailPricing } from "@/lib/repairDetailPricing";
+
 export const IPHONE_SCREEN_REPAIR_COST_SLUG = "how-much-does-iphone-screen-repair-cost-australia";
 
-export const IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA = {
+export const IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA = {
   datePublished: "2026-07-29",
-  dateModified: "2026-09-07",
-  displayDateModified: "7 September 2026",
+  dateModified: "2026-10-08",
 } as const;
 
-export type ScreenPrice = number | null;
+// Retained for sitemap consumers; these are editorial dates, not price freshness.
+export const IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA = IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA;
 
-export interface IPhoneScreenRepairPrice {
-  model: string;
-  lcdInCell: ScreenPrice;
-  softOled: ScreenPrice;
-  originalScreen: ScreenPrice;
+type CatalogueVariant = {
+  quality_grade: string;
+  price: number;
+  is_recommended?: boolean;
+};
+
+type CatalogueRepair = {
+  slug: string;
+  price?: number;
+  variants?: CatalogueVariant[];
+};
+
+export type IphoneScreenRepairPriceTable = {
+  columns: string[];
+  fetchedAt: string | null;
+  range: { min: number; max: number } | null;
+  rows: Array<{
+    model: string;
+    prices: Record<string, number>;
+    quoteTiers: string[];
+  }>;
+};
+
+const KNOWN_TIER_ORDER = ["Standard", "Premium", "Genuine"];
+const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+
+function tierLabel(value: string | undefined) {
+  return value?.trim() || "Current price";
 }
 
-export const IPHONE_SCREEN_REPAIR_PRICES: IPhoneScreenRepairPrice[] = [
-  { model: "iPhone 17 Pro Max", lcdInCell: 190, softOled: 320, originalScreen: 599 },
-  { model: "iPhone 17 Pro", lcdInCell: 190, softOled: 290, originalScreen: 540 },
-  { model: "iPhone 17", lcdInCell: 190, softOled: 250, originalScreen: 470 },
-  { model: "iPhone 17e", lcdInCell: 139, softOled: 179, originalScreen: 250 },
-  { model: "iPhone 17 Air", lcdInCell: null, softOled: null, originalScreen: 540 },
-  { model: "iPhone 16 Pro Max", lcdInCell: 190, softOled: 270, originalScreen: 540 },
-  { model: "iPhone 16 Plus", lcdInCell: 170, softOled: 240, originalScreen: 350 },
-  { model: "iPhone 16 Pro", lcdInCell: 190, softOled: 270, originalScreen: 450 },
-  { model: "iPhone 16", lcdInCell: 170, softOled: 220, originalScreen: 370 },
-  { model: "iPhone 16e", lcdInCell: 139, softOled: 170, originalScreen: 220 },
-  { model: "iPhone 15 Pro Max", lcdInCell: 190, softOled: 240, originalScreen: 390 },
-  { model: "iPhone 15 Plus", lcdInCell: 170, softOled: 220, originalScreen: 350 },
-  { model: "iPhone 15 Pro", lcdInCell: 170, softOled: 240, originalScreen: 390 },
-  { model: "iPhone 15", lcdInCell: 150, softOled: 200, originalScreen: 320 },
-  { model: "iPhone 14 Pro Max", lcdInCell: 170, softOled: 220, originalScreen: 370 },
-  { model: "iPhone 14 Plus", lcdInCell: 170, softOled: 190, originalScreen: 320 },
-  { model: "iPhone 14 Pro", lcdInCell: 170, softOled: 220, originalScreen: 290 },
-  { model: "iPhone 14", lcdInCell: 150, softOled: 190, originalScreen: 240 },
-  { model: "iPhone SE 3", lcdInCell: null, softOled: null, originalScreen: 85 },
-  { model: "iPhone 13 Pro Max", lcdInCell: 170, softOled: 190, originalScreen: 320 },
-  { model: "iPhone 13 Pro", lcdInCell: 150, softOled: 190, originalScreen: 270 },
-  { model: "iPhone 13", lcdInCell: 129, softOled: 169, originalScreen: 240 },
-  { model: "iPhone 13 mini", lcdInCell: 150, softOled: null, originalScreen: 290 },
-  { model: "iPhone 12 Pro Max", lcdInCell: 150, softOled: 170, originalScreen: 270 },
-  { model: "iPhone 12 Pro", lcdInCell: 139, softOled: 169, originalScreen: 199 },
-  { model: "iPhone 12", lcdInCell: 129, softOled: 169, originalScreen: 199 },
-  { model: "iPhone 12 mini", lcdInCell: 150, softOled: 170, originalScreen: 220 },
-  { model: "iPhone SE 2", lcdInCell: null, softOled: null, originalScreen: 85 },
-  { model: "iPhone 11 Pro Max", lcdInCell: 139, softOled: 159, originalScreen: 220 },
-  { model: "iPhone 11 Pro", lcdInCell: 129, softOled: 159, originalScreen: 190 },
-  { model: "iPhone 11", lcdInCell: 120, softOled: null, originalScreen: 150 },
-  { model: "iPhone XS Max", lcdInCell: 120, softOled: null, originalScreen: null },
-  { model: "iPhone XS", lcdInCell: 100, softOled: null, originalScreen: 180 },
-  { model: "iPhone X", lcdInCell: 100, softOled: null, originalScreen: 170 },
-  { model: "iPhone XR", lcdInCell: 110, softOled: null, originalScreen: 150 },
-  { model: "iPhone 8 Plus", lcdInCell: 90, softOled: null, originalScreen: null },
-  { model: "iPhone 8", lcdInCell: null, softOled: null, originalScreen: 85 },
-  { model: "iPhone 7 Plus", lcdInCell: 85, softOled: null, originalScreen: null },
-  { model: "iPhone 7", lcdInCell: null, softOled: null, originalScreen: 80 },
-  { model: "iPhone SE", lcdInCell: null, softOled: null, originalScreen: 85 },
-  { model: "iPhone 6 Plus", lcdInCell: 70, softOled: null, originalScreen: null },
-  { model: "iPhone 6S Plus", lcdInCell: 70, softOled: null, originalScreen: null },
-  { model: "iPhone 6", lcdInCell: 60, softOled: null, originalScreen: null },
-  { model: "iPhone 6S", lcdInCell: 65, softOled: null, originalScreen: null },
-];
+function modelGeneration(model: string) {
+  const match = model.match(/^iPhone\s+(\d+)/i);
+  return match ? Number(match[1]) : 0;
+}
 
-const OLDER_MODEL_START_INDEX = IPHONE_SCREEN_REPAIR_PRICES.findIndex(
-  ({ model }) => model === "iPhone XS Max",
-);
+function compareModelsNewestFirst(left: string, right: string) {
+  const generationDifference = modelGeneration(right) - modelGeneration(left);
+  return generationDifference || collator.compare(right, left);
+}
 
-export const CURRENT_IPHONE_SCREEN_REPAIR_PRICES = IPHONE_SCREEN_REPAIR_PRICES.slice(
-  0,
-  OLDER_MODEL_START_INDEX,
-);
+function compareTierLabels(left: string, right: string) {
+  const leftIndex = KNOWN_TIER_ORDER.indexOf(left);
+  const rightIndex = KNOWN_TIER_ORDER.indexOf(right);
 
-export const OLDER_IPHONE_SCREEN_REPAIR_PRICES = IPHONE_SCREEN_REPAIR_PRICES.slice(
-  OLDER_MODEL_START_INDEX,
-);
+  if (leftIndex !== -1 || rightIndex !== -1) {
+    return (leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex)
+      - (rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex);
+  }
+
+  return collator.compare(left, right);
+}
+
+/**
+ * Converts the public iPhone Screen Replacement catalogue into SSR-safe blog
+ * table data. Positive prices use the same detail-page resolver; unavailable
+ * tier prices remain an explicit quote state rather than becoming $0.
+ */
+export function buildIphoneScreenRepairPriceTable(catalogue: {
+  fetchedAt?: string | null;
+  brands: Array<{
+    category: string;
+    slug: string;
+    models: Array<{ model: string; repairTypes: CatalogueRepair[] }>;
+  }>;
+}): IphoneScreenRepairPriceTable {
+  const iphone = catalogue.brands.find((brand) => brand.category === "phone" && brand.slug === "iphone");
+  const columns = new Set<string>();
+  const rows = (iphone?.models ?? []).flatMap(({ model, repairTypes }) => {
+    const repair = repairTypes.find(({ slug }) => slug === "screen-replacement");
+    if (!repair) return [];
+
+    const rawTiers = new Set((repair.variants ?? []).map((variant) => tierLabel(variant.quality_grade)));
+    const pricing = resolveRepairDetailPricing({ basePrice: repair.price, variants: repair.variants });
+    const prices: Record<string, number> = {};
+
+    for (const variant of pricing.validVariants) {
+      const label = tierLabel(variant.quality_grade);
+      columns.add(label);
+      prices[label] = Math.min(prices[label] ?? Infinity, variant.price);
+    }
+
+    if (rawTiers.size === 0) {
+      columns.add("Current price");
+      rawTiers.add("Current price");
+      if (pricing.resolvedPrice !== null) prices["Current price"] = pricing.resolvedPrice;
+    }
+
+    for (const label of rawTiers) columns.add(label);
+
+    return [{
+      model,
+      prices,
+      quoteTiers: [...rawTiers].filter((label) => prices[label] === undefined),
+    }];
+  }).sort((left, right) => compareModelsNewestFirst(left.model, right.model));
+
+  const allPrices = rows.flatMap((row) => Object.values(row.prices));
+
+  return {
+    columns: [...columns].sort(compareTierLabels),
+    fetchedAt: catalogue.fetchedAt || null,
+    range: allPrices.length > 0
+      ? { min: Math.min(...allPrices), max: Math.max(...allPrices) }
+      : null,
+    rows,
+  };
+}
 
 export const SCREEN_OPTION_SAMPLE = [
   { name: "Soft OLED", customers: 74, colour: "#2563eb", summary: "Most frequently selected balance of display quality and price." },

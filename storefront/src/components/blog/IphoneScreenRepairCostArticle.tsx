@@ -2,22 +2,29 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
-  CURRENT_IPHONE_SCREEN_REPAIR_PRICES,
-  OLDER_IPHONE_SCREEN_REPAIR_PRICES,
-  IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA,
   IPHONE_SCREEN_PHOTOS,
   SCREEN_OPTION_SAMPLE,
   SCREEN_OPTION_SAMPLE_TOTAL,
-  type IPhoneScreenRepairPrice,
-  type ScreenPrice,
+  type IphoneScreenRepairPriceTable,
 } from "@/data/iphoneScreenRepairCost";
 
 import styles from "./IphoneScreenRepairCostArticle.module.css";
 
 const photoCaption = "Photographed by Ali Mobile & Repair. Camera exposure and device settings can affect how displays appear in photos.";
 
-function priceLabel(price: ScreenPrice) {
-  return price === null ? "—" : `$${price}`;
+function priceLabel(price: number | undefined, isQuote: boolean) {
+  if (price !== undefined) return `$${price}`;
+  return isQuote ? "Quote" : "—";
+}
+
+function catalogueFreshnessLabel(fetchedAt: string | null) {
+  if (!fetchedAt || Number.isNaN(new Date(fetchedAt).getTime())) return null;
+
+  return new Date(fetchedAt).toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function ScreenPhoto({ photo }: { photo: (typeof IPHONE_SCREEN_PHOTOS)[keyof typeof IPHONE_SCREEN_PHOTOS] }) {
@@ -50,35 +57,35 @@ function ComparisonCell({ option, children }: { option: (typeof SCREEN_OPTION_CO
   );
 }
 
-function PriceTable({ rows, caption }: { rows: IPhoneScreenRepairPrice[]; caption: string }) {
-  const priceColumns = [
-    { key: "lcdInCell", label: "LCD / In-cell" },
-    { key: "softOled", label: "Soft OLED" },
-    { key: "originalScreen", label: "Original" },
-  ] as const;
+function PriceTable({
+  priceTable,
+  rows,
+}: {
+  priceTable: IphoneScreenRepairPriceTable;
+  rows: IphoneScreenRepairPriceTable["rows"];
+}) {
+  const { columns } = priceTable;
 
   return (
     <div className={`${styles.tableScroll} ${styles.priceTableScroll}`} tabIndex={0} aria-label="iPhone screen repair price table">
       <table className={styles.priceTable}>
-        <caption>{caption}</caption>
+        <caption>Current Ali Mobile iPhone screen replacement prices by model and available repair grade</caption>
         <thead>
           <tr>
             <th scope="col">iPhone model</th>
-            <th scope="col">LCD / In-cell</th>
-            <th scope="col">Soft OLED</th>
-            <th scope="col">Original Screen</th>
+            {columns.map((column) => <th key={column} scope="col">{column}</th>)}
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
             <tr key={row.model}>
               <th scope="row">{row.model}</th>
-              {priceColumns.map(({ key, label }) => {
-                const price = priceLabel(row[key]);
+              {columns.map((column) => {
+                const price = priceLabel(row.prices[column], row.quoteTiers.includes(column));
 
                 return (
-                  <td key={key} aria-label={`${row.model}, ${label}, ${price}`}>
-                    <span className={styles.mobilePriceLabel} aria-hidden="true">{label}</span>
+                  <td key={column} aria-label={`${row.model}, ${column}, ${price}`}>
+                    <span className={styles.mobilePriceLabel} aria-hidden="true">{column}</span>
                     {price}
                   </td>
                 );
@@ -91,22 +98,38 @@ function PriceTable({ rows, caption }: { rows: IPhoneScreenRepairPrice[]; captio
   );
 }
 
-export function IphoneScreenRepairCostArticle() {
+function isIphone14OrNewer(model: string) {
+  const match = model.match(/^iPhone\s+(\d+)/i);
+  return match !== null && Number(match[1]) >= 14;
+}
+
+export function IphoneScreenRepairCostArticle({ priceTable }: { priceTable: IphoneScreenRepairPriceTable | null }) {
   const [softOledSample, lcdInCellSample, originalScreenSample] = SCREEN_OPTION_SAMPLE;
+  const freshnessLabel = catalogueFreshnessLabel(priceTable?.fetchedAt ?? null);
+  const currentModelRows = priceTable?.rows.filter((row) => isIphone14OrNewer(row.model)) ?? [];
+  const olderModelRows = priceTable?.rows.filter((row) => !isIphone14OrNewer(row.model)) ?? [];
 
   return (
     <div className={styles.article}>
       <section aria-labelledby="price-table-heading">
         <h2 id="price-table-heading">Current iPhone screen replacement prices</h2>
         <p className={styles.intro}>
-          Prices checked against Ali Mobile&apos;s current public Storefront on {IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.displayDateModified}. Prices can change with parts supply, the exact model and the device&apos;s condition.
+          {priceTable?.range
+            ? `At Ali Mobile, current iPhone screen replacement prices range from $${priceTable.range.min} to $${priceTable.range.max}, depending on the model and available repair grade.`
+            : "Current fixed iPhone screen prices are not available in our online repair catalogue. Contact us for a quote for your model."}
         </p>
-        <PriceTable rows={CURRENT_IPHONE_SCREEN_REPAIR_PRICES} caption="Current Ali Mobile iPhone screen replacement prices by model and screen option" />
-        <details className={styles.olderModels}>
-          <summary>More iPhone models ({OLDER_IPHONE_SCREEN_REPAIR_PRICES.length})</summary>
-          <PriceTable rows={OLDER_IPHONE_SCREEN_REPAIR_PRICES} caption="Earlier iPhone screen replacement prices by model and screen option" />
-        </details>
-        <p className={styles.tableNote}><strong>—</strong> Not currently listed online. Contact us to confirm current screen options.</p>
+        {priceTable && currentModelRows.length > 0 && <PriceTable priceTable={priceTable} rows={currentModelRows} />}
+        {priceTable && olderModelRows.length > 0 && (
+          <details className={styles.olderModels}>
+            <summary>View iPhone 13 and older screen repair prices</summary>
+            <PriceTable priceTable={priceTable} rows={olderModelRows} />
+          </details>
+        )}
+        <p className={styles.tableNote}><strong>—</strong> Not currently listed in the online catalogue. <strong>Quote</strong> means a current fixed online price is unavailable. Contact us to confirm the right option.</p>
+        <p className={styles.tableNote}>
+          Prices shown are sourced from Ali Mobile&apos;s current online repair catalogue.
+          {freshnessLabel ? ` Catalogue snapshot refreshed ${freshnessLabel}.` : ""} Prices may change as parts pricing changes.
+        </p>
       </section>
 
       <section aria-labelledby="screen-options-heading">
@@ -218,7 +241,7 @@ export function IphoneScreenRepairCostArticle() {
         <h2 id="contact-heading">Confirm the right option before repair</h2>
         <p>Ali Mobile &amp; Repair<br />Kiosk C1, Ringwood Square Shopping Centre<br />Seymour Street, Ringwood VIC 3134<br /><a href="tel:0481058514">0481 058 514</a></p>
         <Link href="/book-repair" className={styles.bookLink}>Book a repair assessment</Link>
-        <p className={styles.sourceNote}>Price source: Ali Mobile&apos;s current public Storefront. Customer-choice source: an Ali Mobile sample of 100 screen repairs. Updated {IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA.displayDateModified}.</p>
+        <p className={styles.sourceNote}>Price source: Ali Mobile&apos;s current online repair catalogue. Customer-choice source: an Ali Mobile sample of 100 screen repairs. The customer-choice sample is editorial evidence and is reviewed separately from live pricing.</p>
       </section>
     </div>
   );
