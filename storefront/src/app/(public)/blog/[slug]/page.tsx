@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
+import { IphoneBatteryHealthArticle } from "@/components/blog/IphoneBatteryHealthArticle";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
 import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
 import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
@@ -82,6 +83,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   }
 
   const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
+  const isIphoneBatteryHealthArticle = slug === "when-should-you-replace-iphone-battery";
   const isSamsungGalaxySScreenCostArticle = slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG;
   let postData: BlogPost;
   if (isSamsungGalaxySScreenCostArticle) {
@@ -208,6 +210,8 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           <SamsungGalaxySScreenRepairCostArticle />
           ) : isIphoneScreenCostArticle ? (
             <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
+          ) : isIphoneBatteryHealthArticle ? (
+            <div className={styles.articleBody}><IphoneBatteryHealthArticle /></div>
           ) : (
             <div
               className={styles.articleBody}
@@ -220,9 +224,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           <span className={styles.kicker}>Ringwood Repairs</span>
           <h2>Need a hands-on diagnosis?</h2>
           <p>
-            Bring your phone, tablet, or laptop to Ali Mobile & Repair for a practical quote and
-            same-day repair may be available for many common phone models when parts are in stock.
-            Contact us first to confirm your model, issue and timing.
+            {isIphoneBatteryHealthArticle
+              ? "Bring your iPhone to Ali Mobile & Repair for an assessment. Contact us first to confirm your model, issue and timing."
+              : "Bring your phone, tablet, or laptop to Ali Mobile & Repair for a practical quote and same-day repair may be available for many common phone models when parts are in stock. Contact us first to confirm your model, issue and timing."}
           </p>
           <Link href="/book-repair" className={styles.ctaButton}>
             Book Repair Now
