@@ -128,11 +128,24 @@ describe('resolveModelHubRepairPageMode', () => {
     expect(result.decisions[0]?.mode).toBe('shared');
   });
 
-  it('centralizes Water Damage without brand or model query context', () => {
-    expect(resolve({ repairTypes: [repair('water-damage-repair', 'synthetic-core')] }).options[0]?.href)
-      .toBe('/repairs/water-damage');
-    expect(resolve({ repairTypes: [repair('water-damage-repair', 'synthetic-core')] }).options[0]?.href)
-      .not.toContain('?');
+  it.each([
+    ['Galaxy A16', 'samsung', 'galaxy-a16', '/repairs/phone/samsung/galaxy-a16/water-damage-repair'],
+    ['Galaxy S23 Ultra', 'samsung', 'galaxy-s23-ultra', '/repairs/phone/samsung/galaxy-s23-ultra/water-damage-repair'],
+    ['Galaxy Z Fold 5', 'samsung', 'galaxy-z-fold-5', '/repairs/phone/samsung/galaxy-z-fold-5/water-damage-repair'],
+    ['Galaxy S24 Ultra', 'samsung', 'galaxy-s24-ultra', '/repairs/water-damage'],
+    ['Galaxy A54', 'samsung', 'galaxy-a54', '/repairs/water-damage'],
+    ['Pixel 8 Pro', 'google-pixel', 'pixel-8-pro', '/repairs/phone/google-pixel/pixel-8-pro/water-damage-repair'],
+    ['Pixel 9', 'google-pixel', 'pixel-9', '/repairs/water-damage'],
+    ['OPPO Find X8', 'oppo', 'find-x8', '/repairs/water-damage'],
+  ])('resolves the final Water Damage destination for %s', (_label, brandSlug, modelSlug, href) => {
+    const result = resolve({
+      brandSlug,
+      modelSlug,
+      repairTypes: [repair('water-damage-repair', 'synthetic-core')],
+    });
+
+    expect(result.options[0]?.href).toBe(href);
+    expect(result.options[0]?.href).not.toContain('?');
   });
 
   it('emits the canonical shared destination for an exact Phase 1 Logic Board source', () => {

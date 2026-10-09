@@ -105,6 +105,26 @@ describe('Model Hub page-mode Server consumer', () => {
     ]));
   });
 
+  it.each([
+    ['Galaxy A16', 'galaxy-a16', '/repairs/phone/samsung/galaxy-a16/water-damage-repair'],
+    ['Galaxy S24 Ultra', 'galaxy-s24-ultra', '/repairs/water-damage'],
+  ])('passes the resolved Samsung Water Damage target for %s to the Grid', async (model, modelSlug, href) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model,
+      repairTypes: [{ slug: 'water-damage-repair', name: 'Water Damage', price: 0, repairOrigin: 'synthetic-core' }],
+      brandModels: [{ slug: modelSlug, model, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'samsung', model: modelSlug }),
+    }));
+
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'water-damage-repair', href }),
+    ]));
+  });
+
   it('keeps iPhone repairs unchanged while server-rendering one selected Motherboard Master card', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'iPhone',

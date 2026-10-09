@@ -2,6 +2,7 @@ import {
   GRANDFATHERED_WATER_DAMAGE_PATHS,
   GRANDFATHERED_WATER_DAMAGE_PATH_SET,
 } from '@/data/grandfatheredWaterDamagePaths';
+import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 
 const CENTRAL_WATER_DAMAGE_HREF = '/repairs/water-damage';
 const WATER_DAMAGE_REPAIR_SLUGS = new Set(['water-damage', 'water-damage-repair']);
@@ -42,6 +43,30 @@ export function buildCanonicalModelRepairPath(category: string, brand: string, m
 
 export function isGrandfatheredWaterDamagePath(pathname: string) {
   return GRANDFATHERED_WATER_DAMAGE_PATH_SET.has(pathname);
+}
+
+export type ModelHubWaterDamageTargetInput = Readonly<{
+  category: string;
+  brand: string;
+  model: string;
+  repairSlug: string;
+}>;
+
+/** Resolves only model-hub Water Damage cards; Repair Results retain their existing helper. */
+export function getModelHubWaterDamageHref({
+  category,
+  brand,
+  model,
+  repairSlug,
+}: ModelHubWaterDamageTargetInput) {
+  if (!isWaterDamageRepairSlug(repairSlug)) return undefined;
+
+  const canonicalPath = buildCanonicalModelRepairPath(category, brand, model, repairSlug);
+
+  return isGrandfatheredWaterDamagePath(canonicalPath)
+    && !getPhase1DniConsolidationDestination(canonicalPath)
+    ? canonicalPath
+    : CENTRAL_WATER_DAMAGE_HREF;
 }
 
 export function getModelHubRepairHref(repairSlug: string, fallbackHref: string) {

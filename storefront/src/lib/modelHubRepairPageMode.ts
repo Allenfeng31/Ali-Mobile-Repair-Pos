@@ -10,6 +10,7 @@ import {
 } from './publicRepairPageModePolicy';
 import { compareDeterministicStrings } from './deterministicStrings';
 import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
+import { getModelHubWaterDamageHref } from './waterDamageRouting';
 
 export type ModelHubRepairPageModeInput = Readonly<{
   category: string;
@@ -69,12 +70,21 @@ function evidenceFor(
 
 function sharedHref(
   decision: NonIphonePublicRepairPageModeDecision,
+  category: string,
   brandSlug: string,
   modelSlug: string,
+  repairSlug: string,
 ): string | undefined {
   const target = decision.target;
   if (!target) return undefined;
-  if (decision.reason === 'central-water-damage') return target.href;
+  if (decision.reason === 'central-water-damage') {
+    return getModelHubWaterDamageHref({
+      category,
+      brand: brandSlug,
+      model: modelSlug,
+      repairSlug,
+    });
+  }
 
   const query = new URLSearchParams();
   switch (target.scope) {
@@ -93,12 +103,14 @@ function sharedHref(
 function resolvedHref(
   decision: NonIphonePublicRepairPageModeDecision,
   fallbackHref: string,
+  category: string,
   brandSlug: string,
   modelSlug: string,
+  repairSlug: string,
 ) : string | undefined {
   if (decision.mode === 'unresolved') return undefined;
   if (decision.mode === 'shared' && decision.target) {
-    return sharedHref(decision, brandSlug, modelSlug);
+    return sharedHref(decision, category, brandSlug, modelSlug, repairSlug);
   }
   return decision.target?.href ?? fallbackHref;
 }
@@ -170,7 +182,7 @@ export function resolveModelHubRepairPageMode(
 
       const href = preservesPrimaryPhoneHubRoute(input, repairSlug, decision)
         ? fallbackHref
-        : resolvedHref(decision, fallbackHref, input.brandSlug, input.modelSlug);
+        : resolvedHref(decision, fallbackHref, input.category, input.brandSlug, input.modelSlug, repairSlug);
 
       return { decision, report, option: freezeOption(selectedRepair, phase1Destination ?? href) };
     });

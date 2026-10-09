@@ -6,7 +6,7 @@ import { analytics } from "@/lib/analytics";
 import { Battery, Camera, Droplet, Ear, Plug, Power, Smartphone, Volume2, Wrench } from "lucide-react";
 import { getStartingPrice } from "@/lib/repairStartingPrices";
 import { formatScopedRepairPriceLabel } from "@/lib/scopedRepairPriceLabel";
-import { getModelHubRepairHref } from "@/lib/waterDamageRouting";
+import { getModelHubRepairHref, getModelHubWaterDamageHref } from "@/lib/waterDamageRouting";
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref } from "@/lib/virtualCameraLens";
 import { getVirtualPhoneRepairLandingHref, getVirtualPhoneRepair, type VirtualPhoneRepairSlug } from "@/lib/virtualPhoneRepairs";
 import { sortRepairOptionsForDisplay } from "@/lib/repairOptionDisplayOrder";
@@ -99,6 +99,14 @@ export default function RepairOptionsGrid({
 
   const getRepairHref = (rt: RepairOption) => {
     if (rt.href) return rt.href;
+
+    const waterDamageHref = getModelHubWaterDamageHref({
+      category: categorySlug,
+      brand: brandSlug,
+      model: modelSlug,
+      repairSlug: rt.slug,
+    });
+    if (waterDamageHref) return waterDamageHref;
 
     if (rt.slug === CAMERA_LENS_REPAIR_SLUG && categorySlug === "phone" && brandSlug !== "iphone") {
       return getCameraLensLandingHref(categorySlug, brandSlug, modelSlug) || `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/${rt.slug}`;

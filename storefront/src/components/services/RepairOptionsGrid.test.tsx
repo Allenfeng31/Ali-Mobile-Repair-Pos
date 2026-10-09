@@ -19,6 +19,17 @@ vi.mock("@/lib/scopedRepairPriceLabel", () => ({
 }));
 vi.mock("@/lib/waterDamageRouting", () => ({
   getModelHubRepairHref: (_slug: string, fallback: string) => fallback,
+  getModelHubWaterDamageHref: ({ category, brand, model, repairSlug }: { category: string; brand: string; model: string; repairSlug: string }) => {
+    if (repairSlug !== 'water-damage-repair') return undefined;
+    const path = `/repairs/${category}/${brand}/${model}/water-damage-repair`;
+    return new Set([
+      '/repairs/phone/iphone/iphone-17-pro-max/water-damage-repair',
+      '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619/water-damage-repair',
+      '/repairs/watch/apple/apple-watch-series-7-45mm/water-damage-repair',
+      '/repairs/tablet/ipad/ipad-pro-13-inch-m4/water-damage-repair',
+      '/repairs/laptop/macbook/macbook-air-m2-13-2022/water-damage-repair',
+    ]).has(path) ? path : '/repairs/water-damage';
+  },
 }));
 vi.mock("@/lib/virtualCameraLens", () => ({
   CAMERA_LENS_REPAIR_SLUG: "camera-lens-replacement",
@@ -94,6 +105,46 @@ describe("RepairOptionsGrid", () => {
       'href',
       '/repairs/phone/camera-lens-replacement?brand=motorola&model=moto-g04',
     );
+  });
+
+  it.each([
+    ['iPhone 17 Pro Max', 'phone', 'iphone', 'iphone-17-pro-max', '/repairs/phone/iphone/iphone-17-pro-max/water-damage-repair'],
+    ['Galaxy Tab S6 Lite', 'tablet', 'samsung', 'galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619', '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619/water-damage-repair'],
+    ['Apple Watch Series 7 45mm', 'watch', 'apple', 'apple-watch-series-7-45mm', '/repairs/watch/apple/apple-watch-series-7-45mm/water-damage-repair'],
+    ['iPad Pro 13-inch M4', 'tablet', 'ipad', 'ipad-pro-13-inch-m4', '/repairs/tablet/ipad/ipad-pro-13-inch-m4/water-damage-repair'],
+    ['MacBook Air M2 13', 'laptop', 'macbook', 'macbook-air-m2-13-2022', '/repairs/laptop/macbook/macbook-air-m2-13-2022/water-damage-repair'],
+    ['Pixel 9', 'phone', 'google-pixel', 'pixel-9', '/repairs/water-damage'],
+  ])('resolves the Water Damage card for %s through the model-hub resolver', (_name, categorySlug, brandSlug, modelSlug, href) => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[{ slug: 'water-damage-repair', name: 'Water Damage', price: 0 }]}
+        categorySlug={categorySlug}
+        brandSlug={brandSlug}
+        modelSlug={modelSlug}
+        modelName={_name}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /water damage/i })).toHaveAttribute('href', href);
+  });
+
+  it('preserves an explicit Water Damage href from the server', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[{
+          slug: 'water-damage-repair',
+          name: 'Water Damage',
+          price: 0,
+          href: '/repairs/water-damage',
+        }]}
+        categorySlug="phone"
+        brandSlug="iphone"
+        modelSlug="iphone-17-pro-max"
+        modelName="iPhone 17 Pro Max"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /water damage/i })).toHaveAttribute('href', '/repairs/water-damage');
   });
 
   it('renders the Master-provided Motherboard quote label instead of a POS price', () => {
