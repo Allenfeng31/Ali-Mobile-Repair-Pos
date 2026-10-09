@@ -9,6 +9,7 @@ import SharedRepairBookingControls from '@/components/services/SharedRepairBooki
 import SharedRepairHierarchySections from '@/components/services/SharedRepairHierarchySections';
 import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/SharedRepairSelectedDevice';
 import SharedRepairHeroSelection from '@/components/services/SharedRepairHeroSelection';
+import SharedRepairHeroFacts from '@/components/services/SharedRepairHeroFacts';
 import SharedRepairPageResultsSection from '@/components/repair-results/SharedRepairPageResultsSection';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
@@ -243,6 +244,12 @@ export default function VirtualPhoneRepairLandingPage({
     selectedModelSlug: hierarchy?.selectedDevice ? sharedPageV2.selectedModelSlug : null,
     selectedDevice: hierarchy?.selectedDevice ?? null,
   } : hierarchy;
+  const samsungHeroPriceLabel = hierarchy?.selectedDevice
+    ? hierarchy.selectedDevice.priceLabel ?? 'Quote on Request'
+    : 'Typical $50–$150';
+  const samsungHeroPriceContext = samsungContent && (!hierarchy?.selectedDevice || samsungHeroPriceLabel === 'Quote on Request')
+    ? ' Typical price range: $50–$150. Final pricing depends on the Galaxy model, required part and any other damage.'
+    : '';
 
   return (
     <>
@@ -268,12 +275,13 @@ export default function VirtualPhoneRepairLandingPage({
           useMasterFacts
           brandOnlySelection={Boolean(sharedPageV2)}
           title={pageTitle}
-          description={brandContent?.intro ?? (sharedPageV2 ? `${repair.summary} Ali Mobile & Repair in Ringwood confirms final pricing after inspection if additional damage or parts are involved.` : `${repair.summary} Choose a supported model to view its current repair option before booking.`)}
+          description={brandContent ? `${brandContent.intro}${samsungHeroPriceContext}` : (sharedPageV2 ? `${repair.summary} Ali Mobile & Repair in Ringwood confirms final pricing after inspection if additional damage or parts are involved.` : `${repair.summary} Choose a supported model to view its current repair option before booking.`)}
           eyebrow={repair.eyebrow}
           icon={repair.icon === 'earpiece' || repair.icon === 'power' || repair.icon === 'volume' || repair.icon === 'loudspeaker' ? repair.icon : undefined}
           bookingService={repair.name}
           canonicalPath={canonicalPath}
           hierarchy={masterHierarchy!}
+          heroFacts={samsungContent ? <SharedRepairHeroFacts priceLabel={samsungHeroPriceLabel} /> : undefined}
         /> : <section className="repair-hero repair-detail-hero relative" aria-labelledby="virtual-phone-repair-heading">
           <span className="repair-detail-icon text-blue-600"><RepairIcon icon={repair.icon} size={34} strokeWidth={2.4} /></span>
           <span className="repair-kicker mx-auto mb-5"><RepairIcon icon={repair.icon} size={14} strokeWidth={2.6} />{repair.eyebrow}</span>
@@ -312,7 +320,7 @@ export default function VirtualPhoneRepairLandingPage({
         {hierarchy && !usesSharedMaster ? <SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${repair.name} models`} /> : null}
         {sharedPageV2 ? <SharedRepairPageResultsSection key={sharedPageV2.selectedModelSlug ?? 'all-models'} initialResults={sharedPageV2.initialResults} repairName={repair.name} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
         <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="repair-guidance-heading">
-          <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>{brandContent?.guidanceIntro ?? 'We inspect the device condition first, then provide a clear quote for the suitable repair path.'}</p></div>
+          <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{samsungContent ? `${repair.name}, explained clearly` : <>{repair.name}, explained clearly</>}</h2><p>{brandContent?.guidanceIntro ?? 'We inspect the device condition first, then provide a clear quote for the suitable repair path.'}</p></div>
           <div className={hubStyles.reasonGrid}>{contentCards.map(({ title, body, icon, link }) => <article key={title} className={`${hubStyles.reasonCard} flex h-full flex-col items-center text-center`}><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><RepairIcon icon={icon} size={20} strokeWidth={2.5} /></span><h3>{title}</h3><p>{body}</p>{link ? <Link href={link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 hover:text-blue-800">{link.label}</Link> : null}</article>)}</div>
         </section>
         <CommonRepairProblemsSection modelName={brandName ?? 'Phone'} repairType={repair.slug} problems={[{ title: 'Inspection before replacement', description: 'We check the relevant speaker or button area and explain the repair options before work begins.' }, { title: 'Clear quote first', description: sharedPageV2 ? 'Model-specific pricing depends on the current repair option, device condition and suitable repair path.' : 'The $50 figure is a starting price. Final pricing depends on the device condition and suitable repair path.' }]} />

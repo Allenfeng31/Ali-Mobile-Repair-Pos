@@ -13,6 +13,7 @@ vi.mock('./SharedRepairHierarchySections', () => ({
 }));
 
 import VirtualPhoneRepairLandingPage from './VirtualPhoneRepairLandingPage';
+import { getCameraLensPrice } from '@/lib/virtualCameraLens';
 
 describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
   it.each([
@@ -38,7 +39,7 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
 
     const heading = screen.getByRole('heading', { level: 1, name: `${brandName} Loudspeaker Replacement` });
     const facts = screen.getByLabelText('Repair facts');
-    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText(brandSlug === 'samsung' ? 'Typical $50–$150' : 'From $50')).toBeInTheDocument();
     expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
     expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();
@@ -48,7 +49,7 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.queryByLabelText('Commercial repair facts')).toBeNull();
   });
 
-  it('includes the commercial price and 30-minute facts in initial server HTML after the H1', () => {
+  it('includes the indicative Samsung range and 30-minute facts in initial server HTML after the H1', () => {
     const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
       repairSlug="loudspeaker-replacement"
       canonicalPath="/repairs/phone/samsung/loudspeaker-replacement"
@@ -64,13 +65,18 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
       }}
     />);
 
-    expect(html).toContain('From $50');
+    expect(html).toContain('Typical $50–$150');
     expect(html).toContain('30 Minutes');
-    expect(html.indexOf('From $50')).toBeGreaterThan(html.indexOf('<h1'));
+    expect(html.indexOf('Typical $50–$150')).toBeGreaterThan(html.indexOf('<h1'));
     expect(html.indexOf('30 Minutes')).toBeGreaterThan(html.indexOf('<h1'));
+    expect(html).not.toMatch(/From \$50|From \$0|\$0/);
   });
 
-  it.each(['$129', 'From $149', 'Quote on Request'])('renders selected %s in the centered card while the facts stay From $50', (selectedPriceLabel) => {
+  it.each([
+    ['$129', '$129'],
+    ['From $149', 'From $149'],
+    ['Quote on Request', 'Quote on Request'],
+  ])('prioritizes selected %s over the indicative range in the centered card and facts', (selectedPriceLabel, expectedFact) => {
     const { container } = render(<VirtualPhoneRepairLandingPage
       repairSlug="loudspeaker-replacement"
       canonicalPath="/repairs/phone/samsung/loudspeaker-replacement"
@@ -98,7 +104,11 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     const facts = screen.getByLabelText('Repair facts');
     expect(within(card).getByText(selectedPriceLabel)).toBeInTheDocument();
     expect(heading.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText(expectedFact)).toBeInTheDocument();
+    expect(within(facts).queryByText('Typical $50–$150')).toBeNull();
+    if (selectedPriceLabel === 'Quote on Request') {
+      expect(container.textContent).toContain('Typical price range: $50–$150');
+    }
     expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
     expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();
@@ -106,6 +116,102 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.getByRole('link', { name: /Change model/ })).toHaveAttribute('href', '/repairs/phone/samsung/loudspeaker-replacement');
     expect(container.querySelector('[data-camera-module-model-selector]')).toHaveAttribute('hidden');
     expect(container.querySelector('[data-shared-repair-selected-price]')).toBeNull();
+  });
+
+  it.each([
+    ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
+    ['loudspeaker-replacement', 'Loudspeaker Replacement'],
+    ['power-button-replacement', 'Power Button Replacement'],
+    ['volume-button-replacement', 'Volume Button Replacement'],
+  ] as const)('keeps %s range, quote, timing, warranty, and punctuation truthful in SSR', (repairSlug, repairName) => {
+    const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+      repairSlug={repairSlug}
+      canonicalPath={`/repairs/phone/samsung/${repairSlug}`}
+      brandName="Samsung"
+      brandSlug="samsung"
+      models={[]}
+      sharedPageV2={{
+        supportedModels: [], priceCandidates: [], initialResults: [], selectedModelSlug: null,
+        quickAnswers: { repairTime: '30 minutes', partsSameDay: 'Call us.', warranty: '6 months' },
+        pricingStrategy: { mode: 'pos-derived' },
+      }}
+    />);
+
+    expect(html).toContain('Typical $50–$150');
+    expect(html).toContain('Typical price range: $50–$150');
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('6 Months Warranty');
+    expect(html).toContain(`${repairName}, explained clearly`);
+    expect(html).not.toContain(`${repairName}<!-- -->, explained clearly`);
+    expect(html).not.toMatch(/From \$50|From \$0|\$0/);
+  });
+
+  it.each([
+    ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
+    ['loudspeaker-replacement', 'Loudspeaker Replacement'],
+    ['power-button-replacement', 'Power Button Replacement'],
+    ['volume-button-replacement', 'Volume Button Replacement'],
+  ] as const)('keeps %s quote-only selection and indicative range distinct in SSR', (repairSlug, repairName) => {
+    const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+      repairSlug={repairSlug}
+      canonicalPath={`/repairs/phone/samsung/${repairSlug}`}
+      brandName="Samsung"
+      brandSlug="samsung"
+      models={[]}
+      hierarchy={{
+        models: [], selectedBrandSlug: 'samsung', selectedModelSlug: 'galaxy-s24',
+        selectedDevice: {
+          selectedDevice: { brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24' },
+          selectedRepair: { name: repairName, serviceSlug: repairSlug },
+          priceLabel: 'Quote on Request',
+          booking: { href: '/book-repair?category=phone', isAvailable: true },
+        },
+      }}
+      sharedPageV2={{
+        supportedModels: [], priceCandidates: [], initialResults: [], selectedModelSlug: 'galaxy-s24',
+        quickAnswers: { repairTime: '30 minutes', partsSameDay: 'Call us.', warranty: '6 months' },
+        pricingStrategy: { mode: 'pos-derived' },
+      }}
+    />);
+
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('Typical price range: $50–$150');
+    expect(html).not.toContain('Typical $50–$150</dd>');
+    expect(html).not.toMatch(/From \$50|From \$0|\$0/);
+  });
+
+  it('renders a resolved selected-model price ahead of the category range in SSR', () => {
+    const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+      repairSlug="power-button-replacement"
+      canonicalPath="/repairs/phone/samsung/power-button-replacement"
+      brandName="Samsung"
+      brandSlug="samsung"
+      models={[]}
+      hierarchy={{
+        models: [], selectedBrandSlug: 'samsung', selectedModelSlug: 'galaxy-s24',
+        selectedDevice: {
+          selectedDevice: { brand: 'Samsung', brandSlug: 'samsung', model: 'Galaxy S24', modelSlug: 'galaxy-s24' },
+          selectedRepair: { name: 'Power Button Replacement', serviceSlug: 'power-button-replacement' },
+          priceLabel: '$189',
+          booking: { href: '/book-repair?category=phone', isAvailable: true },
+        },
+      }}
+      sharedPageV2={{
+        supportedModels: [], priceCandidates: [], initialResults: [], selectedModelSlug: 'galaxy-s24',
+        quickAnswers: { repairTime: '30 minutes', partsSameDay: 'Call us.', warranty: '6 months' },
+        pricingStrategy: { mode: 'pos-derived' },
+      }}
+    />);
+
+    expect(html.match(/\$189/g)).toHaveLength(2);
+    expect(html).toContain('$50–$150');
+    expect(html).not.toContain('Typical $50–$150</dd>');
+    expect(html).not.toMatch(/From \$50|From \$0|\$0/);
+  });
+
+  it('retains Samsung Camera Lens fixed-price authority outside the shared range rule', () => {
+    expect(getCameraLensPrice('Samsung')).toBe(50);
   });
 
   it('uses the Camera master selected state without a virtual fallback price or duplicate selected-device card', () => {
