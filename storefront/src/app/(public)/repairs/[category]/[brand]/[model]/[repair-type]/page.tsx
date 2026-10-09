@@ -144,6 +144,8 @@ import { buildRepairDetailSeo, getRepairDetailHeading } from './repairDetailSeo'
 
 export const revalidate = 86400;
 
+const SAMSUNG_WATER_DAMAGE_INITIAL_ASSESSMENT_CLEANING_MINUTES = 30;
+
 function getRepairIcon(slug: string, size = 48) {
   if (slug.includes('water')) return <Droplet size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
   if (slug.includes('battery')) return <Battery size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
@@ -5485,6 +5487,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type']
   );
   const isWaterDamageRepairPage = isWaterDamageRepairSlug(resolvedParams['repair-type']);
+  const isSamsungPhoneWaterDamagePage =
+    resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'samsung' &&
+    resolvedParams['repair-type'] === 'water-damage-repair';
+  const initialAssessmentCleaningMinutes = isSamsungPhoneWaterDamagePage
+    ? SAMSUNG_WATER_DAMAGE_INITIAL_ASSESSMENT_CLEANING_MINUTES
+    : undefined;
   const repairPolicyVariant = getRepairPolicyVariant(resolvedParams['repair-type']);
   const finalRepairName = getRepairDisplayName(
     resolvedParams.category,
@@ -5497,6 +5506,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     ? detailPricing.validVariants.length > 0
       ? `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
       : `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
+    : undefined;
+  const samsungWaterDamageHeroSubtitle = isSamsungPhoneWaterDamagePage
+    ? `${displayModel} water damage assessment and cleaning at Ali Mobile & Repair in Ringwood Square. Initial assessment and cleaning usually take around ${initialAssessmentCleaningMinutes} minutes. We confirm the quote before further work. Further repair time depends on liquid damage, corrosion, cleaning results and whether additional parts or board-level work are required.`
     : undefined;
   const genericRepairIntentDescription = getRepairIntentDescription({
     model: seoDisplayModel,
@@ -5522,7 +5534,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         )
       : finalRepairName;
 
-  const baseFaqs = seoPocket?.faq || generateFaqs(displayModel, finalRepairName, resolvedParams['repair-type'], price, modelCode, displayBrand);
+  const baseFaqs = seoPocket?.faq || generateFaqs(
+    displayModel,
+    finalRepairName,
+    resolvedParams['repair-type'],
+    price,
+    modelCode,
+    displayBrand,
+    { initialAssessmentCleaningMinutes },
+  );
   const timingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
   const faqsWithApprovedTurnaround = timingFaq
     ? withApprovedTurnaroundFaq({
@@ -5713,6 +5733,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               enhancedSamsungTabletSeoPocket?.heroSubtitle ??
               enhancedIpadSeoPocket?.heroSubtitle ??
               seoPocket?.heroSubtitle ??
+              samsungWaterDamageHeroSubtitle ??
               samsungCommercialHeroSubtitle ??
               iphoneScreenFamilyHeroSubtitle ??
               iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
@@ -5721,6 +5742,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               iphoneStandardHardwareFamilyHero ??
               'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
           </p>
+          {isSamsungPhoneWaterDamagePage && (
+            <p className="mx-auto mt-3 max-w-3xl text-sm font-semibold text-slate-700">
+              Need immediate first steps? <Link href={getCentralWaterDamageHref()} className="text-blue-700 underline underline-offset-2">Read the phone water damage guide.</Link>
+            </p>
+          )}
 
           <RepairPricingAndCTA
             brandName={displayBrand}
@@ -5739,7 +5765,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               <>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-                  Timeframe Depends on Damage
+                  {isSamsungPhoneWaterDamagePage
+                    ? `Initial Assessment & Cleaning — ${initialAssessmentCleaningMinutes} Minutes`
+                    : 'Timeframe Depends on Damage'}
                 </div>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><ShieldAlert size={20} strokeWidth={2.5} aria-hidden="true" /></span>

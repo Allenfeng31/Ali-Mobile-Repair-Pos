@@ -358,8 +358,56 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   it('keeps Pixel 8 Pro Water on its retained model-specific Detail route', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [pixel8ProWithWaterRepair], retiredRepairs: [] });
 
-    await expect(RepairServicePage({ params: Promise.resolve(params({ brand: 'google-pixel', model: 'pixel-8-pro', 'repair-type': 'water-damage-repair' })) }))
-      .resolves.toBeTruthy();
+    const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'google-pixel', model: 'pixel-8-pro', 'repair-type': 'water-damage-repair' })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+
+    expect(html).toContain('Timeframe Depends on Damage');
+    expect(html).toContain('Choose a quality tier');
+    expect(html).not.toContain('Initial Assessment &amp; Cleaning');
+    expect(html).not.toContain('href="/repairs/water-damage"');
+    expect(faqs[0].answer).toContain('Power it off if possible, do not charge it');
+    expect(faqs.map((faq) => faq.answer).join(' ')).not.toContain('around 30 minutes');
+    expect(permanentRedirect).not.toHaveBeenCalled();
+  });
+
+  it('keeps Galaxy A16 Water Damage quote-first with a 30-minute initial service and no completed-repair promise', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone', brand: 'Samsung', slug: 'samsung', models: [{
+          model: 'Galaxy A16', slug: 'galaxy-a16', modelCode: 'SM-A166B', repairTypes: [waterRepair],
+        }],
+      }],
+      retiredRepairs: [],
+    });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'samsung', model: 'galaxy-a16', 'repair-type': 'water-damage-repair',
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain('<h1>Galaxy A16 Water Damage Cleaning / Assessment</h1>');
+    expect(html).toContain('Initial Assessment &amp; Cleaning');
+    expect(html).toContain('30 Minutes');
+    expect(html).toContain('Further repair time depends');
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('Diagnostic Required');
+    expect(html).toContain('No Warranty for Water Damage');
+    expect(html).toContain('href="/repairs/water-damage"');
+    expect(html).not.toContain('Choose a quality tier');
+    expect(html).not.toContain('Timeframe Depends on Damage');
+    expect(html).not.toContain('6-Month Warranty');
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain('around 30 minutes');
+    expect(timingFaqs[0].answer).not.toMatch(/around 1 hour|repair.*takes around 30 minutes/i);
+    expect(faqs.some((faq) => /gets wet/i.test(faq.question))).toBe(true);
+    expect(faqs.some((faq) => /recover/i.test(faq.question))).toBe(true);
+    expect(serviceSchema).toContain('"@type":"Service"');
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(html).toContain('"@type":"BreadcrumbList"');
     expect(permanentRedirect).not.toHaveBeenCalled();
   });
 

@@ -85,13 +85,27 @@ export function getLSIForRepair(slug: string): { component?: string[]; issue?: s
   return {};
 }
 
-export function generateFaqs(model: string, repairName: string, repairSlug: string, price: number, modelCode?: string, brand?: string) {
+export function generateFaqs(
+  model: string,
+  repairName: string,
+  repairSlug: string,
+  price: number,
+  modelCode?: string,
+  brand?: string,
+  options?: { initialAssessmentCleaningMinutes?: number },
+) {
   const lsi = getLSIForRepair(repairSlug);
   const component = lsi.component?.[0] || repairName.toLowerCase();
   const altComponent = lsi.component?.[1] || 'damaged component';
 
   const displayModel = modelCode ? `${model} (${modelCode})` : model;
   const isWaterDamage = isWaterDamageRepairSlug(repairSlug);
+  const samsungWaterDamageInitialMinutes = isWaterDamage && brand?.toLowerCase() === 'samsung' &&
+    typeof options?.initialAssessmentCleaningMinutes === 'number' &&
+    Number.isFinite(options.initialAssessmentCleaningMinutes) &&
+    options.initialAssessmentCleaningMinutes > 0
+      ? options.initialAssessmentCleaningMinutes
+      : undefined;
   const isLogicBoard = repairSlug === 'logic-board-repair';
   const isDataRecovery = repairSlug === 'data-recovery';
   const isNoPower = repairSlug === 'no-power';
@@ -123,7 +137,9 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
   } else {
     q1 = {
       question: `How long does the ${model} ${repairName} take?`,
-      answer: isWaterDamage
+      answer: samsungWaterDamageInitialMinutes
+        ? `For ${model}, initial assessment and cleaning usually take around ${samsungWaterDamageInitialMinutes} minutes. Further repair time depends on the extent of liquid damage, corrosion, cleaning results, drying condition, additional parts, board-level work and further diagnosis.`
+        : isWaterDamage
         ? `Water damage recovery typically takes around 1 hour for the initial assessment and cleaning. If the damage is extensive, our technicians will inform you beforehand.`
         : isBackGlass
         ? `Time depends on the specific ${model} variant and parts availability. Many back glass repairs need more time than simple screen or battery repairs, usually taking longer to ensure a safe, clean removal and precise bonding. We confirm the timeframe after checking the device at our Ringwood location.`
@@ -171,6 +187,19 @@ export function generateFaqs(model: string, repairName: string, repairSlug: stri
         : STANDARD_WARRANTY_SUMMARY,
     },
   ];
+
+  if (samsungWaterDamageInitialMinutes) {
+    baseFaqs.splice(1, 0,
+      {
+        question: `What should I do if my ${model} gets wet?`,
+        answer: `Turn off your ${model} if possible, do not charge it or repeatedly power it on, and arrange an assessment promptly.`,
+      },
+      {
+        question: `Can my ${model} or its data always be recovered after water damage?`,
+        answer: `No. Repair and data recovery depend on the extent and location of liquid damage. Neither outcome is guaranteed, and cleaning does not guarantee long-term reliability. Data recovery may sometimes be possible; tell us if data is your priority before work begins.`,
+      },
+    );
+  }
 
   if ((brand?.toLowerCase() === 'apple' || brand?.toLowerCase() === 'iphone') && repairSlug.includes('screen')) {
     baseFaqs.splice(1, 0, {

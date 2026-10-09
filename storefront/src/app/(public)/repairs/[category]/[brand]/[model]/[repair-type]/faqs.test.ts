@@ -73,6 +73,36 @@ describe('generateFaqs', () => {
     expect(warrantyFaq?.answer).not.toContain(STANDARD_WARRANTY_SUMMARY);
   });
 
+  it('describes Samsung Water Damage timing as initial assessment and cleaning, not complete recovery', () => {
+    const faqs = generateFaqs(
+      'Galaxy A16',
+      'Water Damage Cleaning / Assessment',
+      'water-damage-repair',
+      0,
+      'SM-A166B',
+      'Samsung',
+      { initialAssessmentCleaningMinutes: 30 },
+    );
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain('initial assessment and cleaning usually take around 30 minutes');
+    expect(timingFaqs[0].answer).toContain('Further repair time depends');
+    expect(timingFaqs[0].answer).not.toMatch(/around 1 hour|complete repair.*30 minutes/i);
+    expect(faqs.find((faq) => /how much/i.test(faq.question))?.answer).toContain('starts from $50');
+    expect(faqs.find((faq) => /warranty/i.test(faq.question))?.answer).toBe(WATER_DAMAGE_WARRANTY_SUMMARY);
+    expect(faqs.find((faq) => /gets wet/i.test(faq.question))?.answer).toMatch(/do not charge|stop charging/i);
+    expect(faqs.find((faq) => /recover/i.test(faq.question))?.answer).toContain('Neither outcome is guaranteed');
+  });
+
+  it('keeps non-Samsung Water Damage timing and FAQ content unchanged', () => {
+    const faqs = generateFaqs('Pixel 8 Pro', 'Water Damage Repair', 'water-damage-repair', 0, undefined, 'Google Pixel');
+
+    expect(faqs).toHaveLength(5);
+    expect(faqs[0].answer).toContain('around 1 hour for the initial assessment and cleaning');
+    expect(faqs.some((faq) => /gets wet/i.test(faq.question))).toBe(false);
+  });
+
   it.each(['screen-replacement', 'battery-replacement'])('uses the standard part-and-labour policy for %s', (repairSlug) => {
     const faqs = generateFaqs('iPhone 15', 'Standard Repair', repairSlug, 50, 'A3090', 'Apple');
     const warrantyFaq = faqs.find((faq) => faq.question.startsWith('Is there a warranty'));
