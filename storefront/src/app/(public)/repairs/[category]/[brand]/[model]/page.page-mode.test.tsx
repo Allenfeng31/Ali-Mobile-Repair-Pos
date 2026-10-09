@@ -57,6 +57,29 @@ const modelData = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const pixelLogicBoardPolicy = {
+  retained: [
+    'pixel-10-pro-fold', 'pixel-10-pro-xl', 'pixel-3a-xl', 'pixel-4-xl', 'pixel-5',
+    'pixel-6-pro', 'pixel-6a', 'pixel-7', 'pixel-8-pro',
+  ],
+  consolidated: [
+    'pixel-10-pro', 'pixel-10', 'pixel-3-xl', 'pixel-3', 'pixel-3a', 'pixel-4',
+    'pixel-4a-5g', 'pixel-4a', 'pixel-5a', 'pixel-6', 'pixel-7-pro', 'pixel-7a',
+    'pixel-8', 'pixel-8a', 'pixel-9-pro-fold', 'pixel-9-pro-xl', 'pixel-9-pro', 'pixel-9',
+  ],
+} as const;
+
+const pixelModelData = (modelSlug: string, repairTypes = [
+  { slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' },
+  { slug: 'logic-board-repair', name: 'Logic Board Repair', price: 0, repairOrigin: 'pos' },
+]) => modelData({
+  brand: 'Google Pixel',
+  model: `Google Pixel ${modelSlug}`,
+  catalogueSource: 'live-pos',
+  repairTypes,
+  brandModels: [{ slug: modelSlug, model: `Google Pixel ${modelSlug}`, repairTypes: [] }],
+});
+
 beforeEach(() => {
   state.gridProps = null;
   state.matchingProps = [];
@@ -150,6 +173,107 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(state.gridProps?.repairTypes.filter((repair) => repair.slug === 'logic-board-repair')).toHaveLength(1);
     expect(state.gridProps?.repairTypes[0]).not.toHaveProperty('href');
     expect(html).toContain('href="/repairs/phone/iphone/iphone-15/screen-replacement"');
+  });
+
+  it('keeps a retained Pixel Logic Board card on its direct Detail URL without a same-day promise', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData('pixel-8-pro') as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: 'pixel-8-pro' }),
+    }));
+
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        slug: 'logic-board-repair',
+        href: '/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair',
+      }),
+    ]));
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.href)
+      .not.toContain('/repairs/motherboard-repair?');
+    expect(html).not.toMatch(/same[ -]day/i);
+    expect(html).toContain('Timing depends on the selected repair, part availability and the device condition.');
+  });
+
+  it('uses the existing 9 retained / 18 consolidated / 1 unsupported Pixel Logic Board policy without master-selector links', async () => {
+    for (const modelSlug of pixelLogicBoardPolicy.retained) {
+      vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData(modelSlug) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+      renderToStaticMarkup(await ModelHubPage({
+        params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: modelSlug }),
+      }));
+
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.href)
+        .toBe(`/repairs/phone/google-pixel/${modelSlug}/logic-board-repair`);
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.href)
+        .toBe(`/repairs/phone/google-pixel/${modelSlug}/screen-replacement`);
+    }
+
+    for (const modelSlug of pixelLogicBoardPolicy.consolidated) {
+      vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData(modelSlug) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+      renderToStaticMarkup(await ModelHubPage({
+        params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: modelSlug }),
+      }));
+
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.href)
+        .toBe('/repairs/phone/logic-board-repair');
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.href)
+        .toBe(`/repairs/phone/google-pixel/${modelSlug}/screen-replacement`);
+    }
+
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData('pixel-9a', [
+      { slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' },
+    ]) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: 'pixel-9a' }),
+    }));
+
+    expect(state.gridProps?.repairTypes.filter((repair) => repair.slug === 'logic-board-repair')).toHaveLength(0);
+    expect(state.gridProps?.repairTypes.some((repair) => repair.href?.includes('/repairs/motherboard-repair?'))).toBe(false);
+  });
+
+  it.each([
+    ['Pixel 10 Pro XL', 'pixel-10-pro-xl'],
+    ['Pixel 9 Pro XL', 'pixel-9-pro-xl'],
+    ['Pixel 8 Pro', 'pixel-8-pro'],
+    ['Pixel 7 Pro', 'pixel-7-pro'],
+    ['Pixel 6a', 'pixel-6a'],
+    ['Pixel 5', 'pixel-5'],
+    ['Pixel 3', 'pixel-3'],
+    ['Pixel 9a', 'pixel-9a'],
+  ])('renders neutral repair-timing guidance without unsupported urgency wording for %s', async (_label, modelSlug) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData(modelSlug) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: modelSlug }),
+    }));
+
+    expect(html).toContain('How is repair timing confirmed?');
+    expect(html).toContain('What affects Google Pixel');
+    expect(html).toContain('Timing depends on the selected repair, part availability and the device condition.');
+    expect(html).not.toMatch(/same[ -]day|while you wait|immediate|instant/i);
+  });
+
+  it.each([
+    ['Samsung', 'Samsung', 'galaxy-s23', '/repairs/motherboard-repair?category=phone&brand=samsung&model=galaxy-s23'],
+    ['OPPO', 'OPPO', 'find-x8-pro', '/repairs/motherboard-repair?category=phone&brand=oppo&model=find-x8-pro'],
+  ])('keeps the motherboard master card for non-Pixel %s model hubs', async (_label, brand, modelSlug, href) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand,
+      model: `${brand} ${modelSlug}`,
+      catalogueSource: 'live-pos',
+      repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' }],
+      brandModels: [{ slug: modelSlug, model: `${brand} ${modelSlug}`, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: brand.toLowerCase(), model: modelSlug }),
+    }));
+
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'logic-board-repair', href }),
+    ]));
   });
 
   it('keeps iPhone Model Hub metadata broad and sends screen-detail intent to the exact SSR link', async () => {

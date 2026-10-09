@@ -154,6 +154,20 @@ describe('resolveModelHubRepairPageMode', () => {
     expect(result.options[0]?.href).toBe('/repairs/phone/logic-board-repair');
   });
 
+  it.each([
+    ['retained Pixel 8 Pro', 'pixel-8-pro', '/repairs/phone/google-pixel/pixel-8-pro/logic-board-repair'],
+    ['consolidated Pixel 9 Pro XL', 'pixel-9-pro-xl', '/repairs/phone/logic-board-repair'],
+  ])('resolves the final Phase 1 Logic Board destination for %s', (_label, modelSlug, href) => {
+    const result = resolve({
+      brandSlug: 'google-pixel',
+      modelSlug,
+      repairTypes: [repair('logic-board-repair')],
+    });
+
+    expect(result.options[0]?.href).toBe(href);
+    expect(result.options[0]?.href).not.toContain('/repairs/motherboard-repair?');
+  });
+
   it('hides unknown taxonomy and preserves iPhone and non-phone fallback routes', () => {
     expect(resolve({ repairTypes: [repair('microsoldering-special', 'pos')] }).options).toEqual([]);
     expect(resolve({ brandSlug: 'iphone', modelSlug: 'iphone-15', repairTypes: [repair('screen-replacement')] }).options[0]?.href)

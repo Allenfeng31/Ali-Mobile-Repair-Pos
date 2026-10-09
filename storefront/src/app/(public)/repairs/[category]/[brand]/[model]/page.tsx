@@ -363,12 +363,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         repairTypes,
       }).options
     : repairTypes;
-  const modelHubRepairTypes = withMotherboardMasterModelHubOption(
-    gridRepairTypes,
-    categorySlug,
-    brandSlug,
-    modelSlug,
-  );
+  const modelHubRepairTypes = isGooglePixelModelPage
+    ? gridRepairTypes
+    : withMotherboardMasterModelHubOption(
+        gridRepairTypes,
+        categorySlug,
+        brandSlug,
+        modelSlug,
+      );
   const visibleRelatedModels = sameBrandModels.slice(0, RELATED_MODEL_LIMIT);
   const relatedModelHubLabel = isIPhoneModelPage
     ? "iPhone"
@@ -887,8 +889,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       : null,
     {
       number: "04",
-      title: "Can it normally be repaired today?",
-      body: "Same-day repair may be available for many common Google Pixel models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      title: "How is repair timing confirmed?",
+      body: "Timing depends on the selected repair, part availability and the device condition. Choose the exact repair below for its current service details.",
     },
     {
       number: "05",
@@ -978,8 +980,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         }
       : null,
     {
-      question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Same-day repair may be available for many common Google Pixel models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      question: `What affects ${modelName} repair timing?`,
+      answer: "Timing depends on the selected repair, part availability and the device condition. Choose the exact repair below for its current service details.",
     },
     activeScreenOptions.length > 0
       ? {
