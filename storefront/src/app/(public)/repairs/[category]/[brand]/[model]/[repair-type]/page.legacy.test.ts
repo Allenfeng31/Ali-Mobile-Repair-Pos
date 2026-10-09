@@ -26,6 +26,7 @@ vi.mock('next/navigation', () => ({
 
 import RepairServicePage, { generateStaticParams } from './page';
 import FaqAccordionComponent from '@/components/FaqAccordion';
+import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getAliMobileEnhancedIphoneSeoPocket } from '@/lib/seo/content/iphone';
@@ -67,6 +68,22 @@ const pixel9a = {
   slug: 'google-pixel',
   models: [{ model: 'Google Pixel 9a', slug: 'pixel-9a', repairTypes: pixel9aRepairs }],
 };
+const pixelRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  variants: ReadonlyArray<{ quality_grade: string; price: number }> = [],
+) => ({
+  category: 'phone',
+  brand: 'Google Pixel',
+  slug: 'google-pixel',
+  models: [{
+    model,
+    slug,
+    repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
+  }],
+});
 const lenovoYogaSmartTabWithWaterRepair = {
   category: 'tablet',
   brand: 'Lenovo',
@@ -441,6 +458,66 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       })) })).resolves.toBeTruthy();
     }
     expect(notFound).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Pixel 7 Pro Screen', 'Google Pixel 7 Pro', 'pixel-7-pro', 'Screen Replacement', 'screen-replacement', 30, [{ quality_grade: 'Standard', price: 299 }], true],
+    ['Pixel 8 Pro Battery', 'Google Pixel 8 Pro', 'pixel-8-pro', 'Battery Replacement', 'battery-replacement', 30, [{ quality_grade: 'Standard', price: 189 }], true],
+    ['Pixel 9 Pro XL Charging Port', 'Google Pixel 9 Pro XL', 'pixel-9-pro-xl', 'Charging Port Replacement', 'charging-port-replacement', 30, [], false],
+    ['Pixel 10 Front Camera', 'Google Pixel 10', 'pixel-10', 'Front Camera Replacement', 'front-camera-replacement', 30, [], false],
+    ['Pixel 8 Pro Back Camera', 'Google Pixel 8 Pro', 'pixel-8-pro', 'Back Camera Replacement', 'back-camera-replacement', 30, [], false],
+    ['Pixel 10 Pro Fold Back Glass', 'Google Pixel 10 Pro Fold', 'pixel-10-pro-fold', 'Back Glass Replacement', 'back-glass-replacement', 60, [], false],
+    ['Pixel 9a Back Glass', 'Google Pixel 9a', 'pixel-9a', 'Back Glass Replacement', 'back-glass-replacement', 60, [{ quality_grade: 'Standard', price: 239 }], true],
+  ] as const)('renders %s with approved timing and catalogue pricing state', async (
+    _label,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    turnaroundMinutes,
+    variants,
+    hasResolvedPrice,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [pixelRepairCatalogue(model, modelSlug, repairName, repairSlug, variants)],
+      retiredRepairs: [],
+    });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'google-pixel', model: modelSlug, 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const priceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+    expect(html).toContain('6-Month Warranty');
+    expect(html).not.toContain('Fast Turnaround');
+    expect(html).not.toContain('Timeframe Varies');
+    expect(html).not.toContain('a few hours');
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain(`around ${turnaroundMinutes} minutes`);
+
+    if (hasResolvedPrice) {
+      expect(pricing?.showStartingPriceFallback).toBe(true);
+      expect(priceFaq?.answer).toContain(`$${variants[0].price}`);
+      expect(serviceSchema).toContain('"offers"');
+      expect(html).toContain('View the current repair price below.');
+    } else {
+      expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(html).toContain('Quote on Request');
+      expect(html).toContain('Ringwood Square');
+      expect(html).not.toContain('Choose a quality tier');
+      expect(priceFaq?.answer).toMatch(/quote/i);
+      expect(serviceSchema).not.toContain('"offers"');
+    }
+
+    if (repairSlug === 'back-glass-replacement') {
+      expect(html).toMatch(/housing assembly|back housing/i);
+    }
   });
 
   it('keeps the Google-brand Pixel 4 Water alias consolidating to shared Water', async () => {

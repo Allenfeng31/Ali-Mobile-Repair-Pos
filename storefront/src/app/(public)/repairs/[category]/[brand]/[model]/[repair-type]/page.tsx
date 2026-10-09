@@ -5507,6 +5507,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       ? `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
       : `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile in Ringwood Square. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
     : undefined;
+  const googlePixelCommercialHeroSubtitle = isAliMobileEnhancedGooglePixelPage && googlePixelEnhancedRepairType
+    ? detailPricing.validVariants.length > 0
+      ? `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile & Repair in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
+      : `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile & Repair in Ringwood Square. Quote on Request. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
+    : undefined;
   const samsungWaterDamageHeroSubtitle = isSamsungPhoneWaterDamagePage
     ? `${displayModel} water damage assessment and cleaning at Ali Mobile & Repair in Ringwood Square. Initial assessment and cleaning usually take around ${initialAssessmentCleaningMinutes} minutes. We confirm the quote before further work. Further repair time depends on liquid damage, corrosion, cleaning results and whether additional parts or board-level work are required.`
     : undefined;
@@ -5735,6 +5740,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               seoPocket?.heroSubtitle ??
               samsungWaterDamageHeroSubtitle ??
               samsungCommercialHeroSubtitle ??
+              googlePixelCommercialHeroSubtitle ??
               iphoneScreenFamilyHeroSubtitle ??
               iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
               iphoneCameraModuleFamilyHeroSubtitle ??
@@ -5754,7 +5760,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
             showBackHousingNotice={showBackHousingNotice}
-            showStartingPriceFallback={!(isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass)}
+            showStartingPriceFallback={!(
+              (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
+              (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly)
+            )}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}

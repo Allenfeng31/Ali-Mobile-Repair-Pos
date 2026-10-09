@@ -3,7 +3,11 @@ import { buildGooglePixelBackCameraReplacementPocket } from './back-camera-repla
 import { buildGooglePixelBackGlassReplacementPocket } from './back-glass-replacement';
 import { buildGooglePixelBatteryReplacementPocket } from './battery-replacement';
 import { buildGooglePixelChargingPortReplacementPocket } from './charging-port-replacement';
-import { getGooglePixelHardwareConfig, GOOGLE_PIXEL_HARDWARE_CONFIG } from './config';
+import {
+  getGooglePixelHardwareConfig,
+  GOOGLE_PIXEL_HARDWARE_CONFIG,
+  GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES,
+} from './config';
 import { buildGooglePixelFrontCameraReplacementPocket } from './front-camera-replacement';
 import { buildGooglePixelLogicBoardRepairPocket } from './logic-board-repair';
 import { buildGooglePixelScreenReplacementPocket } from './screen-replacement';
@@ -92,6 +96,21 @@ export function isAliMobileEnhancedGooglePixelRepairPage(
   return getAliMobileEnhancedGooglePixelRepairType(params) !== null;
 }
 
+function withStandardGooglePixelTurnaround(
+  pocket: RepairTypeSeoPocket,
+  repairType: AliMobileEnhancedGooglePixelRepairType,
+): RepairTypeSeoPocket {
+  const turnaroundMinutes = GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES[repairType];
+
+  if (!turnaroundMinutes) return pocket;
+
+  return {
+    ...pocket,
+    turnaroundMinutes,
+    useResolvedTierPriceFaq: true,
+  };
+}
+
 export function getAliMobileEnhancedGooglePixelSeoPocket({
   category,
   brand,
@@ -115,7 +134,8 @@ export function getAliMobileEnhancedGooglePixelSeoPocket({
     return pocket;
   }
 
-  switch (enhancedRepairType) {
+  const familyPocket = (() => {
+    switch (enhancedRepairType) {
     case 'screen-replacement':
       return buildGooglePixelScreenReplacementPocket(hardwareConfig);
     case 'battery-replacement':
@@ -132,7 +152,12 @@ export function getAliMobileEnhancedGooglePixelSeoPocket({
       return buildGooglePixelLogicBoardRepairPocket(hardwareConfig);
     default:
       return pocket;
-  }
+    }
+  })();
+
+  if (!familyPocket) return pocket;
+
+  return withStandardGooglePixelTurnaround(familyPocket, enhancedRepairType);
 }
 
 export function getAliMobileEnhancedGooglePixelHubLinks(modelSlug: string): GooglePixelHubLink[] {

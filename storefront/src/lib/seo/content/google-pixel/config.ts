@@ -1,4 +1,19 @@
-import type { GooglePixelHardwareConfig, AliMobileEnhancedGooglePixelModelSlug } from './types';
+import type {
+  AliMobileEnhancedGooglePixelModelSlug,
+  AliMobileEnhancedGooglePixelRepairType,
+  GooglePixelHardwareConfig,
+} from './types';
+
+export const GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES: Partial<
+  Record<AliMobileEnhancedGooglePixelRepairType, number>
+> = {
+  'screen-replacement': 30,
+  'battery-replacement': 30,
+  'charging-port-replacement': 30,
+  'back-glass-replacement': 60,
+  'front-camera-replacement': 30,
+  'back-camera-replacement': 30,
+};
 
 export const GOOGLE_PIXEL_HARDWARE_CONFIG: Record<
   AliMobileEnhancedGooglePixelModelSlug,
