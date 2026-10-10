@@ -5218,6 +5218,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     seoPocket.turnaroundMinutes > 0
       ? seoPocket.turnaroundMinutes
       : undefined;
+  const samsungTabletTurnaroundLabel =
+    isAliMobileEnhancedSamsungTabletPage && approvedTurnaroundMinutes === 60
+      ? '1 Hour'
+      : undefined;
   const ipadDetailTiming = getIpadDetailTiming(
     resolvedParams.model,
     resolvedParams['repair-type'],
@@ -5570,7 +5574,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     { initialAssessmentCleaningMinutes },
   );
   const existingTimingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
-  const timingFaq = existingTimingFaq ?? (ipadDetailTiming
+  const timingFaq = existingTimingFaq ?? (ipadDetailTiming || samsungTabletTurnaroundLabel
     ? {
         question: `How long does ${displayModel} ${finalRepairName.toLowerCase()} take?`,
         answer: '',
@@ -5592,7 +5596,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       turnaroundMinutes: approvedTurnaroundMinutes,
       turnaroundLabel: ipadDetailTiming?.kind === 'standard'
         ? ipadDetailTiming.faqDurationLabel
-        : undefined,
+        : samsungTabletTurnaroundLabel,
     })
     : faqsWithTimingQuestion;
   const costFaq = faqsWithApprovedTurnaround.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
@@ -5800,11 +5804,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             showBackHousingNotice={showBackHousingNotice}
             showStartingPriceFallback={!(
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
+              (isAliMobileEnhancedSamsungTabletPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
-            useNeutralQuoteWording={Boolean(ipadDetailTiming && detailPricing.isQuoteOnly)}
+            useNeutralQuoteWording={Boolean(
+              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage) && detailPricing.isQuoteOnly
+            )}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
@@ -5843,7 +5850,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       ? `${approvedTurnaroundMinutes} Minutes`
                       : 'Timeframe Varies'
                     : approvedTurnaroundMinutes
-                    ? `${approvedTurnaroundMinutes} Minutes`
+                      ? samsungTabletTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`
                     : samsungFoldableScreenDetailContext
                     ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')

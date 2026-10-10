@@ -60,6 +60,7 @@ export function buildSamsungTabletBatteryReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'battery-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildSamsungTabletMetaTitle(config, 'battery-replacement'),
     metaDescription: buildSamsungTabletMetaDescription(config, 'battery-replacement'),
     heroSubtitle: buildSamsungTabletHeroSubtitle(config, 'battery-replacement'),
@@ -138,4 +139,3 @@ export function buildSamsungTabletBatteryReplacementPocket(
     ],
   };
 }
-

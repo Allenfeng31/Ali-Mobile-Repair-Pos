@@ -121,6 +121,26 @@ const ipadRepairCatalogue = (
   }],
   retiredRepairs: [],
 });
+const samsungTabletRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  variants: ReadonlyArray<{ quality_grade: string; price: number }> = [],
+) => ({
+  source: 'pos' as const,
+  brands: [{
+    category: 'tablet',
+    brand: 'Samsung',
+    slug: 'samsung',
+    models: [{
+      model,
+      slug,
+      repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
+    }],
+  }],
+  retiredRepairs: [],
+});
 const lenovoYogaSmartTabWithWaterRepair = {
   category: 'tablet',
   brand: 'Lenovo',
@@ -389,6 +409,77 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     RepairResultsMatchingSection.mockClear();
     notFound.mockClear();
     permanentRedirect.mockClear();
+  });
+
+  it.each([
+    ['Galaxy Tab A8 Screen', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true],
+    ['Galaxy Tab A8 Battery', 'Battery Replacement', 'battery-replacement', [], false],
+    ['Galaxy Tab A8 Charging Port', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Standard', price: 129 }], true],
+    ['Galaxy Tab A8 Front Camera', 'Front Camera Replacement', 'front-camera-replacement', [], false],
+    ['Galaxy Tab A8 Back Camera', 'Back Camera Replacement', 'back-camera-replacement', [], false],
+  ] as const)('renders %s with Samsung Tablet standard timing and quote-safe pricing', async (
+    _label,
+    repairName,
+    repairSlug,
+    variants,
+    hasResolvedPrice,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(samsungTabletRepairCatalogue(
+      'Galaxy Tab A8',
+      'galaxy-tab-a8-sm-x200-sm-x205',
+      repairName,
+      repairSlug,
+      variants,
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: 'samsung', model: 'galaxy-tab-a8-sm-x200-sm-x205', 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    const heroStart = html.indexOf('<section class="repair-hero');
+    const heroEnd = html.indexOf('<section class="mx-auto my', heroStart);
+    const heroHtml = html.slice(heroStart, heroEnd);
+
+    expect(html).toContain('1 Hour');
+    expect(html).toContain('6-Month Warranty');
+    expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait|immediate/i);
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain('around 1 Hour');
+
+    if (hasResolvedPrice) {
+      expect(pricing?.showStartingPriceFallback).toBe(true);
+      expect(html).toContain(`$${variants[0].price}`);
+      expect(serviceSchema).toContain('"offers"');
+      expect(serviceSchema).toContain(`"price":"${variants[0].price}.00"`);
+    } else {
+      expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(html).toContain('Quote on Request');
+      expect(html).not.toMatch(/Starting from \$|From \$/);
+      expect(html).not.toMatch(/instant quote/i);
+      expect(serviceSchema).not.toContain('"offers"');
+    }
+  });
+
+  it('keeps Samsung Tablet Water Damage outside the standard timing and warranty rule', async () => {
+    fetchRepairCatalog.mockResolvedValue(samsungTabletRepairCatalogue(
+      'Galaxy Tab A8',
+      'galaxy-tab-a8-sm-x200-sm-x205',
+      'Water Damage Repair',
+      'water-damage-repair',
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: 'samsung', model: 'galaxy-tab-a8-sm-x200-sm-x205', 'repair-type': 'water-damage-repair',
+    })) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Timeframe Depends on Damage');
+    expect(html).toContain('No Warranty for Water Damage');
+    expect(html).not.toContain('1 Hour');
   });
 
   it.each([

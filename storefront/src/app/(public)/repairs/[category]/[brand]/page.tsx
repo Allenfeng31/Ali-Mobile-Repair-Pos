@@ -1816,16 +1816,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const samsungTabletHeroInsightCards = isSamsungTabletHub
     ? [
         {
-          title: "Samsung Tablet Repairs from $50",
-          body: "Selected Samsung tablet repair services start from $50. Choose your exact model to view current repair options and pricing.",
+          title: "View Current Pricing by Model",
+          body: "Choose your exact Samsung tablet model to view current repair options and pricing.",
         },
         {
           title: "6-Month Repair Warranty",
           body: "Eligible Samsung tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.",
         },
         {
-          title: "Around 45 Minutes Once Parts Are In Stock",
-          body: "Many Samsung tablet repairs can take around 45 minutes once the required part is in stock. If the required part is not in stock, parts usually need 1-2 days to order.",
+          title: "Around 1 Hour for Standard Repairs",
+          body: "Many standard Samsung tablet repairs take around 1 hour once the correct part is available. Timing can vary if additional damage is found during inspection.",
         },
       ]
     : [];

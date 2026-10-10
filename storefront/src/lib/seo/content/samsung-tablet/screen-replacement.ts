@@ -60,6 +60,7 @@ export function buildSamsungTabletScreenReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'screen-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildSamsungTabletMetaTitle(config, 'screen-replacement'),
     metaDescription: buildSamsungTabletMetaDescription(config, 'screen-replacement'),
     heroSubtitle: buildSamsungTabletHeroSubtitle(config, 'screen-replacement'),
@@ -139,4 +140,3 @@ export function buildSamsungTabletScreenReplacementPocket(
     ],
   };
 }
-

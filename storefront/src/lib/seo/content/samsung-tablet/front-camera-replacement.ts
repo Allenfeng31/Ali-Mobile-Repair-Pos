@@ -60,6 +60,7 @@ export function buildSamsungTabletFrontCameraReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'front-camera-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildSamsungTabletMetaTitle(config, 'front-camera-replacement'),
     metaDescription: buildSamsungTabletMetaDescription(config, 'front-camera-replacement'),
     heroSubtitle: buildSamsungTabletHeroSubtitle(config, 'front-camera-replacement'),
@@ -137,4 +138,3 @@ export function buildSamsungTabletFrontCameraReplacementPocket(
     ],
   };
 }
-

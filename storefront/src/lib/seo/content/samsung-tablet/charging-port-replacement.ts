@@ -60,6 +60,7 @@ export function buildSamsungTabletChargingPortReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'charging-port-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildSamsungTabletMetaTitle(config, 'charging-port-replacement'),
     metaDescription: buildSamsungTabletMetaDescription(config, 'charging-port-replacement'),
     heroSubtitle: buildSamsungTabletHeroSubtitle(config, 'charging-port-replacement'),
@@ -137,4 +138,3 @@ export function buildSamsungTabletChargingPortReplacementPocket(
     ],
   };
 }
-

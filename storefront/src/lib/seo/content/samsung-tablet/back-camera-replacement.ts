@@ -60,6 +60,7 @@ export function buildSamsungTabletBackCameraReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'back-camera-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildSamsungTabletMetaTitle(config, 'back-camera-replacement'),
     metaDescription: buildSamsungTabletMetaDescription(config, 'back-camera-replacement'),
     heroSubtitle: buildSamsungTabletHeroSubtitle(config, 'back-camera-replacement'),
@@ -138,4 +139,3 @@ export function buildSamsungTabletBackCameraReplacementPocket(
     ],
   };
 }
-
