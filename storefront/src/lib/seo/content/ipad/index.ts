@@ -64,6 +64,49 @@ const APPROVED_IPAD_ENHANCED_REPAIR_TYPES = new Set<string>([
   'back-camera-replacement'
 ]);
 
+const IPAD_STANDARD_TURNAROUND_MINUTES = 60;
+const IPAD_CHARGING_PORT_ASSESSMENT_FAQ = 'Repair timing depends on the charging-port fault and the work required. We will confirm the expected turnaround after assessment.';
+
+export type IpadDetailTiming =
+  | {
+      kind: 'standard';
+      turnaroundMinutes: typeof IPAD_STANDARD_TURNAROUND_MINUTES;
+      badgeLabel: '1 Hour';
+      faqDurationLabel: '1 hour';
+    }
+  | {
+      kind: 'assessment';
+      badgeLabel: 'Fast Turnaround';
+      faqAnswer: typeof IPAD_CHARGING_PORT_ASSESSMENT_FAQ;
+    };
+
+export function getIpadDetailTiming(modelSlug: string, repairSlug: string): IpadDetailTiming | null {
+  const config = getIpadHardwareConfig(modelSlug);
+  const normalizedRepairSlug = slugify(repairSlug);
+
+  if (!config || !APPROVED_IPAD_ENHANCED_REPAIR_TYPES.has(normalizedRepairSlug)) {
+    return null;
+  }
+
+  if (
+    normalizedRepairSlug === 'charging-port-replacement' &&
+    (config.family === 'ipad' || config.family === 'ipad-air')
+  ) {
+    return {
+      kind: 'assessment',
+      badgeLabel: 'Fast Turnaround',
+      faqAnswer: IPAD_CHARGING_PORT_ASSESSMENT_FAQ,
+    };
+  }
+
+  return {
+    kind: 'standard',
+    turnaroundMinutes: IPAD_STANDARD_TURNAROUND_MINUTES,
+    badgeLabel: '1 Hour',
+    faqDurationLabel: '1 hour',
+  };
+}
+
 function getAliMobileEnhancedIpadModelSlug(
   params: AliMobileEnhancedIpadRouteParams
 ): AliMobileEnhancedIpadModelSlug | null {
@@ -110,7 +153,8 @@ export function getAliMobileEnhancedIpadSeoPocket({
     return null;
   }
 
-  switch (normalizedRepairSlug) {
+  const pocket = (() => {
+    switch (normalizedRepairSlug) {
     case 'screen-replacement':
       return buildIpadScreenReplacementPocket(config);
     case 'battery-replacement':
@@ -123,5 +167,11 @@ export function getAliMobileEnhancedIpadSeoPocket({
       return buildIpadBackCameraReplacementPocket(config);
     default:
       return null;
-  }
+    }
+  })();
+  const timing = getIpadDetailTiming(modelSlug, normalizedRepairSlug);
+
+  return pocket && timing?.kind === 'standard'
+    ? { ...pocket, turnaroundMinutes: timing.turnaroundMinutes }
+    : pocket;
 }

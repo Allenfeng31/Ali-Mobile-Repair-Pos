@@ -26,6 +26,7 @@ interface RepairPricingAndCTAProps {
   bookingRepairName?: string;
   showBackHousingNotice?: boolean;
   showStartingPriceFallback?: boolean;
+  useNeutralQuoteWording?: boolean;
   variants?: RepairVariant[];
   pricing?: RepairDetailPricing;
   sourceType?: 'real' | 'virtual' | 'diagnostic';
@@ -38,6 +39,7 @@ export default function RepairPricingAndCTA({
   bookingRepairName,
   showBackHousingNotice = false,
   showStartingPriceFallback = true,
+  useNeutralQuoteWording = false,
   variants = [],
   pricing,
   sourceType
@@ -221,7 +223,7 @@ export default function RepairPricingAndCTA({
                   <a href="tel:0481058514" className="text-blue-600 dark:text-blue-700 font-bold hover:underline">
                     0481 058 514
                   </a>{' '}
-                  for an instant quote.</>}
+                  {useNeutralQuoteWording ? 'for a quote.' : 'for an instant quote.'}</>}
           </p>
         </div>
       )}

@@ -30,6 +30,7 @@ import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getAliMobileEnhancedIphoneSeoPocket } from '@/lib/seo/content/iphone';
+import { getIpadDetailTiming } from '@/lib/seo/content/ipad';
 
 const params = (overrides: Record<string, string> = {}) => ({ category: 'phone', brand: 'motorola', model: 'moto-g24', 'repair-type': 'screen-replacement', ...overrides });
 const active = { category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{ model: 'Moto G24', slug: 'moto-g24', repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 149, variants: [] }] }] };
@@ -99,6 +100,26 @@ const oppoRepairCatalogue = (
     slug,
     repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
   }],
+});
+const ipadRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  variants: ReadonlyArray<{ quality_grade: string; price: number }> = [],
+) => ({
+  source: 'pos' as const,
+  brands: [{
+    category: 'tablet',
+    brand: 'iPad',
+    slug: 'ipad',
+    models: [{
+      model,
+      slug,
+      repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
+    }],
+  }],
+  retiredRepairs: [],
 });
 const lenovoYogaSmartTabWithWaterRepair = {
   category: 'tablet',
@@ -590,6 +611,70 @@ describe('Repair Detail active and legacy page-data resolution', () => {
         expect(html).not.toContain('Starting from $65');
       }
     }
+  });
+
+  it.each([
+    ['iPad 10th Generation Screen', 'iPad 10th Generation', 'ipad-10th-generation', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Premium', price: 249 }], '1 Hour'],
+    ['iPad Air 5th Generation Screen', 'iPad Air 5th Generation', 'ipad-air-5th-generation', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Premium', price: 249 }], '1 Hour'],
+    ['iPad mini 6th Generation Screen', 'iPad mini 6th Generation', 'ipad-mini-6th-generation', 'Screen Replacement', 'screen-replacement', [], '1 Hour'],
+    ['iPad Pro 11-inch 3rd Generation Screen', 'iPad Pro 11-inch 3rd Generation', 'ipad-pro-11-inch-3rd-generation', 'Screen Replacement', 'screen-replacement', [], '1 Hour'],
+    ['iPad Air 5th Generation Battery', 'iPad Air 5th Generation', 'ipad-air-5th-generation', 'Battery Replacement', 'battery-replacement', [{ quality_grade: 'Premium', price: 199 }], '1 Hour'],
+    ['iPad mini 6th Generation Battery', 'iPad mini 6th Generation', 'ipad-mini-6th-generation', 'Battery Replacement', 'battery-replacement', [], '1 Hour'],
+    ['iPad mini 6th Generation Front Camera', 'iPad mini 6th Generation', 'ipad-mini-6th-generation', 'Front Camera Replacement', 'front-camera-replacement', [], '1 Hour'],
+    ['iPad Pro 11-inch 3rd Generation Back Camera', 'iPad Pro 11-inch 3rd Generation', 'ipad-pro-11-inch-3rd-generation', 'Back Camera Replacement', 'back-camera-replacement', [], '1 Hour'],
+    ['iPad 10th Generation Charging Port', 'iPad 10th Generation', 'ipad-10th-generation', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Premium', price: 149 }], 'Fast Turnaround'],
+    ['iPad Air 5th Generation Charging Port', 'iPad Air 5th Generation', 'ipad-air-5th-generation', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Premium', price: 149 }], 'Fast Turnaround'],
+    ['iPad mini 6th Generation Charging Port', 'iPad mini 6th Generation', 'ipad-mini-6th-generation', 'Charging Port Replacement', 'charging-port-replacement', [], '1 Hour'],
+    ['iPad Pro 11-inch 3rd Generation Charging Port', 'iPad Pro 11-inch 3rd Generation', 'ipad-pro-11-inch-3rd-generation', 'Charging Port Replacement', 'charging-port-replacement', [], '1 Hour'],
+  ] as const)('renders %s with the approved iPad timing and quote-safe pricing behavior', async (
+    _label,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    variants,
+    expectedTiming,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(ipadRepairCatalogue(model, modelSlug, repairName, repairSlug, variants));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: 'ipad', model: modelSlug, 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain(expectedTiming);
+    expect(html).toContain('6-Month Warranty');
+    expect(timingFaqs).toHaveLength(1);
+
+    if (expectedTiming === '1 Hour') {
+      expect(timingFaqs[0].answer).toContain('around 1 hour');
+      expect(html).not.toContain('Fast Turnaround');
+    } else {
+      expect(timingFaqs[0].answer).toContain('Repair timing depends on the charging-port fault');
+      expect(timingFaqs[0].answer).not.toMatch(/1 hour|60 minutes/i);
+      expect(html).not.toContain('1 Hour');
+      expect(html).not.toContain('60 Minutes');
+    }
+
+    if (variants.length > 0) {
+      expect(pricing?.showStartingPriceFallback).toBe(true);
+      expect(serviceSchema).toContain('"offers"');
+    } else {
+      expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(html).toContain('Quote on Request');
+      expect(html).not.toMatch(/Starting from \$|From \$/);
+      expect(html).not.toMatch(/instant quote/i);
+      expect(serviceSchema).not.toContain('"offers"');
+    }
+  });
+
+  it('keeps iPad Water Damage and Logic Board outside the standard timing decision', () => {
+    expect(getIpadDetailTiming('ipad-10th-generation', 'water-damage-repair')).toBeNull();
+    expect(getIpadDetailTiming('ipad-10th-generation', 'logic-board-repair')).toBeNull();
   });
 
   it('keeps the Google-brand Pixel 4 Water alias consolidating to shared Water', async () => {

@@ -23,12 +23,14 @@ export function withApprovedTurnaroundFaq({
   model,
   repairName,
   turnaroundMinutes,
+  turnaroundLabel,
 }: {
   faqs: RepairFaq[];
   question: string;
   model: string;
   repairName: string;
   turnaroundMinutes?: number;
+  turnaroundLabel?: string;
 }): RepairFaq[] {
   if (
     typeof turnaroundMinutes !== 'number' ||
@@ -38,7 +40,8 @@ export function withApprovedTurnaroundFaq({
     return faqs;
   }
 
-  const answer = `${model} ${repairName.toLowerCase()} usually takes around ${turnaroundMinutes} minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.`;
+  const duration = turnaroundLabel ?? `${turnaroundMinutes} minutes`;
+  const answer = `${model} ${repairName.toLowerCase()} usually takes around ${duration} when the correct part is available. If additional damage is found during inspection, turnaround may vary.`;
 
   return faqs.map((faq) => faq.question === question ? { ...faq, answer } : faq);
 }

@@ -60,6 +60,7 @@ import {
 } from '@/lib/seo/content/google-pixel';
 import {
   ALI_MOBILE_IPAD_BUSINESS,
+  getIpadDetailTiming,
   getAliMobileEnhancedIpadRepairType,
   getAliMobileEnhancedIpadSeoPocket,
   getIpadModelHubLinks,
@@ -5217,6 +5218,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     seoPocket.turnaroundMinutes > 0
       ? seoPocket.turnaroundMinutes
       : undefined;
+  const ipadDetailTiming = getIpadDetailTiming(
+    resolvedParams.model,
+    resolvedParams['repair-type'],
+  );
   const iphoneRearRepairMethod =
     resolvedParams.category === 'phone' &&
     resolvedParams.brand === 'iphone' &&
@@ -5564,16 +5569,32 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     displayBrand,
     { initialAssessmentCleaningMinutes },
   );
-  const timingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
-  const faqsWithApprovedTurnaround = timingFaq
+  const existingTimingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
+  const timingFaq = existingTimingFaq ?? (ipadDetailTiming
+    ? {
+        question: `How long does ${displayModel} ${finalRepairName.toLowerCase()} take?`,
+        answer: '',
+      }
+    : undefined);
+  const faqsWithTimingQuestion = existingTimingFaq || !timingFaq
+    ? baseFaqs
+    : [...baseFaqs, timingFaq];
+  const faqsWithApprovedTurnaround = timingFaq && ipadDetailTiming?.kind === 'assessment'
+    ? faqsWithTimingQuestion.map((faq: { question: string; answer: string }) => faq.question === timingFaq.question
+      ? { ...faq, answer: ipadDetailTiming.faqAnswer }
+      : faq)
+    : timingFaq
     ? withApprovedTurnaroundFaq({
-      faqs: baseFaqs,
+      faqs: faqsWithTimingQuestion,
       question: timingFaq.question,
       model: displayModel,
       repairName: finalRepairName,
       turnaroundMinutes: approvedTurnaroundMinutes,
+      turnaroundLabel: ipadDetailTiming?.kind === 'standard'
+        ? ipadDetailTiming.faqDurationLabel
+        : undefined,
     })
-    : baseFaqs;
+    : faqsWithTimingQuestion;
   const costFaq = faqsWithApprovedTurnaround.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
   const shouldUseResolvedTierPriceFaq = seoPocket?.useResolvedTierPriceFaq &&
     (!isAliMobileEnhancedSamsungPage || detailPricing.validVariants.length >= 2);
@@ -5780,8 +5801,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             showStartingPriceFallback={!(
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
-              (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly)
+              (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
+              (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
+            useNeutralQuoteWording={Boolean(ipadDetailTiming && detailPricing.isQuoteOnly)}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
@@ -5813,7 +5836,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               <>
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
-                  {(resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
+                  {ipadDetailTiming
+                    ? ipadDetailTiming.badgeLabel
+                    : (resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
                     ? approvedTurnaroundMinutes
                       ? `${approvedTurnaroundMinutes} Minutes`
                       : 'Timeframe Varies'
