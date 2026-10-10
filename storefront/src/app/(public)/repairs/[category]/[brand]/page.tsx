@@ -1784,16 +1784,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const ipadHeroInsightCards = isIPadHub
     ? [
         {
-          title: "iPad Repairs from $50",
-          body: "Selected iPad repair services start from $50. Choose your exact model to view current repair options and pricing.",
+          title: "iPad repair pricing",
+          body: "Choose your exact iPad model to view current repair options, current pricing or the quote requirement.",
         },
         {
-          title: "Fast Screen & Battery Repairs",
-          body: "Most iPad screen and battery repairs take about 45 minutes once the correct part is available.",
+          title: "iPad repair timing",
+          body: "Many standard iPad repairs are completed in around 1 hour. Repair timing depends on the service selected, and some charging port repairs may require additional time.",
         },
         {
-          title: "Timing depends on parts availability",
-          body: "Some iPad repairs may be completed the same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+          title: "Exact iPad model matters",
+          body: "Parts and repair options can differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
         },
       ]
     : [];

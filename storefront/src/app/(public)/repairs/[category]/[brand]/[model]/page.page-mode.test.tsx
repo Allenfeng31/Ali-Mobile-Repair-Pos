@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchModelRepairTypes, fetchRepairCatalog } from '@/lib/api';
 
 const state = vi.hoisted(() => ({
-  gridProps: null as { repairTypes: Array<{ slug: string; href?: string }> } | null,
+  gridProps: null as { repairTypes: Array<{ slug: string; href?: string }>; showStartingPriceFallback?: boolean } | null,
   matchingProps: [] as Array<{ initialResults?: unknown[] }>,
 }));
 const fetchModelRepairResultSeeds = vi.hoisted(() => vi.fn());
@@ -26,7 +26,7 @@ vi.mock('@/lib/seo/content/selectedCrawledRepairPages', () => ({ getSelectedCraw
 vi.mock('@/components/Breadcrumbs', () => ({ default: () => null }));
 vi.mock('@/components/BackButton', () => ({ default: () => null }));
 vi.mock('@/components/services/RepairOptionsGrid', () => ({
-  default: (props: { repairTypes: Array<{ slug: string; href?: string }> }) => {
+  default: (props: { repairTypes: Array<{ slug: string; href?: string }>; showStartingPriceFallback?: boolean }) => {
     state.gridProps = props;
     return <div data-repair-options-grid="true" />;
   },
@@ -253,6 +253,32 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(html).toContain('What affects Google Pixel');
     expect(html).toContain('Timing depends on the selected repair, part availability and the device condition.');
     expect(html).not.toMatch(/same[ -]day|while you wait|immediate|instant/i);
+  });
+
+  it.each([
+    ['iPad 10th Generation', 'ipad-10th-generation', 'Charging port repairs may require additional time depending on the repair process.'],
+    ['iPad Air 5th Generation', 'ipad-air-5th-generation', 'Charging port repairs may require additional time depending on the repair process.'],
+    ['iPad mini 7th Generation', 'ipad-mini-7th-generation', 'Choose the repair below for its current service details.'],
+    ['iPad Pro 11-inch M4', 'ipad-pro-11-inch-m4', 'Choose the repair below for its current service details.'],
+  ])('renders approved iPad timing guidance for %s without urgency claims', async (model, modelSlug, expectedGuidance) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'iPad',
+      model,
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: modelSlug, model, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'ipad', model: modelSlug }),
+    }));
+
+    expect(html).toContain('Most standard repairs for this iPad are completed in around 1 hour.');
+    expect(html).toContain(expectedGuidance);
+    expect(html).not.toMatch(/45 minutes|same[ -]day|while you wait|immediate|instant/i);
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
   });
 
   it.each([

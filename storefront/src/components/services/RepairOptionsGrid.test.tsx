@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
 import RepairOptionsGrid from "./RepairOptionsGrid";
 
@@ -13,7 +13,9 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/lib/analytics", () => ({ analytics: { trackRepairView: vi.fn() } }));
-vi.mock("@/lib/repairStartingPrices", () => ({ getStartingPrice: vi.fn(() => null) }));
+const getStartingPriceMock = vi.hoisted(() => vi.fn(() => null));
+
+vi.mock("@/lib/repairStartingPrices", () => ({ getStartingPrice: getStartingPriceMock }));
 vi.mock("@/lib/scopedRepairPriceLabel", () => ({
   formatScopedRepairPriceLabel: (_slug: string, _price: number, label: string) => label,
 }));
@@ -41,6 +43,11 @@ vi.mock("@/lib/virtualPhoneRepairs", () => ({
 }));
 
 describe("RepairOptionsGrid", () => {
+  afterEach(() => {
+    getStartingPriceMock.mockReset();
+    getStartingPriceMock.mockReturnValue(null);
+  });
+
   it("renders model repair options through the centralized display order", () => {
     render(
       <RepairOptionsGrid
@@ -105,6 +112,23 @@ describe("RepairOptionsGrid", () => {
       'href',
       '/repairs/phone/camera-lens-replacement?brand=motorola&model=moto-g04',
     );
+  });
+
+  it('uses Quote on Request for an iPad model card when static starting-price fallback is disabled', () => {
+    getStartingPriceMock.mockReturnValue(50);
+    const quoteSafeProps = {
+      repairTypes: [{ slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0 }],
+      categorySlug: 'tablet',
+      brandSlug: 'ipad',
+      modelSlug: 'ipad-10th-generation',
+      modelName: 'iPad 10th Generation',
+      showStartingPriceFallback: false,
+    } as unknown as Parameters<typeof RepairOptionsGrid>[0];
+
+    render(<RepairOptionsGrid {...quoteSafeProps} />);
+
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.queryByText('Starting from $50')).not.toBeInTheDocument();
   });
 
   it.each([

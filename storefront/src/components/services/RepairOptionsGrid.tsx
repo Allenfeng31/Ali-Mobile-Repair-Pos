@@ -32,6 +32,7 @@ interface RepairOptionsGridProps {
   brandSlug: string;
   modelSlug: string;
   modelName: string;
+  showStartingPriceFallback?: boolean;
 }
 
 
@@ -42,6 +43,7 @@ export default function RepairOptionsGrid({
   brandSlug,
   modelSlug,
   modelName,
+  showStartingPriceFallback = true,
 }: RepairOptionsGridProps) {
   const displayRepairTypes = sortRepairOptionsForDisplay(repairTypes);
 
@@ -79,7 +81,9 @@ export default function RepairOptionsGrid({
     if (rt.price > 0) {
       unscopedLabel = `From $${rt.price}`;
     } else {
-      const startingPrice = getStartingPrice(categorySlug, brandSlug, rt.slug);
+      const startingPrice = showStartingPriceFallback
+        ? getStartingPrice(categorySlug, brandSlug, rt.slug)
+        : null;
       unscopedLabel = startingPrice ? `Starting from $${startingPrice}` : "Quote on Request";
     }
 

@@ -147,5 +147,8 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     const { container } = render(pageElement);
 
     expectApprovedLocalCards(container);
+    expect(container.textContent).toContain("Many standard iPad repairs are completed in around 1 hour.");
+    expect(container.textContent).toContain("some charging port repairs may require additional time");
+    expect(container.textContent).not.toMatch(/iPad Repairs from \$50|45 minutes|same[ -]day|while you wait|immediate|instant/i);
   });
 });

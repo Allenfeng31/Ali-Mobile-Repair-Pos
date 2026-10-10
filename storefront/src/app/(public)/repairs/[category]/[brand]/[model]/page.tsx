@@ -19,6 +19,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
 import { getSamsungHardwareConfig } from "@/lib/seo/content/samsung/config";
+import { getIpadHardwareConfig } from "@/lib/seo/content/ipad/config";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -345,6 +346,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
   const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
+  const iPadHardwareConfig = isIPadModelPage ? getIpadHardwareConfig(modelSlug) : null;
+  const hasIpadChargingPortTimingException = iPadHardwareConfig?.family === "ipad" || iPadHardwareConfig?.family === "ipad-air";
+  const iPadTimingGuidance = hasIpadChargingPortTimingException
+    ? "Most standard repairs for this iPad are completed in around 1 hour. Charging port repairs may require additional time depending on the repair process."
+    : "Most standard repairs for this iPad are completed in around 1 hour. Choose the repair below for its current service details.";
   const isTabletModelPage = categorySlug === "tablet";
   const isSamsungTabletModelPage = categorySlug === "tablet" && brandSlug === "samsung";
   const isLenovoTabletModelPage = categorySlug === "tablet" && brandSlug === "lenovo";
@@ -1346,8 +1352,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         : `Choose the available iPad repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
     {
-      title: "iPad screen & battery timing",
-      body: "Common iPad screen and battery repairs can often be completed in about 45 minutes once the correct part is available. Call first to confirm current stock, queue and timing.",
+      title: "iPad repair timing",
+      body: iPadTimingGuidance,
     },
     {
       title: "Exact iPad generation matters",
@@ -1419,6 +1425,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const iPadFaqs = [
     { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact iPad model to see the current price or quote requirement." },
+    { question: "How long does iPad repair take?", answer: iPadTimingGuidance },
     { question: "How do I identify the exact iPad model?", answer: "Check Settings → General → About, or look for the A-number printed on the rear casing of your iPad." },
     hasScreenRepair ? { question: `What affects ${modelName} screen replacement?`, answer: "Frame bend, touch response, glass/display construction, button or camera-area damage and part availability can all affect the final repair path." } : null,
     hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We confirm availability and condition before repair." } : null,
@@ -1982,6 +1989,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
+          showStartingPriceFallback={!isIPadModelPage}
         />
         {isMacBookModelPage && (
           <div className="mt-8 text-center">
