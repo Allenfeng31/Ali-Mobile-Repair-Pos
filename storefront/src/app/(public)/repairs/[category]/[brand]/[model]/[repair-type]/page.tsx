@@ -5199,7 +5199,18 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairType: resolvedParams['repair-type'],
     pocket: pixelSeoPocket,
   });
-  const seoPocket = selectedCrawledRepairContent?.pocket ?? inheritedSeoPocket;
+  const selectedCrawledPocket = selectedCrawledRepairContent?.pocket;
+  const inheritedTimingFaq = inheritedSeoPocket?.faq?.find((faq: { question: string }) => /how long/i.test(faq.question));
+  const selectedHasTimingFaq = selectedCrawledPocket?.faq?.some((faq: { question: string }) => /how long/i.test(faq.question));
+  const seoPocket = selectedCrawledPocket
+    ? {
+        ...inheritedSeoPocket,
+        ...selectedCrawledPocket,
+        ...(inheritedTimingFaq && !selectedHasTimingFaq
+          ? { faq: [...(selectedCrawledPocket.faq ?? []), inheritedTimingFaq] }
+          : {}),
+      }
+    : inheritedSeoPocket;
   const approvedTurnaroundMinutes =
     typeof seoPocket?.turnaroundMinutes === 'number' &&
     Number.isFinite(seoPocket.turnaroundMinutes) &&
@@ -5512,6 +5523,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       ? `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile & Repair in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
       : `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile & Repair in Ringwood Square. Quote on Request. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
     : undefined;
+  const oppoCommercialHeroSubtitle = isAliMobileEnhancedOppoPage && approvedTurnaroundMinutes
+    ? detailPricing.validVariants.length > 0
+      ? `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile & Repair in Ringwood Square. ${detailPricing.validVariants.length === 1 ? 'View the current repair price below.' : 'View the current repair options and prices below.'} Walk-ins are welcome, and booking is recommended to confirm the correct part is available.`
+      : `${displayModel} ${finalRepairName.toLowerCase()} at Ali Mobile & Repair in Ringwood Square. Quote on Request. Walk-ins are welcome, and booking is recommended so we can confirm the correct part and quote before you visit.`
+    : undefined;
   const samsungWaterDamageHeroSubtitle = isSamsungPhoneWaterDamagePage
     ? `${displayModel} water damage assessment and cleaning at Ali Mobile & Repair in Ringwood Square. Initial assessment and cleaning usually take around ${initialAssessmentCleaningMinutes} minutes. We confirm the quote before further work. Further repair time depends on liquid damage, corrosion, cleaning results and whether additional parts or board-level work are required.`
     : undefined;
@@ -5741,6 +5757,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               samsungWaterDamageHeroSubtitle ??
               samsungCommercialHeroSubtitle ??
               googlePixelCommercialHeroSubtitle ??
+              oppoCommercialHeroSubtitle ??
               iphoneScreenFamilyHeroSubtitle ??
               iphoneBatteryOrChargingPortFamilyHeroSubtitle ??
               iphoneCameraModuleFamilyHeroSubtitle ??
@@ -5762,7 +5779,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             showBackHousingNotice={showBackHousingNotice}
             showStartingPriceFallback={!(
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
-              (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly)
+              (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
+              (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly)
             )}
             variants={details?.variants || []}
             pricing={detailPricing}

@@ -75,7 +75,7 @@ export function getOppoScreenPocket(modelSlug: string): RepairTypeSeoPocket | nu
         },
         {
           question: "How long does the screen repair take?",
-          answer: "Most screen replacements take approximately approximately 30 to 60 minutes, subject to part availability and device condition once the correctly matched part is available at the store."
+          answer: "Timing is confirmed from the approved service timeframe once the correctly matched part is available."
         },
         {
           question: "Will the new screen sit flush if my frame is dented?",
@@ -83,7 +83,7 @@ export function getOppoScreenPocket(modelSlug: string): RepairTypeSeoPocket | nu
         },
         {
           question: "Does the screen replacement come with a warranty?",
-          answer: "Yes, our screen replacements are covered by a warranty against manufacturing defects (excluding accidental damage)."
+          answer: "Yes, eligible completed standard screen repairs include a 6-month warranty covering the replacement part and workmanship, excluding accidental damage."
         },
         {
           question: "Will my phone still be water resistant?",

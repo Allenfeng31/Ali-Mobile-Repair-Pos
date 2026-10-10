@@ -42,7 +42,7 @@ export function getOppoChargingPortPocket(modelSlug: string): RepairTypeSeoPocke
 
         { question: "Do you automatically replace the port if my phone won't charge?", answer: "No. We do not promise port replacement before inspection. We check for simple lint buildup or a faulty battery first." },
         { question: "My cable feels loose, is the port broken?", answer: `Often, a loose cable is caused by compacted lint at the bottom of the ${config.chargingPort === 'unknown' ? 'charging' : config.chargingPort} port preventing a full click. We will check this during diagnosis.` },
-        { question: "How long does a charging port repair take?", answer: "Typically around around 45 minutes to an hour, provided there is no unforeseen frame damage once parts are available." },
+        { question: "How long does a charging port repair take?", answer: "Timing is confirmed from the approved service timeframe once the correct part is available." },
         { question: "Will a new port fix slow charging?", answer: "If the current port has damaged pins limiting power delivery, a replacement typically resolves it. However, slow charging can also be due to the charger itself or the battery." },
         { question: `Is the replacement part a genuine ${config.chargingPort === 'unknown' ? 'charging' : config.chargingPort} standard?`, answer: "We use high-quality replacement flex cables that support the appropriate charging protocols for your device." },
         { question: "Does this repair affect my data?", answer: "No, replacing the charging sub-board does not interact with the main logic board's storage." },

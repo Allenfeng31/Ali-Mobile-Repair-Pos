@@ -8,6 +8,14 @@ import { getOppoLogicBoardPocket } from "./logic-board-repair";
 import { getOppoModelConfig } from "./shared";
 export { getOppoModelConfig };
 
+export const OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES = {
+  "screen-replacement": 45,
+  "battery-replacement": 30,
+  "charging-port-replacement": 30,
+  "front-camera-replacement": 30,
+  "back-camera-replacement": 30,
+} as const;
+
 export function getAliMobileEnhancedOppoSeoPocket({
   category,
   brand,
@@ -40,7 +48,18 @@ export function getAliMobileEnhancedOppoSeoPocket({
     case "logic-board-repair": oppoPocket = getOppoLogicBoardPocket(model.toLowerCase()); break;
   }
 
-  return oppoPocket || pocket;
+  const turnaroundMinutes = OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES[
+    repairSlug as keyof typeof OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES
+  ];
+
+  return oppoPocket
+    ? {
+        ...oppoPocket,
+        ...(turnaroundMinutes
+          ? { turnaroundMinutes, useResolvedTierPriceFaq: true }
+          : {}),
+      }
+    : pocket;
 }
 
 export function getAliMobileEnhancedOppoRepairType(params: any): string | null {

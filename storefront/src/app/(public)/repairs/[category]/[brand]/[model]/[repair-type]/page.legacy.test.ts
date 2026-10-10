@@ -84,6 +84,22 @@ const pixelRepairCatalogue = (
     repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
   }],
 });
+const oppoRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  variants: ReadonlyArray<{ quality_grade: string; price: number }> = [],
+) => ({
+  category: 'phone',
+  brand: 'OPPO',
+  slug: 'oppo',
+  models: [{
+    model,
+    slug,
+    repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
+  }],
+});
 const lenovoYogaSmartTabWithWaterRepair = {
   category: 'tablet',
   brand: 'Lenovo',
@@ -517,6 +533,62 @@ describe('Repair Detail active and legacy page-data resolution', () => {
 
     if (repairSlug === 'back-glass-replacement') {
       expect(html).toMatch(/housing assembly|back housing/i);
+    }
+  });
+
+  it.each([
+    ['OPPO A79 Screen', 'OPPO A79', 'a79', 'Screen Replacement', 'screen-replacement', 45, [{ quality_grade: 'Premium', price: 249 }], true],
+    ['OPPO Find X5 Pro Battery', 'OPPO Find X5 Pro', 'find-x5-pro', 'Battery Replacement', 'battery-replacement', 30, [], false],
+    ['OPPO Reno 10 Pro Plus Charging Port', 'OPPO Reno 10 Pro Plus', 'reno-10-pro-plus', 'Charging Port Replacement', 'charging-port-replacement', 30, [], false],
+    ['OPPO Reno 9 Pro Charging Port', 'OPPO Reno 9 Pro', 'reno-9-pro', 'Charging Port Replacement', 'charging-port-replacement', 30, [], false],
+    ['OPPO Find X8 Front Camera', 'OPPO Find X8', 'find-x8', 'Front Camera Replacement', 'front-camera-replacement', 30, [], false],
+    ['OPPO Find X8 Pro Back Camera', 'OPPO Find X8 Pro', 'find-x8-pro', 'Back Camera Replacement', 'back-camera-replacement', 30, [], false],
+  ] as const)('renders %s with OPPO-approved timing and quote-safe pricing', async (
+    _label,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    turnaroundMinutes,
+    variants,
+    hasResolvedPrice,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [oppoRepairCatalogue(model, modelSlug, repairName, repairSlug, variants)],
+      retiredRepairs: [],
+    });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'oppo', model: modelSlug, 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    const heroStart = html.indexOf('<section class="repair-hero');
+    const heroEnd = html.indexOf('<section class="mx-auto my', heroStart);
+    const heroHtml = html.slice(heroStart, heroEnd);
+
+    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+    expect(html).toContain('6-Month Warranty');
+    expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait/i);
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain(`around ${turnaroundMinutes} minutes`);
+
+    if (hasResolvedPrice) {
+      expect(pricing?.showStartingPriceFallback).toBe(true);
+      expect(html).toContain('View the current repair price below.');
+      expect(serviceSchema).toContain('"offers"');
+    } else {
+      expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(html).toContain('Quote on Request');
+      expect(html).toContain('Ringwood Square');
+      expect(html).not.toContain('Choose a quality tier');
+      expect(serviceSchema).not.toContain('"offers"');
+      if (modelSlug === 'reno-9-pro') {
+        expect(html).not.toContain('Starting from $65');
+      }
     }
   });
 
