@@ -15,6 +15,24 @@ interface RepairFaq {
   answer: string;
 }
 
+export function withTypicalRepairRangeFaq({
+  faqs,
+  question,
+  answer,
+}: {
+  faqs: RepairFaq[];
+  question: string;
+  answer: string;
+}): RepairFaq[] {
+  const existingPriceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+
+  if (!existingPriceFaq) {
+    return [...faqs, { question, answer }];
+  }
+
+  return faqs.map((faq) => faq === existingPriceFaq ? { question, answer } : faq);
+}
+
 const UNKNOWN_SCREEN_TIER_DESCRIPTION = 'Current screen option for this model. We confirm the suitable option before work begins.';
 
 export function withApprovedTurnaroundFaq({

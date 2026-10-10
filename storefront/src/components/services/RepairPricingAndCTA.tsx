@@ -13,6 +13,12 @@ import { formatScopedRepairPriceLabel, isStartingPriceRepair } from '@/lib/scope
 import { getRepairTierDescription } from '@/lib/repairTierDescriptions';
 import { orderRepairVariantsForDisplay } from '@/lib/repairTierDisplayOrder';
 
+interface TypicalPriceRange {
+  label: string;
+  amountLabel: string;
+  explanation: string;
+}
+
 interface RepairVariant {
   quality_grade: string;
   price: number;
@@ -27,6 +33,8 @@ interface RepairPricingAndCTAProps {
   showBackHousingNotice?: boolean;
   showStartingPriceFallback?: boolean;
   useNeutralQuoteWording?: boolean;
+  typicalPriceRange?: TypicalPriceRange;
+  quoteCtaLabel?: string;
   variants?: RepairVariant[];
   pricing?: RepairDetailPricing;
   sourceType?: 'real' | 'virtual' | 'diagnostic';
@@ -40,6 +48,8 @@ export default function RepairPricingAndCTA({
   showBackHousingNotice = false,
   showStartingPriceFallback = true,
   useNeutralQuoteWording = false,
+  typicalPriceRange,
+  quoteCtaLabel,
   variants = [],
   pricing,
   sourceType
@@ -124,6 +134,14 @@ export default function RepairPricingAndCTA({
     return getRepairTierDescription(bookingRepairName || repairName, tierName, tierDescriptions);
   };
 
+  const typicalRangeContext = typicalPriceRange ? (
+    <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{typicalPriceRange.label}</p>
+      <p className="mt-1 text-lg font-extrabold text-slate-800">{typicalPriceRange.amountLabel}</p>
+      <p className="mt-1 text-sm leading-relaxed text-slate-600">{typicalPriceRange.explanation}</p>
+    </div>
+  ) : null;
+
   return (
     <div className="w-full flex flex-col items-center mt-8">
       {hasResolvedPrice ? (
@@ -202,9 +220,11 @@ export default function RepairPricingAndCTA({
               <p className="mt-2 text-3xl font-extrabold text-blue-600">${resolvedPricing.resolvedPrice}</p>
             </div>
           )}
+          {typicalRangeContext}
         </>
       ) : (
         <div className="mb-12 mt-4 text-center max-w-md mx-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm dark:bg-white dark:border-white sm:p-6 md:p-10">
+          {typicalRangeContext}
           {startingPrice && (
             <div className="mb-4">
               <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Starting from</span>
@@ -213,7 +233,7 @@ export default function RepairPricingAndCTA({
               <div className="my-5 h-px w-16 bg-slate-200 mx-auto"></div>
             </div>
           )}
-          <p className="text-2xl font-extrabold text-blue-600 dark:text-black mb-4">
+          <p className="mt-4 text-2xl font-extrabold text-blue-600 dark:text-black mb-4">
             {zeroPriceLabel}
           </p>
           <p className="text-base text-slate-500 dark:text-black leading-relaxed">
@@ -267,7 +287,7 @@ export default function RepairPricingAndCTA({
           onClick={handleBookRepair}
           className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
         >
-          Book Repair Now
+          {!hasResolvedPrice && quoteCtaLabel ? quoteCtaLabel : 'Book Repair Now'}
         </button>
         <a 
           href="tel:0481058514" 

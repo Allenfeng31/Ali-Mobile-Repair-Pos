@@ -6,6 +6,7 @@ import {
   getLenovoTabletModelConfig,
   getLenovoTabletModelConfigByModelName,
   LENOVO_TABLET_MODEL_CONFIG_LIST,
+  LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST,
 } from './config';
 import { buildLenovoTabletFrontCameraReplacementPocket } from './front-camera-replacement';
 import { buildLenovoTabletScreenReplacementPocket } from './screen-replacement';
@@ -56,6 +57,7 @@ export {
   getLenovoTabletSupportLabel,
   getLenovoTabletWhyChooseConfig,
   LENOVO_TABLET_MODEL_CONFIG_LIST,
+  LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST,
   LENOVO_TABLET_WHY_CHOOSE_SHARED_HIGHLIGHTS,
 };
 
@@ -89,6 +91,18 @@ function getAliMobileEnhancedLenovoTabletModelSlug(
   return getLenovoTabletModelConfig(params.model)?.modelSlug ?? null;
 }
 
+function isSupportedLenovoTabletRepair(
+  modelSlug: AliMobileEnhancedLenovoTabletModelSlug,
+  repairType: string,
+): repairType is AliMobileEnhancedLenovoTabletRepairType {
+  const config = getLenovoTabletModelConfig(modelSlug);
+  return Boolean(
+    config &&
+      APPROVED_LENOVO_TABLET_REPAIR_TYPES.has(repairType) &&
+      config.supportedRepairTypes.includes(repairType as AliMobileEnhancedLenovoTabletRepairType),
+  );
+}
+
 export function getAliMobileEnhancedLenovoTabletRepairType(
   params: AliMobileEnhancedLenovoTabletRouteParams
 ): AliMobileEnhancedLenovoTabletRepairType | null {
@@ -99,7 +113,7 @@ export function getAliMobileEnhancedLenovoTabletRepairType(
     return null;
   }
 
-  return APPROVED_LENOVO_TABLET_REPAIR_TYPES.has(repairType)
+  return isSupportedLenovoTabletRepair(modelSlug, repairType)
     ? (repairType as AliMobileEnhancedLenovoTabletRepairType)
     : null;
 }
@@ -117,7 +131,7 @@ export function getAliMobileEnhancedLenovoTabletSeoPocket({
   const config = getLenovoTabletModelConfig(modelSlug);
   const normalizedRepairSlug = slugify(repairSlug);
 
-  if (!config || !APPROVED_LENOVO_TABLET_REPAIR_TYPES.has(normalizedRepairSlug)) {
+  if (!config || !isSupportedLenovoTabletRepair(config.modelSlug, normalizedRepairSlug)) {
     return null;
   }
 
@@ -136,4 +150,3 @@ export function getAliMobileEnhancedLenovoTabletSeoPocket({
       return null;
   }
 }
-

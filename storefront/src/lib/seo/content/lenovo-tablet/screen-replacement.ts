@@ -60,6 +60,7 @@ export function buildLenovoTabletScreenReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'screen-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildLenovoTabletMetaTitle(config, 'screen-replacement'),
     metaDescription: buildLenovoTabletMetaDescription(config, 'screen-replacement'),
     heroSubtitle: buildLenovoTabletHeroSubtitle(config, 'screen-replacement'),
@@ -139,4 +140,3 @@ export function buildLenovoTabletScreenReplacementPocket(
     ],
   };
 }
-

@@ -23,7 +23,12 @@ import {
   generateFaqs,
   withApprovedTurnaroundFaq,
   withResolvedTierPriceFaq,
+  withTypicalRepairRangeFaq,
 } from './repairFaqs';
+import {
+  getLenovoTabletTypicalPriceGuidance,
+  getSamsungTabletTypicalPriceGuidance,
+} from '@/lib/seo/content/tabletTypicalPriceGuidance';
 import { getCrossModelRepairRecommendations } from '@/lib/repairRecommendations';
 import { getRepairTypeHubDefinition } from '@/lib/repair-type-hubs';
 import {
@@ -5222,6 +5227,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedSamsungTabletPage && approvedTurnaroundMinutes === 60
       ? '1 Hour'
       : undefined;
+  const lenovoTabletTurnaroundLabel =
+    isAliMobileEnhancedLenovoTabletPage && approvedTurnaroundMinutes === 60
+      ? '1 Hour'
+      : undefined;
+  const tabletTypicalPriceGuidance = isAliMobileEnhancedSamsungTabletPage
+    ? getSamsungTabletTypicalPriceGuidance(resolvedParams.model, resolvedParams['repair-type'])
+    : isAliMobileEnhancedLenovoTabletPage
+    ? getLenovoTabletTypicalPriceGuidance(resolvedParams.model, resolvedParams['repair-type'])
+    : null;
   const ipadDetailTiming = getIpadDetailTiming(
     resolvedParams.model,
     resolvedParams['repair-type'],
@@ -5574,7 +5588,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     { initialAssessmentCleaningMinutes },
   );
   const existingTimingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
-  const timingFaq = existingTimingFaq ?? (ipadDetailTiming || samsungTabletTurnaroundLabel
+  const timingFaq = existingTimingFaq ?? (ipadDetailTiming || samsungTabletTurnaroundLabel || lenovoTabletTurnaroundLabel
     ? {
         question: `How long does ${displayModel} ${finalRepairName.toLowerCase()} take?`,
         answer: '',
@@ -5596,13 +5610,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       turnaroundMinutes: approvedTurnaroundMinutes,
       turnaroundLabel: ipadDetailTiming?.kind === 'standard'
         ? ipadDetailTiming.faqDurationLabel
-        : samsungTabletTurnaroundLabel,
+        : samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel,
     })
     : faqsWithTimingQuestion;
   const costFaq = faqsWithApprovedTurnaround.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
   const shouldUseResolvedTierPriceFaq = seoPocket?.useResolvedTierPriceFaq &&
     (!isAliMobileEnhancedSamsungPage || detailPricing.validVariants.length >= 2);
-  const faqs = shouldUseResolvedTierPriceFaq && costFaq
+  const faqsWithResolvedTierPrice = shouldUseResolvedTierPriceFaq && costFaq
     ? withResolvedTierPriceFaq({
       faqs: faqsWithApprovedTurnaround,
       question: costFaq.question,
@@ -5613,6 +5627,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         samsungResolvedPriceUnknownTierDescription ?? iphoneResolvedPriceUnknownTierDescription,
     })
     : faqsWithApprovedTurnaround;
+  const faqs = tabletTypicalPriceGuidance
+    ? withTypicalRepairRangeFaq({
+      faqs: faqsWithResolvedTierPrice,
+      question: tabletTypicalPriceGuidance.faqQuestion,
+      answer: tabletTypicalPriceGuidance.faqAnswer,
+    })
+    : faqsWithResolvedTierPrice;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
   const bookRepairUrl = `/book-repair?${new URLSearchParams({
@@ -5805,13 +5826,16 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             showStartingPriceFallback={!(
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
               (isAliMobileEnhancedSamsungTabletPage && detailPricing.isQuoteOnly) ||
+              (isAliMobileEnhancedLenovoTabletPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
             useNeutralQuoteWording={Boolean(
-              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage) && detailPricing.isQuoteOnly
+              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage) && detailPricing.isQuoteOnly
             )}
+            typicalPriceRange={tabletTypicalPriceGuidance ?? undefined}
+            quoteCtaLabel={tabletTypicalPriceGuidance && detailPricing.isQuoteOnly ? 'Get Exact Quote' : undefined}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
@@ -5850,7 +5874,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       ? `${approvedTurnaroundMinutes} Minutes`
                       : 'Timeframe Varies'
                     : approvedTurnaroundMinutes
-                      ? samsungTabletTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`
+                      ? samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`
                     : samsungFoldableScreenDetailContext
                     ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')

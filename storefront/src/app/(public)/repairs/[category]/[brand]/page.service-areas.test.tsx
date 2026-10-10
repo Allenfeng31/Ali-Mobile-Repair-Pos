@@ -167,4 +167,14 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(container.textContent).not.toMatch(/from \$50|45 minutes|same[ -]day|while you wait|immediate/i);
     expect(container.querySelector('a[href="/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205"]')).not.toBeNull();
   });
+
+  it("keeps Lenovo Tablet pricing catalogue-safe and gives only the approved standard-repair timing guidance", async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "tablet", brand: "lenovo" }) });
+    const { container } = render(pageElement);
+
+    expect(container.textContent).toContain("Lenovo Tablet Repair");
+    expect(container.textContent).toContain("View Current Pricing by Model");
+    expect(container.textContent).toContain("Around 1 Hour for Standard Repairs");
+    expect(container.textContent).not.toMatch(/Lenovo Tablet Repairs from \$50|from \$50|same[ -]day|while you wait|immediate/i);
+  });
 });

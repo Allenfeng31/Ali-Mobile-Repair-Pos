@@ -1800,16 +1800,16 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const lenovoTabletHeroInsightCards = isLenovoTabletHub
     ? [
         {
-          title: "Lenovo Tablet Repairs from $50",
-          body: "Selected Lenovo tablet repair services start from $50. Choose your exact model to view current repair options and pricing.",
+          title: "View Current Pricing by Model",
+          body: "Choose your exact Lenovo tablet model to view current repair options and pricing.",
         },
         {
           title: "6-Month Repair Warranty",
           body: "Eligible Lenovo tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.",
         },
         {
-          title: "Timing Depends on Parts Availability",
-          body: "Some Lenovo tablet repairs may be completed the same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+          title: "Around 1 Hour for Standard Repairs",
+          body: "Many standard Lenovo tablet repairs take around 1 hour once the correct part is available. Timing can vary if additional damage is found during inspection.",
         },
       ]
     : [];

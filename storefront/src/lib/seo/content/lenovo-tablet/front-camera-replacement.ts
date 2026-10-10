@@ -60,6 +60,7 @@ export function buildLenovoTabletFrontCameraReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'front-camera-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildLenovoTabletMetaTitle(config, 'front-camera-replacement'),
     metaDescription: buildLenovoTabletMetaDescription(config, 'front-camera-replacement'),
     heroSubtitle: buildLenovoTabletHeroSubtitle(config, 'front-camera-replacement'),
@@ -137,4 +138,3 @@ export function buildLenovoTabletFrontCameraReplacementPocket(
     ],
   };
 }
-

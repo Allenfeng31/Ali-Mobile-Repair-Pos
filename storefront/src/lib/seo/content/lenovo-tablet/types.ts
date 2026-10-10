@@ -14,6 +14,7 @@ export type AliMobileEnhancedLenovoTabletRepairType =
   typeof LENOVO_TABLET_REPAIR_TYPES[number];
 
 export const LENOVO_TABLET_MODEL_SLUGS = [
+  'lenovo-tab-m11',
   'lenovo-tab-p12-tb-370fu',
   'lenovo-tab-p11-gen-2-tb-350fu',
   'lenovo-tab-p11-pro-gen-2-tb-132fu',

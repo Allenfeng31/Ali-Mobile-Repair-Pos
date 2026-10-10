@@ -9,6 +9,11 @@ function createConfig(config: LenovoTabletModelConfig): LenovoTabletModelConfig 
 }
 
 const ALL_REPAIR_TYPES = [...LENOVO_TABLET_REPAIR_TYPES] as const;
+const M11_REPAIR_TYPES = [
+  'screen-replacement',
+  'battery-replacement',
+  'charging-port-replacement',
+] as const;
 
 export const LENOVO_TABLET_MODEL_CONFIG_LIST: ReadonlyArray<LenovoTabletModelConfig> = [
   createConfig({
@@ -229,11 +234,29 @@ export const LENOVO_TABLET_MODEL_CONFIG_LIST: ReadonlyArray<LenovoTabletModelCon
   }),
 ] as const;
 
+const LENOVO_TAB_M11_STANDARD_REPAIR_CONFIG = createConfig({
+  modelSlug: 'lenovo-tab-m11',
+  modelName: 'Lenovo Tab M11',
+  modelCodes: [],
+  family: 'tab-m',
+  familyLabel: 'Lenovo Tab M',
+  familyOrder: 0,
+  generationKey: 'tab-m11',
+  sizeKey: '11',
+  variantClass: 'base',
+  supportedRepairTypes: M11_REPAIR_TYPES,
+});
+
+export const LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST: ReadonlyArray<LenovoTabletModelConfig> = [
+  LENOVO_TAB_M11_STANDARD_REPAIR_CONFIG,
+  ...LENOVO_TABLET_MODEL_CONFIG_LIST,
+];
+
 export const LENOVO_TABLET_MODEL_CONFIG: Record<
   AliMobileEnhancedLenovoTabletModelSlug,
   LenovoTabletModelConfig
 > = Object.fromEntries(
-  LENOVO_TABLET_MODEL_CONFIG_LIST.map((config) => [config.modelSlug, config])
+  LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST.map((config) => [config.modelSlug, config])
 ) as Record<AliMobileEnhancedLenovoTabletModelSlug, LenovoTabletModelConfig>;
 
 export function getLenovoTabletModelConfig(
@@ -245,7 +268,7 @@ export function getLenovoTabletModelConfig(
 export function getLenovoTabletModelConfigByModelName(
   modelName: string
 ): LenovoTabletModelConfig | null {
-  return LENOVO_TABLET_MODEL_CONFIG_LIST.find((config) => config.modelName === modelName) ?? null;
+  return LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST.find((config) => config.modelName === modelName) ?? null;
 }
 
 export const LENOVO_TABLET_MODEL_COUNT = LENOVO_TABLET_MODEL_SLUGS.length;

@@ -60,6 +60,7 @@ export function buildLenovoTabletBackCameraReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'back-camera-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildLenovoTabletMetaTitle(config, 'back-camera-replacement'),
     metaDescription: buildLenovoTabletMetaDescription(config, 'back-camera-replacement'),
     heroSubtitle: buildLenovoTabletHeroSubtitle(config, 'back-camera-replacement'),
@@ -138,4 +139,3 @@ export function buildLenovoTabletBackCameraReplacementPocket(
     ],
   };
 }
-

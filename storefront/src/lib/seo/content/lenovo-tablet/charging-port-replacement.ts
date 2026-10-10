@@ -60,6 +60,7 @@ export function buildLenovoTabletChargingPortReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'charging-port-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildLenovoTabletMetaTitle(config, 'charging-port-replacement'),
     metaDescription: buildLenovoTabletMetaDescription(config, 'charging-port-replacement'),
     heroSubtitle: buildLenovoTabletHeroSubtitle(config, 'charging-port-replacement'),
@@ -137,4 +138,3 @@ export function buildLenovoTabletChargingPortReplacementPocket(
     ],
   };
 }
-

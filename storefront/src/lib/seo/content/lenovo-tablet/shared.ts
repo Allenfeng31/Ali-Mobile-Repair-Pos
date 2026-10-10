@@ -2,7 +2,7 @@ import type { ExploreRepairLink } from '@/components/services/ExploreRepairNetwo
 import { preserveRouteSegment, slugify } from '@/lib/inventoryUtils';
 import {
   getLenovoTabletModelConfig,
-  LENOVO_TABLET_MODEL_CONFIG_LIST,
+  LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST,
 } from './config';
 import type {
   AliMobileEnhancedLenovoTabletModelSlug,
@@ -85,6 +85,10 @@ export function formatLenovoTabletModelCodes(modelCodes: readonly string[]): str
 }
 
 export function getLenovoTabletSupportLabel(config: LenovoTabletModelConfig): string {
+  if (config.modelCodes.length === 0) {
+    return `We confirm the exact ${config.modelName} model so the repair information matches the correct Lenovo tablet version.`;
+  }
+
   return `We confirm model codes such as ${formatLenovoTabletModelCodes(config.modelCodes)} so the repair information matches the correct Lenovo tablet version.`;
 }
 
@@ -291,7 +295,7 @@ export function getLenovoTabletSameModelRepairLinks(
   }
 
   return LENOVO_TABLET_REPAIR_ORDER
-    .filter((repairType) => repairType !== currentRepairType)
+    .filter((repairType) => repairType !== currentRepairType && config.supportedRepairTypes.includes(repairType))
     .map((repairType) => ({
       href: buildLenovoTabletRepairDetailHref(config.modelSlug, repairType),
       label: `${config.modelName} ${getLenovoTabletRepairLabel(repairType).toLowerCase()}`,
@@ -308,8 +312,8 @@ export function getLenovoTabletSameRepairLinks(
     return [];
   }
 
-  return LENOVO_TABLET_MODEL_CONFIG_LIST
-    .filter((config) => config.modelSlug !== modelSlug)
+  return LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST
+    .filter((config) => config.modelSlug !== modelSlug && config.supportedRepairTypes.includes(repairType))
     .map((config) => ({
       config,
       score: getLenovoTabletSimilarityScore(currentConfig, config),
@@ -337,7 +341,7 @@ export function getLenovoTabletModelHubLinks(
     return [];
   }
 
-  return LENOVO_TABLET_MODEL_CONFIG_LIST
+  return LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST
     .filter((config) => config.modelSlug !== modelSlug)
     .map((config) => ({
       config,

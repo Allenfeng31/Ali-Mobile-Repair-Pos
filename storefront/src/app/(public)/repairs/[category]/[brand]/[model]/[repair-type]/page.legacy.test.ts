@@ -31,6 +31,11 @@ import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/con
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getAliMobileEnhancedIphoneSeoPocket } from '@/lib/seo/content/iphone';
 import { getIpadDetailTiming } from '@/lib/seo/content/ipad';
+import {
+  getAliMobileEnhancedLenovoTabletRepairType,
+  getAliMobileEnhancedLenovoTabletSeoPocket,
+  getLenovoTabletSameModelRepairLinks,
+} from '@/lib/seo/content/lenovo-tablet';
 
 const params = (overrides: Record<string, string> = {}) => ({ category: 'phone', brand: 'motorola', model: 'moto-g24', 'repair-type': 'screen-replacement', ...overrides });
 const active = { category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{ model: 'Moto G24', slug: 'moto-g24', repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 149, variants: [] }] }] };
@@ -133,6 +138,26 @@ const samsungTabletRepairCatalogue = (
     category: 'tablet',
     brand: 'Samsung',
     slug: 'samsung',
+    models: [{
+      model,
+      slug,
+      repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
+    }],
+  }],
+  retiredRepairs: [],
+});
+const lenovoTabletRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  variants: ReadonlyArray<{ quality_grade: string; price: number }> = [],
+) => ({
+  source: 'pos' as const,
+  brands: [{
+    category: 'tablet',
+    brand: 'Lenovo',
+    slug: 'lenovo',
     models: [{
       model,
       slug,
@@ -412,32 +437,42 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
-    ['Galaxy Tab A8 Screen', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true],
-    ['Galaxy Tab A8 Battery', 'Battery Replacement', 'battery-replacement', [], false],
-    ['Galaxy Tab A8 Charging Port', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Standard', price: 129 }], true],
-    ['Galaxy Tab A8 Front Camera', 'Front Camera Replacement', 'front-camera-replacement', [], false],
-    ['Galaxy Tab A8 Back Camera', 'Back Camera Replacement', 'back-camera-replacement', [], false],
+    ['Galaxy Tab A8 Screen', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $150–$300', 'AUD $250–$550'],
+    ['Galaxy Tab A8 Battery', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $110–$180', 'AUD $110–$230'],
+    ['Galaxy Tab A8 Charging Port', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Standard', price: 129 }], true, 'AUD $85–$150', 'AUD $95–$150'],
+    ['Galaxy Tab A8 Front Camera', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Front Camera Replacement', 'front-camera-replacement', [], false, 'AUD $99–$130', 'AUD $109–$130'],
+    ['Galaxy Tab A8 Back Camera', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Back Camera Replacement', 'back-camera-replacement', [], false, 'AUD $99–$130', 'AUD $109–$130'],
+    ['Galaxy Tab S8 Screen', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Screen Replacement', 'screen-replacement', [], false, 'AUD $250–$550', 'AUD $150–$300'],
+    ['Galaxy Tab S8 Battery', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $110–$230', 'AUD $110–$180'],
+    ['Galaxy Tab S8 Charging Port', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $95–$150', 'AUD $85–$150'],
+    ['Galaxy Tab S8 Front Camera', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Front Camera Replacement', 'front-camera-replacement', [], false, 'AUD $109–$130', 'AUD $99–$130'],
+    ['Galaxy Tab S8 Back Camera', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Back Camera Replacement', 'back-camera-replacement', [], false, 'AUD $109–$130', 'AUD $99–$130'],
   ] as const)('renders %s with Samsung Tablet standard timing and quote-safe pricing', async (
     _label,
+    model,
+    modelSlug,
     repairName,
     repairSlug,
     variants,
     hasResolvedPrice,
+    expectedRange,
+    unexpectedRange,
   ) => {
     fetchRepairCatalog.mockResolvedValue(samsungTabletRepairCatalogue(
-      'Galaxy Tab A8',
-      'galaxy-tab-a8-sm-x200-sm-x205',
+      model,
+      modelSlug,
       repairName,
       repairSlug,
       variants,
     ));
 
     const page = await RepairServicePage({ params: Promise.resolve(params({
-      category: 'tablet', brand: 'samsung', model: 'galaxy-tab-a8-sm-x200-sm-x205', 'repair-type': repairSlug,
+      category: 'tablet', brand: 'samsung', model: modelSlug, 'repair-type': repairSlug,
     })) });
     const html = renderToStaticMarkup(page);
     const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
     const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const priceFaqs = faqs.filter((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
     const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
     const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
     const heroStart = html.indexOf('<section class="repair-hero');
@@ -449,10 +484,17 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait|immediate/i);
     expect(timingFaqs).toHaveLength(1);
     expect(timingFaqs[0].answer).toContain('around 1 Hour');
+    expect(priceFaqs).toHaveLength(1);
+    expect(priceFaqs[0].answer).toContain(expectedRange);
+    expect(priceFaqs[0].answer).toContain('exact price takes priority');
+    expect(html).toContain('Typical Repair Range');
+    expect(html).toContain(expectedRange);
+    expect(html).not.toContain(unexpectedRange);
 
     if (hasResolvedPrice) {
       expect(pricing?.showStartingPriceFallback).toBe(true);
       expect(html).toContain(`$${variants[0].price}`);
+      expect(html.indexOf(`$${variants[0].price}`)).toBeLessThan(html.indexOf(expectedRange));
       expect(serviceSchema).toContain('"offers"');
       expect(serviceSchema).toContain(`"price":"${variants[0].price}.00"`);
     } else {
@@ -460,7 +502,9 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       expect(html).toContain('Quote on Request');
       expect(html).not.toMatch(/Starting from \$|From \$/);
       expect(html).not.toMatch(/instant quote/i);
+      expect(html).toContain('Get Exact Quote');
       expect(serviceSchema).not.toContain('"offers"');
+      expect(serviceSchema).not.toContain('AggregateOffer');
     }
   });
 
@@ -480,6 +524,79 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).toContain('Timeframe Depends on Damage');
     expect(html).toContain('No Warranty for Water Damage');
     expect(html).not.toContain('1 Hour');
+  });
+
+  it.each([
+    ['Lenovo Tab P12 Screen', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $100–$250'],
+    ['Lenovo Tab P12 Battery', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $80–$150'],
+    ['Lenovo Tab P12 Charging Port', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $80–$150'],
+    ['Lenovo Tab P12 Front Camera', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Front Camera Replacement', 'front-camera-replacement', [], false, 'AUD $70–$150'],
+    ['Lenovo Tab P12 Back Camera', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Back Camera Replacement', 'back-camera-replacement', [], false, 'AUD $70–$150'],
+    ['Lenovo Tab M11 Screen', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Screen Replacement', 'screen-replacement', [], false, 'AUD $100–$250'],
+    ['Lenovo Tab M11 Battery', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $80–$150'],
+    ['Lenovo Tab M11 Charging Port', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $80–$150'],
+  ] as const)('renders %s with Lenovo Tablet standard timing and quote-safe pricing', async (
+    _label,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    variants,
+    hasResolvedPrice,
+    expectedRange,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(lenovoTabletRepairCatalogue(model, modelSlug, repairName, repairSlug, variants));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: 'lenovo', model: modelSlug, 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+    const priceFaqs = faqs.filter((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    const heroStart = html.indexOf('<section class="repair-hero');
+    const heroEnd = html.indexOf('<section class="mx-auto my', heroStart);
+    const heroHtml = html.slice(heroStart, heroEnd);
+
+    expect(html).toContain('1 Hour');
+    expect(html).toContain('6-Month Warranty');
+    expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait|immediate/i);
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain('around 1 Hour');
+    expect(priceFaqs).toHaveLength(1);
+    expect(priceFaqs[0].answer).toContain(expectedRange);
+    expect(priceFaqs[0].answer).toContain('exact price takes priority');
+    expect(html).toContain('Typical Repair Range');
+    expect(html).toContain(expectedRange);
+
+    if (hasResolvedPrice) {
+      expect(pricing?.showStartingPriceFallback).toBe(true);
+      expect(html).toContain(`$${variants[0].price}`);
+      expect(html.indexOf(`$${variants[0].price}`)).toBeLessThan(html.indexOf(expectedRange));
+      expect(serviceSchema).toContain('"offers"');
+    } else {
+      expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(html).toContain('Quote on Request');
+      expect(html).not.toMatch(/Starting from \$|From \$|\$129|\$85|\$65|instant quote/i);
+      expect(html).toContain('Get Exact Quote');
+      expect(serviceSchema).not.toContain('"offers"');
+      expect(serviceSchema).not.toContain('AggregateOffer');
+    }
+  });
+
+  it('limits Lenovo Tab M11 enhanced treatment to its existing three standard repair types', () => {
+    const baseParams = { category: 'tablet', brand: 'lenovo', model: 'lenovo-tab-m11' };
+
+    expect(getAliMobileEnhancedLenovoTabletRepairType({ ...baseParams, 'repair-type': 'front-camera-replacement' })).toBeNull();
+    expect(getAliMobileEnhancedLenovoTabletRepairType({ ...baseParams, 'repair-type': 'back-camera-replacement' })).toBeNull();
+    expect(getAliMobileEnhancedLenovoTabletSeoPocket({ modelSlug: 'lenovo-tab-m11', repairSlug: 'front-camera-replacement' })).toBeNull();
+    expect(getAliMobileEnhancedLenovoTabletSeoPocket({ modelSlug: 'lenovo-tab-m11', repairSlug: 'back-camera-replacement' })).toBeNull();
+    expect(getLenovoTabletSameModelRepairLinks('lenovo-tab-m11', 'screen-replacement').map(({ slug }) => slug)).toEqual([
+      'battery-replacement',
+      'charging-port-replacement',
+    ]);
   });
 
   it.each([

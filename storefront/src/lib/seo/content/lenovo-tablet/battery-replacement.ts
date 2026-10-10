@@ -60,6 +60,7 @@ export function buildLenovoTabletBatteryReplacementPocket(
     modelSlug: config.modelSlug,
     modelName: config.modelName,
     repairType: 'battery-replacement',
+    turnaroundMinutes: 60,
     metaTitle: buildLenovoTabletMetaTitle(config, 'battery-replacement'),
     metaDescription: buildLenovoTabletMetaDescription(config, 'battery-replacement'),
     heroSubtitle: buildLenovoTabletHeroSubtitle(config, 'battery-replacement'),
@@ -138,4 +139,3 @@ export function buildLenovoTabletBatteryReplacementPocket(
     ],
   };
 }
-
