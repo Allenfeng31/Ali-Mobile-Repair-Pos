@@ -5817,9 +5817,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         <section className="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">
           <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
           <h1>{getRepairDetailHeading(seoDisplayModel, finalRepairName)}</h1>
-          {(enhancedSamsungTabletSeoPocket?.supportLabel ?? enhancedIpadSeoPocket?.supportLabel) ? (
+          {enhancedIpadSeoPocket?.supportLabel ? (
             <p className="mx-auto mt-4 max-w-3xl text-sm font-semibold leading-6 text-slate-600">
-              {enhancedSamsungTabletSeoPocket?.supportLabel ?? enhancedIpadSeoPocket?.supportLabel}
+              {enhancedIpadSeoPocket.supportLabel}
             </p>
           ) : null}
           <p className="repair-detail-subtitle">
@@ -5864,11 +5864,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage) && detailPricing.isQuoteOnly
             )}
             typicalPriceRange={tabletTypicalPriceGuidance ?? undefined}
-            quoteCtaLabel={tabletTypicalPriceGuidance && detailPricing.isQuoteOnly
-              ? 'Get Exact Quote'
-              : isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly
-                ? 'Get a Quote'
-                : undefined}
+            quoteCtaLabel={isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly
+              ? 'Get a Quote'
+              : undefined}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}

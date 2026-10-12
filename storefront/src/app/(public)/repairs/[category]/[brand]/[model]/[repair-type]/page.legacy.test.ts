@@ -616,10 +616,12 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       expect(serviceSchema).toContain(`"price":"${variants[0].price}.00"`);
     } else {
       expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(pricing?.quoteCtaLabel).toBeUndefined();
       expect(html).toContain('Quote on Request');
       expect(html).not.toMatch(/Starting from \$|From \$/);
       expect(html).not.toMatch(/instant quote/i);
-      expect(html).toContain('Get Exact Quote');
+      expect(html).toContain('Book Repair Now');
+      expect(html).not.toContain('Get Exact Quote');
       expect(serviceSchema).not.toContain('"offers"');
       expect(serviceSchema).not.toContain('AggregateOffer');
     }
@@ -627,20 +629,24 @@ describe('Repair Detail active and legacy page-data resolution', () => {
 
   it.each([
     [
-      'Samsung Tab S11 Battery',
+      'Samsung Galaxy Tab A 8.0 2017 Battery',
       samsungTabletRepairCatalogue,
       'samsung',
       'Samsung',
-      'Galaxy Tab S11 (SM-X730 / SM-X736)',
-      'galaxy-tab-s11-sm-x730-sm-x736',
+      'Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385)',
+      'galaxy-tab-a-80-2017-sm-t380-sm-t385',
+      'Battery Replacement',
+      'battery-replacement',
     ],
     [
-      'Lenovo Tab P12 Battery',
+      'Lenovo Tab P12 Screen',
       lenovoTabletRepairCatalogue,
       'lenovo',
       'Lenovo',
       'Lenovo Tab P12 (TB-370FU)',
       'lenovo-tab-p12-tb-370fu',
+      'Screen Replacement',
+      'screen-replacement',
     ],
   ] as const)('hands off one canonical booking href for %s to the hero and final CTA', async (
     _label,
@@ -649,16 +655,18 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     displayBrand,
     displayModel,
     modelSlug,
+    repairName,
+    repairSlug,
   ) => {
     fetchRepairCatalog.mockResolvedValue(catalogue(
       displayModel,
       modelSlug,
-      'Battery Replacement',
-      'battery-replacement',
+      repairName,
+      repairSlug,
     ));
 
     const page = await RepairServicePage({ params: Promise.resolve(params({
-      category: 'tablet', brand: brandSlug, model: modelSlug, 'repair-type': 'battery-replacement',
+      category: 'tablet', brand: brandSlug, model: modelSlug, 'repair-type': repairSlug,
     })) });
     const html = renderToStaticMarkup(page);
     const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
@@ -670,14 +678,38 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(query.get('category')).toBe('tablet');
     expect(query.get('brandSlug')).toBe(brandSlug);
     expect(query.get('modelSlug')).toBe(modelSlug);
-    expect(query.get('serviceSlug')).toBe('battery-replacement');
+    expect(query.get('serviceSlug')).toBe(repairSlug);
     expect(query.get('brand')).toBe(displayBrand);
     expect(query.get('model')).toBe(displayModel);
-    expect(query.get('service')).toBe('Battery Replacement');
+    expect(query.get('service')).toBe(repairName);
     expect(query.has('price')).toBe(false);
     expect(query.has('typicalRepairRange')).toBe(false);
     expect(query.has('startingPrice')).toBe(false);
     expect(query.has('fallbackPrice')).toBe(false);
+  });
+
+  it('keeps Samsung model codes in the H1 and normal intro without the redundant support sentence', async () => {
+    fetchRepairCatalog.mockResolvedValue(samsungTabletRepairCatalogue(
+      'Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385)',
+      'galaxy-tab-a-80-2017-sm-t380-sm-t385',
+      'Battery Replacement',
+      'battery-replacement',
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet',
+      brand: 'samsung',
+      model: 'galaxy-tab-a-80-2017-sm-t380-sm-t385',
+      'repair-type': 'battery-replacement',
+    })) });
+    const html = renderToStaticMarkup(page);
+    const heroStart = html.indexOf('<section class="repair-hero');
+    const heroEnd = html.indexOf('<div class="trust-badges">', heroStart);
+    const heroHtml = html.slice(heroStart, heroEnd);
+
+    expect(heroHtml).toContain('<h1>Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385) Battery Replacement</h1>');
+    expect(heroHtml).toContain('Bring your Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385)');
+    expect(heroHtml).not.toContain('We confirm model codes such as');
   });
 
   it.each([
@@ -794,9 +826,11 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       expect(serviceSchema).toContain('"offers"');
     } else {
       expect(pricing?.showStartingPriceFallback).toBe(false);
+      expect(pricing?.quoteCtaLabel).toBeUndefined();
       expect(html).toContain('Quote on Request');
       expect(html).not.toMatch(/Starting from \$|From \$|\$129|\$85|\$65|instant quote/i);
-      expect(html).toContain('Get Exact Quote');
+      expect(html).toContain('Book Repair Now');
+      expect(html).not.toContain('Get Exact Quote');
       expect(serviceSchema).not.toContain('"offers"');
       expect(serviceSchema).not.toContain('AggregateOffer');
     }
