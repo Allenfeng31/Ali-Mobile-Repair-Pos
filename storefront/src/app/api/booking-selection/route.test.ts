@@ -28,7 +28,7 @@ const catalog = {
 describe('GET /api/booking-selection', () => {
   it('returns only the resolved public selection for a valid canonical identity', async () => {
     fetchRepairCatalog.mockResolvedValueOnce(catalog);
-    const response = await GET(new Request('https://example.test/api/booking-selection?category=phone&brandSlug=google-pixel&modelSlug=pixel-8&serviceSlug=screen-replacement&brand=Google%20Pixel&model=Pixel%208&service=Screen%20Replacement'));
+    const response = await GET(new Request('https://example.test/api/booking-selection?category=phone&brandSlug=google-pixel&modelSlug=pixel-8&serviceSlug=screen-replacement&brand=Google%20Pixel&model=Pixel%208&service=Screen%20Replacement&price=1&typicalRepairRange=1'));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({

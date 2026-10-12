@@ -75,7 +75,82 @@ const canonical = {
   service: 'Screen Replacement',
 };
 
+const tabletServiceIdentityCatalog = {
+  brands: [
+    {
+      category: 'tablet', brand: 'Samsung', slug: 'samsung', icon: '', models: [{
+        model: 'Galaxy Tab S11 (SM-X730 / SM-X736)', slug: 'galaxy-tab-s11-sm-x730-sm-x736', repairTypes: [{
+          slug: 'battery-replacement', name: 'Galaxy Tab S11 Battery Service', price: 179, repairOrigin: 'pos',
+        }],
+      }],
+    },
+    {
+      category: 'tablet', brand: 'Lenovo', slug: 'lenovo', icon: '', models: [{
+        model: 'Lenovo Tab P12 (TB-370FU)', slug: 'lenovo-tab-p12-tb-370fu', repairTypes: [{
+          slug: 'battery-replacement', name: 'Lenovo Tab P12 Battery Service', price: 149, repairOrigin: 'pos',
+        }],
+      }],
+    },
+  ],
+} as Pick<RepairCatalog, 'brands'>;
+
 describe('resolvePublicBookingSelection', () => {
+  it.each([
+    ['Samsung', 'samsung', 'Galaxy Tab S11 (SM-X730 / SM-X736)', 'galaxy-tab-s11-sm-x730-sm-x736', 'Galaxy Tab S11 Battery Service', 179],
+    ['Lenovo', 'lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Lenovo Tab P12 Battery Service', 149],
+  ] as const)('resolves %s Tablet Battery through canonical and equivalent display identities', (
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    catalogueService,
+    price,
+  ) => {
+    const canonicalTablet = {
+      category: 'tablet', brandSlug, modelSlug, serviceSlug: 'battery-replacement',
+    };
+
+    for (const service of [undefined, 'Battery Replacement', catalogueService]) {
+      expect(resolvePublicBookingSelection(tabletServiceIdentityCatalog, {
+        ...canonicalTablet,
+        ...(service ? { brand, model, service } : {}),
+      })).toMatchObject({
+        category: 'tablet', brand, brandSlug, model, modelSlug,
+        service: catalogueService, serviceSlug: 'battery-replacement', price,
+      });
+    }
+
+    expect(resolvePublicBookingSelection(tabletServiceIdentityCatalog, {
+      ...canonicalTablet, brand, model, service: 'Screen Replacement',
+    })).toBeNull();
+    expect(resolvePublicBookingSelection(tabletServiceIdentityCatalog, {
+      ...canonicalTablet, brand, model: 'Conflicting Tablet', service: 'Battery Replacement',
+    })).toBeNull();
+  });
+
+  it.each([
+    ['Samsung', 'Galaxy Tab S11 (SM-X730 / SM-X736)', 'Battery Replacement', 'samsung', 'galaxy-tab-s11-sm-x730-sm-x736'],
+    ['Samsung', 'Galaxy Tab S11 (SM-X730 / SM-X736)', 'Galaxy Tab S11 Battery Service', 'samsung', 'galaxy-tab-s11-sm-x730-sm-x736'],
+    ['Lenovo', 'Lenovo Tab P12 (TB-370FU)', 'Battery Replacement', 'lenovo', 'lenovo-tab-p12-tb-370fu'],
+  ] as const)('resolves normalized legacy Tablet identity for %s / %s', (brand, model, service, brandSlug, modelSlug) => {
+    expect(resolvePublicBookingSelection(tabletServiceIdentityCatalog, {
+      brand, model, service,
+    })).toMatchObject({ brandSlug, modelSlug, serviceSlug: 'battery-replacement' });
+  });
+
+  it('keeps normalized legacy identity fail-closed when more than one repair matches', () => {
+    const duplicate = {
+      brands: [
+        ...tabletServiceIdentityCatalog.brands,
+        { ...tabletServiceIdentityCatalog.brands[0], category: 'phone' },
+      ],
+    } as Pick<RepairCatalog, 'brands'>;
+
+    expect(resolvePublicBookingSelection(duplicate, {
+      brand: 'Samsung', model: 'Galaxy Tab S11 (SM-X730 / SM-X736)', service: 'Battery Replacement',
+    })).toBeNull();
+  });
+
   it('resolves a canonical shared-page identity with its trusted display values', () => {
     expect(resolvePublicBookingSelection(catalog, canonical)).toMatchObject({
       ...canonical,

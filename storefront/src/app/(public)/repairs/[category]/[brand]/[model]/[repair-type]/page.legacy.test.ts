@@ -442,6 +442,11 @@ function findElementByType(node: ReactNode, type: unknown): ReactElement<DetailM
   return findElementByType((node as ReactElement<{ children?: ReactNode }>).props.children, type);
 }
 
+function getRenderedBookingHrefs(html: string): string[] {
+  return [...html.matchAll(/href="([^"]*\/book-repair\?[^"]*)"/g)]
+    .map(([, href]) => href.replaceAll('&amp;', '&'));
+}
+
 describe('Repair Detail active and legacy page-data resolution', () => {
   beforeEach(() => {
     fetchRepairDetailInitialResults.mockResolvedValue([]);
@@ -618,6 +623,105 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       expect(serviceSchema).not.toContain('"offers"');
       expect(serviceSchema).not.toContain('AggregateOffer');
     }
+  });
+
+  it.each([
+    [
+      'Samsung Tab S11 Battery',
+      samsungTabletRepairCatalogue,
+      'samsung',
+      'Samsung',
+      'Galaxy Tab S11 (SM-X730 / SM-X736)',
+      'galaxy-tab-s11-sm-x730-sm-x736',
+    ],
+    [
+      'Lenovo Tab P12 Battery',
+      lenovoTabletRepairCatalogue,
+      'lenovo',
+      'Lenovo',
+      'Lenovo Tab P12 (TB-370FU)',
+      'lenovo-tab-p12-tb-370fu',
+    ],
+  ] as const)('hands off one canonical booking href for %s to the hero and final CTA', async (
+    _label,
+    catalogue,
+    brandSlug,
+    displayBrand,
+    displayModel,
+    modelSlug,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(catalogue(
+      displayModel,
+      modelSlug,
+      'Battery Replacement',
+      'battery-replacement',
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: brandSlug, model: modelSlug, 'repair-type': 'battery-replacement',
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const heroHref = String(pricing?.bookingHref);
+    const finalHrefs = getRenderedBookingHrefs(html);
+    const query = new URL(heroHref, 'https://example.test').searchParams;
+
+    expect(finalHrefs).toEqual([heroHref]);
+    expect(query.get('category')).toBe('tablet');
+    expect(query.get('brandSlug')).toBe(brandSlug);
+    expect(query.get('modelSlug')).toBe(modelSlug);
+    expect(query.get('serviceSlug')).toBe('battery-replacement');
+    expect(query.get('brand')).toBe(displayBrand);
+    expect(query.get('model')).toBe(displayModel);
+    expect(query.get('service')).toBe('Battery Replacement');
+    expect(query.has('price')).toBe(false);
+    expect(query.has('typicalRepairRange')).toBe(false);
+    expect(query.has('startingPrice')).toBe(false);
+    expect(query.has('fallbackPrice')).toBe(false);
+  });
+
+  it.each([
+    ['Samsung Screen', samsungTabletRepairCatalogue, 'samsung', 'Samsung', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Screen Replacement', 'screen-replacement'],
+    ['Samsung Charging', samsungTabletRepairCatalogue, 'samsung', 'Samsung', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Charging Port Replacement', 'charging-port-replacement'],
+    ['Samsung Front Camera', samsungTabletRepairCatalogue, 'samsung', 'Samsung', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Front Camera Replacement', 'front-camera-replacement'],
+    ['Samsung Back Camera', samsungTabletRepairCatalogue, 'samsung', 'Samsung', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Back Camera Replacement', 'back-camera-replacement'],
+    ['Lenovo Screen', lenovoTabletRepairCatalogue, 'lenovo', 'Lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Screen Replacement', 'screen-replacement'],
+    ['Lenovo Charging', lenovoTabletRepairCatalogue, 'lenovo', 'Lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Charging Port Replacement', 'charging-port-replacement'],
+    ['Lenovo Front Camera', lenovoTabletRepairCatalogue, 'lenovo', 'Lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Front Camera Replacement', 'front-camera-replacement'],
+    ['Lenovo Back Camera', lenovoTabletRepairCatalogue, 'lenovo', 'Lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Back Camera Replacement', 'back-camera-replacement'],
+  ] as const)('uses the actual route repair slug for the %s CTA', async (
+    _label,
+    catalogue,
+    brandSlug,
+    displayBrand,
+    displayModel,
+    modelSlug,
+    repairName,
+    repairSlug,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(catalogue(displayModel, modelSlug, repairName, repairSlug));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: brandSlug, model: modelSlug, 'repair-type': repairSlug,
+    })) });
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const query = new URL(String(pricing?.bookingHref), 'https://example.test').searchParams;
+
+    expect(query.get('serviceSlug')).toBe(repairSlug);
+    expect(query.get('service')).toBe(repairName);
+    expect(query.get('brand')).toBe(displayBrand);
+  });
+
+  it('keeps an unrelated phone detail CTA on the legacy display-only contract', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [active], retiredRepairs: [] });
+
+    const page = await RepairServicePage({ params: Promise.resolve(params()) });
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const heroHref = String(pricing?.bookingHref);
+    const query = new URL(heroHref, 'https://example.test').searchParams;
+
+    expect(heroHref).toBe('/book-repair?brand=Motorola&model=Moto+G24&service=Screen+Replacement');
+    expect([...query.keys()]).toEqual(['brand', 'model', 'service']);
   });
 
   it('keeps Samsung Tablet Water Damage outside the standard timing and warranty rule', async () => {

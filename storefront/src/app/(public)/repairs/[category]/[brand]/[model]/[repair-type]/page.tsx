@@ -5644,7 +5644,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     : faqsWithResolvedTierPrice;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
+  const usesCanonicalTabletBookingIdentity =
+    isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage;
   const bookRepairUrl = `/book-repair?${new URLSearchParams({
+    ...(usesCanonicalTabletBookingIdentity ? {
+      category: resolvedParams.category,
+      brandSlug: resolvedParams.brand,
+      modelSlug: resolvedParams.model,
+      serviceSlug: resolvedParams['repair-type'],
+    } : {}),
     brand: displayBrand,
     model: displayModel,
     service: bookingRepairName || finalRepairName,
@@ -5830,6 +5838,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             modelName={displayModel}
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
+            bookingHref={bookRepairUrl}
             showBackHousingNotice={showBackHousingNotice}
             showStartingPriceFallback={!(
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||

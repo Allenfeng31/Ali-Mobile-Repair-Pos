@@ -184,6 +184,27 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(url).toContain('service=Screen+Replacement');
   });
 
+  it('preserves the page-owned canonical booking identity when adding the selected tier', () => {
+    const bookingHref = '/book-repair?category=tablet&brandSlug=samsung&modelSlug=galaxy-tab-a8-sm-x200-sm-x205&serviceSlug=screen-replacement&brand=Samsung&model=Galaxy+Tab+A8&service=Screen+Replacement';
+    render(<RepairPricingAndCTA {...defaultProps} bookingHref={bookingHref} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /select premium tier/i }));
+    fireEvent.click(screen.getByRole('button', { name: /book repair now/i }));
+
+    const pushedUrl = new URL(mockPush.mock.calls[0][0], 'https://example.test');
+    expect(pushedUrl.pathname).toBe('/book-repair');
+    expect(Object.fromEntries(pushedUrl.searchParams)).toEqual({
+      category: 'tablet',
+      brandSlug: 'samsung',
+      modelSlug: 'galaxy-tab-a8-sm-x200-sm-x205',
+      serviceSlug: 'screen-replacement',
+      brand: 'Samsung',
+      model: 'Galaxy Tab A8',
+      service: 'Screen Replacement',
+      tier: 'Premium',
+    });
+  });
+
   it('allows routing without tier selection when only one variant exists', () => {
     render(
       <RepairPricingAndCTA 

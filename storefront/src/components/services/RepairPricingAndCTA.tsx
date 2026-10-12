@@ -30,6 +30,7 @@ interface RepairPricingAndCTAProps {
   modelName: string;
   repairName: string;
   bookingRepairName?: string;
+  bookingHref?: string;
   showBackHousingNotice?: boolean;
   showStartingPriceFallback?: boolean;
   useNeutralQuoteWording?: boolean;
@@ -45,6 +46,7 @@ export default function RepairPricingAndCTA({
   modelName, 
   repairName,
   bookingRepairName,
+  bookingHref,
   showBackHousingNotice = false,
   showStartingPriceFallback = true,
   useNeutralQuoteWording = false,
@@ -116,15 +118,16 @@ export default function RepairPricingAndCTA({
 
     const tierToUse = selectedTier || (displayVariants.length === 1 ? displayVariants[0].quality_grade : null);
     
-    const params = new URLSearchParams();
-    params.set('brand', brandName);
-    params.set('model', modelName);
-    params.set('service', bookingRepairName || repairName);
+    const fallbackParams = new URLSearchParams();
+    fallbackParams.set('brand', brandName);
+    fallbackParams.set('model', modelName);
+    fallbackParams.set('service', bookingRepairName || repairName);
+    const [bookingPath, bookingQuery = ''] = (bookingHref ?? `/book-repair?${fallbackParams.toString()}`).split('?');
+    const bookingParams = new URLSearchParams(bookingQuery);
     if (tierToUse) {
-      params.set('tier', tierToUse);
+      bookingParams.set('tier', tierToUse);
     }
-    
-    const url = `/book-repair?${params.toString()}`;
+    const url = `${bookingPath}?${bookingParams.toString()}`;
     
     analytics.trackBookRepair(modelName, repairName);
     router.push(url);

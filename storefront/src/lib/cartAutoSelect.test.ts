@@ -218,6 +218,84 @@ describe('cartAutoSelect', () => {
     expect(result.shouldAutoConfirm).toBe(true);
   });
 
+  it.each([
+    ['Samsung', 'samsung', 'Galaxy Tab S11 (SM-X730 / SM-X736)', 'galaxy-tab-s11-sm-x730-sm-x736', 'Galaxy Tab S11 Battery Service', 730, 179],
+    ['Lenovo', 'lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Lenovo Tab P12 Battery Service', 370, 149],
+  ] as const)('uses the real normalized inventory Battery service for %s Tablet', (
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    catalogueService,
+    id,
+    price,
+  ) => {
+    const result = resolvePublicBookingCartState({
+      category: 'tablet', brand, brandSlug, model, modelSlug,
+      service: catalogueService, serviceSlug: 'battery-replacement', price, priceAuthority: 'exact-pos',
+    }, [{
+      id, category: 'Battery Service', brand: `T ${brand}`, deviceModel: model,
+      service: 'Battery Replacement', price, deviceType: 'tablet', quality_grade: 'Standard',
+      is_recommended: false, name: `${model} Battery Service`,
+    }]);
+
+    expect(result).toMatchObject({
+      brand: `T ${brand}`, model, category: 'tablet', shouldAutoConfirm: true,
+      serviceToSelect: { id, name: 'Battery Replacement', price },
+    });
+    expect(String(result.serviceToSelect?.id)).not.toContain('public-booking:');
+  });
+
+  it('validates tier only inside the serviceSlug-matched inventory group', () => {
+    const selection = {
+      category: 'tablet', brand: 'Samsung', brandSlug: 'samsung',
+      model: 'Galaxy Tab S11 (SM-X730 / SM-X736)', modelSlug: 'galaxy-tab-s11-sm-x730-sm-x736',
+      service: 'Galaxy Tab S11 Screen Repair', serviceSlug: 'screen-replacement',
+      price: 249, priceAuthority: 'quote-only' as const,
+    };
+    const inventory: ParsedItem[] = [{
+      id: 731, category: 'Screen Repair', brand: 'T Samsung', deviceModel: selection.model,
+      service: 'Screen Replacement', price: 249, deviceType: 'tablet', quality_grade: 'Standard',
+      is_recommended: false, name: `${selection.model} Screen Repair Standard`,
+    }, {
+      id: 732, category: 'Screen Repair', brand: 'T Samsung', deviceModel: selection.model,
+      service: 'Screen Replacement', price: 349, deviceType: 'tablet', quality_grade: 'Premium',
+      is_recommended: true, name: `${selection.model} Screen Repair Premium`,
+    }, {
+      id: 733, category: 'Battery Service', brand: 'T Samsung', deviceModel: selection.model,
+      service: 'Battery Replacement', price: 179, deviceType: 'tablet', quality_grade: 'Premium',
+      is_recommended: true, name: `${selection.model} Battery Service Premium`,
+    }];
+
+    expect(resolvePublicBookingCartState(selection, inventory, 'Premium')).toMatchObject({
+      serviceToSelect: { id: 732, name: 'Screen Replacement - Premium', price: 349 },
+      serviceToExpand: null, shouldAutoConfirm: true,
+    });
+    expect(resolvePublicBookingCartState(selection, inventory, 'Unknown')).toMatchObject({
+      serviceToSelect: null, serviceToExpand: 'Screen Replacement', shouldAutoConfirm: false,
+    });
+  });
+
+  it('keeps a genuinely unmatched Tablet service quote-only without cross-matching another service', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'tablet', brand: 'Samsung', brandSlug: 'samsung',
+      model: 'Galaxy Tab S11 (SM-X730 / SM-X736)', modelSlug: 'galaxy-tab-s11-sm-x730-sm-x736',
+      service: 'Galaxy Tab S11 Front Camera Replacement', serviceSlug: 'front-camera-replacement',
+      price: 0, priceAuthority: 'quote-only',
+    }, [{
+      id: 734, category: 'Battery Service', brand: 'T Samsung',
+      deviceModel: 'Galaxy Tab S11 (SM-X730 / SM-X736)', service: 'Battery Replacement',
+      price: 179, deviceType: 'tablet', quality_grade: 'Standard', is_recommended: false,
+      name: 'Galaxy Tab S11 Battery Service',
+    }]);
+
+    expect(result.serviceToSelect).toMatchObject({
+      id: 'public-booking:tablet:samsung:galaxy-tab-s11-sm-x730-sm-x736:front-camera-replacement',
+      name: 'Galaxy Tab S11 Front Camera Replacement',
+      price: 0,
+    });
+  });
+
   it('keeps an approved selection as a deterministic custom quote when its raw model or service is absent', () => {
     const selection = {
       category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 9a', modelSlug: 'pixel-9a',

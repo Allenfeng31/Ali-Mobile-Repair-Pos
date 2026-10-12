@@ -3,6 +3,7 @@ import { CAMERA_LENS_REPAIR_NAME, withGoogleCameraLensFixedPrice, withVirtualCam
 import { isVirtualPhoneRepairName, withVirtualPhoneRepairGroupedServices } from './virtualPhoneRepairs';
 import { APPLE_WATCH_CHARGING_REPAIR_NAME, withAppleWatchChargingRepairGroupedService } from './seo/content/apple-watch';
 import type { PublicBookingSelection } from './publicBookingSelection';
+import { getCanonicalPublicRepairServiceSlug } from './repairServiceIdentity';
 
 export interface AutoSelectResult {
   brand: string | null;
@@ -15,6 +16,7 @@ export interface AutoSelectResult {
 
 interface ResolveInitialCartStateOptions {
   includeVirtualServices?: boolean;
+  serviceSlug?: string;
 }
 
 export function resolveInitialCartState(
@@ -68,7 +70,12 @@ export function resolveInitialCartState(
       model,
       category,
     ), brand, model, category);
-  const matchedGroup = grouped.find(g => g.service.toLowerCase() === decodedService);
+  const canonicalMatches = options.serviceSlug
+    ? grouped.filter((group) => getCanonicalPublicRepairServiceSlug(group.service) === options.serviceSlug)
+    : [];
+  const matchedGroup = options.serviceSlug
+    ? (canonicalMatches.length === 1 ? canonicalMatches[0] : undefined)
+    : grouped.find(g => g.service.toLowerCase() === decodedService);
 
   if (!matchedGroup) {
     if (
@@ -154,13 +161,13 @@ export function resolvePublicBookingCartState(
     selection.service,
     inventory,
     tierParam,
-    { includeVirtualServices: false },
+    { includeVirtualServices: false, serviceSlug: selection.serviceSlug },
   );
 
   const hasExactRawService = rawResult.brand !== null && rawResult.model !== null && inventory.some((item) => (
     item.brand === rawResult.brand &&
     item.deviceModel === rawResult.model &&
-    item.service.trim().toLowerCase() === selection.service.trim().toLowerCase()
+    getCanonicalPublicRepairServiceSlug(item.service) === selection.serviceSlug
   ));
 
   // A virtual service is deliberately absent from the raw POS groups. Its

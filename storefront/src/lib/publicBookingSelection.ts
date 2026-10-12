@@ -6,6 +6,7 @@ import {
   MOTHERBOARD_REPAIR_SLUG,
   resolveMotherboardSelection,
 } from './motherboardRepair';
+import { getCanonicalPublicRepairServiceSlug } from './repairServiceIdentity';
 
 export interface PublicBookingSelectionInput {
   category?: string | null;
@@ -187,7 +188,8 @@ export function resolvePublicBookingSelection(
       if (
         (input.brand !== null && input.brand !== undefined && input.brand !== selection.brand) ||
         (input.model !== null && input.model !== undefined && input.model !== selection.model) ||
-        (input.service !== null && input.service !== undefined && input.service !== selection.service)
+        (input.service !== null && input.service !== undefined &&
+          getCanonicalPublicRepairServiceSlug(input.service) !== selection.serviceSlug)
       ) return null;
       return selection;
     }
@@ -210,13 +212,17 @@ export function resolvePublicBookingSelection(
     if (
       (input.brand !== null && input.brand !== undefined && input.brand !== selection.brand) ||
       (input.model !== null && input.model !== undefined && input.model !== selection.model) ||
-      (input.service !== null && input.service !== undefined && input.service !== selection.service)
+      (input.service !== null && input.service !== undefined &&
+        getCanonicalPublicRepairServiceSlug(input.service) !== selection.serviceSlug)
     ) return null;
 
     return selection;
   }
 
   if (!hasAll([input.brand, input.model, input.service])) return null;
+
+  const serviceSlug = getCanonicalPublicRepairServiceSlug(input.service);
+  if (!serviceSlug) return null;
 
   const matches: PublicBookingSelection[] = [];
   for (const brand of catalog.brands) {
@@ -226,7 +232,7 @@ export function resolvePublicBookingSelection(
     for (const model of brand.models) {
       if (model.model !== input.model) continue;
       const repair = repairOptions(brand.category, brand.slug, model.repairTypes).find(
-        (candidate) => candidate.name === input.service,
+        (candidate) => candidate.slug === serviceSlug,
       );
       if (repair) matches.push(resolvedSelection(brand.category, brand, model, repair));
     }
