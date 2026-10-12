@@ -82,7 +82,7 @@ describe("RepairsHubPage privacy FAQs", () => {
 
     const watchCard = screen.getByRole("link", { name: /Smart Watch Repair/i });
     expect(watchCard).toHaveAttribute("href", "/repairs/watch");
-    expect(within(watchCard).getByText("30–60 Minutes")).toBeInTheDocument();
+    expect(within(watchCard).getByText("45 Minutes")).toBeInTheDocument();
     expect(within(watchCard).queryByText("2-4 hrs")).not.toBeInTheDocument();
 
     expect(screen.queryByText("6 mo")).not.toBeInTheDocument();

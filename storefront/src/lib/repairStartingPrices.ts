@@ -110,12 +110,38 @@ export const LAPTOP_BRAND_STARTING_PRICES: Record<string, Partial<Record<string,
   },
 };
 
-export const WATCH_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {
-  apple: {
-    "screen-replacement": 150,
-    "battery-replacement": 85,
-  },
-};
+const APPLE_WATCH_STANDARD_REPAIR_SLUGS = new Set([
+  "screen-replacement",
+  "battery-replacement",
+  "charging-repair",
+]);
+
+export function getAppleWatchCatalogueStartingPrice(models: ReadonlyArray<{
+  repairTypes: ReadonlyArray<{
+    slug: string;
+    price: number;
+    repairOrigin?: string;
+  }>;
+}>): number | null {
+  let lowestPrice: number | null = null;
+
+  for (const model of models) {
+    for (const repair of model.repairTypes) {
+      if (
+        repair.repairOrigin !== "pos" ||
+        !APPLE_WATCH_STANDARD_REPAIR_SLUGS.has(repair.slug) ||
+        !Number.isFinite(repair.price) ||
+        repair.price <= 0
+      ) {
+        continue;
+      }
+
+      lowestPrice = lowestPrice === null ? repair.price : Math.min(lowestPrice, repair.price);
+    }
+  }
+
+  return lowestPrice;
+}
 
 export function getStartingPrice(categorySlug: string, brandSlug: string, repairSlug: string) {
   if (categorySlug === "phone") {
@@ -128,10 +154,6 @@ export function getStartingPrice(categorySlug: string, brandSlug: string, repair
   }
   if (categorySlug === "laptop") {
     const brandPrices = LAPTOP_BRAND_STARTING_PRICES[brandSlug];
-    return brandPrices ? (brandPrices[repairSlug] ?? null) : null;
-  }
-  if (categorySlug === "watch") {
-    const brandPrices = WATCH_BRAND_STARTING_PRICES[brandSlug];
     return brandPrices ? (brandPrices[repairSlug] ?? null) : null;
   }
   return null;

@@ -122,6 +122,7 @@ import {
   getAppleWatchModelHubLinks,
   getAppleWatchRepairLabel,
   getAppleWatchSameModelRepairLinks,
+  getAppleWatchStandardTurnaroundMinutes,
   isConfiguredAppleWatchModel,
   isAliMobileEnhancedAppleWatchRepairPage,
 } from '@/lib/seo/content/apple-watch';
@@ -5221,12 +5222,19 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           : {}),
       }
     : inheritedSeoPocket;
-  const approvedTurnaroundMinutes =
+  const appleWatchStandardTurnaroundMinutes = getAppleWatchStandardTurnaroundMinutes({
+    category: resolvedParams.category,
+    brand: resolvedParams.brand,
+    model: resolvedParams.model,
+    repairType: resolvedParams['repair-type'],
+  });
+  const approvedTurnaroundMinutes = appleWatchStandardTurnaroundMinutes ?? (
     typeof seoPocket?.turnaroundMinutes === 'number' &&
     Number.isFinite(seoPocket.turnaroundMinutes) &&
     seoPocket.turnaroundMinutes > 0
       ? seoPocket.turnaroundMinutes
-      : undefined;
+      : undefined
+  );
   const samsungTabletTurnaroundLabel =
     isAliMobileEnhancedSamsungTabletPage && approvedTurnaroundMinutes === 60
       ? '1 Hour'
@@ -5595,7 +5603,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     displayBrand,
     { initialAssessmentCleaningMinutes },
   );
-  const existingTimingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
+  const existingTimingFaq = baseFaqs.find((faq: { question: string }) =>
+    /how long/i.test(faq.question) ||
+    (Boolean(appleWatchStandardTurnaroundMinutes) && /timing/i.test(faq.question))
+  );
   const timingFaq = existingTimingFaq ?? (ipadDetailTiming || samsungTabletTurnaroundLabel || lenovoTabletTurnaroundLabel || macBookTurnaroundLabel
     ? {
         question: `How long does ${displayModel} ${finalRepairName.toLowerCase()} take?`,

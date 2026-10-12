@@ -3,7 +3,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
-import { WATCH_BRAND_STARTING_PRICES } from "@/lib/repairStartingPrices";
+import { getAppleWatchCatalogueStartingPrice } from "@/lib/repairStartingPrices";
+import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
 import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -1167,11 +1168,6 @@ function getStartingRepairPrice(
   return Math.min(...prices);
 }
 
-function getLowestStartingPrice(prices: Partial<Record<string, number>>): number | null {
-  const validPrices = Object.values(prices).filter((price): price is number => typeof price === "number" && Number.isFinite(price) && price > 0);
-  return validPrices.length > 0 ? Math.min(...validPrices) : null;
-}
-
 function formatStartingRepairPrice(price: number): string {
   return new Intl.NumberFormat('en-AU', {
     maximumFractionDigits: 0,
@@ -1846,13 +1842,13 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
       ]
     : [];
-  const appleWatchStartingRepairPrice = isAppleWatchHub ? getLowestStartingPrice(WATCH_BRAND_STARTING_PRICES.apple) : null;
+  const appleWatchStartingRepairPrice = isAppleWatchHub ? getAppleWatchCatalogueStartingPrice(models) : null;
   const appleWatchHeroInsightCards = isAppleWatchHub
     ? [
         {
           title: appleWatchStartingRepairPrice
             ? `Apple Watch Repairs from $${formatStartingRepairPrice(appleWatchStartingRepairPrice)}`
-            : "Apple Watch Repair Quote First",
+            : "Apple Watch Repairs — Quote on Request",
           body: "We check the exact Apple Watch model, fault and part option before confirming the repair quote.",
         },
         {
@@ -1860,8 +1856,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           body: "Supported Apple Watch repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
         },
         {
-          title: "Parts Checked Before Repair",
-          body: "Apple Watch repair timing depends on the exact model, fault and part availability. If the required part is not in stock, we usually need 1-2 days to order parts.",
+          title: `${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} Minutes for Standard Repairs`,
+          body: `Standard Apple Watch part-based repairs typically take around ${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when the required part is available. If the part is not in stock, we usually need 1-2 days to order it.`,
         },
       ]
     : [];

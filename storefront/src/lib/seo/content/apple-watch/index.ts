@@ -117,6 +117,8 @@ export const APPLE_WATCH_REPAIRS: ReadonlyArray<AppleWatchRepairSlug> = [
   'charging-repair',
 ];
 
+export const APPLE_WATCH_STANDARD_TURNAROUND_MINUTES = 45;
+
 export const APPLE_WATCH_CHARGING_REPAIR_SLUG = 'charging-repair';
 export const APPLE_WATCH_CHARGING_REPAIR_NAME = 'Charging Repair';
 
@@ -400,6 +402,25 @@ type AppleWatchPageKey = `${AppleWatchModelSlug}|${AppleWatchRepairSlug}`;
 
 export function isConfiguredAppleWatchModel(value: string): value is AppleWatchModelSlug {
   return Object.prototype.hasOwnProperty.call(MODEL_CONFIGS, value);
+}
+
+export function getAppleWatchStandardTurnaroundMinutes({
+  category,
+  brand,
+  model,
+  repairType,
+}: {
+  category: string;
+  brand: string;
+  model: string;
+  repairType: string;
+}): number | undefined {
+  return category === 'watch' &&
+    brand === 'apple' &&
+    isConfiguredAppleWatchModel(model) &&
+    isAppleWatchRepairSlug(repairType)
+    ? APPLE_WATCH_STANDARD_TURNAROUND_MINUTES
+    : undefined;
 }
 
 /** Canonical model identity shared by Apple Watch route consumers. */
@@ -808,7 +829,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     "modelName": "Apple Watch Series 3 42mm",
     "repairSlug": "screen-replacement",
     "metaTitle": "Apple Watch Series 3 42mm screen replacement in Ringwood | Ali Mobile",
-    "metaDescription": "Apple Watch Series 3 42mm display support for glass damage, flicker, no image and case-frame marks, with live pricing kept unchanged.",
+    "metaDescription": "Apple Watch Series 3 42mm screen replacement for cracked glass, flicker, no image and case-frame damage at Ali Mobile in Ringwood.",
     "quickAnswer": "If your older workout companion still buzzes but shows no image, we test the screen path and case condition before any part is approved.",
     "repairOptions": [
       {
@@ -2368,7 +2389,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     "modelName": "Apple Watch Series 5 44mm",
     "repairSlug": "screen-replacement",
     "metaTitle": "Apple Watch Series 5 44mm screen replacement in Ringwood | Ali Mobile",
-    "metaDescription": "Apple Watch Series 5 44mm display support for glass damage, flicker, no image and case-frame marks, with live pricing kept unchanged.",
+    "metaDescription": "Apple Watch Series 5 44mm screen replacement for cracked glass, flicker, no image and case-frame damage at Ali Mobile in Ringwood.",
     "quickAnswer": "If your larger always-on companion still buzzes but shows no image, we test the screen path and case condition before any part is approved.",
     "repairOptions": [
       {
@@ -3928,7 +3949,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     "modelName": "Apple Watch SE 1st Gen 44mm",
     "repairSlug": "screen-replacement",
     "metaTitle": "Apple Watch SE 1st Gen 44mm screen replacement in Ringwood | Ali Mobile",
-    "metaDescription": "Apple Watch SE 1st Gen 44mm display support for glass damage, flicker, no image and case-frame marks, with live pricing kept unchanged.",
+    "metaDescription": "Apple Watch SE 1st Gen 44mm screen replacement for cracked glass, flicker, no image and case-frame damage at Ali Mobile in Ringwood.",
     "quickAnswer": "If your everyday larger SE still buzzes but shows no image, we test the screen path and case condition before any part is approved.",
     "repairOptions": [
       {
@@ -5488,7 +5509,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     "modelName": "Apple Watch Series 8 45mm",
     "repairSlug": "screen-replacement",
     "metaTitle": "Apple Watch Series 8 45mm screen replacement in Ringwood | Ali Mobile",
-    "metaDescription": "Apple Watch Series 8 45mm display support for glass damage, flicker, no image and case-frame marks, with live pricing kept unchanged.",
+    "metaDescription": "Apple Watch Series 8 45mm screen replacement for cracked glass, flicker, no image and case-frame damage at Ali Mobile in Ringwood.",
     "quickAnswer": "If your larger sensor model still buzzes but shows no image, we test the screen path and case condition before any part is approved.",
     "repairOptions": [
       {
@@ -7048,7 +7069,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     "modelName": "Apple Watch Series 10 46mm",
     "repairSlug": "screen-replacement",
     "metaTitle": "Apple Watch Series 10 46mm screen replacement in Ringwood | Ali Mobile",
-    "metaDescription": "Apple Watch Series 10 46mm display support for glass damage, flicker, no image and case-frame marks, with live pricing kept unchanged.",
+    "metaDescription": "Apple Watch Series 10 46mm screen replacement for cracked glass, flicker, no image and case-frame damage at Ali Mobile in Ringwood.",
     "quickAnswer": "If your larger thin generation still buzzes but shows no image, we test the screen path and case condition before any part is approved.",
     "repairOptions": [
       {
@@ -8608,7 +8629,7 @@ const APPLE_WATCH_PAGE_CONTENT: Record<AppleWatchPageKey, AppleWatchEnhancedSeoP
     "modelName": "Apple Watch Ultra 2 49mm",
     "repairSlug": "screen-replacement",
     "metaTitle": "Apple Watch Ultra 2 49mm screen replacement in Ringwood | Ali Mobile",
-    "metaDescription": "Apple Watch Ultra 2 49mm display support for glass damage, flicker, no image and case-frame marks, with live pricing kept unchanged.",
+    "metaDescription": "Apple Watch Ultra 2 49mm screen replacement for cracked glass, flicker, no image and case-frame damage at Ali Mobile in Ringwood.",
     "quickAnswer": "If your newer rugged 49mm model still buzzes but shows no image, we test the screen path and case condition before any part is approved.",
     "repairOptions": [
       {

@@ -20,6 +20,7 @@ import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
 import { getSamsungHardwareConfig } from "@/lib/seo/content/samsung/config";
 import { getIpadHardwareConfig } from "@/lib/seo/content/ipad/config";
+import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -1608,15 +1609,15 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: "Apple Watch repair compatibility depends on the exact Series, SE or Ultra model, case size, housing condition and visible fault signs.",
     },
     {
-      title: "Quote before opening",
-      body: "We confirm the practical repair path and quote before opening the watch. Same-day completion is not promised for Apple Watch repairs.",
+      title: `${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when parts are available`,
+      body: `Standard Apple Watch part-based repairs typically take around ${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when the required part is available. More complex diagnosis or part ordering may require additional time.`,
     },
   ];
   const appleWatchQuickAnswers = [
     { number: "01", title: "How much does the repair cost?", body: startingPrice ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact Apple Watch model to see the current price or quote requirement." },
     hasScreenRepair ? { number: "02", title: "What affects screen repair?", body: "Apple Watch screen repair depends on the exact model, case size, display condition, housing damage and part availability." } : null,
     hasBatteryRepair ? { number: "03", title: "What affects battery service?", body: "Apple Watch battery service depends on runtime symptoms, charging response, model, seal condition and part availability." } : null,
-    { number: "04", title: "Can it be same-day?", body: "We do not promise same-day Apple Watch completion. Timing depends on the exact model, condition, parts availability and repair queue." },
+    { number: "04", title: "How long does a standard repair take?", body: `Standard Apple Watch part-based repairs typically take around ${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when the required part is available. More complex diagnosis may require additional time.` },
     { number: "05", title: "Will it stay water-resistant?", body: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
     hasWarrantyRepair ? { number: "06", title: "What warranty is included?", body: "Eligible Apple Watch repairs include a 6-month warranty on the fitted part and workmanship. It does not cover new impact damage, liquid exposure, misuse or unrelated faults." } : null,
     { number: "07", title: "Can no-power be another fault?", body: "Yes. No-power or charging symptoms can involve the battery, charging hardware, display, internal connectors or board-level faults." },
@@ -1640,7 +1641,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { question: "How do I confirm the exact Apple Watch model?", answer: "Check the Watch app, device settings, or the case size and model details on the watch. Bring it in if you are unsure." },
     hasScreenRepair ? { question: `What affects ${modelName} screen repair?`, answer: "Display condition, housing damage, case size, seal condition and part availability can all affect the practical repair path." } : null,
     hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We check runtime and charging response first." } : null,
-    { question: "Do you offer same-day Apple Watch repairs?", answer: "We do not promise same-day completion. Timing depends on the exact model, condition, parts availability and repair queue." },
+    { question: "How long does a standard Apple Watch repair take?", answer: `Standard Apple Watch part-based repairs typically take around ${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when the required part is available. More complex diagnosis or part ordering may require additional time.` },
     { question: "Will my Apple Watch remain water-resistant?", answer: "Factory water resistance cannot be guaranteed after opening or repair. Adhesive replacement does not restore guaranteed factory water-resistance certification." },
     hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and workmanship. It does not cover liquid exposure, new impact damage, misuse or unrelated faults." } : null,
     { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm whether assessment or part ordering is the best next step." },
@@ -1989,7 +1990,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
-          showStartingPriceFallback={!isIPadModelPage && !isMacBookModelPage}
+          showStartingPriceFallback={!isIPadModelPage && !isMacBookModelPage && !isAppleWatchModelPage}
           useQuoteLedPricingSummary={isMacBookModelPage}
         />
         {isMacBookModelPage && (

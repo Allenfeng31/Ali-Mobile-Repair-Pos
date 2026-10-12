@@ -89,6 +89,27 @@ beforeEach(() => {
 });
 
 describe('Model Hub page-mode Server consumer', () => {
+  it('uses approved standard Apple Watch timing and disables static quote fallbacks', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Apple',
+      model: 'Apple Watch Series 3 (42mm)',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'synthetic-core' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 90, repairOrigin: 'pos' },
+        { slug: 'charging-repair', name: 'Charging Repair', price: 0, repairOrigin: 'synthetic-core', sourceType: 'diagnostic' },
+      ],
+      brandModels: [{ slug: 'apple-watch-series-3-42mm', model: 'Apple Watch Series 3 (42mm)', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'watch', brand: 'apple', model: 'apple-watch-series-3-42mm' }),
+    }));
+
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+    expect(html).toContain('around 45 minutes when the required part is available');
+    expect(html).not.toContain('Same-day completion is not promised');
+  });
+
   it('resolves active non-iPhone options before the Client Grid without another catalogue fetch', async () => {
     renderToStaticMarkup(await ModelHubPage({ params: Promise.resolve({ category: 'phone', brand: 'oppo', model: 'find-x8-pro' }) }));
 

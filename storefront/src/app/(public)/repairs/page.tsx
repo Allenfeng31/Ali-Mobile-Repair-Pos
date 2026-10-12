@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import ChatNowButton from "@/components/ChatNowButton";
 import ServiceAreas from "@/components/seo/ServiceAreas";
+import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
 
 import styles from "./RepairsHub.module.css";
 
@@ -61,8 +62,8 @@ const repairCategories = [
     description:
       "Precision Apple Watch and smart watch screen, battery, rear glass, and sealing repairs for everyday wear.",
     image: "/images/services/watch-repair.jpg",
-    metric: "30–60 Minutes",
-    detail: "Precision reseal process",
+    metric: `${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} Minutes`,
+    detail: "Standard repairs when parts are available",
   },
 ];
 
