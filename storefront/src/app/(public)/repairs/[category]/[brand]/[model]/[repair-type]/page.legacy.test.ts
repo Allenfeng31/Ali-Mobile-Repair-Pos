@@ -166,6 +166,26 @@ const lenovoTabletRepairCatalogue = (
   }],
   retiredRepairs: [],
 });
+const macBookRepairCatalogue = (
+  model: string,
+  slug: string,
+  repairName: string,
+  repairSlug: string,
+  variants: ReadonlyArray<{ quality_grade: string; price: number }> = [],
+) => ({
+  source: 'pos' as const,
+  brands: [{
+    category: 'laptop',
+    brand: 'MacBook',
+    slug: 'macbook',
+    models: [{
+      model,
+      slug,
+      repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
+    }],
+  }],
+  retiredRepairs: [],
+});
 const lenovoYogaSmartTabWithWaterRepair = {
   category: 'tablet',
   brand: 'Lenovo',
@@ -437,6 +457,98 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['MacBook screen', 'Screen Replacement', 'screen-replacement'],
+    ['MacBook battery', 'Battery Replacement', 'battery-replacement'],
+    ['MacBook charging port', 'Charging Port Repair', 'charging-port-replacement'],
+  ] as const)('renders %s with explicit one-hour repair time and quote-safe pricing', async (
+    _label,
+    repairName,
+    repairSlug,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(
+      'MacBook Air M2 13-inch 2022',
+      'macbook-air-m2-13-2022',
+      repairName,
+      repairSlug,
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'laptop', brand: 'macbook', model: 'macbook-air-m2-13-2022', 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+    expect(html).toContain('Repair Time: 1 Hour');
+    expect(html).toContain('6-Month Warranty');
+    expect(html).not.toContain('Fast Turnaround');
+    expect(timingFaqs).toHaveLength(1);
+    expect(timingFaqs[0].answer).toContain('around 1 Hour');
+    expect(pricing?.showStartingPriceFallback).toBe(false);
+    expect(pricing?.useNeutralQuoteWording).toBe(true);
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('Get a Quote');
+    expect(html).not.toMatch(/Starting from \$(250|150|99)|instant quote/i);
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(serviceSchema).not.toContain('AggregateOffer');
+  });
+
+  it.each([
+    ['MacBook Pro 14/16 M1 Pro/Max 2021', 'macbook-pro-1416-m1-promax-2021'],
+    ['MacBook Pro 14/16 M2 Pro/Max 2023', 'macbook-pro-1416-m2-promax-2023'],
+    ['MacBook Pro 14/16 M3 Pro/Max 2024', 'macbook-pro-1416-m3-promax-2024'],
+  ] as const)('renders all standard repairs for %s from the shared one-hour MacBook source', async (model, modelSlug) => {
+    for (const [repairName, repairSlug] of [
+      ['Screen Replacement', 'screen-replacement'],
+      ['Battery Replacement', 'battery-replacement'],
+      ['Charging Port Repair', 'charging-port-replacement'],
+    ] as const) {
+      fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(model, modelSlug, repairName, repairSlug));
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({
+        category: 'laptop', brand: 'macbook', model: modelSlug, 'repair-type': repairSlug,
+      })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+      expect(html).toContain('Repair Time: 1 Hour');
+      expect(html).not.toContain('Fast Turnaround');
+      expect(timingFaqs).toHaveLength(1);
+      expect(timingFaqs[0].answer).toContain('around 1 Hour');
+
+      if (repairSlug === 'charging-port-replacement') {
+        expect(html).toContain('Get a Quote');
+        expect(html).not.toMatch(/instant quote/i);
+      }
+    }
+  });
+
+  it('preserves a resolved MacBook catalogue price and its AUD Offer', async () => {
+    fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(
+      'MacBook Air M2 13-inch 2022',
+      'macbook-air-m2-13-2022',
+      'Screen Replacement',
+      'screen-replacement',
+      [{ quality_grade: 'Standard', price: 499 }],
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'laptop', brand: 'macbook', model: 'macbook-air-m2-13-2022', 'repair-type': 'screen-replacement',
+    })) });
+    const html = renderToStaticMarkup(page);
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain('Repair Time: 1 Hour');
+    expect(html).toContain('$499');
+    expect(serviceSchema).toContain('"offers"');
+    expect(serviceSchema).toContain('"price":"499.00"');
+    expect(serviceSchema).toContain('"priceCurrency":"AUD"');
+  });
+
+  it.each([
     ['Galaxy Tab A8 Screen', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $150–$300', 'AUD $250–$550'],
     ['Galaxy Tab A8 Battery', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $110–$180', 'AUD $110–$230'],
     ['Galaxy Tab A8 Charging Port', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Standard', price: 129 }], true, 'AUD $85–$150', 'AUD $95–$150'],
@@ -479,7 +591,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const heroEnd = html.indexOf('<section class="mx-auto my', heroStart);
     const heroHtml = html.slice(heroStart, heroEnd);
 
-    expect(html).toContain('1 Hour');
+    expect(html).toContain('Repair Time: 1 Hour');
     expect(html).toContain('6-Month Warranty');
     expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait|immediate/i);
     expect(timingFaqs).toHaveLength(1);
@@ -560,7 +672,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const heroEnd = html.indexOf('<section class="mx-auto my', heroStart);
     const heroHtml = html.slice(heroStart, heroEnd);
 
-    expect(html).toContain('1 Hour');
+    expect(html).toContain('Repair Time: 1 Hour');
     expect(html).toContain('6-Month Warranty');
     expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait|immediate/i);
     expect(timingFaqs).toHaveLength(1);
@@ -654,6 +766,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).toContain('<h1>Galaxy A16 Water Damage Cleaning / Assessment</h1>');
     expect(html).toContain('Initial Assessment &amp; Cleaning');
     expect(html).toContain('30 Minutes');
+    expect(html).not.toContain('Repair Time: 30 Minutes');
     expect(html).toContain('Further repair time depends');
     expect(html).toContain('Quote on Request');
     expect(html).toContain('Diagnostic Required');
@@ -738,7 +851,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
     const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
 
-    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+    expect(html).toContain(`Repair Time: ${turnaroundMinutes} Minutes`);
     expect(html).toContain('6-Month Warranty');
     expect(html).not.toContain('Fast Turnaround');
     expect(html).not.toContain('Timeframe Varies');
@@ -799,7 +912,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const heroEnd = html.indexOf('<section class="mx-auto my', heroStart);
     const heroHtml = html.slice(heroStart, heroEnd);
 
-    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+    expect(html).toContain(`Repair Time: ${turnaroundMinutes} Minutes`);
     expect(html).toContain('6-Month Warranty');
     expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait/i);
     expect(timingFaqs).toHaveLength(1);
@@ -854,7 +967,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
     const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
 
-    expect(html).toContain(expectedTiming);
+    expect(html).toContain(`Repair Time: ${expectedTiming}`);
     expect(html).toContain('6-Month Warranty');
     expect(timingFaqs).toHaveLength(1);
 
@@ -1407,7 +1520,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).toContain(`<h1>${model} Back Glass / Back Housing Replacement</h1>`);
     expect(html).toContain(`${model} back housing replacement at Ali Mobile in Ringwood Square.`);
     expect(faqs[0]?.answer).toContain('rear housing or chassis assembly');
-    expect(html).toContain('60 Minutes');
+    expect(html).toContain('Repair Time: 60 Minutes');
     expect(html).not.toContain('Timeframe Varies');
     expect(html).toContain('6-Month Warranty');
     expect(timingFaqs).toHaveLength(1);
@@ -1436,7 +1549,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).toContain(`${model} back glass replacement at Ali Mobile in Ringwood Square.`);
     expect(html).not.toContain('full rear housing replacement instead of back glass only');
     expect(faqs[0]?.answer).toContain('rear glass component');
-    expect(html).toContain('Timeframe Varies');
+    expect(html).toContain('Repair Time: Varies');
     expect(html).not.toContain('60 Minutes');
     expect(html).toContain('6-Month Warranty');
     expect(timingFaqs).toHaveLength(1);
@@ -1472,7 +1585,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     );
 
     expect(html).toContain('<h1>iPhone 8 Back Camera Replacement</h1>');
-    expect(html).toContain('30 Minutes');
+    expect(html).toContain('Repair Time: 30 Minutes');
     expect(html).not.toContain('rear camera switching');
     expect(html).not.toContain('supported rear camera modes');
   });
@@ -1530,7 +1643,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
     const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
 
-    expect(html).toContain(`${turnaroundMinutes} Minutes`);
+    expect(html).toContain(`Repair Time: ${turnaroundMinutes} Minutes`);
     expect(html).toContain('6-Month Warranty');
     expect(html).not.toContain('Fast Turnaround');
     expect(html).not.toContain('Timeframe Varies');

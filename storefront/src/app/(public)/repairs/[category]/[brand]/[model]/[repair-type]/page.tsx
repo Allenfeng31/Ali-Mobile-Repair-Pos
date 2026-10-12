@@ -160,6 +160,10 @@ function getRepairIcon(slug: string, size = 48) {
   return <Wrench size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
 }
 
+function formatRepairTimeBadge(duration: string): string {
+  return `Repair Time: ${duration}`;
+}
+
 interface RepairPageProps {
   params: Promise<{
     category: string;
@@ -5231,6 +5235,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedLenovoTabletPage && approvedTurnaroundMinutes === 60
       ? '1 Hour'
       : undefined;
+  const macBookTurnaroundLabel =
+    isAliMobileEnhancedMacBookPage && approvedTurnaroundMinutes === 60
+      ? '1 Hour'
+      : undefined;
   const tabletTypicalPriceGuidance = isAliMobileEnhancedSamsungTabletPage
     ? getSamsungTabletTypicalPriceGuidance(resolvedParams.model, resolvedParams['repair-type'])
     : isAliMobileEnhancedLenovoTabletPage
@@ -5588,7 +5596,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     { initialAssessmentCleaningMinutes },
   );
   const existingTimingFaq = baseFaqs.find((faq: { question: string }) => /how long/i.test(faq.question));
-  const timingFaq = existingTimingFaq ?? (ipadDetailTiming || samsungTabletTurnaroundLabel || lenovoTabletTurnaroundLabel
+  const timingFaq = existingTimingFaq ?? (ipadDetailTiming || samsungTabletTurnaroundLabel || lenovoTabletTurnaroundLabel || macBookTurnaroundLabel
     ? {
         question: `How long does ${displayModel} ${finalRepairName.toLowerCase()} take?`,
         answer: '',
@@ -5610,7 +5618,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       turnaroundMinutes: approvedTurnaroundMinutes,
       turnaroundLabel: ipadDetailTiming?.kind === 'standard'
         ? ipadDetailTiming.faqDurationLabel
-        : samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel,
+        : samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? macBookTurnaroundLabel,
     })
     : faqsWithTimingQuestion;
   const costFaq = faqsWithApprovedTurnaround.find((faq: { question: string }) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
@@ -5827,15 +5835,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
               (isAliMobileEnhancedSamsungTabletPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedLenovoTabletPage && detailPricing.isQuoteOnly) ||
+              (isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
             useNeutralQuoteWording={Boolean(
-              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage) && detailPricing.isQuoteOnly
+              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage) && detailPricing.isQuoteOnly
             )}
             typicalPriceRange={tabletTypicalPriceGuidance ?? undefined}
-            quoteCtaLabel={tabletTypicalPriceGuidance && detailPricing.isQuoteOnly ? 'Get Exact Quote' : undefined}
+            quoteCtaLabel={tabletTypicalPriceGuidance && detailPricing.isQuoteOnly
+              ? 'Get Exact Quote'
+              : isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly
+                ? 'Get a Quote'
+                : undefined}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
@@ -5868,13 +5881,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 <div className="trust-badge">
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
                   {ipadDetailTiming
-                    ? ipadDetailTiming.badgeLabel
+                    ? formatRepairTimeBadge(ipadDetailTiming.badgeLabel)
                     : (resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
                     ? approvedTurnaroundMinutes
-                      ? `${approvedTurnaroundMinutes} Minutes`
-                      : 'Timeframe Varies'
+                      ? formatRepairTimeBadge(`${approvedTurnaroundMinutes} Minutes`)
+                      : isAliMobileEnhancedIphonePage
+                        ? formatRepairTimeBadge('Varies')
+                        : 'Timeframe Varies'
                     : approvedTurnaroundMinutes
-                      ? samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`
+                      ? formatRepairTimeBadge(samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? macBookTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`)
                     : samsungFoldableScreenDetailContext
                     ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')

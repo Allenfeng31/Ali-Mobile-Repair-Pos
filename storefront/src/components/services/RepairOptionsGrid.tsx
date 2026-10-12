@@ -33,6 +33,7 @@ interface RepairOptionsGridProps {
   modelSlug: string;
   modelName: string;
   showStartingPriceFallback?: boolean;
+  useQuoteLedPricingSummary?: boolean;
 }
 
 
@@ -44,6 +45,7 @@ export default function RepairOptionsGrid({
   modelSlug,
   modelName,
   showStartingPriceFallback = true,
+  useQuoteLedPricingSummary = false,
 }: RepairOptionsGridProps) {
   const displayRepairTypes = sortRepairOptionsForDisplay(repairTypes);
 
@@ -162,6 +164,8 @@ export default function RepairOptionsGrid({
       <p className="mt-3 text-center text-sm font-medium text-slate-500">
         {displayRepairTypes.some((repair) => repair.sourceType === 'diagnostic')
           ? 'Final quote depends on the confirmed fault, parts and device condition.'
+          : useQuoteLedPricingSummary
+            ? 'Current catalogue prices are shown where available; otherwise request a quote for the exact model and repair.'
           : 'Prices are starting prices. Final quote depends on parts, model, and device condition.'}
       </p>
     </>

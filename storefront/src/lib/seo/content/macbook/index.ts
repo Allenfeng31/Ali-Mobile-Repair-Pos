@@ -93,6 +93,7 @@ interface FinalCtaSection {
 export interface MacBookEnhancedSeoPocket extends RepairTypeSeoPocket {
   modelName: string;
   repairSlug: MacBookRepairSlug;
+  turnaroundMinutes?: number;
   metaTitle: string;
   metaDescription: string;
   serviceSection: ServiceSection;
@@ -111,6 +112,12 @@ export const MACBOOK_REPAIRS: ReadonlyArray<MacBookRepairSlug> = [
   'battery-replacement',
   'charging-port-replacement',
 ];
+
+export const MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES: Readonly<Record<MacBookRepairSlug, 60>> = {
+  'screen-replacement': 60,
+  'battery-replacement': 60,
+  'charging-port-replacement': 60,
+};
 
 export const MACBOOK_MODELS: ReadonlyArray<MacBookModelSlug> = [
   'macbook-air-11-2014-2015',
@@ -151,10 +158,10 @@ const PUBLIC_MACBOOK_MODEL_ALIASES = {
   'macbook-pro-13-inch-2018-2020': 'macbook-pro-13-2018-2020',
   'macbook-pro-16-inch-2019': 'macbook-pro-16-2019',
   'macbook-pro-13-inch-m1-2020': 'macbook-pro-13-m1-2020',
-  'macbook-pro-1416-inch-m1-promax-2021': 'macbook-pro-14-16-m1-pro-max-2021',
+  'macbook-pro-1416-m1-promax-2021': 'macbook-pro-14-16-m1-pro-max-2021',
   'macbook-pro-13-inch-m2-2022': 'macbook-pro-13-m2-2022',
-  'macbook-pro-1416-inch-m2-promax-2023': 'macbook-pro-14-16-m2-pro-max-2023',
-  'macbook-pro-1416-inch-m3-promax-2024': 'macbook-pro-14-16-m3-pro-max-2024',
+  'macbook-pro-1416-m2-promax-2023': 'macbook-pro-14-16-m2-pro-max-2023',
+  'macbook-pro-1416-m3-promax-2024': 'macbook-pro-14-16-m3-pro-max-2024',
   'macbook-12-inch-2015-2019': 'macbook-12-2015-2019',
 } as const satisfies Record<string, MacBookModelSlug>;
 
@@ -6251,7 +6258,14 @@ export function getAliMobileEnhancedMacBookSeoPocket({
     return null;
   }
 
-  return MACBOOK_PAGE_CONTENT[`${contentModelSlug}|${repairSlug}` as MacBookPageKey] ?? null;
+  const pocket = MACBOOK_PAGE_CONTENT[`${contentModelSlug}|${repairSlug}` as MacBookPageKey];
+
+  return pocket
+    ? {
+        ...pocket,
+        turnaroundMinutes: MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES[repairSlug],
+      }
+    : null;
 }
 
 export function getMacBookRepairLabel(repairSlug: MacBookRepairSlug) {

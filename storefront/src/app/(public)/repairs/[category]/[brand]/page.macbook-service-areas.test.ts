@@ -83,4 +83,14 @@ describe('MacBook Brand Hub Service Areas', () => {
     expect(metadata.title).toBe('MacBook Repair in Ringwood | Ali Mobile & Repair');
     expect(metadata.alternates?.canonical).toBe('/repairs/laptop/macbook');
   });
+
+  it('uses model-led pricing and approved one-hour guidance without a static starting price', async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'laptop', brand: 'macbook' }) });
+    const { container } = render(pageElement);
+    const text = container.textContent || '';
+
+    expect(text).toContain('View Current Pricing by Model');
+    expect(text).toContain('Standard MacBook Repairs: Around 1 Hour');
+    expect(text).not.toContain('MacBook Repairs from $99');
+  });
 });

@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
 import { REPAIR_TYPES } from "@/data/seo-data";
-import { LAPTOP_BRAND_STARTING_PRICES, WATCH_BRAND_STARTING_PRICES } from "@/lib/repairStartingPrices";
+import { WATCH_BRAND_STARTING_PRICES } from "@/lib/repairStartingPrices";
 import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -1725,14 +1725,15 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         "Yes. Ali Mobile & Repair provides MacBook repair support at Kiosk C1 inside Ringwood Square Shopping Centre. If you are searching for MacBook repair near me around Ringwood, Ringwood East, Heathmont, Mitcham or Croydon, choose your MacBook model first, then walk in or contact us before visiting.",
     },
   ];
-  const macbookStartingRepairPrice = isMacBookHub ? getLowestStartingPrice(LAPTOP_BRAND_STARTING_PRICES.macbook) : null;
   const macbookHeroInsightCards = isMacBookHub
     ? [
         {
-          title: macbookStartingRepairPrice
-            ? `MacBook Repairs from $${formatStartingRepairPrice(macbookStartingRepairPrice)}`
-            : "MacBook Repair Quote First",
+          title: "View Current Pricing by Model",
           body: "We check the exact MacBook model, fault and part option before confirming the repair quote.",
+        },
+        {
+          title: "Standard MacBook Repairs: Around 1 Hour",
+          body: "Screen, battery and charging port repairs use the approved standard repair time once the correct part and repair path are confirmed.",
         },
         {
           title: "6-Month Repair Warranty",

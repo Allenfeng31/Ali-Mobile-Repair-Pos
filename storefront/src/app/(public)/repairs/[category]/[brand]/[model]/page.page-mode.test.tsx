@@ -392,6 +392,7 @@ describe('Model Hub page-mode Server consumer', () => {
         href: '/repairs/motherboard-repair?category=laptop&brand=macbook&model=macbook-air-m3',
       }),
     ]));
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
   });
 
   it('passes canonical exact-model server seeds to the one enhanced-branch Repair Results module', async () => {

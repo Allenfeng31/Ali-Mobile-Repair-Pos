@@ -1989,7 +1989,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
-          showStartingPriceFallback={!isIPadModelPage}
+          showStartingPriceFallback={!isIPadModelPage && !isMacBookModelPage}
+          useQuoteLedPricingSummary={isMacBookModelPage}
         />
         {isMacBookModelPage && (
           <div className="mt-8 text-center">

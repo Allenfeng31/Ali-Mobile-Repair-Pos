@@ -131,6 +131,25 @@ describe("RepairOptionsGrid", () => {
     expect(screen.queryByText('Starting from $50')).not.toBeInTheDocument();
   });
 
+  it('uses a quote-led pricing summary for a MacBook model with no resolved catalogue price', () => {
+    getStartingPriceMock.mockReturnValue(250);
+    const quoteSafeProps = {
+      repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0 }],
+      categorySlug: 'laptop',
+      brandSlug: 'macbook',
+      modelSlug: 'macbook-air-m2-13-2022',
+      modelName: 'MacBook Air M2 13-inch 2022',
+      showStartingPriceFallback: false,
+      useQuoteLedPricingSummary: true,
+    } as unknown as Parameters<typeof RepairOptionsGrid>[0];
+
+    render(<RepairOptionsGrid {...quoteSafeProps} />);
+
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.getByText('Current catalogue prices are shown where available; otherwise request a quote for the exact model and repair.')).toBeInTheDocument();
+    expect(screen.queryByText('Prices are starting prices. Final quote depends on parts, model, and device condition.')).not.toBeInTheDocument();
+  });
+
   it.each([
     ['iPhone 17 Pro Max', 'phone', 'iphone', 'iphone-17-pro-max', '/repairs/phone/iphone/iphone-17-pro-max/water-damage-repair'],
     ['Galaxy Tab S6 Lite', 'tablet', 'samsung', 'galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619', '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619/water-damage-repair'],
