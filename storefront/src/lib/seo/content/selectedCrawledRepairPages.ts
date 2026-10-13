@@ -9,9 +9,10 @@ type ScopedRepairPageContent = {
 };
 
 type ScopedModelHubContent = {
-  metaTitle: string;
-  metaDescription: string;
+  metaTitle?: string;
+  metaDescription?: string;
   heroIntro: string;
+  h1?: string;
 };
 
 function repairPageKey(category: string, brand: string, model: string, repairType: string) {
@@ -135,6 +136,11 @@ const SCOPED_MODEL_HUB_CONTENT: Record<string, ScopedModelHubContent> = {
       'OPPO A31 repair options in Ringwood. Compare available screen, battery, charging, and camera-related services, check current pricing, and book the right repair path.',
     heroIntro:
       'Choose the available repair for your OPPO A31 to compare screen, battery, charging, and camera-related services. Each option links to its exact canonical repair page with current pricing or quote guidance.',
+  },
+  'phone/vivo/y20s': {
+    h1: 'Vivo Y20s Repairs',
+    heroIntro:
+      'Ali Mobile provides Vivo Y20s repairs at Ringwood Square. Choose an available service below—such as screen replacement, battery service, charging port repair, camera replacement, or damage inspection—to check current pricing where available or request a quote. Selecting a repair opens its dedicated page with service details and booking options.',
   },
 };
 

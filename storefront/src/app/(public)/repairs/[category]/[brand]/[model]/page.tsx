@@ -239,7 +239,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage || isSamsungTabletModelPage;
 
   return {
-    title: selectedCrawledModelHubContent
+    title: selectedCrawledModelHubContent?.metaTitle
       ? selectedCrawledModelHubContent.metaTitle
       : isMacBookModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
@@ -250,7 +250,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       : isEnhancedPhoneModelPage
       ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking | Ali Mobile`
       : `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
-    description: selectedCrawledModelHubContent
+    description: selectedCrawledModelHubContent?.metaDescription
       ? selectedCrawledModelHubContent.metaDescription
       : isIPhoneModelPage
       ? `Choose the available repairs for ${modelName}, view current pricing, check model-level timing, and book with Ali Mobile & Repair in Ringwood.`
@@ -275,7 +275,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       canonical: canonicalPath,
     },
     openGraph: {
-      title: selectedCrawledModelHubContent
+      title: selectedCrawledModelHubContent?.metaTitle
         ? selectedCrawledModelHubContent.metaTitle
         : isMacBookModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
@@ -286,7 +286,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         : isEnhancedPhoneModelPage
         ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking`
         : `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
-      description: selectedCrawledModelHubContent
+      description: selectedCrawledModelHubContent?.metaDescription
         ? selectedCrawledModelHubContent.metaDescription
         : isIPhoneModelPage
         ? `Choose the available repairs for ${modelName}, view current pricing, check model-level timing, and book with Ali Mobile & Repair in Ringwood.`
@@ -1915,7 +1915,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               <EnhancedBadgeIcon size={16} strokeWidth={2.4} aria-hidden="true" />
               {enhancedMenuLabel}
             </span>
-            <h1 id="model-repair-heading">{modelName} repair options</h1>
+            <h1 id="model-repair-heading">{selectedCrawledModelHubContent?.h1 ?? `${modelName} repair options`}</h1>
             <p>
               {selectedCrawledModelHubContent?.heroIntro ?? (isIPhoneModelPage
                 ? `Choose the available repair for your exact ${modelName} to view current pricing, model-level timing and the repair path that best matches the device in front of you.`
@@ -1953,7 +1953,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </div>
             <div className="mt-6 max-w-3xl">
               <h1 id="model-repair-heading" className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl lg:leading-[0.98]">
-                {modelName} repair options
+                {selectedCrawledModelHubContent?.h1 ?? `${modelName} repair options`}
               </h1>
               <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-slate-600 sm:text-[1.03rem]">
                 Professional {introBrandPrefix}{modelName} repairs in Ringwood. Choose a repair type below to check pricing, parts availability and booking options.
