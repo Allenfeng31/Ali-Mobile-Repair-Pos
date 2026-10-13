@@ -6,6 +6,24 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import BrandHubPage from "./page";
 
+const secondaryPhoneBrands = vi.hoisted(() => [
+  ["asus", "Asus"],
+  ["htc", "HTC"],
+  ["huawei", "Huawei"],
+  ["lg", "LG"],
+  ["microsoft", "Microsoft"],
+  ["motorola", "Motorola"],
+  ["nokia", "Nokia"],
+  ["nothing", "Nothing"],
+  ["oneplus", "OnePlus"],
+  ["realme", "Realme"],
+  ["sony", "Sony"],
+  ["tcl", "TCL"],
+  ["telstra", "Telstra"],
+  ["vivo", "Vivo"],
+  ["xiaomi", "Xiaomi"],
+] as const);
+
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(() => ({
     push: vi.fn(),
@@ -37,6 +55,21 @@ vi.mock("@/lib/api", () => ({
         slug: "samsung",
         models: [{ slug: "galaxy-tab-a8-sm-x200-sm-x205", model: "Galaxy Tab A8", repairTypes: [] }],
       },
+      ...secondaryPhoneBrands.map(([slug, brand]) => ({
+        category: "phone",
+        slug,
+        brand,
+        models: [{
+          slug: slug === "motorola" ? "moto-g04" : `${slug}-test-model`,
+          model: slug === "motorola" ? "Moto G04" : `${brand} Test Model`,
+          repairTypes: slug === "motorola"
+            ? [
+                { slug: "screen-replacement", name: "Screen Replacement", price: 129 },
+                { slug: "battery-replacement", name: "Battery Replacement", price: 75 },
+              ]
+            : [{ slug: "screen-replacement", name: "Screen Replacement", price: 0 }],
+        }],
+      })),
     ],
   }),
 }));
@@ -145,6 +178,10 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(serviceSchema?.provider).not.toHaveProperty("name");
     expect(serviceSchema?.provider).not.toHaveProperty("telephone");
     expect(serviceSchema?.provider).not.toHaveProperty("address");
+    expect(serviceSchema?.hasOfferCatalog?.['@type']).toBe('OfferCatalog');
+    expect(serviceSchema?.hasOfferCatalog?.itemListElement).toEqual(
+      expect.arrayContaining([expect.objectContaining({ '@type': 'Offer' })]),
+    );
   });
 
   it("renders only the approved four local cards for the iPad Brand Hub", async () => {
@@ -176,5 +213,42 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(container.textContent).toContain("View Current Pricing by Model");
     expect(container.textContent).toContain("Around 1 Hour for Standard Repairs");
     expect(container.textContent).not.toMatch(/Lenovo Tablet Repairs from \$50|from \$50|same[ -]day|while you wait|immediate/i);
+  });
+
+  it('emits no unpriced Offer nodes for all 15 secondary-phone brand hubs', async () => {
+    for (const [brandSlug] of secondaryPhoneBrands) {
+      const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'phone', brand: brandSlug }) });
+      const { container, unmount } = render(pageElement);
+      const serviceSchema = Array.from(container.querySelectorAll('script[type="application/ld+json"]'))
+        .map((script) => JSON.parse(script.textContent || '{}'))
+        .find((schema) => schema['@id'] === `https://www.alimobile.com.au/repairs/phone/${brandSlug}#service`);
+      const serializedSchema = JSON.stringify(serviceSchema);
+
+      expect(serviceSchema?.['@type']).toBe('Service');
+      expect(serializedSchema).not.toContain('"@type":"Offer"');
+      expect(serviceSchema?.serviceType).toEqual(expect.arrayContaining([
+        expect.stringMatching(/Repair/),
+        expect.stringMatching(/screen/i),
+        expect.stringMatching(/battery/i),
+      ]));
+
+      unmount();
+    }
+  });
+
+  it('derives the Motorola brand minimum only from exact catalogue prices and keeps the other 14 brands quote-led', async () => {
+    for (const [brandSlug, brandName] of secondaryPhoneBrands) {
+      const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'phone', brand: brandSlug }) });
+      const { container, unmount } = render(pageElement);
+
+      if (brandSlug === 'motorola') {
+        expect(container.textContent).toContain('Motorola Repairs from $75');
+      } else {
+        expect(container.textContent).toContain(`${brandName} Repair Pricing`);
+        expect(container.textContent).not.toMatch(new RegExp(`${brandName} Repairs from \\$`));
+      }
+
+      unmount();
+    }
   });
 });

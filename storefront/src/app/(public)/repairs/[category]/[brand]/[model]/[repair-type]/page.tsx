@@ -5083,6 +5083,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     basePrice: details?.price,
     variants: details?.variants,
   });
+  const isSecondaryPhoneDetailPage = resolvedParams.category === 'phone'
+    && classifyPhoneBrand(resolvedParams.brand) === 'secondary-phone';
   const modelCode = details?.modelCode;
   const internalRepairSlug = resolveRepairSlugForLookup(
     resolvedParams.category,
@@ -5858,10 +5860,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
+              (isSecondaryPhoneDetailPage && detailPricing.isQuoteOnly) ||
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
             useNeutralQuoteWording={Boolean(
-              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage) && detailPricing.isQuoteOnly
+              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage || isSecondaryPhoneDetailPage) && detailPricing.isQuoteOnly
             )}
             typicalPriceRange={tabletTypicalPriceGuidance ?? undefined}
             quoteCtaLabel={isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly

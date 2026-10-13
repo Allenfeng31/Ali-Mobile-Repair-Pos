@@ -1868,7 +1868,9 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     "@type": "Service",
     "@id": `${canonicalUrl}#service`,
     name: `${brandHubHeading} at Ali Mobile & Repair`,
-    serviceType: brandHubHeading,
+    serviceType: batchPhoneBrandConfig
+      ? [brandHubHeading, ...phoneRepairTypeLinks.map((link) => link.label)]
+      : brandHubHeading,
     url: canonicalUrl,
     description: isMacBookHub
       ? "MacBook repair support at Ringwood Square Shopping Centre, with model confirmation, quote approval and parts availability checked before work begins."
@@ -1880,7 +1882,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       "@type": "Place",
       name: `${area.name}, VIC`,
     })),
-    ...(isPhoneHub
+    ...(isPhoneHub && !batchPhoneBrandConfig
       ? {
           hasOfferCatalog: {
             "@type": "OfferCatalog",

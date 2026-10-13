@@ -7,6 +7,7 @@ import { withVirtualCameraLensRepairOption } from "@/lib/virtualCameraLens";
 import { withVirtualPhoneRepairOptions } from "@/lib/virtualPhoneRepairs";
 import { getCanonicalBrandSlug, isGooglePixelAliasBrand } from "@/lib/waterDamageRouting";
 import { resolveModelHubRepairPageMode } from "@/lib/modelHubRepairPageMode";
+import { classifyPhoneBrand } from "@/lib/publicRepairPageModePolicy";
 import { withMotherboardMasterModelHubOption } from "@/lib/motherboardRepair";
 import { getSelectedCrawledModelHubContent } from "@/lib/seo/content/selectedCrawledRepairPages";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -342,6 +343,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     brandSlug
   );
   const isPhoneModelPage = categorySlug === "phone";
+  const isSecondaryPhoneModelPage = isPhoneModelPage && classifyPhoneBrand(brandSlug) === 'secondary-phone';
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
@@ -1990,8 +1992,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
-          showStartingPriceFallback={!isIPadModelPage && !isMacBookModelPage && !isAppleWatchModelPage}
-          useQuoteLedPricingSummary={isMacBookModelPage}
+          showStartingPriceFallback={!isIPadModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
+          useQuoteLedPricingSummary={isMacBookModelPage || isSecondaryPhoneModelPage}
         />
         {isMacBookModelPage && (
           <div className="mt-8 text-center">

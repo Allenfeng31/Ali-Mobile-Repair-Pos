@@ -150,6 +150,33 @@ describe("RepairOptionsGrid", () => {
     expect(screen.queryByText('Prices are starting prices. Final quote depends on parts, model, and device condition.')).not.toBeInTheDocument();
   });
 
+  it('renders secondary-phone model cards as exact-or-quote without generic fallback prices', () => {
+    getStartingPriceMock.mockImplementation((_category, _brand, repairSlug) =>
+      repairSlug === 'screen-replacement' ? 129 : 50
+    );
+
+    render(
+      <RepairOptionsGrid
+        repairTypes={[
+          { slug: 'screen-replacement', name: 'Screen Replacement', price: 0 },
+          { slug: 'battery-replacement', name: 'Battery Replacement', price: 75 },
+          { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0 },
+        ]}
+        categorySlug="phone"
+        brandSlug="motorola"
+        modelSlug="moto-g04"
+        modelName="Moto G04"
+        showStartingPriceFallback={false}
+        useQuoteLedPricingSummary
+      />,
+    );
+
+    expect(screen.getAllByText('Quote on Request')).toHaveLength(2);
+    expect(screen.getByText('From $75')).toBeInTheDocument();
+    expect(screen.queryByText('Starting from $129')).not.toBeInTheDocument();
+    expect(screen.queryByText('Starting from $50')).not.toBeInTheDocument();
+  });
+
   it.each([
     ['iPhone 17 Pro Max', 'phone', 'iphone', 'iphone-17-pro-max', '/repairs/phone/iphone/iphone-17-pro-max/water-damage-repair'],
     ['Galaxy Tab S6 Lite', 'tablet', 'samsung', 'galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619', '/repairs/tablet/samsung/galaxy-tab-s6-lite-sm-p610-sm-p613-sm-p615-sm-p619/water-damage-repair'],

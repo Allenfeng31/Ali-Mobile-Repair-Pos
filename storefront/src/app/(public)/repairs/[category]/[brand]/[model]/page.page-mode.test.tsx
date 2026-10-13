@@ -5,7 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchModelRepairTypes, fetchRepairCatalog } from '@/lib/api';
 
 const state = vi.hoisted(() => ({
-  gridProps: null as { repairTypes: Array<{ slug: string; href?: string }>; showStartingPriceFallback?: boolean } | null,
+  gridProps: null as {
+    repairTypes: Array<{ slug: string; href?: string; price?: number }>;
+    showStartingPriceFallback?: boolean;
+    useQuoteLedPricingSummary?: boolean;
+  } | null,
   matchingProps: [] as Array<{ initialResults?: unknown[] }>,
 }));
 const fetchModelRepairResultSeeds = vi.hoisted(() => vi.fn());
@@ -26,7 +30,11 @@ vi.mock('@/lib/seo/content/selectedCrawledRepairPages', () => ({ getSelectedCraw
 vi.mock('@/components/Breadcrumbs', () => ({ default: () => null }));
 vi.mock('@/components/BackButton', () => ({ default: () => null }));
 vi.mock('@/components/services/RepairOptionsGrid', () => ({
-  default: (props: { repairTypes: Array<{ slug: string; href?: string }>; showStartingPriceFallback?: boolean }) => {
+  default: (props: {
+    repairTypes: Array<{ slug: string; href?: string; price?: number }>;
+    showStartingPriceFallback?: boolean;
+    useQuoteLedPricingSummary?: boolean;
+  }) => {
     state.gridProps = props;
     return <div data-repair-options-grid="true" />;
   },
@@ -119,6 +127,29 @@ describe('Model Hub page-mode Server consumer', () => {
       expect.objectContaining({ slug: 'loudspeaker-replacement', href: '/repairs/phone/oppo/loudspeaker-replacement?model=find-x8-pro' }),
     ]));
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')).not.toHaveProperty('href');
+  });
+
+  it('disables static quote fallbacks for a secondary-phone model while preserving exact catalogue prices', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Motorola',
+      model: 'Moto G04',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'synthetic-core' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 75, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: 'moto-g04', model: 'Moto G04', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'motorola', model: 'moto-g04' }),
+    }));
+
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+    expect(state.gridProps?.useQuoteLedPricingSummary).toBe(true);
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'screen-replacement', price: 0 }),
+      expect.objectContaining({ slug: 'battery-replacement', price: 75 }),
+    ]));
   });
 
   it('omits hidden taxonomy and renders one conflicting Detail option rather than selecting POS evidence', async () => {

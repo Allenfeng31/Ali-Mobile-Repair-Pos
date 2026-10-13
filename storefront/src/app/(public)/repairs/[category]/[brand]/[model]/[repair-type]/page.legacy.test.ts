@@ -106,6 +106,28 @@ const oppoRepairCatalogue = (
     repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [...variants] }],
   }],
 });
+const secondaryPhoneRepairCatalogue = (
+  brand: string,
+  brandSlug: string,
+  model: string,
+  modelSlug: string,
+  repairName: string,
+  repairSlug: string,
+  price = 0,
+) => ({
+  source: 'pos' as const,
+  brands: [{
+    category: 'phone',
+    brand,
+    slug: brandSlug,
+    models: [{
+      model,
+      slug: modelSlug,
+      repairTypes: [{ name: repairName, slug: repairSlug, price, variants: [] }],
+    }],
+  }],
+  retiredRepairs: [],
+});
 const ipadRepairCatalogue = (
   model: string,
   slug: string,
@@ -754,6 +776,103 @@ describe('Repair Detail active and legacy page-data resolution', () => {
 
     expect(heroHref).toBe('/book-repair?brand=Motorola&model=Moto+G24&service=Screen+Replacement');
     expect([...query.keys()]).toEqual(['brand', 'model', 'service']);
+  });
+
+  it.each([
+    ['Asus Screen', 'Asus', 'asus', 'ROG Phone 5', 'rog-phone-5', 'Screen Replacement', 'screen-replacement'],
+    ['Huawei Battery', 'Huawei', 'huawei', 'P30 Pro', 'p30-pro', 'Battery Replacement', 'battery-replacement'],
+    ['Nokia Charging', 'Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Charging Port Replacement', 'charging-port-replacement'],
+    ['Nothing Front Camera', 'Nothing', 'nothing', 'Phone (2)', 'phone-2', 'Front Camera Replacement', 'front-camera-replacement'],
+    ['Vivo Back Camera', 'Vivo', 'vivo', 'Vivo X80 Pro', 'vivo-x80-pro', 'Back Camera Replacement', 'back-camera-replacement'],
+    ['Xiaomi Screen', 'Xiaomi', 'xiaomi', 'Mi 11', 'mi-11', 'Screen Replacement', 'screen-replacement'],
+  ] as const)('fails closed to quote-only commercial output for secondary-phone %s', async (
+    _label,
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      brand,
+      brandSlug,
+      model,
+      modelSlug,
+      repairName,
+      repairSlug,
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: brandSlug,
+      model: modelSlug,
+      'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    const bookingHref = String(pricing?.bookingHref);
+
+    expect(pricing?.showStartingPriceFallback).toBe(false);
+    expect(pricing?.useNeutralQuoteWording).toBe(true);
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('Book Repair Now');
+    expect(html).not.toMatch(/Starting from \$(?:129|50)|From \$(?:129|50)|instant quote/i);
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(bookingHref).toBe(`/book-repair?${new URLSearchParams({
+      brand,
+      model,
+      service: repairName,
+    }).toString()}`);
+  });
+
+  it.each([
+    ['Moto G04 Screen', 'Moto G04', 'moto-g04', 'Screen Replacement', 'screen-replacement', 129],
+    ['Moto G04 Battery', 'Moto G04', 'moto-g04', 'Battery Replacement', 'battery-replacement', 75],
+    ['Moto G04 Charging', 'Moto G04', 'moto-g04', 'Charging Port Replacement', 'charging-port-replacement', 75],
+    ['Moto G24 Screen', 'Moto G24', 'moto-g24', 'Screen Replacement', 'screen-replacement', 140],
+    ['Moto G24 Battery', 'Moto G24', 'moto-g24', 'Battery Replacement', 'battery-replacement', 75],
+    ['Moto G55 Screen', 'Moto G55', 'moto-g55', 'Screen Replacement', 'screen-replacement', 129],
+    ['Moto G55 Battery', 'Moto G55', 'moto-g55', 'Battery Replacement', 'battery-replacement', 80],
+    ['Moto G55 Charging', 'Moto G55', 'moto-g55', 'Charging Port Replacement', 'charging-port-replacement', 80],
+  ] as const)('preserves exact Motorola commercial authority for %s', async (
+    _label,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    price,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      'Motorola',
+      'motorola',
+      model,
+      modelSlug,
+      repairName,
+      repairSlug,
+      price,
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'motorola',
+      model: modelSlug,
+      'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+    const bookingQuery = new URL(String(pricing?.bookingHref), 'https://example.test').searchParams;
+
+    expect(pricing?.pricing).toMatchObject({ resolvedPrice: price, canEmitOffer: true, isQuoteOnly: false });
+    expect(html).toContain(`$${price}`);
+    expect(html).not.toContain('Quote on Request');
+    expect(serviceSchema).toContain('"offers"');
+    expect(serviceSchema).toContain(`"price":"${price.toFixed(2)}"`);
+    expect(serviceSchema).toContain('"priceCurrency":"AUD"');
+    expect([...bookingQuery.keys()]).toEqual(['brand', 'model', 'service']);
+    expect(bookingQuery.get('brand')).toBe('Motorola');
+    expect(bookingQuery.get('model')).toBe(model);
+    expect(bookingQuery.get('service')).toBe(repairName);
   });
 
   it('keeps Samsung Tablet Water Damage outside the standard timing and warranty rule', async () => {
