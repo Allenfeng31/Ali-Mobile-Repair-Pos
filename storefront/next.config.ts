@@ -157,6 +157,9 @@ const nextConfig: NextConfig = {
       { source: '/repairs/phone/samsung/galaxy-note-10-plus/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-10-plus/back-glass-replacement', permanent: true },
       { source: '/repairs/phone/samsung/galaxy-note-20/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-20/back-glass-replacement', permanent: true },
       { source: '/repairs/phone/samsung/galaxy-note-20-ultra/back-housing-replacement', destination: '/repairs/phone/samsung/galaxy-note-20-ultra/back-glass-replacement', permanent: true },
+      // Historical TCL 30+ URLs lost the plus sign under the former slugifier.
+      { source: '/repairs/phone/tcl/30', destination: '/repairs/phone/tcl/30-plus', permanent: true },
+      { source: '/repairs/phone/tcl/30/:repairType*', destination: '/repairs/phone/tcl/30-plus/:repairType*', permanent: true },
 
       // 5. EXISTING REDIRECTS
       // Apple Watch uses magnetic charging diagnosis. Keep only configured legacy model aliases.

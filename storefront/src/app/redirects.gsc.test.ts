@@ -374,6 +374,23 @@ const nonSamsungTabletSliceAExistingStaticRedirects = [
 const nonSamsungTabletSliceADynamicPixelWaterSource =
   '/repairs/phone/google/pixel-4/water-damage-repair';
 
+const tcl30LegacyRedirects = [
+  {
+    source: '/repairs/phone/tcl/30',
+    destination: '/repairs/phone/tcl/30-plus',
+  },
+  {
+    source: '/repairs/phone/tcl/30/:repairType*',
+    destination: '/repairs/phone/tcl/30-plus/:repairType*',
+  },
+] as const;
+
+const tcl30LegacyRepairTypes = [
+  'battery-replacement',
+  'screen-replacement',
+  'charging-port-replacement',
+] as const;
+
 async function getRedirects() {
   const redirects = await nextConfig.redirects?.();
 
@@ -393,6 +410,32 @@ function getPathname(url: string) {
 }
 
 describe('July 15 GSC technical redirect batch', () => {
+  it('permanently redirects only the historical TCL 30 plus-loss URLs', async () => {
+    const redirects = await getRedirects();
+    const sources = new Set(redirects.map((entry) => entry.source));
+    const redirectBySource = new Map(redirects.map((entry) => [entry.source, entry]));
+
+    expect(tcl30LegacyRedirects).toHaveLength(2);
+    for (const { source, destination } of tcl30LegacyRedirects) {
+      const matches = redirects.filter((entry) => entry.source === source);
+
+      expect(matches, source).toHaveLength(1);
+      expect(matches[0]).toMatchObject({ destination, permanent: true });
+    }
+
+    const childRedirect = redirectBySource.get(tcl30LegacyRedirects[1].source);
+    for (const repairType of tcl30LegacyRepairTypes) {
+      expect(childRedirect?.destination.replace(':repairType*', repairType)).toBe(
+        `/repairs/phone/tcl/30-plus/${repairType}`,
+      );
+    }
+
+    expect(sources.has('/repairs/phone/tcl/30-se')).toBe(false);
+    expect(sources.has('/repairs/phone/tcl/30-se/:repairType*')).toBe(false);
+    expect(sources.has('/repairs/phone/tcl/30-plus')).toBe(false);
+    expect(sources.has('/repairs/phone/tcl/30-plus/:repairType*')).toBe(false);
+  });
+
   it('permanently redirects only the verified hyphen-less location aliases to their canonical paths', async () => {
     const redirects = await getRedirects();
     const sources = new Set(redirects.map((entry) => entry.source));
