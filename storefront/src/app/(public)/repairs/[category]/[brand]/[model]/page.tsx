@@ -19,9 +19,14 @@ import { fetchModelRepairResultSeeds } from "@/lib/repair-results.server";
 import ScrollReveal from "@/components/ScrollReveal";
 import FloatingJumpCTA from "@/components/FloatingJumpCTA";
 import { ArrowRight, Battery, Camera, Clock3, Droplets, Laptop, PhoneCall, PlugZap, ShieldCheck, Smartphone, Tablet, Watch, Wrench } from "lucide-react";
-import { getSamsungHardwareConfig } from "@/lib/seo/content/samsung/config";
 import { getIpadHardwareConfig } from "@/lib/seo/content/ipad/config";
 import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
+import {
+  getModelHubTimingSummary,
+  resolveModelHubRepairPresentation,
+} from "@/lib/modelHubRepairPresentation";
+import { getIndefiniteArticle } from "@/lib/grammar";
+import { isGooglePixelBackHousingModel } from "@/lib/seo/content/google-pixel";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -35,6 +40,11 @@ type RepairTypeEntry = {
   name: string;
   price: number;
   variants?: Array<{ quality_grade: string; price: number; is_recommended?: boolean }>;
+  sourceType?: "real" | "virtual" | "diagnostic";
+  repairOrigin?: string;
+  href?: string;
+  displayName?: string;
+  timingLabel?: string;
 };
 
 const RELATED_MODEL_LIMIT = 5;
@@ -330,6 +340,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   });
 
   const modelName = data?.model || formatDynamicParam(modelSlug);
+  const modelArticle = getIndefiniteArticle(modelName);
   const brandName = data?.brand || formatDynamicParam(brandSlug);
   const selectedCrawledModelHubContent = getSelectedCrawledModelHubContent({
     category: categorySlug,
@@ -380,6 +391,29 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         brandSlug,
         modelSlug,
       );
+  const presentedModelHubRepairTypes = modelHubRepairTypes.map((repair) => ({
+    ...repair,
+    ...resolveModelHubRepairPresentation({
+      category: categorySlug,
+      brandSlug,
+      modelSlug,
+      repairSlug: repair.slug,
+    }),
+  }));
+  const modelHubTimingSummary = getModelHubTimingSummary({
+    category: categorySlug,
+    brandSlug,
+    modelSlug,
+    repairSlugs: modelHubRepairTypes.map((repair) => repair.slug),
+  });
+  const isMajorPhoneModelPage = isIPhoneModelPage || isSamsungModelPage || isGooglePixelModelPage || isOppoModelPage;
+  const entityModelName = isSamsungModelPage && !modelName.toLowerCase().startsWith("samsung ")
+    ? `Samsung ${modelName}`
+    : isGooglePixelModelPage && !modelName.toLowerCase().startsWith("google ")
+    ? `Google ${modelName}`
+    : isOppoModelPage && !modelName.toLowerCase().startsWith("oppo ")
+    ? `OPPO ${modelName}`
+    : modelName;
   const visibleRelatedModels = sameBrandModels.slice(0, RELATED_MODEL_LIMIT);
   const relatedModelHubLabel = isIPhoneModelPage
     ? "iPhone"
@@ -443,15 +477,34 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const chargingRepair = getRepairBySlugs(repairTypes, ["charging-repair", "charging-port-replacement", "charging-port-repair", "charging-port"]);
   const backHousingRepair = getRepairBySlugs(repairTypes, ["back-housing-replacement", "back-glass-replacement", "back-glass", "back-housing"]);
   const hasScreenRepair = Boolean(screenRepair);
-  const isFoldableSamsungScreenModelPage = Boolean(
-    hasScreenRepair && isSamsungModelPage && getSamsungHardwareConfig(modelSlug)?.displayForm === 'foldable'
-  );
   const hasBatteryRepair = Boolean(batteryRepair);
   const hasWarrantyRepair = Boolean(screenRepair || batteryRepair || chargingRepair || backHousingRepair);
   const iPhoneScreenDetailHref = isIPhoneModelPage && hasScreenRepair
     ? `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/screen-replacement`
     : null;
   const startingPrice = getStartingPrice(repairTypes);
+  const startingPriceRepairs = startingPrice === null
+    ? []
+    : repairTypes.filter((repair) => repair.price === startingPrice);
+  const startingPriceUsesVirtualAuthority = startingPriceRepairs.length > 0 && startingPriceRepairs.every((repair) =>
+    repair.sourceType === "virtual" || repair.repairOrigin === "virtual"
+  );
+  const publishedStartingPrice = startingPriceUsesVirtualAuthority ? null : startingPrice;
+  const modelHubPriceTitle = publishedStartingPrice
+    ? `${modelName} repairs from $${formatStartingPrice(publishedStartingPrice)}`
+    : `${modelName} repair pricing`;
+  const modelHubPriceBody = publishedStartingPrice
+    ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(publishedStartingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+    : `Each service below shows its current published price, starting price or Quote on Request.`;
+  const majorPhoneTimingCard = modelHubTimingSummary
+    ? {
+        title: modelHubTimingSummary.title,
+        body: `${modelHubTimingSummary.primaryLine} ${modelHubTimingSummary.secondaryLine}`,
+      }
+    : {
+        title: "Repair timing by service",
+        body: "Choose the exact repair below for its current service timing.",
+      };
   const hasPublishedScreenOptions = hasScreenRepair && isIPhone12OrNewer(modelName) && (screenRepair?.variants?.length || 0) > 0;
   const screenOptions = hasPublishedScreenOptions ? getIPhoneScreenOptions(screenRepair?.variants || []) : [];
   const nonIPhoneScreenOptions = !isIPhoneModelPage && hasScreenRepair && (screenRepair?.variants?.length || 0) > 0
@@ -480,18 +533,13 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const diagnosticSteps = ["Quick test", "Honest quote", "Repair options"];
   const iPhoneHeroCards = [
     {
-      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
-      body: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : `Choose the available repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+      title: modelHubPriceTitle,
+      body: modelHubPriceBody,
     },
+    majorPhoneTimingCard,
     {
-      title: "Repair timing by service",
-      body: "Timing depends on the selected repair, part availability and the device condition. Choose the exact repair below for its current service details.",
-    },
-    {
-      title: "Same-day may be available",
-      body: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      title: "Parts availability",
+      body: "Published repair times apply when the correct part is available. Contact Ali Mobile before visiting for uncommon parts or diagnosis-led repairs.",
     },
   ];
   const iPhoneQuickAnswers = [
@@ -502,44 +550,30 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : `Choose the repair option for this exact iPhone model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.`,
     },
-    hasScreenRepair
-      ? {
-          number: "02",
-          title: "How long does an iPhone repair take?",
-          body: "Timing depends on the selected repair, current part availability and the device condition. Choose the exact repair option for its current timing and service details.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          number: "03",
-          title: "How long does a battery replacement take?",
-          body: "Most iPhone battery replacements take less than 30 minutes once the correct battery is available.",
-        }
-      : null,
     {
-      number: "04",
-      title: "Can it normally be repaired today?",
-      body: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      number: "02",
+      title: "What affects parts availability?",
+      body: "Published repair times apply when the correct part is available. Contact us before visiting for uncommon parts or diagnosis-led repairs.",
     },
     {
-      number: "05",
+      number: "03",
       title: "Will I lose my data or need to share my passcode?",
       body: "Most hardware repairs do not intentionally erase customer data, but a backup is recommended because damaged devices always carry some data risk. We generally do not require the customer’s lock-screen passcode, and if additional unlocked testing is needed the technician will ask first. If the customer prefers not to provide it, testing can be completed together before handover.",
     },
     hasWarrantyRepair
       ? {
-          number: "06",
+          number: "04",
           title: "What warranty is included?",
           body: "Screen, battery, charging-port and back-housing repairs include a 6-month warranty on the fitted part and workmanship. The warranty does not cover new impact damage, bending, liquid damage, misuse, another repairer’s work or faults in unrelated components.",
         }
       : null,
     {
-      number: "07",
+      number: "05",
       title: "What if another fault is discovered?",
       body: "If we discover additional damage that changes the repair method, price or expected result, we will explain it and obtain approval before carrying out extra work.",
     },
     {
-      number: "08",
+      number: "06",
       title: "Is there an assessment fee?",
       body: "Most standard repair assessments are free. An assessment fee may apply to liquid-damaged or severely damaged iPhones where several components may be affected and a more detailed diagnosis is required.",
     },
@@ -591,26 +625,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const iPhoneFaqs = [
     {
-      question: `How much does a ${modelName} repair cost?`,
+      question: `How much does ${modelArticle} ${modelName} repair cost?`,
       answer: startingPrice
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement. Published prices include the fitted part and repair labour unless the page states otherwise.`
         : `Choose the repair option for this exact iPhone model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.`,
     },
-    hasScreenRepair
-      ? {
-          question: `How long does a ${modelName} repair take?`,
-          answer: "Timing depends on the selected repair, current part availability and device condition. Choose the exact repair option for the current timing and service details.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          question: `How long does a ${modelName} battery replacement take?`,
-          answer: "Most iPhone battery replacements take less than 30 minutes once the correct battery is available.",
-        }
-      : null,
     {
-      question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Around 80% of common iPhone models can usually be handled same day when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      question: `How long does ${modelArticle} ${modelName} repair take?`,
+      answer: `Most standard ${modelName} repairs take 30 minutes. The exact repair time is shown with each repair option above. True Back Glass, Water Damage and Logic Board work use different timeframes.`,
     },
     hasPublishedScreenOptions && screenOptions.length > 0
       ? {
@@ -628,7 +650,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     hasScreenRepair
       ? {
-          question: `Will Face ID or Touch ID still work after a ${modelName} repair?`,
+          question: `Will Face ID or Touch ID still work after ${modelArticle} ${modelName} repair?`,
           answer: "We test the relevant functions before repair where the phone’s condition allows, then repeat the related checks after repair. If the phone arrives with no display, no power, severe liquid damage or existing sensor faults, not every function can always be confirmed at the initial stage.",
         }
       : null,
@@ -671,19 +693,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const samsungHeroCards = [
     {
-      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
-      body: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : `Choose the available Samsung repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+      title: modelHubPriceTitle,
+      body: modelHubPriceBody,
     },
-    {
-      title: "Samsung screen repair timing",
-      body: hasScreenRepair
-        ? isFoldableSamsungScreenModelPage
-          ? "Timing depends on the confirmed display path, parts availability and assessment."
-          : "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available."
-        : "Repair timing is confirmed after we identify the exact Samsung model, the fault and the required part.",
-    },
+    majorPhoneTimingCard,
     {
       title: "Model-specific Samsung parts",
       body: "Galaxy S, Note, A, J and Z series models use different parts and repair methods. Choose the exact model repair below so the quote matches the phone you have.",
@@ -697,48 +710,30 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : "Choose the repair option for this exact Samsung model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.",
     },
-    hasScreenRepair
-      ? {
-          number: "02",
-          title: "How long does a screen replacement take?",
-          body: isFoldableSamsungScreenModelPage
-            ? "Timing depends on the confirmed display path, parts availability and assessment."
-            : "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available. Extra time may be required if the frame is bent, the phone has liquid or impact damage, or additional diagnosis is needed.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          number: "03",
-          title: "How long does a battery replacement take?",
-          body: "Samsung battery replacement timing depends on the exact model, battery availability and device condition. We confirm the likely timing before work begins.",
-        }
-      : null,
     {
-      number: "04",
-      title: isFoldableSamsungScreenModelPage ? "How is timing confirmed?" : "Can it normally be repaired today?",
-      body: isFoldableSamsungScreenModelPage
-        ? "Timing depends on the confirmed display path, parts availability and assessment."
-        : "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      number: "02",
+      title: "What affects parts availability?",
+      body: "Published repair times apply when the correct Samsung part is available. Contact us before visiting for uncommon parts or diagnosis-led repairs.",
     },
     {
-      number: "05",
+      number: "03",
       title: "Why does the exact Samsung model matter?",
       body: "Samsung parts differ significantly across Galaxy S, Note, A, J and Z series models, including Z Fold and Z Flip devices. The exact model is needed to confirm compatible parts, repair method and pricing.",
     },
     hasWarrantyRepair
       ? {
-          number: "06",
+          number: "04",
           title: "What warranty is included?",
           body: "Screen, battery, charging-port and back-housing repairs include a 6-month warranty on the fitted part and workmanship. The warranty does not cover new impact damage, bending, liquid damage, misuse, another repairer’s work or faults in unrelated components.",
         }
       : null,
     {
-      number: "07",
+      number: "05",
       title: "Can charging symptoms be another fault?",
       body: "Yes. Charging problems can come from debris in the port, a cable or charger issue, battery wear, connector damage or a board-level fault. We inspect the likely cause before confirming a port replacement.",
     },
     {
-      number: "08",
+      number: "06",
       title: "Will it remain water-resistant?",
       body: "Factory water resistance cannot be guaranteed after a Samsung phone has been opened or repaired. New adhesive may help reseal the device, but it does not restore certified factory water resistance.",
     },
@@ -790,34 +785,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const samsungFaqs = [
     {
-      question: `How much does a ${modelName} repair cost?`,
+      question: `How much does ${modelArticle} ${modelName} repair cost?`,
       answer: startingPrice
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : "Choose the repair option for this exact Samsung model to see the current price or quote requirement.",
     },
-    hasScreenRepair
-      ? {
-          question: isFoldableSamsungScreenModelPage
-            ? `How is ${modelName} screen repair timing confirmed?`
-            : `How long does a ${modelName} screen replacement take?`,
-          answer: isFoldableSamsungScreenModelPage
-            ? "Timing depends on the confirmed display path, parts availability and assessment."
-            : "Most supported Samsung screen replacements can usually be completed in about 30 minutes once the correct part is available. Frame damage, liquid damage, folding-display construction or additional faults may require more time.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          question: `How long does a ${modelName} battery replacement take?`,
-          answer: "Samsung battery replacement timing is confirmed after checking the exact model, battery availability and device condition.",
-        }
-      : null,
     {
-      question: isFoldableSamsungScreenModelPage
-        ? `What affects ${modelName} repair timing?`
-        : `Can my ${modelName} normally be repaired the same day?`,
-      answer: isFoldableSamsungScreenModelPage
-        ? "Timing depends on the confirmed display path, parts availability and assessment."
-        : "Same-day repair may be available for many common Samsung models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      question: `How long does ${modelArticle} ${modelName} repair take?`,
+      answer: `Most standard ${modelName} repairs take 30 minutes when the correct part is available. Back Glass takes 20 minutes. Water Damage lists 30 minutes for initial assessment and cleaning only. Published Logic Board repair is 30 minutes once the fault is diagnosed, while initial diagnosis or complex board repairs may require additional time.`,
     },
     activeScreenOptions.length > 0
       ? {
@@ -858,17 +833,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const googlePixelHeroCards = [
     {
-      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
-      body: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : `Choose the available Google Pixel repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+      title: modelHubPriceTitle,
+      body: modelHubPriceBody,
     },
-    {
-      title: "Pixel screen repair timing",
-      body: hasScreenRepair
-        ? "Most supported Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available."
-        : "Repair timing is confirmed after we identify the exact Pixel model, fault and required part.",
-    },
+    majorPhoneTimingCard,
     {
       title: "Exact Pixel model matters",
       body: "Pixel standard, Pro, Fold and a-series models can use different parts and repair methods. Choose the exact model repair below so the quote matches your phone.",
@@ -882,44 +850,30 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : "Choose the repair option for this exact Google Pixel model to see the current price or quote requirement.",
     },
-    hasScreenRepair
-      ? {
-          number: "02",
-          title: "How long does a screen replacement take?",
-          body: "Most supported Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Frame damage, liquid damage or additional faults may require more time.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          number: "03",
-          title: "How long does a battery replacement take?",
-          body: "Pixel battery replacement timing depends on the exact model, battery availability and device condition. We confirm the likely timing before work begins.",
-        }
-      : null,
     {
-      number: "04",
-      title: "How is repair timing confirmed?",
-      body: "Timing depends on the selected repair, part availability and the device condition. Choose the exact repair below for its current service details.",
+      number: "02",
+      title: "What affects parts availability?",
+      body: "Published repair times apply when the correct Pixel part is available. Contact us before visiting for uncommon parts or diagnosis-led repairs.",
     },
     {
-      number: "05",
+      number: "03",
       title: "Why does the exact Pixel model matter?",
       body: "Repair compatibility varies between standard, Pro, Fold and a-series Pixel models. The exact model is needed to confirm compatible parts, repair method and pricing.",
     },
     hasWarrantyRepair
       ? {
-          number: "06",
+          number: "04",
           title: "What warranty is included?",
           body: "Eligible screen, battery, charging-port and back-housing repairs include a 6-month warranty on the fitted part and workmanship. The warranty does not cover new impact damage, bending, liquid damage, misuse or unrelated faults.",
         }
       : null,
     {
-      number: "07",
+      number: "05",
       title: "Can charging symptoms be another fault?",
       body: "Yes. Pixel charging problems can come from debris, a cable or charger issue, battery wear, port damage or a board-level fault. We check the likely cause before confirming the repair.",
     },
     {
-      number: "08",
+      number: "06",
       title: "Will it remain water-resistant?",
       body: "Factory water resistance cannot be guaranteed after a Pixel has been opened or repaired. Adhesive replacement does not restore certified factory water-resistance certification.",
     },
@@ -971,26 +925,18 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const googlePixelFaqs = [
     {
-      question: `How much does a ${modelName} repair cost?`,
+      question: `How much does ${modelArticle} ${modelName} repair cost?`,
       answer: startingPrice
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : "Choose the repair option for this exact Google Pixel model to see the current price or quote requirement.",
     },
-    hasScreenRepair
-      ? {
-          question: `How long does a ${modelName} screen replacement take?`,
-          answer: "Most supported Google Pixel screen replacements can usually be completed in about 30 minutes once the correct part is available. Frame damage, liquid damage or additional diagnosis may require more time.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          question: `How long does a ${modelName} battery replacement take?`,
-          answer: "Pixel battery replacement timing is confirmed after checking the exact model, battery availability and device condition.",
-        }
-      : null,
     {
-      question: `What affects ${modelName} repair timing?`,
-      answer: "Timing depends on the selected repair, part availability and the device condition. Choose the exact repair below for its current service details.",
+      question: `How long does ${modelArticle} ${modelName} repair take?`,
+      answer: `Most standard ${modelName} repairs take 30 minutes when the correct part is available. ${
+        isGooglePixelBackHousingModel(modelSlug)
+          ? "Back Housing takes 60 minutes."
+          : "Back Glass takes 30 minutes."
+      } Water Damage depends on damage, and Logic Board work requires diagnosis.`,
     },
     activeScreenOptions.length > 0
       ? {
@@ -1023,17 +969,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const oppoHeroCards = [
     {
-      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
-      body: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : `Choose the available Oppo repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
+      title: modelHubPriceTitle,
+      body: modelHubPriceBody,
     },
-    {
-      title: "Oppo screen repair timing",
-      body: hasScreenRepair
-        ? "Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes once the correct part is available."
-        : "Repair timing is confirmed after we identify the exact Oppo model, fault and required part.",
-    },
+    majorPhoneTimingCard,
     {
       title: "Find, Reno and A series parts",
       body: "Oppo parts are specific to the exact model and series. Choose the exact model repair below so the quote matches the phone you have.",
@@ -1047,44 +986,30 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : "Choose the repair option for this exact Oppo model to see the current price or quote requirement.",
     },
-    hasScreenRepair
-      ? {
-          number: "02",
-          title: "How long does a screen replacement take?",
-          body: "Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes once the correct part is available. Frame damage, liquid damage or additional faults may require more time.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          number: "03",
-          title: "How long does a battery replacement take?",
-          body: "Oppo battery replacement timing depends on the exact model, battery availability and device condition. We confirm the likely timing before work begins.",
-        }
-      : null,
     {
-      number: "04",
-      title: "Can it normally be repaired today?",
-      body: "Same-day repair may be available for many common OPPO models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      number: "02",
+      title: "What affects parts availability?",
+      body: "Published repair times apply when the correct OPPO part is available. Contact us before visiting for uncommon parts or diagnosis-led repairs.",
     },
     {
-      number: "05",
+      number: "03",
       title: "Why does the exact Oppo model matter?",
       body: "Find, Reno, A series and other Oppo models use different parts. The exact model is needed to confirm compatible parts, repair method and pricing.",
     },
     hasWarrantyRepair
       ? {
-          number: "06",
+          number: "04",
           title: "What warranty is included?",
           body: "Eligible screen, battery, charging-port and back-cover repairs include a 6-month warranty on the fitted part and workmanship. The warranty does not cover new impact damage, bending, liquid damage, misuse or unrelated faults.",
         }
       : null,
     {
-      number: "07",
+      number: "05",
       title: "Can charging symptoms be another fault?",
       body: "Yes. Oppo charging problems can come from debris, a cable or charger issue, battery wear, port damage or a board-level fault. We check the likely cause before confirming the repair.",
     },
     {
-      number: "08",
+      number: "06",
       title: "Can the back cover be repaired?",
       body: "Depending on the exact Oppo model, back cover or rear-glass repair may be available. The method can vary based on frame condition and camera positioning.",
     },
@@ -1136,26 +1061,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const oppoFaqs = [
     {
-      question: `How much does an ${modelName} repair cost?`,
+      question: `How much does ${modelArticle} ${modelName} repair cost?`,
       answer: startingPrice
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : "Choose the repair option for this exact Oppo model to see the current price or quote requirement.",
     },
-    hasScreenRepair
-      ? {
-          question: `How long does an ${modelName} screen replacement take?`,
-          answer: "Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes once the correct part is available. Frame damage, liquid damage or additional diagnosis may require more time.",
-        }
-      : null,
-    hasBatteryRepair
-      ? {
-          question: `How long does an ${modelName} battery replacement take?`,
-          answer: "Oppo battery replacement timing is confirmed after checking the exact model, battery availability and device condition.",
-        }
-      : null,
     {
-      question: `Can my ${modelName} normally be repaired the same day?`,
-      answer: "Same-day repair may be available for many common OPPO models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
+      question: `How long does ${modelArticle} ${modelName} repair take?`,
+      answer: `Most standard ${modelName} repairs take 30 to 45 minutes when the correct part is available. Confirmed rear glass or back-cover repair takes 20 minutes. Logic Board work requires diagnosis, and specialist Water Damage timing depends on damage.`,
     },
     activeScreenOptions.length > 0
       ? {
@@ -1297,20 +1210,20 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ];
   const genericPhoneFaqs = [
     {
-      question: `How much does a ${modelName} repair cost?`,
+      question: `How much does ${modelArticle} ${modelName} repair cost?`,
       answer: startingPrice
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : `Choose the repair option for this exact ${brandName} model to see the current price or quote requirement.`,
     },
     hasScreenRepair
       ? {
-          question: `How long does a ${modelName} screen replacement take?`,
+          question: `How long does ${modelArticle} ${modelName} screen replacement take?`,
           answer: `${brandName} screen replacement timing depends on the exact model, part availability, frame condition and any liquid or impact damage. We confirm the likely timing before work begins.`,
         }
       : null,
     hasBatteryRepair
       ? {
-          question: `How long does a ${modelName} battery replacement take?`,
+          question: `How long does ${modelArticle} ${modelName} battery replacement take?`,
           answer: `${brandName} battery replacement timing is confirmed after checking the exact model, battery availability and device condition.`,
         }
       : null,
@@ -1427,7 +1340,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { title: "Approval before extra work", body: "If additional damage changes the repair method, price or expected result, we explain it and obtain approval before carrying out extra work." },
   ];
   const iPadFaqs = [
-    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact iPad model to see the current price or quote requirement." },
+    { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact iPad model to see the current price or quote requirement." },
     { question: "How long does iPad repair take?", answer: iPadTimingGuidance },
     { question: "How do I identify the exact iPad model?", answer: "Check Settings → General → About, or look for the A-number printed on the rear casing of your iPad." },
     hasScreenRepair ? { question: `What affects ${modelName} screen replacement?`, answer: "Frame bend, touch response, glass/display construction, button or camera-area damage and part availability can all affect the final repair path." } : null,
@@ -1540,7 +1453,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { title: "Quote and limitations before repair", body: "If liquid exposure, severe impact or an additional fault changes the expected repair path, we explain the limitation and obtain approval before extra work." },
   ];
   const tabletFaqs = [
-    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : `Choose the repair option for this exact ${tabletBrandRepairLabel} model to see the current price or quote requirement.` },
+    { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : `Choose the repair option for this exact ${tabletBrandRepairLabel} model to see the current price or quote requirement.` },
     { question: `Why do you need the exact ${tabletBrandRepairLabel} model?`, answer: tabletExactModelBody },
     hasScreenRepair ? { question: `What affects ${modelName} screen replacement?`, answer: "Frame bend, touch response, display construction, camera-area damage, liquid exposure signs and part availability can all affect the final repair path." } : null,
     hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We confirm availability and condition before repair." } : null,
@@ -1590,7 +1503,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { title: "Liquid or board-level faults", body: "Liquid-damaged or severely damaged MacBooks may require detailed diagnosis before we can confirm whether repair is practical." },
   ];
   const macBookFaqs = [
-    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact MacBook model to see the current price or quote requirement." },
+    { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact MacBook model to see the current price or quote requirement." },
     { question: "Why do I need the exact MacBook model?", answer: "MacBook repair compatibility, parts selection and quote accuracy depend on the exact model, year, chip generation and A-number." },
     hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery replacement is available for this model, choose Battery Replacement below for the current price or quote path. We check battery condition and charging response before repair." } : null,
     hasScreenRepair ? { question: `What affects ${modelName} screen repair?`, answer: "Display assembly compatibility, lid-angle symptoms, hinge condition, camera area, liquid signs and impact damage can all affect the repair path." } : null,
@@ -1639,7 +1552,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { title: "Quote before service", body: "Repair scope, price and timing are confirmed before opening the watch or ordering a specific part." },
   ];
   const appleWatchFaqs = [
-    { question: `How much does a ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact Apple Watch model to see the current price or quote requirement." },
+    { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: startingPrice ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact Apple Watch model to see the current price or quote requirement." },
     { question: "How do I confirm the exact Apple Watch model?", answer: "Check the Watch app, device settings, or the case size and model details on the watch. Bring it in if you are unsure." },
     hasScreenRepair ? { question: `What affects ${modelName} screen repair?`, answer: "Display condition, housing damage, case size, seal condition and part availability can all affect the practical repair path." } : null,
     hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery service is available for this exact model, choose Battery Replacement below for the current price or quote path. We check runtime and charging response first." } : null,
@@ -1915,10 +1828,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               <EnhancedBadgeIcon size={16} strokeWidth={2.4} aria-hidden="true" />
               {enhancedMenuLabel}
             </span>
-            <h1 id="model-repair-heading">{selectedCrawledModelHubContent?.h1 ?? `${modelName} repair options`}</h1>
+            <h1 id="model-repair-heading">
+              {selectedCrawledModelHubContent?.h1 ?? (isMajorPhoneModelPage ? `${entityModelName} Repairs` : `${modelName} repair options`)}
+            </h1>
             <p>
-              {selectedCrawledModelHubContent?.heroIntro ?? (isIPhoneModelPage
-                ? `Choose the available repair for your exact ${modelName} to view current pricing, model-level timing and the repair path that best matches the device in front of you.`
+              {selectedCrawledModelHubContent?.heroIntro ?? (isMajorPhoneModelPage
+                ? `Choose a repair for your exact ${entityModelName} to compare current pricing, approved service timing and the repair path that matches the device in front of you.`
                 : `Choose the available repair for your exact ${modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.`)}
             </p>
             <div className="repair-hero-actions">
@@ -1987,7 +1902,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           </h2>
         </div>
         <RepairOptionsGrid
-          repairTypes={modelHubRepairTypes}
+          repairTypes={presentedModelHubRepairTypes}
           categorySlug={categorySlug}
           brandSlug={brandSlug}
           modelSlug={modelSlug}
@@ -2348,6 +2263,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 </p>
               </div>
               <RepairCTA
+                {...(isOppoModelPage ? { category: categorySlug, brand: brandName } : {})}
                 modelSlug={modelSlug}
                 repairSlug="general"
                 modelName={modelName}
@@ -2413,6 +2329,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 </div>
               </div>
               <RepairCTA
+                {...(isOppoModelPage ? { category: categorySlug, brand: brandName } : {})}
                 modelSlug={modelSlug}
                 repairSlug="general"
                 modelName={modelName}

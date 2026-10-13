@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolveInitialCartState, resolvePublicBookingCartState } from './cartAutoSelect';
 import { ParsedItem } from './inventoryUtils';
+import { calculateCartPricing } from './otherRepairBooking';
 
 describe('cartAutoSelect', () => {
   const mockInventory: ParsedItem[] = [
@@ -218,6 +219,42 @@ describe('cartAutoSelect', () => {
     expect(result.shouldAutoConfirm).toBe(true);
   });
 
+  it('preserves a Google Pixel exact POS price when raw inventory uses the P Google brand alias', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 9 Pro', modelSlug: 'pixel-9-pro',
+      service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 270, priceAuthority: 'exact-pos-variant',
+    }, [{
+      id: 835, category: 'Screen Replacement', brand: 'P Google', deviceModel: 'Pixel 9 Pro',
+      service: 'Screen Replacement', price: 270, deviceType: 'phone', quality_grade: 'Genuine',
+      is_recommended: false, name: 'Pixel 9 Pro Screen Replacement',
+    }]);
+
+    expect(result).toMatchObject({
+      brand: 'P Google', model: 'Pixel 9 Pro', category: 'phone', shouldAutoConfirm: true,
+      serviceToSelect: { id: 835, name: 'Screen Replacement', price: 270 },
+    });
+    expect(String(result.serviceToSelect?.id)).not.toContain('public-booking:');
+    expect(calculateCartPricing([{
+      id: 'pixel-9-pro', brand: result.brand!, model: result.model!, category: result.category!,
+      services: [result.serviceToSelect!], isConfirmed: result.shouldAutoConfirm,
+    }], { multi_discount_tier_2: 0.1, multi_discount_tier_3: 0.15 })).toMatchObject({
+      subtotalPrice: 270, totalPrice: 270, hasCustomQuote: false,
+    });
+  });
+
+  it('preserves a second Google Pixel exact POS price through the same raw brand alias', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'phone', brand: 'Google Pixel', brandSlug: 'google-pixel', model: 'Pixel 8', modelSlug: 'pixel-8',
+      service: 'Battery Replacement', serviceSlug: 'battery-replacement', price: 99, priceAuthority: 'exact-pos-variant',
+    }, [{
+      id: 808, category: 'Battery Service', brand: 'P Google', deviceModel: 'Pixel 8',
+      service: 'Battery Replacement', price: 99, deviceType: 'phone', quality_grade: 'Genuine',
+      is_recommended: false, name: 'Pixel 8 Battery Service',
+    }]);
+
+    expect(result.serviceToSelect).toMatchObject({ id: 808, name: 'Battery Replacement', price: 99 });
+  });
+
   it.each([
     ['Samsung', 'samsung', 'Galaxy Tab S11 (SM-X730 / SM-X736)', 'galaxy-tab-s11-sm-x730-sm-x736', 'Galaxy Tab S11 Battery Service', 730, 179],
     ['Lenovo', 'lenovo', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Lenovo Tab P12 Battery Service', 370, 149],
@@ -244,6 +281,19 @@ describe('cartAutoSelect', () => {
       serviceToSelect: { id, name: 'Battery Replacement', price },
     });
     expect(String(result.serviceToSelect?.id)).not.toContain('public-booking:');
+  });
+
+  it('matches the live Lenovo Tablet POS brand suffix to the canonical Lenovo brand', () => {
+    const result = resolvePublicBookingCartState({
+      category: 'tablet', brand: 'Lenovo', brandSlug: 'lenovo', model: 'Lenovo Tab M11', modelSlug: 'lenovo-tab-m11',
+      service: 'Screen Replacement', serviceSlug: 'screen-replacement', price: 170, priceAuthority: 'exact-pos-variant',
+    }, [{
+      id: 170, category: 'Screen Replacement', brand: 'T Lenovo Tablet', deviceModel: 'Lenovo Tab M11',
+      service: 'Screen Replacement', price: 170, deviceType: 'tablet', quality_grade: 'Standard',
+      is_recommended: false, name: 'Lenovo Tab M11 Screen Replacement',
+    }]);
+
+    expect(result.serviceToSelect).toMatchObject({ id: 170, name: 'Screen Replacement', price: 170 });
   });
 
   it('validates tier only inside the serviceSlug-matched inventory group', () => {

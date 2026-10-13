@@ -70,7 +70,7 @@ export function formatDynamicParam(param: string): string {
   let decoded = param;
   try {
     decoded = decodeURIComponent(param);
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -216,10 +216,14 @@ export function formatDeviceTitle(brand: string, model: string): string {
   if (!model) return displayBrand(brand);
   
   const b = displayBrand(brand);
+  const trimmedModel = model.trim();
   if (model.toLowerCase().includes(b.toLowerCase())) {
     return model;
   }
-  return `${b} ${model}`;
+  if (b.toLowerCase() === 'google pixel' && /^pixel(?:\s|$)/i.test(trimmedModel)) {
+    return `${b.replace(/\s+pixel$/i, '')} ${trimmedModel}`;
+  }
+  return `${b} ${trimmedModel}`;
 }
 
 export function parseItem(raw: RawItem): ParsedItem | null {
@@ -246,7 +250,7 @@ export function parseItem(raw: RawItem): ParsedItem | null {
 
   // Split standardized model field: "P Brand||ModelName" or "Other||Brand|ModelName"
   if (typeof raw.model === "string") {
-    let parts = raw.model.split(/\|\||\|/).map(p => p.trim()).filter(Boolean);
+    const parts = raw.model.split(/\|\||\|/).map(p => p.trim()).filter(Boolean);
     if (parts.length >= 2) {
        brand = parts[0];
        modelName = parts.slice(1).join(" ");

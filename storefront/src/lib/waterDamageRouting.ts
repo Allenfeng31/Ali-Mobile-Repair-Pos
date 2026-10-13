@@ -8,6 +8,8 @@ const CENTRAL_WATER_DAMAGE_HREF = '/repairs/water-damage';
 const WATER_DAMAGE_REPAIR_SLUGS = new Set(['water-damage', 'water-damage-repair']);
 const GOOGLE_PIXEL_ALIAS_BRANDS = new Set(['google', 'pixel']);
 
+export const SAMSUNG_PHONE_WATER_DAMAGE_INITIAL_ASSESSMENT_MINUTES = 30;
+
 export function isWaterDamageRepairSlug(slug: string) {
   return WATER_DAMAGE_REPAIR_SLUGS.has(slug);
 }

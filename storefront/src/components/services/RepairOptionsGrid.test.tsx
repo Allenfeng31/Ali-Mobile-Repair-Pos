@@ -13,7 +13,11 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/lib/analytics", () => ({ analytics: { trackRepairView: vi.fn() } }));
-const getStartingPriceMock = vi.hoisted(() => vi.fn(() => null));
+const getStartingPriceMock = vi.hoisted(() => vi.fn<(
+  category: string,
+  brand: string,
+  repairSlug: string,
+) => number | null>(() => null));
 
 vi.mock("@/lib/repairStartingPrices", () => ({ getStartingPrice: getStartingPriceMock }));
 vi.mock("@/lib/scopedRepairPriceLabel", () => ({
@@ -68,6 +72,34 @@ describe("RepairOptionsGrid", () => {
     expect(screen.getAllByRole("link").map((link) =>
       link.querySelector(".repair-option-name")?.textContent
     )).toEqual(["Screen", "Battery", "Water Damage", "Power Button", "Keyboard Repair"]);
+  });
+
+  it('renders compact server-resolved timing and service semantics without changing price, href or card height', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[
+          {
+            slug: 'back-glass-replacement',
+            name: 'Back Glass Replacement',
+            displayName: 'Back Housing Replacement',
+            timingLabel: '60 Minutes',
+            price: 50,
+            href: '/repairs/phone/google-pixel/pixel-8-pro/back-glass-replacement',
+          },
+        ]}
+        categorySlug="phone"
+        brandSlug="google-pixel"
+        modelSlug="pixel-8-pro"
+        modelName="Pixel 8 Pro"
+      />,
+    );
+
+    const card = screen.getByRole('link', { name: /back housing replacement/i });
+    expect(card).toHaveAttribute('href', '/repairs/phone/google-pixel/pixel-8-pro/back-glass-replacement');
+    expect(card).toHaveStyle({ minHeight: '108px' });
+    expect(screen.getByText('From $50')).toBeInTheDocument();
+    expect(screen.getByText('60 Minutes')).toHaveClass('repair-option-timing');
+    expect(screen.queryByText('Back Glass Replacement')).not.toBeInTheDocument();
   });
 
   it('keeps the configured Apple Watch card on the charging-repair route with a visible diagnostic label', () => {

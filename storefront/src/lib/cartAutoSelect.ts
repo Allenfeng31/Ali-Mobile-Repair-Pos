@@ -19,6 +19,14 @@ interface ResolveInitialCartStateOptions {
   serviceSlug?: string;
 }
 
+function normalizeBookingBrand(brand: string): string {
+  const normalized = displayBrand(brand)
+    .trim()
+    .replace(/\s+(Tablet|Phone|Watch|Laptop)$/i, '')
+    .toLowerCase();
+  return normalized === 'google' ? 'google pixel' : normalized;
+}
+
 export function resolveInitialCartState(
   brandParam: string | null,
   modelParam: string | null,
@@ -32,14 +40,12 @@ export function resolveInitialCartState(
   }
 
   // Find model matches
-  const decodedBrand = decodeURIComponent(brandParam).toLowerCase();
+  const decodedBrand = normalizeBookingBrand(decodeURIComponent(brandParam));
   const decodedModel = decodeURIComponent(modelParam).toLowerCase();
 
   const matchedItems = inventory.filter(i => {
-    const itemBrand = displayBrand(i.brand).toLowerCase();
-      
-    const isAppleWatchBrandMatch = decodedBrand === 'apple' && itemBrand === 'apple watch';
-    return (itemBrand === decodedBrand || isAppleWatchBrandMatch) && i.deviceModel.toLowerCase() === decodedModel;
+    const itemBrand = normalizeBookingBrand(i.brand);
+    return itemBrand === decodedBrand && i.deviceModel.toLowerCase() === decodedModel;
   });
 
   if (matchedItems.length === 0) {

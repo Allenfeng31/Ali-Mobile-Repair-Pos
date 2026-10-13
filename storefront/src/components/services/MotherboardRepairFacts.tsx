@@ -7,9 +7,11 @@ const FACTS = [
   { label: 'Location', value: 'Ringwood Square', icon: MapPin },
 ] as const;
 
-export default function MotherboardRepairFacts() {
+export default function MotherboardRepairFacts({ repairTime = 'Around 2–3 Weeks' }: { repairTime?: string }) {
+  const facts = FACTS.map((fact) => fact.label === 'Repair Time' ? { ...fact, value: repairTime } : fact);
+
   return <dl data-motherboard-repair-facts className="trust-badges mt-8" aria-label="Motherboard repair facts">
-    {FACTS.map(({ label, value, icon: Icon }) => <div key={label} className="trust-badge max-w-full !flex-col !gap-1 !whitespace-normal text-center">
+    {facts.map(({ label, value, icon: Icon }) => <div key={label} className="trust-badge max-w-full !flex-col !gap-1 !whitespace-normal text-center">
       <dt className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-600"><Icon className="shrink-0 text-blue-600" size={16} aria-hidden="true" />{label}</dt>
       <dd className="m-0 break-words text-sm font-bold text-slate-950">{value}</dd>
     </div>)}

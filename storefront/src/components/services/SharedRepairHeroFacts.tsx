@@ -1,9 +1,10 @@
 import { Clock3, MapPin, ShieldCheck, Tag } from 'lucide-react';
+import { SHARED_PHONE_STANDARD_REPAIR_MINUTES } from '@/lib/sharedPhoneRepairTiming';
 
 export default function SharedRepairHeroFacts({ priceLabel }: { priceLabel: string }) {
   const facts = [
     { label: 'Price', value: priceLabel, icon: Tag },
-    { label: 'Repair Time', value: '30 Minutes', icon: Clock3 },
+    { label: 'Repair Time', value: `${SHARED_PHONE_STANDARD_REPAIR_MINUTES} Minutes`, icon: Clock3 },
     { label: 'Warranty', value: '6 Months Warranty', icon: ShieldCheck },
     { label: 'Location', value: 'Ringwood Square', icon: MapPin },
   ];

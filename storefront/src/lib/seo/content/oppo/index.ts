@@ -5,8 +5,15 @@ import { getOppoBackGlassPocket } from "./back-glass-replacement";
 import { getOppoFrontCameraPocket } from "./front-camera-replacement";
 import { getOppoBackCameraPocket } from "./back-camera-replacement";
 import { getOppoLogicBoardPocket } from "./logic-board-repair";
-import { getOppoModelConfig } from "./shared";
+import { getOppoBackGlassTurnaroundMinutes, getOppoModelConfig } from "./shared";
+import type { RepairTypeSeoPocket } from "../iphone/types";
 export { getOppoModelConfig };
+
+type OppoRepairRouteParams = {
+  brand?: string;
+  model?: string;
+  'repair-type'?: string;
+};
 
 export const OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES = {
   "screen-replacement": 45,
@@ -27,8 +34,9 @@ export function getAliMobileEnhancedOppoSeoPocket({
   brand: string;
   model: string;
   repairType: string;
-  pocket: any;
+  pocket: RepairTypeSeoPocket | null;
 }) {
+  void category;
   if (brand.toLowerCase() !== "oppo") return pocket;
 
   const config = getOppoModelConfig(model.toLowerCase());
@@ -48,9 +56,11 @@ export function getAliMobileEnhancedOppoSeoPocket({
     case "logic-board-repair": oppoPocket = getOppoLogicBoardPocket(model.toLowerCase()); break;
   }
 
-  const turnaroundMinutes = OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES[
-    repairSlug as keyof typeof OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES
-  ];
+  const turnaroundMinutes = repairSlug === 'back-glass-replacement'
+    ? getOppoBackGlassTurnaroundMinutes(model.toLowerCase())
+    : OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES[
+        repairSlug as keyof typeof OPPO_STANDARD_REPAIR_TURNAROUND_MINUTES
+      ];
 
   return oppoPocket
     ? {
@@ -62,7 +72,7 @@ export function getAliMobileEnhancedOppoSeoPocket({
     : pocket;
 }
 
-export function getAliMobileEnhancedOppoRepairType(params: any): string | null {
+export function getAliMobileEnhancedOppoRepairType(params: OppoRepairRouteParams): string | null {
   if (params.brand?.toLowerCase() !== "oppo") return null;
 
   const config = getOppoModelConfig(params.model?.toLowerCase() || "");
@@ -79,10 +89,11 @@ export function getAliMobileEnhancedOppoRepairType(params: any): string | null {
     'logic-board-repair'
   ];
   const repairType = params['repair-type']?.toLowerCase();
+  if (!repairType) return null;
   return validRoutes.includes(repairType) ? repairType : null;
 }
 
-export function isAliMobileEnhancedOppoRepairPage(params: any): boolean {
+export function isAliMobileEnhancedOppoRepairPage(params: OppoRepairRouteParams): boolean {
   return getAliMobileEnhancedOppoRepairType(params) !== null;
 }
 

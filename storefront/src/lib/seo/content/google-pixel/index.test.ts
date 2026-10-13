@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   getAliMobileEnhancedGooglePixelSeoPocket,
+  isGooglePixelBackHousingModel,
 } from './index';
 import {
   GOOGLE_PIXEL_HARDWARE_CONFIG,
@@ -58,7 +59,13 @@ describe('standard Google Pixel detail families', () => {
           pixelRoute(configuration.modelSlug, repairType),
         );
 
-        expect(pocket?.turnaroundMinutes).toBe(turnaroundMinutes);
+        const expectedTurnaround =
+          repairType === 'back-glass-replacement' &&
+          isGooglePixelBackHousingModel(configuration.modelSlug)
+            ? 60
+            : turnaroundMinutes;
+
+        expect(pocket?.turnaroundMinutes).toBe(expectedTurnaround);
         routeCount += 1;
       }
     }
@@ -72,7 +79,7 @@ describe('standard Google Pixel detail families', () => {
     ['charging-port-replacement', 30],
     ['front-camera-replacement', 30],
     ['back-camera-replacement', 30],
-    ['back-glass-replacement', 60],
+    ['back-glass-replacement', 30],
   ] as const)('uses one semantic turnaround source for %s', (repairType, turnaroundMinutes) => {
     expect(GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES[repairType]).toBe(turnaroundMinutes);
 
@@ -80,6 +87,25 @@ describe('standard Google Pixel detail families', () => {
 
     expect(pocket?.turnaroundMinutes).toBe(turnaroundMinutes);
     expect(pocket?.faq.filter((faq) => /how long/i.test(faq.question))).toHaveLength(1);
+  });
+
+  it('distinguishes rear repair turnaround between Back Housing (60m) and Back Glass (30m)', () => {
+    expect(
+      getAliMobileEnhancedGooglePixelSeoPocket(pixelRoute('pixel-5', 'back-glass-replacement'))
+        ?.turnaroundMinutes
+    ).toBe(60);
+    expect(
+      getAliMobileEnhancedGooglePixelSeoPocket(pixelRoute('pixel-4a-5g', 'back-glass-replacement'))
+        ?.turnaroundMinutes
+    ).toBe(60);
+    expect(
+      getAliMobileEnhancedGooglePixelSeoPocket(pixelRoute('pixel-8-pro', 'back-glass-replacement'))
+        ?.turnaroundMinutes
+    ).toBe(30);
+    expect(
+      getAliMobileEnhancedGooglePixelSeoPocket(pixelRoute('pixel-7-pro', 'back-glass-replacement'))
+        ?.turnaroundMinutes
+    ).toBe(30);
   });
 
   it('keeps Pixel Logic Board outside the standard family timing source', () => {

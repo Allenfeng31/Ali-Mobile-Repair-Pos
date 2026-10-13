@@ -37,6 +37,11 @@ const bookingCatalog = {
         model: 'Pixel 10a', slug: 'pixel-10a', repairTypes: [{
           slug: 'screen-replacement', name: 'Screen Replacement', price: 120, repairOrigin: 'pos',
         }],
+      }, {
+        model: 'Pixel 9 Pro', slug: 'pixel-9-pro', repairTypes: [{
+          slug: 'screen-replacement', name: 'Screen Replacement', price: 270, repairOrigin: 'pos',
+          variants: [{ quality_grade: 'Genuine', price: 270, is_recommended: false }],
+        }],
       }],
     },
     {
@@ -174,6 +179,27 @@ describe('GlobalRepairCart Hydration Logic', () => {
     expect(priceText).toBeTruthy();
   });
 
+  it('renders the Pixel 9 Pro exact POS price instead of Custom Quote for the live P Google alias', async () => {
+    mockInventory = [{
+      id: 835,
+      name: 'Pixel 9 Pro Screen Replacement',
+      model: 'P Google||Pixel 9 Pro',
+      price: 270,
+      category: 'Screen Replacement',
+      quality_grade: 'Genuine',
+    }];
+    mockSearchParams.set('brand', 'Google Pixel');
+    mockSearchParams.set('model', 'Pixel 9 Pro');
+    mockSearchParams.set('service', 'Screen Replacement');
+
+    render(<CartProvider><GlobalRepairCart /></CartProvider>);
+
+    await screen.findByText('Google Pixel 9 Pro');
+    expect(screen.getByText('Screen Replacement')).toBeTruthy();
+    expect(screen.getByText('$270.00')).toBeTruthy();
+    expect(screen.queryByText('Custom Quote')).toBeNull();
+  });
+
   it('renders the fixed $50 Camera Lens service for a Google booking without an exact POS product', async () => {
     mockInventory = [{
       id: 3,
@@ -193,7 +219,7 @@ describe('GlobalRepairCart Hydration Logic', () => {
       </CartProvider>
     );
 
-    await screen.findByText('Google Pixel Pixel 10a');
+    await screen.findByText('Google Pixel 10a');
     expect(screen.getByText('Camera Lens Replacement')).toBeTruthy();
     expect(screen.getByText('$50.00')).toBeTruthy();
   });
@@ -209,7 +235,7 @@ describe('GlobalRepairCart Hydration Logic', () => {
 
     render(<CartProvider><GlobalRepairCart /></CartProvider>);
 
-    await screen.findByText('Google Pixel Pixel 10a');
+    await screen.findByText('Google Pixel 10a');
     expect(screen.getByText('Loudspeaker Replacement')).toBeTruthy();
     expect(screen.getByText('Custom Quote')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Confirm Selection' })).toBeNull();
@@ -354,7 +380,7 @@ describe('GlobalRepairCart Hydration Logic', () => {
     render(<CartProvider><GlobalRepairCart /></CartProvider>);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/booking-selection?')));
-    expect(screen.queryByText(/Google Pixel Pixel 8/)).toBeNull();
+    expect(screen.queryByText(/Google Pixel 8/)).toBeNull();
   });
 
   it('does not duplicate a real resolved booking after cart reinitialisation', async () => {

@@ -19,7 +19,9 @@ interface RepairVariant {
 interface RepairOption {
   slug: string;
   name: string;
+  displayName?: string;
   price: number;
+  timingLabel?: string;
   variants?: readonly RepairVariant[];
   sourceType?: 'real' | 'virtual' | 'diagnostic';
   href?: string;
@@ -93,6 +95,8 @@ export default function RepairOptionsGrid({
   };
 
   const getRepairDisplayName = (rt: RepairOption) => {
+    if (rt.displayName) return rt.displayName;
+
     if (
       categorySlug === "phone" &&
       (rt.slug === "back-housing-replacement" || rt.slug === "back-glass-replacement")
@@ -152,6 +156,11 @@ export default function RepairOptionsGrid({
                   <span className="repair-option-price">
                     {getDisplayPrice(rt)}
                   </span>
+                  {rt.timingLabel ? (
+                    <span className="repair-option-timing text-xs font-bold leading-5 text-slate-600">
+                      {rt.timingLabel}
+                    </span>
+                  ) : null}
                 </div>
                 <span className="repair-option-arrow shrink-0">
                   →

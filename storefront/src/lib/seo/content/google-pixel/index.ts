@@ -5,8 +5,12 @@ import { buildGooglePixelBatteryReplacementPocket } from './battery-replacement'
 import { buildGooglePixelChargingPortReplacementPocket } from './charging-port-replacement';
 import {
   getGooglePixelHardwareConfig,
+  getGooglePixelRearServiceSemantic,
   GOOGLE_PIXEL_HARDWARE_CONFIG,
   GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES,
+  isGooglePixelBackHousingModel,
+  PIXEL_BACK_HOUSING_MODELS,
+  type GooglePixelRearServiceSemantic,
 } from './config';
 import { buildGooglePixelFrontCameraReplacementPocket } from './front-camera-replacement';
 import { buildGooglePixelLogicBoardRepairPocket } from './logic-board-repair';
@@ -17,6 +21,13 @@ import type {
   AliMobileEnhancedGooglePixelRepairType,
   RepairTypeSeoPocket,
 } from './types';
+
+export {
+  getGooglePixelRearServiceSemantic,
+  isGooglePixelBackHousingModel,
+  PIXEL_BACK_HOUSING_MODELS,
+  type GooglePixelRearServiceSemantic,
+};
 
 export type {
   AliMobileEnhancedGooglePixelModelSlug,
@@ -99,8 +110,12 @@ export function isAliMobileEnhancedGooglePixelRepairPage(
 function withStandardGooglePixelTurnaround(
   pocket: RepairTypeSeoPocket,
   repairType: AliMobileEnhancedGooglePixelRepairType,
+  modelSlug?: string,
 ): RepairTypeSeoPocket {
-  const turnaroundMinutes = GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES[repairType];
+  const turnaroundMinutes =
+    repairType === 'back-glass-replacement' && modelSlug
+      ? getGooglePixelRearServiceSemantic(modelSlug).turnaroundMinutes
+      : GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES[repairType];
 
   if (!turnaroundMinutes) return pocket;
 
@@ -157,7 +172,7 @@ export function getAliMobileEnhancedGooglePixelSeoPocket({
 
   if (!familyPocket) return pocket;
 
-  return withStandardGooglePixelTurnaround(familyPocket, enhancedRepairType);
+  return withStandardGooglePixelTurnaround(familyPocket, enhancedRepairType, hardwareConfig.modelSlug);
 }
 
 export function getAliMobileEnhancedGooglePixelHubLinks(modelSlug: string): GooglePixelHubLink[] {

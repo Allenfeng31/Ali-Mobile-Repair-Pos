@@ -1,6 +1,5 @@
 import { RepairTypeSeoPocket } from "../iphone/types";
-import { getOppoWhyChooseUsBlocks } from "./why-choose";
-import { getOppoModelConfig } from "./shared";
+import { getOppoBackGlassTurnaroundMinutes, getOppoModelConfig } from "./shared";
 
 export function getOppoBackGlassPocket(modelSlug: string): RepairTypeSeoPocket | null {
   const config = getOppoModelConfig(modelSlug);
@@ -8,10 +7,11 @@ export function getOppoBackGlassPocket(modelSlug: string): RepairTypeSeoPocket |
 
   const displayModel = config.displayName;
   const terminology = config.rearPanelPublicTerminology;
+  const turnaroundMinutes = getOppoBackGlassTurnaroundMinutes(modelSlug);
   
   return {
-    
-    quickAnswer: `The public Back Glass Replacement service maps directly to the real model-specific Back Housing Replacement product for the OPPO ${displayModel}. This repair addresses a cracked, chipped or damaged ${terminology} to restore the structural integrity of your device.`,
+    ...(turnaroundMinutes ? { turnaroundMinutes } : {}),
+    quickAnswer: `OPPO ${displayModel} Back Glass Replacement addresses a cracked, chipped or damaged ${terminology}. We confirm that the damage is limited to the rear glass or cover before proceeding; frame or full-housing damage requires a different repair scope.`,
     repairOptions: [
 
         { name: "Damage Assessment", shortDescription: `The inspection checks the ${terminology}, frame, camera openings and battery swelling before proceeding.`, bestFor: "", notes: "" },
@@ -48,7 +48,12 @@ export function getOppoBackGlassPocket(modelSlug: string): RepairTypeSeoPocket |
         { question: "Is camera-lens replacement included?", answer: "No, external camera lens or lens-cover replacement is not automatically included with the rear panel replacement." },
         { question: "Will my data normally remain on the phone?", answer: "Yes, rear panel replacement does not normally affect your data. However, a backup is always recommended." },
         { question: "Will factory water resistance be restored?", answer: "While we use appropriate replacement adhesives, opening the device breaks the original factory seal. We cannot guarantee it will remain fully water resistant." },
-        { question: "How long does the repair take?", answer: "The repair generally takes 60 to 90 minutes as careful cleaning of the frame and proper adhesive curing is required." }
+        {
+          question: "How long does the repair take?",
+          answer: turnaroundMinutes
+            ? `Back Glass Replacement takes around ${turnaroundMinutes} minutes when the correct rear-cover part is available. Frame or housing damage requires a separate assessment and timeframe.`
+            : "Timing is confirmed after we determine whether the damage is limited to the rear cover or requires a housing-level repair.",
+        }
       
     ]
   };

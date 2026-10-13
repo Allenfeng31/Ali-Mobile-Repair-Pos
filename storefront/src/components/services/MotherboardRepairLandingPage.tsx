@@ -44,6 +44,16 @@ export default function MotherboardRepairLandingPage({ canonicalPath, eligibleDe
   eligibleDevices: readonly MotherboardEligibleDevice[];
   selection: MotherboardEligibleDevice | null;
 }) {
+  const usesSamsungPhoneTiming = selection?.category === 'phone' && selection.brandSlug === 'samsung';
+  const repairTimeLabel = usesSamsungPhoneTiming ? '30 Minutes' : 'Around 2–3 Weeks';
+  const timingCardBody = usesSamsungPhoneTiming
+    ? 'The approved Samsung phone Logic Board service time is 30 minutes. Repair suitability and the exact fault are still confirmed after diagnosis.'
+    : 'Typical turnaround is around 2–3 weeks. Specialist or off-site board-level work may be required, and the expected timing is confirmed after diagnosis.';
+  const faqs = usesSamsungPhoneTiming
+    ? FAQS.map((faq) => faq.question === 'How long does motherboard or logic board repair take?'
+      ? { ...faq, answer: 'The approved Samsung phone Logic Board service time is 30 minutes. Repair suitability and the exact fault are still confirmed after diagnosis.' }
+      : faq)
+    : FAQS;
   const selectorGroups = buildMotherboardSelectorGroups(eligibleDevices, canonicalPath);
   const selectedDevice = selection ? {
     selectedDevice: { brand: selection.brand, brandSlug: selection.brandSlug, model: selection.model, modelSlug: selection.modelSlug },
@@ -73,7 +83,7 @@ export default function MotherboardRepairLandingPage({ canonicalPath, eligibleDe
         bookingService={MOTHERBOARD_REPAIR_NAME}
         canonicalPath={canonicalPath}
         useMasterFacts
-        heroFacts={<MotherboardRepairFacts />}
+        heroFacts={<MotherboardRepairFacts repairTime={repairTimeLabel} />}
         selectActionLabel="Select your device"
         selectorGuide="Choose your device type, then its brand or series and model. Selection requests a motherboard or logic-board assessment; repairability is confirmed after diagnosis."
         selectorContent={<section className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8" aria-labelledby="motherboard-device-selector-heading"><div className="repair-workbench-heading"><span>Choose your device</span><h2 id="motherboard-device-selector-heading">Find your device for board-level assessment</h2><p>Select a device type, then a brand or series and model. We confirm assessment suitability after inspection.</p></div><MotherboardDeviceSelector groups={selectorGroups} /></section>}
@@ -105,12 +115,12 @@ export default function MotherboardRepairLandingPage({ canonicalPath, eligibleDe
         <section data-motherboard-layout-section className={styles.layoutSection} aria-labelledby="motherboard-boundaries-heading">
           <div className="repair-workbench-heading"><span>Timing and preparation</span><h2 id="motherboard-boundaries-heading">Specialist work with clear boundaries</h2><p>We set expectations after assessment so the scope, cost and timing are understood before detailed work begins.</p></div>
           <div className={hubStyles.reasonGrid}>
-            <ContentCard icon={<Cpu size={20} strokeWidth={2.5} aria-hidden="true" />} title="Around 2–3 weeks" body="Typical turnaround is around 2–3 weeks. Specialist or off-site board-level work may be required, and the expected timing is confirmed after diagnosis." />
+            <ContentCard icon={<Cpu size={20} strokeWidth={2.5} aria-hidden="true" />} title={repairTimeLabel} body={timingCardBody} />
             <ContentCard icon={<ShieldCheck size={20} strokeWidth={2.5} aria-hidden="true" />} title="Data and water-damage considerations" body="Board faults can affect data access. Back up important information where possible and tell us about any liquid exposure before assessment."><Link href="/repairs/water-damage" className="mt-5 inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100">Water damage assessment</Link></ContentCard>
           </div>
         </section>
 
-        <div data-motherboard-layout-section className={styles.layoutSection}><FaqAccordion faqs={FAQS} density="comfortable" layout="repair-detail" /></div>
+        <div data-motherboard-layout-section className={styles.layoutSection}><FaqAccordion faqs={faqs} density="comfortable" layout="repair-detail" /></div>
       </div>
 
       <section data-motherboard-layout-section className={styles.layoutSection} aria-labelledby="motherboard-links-heading"><div className={`${styles.linksPanel} mx-auto flex w-full flex-col gap-6 rounded-[28px] border-[2px] border-slate-800 bg-transparent text-center`}><div className="repair-workbench-heading"><span>Helpful links</span><h2 id="motherboard-links-heading" className="scroll-mt-32">Board-level assessment in Ringwood</h2><p>Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square. We inspect the device, explain the assessment outcome and confirm the quote before approved work begins.</p></div><div className="flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row"><Link href="/repairs/phone" className="inline-flex min-h-12 items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-extrabold !text-white transition-colors hover:bg-blue-700">Phone Repair Services</Link><Link href="/repairs/water-damage" className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50">Water Damage Assessment</Link></div></div></section>

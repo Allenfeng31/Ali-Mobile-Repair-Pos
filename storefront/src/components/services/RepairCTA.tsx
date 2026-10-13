@@ -12,10 +12,12 @@ interface RepairVariant {
 
 interface RepairCTAProps {
   modelSlug: string;
-  repairSlug: string;
+  repairSlug?: string;
   modelName: string;
-  repairName: string;
+  repairName?: string;
   variants?: RepairVariant[];
+  category?: string;
+  brand?: string;
 }
 
 // Dynamic tier descriptions fetched from backend
@@ -23,10 +25,12 @@ interface RepairCTAProps {
 
 export default function RepairCTA({ 
   modelSlug, 
-  repairSlug, 
+  repairSlug = "general",
   modelName, 
-  repairName,
-  variants = []
+  repairName = "General Inquiry",
+  variants = [],
+  category,
+  brand,
 }: RepairCTAProps) {
   // If there's only 1 variant or if none exist, we don't strictly "require" a selection to proceed,
   // but if there are multiple, the user must select one.
@@ -40,7 +44,7 @@ export default function RepairCTA({
         if (res.ok) {
           const tiers = await res.json();
           const map: Record<string, string> = {};
-          tiers.forEach((t: any) => { map[t.name] = t.description; });
+          tiers.forEach((t: { name: string; description: string }) => { map[t.name] = t.description; });
           setTierDescriptions(map);
         }
       } catch (err) {
@@ -51,6 +55,25 @@ export default function RepairCTA({
   }, []);
 
   const displayVariants = variants.length > 0 ? variants : [];
+
+  const bookingHref = (() => {
+    if (category && brand) {
+      const params = new URLSearchParams({
+        category,
+        brand,
+        model: modelName || modelSlug,
+      });
+      if (repairSlug && repairSlug !== 'general') {
+        params.set('repair', repairSlug);
+      }
+      if (selectedVariant) {
+        params.set('tier', selectedVariant);
+      }
+      return `/book-repair?${params.toString()}`;
+    }
+    const legacyRepairPart = repairSlug ? `&repair=${repairSlug}` : '';
+    return `/book-repair?model=${modelSlug}${legacyRepairPart}${selectedVariant ? `&tier=${selectedVariant}` : ''}`;
+  })();
 
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto mt-6">
@@ -101,7 +124,7 @@ export default function RepairCTA({
 
       <div className="cta-group w-full">
         <Link 
-          href={`/book-repair?model=${modelSlug}&repair=${repairSlug}${selectedVariant ? `&tier=${selectedVariant}` : ''}`} 
+          href={bookingHref}
           className={`cta-book ${(!selectedVariant && displayVariants.length > 1) ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={(e) => {
             if (!selectedVariant && displayVariants.length > 1) {

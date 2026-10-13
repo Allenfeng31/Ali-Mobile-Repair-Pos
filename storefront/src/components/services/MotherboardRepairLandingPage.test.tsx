@@ -63,4 +63,18 @@ describe('MotherboardRepairLandingPage', () => {
     expect(schema).toContain('Service');
     expect(schema).not.toMatch(/Offer|Product|30 minutes|same day repair|same day service|while you wait|30–60 minutes/i);
   });
+
+  it('keeps selected Samsung phone timing consistent with its Model Hub card', () => {
+    const { container } = render(
+      <MotherboardRepairLandingPage
+        canonicalPath="/repairs/motherboard-repair"
+        eligibleDevices={eligibleDevices}
+        selection={eligibleDevices[1]}
+      />,
+    );
+
+    expect(container.textContent).toContain('30 Minutes');
+    expect(container.textContent).not.toContain('Around 2–3 Weeks');
+    expect(container.textContent).toContain('approved Samsung phone Logic Board service time');
+  });
 });

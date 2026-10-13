@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { displayBrand, parseItem, slugify } from './inventoryUtils';
+import { displayBrand, formatDeviceTitle, parseItem, slugify } from './inventoryUtils';
 
 describe('parseItem', () => {
   it('excludes the exact canonical Accessories category before repair parsing', () => {
@@ -98,5 +98,16 @@ describe('parseItem', () => {
     });
 
     expect(parsed?.service).toBe('Flex Cable');
+  });
+});
+
+describe('formatDeviceTitle', () => {
+  it.each([
+    ['Google Pixel', 'Pixel 9 Pro', 'Google Pixel 9 Pro'],
+    ['P Google Pixel', 'Pixel 8 Pro', 'Google Pixel 8 Pro'],
+    ['P iPhone', 'iPhone 15', 'iPhone 15'],
+    ['P Samsung', 'Galaxy S24', 'Samsung Galaxy S24'],
+  ])('renders %s + %s as %s without changing stored identity', (brand, model, expected) => {
+    expect(formatDeviceTitle(brand, model)).toBe(expected);
   });
 });

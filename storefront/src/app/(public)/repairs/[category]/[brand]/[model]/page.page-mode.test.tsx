@@ -6,7 +6,7 @@ import { fetchModelRepairTypes, fetchRepairCatalog } from '@/lib/api';
 
 const state = vi.hoisted(() => ({
   gridProps: null as {
-    repairTypes: Array<{ slug: string; href?: string; price?: number }>;
+    repairTypes: Array<{ slug: string; href?: string; price?: number; displayName?: string; timingLabel?: string }>;
     showStartingPriceFallback?: boolean;
     useQuoteLedPricingSummary?: boolean;
   } | null,
@@ -31,7 +31,7 @@ vi.mock('@/components/Breadcrumbs', () => ({ default: () => null }));
 vi.mock('@/components/BackButton', () => ({ default: () => null }));
 vi.mock('@/components/services/RepairOptionsGrid', () => ({
   default: (props: {
-    repairTypes: Array<{ slug: string; href?: string; price?: number }>;
+    repairTypes: Array<{ slug: string; href?: string; price?: number; displayName?: string; timingLabel?: string }>;
     showStartingPriceFallback?: boolean;
     useQuoteLedPricingSummary?: boolean;
   }) => {
@@ -97,6 +97,146 @@ beforeEach(() => {
 });
 
 describe('Model Hub page-mode Server consumer', () => {
+  it.each([
+    {
+      label: 'iPhone 16 Plus',
+      brand: 'iPhone',
+      brandSlug: 'iphone',
+      model: 'iPhone 16 Plus',
+      modelSlug: 'iphone-16-plus',
+      expectedH1: 'iPhone 16 Plus Repairs',
+      expectedSummary: 'Most standard repairs: 30 Minutes',
+      repairs: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 170, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 110, repairOrigin: 'pos' },
+        { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 120, repairOrigin: 'pos' },
+        { slug: 'water-damage-repair', name: 'Water Damage', price: 0, repairOrigin: 'pos' },
+      ],
+      expectedCards: [
+        ['screen-replacement', '30 Minutes', undefined],
+        ['back-glass-replacement', 'Varies', undefined],
+        ['water-damage-repair', 'Depends on Damage', undefined],
+        ['logic-board-repair', 'Diagnostic Required', undefined],
+      ],
+    },
+    {
+      label: 'Samsung Galaxy S24 Ultra',
+      brand: 'Samsung',
+      brandSlug: 'samsung',
+      model: 'Galaxy S24 Ultra',
+      modelSlug: 'galaxy-s24-ultra',
+      expectedH1: 'Samsung Galaxy S24 Ultra Repairs',
+      expectedSummary: 'Most standard repairs: 30 Minutes',
+      repairs: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 320, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 100, repairOrigin: 'pos' },
+        { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 65, repairOrigin: 'pos' },
+        { slug: 'water-damage-repair', name: 'Water Damage', price: 0, repairOrigin: 'synthetic-core' },
+      ],
+      expectedCards: [
+        ['screen-replacement', '30 Minutes', undefined],
+        ['back-glass-replacement', '20 Minutes', undefined],
+        ['water-damage-repair', 'Initial Assessment & Cleaning — 30 Minutes', undefined],
+        ['logic-board-repair', '30 Minutes', undefined],
+      ],
+    },
+    {
+      label: 'Google Pixel 8 Pro',
+      brand: 'Google Pixel',
+      brandSlug: 'google-pixel',
+      model: 'Pixel 8 Pro',
+      modelSlug: 'pixel-8-pro',
+      expectedH1: 'Google Pixel 8 Pro Repairs',
+      expectedSummary: 'Most standard repairs: 30 Minutes',
+      repairs: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 360, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 99, repairOrigin: 'pos' },
+        { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'logic-board-repair', name: 'Logic Board Repair', price: 0, repairOrigin: 'pos' },
+      ],
+      expectedCards: [
+        ['screen-replacement', '30 Minutes', undefined],
+        ['back-glass-replacement', '30 Minutes', 'Back Glass Replacement'],
+        ['logic-board-repair', 'Diagnostic Required', undefined],
+      ],
+    },
+    {
+      label: 'OPPO Find X3 Pro',
+      brand: 'OPPO',
+      brandSlug: 'oppo',
+      model: 'Find X3 Pro',
+      modelSlug: 'find-x3-pro',
+      expectedH1: 'OPPO Find X3 Pro Repairs',
+      expectedSummary: 'Most standard repairs: 30–45 Minutes',
+      repairs: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 320, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 90, repairOrigin: 'pos' },
+        { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      expectedCards: [
+        ['screen-replacement', '45 Minutes', undefined],
+        ['battery-replacement', '30 Minutes', undefined],
+        ['back-glass-replacement', '20 Minutes', undefined],
+        ['logic-board-repair', 'Diagnostic Required', undefined],
+      ],
+    },
+  ])('renders precise shared model-hub content for $label', async ({
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    expectedH1,
+    expectedSummary,
+    repairs,
+    expectedCards,
+  }) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand,
+      model,
+      catalogueSource: 'live-pos',
+      repairTypes: repairs,
+      brandModels: [{ slug: modelSlug, model, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: brandSlug, model: modelSlug }),
+    }));
+
+    expect(html).toContain(`<h1 id="model-repair-heading">${expectedH1}</h1>`);
+    expect(html).toContain(expectedSummary);
+    expect(html).toContain('Exact repair time is shown with each service below.');
+    expect(html).not.toMatch(/Around 80%|same[ -]day/i);
+
+    for (const [slug, timingLabel, displayName] of expectedCards) {
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === slug)).toMatchObject({
+        slug,
+        timingLabel,
+        ...(displayName ? { displayName } : {}),
+      });
+    }
+  });
+
+  it('uses neutral top pricing when the lowest value is only a virtual shared-service fallback', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model: 'Galaxy S24 Ultra',
+      catalogueSource: 'live-pos',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 320, repairOrigin: 'pos' },
+        { slug: 'camera-lens-replacement', name: 'Camera Lens Replacement', price: 50, repairOrigin: 'virtual', sourceType: 'virtual' },
+      ],
+      brandModels: [{ slug: 'galaxy-s24-ultra', model: 'Galaxy S24 Ultra', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'samsung', model: 'galaxy-s24-ultra' }),
+    }));
+
+    expect(html).toContain('<h2>Galaxy S24 Ultra repair pricing</h2>');
+    expect(html).toContain('Each service below shows its current published price, starting price or Quote on Request.');
+    expect(html).not.toContain('<h2>Galaxy S24 Ultra repairs from $50</h2>');
+  });
+
   it('uses approved standard Apple Watch timing and disables static quote fallbacks', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'Apple',
@@ -242,8 +382,10 @@ describe('Model Hub page-mode Server consumer', () => {
     ]));
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.href)
       .not.toContain('/repairs/motherboard-repair?');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.timingLabel)
+      .toBe('Diagnostic Required');
     expect(html).not.toMatch(/same[ -]day/i);
-    expect(html).toContain('Timing depends on the selected repair, part availability and the device condition.');
+    expect(html).toContain('Most standard repairs: 30 Minutes');
   });
 
   it('uses the existing 9 retained / 18 consolidated / 1 unsupported Pixel Logic Board policy without master-selector links', async () => {
@@ -294,16 +436,17 @@ describe('Model Hub page-mode Server consumer', () => {
     ['Pixel 5', 'pixel-5'],
     ['Pixel 3', 'pixel-3'],
     ['Pixel 9a', 'pixel-9a'],
-  ])('renders neutral repair-timing guidance without unsupported urgency wording for %s', async (_label, modelSlug) => {
+  ])('renders precise per-service timing without unsupported urgency wording for %s', async (_label, modelSlug) => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData(modelSlug) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
 
     const html = renderToStaticMarkup(await ModelHubPage({
       params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: modelSlug }),
     }));
 
-    expect(html).toContain('How is repair timing confirmed?');
-    expect(html).toContain('What affects Google Pixel');
-    expect(html).toContain('Timing depends on the selected repair, part availability and the device condition.');
+    expect(html).toContain('Most standard repairs: 30 Minutes');
+    expect(html).toContain('Exact repair time is shown with each service below.');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
+      .toBe('30 Minutes');
     expect(html).not.toMatch(/same[ -]day|while you wait|immediate|instant/i);
   });
 
@@ -393,7 +536,7 @@ describe('Model Hub page-mode Server consumer', () => {
   it.each([
     ['galaxy-z-fold-7', 'Galaxy Z Fold 7'],
     ['galaxy-z-flip-7', 'Galaxy Z Flip 7'],
-  ])('uses foldable-safe screen timing for %s', async (model, modelName) => {
+  ])('uses the approved Samsung screen timing for %s', async (model, modelName) => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'Samsung',
       model: modelName,
@@ -405,9 +548,10 @@ describe('Model Hub page-mode Server consumer', () => {
       params: Promise.resolve({ category: 'phone', brand: 'samsung', model }),
     }));
 
-    expect(html).toContain('Timing depends on the confirmed display path, parts availability and assessment.');
-    expect(html).not.toContain('about 30 minutes');
-    expect(html).not.toContain('Same-day repair may be available');
+    expect(html).toContain('Most standard repairs: 30 Minutes');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
+      .toBe('30 Minutes');
+    expect(html).not.toMatch(/same[ -]day/i);
   });
 
   it('keeps normal Samsung screen timing unchanged', async () => {
@@ -422,8 +566,10 @@ describe('Model Hub page-mode Server consumer', () => {
       params: Promise.resolve({ category: 'phone', brand: 'samsung', model: 'galaxy-s23-ultra' }),
     }));
 
-    expect(html).toContain('about 30 minutes');
-    expect(html).toContain('Same-day repair may be available');
+    expect(html).toContain('Most standard repairs: 30 Minutes');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
+      .toBe('30 Minutes');
+    expect(html).not.toMatch(/same[ -]day/i);
   });
 
   it('server-renders the category-aware Motherboard Master card for MacBook without phone query leakage', async () => {

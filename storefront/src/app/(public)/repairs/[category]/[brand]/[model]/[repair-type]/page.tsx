@@ -60,6 +60,7 @@ import {
   getAliMobileEnhancedGooglePixelHubLinks,
   getAliMobileEnhancedGooglePixelRepairType,
   getAliMobileEnhancedGooglePixelSeoPocket,
+  getGooglePixelRearServiceSemantic,
   isAliMobileEnhancedGooglePixelRepairPage,
   type AliMobileEnhancedGooglePixelRepairType,
 } from '@/lib/seo/content/google-pixel';
@@ -135,6 +136,7 @@ import {
   getGrandfatheredWaterDamageStaticParams,
   isGooglePixelAliasBrand,
   isGrandfatheredWaterDamagePath,
+  SAMSUNG_PHONE_WATER_DAMAGE_INITIAL_ASSESSMENT_MINUTES,
   isWaterDamageRepairSlug,
 } from '@/lib/waterDamageRouting';
 import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from '@/lib/logicBoardRouting';
@@ -150,8 +152,6 @@ import SamsungTabletEnhancedSeoSection from '@/components/services/SamsungTablet
 import { buildRepairDetailSeo, getRepairDetailHeading } from './repairDetailSeo';
 
 export const revalidate = 86400;
-
-const SAMSUNG_WATER_DAMAGE_INITIAL_ASSESSMENT_CLEANING_MINUTES = 30;
 
 function getRepairIcon(slug: string, size = 48) {
   if (slug.includes('water')) return <Droplet size={size} strokeWidth={1.5} color="#2563eb" aria-hidden="true" />;
@@ -4563,7 +4563,7 @@ function getRepairDisplayName(
   }
 
   if (isGooglePixelBackGlassPublicAlias(category, brand, publicRepairSlug)) {
-    return NON_IPHONE_BACK_GLASS_DISPLAY_NAME;
+    return getGooglePixelRearServiceSemantic(modelSlug).displayName;
   }
 
 
@@ -4733,6 +4733,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
     resolvedParams['repair-type'],
     details?.repairType || formatDynamicParam(resolvedParams['repair-type'])
   );
+  const metadataRepairName = repairName;
   const enhancedIpadSeoPocket = getAliMobileEnhancedIpadSeoPocket({
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
@@ -4780,8 +4781,8 @@ export async function generateMetadata({ params }: RepairPageProps) {
     : enhancedAppleWatchSeoPocket
     ? enhancedAppleWatchSeoPocket.metaTitle
     : modelCode
-      ? `${model} ${repairName} | Ringwood${priceStr} | ${modelCode}`
-      : `${model} ${repairName} in Ringwood${priceStr} | Ali Mobile`;
+      ? `${model} ${metadataRepairName} | Ringwood${priceStr} | ${modelCode}`
+      : `${model} ${metadataRepairName} in Ringwood${priceStr} | Ali Mobile`;
   const description = selectedCrawledRepairContent
     ? selectedCrawledRepairContent.metaDescription
     : enhancedLenovoTabletSeoPocket
@@ -4798,7 +4799,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? samsungFoldableScreenDetailContext.description
     : getRepairIntentDescription({
         model,
-        repairName,
+        repairName: metadataRepairName,
         repairSlug: internalRepairSlug,
         category: resolvedParams.category,
       });
@@ -4812,7 +4813,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
     ? getLenovoTabletRepairLabel(enhancedLenovoTabletSeoPocket.repairType)
     : enhancedSamsungTabletSeoPocket
       ? getSamsungTabletRepairLabel(enhancedSamsungTabletSeoPocket.repairType)
-      : repairName;
+      : metadataRepairName;
 
   return {
     ...buildRepairDetailSeo({
@@ -5544,7 +5545,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams.brand === 'samsung' &&
     resolvedParams['repair-type'] === 'water-damage-repair';
   const initialAssessmentCleaningMinutes = isSamsungPhoneWaterDamagePage
-    ? SAMSUNG_WATER_DAMAGE_INITIAL_ASSESSMENT_CLEANING_MINUTES
+    ? SAMSUNG_PHONE_WATER_DAMAGE_INITIAL_ASSESSMENT_MINUTES
     : undefined;
   const repairPolicyVariant = getRepairPolicyVariant(resolvedParams['repair-type']);
   const finalRepairName = getRepairDisplayName(
@@ -5657,17 +5658,20 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     : faqsWithResolvedTierPrice;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
-  const usesCanonicalTabletBookingIdentity =
-    isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage;
+  const usesCanonicalBookingIdentity =
+    isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || resolvedParams.brand === 'oppo';
+  const bookingModel = resolvedParams.brand === 'oppo'
+    ? (details?.model || formatDynamicParam(resolvedParams.model))
+    : displayModel;
   const bookRepairUrl = `/book-repair?${new URLSearchParams({
-    ...(usesCanonicalTabletBookingIdentity ? {
+    ...(usesCanonicalBookingIdentity ? {
       category: resolvedParams.category,
       brandSlug: resolvedParams.brand,
       modelSlug: resolvedParams.model,
       serviceSlug: resolvedParams['repair-type'],
     } : {}),
     brand: displayBrand,
-    model: displayModel,
+    model: bookingModel,
     service: bookingRepairName || finalRepairName,
   }).toString()}`;
   const sameModelRepairSection = sameModelLinks.length > 0 ? (
@@ -5780,14 +5784,15 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     </ScrollReveal>
   ) : null;
 
+  const schemaRepairName = finalRepairName;
 
   return (
     <>
       <RepairServiceSchema
-        serviceName={`${seoDisplayModel} ${finalRepairName} in Ringwood`}
+        serviceName={`${seoDisplayModel} ${schemaRepairName} in Ringwood`}
         description={
           isWaterDamageRepairPage
-            ? getWaterDamageServiceDescription(`${seoDisplayModel} ${finalRepairName} in Ringwood`)
+            ? getWaterDamageServiceDescription(`${seoDisplayModel} ${schemaRepairName} in Ringwood`)
             : selectedCrawledRepairContent?.schemaDescription ??
           enhancedSamsungTabletSeoPocket?.schemaDescription ??
           enhancedIpadSeoPocket?.schemaDescription ??

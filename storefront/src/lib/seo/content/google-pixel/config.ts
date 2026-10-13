@@ -10,10 +10,49 @@ export const GOOGLE_PIXEL_STANDARD_REPAIR_TURNAROUND_MINUTES: Partial<
   'screen-replacement': 30,
   'battery-replacement': 30,
   'charging-port-replacement': 30,
-  'back-glass-replacement': 60,
+  'back-glass-replacement': 30,
   'front-camera-replacement': 30,
   'back-camera-replacement': 30,
 };
+
+export const PIXEL_BACK_HOUSING_MODELS = new Set<string>([
+  'pixel-3a',
+  'pixel-3a-xl',
+  'pixel-4a',
+  'pixel-4a-5g',
+  'pixel-5',
+  'pixel-5a',
+]);
+
+export interface GooglePixelRearServiceSemantic {
+  readonly displayName: string;
+  readonly turnaroundMinutes: number;
+  readonly timingLabel: string;
+  readonly isBackHousing: boolean;
+}
+
+export function isGooglePixelBackHousingModel(modelSlug: string): boolean {
+  return PIXEL_BACK_HOUSING_MODELS.has(modelSlug);
+}
+
+export function getGooglePixelRearServiceSemantic(
+  modelSlug: string
+): GooglePixelRearServiceSemantic {
+  const isBackHousing = isGooglePixelBackHousingModel(modelSlug);
+  return isBackHousing
+    ? {
+        displayName: 'Back Housing Replacement',
+        turnaroundMinutes: 60,
+        timingLabel: '60 Minutes',
+        isBackHousing: true,
+      }
+    : {
+        displayName: 'Back Glass Replacement',
+        turnaroundMinutes: 30,
+        timingLabel: '30 Minutes',
+        isBackHousing: false,
+      };
+}
 
 export const GOOGLE_PIXEL_HARDWARE_CONFIG: Record<
   AliMobileEnhancedGooglePixelModelSlug,
