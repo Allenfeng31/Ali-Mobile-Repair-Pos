@@ -496,7 +496,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const modelHubPriceBody = publishedStartingPrice
     ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(publishedStartingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
     : `Each service below shows its current published price, starting price or Quote on Request.`;
-  const majorPhoneTimingCard = modelHubTimingSummary
+  const modelHubTimingCard = modelHubTimingSummary
     ? {
         title: modelHubTimingSummary.title,
         body: `${modelHubTimingSummary.primaryLine} ${modelHubTimingSummary.secondaryLine}`,
@@ -536,7 +536,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       title: modelHubPriceTitle,
       body: modelHubPriceBody,
     },
-    majorPhoneTimingCard,
+    modelHubTimingCard,
     {
       title: "Parts availability",
       body: "Published repair times apply when the correct part is available. Contact Ali Mobile before visiting for uncommon parts or diagnosis-led repairs.",
@@ -696,7 +696,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       title: modelHubPriceTitle,
       body: modelHubPriceBody,
     },
-    majorPhoneTimingCard,
+    modelHubTimingCard,
     {
       title: "Model-specific Samsung parts",
       body: "Galaxy S, Note, A, J and Z series models use different parts and repair methods. Choose the exact model repair below so the quote matches the phone you have.",
@@ -836,7 +836,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       title: modelHubPriceTitle,
       body: modelHubPriceBody,
     },
-    majorPhoneTimingCard,
+    modelHubTimingCard,
     {
       title: "Exact Pixel model matters",
       body: "Pixel standard, Pro, Fold and a-series models can use different parts and repair methods. Choose the exact model repair below so the quote matches your phone.",
@@ -972,7 +972,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       title: modelHubPriceTitle,
       body: modelHubPriceBody,
     },
-    majorPhoneTimingCard,
+    modelHubTimingCard,
     {
       title: "Find, Reno and A series parts",
       body: "Oppo parts are specific to the exact model and series. Choose the exact model repair below so the quote matches the phone you have.",
@@ -1267,10 +1267,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : `Choose the available iPad repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
-    {
-      title: "iPad repair timing",
-      body: iPadTimingGuidance,
-    },
+    modelHubTimingCard,
     {
       title: "Exact iPad generation matters",
       body: "Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
@@ -1372,18 +1369,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
         : `Choose the available ${tabletBrandRepairLabel} repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
-    {
-      title: isSamsungTabletModelPage
-        ? "Samsung tablet parts and timing"
-        : isLenovoTabletModelPage
-        ? "Lenovo tablet parts and timing"
-        : "Tablet parts and timing",
-      body: isSamsungTabletModelPage
-        ? "Samsung tablet parts can vary by model number and screen size. Call first so we can confirm current stock, repair queue and expected timing before you visit."
-        : isLenovoTabletModelPage
-        ? "Lenovo tablet parts can vary by exact model and TB code. Call first so we can confirm current stock, repair queue and expected timing before you visit."
-        : "Tablet parts can vary by exact model, screen size and model code. Call first so we can confirm current stock, repair queue and expected timing before you visit.",
-    },
+    modelHubTimingCard,
     {
       title: tabletExactModelTitle,
       body: tabletExactModelBody,
@@ -1474,10 +1460,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       title: "A-number and year matter",
       body: "MacBook repair compatibility, parts selection and quote accuracy depend on the exact model, year, chip generation and A-number.",
     },
-    {
-      title: "Parts and diagnosis first",
-      body: "Many MacBook parts commonly take around one to two days to obtain, then repair timing is confirmed once the correct part arrives.",
-    },
+    modelHubTimingCard,
   ];
   const macBookQuickAnswers = [
     { number: "01", title: "How much does the repair cost?", body: startingPrice ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact MacBook model to see the current price or quote requirement." },
@@ -1523,10 +1506,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       title: "Series, SE or Ultra first",
       body: "Apple Watch repair compatibility depends on the exact Series, SE or Ultra model, case size, housing condition and visible fault signs.",
     },
-    {
-      title: `${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when parts are available`,
-      body: `Standard Apple Watch part-based repairs typically take around ${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when the required part is available. More complex diagnosis or part ordering may require additional time.`,
-    },
+    modelHubTimingCard,
   ];
   const appleWatchQuickAnswers = [
     { number: "01", title: "How much does the repair cost?", body: startingPrice ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact Apple Watch model to see the current price or quote requirement." },

@@ -254,7 +254,12 @@ describe('Model Hub page-mode Server consumer', () => {
     }));
 
     expect(state.gridProps?.showStartingPriceFallback).toBe(false);
-    expect(html).toContain('around 45 minutes when the required part is available');
+    expect(html).toContain('Most standard repairs: 45 Minutes');
+    expect(html).toContain('Exact repair time is shown with each service below.');
+    for (const repairSlug of ['screen-replacement', 'battery-replacement', 'charging-repair']) {
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
+        .toBe('45 Minutes');
+    }
     expect(html).not.toContain('Same-day completion is not promised');
   });
 
@@ -289,7 +294,12 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
       expect.objectContaining({ slug: 'screen-replacement', price: 0 }),
       expect.objectContaining({ slug: 'battery-replacement', price: 75 }),
+      expect.objectContaining({ slug: 'loudspeaker-replacement', timingLabel: '30 Minutes' }),
     ]));
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
+      .toBeUndefined();
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'battery-replacement')?.timingLabel)
+      .toBeUndefined();
   });
 
   it('omits hidden taxonomy and renders one conflicting Detail option rather than selecting POS evidence', async () => {
@@ -451,11 +461,11 @@ describe('Model Hub page-mode Server consumer', () => {
   });
 
   it.each([
-    ['iPad 10th Generation', 'ipad-10th-generation', 'Charging port repairs may require additional time depending on the repair process.'],
-    ['iPad Air 5th Generation', 'ipad-air-5th-generation', 'Charging port repairs may require additional time depending on the repair process.'],
-    ['iPad mini 7th Generation', 'ipad-mini-7th-generation', 'Choose the repair below for its current service details.'],
-    ['iPad Pro 11-inch M4', 'ipad-pro-11-inch-m4', 'Choose the repair below for its current service details.'],
-  ])('renders approved iPad timing guidance for %s without urgency claims', async (model, modelSlug, expectedGuidance) => {
+    ['iPad 10th Generation', 'ipad-10th-generation', 'Charging port repairs may require additional time depending on the repair process.', 'Fast Turnaround'],
+    ['iPad Air 5th Generation', 'ipad-air-5th-generation', 'Charging port repairs may require additional time depending on the repair process.', 'Fast Turnaround'],
+    ['iPad mini 7th Generation', 'ipad-mini-7th-generation', 'Choose the repair below for its current service details.', '60 Minutes'],
+    ['iPad Pro 11-inch M4', 'ipad-pro-11-inch-m4', 'Choose the repair below for its current service details.', '60 Minutes'],
+  ])('renders approved iPad timing guidance for %s without urgency claims', async (model, modelSlug, expectedGuidance, chargingTiming) => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'iPad',
       model,
@@ -472,8 +482,64 @@ describe('Model Hub page-mode Server consumer', () => {
 
     expect(html).toContain('Most standard repairs for this iPad are completed in around 1 hour.');
     expect(html).toContain(expectedGuidance);
+    expect(html).toContain('Most standard repairs: 60 Minutes');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
+      .toBe('60 Minutes');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'charging-port-replacement')?.timingLabel)
+      .toBe(chargingTiming);
     expect(html).not.toMatch(/45 minutes|same[ -]day|while you wait|immediate|instant/i);
     expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+  });
+
+  it.each([
+    ['Samsung tablet', 'Samsung', 'Galaxy Tab A 8.0 2017', 'samsung', 'galaxy-tab-a-80-2017-sm-t380-sm-t385'],
+    ['Lenovo tablet', 'Lenovo', 'Lenovo Tab P12', 'lenovo', 'lenovo-tab-p12-tb-370fu'],
+  ])('renders 1-hour standard timing on the %s Model Hub', async (_label, brand, model, brandSlug, modelSlug) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand,
+      model,
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 99, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: modelSlug, model, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: brandSlug, model: modelSlug }),
+    }));
+
+    expect(html).toContain('Most standard repairs: 60 Minutes');
+    for (const repairSlug of ['screen-replacement', 'battery-replacement', 'charging-port-replacement']) {
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
+        .toBe('60 Minutes');
+    }
+  });
+
+  it('renders 1-hour standard MacBook timing without applying it to Logic Board diagnosis', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'MacBook',
+      model: 'MacBook Air M3 13-inch',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 299, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 159, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: 'macbook-air-m3-13-2024', model: 'MacBook Air M3 13-inch', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'laptop', brand: 'macbook', model: 'macbook-air-m3-13-2024' }),
+    }));
+
+    expect(html).toContain('Most standard repairs: 60 Minutes');
+    for (const repairSlug of ['screen-replacement', 'battery-replacement', 'charging-port-replacement']) {
+      expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
+        .toBe('60 Minutes');
+    }
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.timingLabel)
+      .toBe('Diagnostic Required');
   });
 
   it.each([
