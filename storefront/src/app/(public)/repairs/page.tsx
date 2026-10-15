@@ -79,12 +79,12 @@ const processSteps = [
     text: "Start with the category that matches your device so you can check repair options, compare repair categories, and move to the right brand, model, and repair type.",
   },
   {
-    title: "Check Live Pricing",
+    title: "Check Repair Pricing",
     text: "Many common repairs show a clear price path before you book, helping you check the repair price before visiting and understand likely repair turnaround time.",
   },
   {
     title: "Bring In or Book",
-    text: "Book online for priority service or use our walk-in repair options at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a fast assessment.",
+    text: "Book online to check available repair pricing and continue to booking, or use our walk-in repair options at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 to discuss parts and timing.",
   },
 ];
 
@@ -111,12 +111,12 @@ const faqs = [
   {
     question: "What if I do not know my exact device model?",
     answer:
-      "Start with the closest device category. Our team can help identify the exact model at the store or when you submit a quote request.",
+      "If the screen is working, you can usually find the model in your device settings. On many Android phones, go to Settings > About phone; on iPhone, go to Settings > General > About. If the screen is not usable, check the back cover for a printed model number. If you still cannot identify the model, call us or bring the device to the store and our team can help identify it and assess the issue.",
   },
   {
     question: "Do I need to book, or can I walk in?",
     answer:
-      "Walk-ins are welcome at our Ringwood Square kiosk. An online booking or quote request helps us prepare the repair path and gives you priority in the queue.",
+      "Walk-ins are welcome at our Ringwood Square kiosk. An online booking or quote request helps us prepare the repair path and lets you check available pricing before you visit.",
   },
   {
     question: "Do I need to share my passcode for a repair?",
@@ -131,7 +131,7 @@ const faqs = [
   {
     question: "Do repairs include a warranty?",
     answer:
-      "Eligible repairs include a warranty on the fitted part and workmanship. Warranty does not cover new impact damage, liquid damage, misuse or unrelated faults.",
+      "Standard repairs include a 6-month warranty. Water-damage repairs have no warranty.",
   },
 ];
 
@@ -263,7 +263,7 @@ export default function RepairsHubPage() {
           </p>
           <div className={styles.ctaActions}>
             <Link href="/book-repair" className={styles.primaryAction}>
-              Get a Live Quote
+              Get a Repair Quote
             </Link>
             <a href="tel:0481058514" className={styles.secondaryAction}>
               Call 0481 058 514

@@ -24,5 +24,9 @@ export function getRepairCategoryTimingLabel(
     return `${approximate ? "around " : ""}${duration} ${unit === "minutes" ? "min" : "hours"}`;
   }
 
+  if (approximate) {
+    return `around ${duration} min`;
+  }
+
   return `${duration} ${unit === "minutes" ? "Minutes" : "Hours"}`;
 }

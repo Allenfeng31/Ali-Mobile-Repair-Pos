@@ -12,6 +12,6 @@ describe("getRepairCategoryTimingLabel", () => {
     expect(getRepairCategoryTimingLabel("phone", "hub")).toBe("15–60 Minutes");
     expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe("1–2 Hours");
     expect(getRepairCategoryTimingLabel("laptop", "hub")).toBe("1–2 Hours");
-    expect(getRepairCategoryTimingLabel("watch", "hub")).toBe("45 Minutes");
+    expect(getRepairCategoryTimingLabel("watch", "hub")).toBe("around 45 min");
   });
 });

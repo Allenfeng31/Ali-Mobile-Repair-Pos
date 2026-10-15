@@ -62,8 +62,8 @@ describe("RepairsHubPage privacy FAQs", () => {
     expect(metadata.openGraph?.url).toBe("/repairs");
   });
 
-  it("keeps the hub chooser, policy wording, and phone timing guidance scoped to approved facts", () => {
-    render(<RepairsHubPage />);
+  it("keeps the hub chooser, factual pricing and booking language, policy wording, and timing guidance scoped to approved facts", () => {
+    const { container } = render(<RepairsHubPage />);
 
     expect(screen.getByTestId("service-areas")).toBeInTheDocument();
 
@@ -82,7 +82,7 @@ describe("RepairsHubPage privacy FAQs", () => {
 
     const watchCard = screen.getByRole("link", { name: /Smart Watch Repair/i });
     expect(watchCard).toHaveAttribute("href", "/repairs/watch");
-    expect(within(watchCard).getByText("45 Minutes")).toBeInTheDocument();
+    expect(within(watchCard).getByText("around 45 min")).toBeInTheDocument();
     expect(within(watchCard).queryByText("2-4 hrs")).not.toBeInTheDocument();
 
     expect(screen.queryByText("6 mo")).not.toBeInTheDocument();
@@ -96,5 +96,19 @@ describe("RepairsHubPage privacy FAQs", () => {
     expect(within(timingDisclosure!).getByText(/model, repair type, part availability, device condition and current workload/i)).toBeInTheDocument();
     expect(within(timingDisclosure!).getByText(/Choose your phone model for more specific repair information/i)).toBeInTheDocument();
     expect(within(timingDisclosure!).queryByText(/80%|same day/i)).not.toBeInTheDocument();
+
+    const modelQuestion = "What if I do not know my exact device model?";
+    const modelDisclosure = screen.getByText(modelQuestion).closest("details");
+    expect(modelDisclosure).not.toBeNull();
+    expect(within(modelDisclosure!).getByText(/Settings > About phone/)).toBeInTheDocument();
+    expect(within(modelDisclosure!).getByText(/Settings > General > About/)).toBeInTheDocument();
+    expect(within(modelDisclosure!).getByText(/back cover/)).toBeInTheDocument();
+    expect(within(modelDisclosure!).getByText(/call us or bring the device to the store/)).toBeInTheDocument();
+    expect(within(modelDisclosure!).getByText(/identify it and assess the issue/)).toBeInTheDocument();
+
+    expect(screen.getByText("Check Repair Pricing")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Get a Repair Quote" })).toHaveAttribute("href", "/book-repair");
+    expect(screen.getByText("Standard repairs include a 6-month warranty. Water-damage repairs have no warranty.")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/Check Live Pricing|Get a Live Quote|priority service|priority in the queue/i);
   });
 });
