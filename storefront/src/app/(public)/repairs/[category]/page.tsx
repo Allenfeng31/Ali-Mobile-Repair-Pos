@@ -9,6 +9,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 import FloatingJumpCTA from '@/components/FloatingJumpCTA';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
+import { getRepairCategoryTimingLabel } from '@/lib/repairCategoryTiming';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
 import { type RepairResultDeviceCategory } from '@/lib/repair-results';
@@ -97,8 +98,8 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
     },
     features: [
       { t: "Timing confirmed by model and diagnosis", d: "Contact us before visiting to confirm your model, issue, parts availability and practical timing." },
-      { t: "Premium Quality Screens & Parts Available", d: "" },
-      { t: "Fast repair options for common screens and batteries", d: "" },
+      { t: "Model-specific parts and repair options", d: "We confirm compatible parts and repair options after checking your exact model, symptoms and part availability." },
+      { t: "Common screen and battery repair pathways", d: "Supported repair options vary by exact model, parts availability, diagnosis and workshop workload." },
       { t: "No Fix, No Charge Policy", d: "" },
       { t: "6-Month Warranty on Standard Repairs", d: "" }
     ],
@@ -345,6 +346,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const isWatch = category === 'watch';
   const isTablet = category === 'tablet';
   const isPhone = category === 'phone';
+  const phoneTimingLabel = isPhone ? getRepairCategoryTimingLabel('phone', 'hub') : null;
   const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
@@ -364,7 +366,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         url={`https://www.alimobile.com.au/repairs/${safeSlugSegment(category)}`}
       />
 
-      <main className="repair-page-shell">
+      <div className="repair-page-shell">
         <nav className="repair-breadcrumb" aria-label="breadcrumb">
           <Link href="/">Home</Link>
           <span>/</span>
@@ -504,7 +506,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   ? watchBrandSectionCopy
                 : isTablet
                   ? 'Pick the tablet brand first, then choose your exact model to view compatible services and pricing.'
-                : 'Pick the brand first, then choose your exact model for live repair options and pricing.'}
+                : 'Pick the brand first, then choose your exact model to view available repair options and the current published price or Quote on Request.'}
             </p>
           </div>
 
@@ -724,7 +726,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <article className="repair-signal-card">
                     <span>01</span>
                     <h3>Repair timing by model</h3>
-                    <p>Timing depends on the exact phone model, repair type, parts availability and the diagnosis confirmed before work begins.</p>
+                    <p>Typical phone repairs can take {phoneTimingLabel}, depending on the exact model, repair type, diagnosis, parts availability and workshop workload. Complex faults, liquid damage and board-level repairs may require a different timeframe, confirmed before approval.</p>
                   </article>
                   <article className="repair-signal-card">
                     <span>02</span>
@@ -1164,7 +1166,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
           targetId={isLaptop ? 'laptop-brands' : 'brands-list'}
           label="Choose Your Brand"
         />
-      </main>
+      </div>
     </>
   );
 }

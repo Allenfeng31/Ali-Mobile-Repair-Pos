@@ -27,6 +27,13 @@ vi.mock("next/link", () => ({
 }));
 
 describe("PublicLayout footer", () => {
+  it("remains the sole owner of the main landmark for public page content", () => {
+    render(<PublicLayout><section aria-label="Category hub content">Phone hub</section></PublicLayout>);
+
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+    expect(screen.getByRole("main")).toHaveTextContent("Phone hub");
+  });
+
   it("renders the standard-repairs warranty label without changing its trust strip", () => {
     render(<PublicLayout><div>Page content</div></PublicLayout>);
 

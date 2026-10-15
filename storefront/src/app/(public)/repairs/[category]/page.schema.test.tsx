@@ -42,4 +42,34 @@ describe('CategoryHubPage service schema', () => {
       description: 'Mobile phone repair pathways for supported iPhone, Samsung Galaxy, Google Pixel, OPPO and other models. Pricing and timing are confirmed after the model, repair type, parts availability and diagnosis are checked.',
     }]);
   });
+
+  it('keeps phone-hub SSR facts, links, and timing qualified without owning a second main landmark', async () => {
+    const html = renderToStaticMarkup(await CategoryHubPage({ params: Promise.resolve({ category: 'phone' }) }));
+
+    expect(html).not.toContain('<main');
+    expect(html).toContain('available repair options and the current published price or Quote on Request');
+    expect(html).toContain('Typical phone repairs can take 15–60 Minutes');
+    expect(html).toContain('exact model, repair type, diagnosis, parts availability and workshop workload');
+    expect(html).toContain('Complex faults, liquid damage and board-level repairs may require a different timeframe');
+    expect(html).toContain('Model-specific parts and repair options');
+    expect(html).toContain('Common screen and battery repair pathways');
+    expect(html).not.toContain('live repair options and pricing');
+    expect(html).not.toContain('Premium Quality Screens &amp; Parts Available');
+    expect(html).not.toContain('Fast repair options for common screens and batteries');
+
+    for (const href of [
+      '/repairs/screen-replacement',
+      '/repairs/battery-replacement',
+      '/repairs/charging-port-replacement',
+      '/repairs/back-glass-replacement',
+    ]) {
+      expect(html).toContain(`href=\"${href}\"`);
+    }
+  });
+
+  it.each(['tablet', 'laptop', 'watch'])('does not add a page-level main landmark to the shared %s category template', async (category) => {
+    const html = renderToStaticMarkup(await CategoryHubPage({ params: Promise.resolve({ category }) }));
+
+    expect(html).not.toContain('<main');
+  });
 });
