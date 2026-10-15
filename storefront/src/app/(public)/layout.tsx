@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 import PageTransition from "@/components/PageTransition";
 import SocialIcon from "@/components/SocialIcon";
 import { BUSINESS_HOURS } from "@/lib/businessHours";
+import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import { Clock3, MapPin, Navigation, PhoneCall, ShieldCheck, Wrench } from "lucide-react";
 
 export const viewport: Viewport = {
@@ -56,7 +57,7 @@ export default function PublicLayout({
                 <span className="footer-kicker">Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 repair desk</span>
                 <h2>Need a clear repair price before you visit?</h2>
                 <p>
-                  Book online for priority service, call for part availability, or drop into Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 for a practical device check.
+                  Book online to help us plan your repair visit. Walk-ins are also welcome; call for part availability before visiting.
                 </p>
               </div>
               <div className="footer-cta-actions">
@@ -82,7 +83,7 @@ export default function PublicLayout({
                 </Link>
                 <p>
                   Local phone, tablet, laptop, and Apple Watch repairs from Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134.
-                  Clear diagnosis first, practical pricing, and warranty-backed workmanship.
+                  Clear diagnosis first and practical pricing. {STANDARD_WARRANTY_SUMMARY} Water-damage repairs are excluded.
                 </p>
                 <div className="footer-trust-strip" aria-label="Repair promises">
                   <span>
@@ -123,7 +124,7 @@ export default function PublicLayout({
                   <PhoneCall size={19} strokeWidth={2.4} aria-hidden="true" />
                   <span>Call the repair desk</span>
                   <strong>0481 058 514</strong>
-                  <small>Ask about parts, timing, and live quote support.</small>
+                  <small>Contact our team to confirm repair options and request a quote.</small>
                 </a>
                 <a
                   href="https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134"
@@ -139,7 +140,7 @@ export default function PublicLayout({
                   <Clock3 size={19} strokeWidth={2.4} aria-hidden="true" />
                   <span>Opening hours</span>
                   <strong>{BUSINESS_HOURS.compactDisplay}</strong>
-                  <small>Walk-ins welcome. Online bookings get priority.</small>
+                  <small>Book online to help us plan your repair visit. Walk-ins are also welcome.</small>
                 </div>
               </div>
 

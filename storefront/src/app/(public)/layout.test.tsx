@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 import { describe, expect, it, vi } from "vitest";
 
 import PublicLayout from "./layout";
+import RepairsHubPage from "./repairs/page";
 
 vi.mock("../ClientChatWidget", () => ({ default: () => null }));
 vi.mock("../Header", () => ({ default: () => null }));
@@ -16,6 +17,8 @@ vi.mock("@/components/PageTransition", () => ({
 vi.mock("@/components/SocialIcon", () => ({
   default: () => <svg aria-hidden="true" />,
 }));
+vi.mock("@/components/ChatNowButton", () => ({ default: () => null }));
+vi.mock("@/components/seo/ServiceAreas", () => ({ default: () => <section>Local coverage</section> }));
 vi.mock("next/image", () => ({
   default: () => <span data-next-image="true" />,
 }));
@@ -32,6 +35,13 @@ describe("PublicLayout footer", () => {
 
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getByRole("main")).toHaveTextContent("Phone hub");
+  });
+
+  it("keeps the Repairs hub inside the PublicLayout main landmark", () => {
+    render(<PublicLayout><RepairsHubPage /></PublicLayout>);
+
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+    expect(screen.getByRole("main")).toContainElement(screen.getByRole("heading", { level: 1, name: "Device Repair Services" }));
   });
 
   it("renders the standard-repairs warranty label without changing its trust strip", () => {
@@ -54,5 +64,10 @@ describe("PublicLayout footer", () => {
     expect(within(footer).getByRole("link", { name: "Call 0481 058 514" })).toHaveAttribute("href", "tel:0481058514");
     expect(within(footer).getByText("Mon-Sat, 9am-5pm")).toBeInTheDocument();
     expect(within(footer).queryByText("Mon-Sat, 10am-5pm")).not.toBeInTheDocument();
+    expect(within(footer).getByText(/Book online to help us plan your repair visit. Walk-ins are also welcome; call for part availability before visiting./)).toBeInTheDocument();
+    expect(within(footer).getByText("Book online to help us plan your repair visit. Walk-ins are also welcome.")).toBeInTheDocument();
+    expect(within(footer).getByText("Contact our team to confirm repair options and request a quote.")).toBeInTheDocument();
+    expect(within(footer).getByText(/Completed standard repairs include a 6-month warranty covering the replacement part and labour. Water-damage repairs are excluded./)).toBeInTheDocument();
+    expect(footer.textContent).not.toMatch(/priority service|online bookings get priority|live quote support|warranty-backed workmanship/i);
   });
 });

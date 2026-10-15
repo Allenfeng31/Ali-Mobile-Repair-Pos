@@ -137,7 +137,7 @@ const faqs = [
 
 export default function RepairsHubPage() {
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <section className={styles.hero} aria-labelledby="repairs-heading">
         <div className={styles.heroInner}>
           <span className={styles.kicker}>Repair Command Center</span>
@@ -272,6 +272,6 @@ export default function RepairsHubPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
