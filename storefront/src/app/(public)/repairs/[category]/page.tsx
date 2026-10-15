@@ -14,6 +14,7 @@ import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Spark
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
 import { type RepairResultDeviceCategory } from '@/lib/repair-results';
 import { fetchCategoryHubRepairResultSeeds } from '@/lib/repair-results.server';
+import CategoryHubJumpButton from '@/components/CategoryHubJumpButton';
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -346,6 +347,14 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
   const isWatch = category === 'watch';
   const isTablet = category === 'tablet';
   const isPhone = category === 'phone';
+  const categorySelectionTargetId = isLaptop ? 'laptop-brands' : isWatch ? 'watch-model-selection' : 'brands-list';
+  const categorySelectionLabel = isPhone
+    ? 'Choose Your Phone Brand'
+    : isTablet
+      ? 'Choose Your Tablet Brand'
+      : isLaptop
+        ? 'Choose Your Laptop Brand'
+        : 'Choose Your Watch Model';
   const phoneTimingLabel = isPhone ? getRepairCategoryTimingLabel('phone', 'hub') : null;
   const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
@@ -400,20 +409,14 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <h1 id="category-repair-heading">{data.hero.title}</h1>
             <p>{data.hero.intro1}</p>
             <div className="repair-hero-actions">
-              <Link href="/book-repair" prefetch={true} className="repair-primary-action">
-                Book a Repair
+              <CategoryHubJumpButton targetId={categorySelectionTargetId}>
+                {categorySelectionLabel}
                 <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
-              </Link>
+              </CategoryHubJumpButton>
               <a href="tel:0481058514" className="repair-secondary-action">
                 <PhoneCall size={18} strokeWidth={2.6} aria-hidden="true" />
                 0481 058 514
               </a>
-              {isLaptop && (
-                <a href="#laptop-brands" className="repair-secondary-action">
-                  Choose a Brand
-                  <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
-                </a>
-              )}
             </div>
           </div>
 
@@ -492,7 +495,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         </section>
 
         <section
-          id={isLaptop ? 'laptop-brands' : 'brands-list'}
+          id={categorySelectionTargetId}
           className="repair-content-band"
           aria-labelledby="popular-brands-heading"
         >
@@ -1163,7 +1166,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         </ScrollReveal>
 
         <FloatingJumpCTA
-          targetId={isLaptop ? 'laptop-brands' : 'brands-list'}
+          targetId={categorySelectionTargetId}
           label="Choose Your Brand"
         />
       </div>
