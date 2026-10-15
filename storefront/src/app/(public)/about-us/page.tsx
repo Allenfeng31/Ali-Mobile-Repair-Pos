@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { LOCAL_BUSINESS_OPENING_HOURS } from "@/lib/businessHours";
+import { getLocalBusinessSchemaData } from "@/components/seo/SchemaOrg";
 
 import styles from "./AboutUs.module.css";
 
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
 };
 
 const proofPoints = [
-  { value: "10+", label: "Years Experience" },
-  { value: "C1", label: "Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134" },
-  { value: "0$", label: "No Fix, No Charge" },
+  { value: "Serving Ringwood since 2014", label: "Local repair business" },
+  { value: "Kiosk C1", label: "Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134" },
+  { value: "$0", label: "No Fix, No Charge" },
 ];
 
 const principles = [
@@ -67,7 +67,7 @@ const trustDetails = [
   },
   {
     label: "Warranty boundaries",
-    text: "Repair warranty support is explained before handover, including what is covered and what may fall outside normal warranty, such as liquid damage, severe impact or unrelated faults.",
+    text: "Standard repairs include a 6-month warranty. Water-damage repairs have no warranty.",
   },
 ];
 
@@ -94,44 +94,7 @@ const repairLinks = [
   },
 ];
 
-const localBusinessSchema = {
-  "@context": "https://schema.org",
-  "@type": "MobilePhoneStore",
-  "@id": `${baseUrl}/#localbusiness`,
-  name: "Ali Mobile & Repair",
-  url: baseUrl,
-  image: `${baseUrl}/images/about-us-new.jpg`,
-  telephone: "+61481058514",
-  priceRange: "$$",
-  description:
-    "Ali Mobile & Repair is a local electronics repair kiosk at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134, helping customers with phone, tablet, laptop and smart watch repair assessments.",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
-    addressLocality: "Ringwood",
-    addressRegion: "VIC",
-    postalCode: "3134",
-    addressCountry: "AU",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: -37.81534,
-    longitude: 145.22851,
-  },
-  openingHoursSpecification: [LOCAL_BUSINESS_OPENING_HOURS],
-  areaServed: [
-    { "@type": "City", name: "Ringwood" },
-    { "@type": "AdministrativeArea", name: "Melbourne eastern suburbs" },
-  ],
-  makesOffer: repairLinks.map((link) => ({
-    "@type": "Offer",
-    itemOffered: {
-      "@type": "Service",
-      name: link.label,
-      url: `${baseUrl}${link.href}`,
-    },
-  })),
-};
+const localBusinessSchema = getLocalBusinessSchemaData();
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -167,14 +130,9 @@ export default function AboutUsPage() {
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
             <span className={styles.kicker}>Ringwood Repair Lab</span>
-            <h1>
-              Quietly technical.
-              <span>Seriously local.</span>
-            </h1>
-            <p>
-              Ali Mobile & Repair has spent more than a decade helping Ringwood customers get phones,
-              tablets, and laptops back to work without drama, hidden costs, or inflated chain-store pricing.
-            </p>
+            <h1>About Ali Mobile & Repair</h1>
+            <p className={styles.heroStrapline}>Quietly technical. Seriously local.</p>
+            <p>Ali Mobile & Repair helps Ringwood customers with phone, tablet, laptop and Apple Watch repairs, clear quotes, practical repair guidance, and everyday accessories such as phone cases and screen protectors.</p>
             <div className={styles.heroActions}>
               <Link href="/book-repair" className={styles.primaryAction}>
                 Book a Repair
@@ -197,8 +155,8 @@ export default function AboutUsPage() {
               />
             </div>
             <div className={styles.signalCard}>
-              <span>Live Bench Status</span>
-              <strong>Repairs in motion</strong>
+              <span>Repair service</span>
+              <strong>Device repairs and assessments</strong>
             </div>
           </div>
         </div>
@@ -290,9 +248,8 @@ export default function AboutUsPage() {
           <span className={styles.kicker}>Free Quote</span>
           <h2>Bring the device in. We will tell you what is worth fixing.</h2>
           <p>
-            Visit Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 or book online for priority service. Most common screen and battery
-            same-day repair may be available for many common phone models when parts are in stock
-            and queue timing allows.
+            Visit Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134 or book online
+            to check pricing and repair availability before your visit.
           </p>
           <Link href="/book-repair" className={styles.primaryAction}>
             Book Repair Now

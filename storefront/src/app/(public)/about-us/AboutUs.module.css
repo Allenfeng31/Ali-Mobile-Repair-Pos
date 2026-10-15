@@ -96,6 +96,14 @@
   color: #475569;
 }
 
+.heroCopy .heroStrapline {
+  margin-top: 0.5rem;
+  color: #475569;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
 .heroCopy p {
   max-width: 42rem;
   margin: 1.35rem 0 0;
