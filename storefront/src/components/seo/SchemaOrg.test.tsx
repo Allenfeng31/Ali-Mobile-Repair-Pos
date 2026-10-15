@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { LocalBusinessSchema, RepairServiceSchema } from './SchemaOrg';
+import { getLocalBusinessSchemaData, LocalBusinessSchema, RepairServiceSchema } from './SchemaOrg';
 
 function repairServiceData(price?: string) {
   const element = RepairServiceSchema({
@@ -55,5 +55,30 @@ describe('LocalBusinessSchema rendering', () => {
     const schema = JSON.parse(scripts[0].textContent ?? '');
     expect(schema['@type']).toBe('MobilePhoneStore');
     expect(schema['@id']).toBe('https://www.alimobile.com.au/#localbusiness');
+  });
+
+  it('keeps the homepage entity facts while omitting services not visible on the homepage', () => {
+    const schema = getLocalBusinessSchemaData();
+
+    expect(schema).toMatchObject({
+      name: 'Ali Mobile & Repair',
+      '@id': 'https://www.alimobile.com.au/#localbusiness',
+      url: 'https://www.alimobile.com.au',
+      telephone: '0481 058 514',
+      address: {
+        streetAddress: 'Ringwood Square Shopping Centre Kiosk C1, Seymour St',
+        addressLocality: 'Ringwood',
+        addressRegion: 'VIC',
+        postalCode: '3134',
+        addressCountry: 'AU',
+      },
+      openingHoursSpecification: [{
+        opens: '09:00',
+        closes: '17:00',
+      }],
+      sameAs: ['https://www.facebook.com/AliMobile'],
+    });
+    expect(schema).not.toHaveProperty('hasOfferCatalog');
+    expect(JSON.stringify(schema)).not.toMatch(/micro-soldering|face id|oem parts/i);
   });
 });

@@ -8,6 +8,7 @@ import RealRepairResultsSection from "@/components/repair-results/RealRepairResu
 import { fetchHomepageRepairResultSeed } from "@/lib/repair-results.server";
 import { REPAIR_RESULT_CATEGORIES } from "@/lib/repair-results";
 import { REPAIR_CATEGORY_NAV_ITEMS } from "@/lib/repairCategoryNavigation";
+import { getRepairCategoryTimingLabel } from "@/lib/repairCategoryTiming";
 import heroStyles from "./HomeHero.module.css";
 import homeStyles from "./HomePage.module.css";
 
@@ -81,7 +82,7 @@ export default async function Home() {
   );
 
   return (
-    <main>
+    <>
       <LocalBusinessSchema />
       <header className={`${heroStyles.heroSection} w-full px-4 sm:px-6 lg:px-8`}>
         <div className={`${heroStyles.heroInner} flex flex-col items-center justify-center text-center w-full max-w-[1400px] mx-auto pt-10 md:pt-16 pb-10 md:pb-12`}>
@@ -96,8 +97,8 @@ export default async function Home() {
           </p>
 
           <div className="hero-contact-pill gap-6">
-            <span className="contact-item">Walk-ins welcome</span>
-            <span className="contact-item">Call ahead for parts and timing</span>
+            <span className="contact-item">Serving Ringwood since 2014</span>
+            <span className="contact-item">6-Month Warranty on Standard Repairs</span>
           </div>
 
           <div className={heroStyles.repairIssueBlock}>
@@ -118,7 +119,7 @@ export default async function Home() {
 
           <div className="hero-cta">
             <a className="primary-btn" href="/book-repair">
-              Book Repair Now
+              Check Price &amp; Book
             </a>
           </div>
         </div>
@@ -141,6 +142,7 @@ export default async function Home() {
             <div className="card-content">
               <h3>Phone Repair</h3>
               <p>iPhone, Samsung, Google Pixel and Oppo screen, battery, charging port and camera repair options.</p>
+              <p className="!mb-2">Typical repair time: {getRepairCategoryTimingLabel("phone", "homepage")}</p>
               <span className="card-link">View Pricing →</span>
             </div>
           </Link>
@@ -158,6 +160,7 @@ export default async function Home() {
             <div className="card-content">
               <h3>Tablet & iPad Repair</h3>
               <p>iPad and tablet screen, battery and charging repairs with quote confirmation before work begins.</p>
+              <p className="!mb-2">Typical repair time: {getRepairCategoryTimingLabel("tablet", "homepage")}</p>
               <span className="card-link">View Pricing →</span>
             </div>
           </Link>
@@ -175,6 +178,7 @@ export default async function Home() {
             <div className="card-content">
               <h3>Laptop & MacBook Repair</h3>
               <p>MacBook screen, battery, keyboard and diagnostic support for common laptop repair issues.</p>
+              <p className="!mb-2">Typical repair time: {getRepairCategoryTimingLabel("laptop", "homepage")}</p>
               <span className="card-link">View Pricing →</span>
             </div>
           </Link>
@@ -192,6 +196,7 @@ export default async function Home() {
             <div className="card-content">
               <h3>Smart Watch Repair</h3>
               <p>Apple Watch screen and battery repair options. Call ahead for model support and parts timing.</p>
+              <p className="!mb-2">Typical repair time: {getRepairCategoryTimingLabel("watch", "homepage")}</p>
               <span className="card-link">View Pricing →</span>
             </div>
           </Link>
@@ -312,6 +317,6 @@ export default async function Home() {
         </section>
       </ScrollReveal>
 
-    </main>
+    </>
   );
 }

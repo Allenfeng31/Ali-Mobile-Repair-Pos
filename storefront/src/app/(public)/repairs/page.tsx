@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import ChatNowButton from "@/components/ChatNowButton";
 import ServiceAreas from "@/components/seo/ServiceAreas";
-import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
+import { getRepairCategoryTimingLabel } from "@/lib/repairCategoryTiming";
 
 import styles from "./RepairsHub.module.css";
 
@@ -35,7 +35,7 @@ const repairCategories = [
     description:
       "Broken screen, weak battery, charging fault, or water damage. We repair iPhone, Samsung, Oppo, Pixel, and more.",
     image: "/images/services/phone-repair.jpg",
-    metric: "15–60 Minutes",
+    metric: getRepairCategoryTimingLabel("phone", "hub"),
     detail: "Common screen and battery repairs",
   },
   {
@@ -44,7 +44,7 @@ const repairCategories = [
     description:
       "Fast iPad and Samsung tablet repairs with careful bonding, glass replacement, battery service, and charging fixes.",
     image: "/images/services/tablet-repair.jpg",
-    metric: "1–2 Hours",
+    metric: getRepairCategoryTimingLabel("tablet", "hub"),
     detail: "Most iPad and tablet repairs",
   },
   {
@@ -53,7 +53,7 @@ const repairCategories = [
     description:
       "MacBook screen, battery, keyboard, charging and diagnostic repair pathways matched to the exact model.",
     image: "/images/services/laptop-repair.jpg",
-    metric: "1–2 Hours",
+    metric: getRepairCategoryTimingLabel("laptop", "hub"),
     detail: "Model-specific repair options",
   },
   {
@@ -62,7 +62,7 @@ const repairCategories = [
     description:
       "Precision Apple Watch and smart watch screen, battery, rear glass, and sealing repairs for everyday wear.",
     image: "/images/services/watch-repair.jpg",
-    metric: `${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} Minutes`,
+    metric: getRepairCategoryTimingLabel("watch", "hub"),
     detail: "Standard repairs when parts are available",
   },
 ];

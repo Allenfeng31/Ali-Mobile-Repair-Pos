@@ -7,35 +7,31 @@ import styles from './HomeFAQ.module.css';
 const faqs = [
   {
     question: "Do I need an appointment, or can I walk in?",
-    answer: "Walk-ins are welcome at Ali Mobile & Repair, and online bookings get priority. If you want to check parts availability or timing before visiting, call us first."
+    answer: "Walk-ins are welcome at Ali Mobile & Repair. You can also check available repair pricing and book online before visiting. If you want to confirm parts availability or repair timing, please call ahead."
   },
   {
-    question: "Can I get a quote before repair?",
-    answer: "Yes. We confirm the quote before repair starts. Pricing depends on the device model, parts needed, and the condition of the device."
+    question: "Can I check the repair price before coming in?",
+    answer: "Yes. You can check available repair prices through our online booking flow and continue directly to booking. For repairs that do not have a listed price, we will provide a quote before repair work starts."
   },
   {
     question: "How long does a repair usually take?",
-    answer: "Repair time depends on the model, issue, queue and parts availability. Same-day repair may be available for many common phone models when parts are in stock, but we confirm timing after checking the device."
+    answer: "Many phone repairs take around 15–60 minutes. Tablet and iPad repairs and laptop or MacBook repairs typically take around 1–2 hours, while selected Apple Watch repairs are around 45 minutes. Actual timing depends on the model, repair type, fault, parts availability and whether diagnostics or specialist work is required."
   },
   {
-    question: "What devices do you repair?",
-    answer: "We repair a wide range of devices including iPhone, Samsung, Google Pixel, Oppo, iPad, MacBook, and selected Apple Watch models."
-  },
-  {
-    question: "Do you repair screens, batteries, and charging ports?",
-    answer: "Yes. Common repair options include screen replacement, battery replacement, charging port repair, and selected camera or housing repairs depending on the model."
+    question: "What devices and repairs do you offer?",
+    answer: "We repair phones, iPad and other tablets, laptops and MacBook models, and selected Apple Watch models. Common repairs include screen replacement, battery replacement, charging port repair, camera repairs and selected back glass or housing repairs, depending on the device and model."
   },
   {
     question: "Do you offer a warranty on repairs?",
-    answer: "Yes. Eligible repairs include warranty support. Please ask our team about warranty coverage for your device and repair type."
+    answer: "Yes. Standard repairs include a 6-month warranty. Water-damage repairs have no warranty."
   },
   {
-    question: "What if I’m not sure what’s wrong with my device?",
-    answer: "That’s okay. Bring the device in for a practical check and we’ll help identify the issue before confirming the repair."
+    question: "What if my device is not working or has water damage?",
+    answer: "Bring the device in for an assessment if you are not sure what is wrong. Water-damaged or non-working devices may require diagnostics, cleaning or further inspection, and repair time and pricing depend on the condition of the device. Recovery or successful repair cannot be guaranteed, and water-damage repairs have no warranty."
   },
   {
-    question: "Do you offer phone repair near me in Ringwood?",
-    answer: "Yes. Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre. If you are searching for phone repair near me around Ringwood, Ringwood East, Heathmont, Mitcham or Croydon, you can walk in or book online before visiting."
+    question: "Where is Ali Mobile & Repair located?",
+    answer: "Ali Mobile & Repair is located at Kiosk C1 inside Ringwood Square Shopping Centre, Ringwood VIC. Walk-ins are welcome, or you can check pricing and book online before visiting."
   }
 ];
 

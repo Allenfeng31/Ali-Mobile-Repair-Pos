@@ -30,7 +30,7 @@ export function getLocalBusinessSchemaData() {
     "url": "https://www.alimobile.com.au",
     "telephone": "0481 058 514",
     "priceRange": "$$",
-    "description": "Expert mobile phone, tablet, and laptop repair service located in Ringwood Square Shopping Centre, Melbourne. Specializing in screen replacements, micro-soldering, Face ID repair, and using OEM parts.",
+    "description": "Phone, tablet, MacBook and Apple Watch repair service located in Ringwood Square Shopping Centre, Melbourne. Clear quotes, walk-ins and online booking are available.",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Ringwood Square Shopping Centre Kiosk C1, Seymour St",
@@ -46,35 +46,8 @@ export function getLocalBusinessSchemaData() {
     },
     "openingHoursSpecification": [LOCAL_BUSINESS_OPENING_HOURS],
     "sameAs": [
-      "https://www.facebook.com/alimobileandreari/"
+      "https://www.facebook.com/AliMobile"
     ],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Specialty Repair Services",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Micro-soldering Repair"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Face ID Repair"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "OEM Parts Replacement"
-          }
-        }
-      ]
-    },
     "areaServed": {
       "@type": "GeoCircle",
       "geoMidpoint": {
