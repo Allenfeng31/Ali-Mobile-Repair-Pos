@@ -2,10 +2,11 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
-import { getRepairCategoryTimingLabel, SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION } from "@/lib/repairCategoryTiming";
+import { getRepairCategoryTimingLabel, GOOGLE_PIXEL_PHONE_REPAIR_TIMING_QUALIFICATION, SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION } from "@/lib/repairCategoryTiming";
 import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import { IPHONE_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/iphone/brand-hub-pricing";
 import { SAMSUNG_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/samsung/brand-hub-pricing";
+import { GOOGLE_PIXEL_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/google-pixel/brand-hub-pricing";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { getAppleWatchCatalogueStartingPrice } from "@/lib/repairStartingPrices";
 import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
@@ -1419,7 +1420,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandHubHeroDescription = getBrandHubHeroDescription(categorySlug, brandSlug, brandName, models.length);
   const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
-  const startingRepairPrice = isPhoneHub && !isIPhoneHub && !isSamsungPhoneHub ? getStartingRepairPrice(models) : null;
+  const startingRepairPrice = isPhoneHub && !isIPhoneHub && !isSamsungPhoneHub && !isGooglePixelHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : flatModelGroup;
@@ -1766,7 +1767,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       ? [
           {
             title: "Samsung Repair Pricing",
-            body: SAMSUNG_BRAND_HUB_PRICING_REFERENCE.qualification,
+            body: SAMSUNG_BRAND_HUB_PRICING_REFERENCE.heroQualification,
             priceRows: SAMSUNG_BRAND_HUB_PRICING_REFERENCE.rows,
           },
           {
@@ -1776,6 +1777,22 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           {
             title: "Parts Checked Before Repair",
             body: "We check compatible parts, confirm repair pricing and explain expected timing for your Samsung phone before starting any repair work.",
+          },
+        ]
+      : isGooglePixelHub
+      ? [
+          {
+            title: "Google Pixel Repair Pricing",
+            body: GOOGLE_PIXEL_BRAND_HUB_PRICING_REFERENCE.qualification,
+            priceRows: GOOGLE_PIXEL_BRAND_HUB_PRICING_REFERENCE.rows,
+          },
+          {
+            title: `Typical Repair Time: ${getRepairCategoryTimingLabel("phone", "hub")}`,
+            body: GOOGLE_PIXEL_PHONE_REPAIR_TIMING_QUALIFICATION,
+          },
+          {
+            title: "Parts Checked Before Repair",
+            body: "We check compatible parts, confirm repair pricing and explain expected timing for your Pixel before starting any repair work.",
           },
         ]
       : [
@@ -1977,7 +1994,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               {isIPhoneHub ? "Choose your iPhone model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
             </a>
             <Link href="/book-repair" className="repair-secondary-action">
-              {isIPhoneHub ? "Get a repair quote" : "Live Quote"}
+              {isIPhoneHub ? "Get a repair quote" : isGooglePixelHub ? "Book a Repair" : "Live Quote"}
               <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
             </Link>
           </div>
@@ -3546,7 +3563,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                   <div>
                     <p><strong>Six-month phone repair warranty</strong></p>
                     <p>
-                      {isIPhoneHub || isSamsungPhoneHub
+                      {isIPhoneHub || isSamsungPhoneHub || isGooglePixelHub
                         ? `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}`
                         : "Phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair."}
                     </p>

@@ -14,6 +14,26 @@ const seed = {
   related_repair_url: '/repairs/phone/future-brand/future-phone/screen-replacement',
 };
 
+const pixelBackGlassSeed = {
+  ...seed,
+  id: 'pixel-back-glass-result',
+  brand: 'Google Pixel',
+  model: 'Pixel 8 Pro',
+  repair_type: 'Back Housing Replacement',
+  repair_type_slug: 'back-glass-replacement',
+  title: 'Pixel 8 Pro Back Glass Replacement',
+  related_repair_url: '/repairs/phone/google-pixel/pixel-8-pro/back-glass-replacement',
+};
+
+const iphoneSeed = {
+  ...seed,
+  id: 'iphone-result',
+  brand: 'iPhone',
+  model: 'iPhone 15',
+  title: 'iPhone 15 screen repaired',
+  related_repair_url: '/repairs/phone/iphone/iphone-15/screen-replacement',
+};
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe('HubRepairResultsSection initial results contract', () => {
@@ -46,5 +66,24 @@ describe('HubRepairResultsSection initial results contract', () => {
     await act(async () => observe?.([{ isIntersecting: true } as IntersectionObserverEntry]));
     await waitFor(() => expect(screen.getByText('Future Phone screen repaired')).toBeTruthy());
     expect(fetchMock).toHaveBeenCalledWith('/api/public/repair-results/hub?category=phone', expect.any(Object));
+  });
+
+  it('uses canonical device and service semantics in the visible brand-hub result display without changing its URL', () => {
+    render(<HubRepairResultsSection category="phone" brand="google-pixel" scope="brand-hub" initialResults={[pixelBackGlassSeed, seed]} showResultSummary />);
+
+    expect(screen.getByText('Google Pixel 8 Pro - Back Glass Replacement')).toBeTruthy();
+    expect(screen.queryByText('Google Pixel Pixel 8 Pro - Back Housing Replacement')).toBeNull();
+    expect(screen.getByText('Back Glass')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
+      .toBe('/repairs/phone/google-pixel/pixel-8-pro/back-glass-replacement');
+  });
+
+  it('keeps an already complete single-brand model name natural', () => {
+    render(<HubRepairResultsSection category="phone" brand="iphone" scope="brand-hub" initialResults={[iphoneSeed]} showResultSummary />);
+
+    expect(screen.getByText('iPhone 15 - Screen Replacement')).toBeTruthy();
+    expect(screen.queryByText('iPhone iPhone 15 - Screen Replacement')).toBeNull();
+    expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
+      .toBe('/repairs/phone/iphone/iphone-15/screen-replacement');
   });
 });

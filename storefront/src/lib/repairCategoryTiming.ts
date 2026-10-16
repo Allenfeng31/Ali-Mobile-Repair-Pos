@@ -20,6 +20,9 @@ export const PHONE_REPAIR_TIMING_QUALIFICATION =
 export const SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION =
   "For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.";
 
+export const GOOGLE_PIXEL_PHONE_REPAIR_TIMING_QUALIFICATION =
+  "For many common Google Pixel repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.";
+
 export function getRepairCategoryTimingLabel(
   category: RepairCategoryTimingCategory,
   context: RepairCategoryTimingContext,

@@ -48,6 +48,42 @@ const GROUP_SHORT_LABELS: Record<RepairGroup, string> = {
   'back-glass-or-housing': 'Back Housing',
 };
 
+function getRepairResultDeviceName(brand: string, model: string): string {
+  const normalizedBrand = brand.trim();
+  const normalizedModel = model.trim();
+  const lowerBrand = normalizedBrand.toLowerCase();
+  const lowerModel = normalizedModel.toLowerCase();
+
+  if (lowerModel === lowerBrand || lowerModel.startsWith(`${lowerBrand} `)) {
+    return normalizedModel;
+  }
+
+  const brandTail = normalizedBrand.split(/\s+/).at(-1) || normalizedBrand;
+  const lowerBrandTail = brandTail.toLowerCase();
+  if (normalizedBrand.includes(' ') && (lowerModel === lowerBrandTail || lowerModel.startsWith(`${lowerBrandTail} `))) {
+    return `${normalizedBrand} ${normalizedModel.slice(brandTail.length).trim()}`;
+  }
+
+  return `${normalizedBrand} ${normalizedModel}`;
+}
+
+function getRepairResultServiceName(result: HubRepairResultItem): string {
+  if (result.related_repair_url?.split('?')[0].endsWith('/back-glass-replacement')) {
+    return 'Back Glass Replacement';
+  }
+  if (result.related_repair_url?.split('?')[0].endsWith('/back-housing-replacement')) {
+    return 'Back Housing Replacement';
+  }
+  return result.repair_type;
+}
+
+function getRepairResultShortLabel(result: HubRepairResultItem, group: RepairGroup): string {
+  if (group === 'back-glass-or-housing') {
+    return getRepairResultServiceName(result).replace(/ Replacement$/, '');
+  }
+  return GROUP_SHORT_LABELS[group];
+}
+
 const GROUPS_IN_ORDER: RepairGroup[] = ['screen', 'battery', 'charging-port', 'back-glass-or-housing'];
 const DESCRIPTION_TOGGLE_LENGTH = 160;
 
@@ -218,7 +254,7 @@ export default function HubRepairResultsSection({
                       onClick={() => activateResult(result)}
                     >
                       <span>{result.model}</span>
-                      <small>{GROUP_SHORT_LABELS[group]}</small>
+                      <small>{getRepairResultShortLabel(result, group)}</small>
                     </button>
                   );
                 })}
@@ -249,7 +285,7 @@ export default function HubRepairResultsSection({
                   hidden={!selected}
                 >
                   <h3>{result.title}</h3>
-                  <p className={styles.resultMeta}>{result.brand} {result.model} - {result.repair_type}</p>
+                  <p className={styles.resultMeta}>{getRepairResultDeviceName(result.brand, result.model)} - {getRepairResultServiceName(result)}</p>
                   {result.short_description && (
                     <p
                       id={descriptionId}

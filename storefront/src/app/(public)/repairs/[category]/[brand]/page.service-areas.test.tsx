@@ -261,11 +261,12 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(heroCards[0]?.textContent).toContain("Screen Replacement: AUD $129–$490");
     expect(heroCards[0]?.textContent).toContain("Battery Replacement: AUD $60–$120");
     expect(heroCards[0]?.textContent).toContain("Charging Port Repair: AUD $60–$120");
-    expect(heroCards[0]?.textContent).toContain("Indicative AUD prices for supported non-foldable Galaxy models. Excludes Z Fold and Z Flip. Select your model for exact pricing or a quote.");
+    expect(heroCards[0]?.textContent).toContain("Indicative AUD prices. Z Fold and Z Flip models excluded.");
     expect(heroCards[1]?.textContent).toContain("Typical Repair Time: 15–60 Minutes");
     expect(heroCards[1]?.textContent).toContain("For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
     expect(heroCards[2]?.textContent).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Samsung phone before starting any repair work.");
     expect(pricingFaq?.textContent).toContain("Screen Replacement: AUD $129–$490");
+    expect(pricingFaq?.textContent).toContain("Select your model for exact pricing or a quote.");
     expect(pricingFaq?.textContent).toContain("Quote on Request");
     expect(timingFaq?.textContent).toContain("15–60 Minutes");
     expect(timingFaq?.textContent).toContain("For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
@@ -275,6 +276,46 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(ssrHtml).toContain("Screen Replacement: AUD $129–$490");
     expect(ssrHtml).toContain("For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
     expect(ssrHtml).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Samsung phone before starting any repair work.");
+  });
+
+  it("renders Pixel-only owner-reviewed pricing, shared timing and warranty facts in matching hero and FAQ content", async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: "google-pixel" }) });
+    const ssrHtml = renderToStaticMarkup(pageElement);
+    const { container } = render(pageElement);
+    const hero = container.querySelector(".repair-tech-hero");
+    const heroCards = Array.from(hero?.querySelectorAll(".repair-hero-brand-proof-card") || []);
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "How much does a Google Pixel repair cost?"
+    ));
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "How long can a Google Pixel repair take?"
+    ));
+    const warrantyFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "Do Google Pixel repairs include a warranty?"
+    ));
+
+    expect(heroCards).toHaveLength(3);
+    expect(heroCards[0]?.textContent).toContain("Google Pixel Repair Pricing");
+    expect(heroCards[0]?.textContent).toContain("Screen Replacement: AUD $129–$450");
+    expect(heroCards[0]?.textContent).toContain("Battery Replacement: AUD $65–$179");
+    expect(heroCards[0]?.textContent).toContain("Charging Port Repair: AUD $65–$179");
+    expect(heroCards[0]?.textContent).toContain("Indicative AUD prices for supported Google Pixel models, including Pixel Fold. Prices vary by model and repair options. Select your model for exact pricing or a quote.");
+    expect(heroCards[1]?.textContent).toContain("Typical Repair Time: 15–60 Minutes");
+    expect(heroCards[1]?.textContent).toContain("For many common Google Pixel repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
+    expect(heroCards[2]?.textContent).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Pixel before starting any repair work.");
+    expect(pricingFaq?.textContent).toContain("Screen Replacement: AUD $129–$450");
+    expect(pricingFaq?.textContent).toContain("Pixel Fold");
+    expect(pricingFaq?.textContent).toContain("Quote on Request");
+    expect(timingFaq?.textContent).toContain("15–60 Minutes");
+    expect(timingFaq?.textContent).toContain("Foldable and complex repairs may take longer.");
+    expect(warrantyFaq?.textContent).toContain("Completed standard repairs include a 6-month warranty covering the replacement part and labour.");
+    expect(warrantyFaq?.textContent).toContain("The service has no warranty.");
+    expect(container.querySelector('a[href="/book-repair"]')?.textContent).toContain("Book a Repair");
+    expect(container.textContent).not.toContain("live pricing");
+    expect(container.textContent).not.toContain("Live Quote");
+    expect(ssrHtml).toContain("Screen Replacement: AUD $129–$450");
+    expect(ssrHtml).toContain("For many common Google Pixel repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
+    expect(ssrHtml).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Pixel before starting any repair work.");
   });
 
   it("keeps the owner-reviewed iPhone price rows off Samsung, Pixel, OPPO and secondary Brand Hubs", async () => {
@@ -299,6 +340,19 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       expect(container.textContent).not.toContain("Screen Replacement: AUD $129–$490");
       expect(container.textContent).not.toContain("Battery Replacement: AUD $60–$120");
       expect(container.textContent).not.toContain("Charging Port Repair: AUD $60–$120");
+
+      unmount();
+    }
+  });
+
+  it("keeps Pixel owner-reviewed price rows off iPhone, Samsung, OPPO and secondary Brand Hubs", async () => {
+    for (const brandSlug of ["iphone", "samsung", "oppo", secondaryPhoneBrands[0][0]]) {
+      const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: brandSlug }) });
+      const { container, unmount } = render(pageElement);
+
+      expect(container.textContent).not.toContain("Screen Replacement: AUD $129–$450");
+      expect(container.textContent).not.toContain("Battery Replacement: AUD $65–$179");
+      expect(container.textContent).not.toContain("Charging Port Repair: AUD $65–$179");
 
       unmount();
     }
