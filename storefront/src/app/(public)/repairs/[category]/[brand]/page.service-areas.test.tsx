@@ -240,6 +240,43 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(container.textContent).not.toContain("Price Guide");
   });
 
+  it("renders Samsung-only owner-reviewed pricing, shared timing and warranty facts in matching hero and FAQ content", async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: "samsung" }) });
+    const ssrHtml = renderToStaticMarkup(pageElement);
+    const { container } = render(pageElement);
+    const hero = container.querySelector(".repair-tech-hero");
+    const heroCards = Array.from(hero?.querySelectorAll(".repair-hero-brand-proof-card") || []);
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "How much does a Samsung phone repair cost?"
+    ));
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "How long can a Samsung repair take?"
+    ));
+    const warrantyFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "Do Samsung phone repairs include a warranty?"
+    ));
+
+    expect(heroCards).toHaveLength(3);
+    expect(heroCards[0]?.textContent).toContain("Samsung Repair Pricing");
+    expect(heroCards[0]?.textContent).toContain("Screen Replacement: AUD $129–$490");
+    expect(heroCards[0]?.textContent).toContain("Battery Replacement: AUD $60–$120");
+    expect(heroCards[0]?.textContent).toContain("Charging Port Repair: AUD $60–$120");
+    expect(heroCards[0]?.textContent).toContain("Indicative AUD prices for supported non-foldable Galaxy models. Excludes Z Fold and Z Flip. Select your model for exact pricing or a quote.");
+    expect(heroCards[1]?.textContent).toContain("Typical Repair Time: 15–60 Minutes");
+    expect(heroCards[1]?.textContent).toContain("For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
+    expect(heroCards[2]?.textContent).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Samsung phone before starting any repair work.");
+    expect(pricingFaq?.textContent).toContain("Screen Replacement: AUD $129–$490");
+    expect(pricingFaq?.textContent).toContain("Quote on Request");
+    expect(timingFaq?.textContent).toContain("15–60 Minutes");
+    expect(timingFaq?.textContent).toContain("For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
+    expect(warrantyFaq?.textContent).toContain("Completed standard repairs include a 6-month warranty covering the replacement part and labour.");
+    expect(warrantyFaq?.textContent).toContain("The service has no warranty.");
+    expect(container.textContent).not.toContain("live pricing");
+    expect(ssrHtml).toContain("Screen Replacement: AUD $129–$490");
+    expect(ssrHtml).toContain("For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
+    expect(ssrHtml).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Samsung phone before starting any repair work.");
+  });
+
   it("keeps the owner-reviewed iPhone price rows off Samsung, Pixel, OPPO and secondary Brand Hubs", async () => {
     for (const [brandSlug] of [...majorPhoneBrands, secondaryPhoneBrands[0]]) {
       const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: brandSlug }) });
@@ -249,6 +286,19 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       expect(container.textContent).not.toContain("Battery Replacement: AUD $45–$250");
       expect(container.textContent).not.toContain("Charging Port Repair: AUD $50–$220");
       expect(container.querySelector("main")).toBeNull();
+
+      unmount();
+    }
+  });
+
+  it("keeps Samsung owner-reviewed price rows off iPhone, Pixel, OPPO and secondary Brand Hubs", async () => {
+    for (const brandSlug of ["iphone", ...majorPhoneBrands.filter(([slug]) => slug !== "samsung").map(([slug]) => slug), secondaryPhoneBrands[0][0]]) {
+      const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: brandSlug }) });
+      const { container, unmount } = render(pageElement);
+
+      expect(container.textContent).not.toContain("Screen Replacement: AUD $129–$490");
+      expect(container.textContent).not.toContain("Battery Replacement: AUD $60–$120");
+      expect(container.textContent).not.toContain("Charging Port Repair: AUD $60–$120");
 
       unmount();
     }

@@ -1,6 +1,7 @@
-import { getRepairCategoryTimingLabel, PHONE_REPAIR_TIMING_QUALIFICATION } from "@/lib/repairCategoryTiming";
+import { getRepairCategoryTimingLabel, PHONE_REPAIR_TIMING_QUALIFICATION, SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION } from "@/lib/repairCategoryTiming";
 import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import { getIphoneBrandHubPricingFaqAnswer } from "@/lib/seo/content/iphone/brand-hub-pricing";
+import { getSamsungBrandHubPricingFaqAnswer } from "@/lib/seo/content/samsung/brand-hub-pricing";
 
 export interface PhoneBrandHubContent {
   slug: string;
@@ -155,11 +156,11 @@ export const PHONE_BRAND_HUBS: Record<string, PhoneBrandHubContent> = {
     faqs: [
       { question: "Which Samsung phone models do you repair?", answer: "This page lists the currently supported public Samsung phone models, including Galaxy S, A, Note and Z series devices. If your exact model is not shown, contact the Ringwood Square store and we can confirm whether a repair path is available." },
       { question: "How can I identify my Samsung model?", answer: "If the phone turns on, check Settings > About phone for the model name or model number. If the device is damaged or you are unsure, contact the store or bring it to Ringwood Square and we can help identify it before quoting." },
-      { question: "How much does a Samsung phone repair cost?", answer: "Cost depends on the exact Samsung model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
-      { question: "How long can a Samsung repair take?", answer: "Timing depends on the exact model, the fault, current stock, the repair queue and the device condition found during assessment. We confirm practical timing before the repair is approved." },
+      { question: "How much does a Samsung phone repair cost?", answer: getSamsungBrandHubPricingFaqAnswer() },
+      { question: "How long can a Samsung repair take?", answer: `Typical repair time for many common Samsung repairs is ${getRepairCategoryTimingLabel("phone", "hub")}. ${SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION}` },
       { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific Samsung model." },
       { question: "Will my data normally be affected by a Samsung repair?", answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in." },
-      { question: "Do Samsung phone repairs include a warranty?", answer: "Eligible Samsung phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair." },
+      { question: "Do Samsung phone repairs include a warranty?", answer: `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}` },
       { question: "What happens if the required Samsung part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed." },
       { question: "Is it better to repair or replace my Samsung phone?", answer: "That depends on the phone age, overall condition, repair quote, other faults, data needs and replacement cost. After checking the model and fault, we can explain the practical options." },
       { question: "Can water resistance be guaranteed after a Samsung repair?", answer: "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally used in water." }

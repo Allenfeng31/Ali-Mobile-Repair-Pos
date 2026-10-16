@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
-import { getRepairCategoryTimingLabel } from "@/lib/repairCategoryTiming";
+import { getRepairCategoryTimingLabel, SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION } from "@/lib/repairCategoryTiming";
 import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import { IPHONE_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/iphone/brand-hub-pricing";
+import { SAMSUNG_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/samsung/brand-hub-pricing";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { getAppleWatchCatalogueStartingPrice } from "@/lib/repairStartingPrices";
 import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
@@ -1418,7 +1419,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandHubHeroDescription = getBrandHubHeroDescription(categorySlug, brandSlug, brandName, models.length);
   const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
-  const startingRepairPrice = isPhoneHub && !isIPhoneHub ? getStartingRepairPrice(models) : null;
+  const startingRepairPrice = isPhoneHub && !isIPhoneHub && !isSamsungPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : flatModelGroup;
@@ -1759,6 +1760,22 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           {
             title: "Parts Checked Before Repair",
             body: "We check compatible parts, confirm repair pricing and explain expected timing for your iPhone before starting any repair work.",
+          },
+        ]
+      : brandSlug === "samsung"
+      ? [
+          {
+            title: "Samsung Repair Pricing",
+            body: SAMSUNG_BRAND_HUB_PRICING_REFERENCE.qualification,
+            priceRows: SAMSUNG_BRAND_HUB_PRICING_REFERENCE.rows,
+          },
+          {
+            title: `Typical Repair Time: ${getRepairCategoryTimingLabel("phone", "hub")}`,
+            body: SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION,
+          },
+          {
+            title: "Parts Checked Before Repair",
+            body: "We check compatible parts, confirm repair pricing and explain expected timing for your Samsung phone before starting any repair work.",
           },
         ]
       : [
@@ -3529,7 +3546,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                   <div>
                     <p><strong>Six-month phone repair warranty</strong></p>
                     <p>
-                      {isIPhoneHub
+                      {isIPhoneHub || isSamsungPhoneHub
                         ? `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}`
                         : "Phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair."}
                     </p>

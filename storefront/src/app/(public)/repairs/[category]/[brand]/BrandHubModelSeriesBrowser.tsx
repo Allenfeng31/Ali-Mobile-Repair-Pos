@@ -88,6 +88,24 @@ export default function BrandHubModelSeriesBrowser({
           );
         })}
       </div>
+      <noscript>
+        <nav aria-label={`${brandSlug} model links without JavaScript`}>
+          {seriesGroups.map((series) => (
+            <section key={series.key}>
+              <h2>{series.label}</h2>
+              <ul>
+                {series.models.map((entry) => (
+                  <li key={entry.slug}>
+                    <Link href={`/repairs/${categorySlug}/${brandSlug}/${entry.slug}`} prefetch={false}>
+                      {entry.model}{entry.modelCode ? ` (${entry.modelCode})` : ""}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </nav>
+      </noscript>
     </div>
   );
 }
