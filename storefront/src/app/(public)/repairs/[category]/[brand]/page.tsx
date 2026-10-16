@@ -37,7 +37,7 @@ import MacBookModelFinder from "./MacBookModelFinder";
 import BrandHubLinks from "./BrandHubLinks";
 import BrandHubModelSeriesBrowser, { type BrandHubSeriesGroup } from "./BrandHubModelSeriesBrowser";
 import IPhoneServiceAreaLinks, { type IPhoneServiceAreaLinkCard } from "./IPhoneServiceAreaLinks";
-import { ArrowRight, ClipboardCheck, Clock3, MapPin, Search, ShieldCheck, Smartphone } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Clock3, MapPin, PhoneCall, Search, ShieldCheck, Smartphone } from "lucide-react";
 
 export const revalidate = 86400;
 export const dynamicParams = true; // Allow on-demand generation of new brand pages
@@ -1993,10 +1993,10 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             <a href="#models-list" className="repair-primary-action">
               {isIPhoneHub ? "Choose your iPhone model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
             </a>
-            <Link href="/book-repair" className="repair-secondary-action">
-              {isIPhoneHub ? "Get a repair quote" : isGooglePixelHub ? "Book a Repair" : "Live Quote"}
-              <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
-            </Link>
+            <a href="tel:0481058514" className="repair-secondary-action">
+              <PhoneCall size={18} strokeWidth={2.7} aria-hidden="true" />
+              Call Us
+            </a>
           </div>
         </div>
         {isPhoneHub && (

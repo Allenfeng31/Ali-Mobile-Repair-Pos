@@ -62,6 +62,24 @@ vi.mock("@/lib/api", () => ({
         slug: "samsung",
         models: [{ slug: "galaxy-tab-a8-sm-x200-sm-x205", model: "Galaxy Tab A8", repairTypes: [] }],
       },
+      {
+        category: "tablet",
+        slug: "lenovo",
+        brand: "Lenovo",
+        models: [{ slug: "tab-p12", model: "Lenovo Tab P12", repairTypes: [] }],
+      },
+      {
+        category: "laptop",
+        slug: "macbook",
+        brand: "MacBook",
+        models: [{ slug: "macbook-air-m2", model: "MacBook Air M2", repairTypes: [] }],
+      },
+      {
+        category: "watch",
+        slug: "apple",
+        brand: "Apple Watch",
+        models: [{ slug: "apple-watch-series-9", model: "Apple Watch Series 9", repairTypes: [] }],
+      },
       ...majorPhoneBrands.map(([slug, brand]) => ({
         category: "phone",
         slug,
@@ -353,6 +371,40 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       expect(container.textContent).not.toContain("Screen Replacement: AUD $129–$450");
       expect(container.textContent).not.toContain("Battery Replacement: AUD $65–$179");
       expect(container.textContent).not.toContain("Charging Port Repair: AUD $65–$179");
+
+      unmount();
+    }
+  });
+
+  it("uses one Call Us phone link for every Brand Hub Hero secondary CTA", async () => {
+    const cases = [
+      { category: "phone", brand: "iphone", primary: "Choose your iPhone model", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "phone", brand: "samsung", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "phone", brand: "google-pixel", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "phone", brand: "oppo", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "phone", brand: secondaryPhoneBrands[0][0], primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "tablet", brand: "ipad", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "tablet", brand: "samsung", primary: "Choose your Samsung tablet model", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "tablet", brand: "lenovo", primary: "Choose your Lenovo tablet model", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "laptop", brand: "macbook", primary: "Choose your MacBook model", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "watch", brand: "apple", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+    ];
+
+    for (const testCase of cases) {
+      const pageElement = await BrandHubPage({ params: Promise.resolve(testCase) });
+      const { container, unmount } = render(pageElement);
+      const hero = container.querySelector(".repair-tech-hero");
+      const primary = hero?.querySelector<HTMLAnchorElement>(".repair-primary-action");
+      const secondary = hero?.querySelector<HTMLAnchorElement>(".repair-secondary-action");
+
+      expect(primary?.textContent).toContain(testCase.primary);
+      expect(primary?.getAttribute("href")).toBe("#models-list");
+      expect(secondary?.textContent).toContain(testCase.secondary);
+      expect(secondary?.getAttribute("href")).toBe(testCase.href);
+      expect(secondary?.getAttribute("aria-label")).toBeNull();
+      expect(hero?.textContent).not.toContain("Live Quote");
+      expect(hero?.textContent).not.toContain("Get a repair quote");
+      expect(hero?.textContent).not.toContain("Book a Repair");
 
       unmount();
     }
