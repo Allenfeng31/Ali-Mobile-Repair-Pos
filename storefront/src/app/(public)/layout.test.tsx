@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import PublicLayout from "./layout";
 import RepairsHubPage from "./repairs/page";
+import BrandHubPage from "./repairs/[category]/[brand]/page";
 
 vi.mock("../ClientChatWidget", () => ({ default: () => null }));
 vi.mock("../Header", () => ({ default: () => null }));
@@ -18,6 +19,27 @@ vi.mock("@/components/SocialIcon", () => ({
   default: () => <svg aria-hidden="true" />,
 }));
 vi.mock("@/components/ChatNowButton", () => ({ default: () => null }));
+vi.mock("@/components/FloatingJumpCTA", () => ({ default: () => null }));
+vi.mock("@/components/repair-results/HubRepairResultsSection", () => ({ default: () => null }));
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({ back: vi.fn() })),
+  notFound: vi.fn(),
+}));
+vi.mock("@/lib/api", () => ({
+  fetchBrandModels: vi.fn().mockResolvedValue({ brand: { brand: "iPhone" } }),
+  fetchRepairCatalog: vi.fn().mockResolvedValue({
+    brands: [{
+      category: "phone",
+      brand: "iPhone",
+      slug: "iphone",
+      models: [{
+        slug: "iphone-15",
+        model: "iPhone 15",
+        repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 50 }],
+      }],
+    }],
+  }),
+}));
 vi.mock("@/components/seo/ServiceAreas", () => ({ default: () => <section>Local coverage</section> }));
 vi.mock("next/image", () => ({
   default: () => <span data-next-image="true" />,
@@ -42,6 +64,15 @@ describe("PublicLayout footer", () => {
 
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getByRole("main")).toContainElement(screen.getByRole("heading", { level: 1, name: "Device Repair Services" }));
+  });
+
+  it("keeps the iPhone Brand Hub inside the PublicLayout's sole main landmark", async () => {
+    const page = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: "iphone" }) });
+
+    render(<PublicLayout>{page}</PublicLayout>);
+
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+    expect(screen.getByRole("main")).toContainElement(screen.getByRole("heading", { level: 1, name: "iPhone Repair" }));
   });
 
   it("renders the standard-repairs warranty label without changing its trust strip", () => {

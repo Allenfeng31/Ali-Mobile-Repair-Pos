@@ -5007,6 +5007,18 @@ input:checked+.toggle-slider:before {
   line-height: 1.55;
 }
 
+.repair-hero-brand-proof-price-list {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .repair-hero-insight-panel::before {
   content: "";
   position: absolute;
@@ -5658,6 +5670,10 @@ input:checked+.toggle-slider:before {
   background: transparent;
   border: 0;
   box-shadow: none;
+}
+
+.brand-hub-page .brand-hub-models-section[id] {
+  scroll-margin-top: 150px;
 }
 
 .brand-hub-section-header {

@@ -14,6 +14,9 @@ const REPAIR_CATEGORY_TIMING: Record<RepairCategoryTimingCategory, {
   watch: { duration: APPLE_WATCH_STANDARD_TURNAROUND_MINUTES, unit: "minutes", approximate: true },
 };
 
+export const PHONE_REPAIR_TIMING_QUALIFICATION =
+  "This range applies to many common iPhone repairs. Actual timing depends on the model, repair type, diagnosis, parts availability and workshop workload. Complex, board-level or liquid-damage repairs may take longer.";
+
 export function getRepairCategoryTimingLabel(
   category: RepairCategoryTimingCategory,
   context: RepairCategoryTimingContext,

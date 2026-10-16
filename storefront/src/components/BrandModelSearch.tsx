@@ -61,6 +61,7 @@ export default function BrandModelSearch({
           type="text"
           className="search-input"
           placeholder={placeholder}
+          aria-label={placeholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

@@ -1,3 +1,7 @@
+import { getRepairCategoryTimingLabel, PHONE_REPAIR_TIMING_QUALIFICATION } from "@/lib/repairCategoryTiming";
+import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
+import { getIphoneBrandHubPricingFaqAnswer } from "@/lib/seo/content/iphone/brand-hub-pricing";
+
 export interface PhoneBrandHubContent {
   slug: string;
   brandName: string;
@@ -130,10 +134,10 @@ export const PHONE_BRAND_HUBS: Record<string, PhoneBrandHubContent> = {
       { question: "What does Parts and Service History mean on iPhone?", answer: "Parts and Service History or related messages can vary by iPhone model, part option, pairing and iOS behaviour. We explain any relevant effect once the model and repair path are selected.", modelSelectionLink: true },
       { question: "Will third-party iPhone repair affect Apple warranty?", answer: "Apple warranty and AppleCare decisions are controlled by Apple. Independent repair may affect how Apple handles related issues, and Ali Mobile is an independent repair shop rather than part of Apple's service-provider network. If your iPhone is still covered by Apple warranty or AppleCare, check with Apple first before choosing independent repair." },
       { question: "Will I lose my data during iPhone repair?", answer: "Most iPhone screen, battery and charging port repairs do not require a data wipe. Back up first where possible, especially if the iPhone has liquid damage, board faults or severe damage that can carry higher data risk." },
-      { question: "How long can an iPhone repair take?", answer: "Timing depends on the exact model, repair path, current stock and the device condition found during assessment. We confirm practical timing before the repair is approved.", modelSelectionLink: true },
-      { question: "How much does an iPhone repair cost?", answer: "Cost depends on the exact iPhone model, repair type, fault and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
+      { question: "How long can an iPhone repair take?", answer: `Typical repair time for many common iPhone repairs is ${getRepairCategoryTimingLabel("phone", "hub")}. ${PHONE_REPAIR_TIMING_QUALIFICATION}`, modelSelectionLink: true },
+      { question: "How much does an iPhone repair cost?", answer: getIphoneBrandHubPricingFaqAnswer() },
       { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your specific iPhone model." },
-      { question: "Do you provide a repair warranty?", answer: "Eligible screen, battery, charging-port and back-housing repairs include a 6-month warranty on the fitted part and workmanship. Coverage has conditions and does not cover unrelated faults, later physical damage or later liquid exposure where applicable." },
+      { question: "Do you provide a repair warranty?", answer: `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}` },
       { question: "What happens if the required part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed." },
       { question: "Is it better to repair or replace my iPhone?", answer: "That depends on the iPhone age, overall condition, repair quote, other faults, storage or data needs, and replacement cost. After checking the model and fault, we can explain the practical options." }
     ]

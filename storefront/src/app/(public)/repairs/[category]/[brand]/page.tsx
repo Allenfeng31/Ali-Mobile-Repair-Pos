@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPhoneBrandHubContent, getPhoneBrandRepairKeyword } from "@/lib/phone-brand-hubs";
+import { getRepairCategoryTimingLabel } from "@/lib/repairCategoryTiming";
+import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
+import { IPHONE_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/iphone/brand-hub-pricing";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { getAppleWatchCatalogueStartingPrice } from "@/lib/repairStartingPrices";
 import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
@@ -1415,7 +1418,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandHubHeroDescription = getBrandHubHeroDescription(categorySlug, brandSlug, brandName, models.length);
   const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
-  const startingRepairPrice = isPhoneHub ? getStartingRepairPrice(models) : null;
+  const startingRepairPrice = isPhoneHub && !isIPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : flatModelGroup;
@@ -1745,18 +1748,17 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     ? brandSlug === "iphone"
       ? [
           {
-            title: startingRepairPrice ? `iPhone Repairs from $${formatStartingRepairPrice(startingRepairPrice)}` : "iPhone Repair Pricing",
-            body: startingRepairPrice
-              ? `Selected iPhone repair services start from $${formatStartingRepairPrice(startingRepairPrice)}. Choose your exact model to view current repair options and pricing.`
-              : "Choose your exact iPhone model to view current repair options and pricing.",
+            title: "iPhone Repair Pricing",
+            body: "Indicative AUD prices vary by model and repair options. Select your model for exact pricing or a quote.",
+            priceRows: IPHONE_BRAND_HUB_PRICING_REFERENCE.rows,
           },
           {
-            title: "Timing Confirmed by Model",
-            body: "Timing depends on the exact iPhone model, repair path, parts availability and diagnosis. Choose your model to check the practical repair path before booking.",
+            title: `Typical Repair Time: ${getRepairCategoryTimingLabel("phone", "hub")}`,
+            body: "For many common iPhone repairs. Timing depends on model, parts availability and diagnosis. Complex repairs may take longer.",
           },
           {
             title: "Parts Checked Before Repair",
-            body: "We confirm the available part, quote and practical timing for the selected iPhone model before work begins.",
+            body: "We check compatible parts, confirm repair pricing and explain expected timing for your iPhone before starting any repair work.",
           },
         ]
       : [
@@ -1902,7 +1904,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   };
 
   return (
-    <main className={`repair-page-shell ${!usesBrandHubDesign ? "repair-page-shell-narrow" : ""} ${usesBrandHubDesign ? "brand-hub-page" : ""} ${isIPadHub ? "tablet-brand-hub-page" : ""} ${isAppleWatchHub ? "watch-brand-hub-page" : ""}`}>
+    <div className={`repair-page-shell ${!usesBrandHubDesign ? "repair-page-shell-narrow" : ""} ${usesBrandHubDesign ? "brand-hub-page" : ""} ${isIPadHub ? "tablet-brand-hub-page" : ""} ${isAppleWatchHub ? "watch-brand-hub-page" : ""}`}>
       <nav className="repair-breadcrumb" aria-label="breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
@@ -1935,7 +1937,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
       />
       <section
         className="repair-tech-hero repair-tech-hero-compact"
-        aria-labelledby="brand-repair-heading"
+        aria-labelledby="category-repair-heading"
       >
         <div className="repair-tech-hero-copy">
           <BackButton fallbackHref={`/repairs/${categorySlug}`} />
@@ -1968,6 +1970,13 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             {phoneHeroInsightCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
+                {"priceRows" in card && card.priceRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.priceRows.map((row) => (
+                      <li key={row.service}>{row.service}: {row.range}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p>{card.body}</p>
               </article>
             ))}
@@ -3519,7 +3528,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                   <h3>Repair support and aftercare</h3>
                   <div>
                     <p><strong>Six-month phone repair warranty</strong></p>
-                    <p>Phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.</p>
+                    <p>
+                      {isIPhoneHub
+                        ? `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}`
+                        : "Phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair."}
+                    </p>
                     <p><strong>Data and functional testing</strong></p>
                     <p>Important data should be backed up where possible. After the repair, the relevant device functions are checked, but a data outcome cannot be guaranteed.</p>
                     <p><strong>Resealing after repair</strong></p>
@@ -3695,6 +3708,6 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         </>
       )}
       <FloatingJumpCTA targetId="models-list" label={floatingJumpLabel} />
-    </main>
+    </div>
   );
 }
