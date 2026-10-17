@@ -12,7 +12,6 @@ import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getRepairCategoryTimingLabel, TABLET_STANDARD_REPAIR_TIMING } from '@/lib/repairCategoryTiming';
 import { BUSINESS_HOURS } from '@/lib/businessHours';
 import { TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE, TABLET_CATEGORY_META_DESCRIPTION } from '@/lib/seo/content/tablet/category-hub';
-import { APPLE_WATCH_CATEGORY_META_DESCRIPTION, APPLE_WATCH_CATEGORY_PRICING_COPY } from '@/lib/seo/content/apple-watch/category-hub-pricing';
 import { STANDARD_WARRANTY_SUMMARY } from '@/lib/repairPolicy';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
@@ -49,8 +48,8 @@ const CATEGORY_HERO_MEDIA = {
   },
   watch: {
     image: '/images/repair-hero/apple-watch-exploded-430x487.png?v=hero-exploded-fit-1',
-    alt: 'Exploded Apple Watch repair parts showing display, frame, battery, sensors, and rear housing',
-    ariaLabel: 'Exploded Apple Watch repair parts preview',
+    alt: 'Exploded smartwatch repair parts showing display, frame, battery, sensors, and rear housing',
+    ariaLabel: 'Exploded smartwatch repair parts preview',
     width: 430,
     height: 487,
   },
@@ -206,19 +205,19 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   },
   watch: {
     metadata: {
-      title: 'Apple Watch Repair Services by Model | Ali Mobile',
-      description: APPLE_WATCH_CATEGORY_META_DESCRIPTION,
+      title: 'Smartwatch Repair Services | Ali Mobile',
+      description: 'Smartwatch screen, battery and charging repair assessments for supported models. Explore Apple Watch options, check compatibility or request a quote.',
     },
     hero: {
       pillType: 'accent',
-      pillText: 'Watch Specialist',
-      title: 'Apple Watch Repair Services by Model',
-      intro1: 'Select your watch model to view supported repair pathways for screen, battery and diagnostic issues where available.',
-      intro2: 'Repair timing depends on the exact model, device condition, parts availability and inspection. We confirm the practical repair path and quote after checking the watch first.',
+      pillText: 'Smartwatch Repair',
+      title: 'Smartwatch Repair Services',
+      intro1: 'Explore supported smartwatch repair assessments for screen, battery, charging and diagnostic issues.',
+      intro2: 'Select an available brand and model to check compatibility or request a quote. We confirm the practical repair path after checking the watch first.',
     },
     schema: {
-      serviceName: 'Apple Watch Repair Services by Model',
-      description: "Smart watch repair pathways for supported Apple Watch models, including screen, battery and diagnostic options where available.",
+      serviceName: 'Smartwatch Repair Services',
+      description: "Smartwatch repair assessments for supported models, including screen, battery, charging and diagnostic options where available.",
     },
     features: [
       { t: "Parts availability varies by brand and model", d: "Replacement parts are model-specific and we confirm availability before quoting." },
@@ -229,7 +228,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
     faqs: [
       { question: "Do you offer same-day smart watch repairs in Ringwood?", answer: "Some smart watch repairs may move faster when the exact model and part are confirmed, but we do not promise same-day completion before checking the watch, parts availability, repair queue and device condition." },
       { question: "What if my smart watch will not turn on or charge?", answer: "A no-power or charging fault needs diagnosis first so we can confirm whether the issue is related to the battery, charging path, display behaviour or another fault before quoting." },
-      { question: "Why do I need the exact model and case size?", answer: "Repair compatibility, parts selection and pricing depend on the exact smartwatch brand, generation, model and case size. Apple Watch models are currently available on the public repair path." },
+      { question: "Why do I need the exact model and case size?", answer: "Repair compatibility, parts selection and pricing depend on the exact smartwatch brand, generation, model and case size. Apple Watch is currently available on the public repair path." },
       { question: "Will my smart watch remain water resistant after repair?", answer: "Factory water resistance cannot be guaranteed after opening or repair. We may reseal where appropriate, but adhesive replacement does not restore guaranteed factory water-resistance certification." },
       { question: "Is a smart watch repair worth it?", answer: "That depends on the brand, model, device condition, damage, repair quote, and replacement-device value. Once we confirm the exact model and fault, we can explain the practical repair path." }
     ]
@@ -358,13 +357,12 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
       ? 'Choose Your Tablet Brand'
       : isLaptop
         ? 'Choose Your Laptop Brand'
-        : 'Choose Your Watch Model';
+        : 'Choose Your Watch Brand';
   const phoneTimingLabel = isPhone ? getRepairCategoryTimingLabel('phone', 'hub') : null;
-  const watchTimingLabel = isWatch ? getRepairCategoryTimingLabel('watch', 'hub').replace('min', 'minutes') : null;
   const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
-  const watchBrandSectionCopy = 'Select your exact Apple Watch model to view compatible repair options and current pricing where available.';
+  const watchBrandSectionCopy = 'Select the available smartwatch brand and exact model to view compatible repair options and current pricing where available.';
   const ringwoodSupportCopy = isWatch
     ? 'We confirm the exact model, device condition, parts availability and practical repair path before quoting timing or starting work. Ali Mobile & Repair operates from Ringwood Square Shopping Centre Kiosk C1, and you can call ahead or book before visiting.'
     : isPhone
@@ -506,7 +504,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         >
           <div className="repair-section-header">
             <span>{isLaptop ? 'Choose your laptop path' : isWatch ? 'Choose your smartwatch brand' : isTablet ? 'Choose your tablet brand' : 'Choose your device path'}</span>
-            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : isWatch ? 'Smart Watch Brand and Model Paths' : isTablet ? 'Tablet Brands and Model Paths' : 'Most Popular Brands'}</h2>
+            <h2 id="popular-brands-heading">{isLaptop ? 'Laptop Brands and Model Paths' : isWatch ? 'Choose Your Watch Brand' : isTablet ? 'Tablet Brands and Model Paths' : 'Most Popular Brands'}</h2>
             <p>
               {isLaptop
                 ? laptopBrandSectionCopy
@@ -1104,16 +1102,9 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
             <section className="repair-content-band" aria-labelledby="pricing-guidance-heading">
               <div className="repair-section-header">
                 <span>Model-first pricing</span>
-                <h2 id="pricing-guidance-heading">{isWatch ? 'Select your Apple Watch model to view current pricing' : 'Select your brand and model to view current pricing'}</h2>
-                <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.'}</p>
+                <h2 id="pricing-guidance-heading">{isWatch ? 'Select a supported smartwatch model to view repair options' : 'Select your brand and model to view current pricing'}</h2>
+                <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Compatibility and pricing are confirmed from the exact brand, model and case-size path where applicable. Choose an available smartwatch pathway above to view options or request a quote.'}</p>
                 {isTablet && <p>{TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE.bodyCopy}</p>}
-                {isWatch && (
-                  <>
-                    <p>{APPLE_WATCH_CATEGORY_PRICING_COPY}</p>
-                    <p>Many standard smartwatch repairs take {watchTimingLabel}. Timing depends on the model, diagnosis, parts availability and workshop workload. Complex repairs, work requiring diagnosis or parts ordering may take longer.</p>
-                    <p>Eligible standard repairs include a 6-month warranty. Water-damage repairs have no warranty. Factory water resistance cannot be guaranteed after repair.</p>
-                  </>
-                )}
               </div>
             </section>
           </ScrollReveal>

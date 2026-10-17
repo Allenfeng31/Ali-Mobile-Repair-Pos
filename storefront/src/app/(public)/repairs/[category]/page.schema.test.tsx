@@ -90,7 +90,7 @@ describe('CategoryHubPage service schema', () => {
   it.each([
     ['tablet', 'Choose Your Tablet Brand', 'brands-list', '/repairs/tablet/ipad'],
     ['laptop', 'Choose Your Laptop Brand', 'laptop-brands', '/repairs/laptop/dell'],
-    ['watch', 'Choose Your Watch Model', 'watch-model-selection', '/repairs/watch/apple'],
+    ['watch', 'Choose Your Watch Brand', 'watch-model-selection', '/repairs/watch/apple'],
   ])('keeps the shared %s category template landmark-free and targets its existing selection section', async (category, label, targetId, brandHref) => {
     const html = renderToStaticMarkup(await CategoryHubPage({ params: Promise.resolve({ category }) }));
 
@@ -107,7 +107,7 @@ describe('CategoryHubPage service schema', () => {
     }
 
     if (category === 'watch') {
-      expect(html).toContain('Smart Watch Brand and Model Paths');
+      expect(html.match(/Choose Your Watch Brand/g)).toHaveLength(2);
     }
 
     if (category === 'tablet') {
@@ -140,17 +140,24 @@ describe('CategoryHubPage service schema', () => {
     expect(html).toContain('href="/repairs/laptop/macbook"');
   });
 
-  it('uses owner-confirmed Apple Watch starting prices with model, timing and warranty qualifications', async () => {
+  it('keeps the smartwatch category focused on supported model discovery rather than Apple Watch commercial terms', async () => {
     const metadata = await generateMetadata({ params: Promise.resolve({ category: 'watch' }) });
     const html = renderToStaticMarkup(await CategoryHubPage({ params: Promise.resolve({ category: 'watch' }) }));
 
-    expect(metadata.title).toBe('Apple Watch Repair Services by Model | Ali Mobile');
-    expect(metadata.description).toBe('Apple Watch repair in Ringwood. Screen repairs from $150, battery from $90 on selected models. Around 45 min for many repairs. 6-month warranty on eligible repairs.');
+    expect(metadata.title).toBe('Smartwatch Repair Services | Ali Mobile');
+    expect(metadata.description).toBe('Smartwatch screen, battery and charging repair assessments for supported models. Explore Apple Watch options, check compatibility or request a quote.');
     expect(metadata.alternates?.canonical).toBe('/repairs/watch');
-    expect(html).toContain('Apple Watch screen repairs start from $150 and battery replacements from $90 for selected models. Select your exact model and case size to view published options or request a quote.');
-    expect(html).toContain('Many standard smartwatch repairs take around 45 minutes. Timing depends on the model, diagnosis, parts availability and workshop workload. Complex repairs, work requiring diagnosis or parts ordering may take longer.');
-    expect(html).toContain('Eligible standard repairs include a 6-month warranty. Water-damage repairs have no warranty. Factory water resistance cannot be guaranteed after repair.');
+    expect(state.serviceProps).toEqual([{
+      url: 'https://www.alimobile.com.au/repairs/watch',
+      serviceName: 'Smartwatch Repair Services',
+      description: 'Smartwatch repair assessments for supported models, including screen, battery, charging and diagnostic options where available.',
+    }]);
+    expect(html).toContain('>Smartwatch Repair Services</h1>');
+    expect(html).toContain('Explore supported smartwatch repair assessments for screen, battery, charging and diagnostic issues.');
+    expect(html).toContain('Select a supported smartwatch model to view repair options');
     expect(html).toContain('href="/repairs/watch/apple"');
+    expect(html).not.toContain('Apple Watch Repairs from');
+    expect(html).not.toContain('battery replacements from $90');
     expect(html).not.toMatch(/live pricing|live POS/i);
   });
 });

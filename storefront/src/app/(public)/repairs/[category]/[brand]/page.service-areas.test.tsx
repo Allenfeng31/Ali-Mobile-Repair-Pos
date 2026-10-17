@@ -447,6 +447,38 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     }
   });
 
+  it("keeps Apple Watch commercial facts on the Apple Watch Brand Hub", async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ category: "watch", brand: "apple" }) });
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "watch", brand: "apple" }) });
+    const ssrHtml = renderToStaticMarkup(pageElement);
+    const { container } = render(pageElement);
+    const heroCards = Array.from(container.querySelectorAll(".repair-tech-hero .repair-hero-brand-proof-card"));
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "How much does Apple Watch repair cost?"
+    ));
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "How long does Apple Watch repair take?"
+    ));
+    const warrantyFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => (
+      item.querySelector("summary")?.textContent === "Do Apple Watch repairs include warranty?"
+    ));
+
+    expect(metadata.title).toBe("Apple Watch Repair | Screen, Battery & Diagnostics | Ali Mobile");
+    expect(metadata.description).toBe("Apple Watch screen repairs from $150 and battery replacements from $90. Many standard repairs take around 45 minutes. 6-month warranty on eligible repairs.");
+    expect(heroCards).toHaveLength(3);
+    expect(heroCards[0]?.textContent).toContain("Apple Watch Repair Pricing");
+    expect(heroCards[0]?.textContent).toContain("Selected Apple Watch screen repairs start from $150 and selected battery replacements from $90.");
+    expect(heroCards[1]?.textContent).toContain("Water-damage repairs are excluded.");
+    expect(heroCards[2]?.textContent).toContain("Typical Repair Time: around 45 minutes");
+    expect(heroCards[2]?.textContent).toContain("Complex repairs or work requiring parts ordering may take longer.");
+    expect(pricingFaq?.textContent).toContain("Selected Apple Watch screen repairs start from $150 and selected battery replacements from $90.");
+    expect(timingFaq?.textContent).toContain("Many standard Apple Watch repairs take around 45 minutes.");
+    expect(timingFaq?.textContent).not.toContain("1-2 days");
+    expect(warrantyFaq?.textContent).toContain("Water-damage repairs are excluded.");
+    expect(ssrHtml).toContain("Selected Apple Watch screen repairs start from $150 and selected battery replacements from $90.");
+    expect(ssrHtml).toContain('href="/repairs/watch/apple/apple-watch-series-9"');
+  });
+
   it("renders the owner-reviewed iPad pricing, timing and opening-hours cards", async () => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "tablet", brand: "ipad" }) });
     const { container } = render(pageElement);

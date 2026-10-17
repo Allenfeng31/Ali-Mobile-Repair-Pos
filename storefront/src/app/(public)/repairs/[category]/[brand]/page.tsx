@@ -30,9 +30,11 @@ import {
   getLenovoTabletBrandHubMetadataDescription,
   getLenovoTabletBrandHubPricingFaqAnswer,
 } from "@/lib/seo/content/lenovo-tablet/brand-hub-pricing";
+import {
+  APPLE_WATCH_BRAND_HUB_META_DESCRIPTION,
+  APPLE_WATCH_BRAND_HUB_PRICING_COPY,
+} from "@/lib/seo/content/apple-watch/brand-hub-pricing";
 import { REPAIR_TYPES } from "@/data/seo-data";
-import { getAppleWatchCatalogueStartingPrice } from "@/lib/repairStartingPrices";
-import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
 import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
 import { formatDynamicParam, safeSlugSegment } from "@/lib/inventoryUtils";
@@ -305,11 +307,11 @@ const APPLE_WATCH_FAQS = [
   },
   {
     question: "How much does Apple Watch repair cost?",
-    answer: "Price depends on the exact Apple Watch model, fault, repair type, parts availability and device condition. The final quote is confirmed after the model and repair option are checked.",
+    answer: `${APPLE_WATCH_BRAND_HUB_PRICING_COPY} Pricing still depends on the exact Apple Watch model, fault, repair type, parts availability and device condition.`,
   },
   {
     question: "How long does Apple Watch repair take?",
-    answer: "Timing depends on the exact model, fault, repair queue and part availability. If the required part is not in stock, we usually need 1-2 days to order parts.",
+    answer: "Many standard Apple Watch repairs take around 45 minutes. Timing depends on the exact model, repair type, diagnosis, parts availability and workshop workload. Complex repairs or work requiring parts ordering may take longer.",
   },
   {
     question: "What if the Apple Watch part is not in stock?",
@@ -317,7 +319,7 @@ const APPLE_WATCH_FAQS = [
   },
   {
     question: "Do Apple Watch repairs include warranty?",
-    answer: "Supported Apple Watch repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
+    answer: "Eligible standard Apple Watch repairs include a 6-month warranty, subject to warranty terms. Water-damage repairs are excluded.",
   },
   {
     question: "Can you replace a cracked Apple Watch screen?",
@@ -1343,7 +1345,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     description = phoneContent.metadata.description;
   } else if (isAppleWatch) {
     title = 'Apple Watch Repair | Screen, Battery & Diagnostics | Ali Mobile';
-    description = "Apple Watch repair at Ringwood Square for Melbourne's eastern suburbs. Choose your model for screen, battery and diagnostic quote options.";
+    description = APPLE_WATCH_BRAND_HUB_META_DESCRIPTION;
   } else if (isIPad) {
     title = 'iPad Repair | Screen, Battery & Charging | Ali Mobile';
     description = getIPadBrandHubMetadataDescription(BUSINESS_HOURS.metadataDisplay);
@@ -1928,22 +1930,19 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
       ]
     : [];
-  const appleWatchStartingRepairPrice = isAppleWatchHub ? getAppleWatchCatalogueStartingPrice(models) : null;
   const appleWatchHeroInsightCards = isAppleWatchHub
     ? [
         {
-          title: appleWatchStartingRepairPrice
-            ? `Apple Watch Repairs from $${formatStartingRepairPrice(appleWatchStartingRepairPrice)}`
-            : "Apple Watch Repairs — Quote on Request",
-          body: "We check the exact Apple Watch model, fault and part option before confirming the repair quote.",
+          title: "Apple Watch Repair Pricing",
+          body: APPLE_WATCH_BRAND_HUB_PRICING_COPY,
         },
         {
           title: "6-Month Repair Warranty",
-          body: "Supported Apple Watch repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
+          body: "Eligible standard Apple Watch repairs include a 6-month warranty, subject to warranty terms. Water-damage repairs are excluded.",
         },
         {
-          title: `${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} Minutes for Standard Repairs`,
-          body: `Standard Apple Watch part-based repairs typically take around ${APPLE_WATCH_STANDARD_TURNAROUND_MINUTES} minutes when the required part is available. If the part is not in stock, we usually need 1-2 days to order it.`,
+          title: `Typical Repair Time: ${getRepairCategoryTimingLabel("watch", "hub").replace("min", "minutes")}`,
+          body: "Many standard Apple Watch repairs take around 45 minutes. Timing depends on the exact model, repair type, diagnosis, parts availability and workshop workload. Complex repairs or work requiring parts ordering may take longer.",
         },
       ]
     : [];
