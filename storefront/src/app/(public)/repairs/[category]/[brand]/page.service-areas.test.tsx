@@ -5,7 +5,7 @@ import { cleanup, render } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import BrandHubPage from "./page";
+import BrandHubPage, { generateMetadata } from "./page";
 
 const secondaryPhoneBrands = vi.hoisted(() => [
   ["asus", "Asus"],
@@ -383,7 +383,7 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       { category: "phone", brand: "google-pixel", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
       { category: "phone", brand: "oppo", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
       { category: "phone", brand: secondaryPhoneBrands[0][0], primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
-      { category: "tablet", brand: "ipad", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "tablet", brand: "ipad", primary: "Choose your iPad model", secondary: "Call Us", href: "tel:0481058514" },
       { category: "tablet", brand: "samsung", primary: "Choose your Samsung tablet model", secondary: "Call Us", href: "tel:0481058514" },
       { category: "tablet", brand: "lenovo", primary: "Choose your Lenovo tablet model", secondary: "Call Us", href: "tel:0481058514" },
       { category: "laptop", brand: "macbook", primary: "Choose your MacBook model", secondary: "Call Us", href: "tel:0481058514" },
@@ -410,35 +410,119 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     }
   });
 
-  it("renders only the approved four local cards for the iPad Brand Hub", async () => {
+  it("renders the owner-reviewed iPad pricing, timing and opening-hours cards", async () => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "tablet", brand: "ipad" }) });
     const { container } = render(pageElement);
 
     expectApprovedLocalCards(container);
-    expect(container.textContent).toContain("Many standard iPad repairs are completed in around 1 hour.");
-    expect(container.textContent).toContain("some charging port repairs may require additional time");
+    const heroCards = Array.from(container.querySelectorAll(".repair-tech-hero .repair-hero-brand-proof-card"));
+    const pricingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "iPad Repair Pricing");
+    const timingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "iPad Repair Time");
+    const hoursCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Opening Hours");
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How much does an iPad repair cost?");
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How long can an iPad repair take?");
+
+    expect(heroCards).toHaveLength(3);
+    expect(pricingCard?.textContent).toContain("Screen Replacement: $99–$420");
+    expect(pricingCard?.textContent).toContain("Battery Replacement: $100–$190");
+    expect(pricingCard?.textContent).toContain("Charging Port Repair: $120–$179");
+    expect(pricingCard?.querySelectorAll("li")).toHaveLength(3);
+    expect(pricingCard?.textContent).toContain("Indicative AUD prices for applicable models. Select your exact iPad model for available pricing or a quote.");
+    expect(timingCard?.textContent).toContain("Around 1 Hour");
+    expect(timingCard?.textContent).toContain("Many standard repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(hoursCard?.textContent).toContain("Monday–Saturday: 9:00am–5:00pm");
+    expect(hoursCard?.textContent).toContain("Sunday: Closed");
+    expect(hoursCard?.textContent).toContain("Walk-ins are welcome.");
+    expect(pricingFaq?.textContent).toContain("Screen Replacement: $99–$420; Battery Replacement: $100–$190; Charging Port Repair: $120–$179.");
+    expect(timingFaq?.textContent).toContain("Many standard repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
+    const heroIntroduction = Array.from(container.querySelectorAll(".repair-tech-hero-copy > p"));
+    expect(heroIntroduction).toHaveLength(2);
+    expect(heroIntroduction[0]?.textContent).toBe("Cracked iPad screen, battery problems or charging issues? We repair supported iPad, iPad Air, iPad mini and iPad Pro models.");
+    expect(heroIntroduction[1]?.textContent).toBe("Choose your model to check repair options and pricing, or request a quote. Walk-ins are welcome at our Ringwood store.");
+    expect(container.textContent).toContain("How much does an iPad repair cost?");
+    expect(container.textContent).toContain("How long can an iPad repair take?");
     expect(container.textContent).not.toMatch(/iPad Repairs from \$50|45 minutes|same[ -]day|while you wait|immediate|instant/i);
   });
 
-  it("keeps Samsung Tablet pricing catalogue-safe and gives only the approved standard-repair timing guidance", async () => {
+  it("keeps iPad owner-reviewed pricing off other Brand Hubs", async () => {
+    for (const [category, brand] of [["phone", "iphone"], ["tablet", "samsung"], ["tablet", "lenovo"], ["laptop", "macbook"], ["watch", "apple"]] as const) {
+      const pageElement = await BrandHubPage({ params: Promise.resolve({ category, brand }) });
+      const { container, unmount } = render(pageElement);
+
+      expect(container.textContent).not.toContain("Screen Replacement: $99–$420");
+      expect(container.textContent).not.toContain("Battery Replacement: $100–$190");
+      expect(container.textContent).not.toContain("Charging Port Repair: $120–$179");
+
+      unmount();
+    }
+  });
+
+  it("renders Samsung tablet owner-reviewed pricing, timing and opening hours while preserving the warranty FAQ", async () => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "tablet", brand: "samsung" }) });
     const { container } = render(pageElement);
+    const heroCards = Array.from(container.querySelectorAll(".repair-tech-hero .repair-hero-brand-proof-card"));
+    const pricingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Samsung Tablet Repair Pricing");
+    const timingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Samsung Tablet Repair Time");
+    const hoursCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Opening Hours");
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How much does Samsung tablet repair cost?");
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How long can a Samsung tablet repair take?");
+    const warrantyFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "What warranty applies to Samsung tablet repair?");
 
     expect(container.textContent).toContain("Samsung Tablet Repair");
-    expect(container.textContent).toContain("View Current Pricing by Model");
-    expect(container.textContent).toContain("Around 1 Hour for Standard Repairs");
+    expect(heroCards).toHaveLength(3);
+    expect(pricingCard?.textContent).toContain("Galaxy Tab A Screen Replacement: $139–$220");
+    expect(pricingCard?.textContent).toContain("Galaxy Tab S Screen Replacement: $180–$450");
+    expect(pricingCard?.textContent).toContain("Battery Replacement: $90–$179");
+    expect(pricingCard?.textContent).toContain("Charging Port Repair: $89–$150");
+    expect(pricingCard?.textContent).toContain("Galaxy Tab Active and other Samsung tablets may need a model-specific price or Quote on Request.");
+    expect(timingCard?.textContent).toContain("Around 1 Hour");
+    expect(timingCard?.textContent).toContain("Many standard Samsung Tablet repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(hoursCard?.textContent).toContain("Monday–Saturday: 9:00am–5:00pm");
+    expect(hoursCard?.textContent).toContain("Sunday: Closed");
+    expect(pricingFaq?.textContent).toContain("Galaxy Tab A Screen Replacement: $139–$220; Galaxy Tab S Screen Replacement: $180–$450; Battery Replacement: $90–$179; Charging Port Repair: $89–$150.");
+    expect(timingFaq?.textContent).toContain("Many standard Samsung Tablet repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(warrantyFaq?.textContent).toContain("Completed standard repairs include a 6-month warranty covering the replacement part and labour.");
+    expect(warrantyFaq?.textContent).toContain("The service has no warranty.");
+    expect(container.textContent).toContain("Samsung tablet repair in Ringwood for cracked screens, battery problems and charging issues.");
     expect(container.textContent).not.toMatch(/from \$50|45 minutes|same[ -]day|while you wait|immediate/i);
     expect(container.querySelector('a[href="/repairs/tablet/samsung/galaxy-tab-a8-sm-x200-sm-x205"]')).not.toBeNull();
   });
 
-  it("keeps Lenovo Tablet pricing catalogue-safe and gives only the approved standard-repair timing guidance", async () => {
+  it("renders Lenovo tablet owner-reviewed pricing, timing and opening hours", async () => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "tablet", brand: "lenovo" }) });
     const { container } = render(pageElement);
+    const heroCards = Array.from(container.querySelectorAll(".repair-tech-hero .repair-hero-brand-proof-card"));
+    const pricingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Lenovo Tablet Repair Pricing");
+    const timingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Lenovo Tablet Repair Time");
+    const hoursCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Opening Hours");
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How much does Lenovo tablet repair cost?");
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How long can a Lenovo tablet repair take?");
 
     expect(container.textContent).toContain("Lenovo Tablet Repair");
-    expect(container.textContent).toContain("View Current Pricing by Model");
-    expect(container.textContent).toContain("Around 1 Hour for Standard Repairs");
+    expect(heroCards).toHaveLength(3);
+    expect(pricingCard?.textContent).toContain("Screen Replacement: $120–$240");
+    expect(pricingCard?.textContent).toContain("Battery Replacement: $89–$149");
+    expect(pricingCard?.textContent).toContain("Charging Port Repair: $79–$150");
+    expect(timingCard?.textContent).toContain("Around 1 Hour");
+    expect(timingCard?.textContent).toContain("Many standard Lenovo tablet repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(hoursCard?.textContent).toContain("Monday–Saturday: 9:00am–5:00pm");
+    expect(hoursCard?.textContent).toContain("Sunday: Closed");
+    expect(pricingFaq?.textContent).toContain("Screen Replacement: $120–$240; Battery Replacement: $89–$149; Charging Port Repair: $79–$150.");
+    expect(timingFaq?.textContent).toContain("Many standard Lenovo tablet repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(container.textContent).toContain("Lenovo tablet repair in Ringwood for cracked screens, battery problems and charging issues.");
     expect(container.textContent).not.toMatch(/Lenovo Tablet Repairs from \$50|from \$50|same[ -]day|while you wait|immediate/i);
+  });
+
+  it("uses owner-reviewed tablet pricing and authoritative opening hours in metadata", async () => {
+    await expect(generateMetadata({ params: Promise.resolve({ category: "tablet", brand: "ipad" }) })).resolves.toMatchObject({
+      description: "iPad repair in Ringwood. Screen $99–$420, battery $100–$190, charging $120–$179 (indicative). Around 1 hour for many repairs. Open Mon–Sat 9am–5pm.",
+    });
+    await expect(generateMetadata({ params: Promise.resolve({ category: "tablet", brand: "samsung" }) })).resolves.toMatchObject({
+      description: "Samsung tablet repair in Ringwood. Galaxy Tab A screens $139–$220; Tab S screens $180–$450; battery $90–$179; charging $89–$150 (indicative). Open Mon–Sat 9am–5pm.",
+    });
+    await expect(generateMetadata({ params: Promise.resolve({ category: "tablet", brand: "lenovo" }) })).resolves.toMatchObject({
+      description: "Lenovo tablet repair in Ringwood. Screen $120–$240, battery $89–$149, charging $79–$150 (indicative). Open Mon–Sat 9am–5pm.",
+    });
   });
 
   it('emits no unpriced Offer nodes for all 15 secondary-phone brand hubs', async () => {

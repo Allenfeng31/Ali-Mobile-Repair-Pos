@@ -7,6 +7,25 @@ import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/
 import { IPHONE_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/iphone/brand-hub-pricing";
 import { SAMSUNG_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/samsung/brand-hub-pricing";
 import { GOOGLE_PIXEL_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/google-pixel/brand-hub-pricing";
+import {
+  IPAD_BRAND_HUB_PRICING_REFERENCE,
+  IPAD_BRAND_HUB_TIMING_REFERENCE,
+  getIPadBrandHubMetadataDescription,
+  getIPadBrandHubPricingFaqAnswer,
+} from "@/lib/seo/content/ipad/brand-hub-pricing";
+import { BUSINESS_HOURS } from "@/lib/businessHours";
+import {
+  SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE,
+  SAMSUNG_TABLET_BRAND_HUB_TIMING_REFERENCE,
+  getSamsungTabletBrandHubMetadataDescription,
+  getSamsungTabletBrandHubPricingFaqAnswer,
+} from "@/lib/seo/content/samsung-tablet/brand-hub-pricing";
+import {
+  LENOVO_TABLET_BRAND_HUB_PRICING_REFERENCE,
+  LENOVO_TABLET_BRAND_HUB_TIMING_REFERENCE,
+  getLenovoTabletBrandHubMetadataDescription,
+  getLenovoTabletBrandHubPricingFaqAnswer,
+} from "@/lib/seo/content/lenovo-tablet/brand-hub-pricing";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { getAppleWatchCatalogueStartingPrice } from "@/lib/repairStartingPrices";
 import { APPLE_WATCH_STANDARD_TURNAROUND_MINUTES } from "@/lib/seo/content/apple-watch";
@@ -376,11 +395,11 @@ const IPAD_FAQS = [
   },
   {
     question: "How much does an iPad repair cost?",
-    answer: "Price depends on the exact iPad model, fault, device condition and current parts availability. Choose your model in the browser to view the available price or Quote status.",
+    answer: getIPadBrandHubPricingFaqAnswer(),
   },
   {
     question: "How long can an iPad repair take?",
-    answer: "Timing depends on the model, repair type, parts stock, device condition and repair queue. If a part needs to be ordered, likely timing is explained before approval.",
+    answer: IPAD_BRAND_HUB_TIMING_REFERENCE.qualification,
   },
   {
     question: "Do I need to make a booking?",
@@ -461,11 +480,11 @@ const SAMSUNG_TABLET_FAQS = [
   },
   {
     question: "How much does Samsung tablet repair cost?",
-    answer: "Price depends on the exact Samsung tablet model, fault, parts availability and device condition. Choose your model first to view available price or Quote status.",
+    answer: getSamsungTabletBrandHubPricingFaqAnswer(),
   },
   {
     question: "How long can a Samsung tablet repair take?",
-    answer: "Timing depends on the model, repair type, stock availability and repair queue. If a Samsung tablet part needs to be ordered, availability and likely timing are explained before approval.",
+    answer: SAMSUNG_TABLET_BRAND_HUB_TIMING_REFERENCE.qualification,
   },
   {
     question: "Can you replace a Samsung tablet charging port?",
@@ -477,7 +496,7 @@ const SAMSUNG_TABLET_FAQS = [
   },
   {
     question: "What warranty applies to Samsung tablet repair?",
-    answer: "Eligible Samsung tablet repairs include a six-month repair warranty, subject to the warranty conditions and exclusions explained with the repair.",
+    answer: `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}`,
   },
   {
     question: "What happens if the Samsung tablet part is not in stock?",
@@ -546,11 +565,11 @@ const LENOVO_TABLET_FAQS = [
   },
   {
     question: "How much does Lenovo tablet repair cost?",
-    answer: "Price depends on the exact Lenovo tablet model, fault, parts availability and device condition. Choose your model first to view available price or Quote status.",
+    answer: getLenovoTabletBrandHubPricingFaqAnswer(),
   },
   {
     question: "How long can a Lenovo tablet repair take?",
-    answer: "Timing depends on the model, repair type, stock availability and repair queue. If a Lenovo tablet part needs to be ordered, availability and likely timing are explained before approval.",
+    answer: LENOVO_TABLET_BRAND_HUB_TIMING_REFERENCE.qualification,
   },
   {
     question: "Can you replace a Lenovo tablet charging port?",
@@ -1274,15 +1293,15 @@ function getBrandHubHeroDescription(
   }
 
   if (categorySlug === "tablet" && brandSlug === "ipad") {
-    return "Choose your exact iPad model to view available screen, LCD, battery, charging, front camera and back camera repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+    return "iPad repairs in Ringwood for screen, battery and charging port issues. Choose your exact iPad model to see available repair options, pricing or a quote.";
   }
 
   if (categorySlug === "tablet" && brandSlug === "samsung") {
-    return "Choose your exact Samsung tablet model to view available screen, battery and charging repair options. Our Ringwood Square repair desk supports Galaxy Tab S, Tab A and Tab Active customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+    return "Samsung tablet repair in Ringwood for cracked screens, battery problems and charging issues. We support selected Galaxy Tab A, Tab S and Tab Active models; choose your exact model to check repair options, indicative pricing or a quote.";
   }
 
   if (categorySlug === "tablet" && brandSlug === "lenovo") {
-    return "Choose your exact Lenovo tablet model to view available screen, battery and charging repair options. Our Ringwood Square repair desk supports Lenovo Tab, Tab M, Tab P and Yoga Tab customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+    return "Lenovo tablet repair in Ringwood for cracked screens, battery problems and charging issues. We support selected Lenovo Tab, Tab M, Tab P and Yoga Tab models; choose your exact model to check repair options, indicative pricing or a quote.";
   }
 
   return `Select your exact ${brandName} model below to view repair options and pricing at Ringwood Square.`;
@@ -1323,13 +1342,13 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     description = "Apple Watch repair at Ringwood Square for Melbourne's eastern suburbs. Choose your model for screen, battery and diagnostic quote options.";
   } else if (isIPad) {
     title = 'iPad Repair | Screen, Battery & Charging | Ali Mobile';
-    description = "iPad repair at Ringwood Square for Melbourne's eastern suburbs. Check screen, LCD, battery, charging and camera repair options by exact model.";
+    description = getIPadBrandHubMetadataDescription(BUSINESS_HOURS.metadataDisplay);
   } else if (isSamsungTablet) {
     title = 'Samsung Tablet Repair | Screen, Battery & Charging | Ali Mobile';
-    description = "Samsung Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Choose your Galaxy Tab model for screen, battery and charging options.";
+    description = getSamsungTabletBrandHubMetadataDescription(BUSINESS_HOURS.metadataDisplay);
   } else if (isLenovoTablet) {
     title = 'Lenovo Tablet Repair | Screen, Battery & Charging | Ali Mobile';
-    description = "Lenovo Tablet repair at Ringwood Square for Melbourne's eastern suburbs. Choose your Lenovo Tab, Tab M, Tab P or Yoga Tab model for screen, battery and charging options.";
+    description = getLenovoTabletBrandHubMetadataDescription(BUSINESS_HOURS.metadataDisplay);
   } else if (isMacBookHub) {
     title = 'MacBook Repair in Ringwood | Ali Mobile & Repair';
     description = 'MacBook repair services in Ringwood for supported screen, battery, keyboard or top case, charging and diagnostic issues. Visit Ali Mobile & Repair at Ringwood Square to confirm the model, parts availability and suitable repair options.';
@@ -1817,48 +1836,57 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const ipadHeroInsightCards = isIPadHub
     ? [
         {
-          title: "iPad repair pricing",
-          body: "Choose your exact iPad model to view current repair options, current pricing or the quote requirement.",
+          title: "iPad Repair Pricing",
+          body: IPAD_BRAND_HUB_PRICING_REFERENCE.qualification,
+          priceRows: IPAD_BRAND_HUB_PRICING_REFERENCE.rows,
         },
         {
-          title: "iPad repair timing",
-          body: "Many standard iPad repairs are completed in around 1 hour. Repair timing depends on the service selected, and some charging port repairs may require additional time.",
+          title: IPAD_BRAND_HUB_TIMING_REFERENCE.title,
+          value: IPAD_BRAND_HUB_TIMING_REFERENCE.primaryValue,
+          body: IPAD_BRAND_HUB_TIMING_REFERENCE.qualification,
         },
         {
-          title: "Exact iPad model matters",
-          body: "Parts and repair options can differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
+          title: "Opening Hours",
+          scheduleRows: BUSINESS_HOURS.customerFacingSchedule,
+          body: "Walk-ins are welcome.",
         },
       ]
     : [];
   const lenovoTabletHeroInsightCards = isLenovoTabletHub
     ? [
         {
-          title: "View Current Pricing by Model",
-          body: "Choose your exact Lenovo tablet model to view current repair options and pricing.",
+          title: "Lenovo Tablet Repair Pricing",
+          body: LENOVO_TABLET_BRAND_HUB_PRICING_REFERENCE.qualification,
+          priceRows: LENOVO_TABLET_BRAND_HUB_PRICING_REFERENCE.rows,
         },
         {
-          title: "6-Month Repair Warranty",
-          body: "Eligible Lenovo tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.",
+          title: LENOVO_TABLET_BRAND_HUB_TIMING_REFERENCE.title,
+          value: LENOVO_TABLET_BRAND_HUB_TIMING_REFERENCE.primaryValue,
+          body: LENOVO_TABLET_BRAND_HUB_TIMING_REFERENCE.qualification,
         },
         {
-          title: "Around 1 Hour for Standard Repairs",
-          body: "Many standard Lenovo tablet repairs take around 1 hour once the correct part is available. Timing can vary if additional damage is found during inspection.",
+          title: "Opening Hours",
+          scheduleRows: BUSINESS_HOURS.customerFacingSchedule,
+          body: "Walk-ins are welcome.",
         },
       ]
     : [];
   const samsungTabletHeroInsightCards = isSamsungTabletHub
     ? [
         {
-          title: "View Current Pricing by Model",
-          body: "Choose your exact Samsung tablet model to view current repair options and pricing.",
+          title: "Samsung Tablet Repair Pricing",
+          body: SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE.qualification,
+          priceRows: SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE.rows,
         },
         {
-          title: "6-Month Repair Warranty",
-          body: "Eligible Samsung tablet repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair.",
+          title: SAMSUNG_TABLET_BRAND_HUB_TIMING_REFERENCE.title,
+          value: SAMSUNG_TABLET_BRAND_HUB_TIMING_REFERENCE.primaryValue,
+          body: SAMSUNG_TABLET_BRAND_HUB_TIMING_REFERENCE.qualification,
         },
         {
-          title: "Around 1 Hour for Standard Repairs",
-          body: "Many standard Samsung tablet repairs take around 1 hour once the correct part is available. Timing can vary if additional damage is found during inspection.",
+          title: "Opening Hours",
+          scheduleRows: BUSINESS_HOURS.customerFacingSchedule,
+          body: "Walk-ins are welcome.",
         },
       ]
     : [];
@@ -1984,14 +2012,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               ? "MacBook Repair in Ringwood"
               : brandHubHeading}
           </h1>
-          <p>
-            {isMacBookHub
-              ? "Ali Mobile & Repair provides MacBook repair in Ringwood at Ringwood Square Shopping Centre. Choose your exact MacBook Air or MacBook Pro model to check screen repair, battery replacement, keyboard or top case, charging port and USB-C assessment options before we confirm the quote and parts path."
-              : brandHubHeroDescription}
-          </p>
+          {isIPadHub ? (
+            <>
+              <p>Cracked iPad screen, battery problems or charging issues? We repair supported iPad, iPad Air, iPad mini and iPad Pro models.</p>
+              <p>Choose your model to check repair options and pricing, or request a quote. Walk-ins are welcome at our Ringwood store.</p>
+            </>
+          ) : (
+            <p>
+              {isMacBookHub
+                ? "Ali Mobile & Repair provides MacBook repair in Ringwood at Ringwood Square Shopping Centre. Choose your exact MacBook Air or MacBook Pro model to check screen repair, battery replacement, keyboard or top case, charging port and USB-C assessment options before we confirm the quote and parts path."
+                : brandHubHeroDescription}
+            </p>
+          )}
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
-              {isIPhoneHub ? "Choose your iPhone model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
+              {isIPhoneHub ? "Choose your iPhone model" : isIPadHub ? "Choose your iPad model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
             </a>
             <a href="tel:0481058514" className="repair-secondary-action">
               <PhoneCall size={18} strokeWidth={2.7} aria-hidden="true" />
@@ -2066,6 +2101,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             {ipadHeroInsightCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
+                {"priceRows" in card && card.priceRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.priceRows.map((row) => (
+                      <li key={row.service}>{row.service}: {row.range}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {"value" in card && card.value ? <p><strong>{card.value}</strong></p> : null}
+                {"scheduleRows" in card && card.scheduleRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.scheduleRows.map(({ days, hours }) => (
+                      <li key={days}>{days}: {hours}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p>{card.body}</p>
               </article>
             ))}
@@ -2076,6 +2126,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             {samsungTabletHeroInsightCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
+                {"priceRows" in card && card.priceRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.priceRows.map((row) => (
+                      <li key={row.service}>{row.service}: {row.range}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {"scheduleRows" in card && card.scheduleRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.scheduleRows.map(({ days, hours }) => (
+                      <li key={days}>{days}: {hours}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {"value" in card && card.value ? <p><strong>{card.value}</strong></p> : null}
                 <p>{card.body}</p>
               </article>
             ))}
@@ -2086,6 +2151,21 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             {lenovoTabletHeroInsightCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
+                {"priceRows" in card && card.priceRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.priceRows.map((row) => (
+                      <li key={row.service}>{row.service}: {row.range}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {"value" in card && card.value ? <p><strong>{card.value}</strong></p> : null}
+                {"scheduleRows" in card && card.scheduleRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.scheduleRows.map(({ days, hours }) => (
+                      <li key={days}>{days}: {hours}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p>{card.body}</p>
               </article>
             ))}

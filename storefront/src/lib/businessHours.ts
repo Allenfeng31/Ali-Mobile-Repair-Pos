@@ -13,6 +13,11 @@ export const BUSINESS_HOURS = Object.freeze({
   closes: "17:00",
   compactDisplay: "Mon-Sat, 9am-5pm",
   sentenceDisplay: "9am to 5pm, Monday to Saturday",
+  metadataDisplay: "Mon–Sat 9am–5pm",
+  customerFacingSchedule: Object.freeze([
+    { days: "Monday–Saturday", hours: "9:00am–5:00pm" },
+    { days: "Sunday", hours: "Closed" },
+  ] as const),
   bookingStartSlots: Object.freeze([
     "09:00",
     "09:30",

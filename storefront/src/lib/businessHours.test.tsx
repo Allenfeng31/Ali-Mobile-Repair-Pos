@@ -14,6 +14,11 @@ describe("business hours", () => {
     expect(BUSINESS_HOURS.closes).toBe("17:00");
     expect(BUSINESS_HOURS.compactDisplay).toBe("Mon-Sat, 9am-5pm");
     expect(BUSINESS_HOURS.sentenceDisplay).toBe("9am to 5pm, Monday to Saturday");
+    expect(BUSINESS_HOURS.metadataDisplay).toBe("Mon–Sat 9am–5pm");
+    expect(BUSINESS_HOURS.customerFacingSchedule).toEqual([
+      { days: "Monday–Saturday", hours: "9:00am–5:00pm" },
+      { days: "Sunday", hours: "Closed" },
+    ]);
     expect(BUSINESS_HOURS.bookingStartSlots).toHaveLength(16);
     expect(BUSINESS_HOURS.bookingStartSlots[0]).toBe("09:00");
     expect(BUSINESS_HOURS.bookingStartSlots[1]).toBe("09:30");
