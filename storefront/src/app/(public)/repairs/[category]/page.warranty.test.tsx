@@ -81,4 +81,14 @@ describe("category warranty content", () => {
       expect(metadata.openGraph?.url).toBe(`/repairs/${category}`);
     }
   });
+
+  it("uses the approved tablet metadata without changing its title or canonical", async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ category: "tablet" }) });
+
+    expect(metadata.title).toBe("Tablet Repair Services by Brand & Model | Ali Mobile");
+    expect(metadata.description).toBe(
+      "iPad, Samsung & Lenovo tablet repairs in Ringwood. iPad screen repairs from $99 on selected models. Many repairs take around 1 hour. 6-month warranty on eligible repairs.",
+    );
+    expect(metadata.alternates?.canonical).toBe("/repairs/tablet");
+  });
 });

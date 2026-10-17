@@ -9,7 +9,9 @@ import ScrollReveal from '@/components/ScrollReveal';
 import FloatingJumpCTA from '@/components/FloatingJumpCTA';
 import { fetchRepairCatalog } from '@/lib/api';
 import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
-import { getRepairCategoryTimingLabel } from '@/lib/repairCategoryTiming';
+import { getRepairCategoryTimingLabel, TABLET_STANDARD_REPAIR_TIMING } from '@/lib/repairCategoryTiming';
+import { BUSINESS_HOURS } from '@/lib/businessHours';
+import { TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE, TABLET_CATEGORY_META_DESCRIPTION } from '@/lib/seo/content/tablet/category-hub';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
 import { type RepairResultDeviceCategory } from '@/lib/repair-results';
@@ -123,7 +125,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   tablet: {
     metadata: {
       title: 'Tablet Repair Services by Brand & Model | Ali Mobile',
-      description: 'Browse tablet and iPad repair pathways by brand, model and issue, including screen, battery, charging port, camera and housing repairs. Choose your tablet model to see supported repair options.',
+      description: TABLET_CATEGORY_META_DESCRIPTION,
     },
     hero: {
       pillType: 'primary',
@@ -1061,12 +1063,12 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                   <article className="repair-signal-card">
                     <span>03</span>
                     <h3>Parts and timing</h3>
-                    <p>Timing depends on model, stock, queue, device condition, and adhesive curing requirements. Some repairs are faster when parts are in stock.</p>
+                    <p>{TABLET_STANDARD_REPAIR_TIMING}</p>
                   </article>
                   <article className="repair-signal-card">
                     <span>04</span>
-                    <h3>Ringwood service</h3>
-                    <p>We operate from Ringwood Square Shopping Centre Kiosk C1. Call or book online before you travel.</p>
+                    <h3>Opening hours</h3>
+                    <p>{BUSINESS_HOURS.customerFacingSchedule.map(({ days, hours }) => `${days}: ${hours}`).join('; ')}. Walk-ins are welcome.</p>
                   </article>
                 </div>
               </div>
@@ -1101,6 +1103,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <span>Model-first pricing</span>
                 <h2 id="pricing-guidance-heading">{isWatch ? 'Select your Apple Watch model to view current pricing' : 'Select your brand and model to view current pricing'}</h2>
                 <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.'}</p>
+                {isTablet && <p>{TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE.bodyCopy}</p>}
               </div>
             </section>
           </ScrollReveal>

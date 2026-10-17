@@ -17,6 +17,8 @@ import {
   isGrandfatheredSecondaryPhoneDetailRepair,
 } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 
+const CATEGORY_HUB_SLUGS = ['phone', 'tablet', 'laptop', 'watch'] as const;
+
 function getReliableBlogLastModified(updatedAt?: string): Date | undefined {
   if (!updatedAt) return undefined;
 
@@ -89,6 +91,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const sitemapUrls = [...staticUrls, ...blogUrls];
+  const categoryUrls: MetadataRoute.Sitemap = CATEGORY_HUB_SLUGS.map((category) => ({
+    url: `${baseUrl}/repairs/${safeSlugSegment(category)}`,
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }));
   const grandfatheredWaterDamageUrls: MetadataRoute.Sitemap = getWaterDamageSitemapPaths()
     .filter((path) => !getPhase1DniConsolidationDestination(path))
     .map((path) => ({
@@ -105,13 +112,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const catalog = await fetchRepairCatalog();
-
-    // Category hub URLs
-    const categoryUrls: MetadataRoute.Sitemap = ['phone', 'tablet', 'laptop', 'watch'].map(category => ({
-      url: `${baseUrl}/repairs/${safeSlugSegment(category)}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.85,
-    }));
 
     // Brand sub-hub URLs
     const brandUrls: MetadataRoute.Sitemap = catalog.brands.map(brand => ({
@@ -170,5 +170,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to generate dynamic sitemap:", error);
   }
 
-  return [...sitemapUrls, ...grandfatheredWaterDamageUrls, ...locationUrls];
+  return [...sitemapUrls, ...categoryUrls, ...grandfatheredWaterDamageUrls, ...locationUrls];
 }

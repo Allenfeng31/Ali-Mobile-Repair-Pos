@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getRepairCategoryTimingLabel } from "./repairCategoryTiming";
+import { getRepairCategoryTimingLabel, TABLET_STANDARD_REPAIR_TIMING } from "./repairCategoryTiming";
 
 describe("getRepairCategoryTimingLabel", () => {
   it("uses the category timing authority for the homepage and repair hub", () => {
@@ -13,5 +13,12 @@ describe("getRepairCategoryTimingLabel", () => {
     expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe("1–2 Hours");
     expect(getRepairCategoryTimingLabel("laptop", "hub")).toBe("1–2 Hours");
     expect(getRepairCategoryTimingLabel("watch", "hub")).toBe("around 45 min");
+  });
+
+  it("keeps the owner-approved standard-tablet timing qualified and separate from the broad category range", () => {
+    expect(TABLET_STANDARD_REPAIR_TIMING).toBe(
+      "Many standard tablet repairs take around 1 hour. Timing depends on the model, repair type, diagnosis and parts availability.",
+    );
+    expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe("1–2 Hours");
   });
 });

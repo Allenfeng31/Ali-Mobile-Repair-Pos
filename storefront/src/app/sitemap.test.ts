@@ -46,6 +46,27 @@ fetchRepairCatalogMock.mockResolvedValue({
 });
 
 describe('Sitemap SEO Generation', () => {
+  it('includes every canonical Category Hub once when the catalogue resolves', async () => {
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+
+    for (const path of ['/repairs/phone', '/repairs/tablet', '/repairs/laptop', '/repairs/watch']) {
+      expect(paths.filter((candidate) => candidate === path)).toHaveLength(1);
+    }
+  });
+
+  it('keeps every canonical Category Hub when the catalogue fetch fails', async () => {
+    fetchRepairCatalogMock.mockRejectedValueOnce(new Error('catalogue unavailable'));
+
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+
+    expect(paths).toEqual(expect.arrayContaining([
+      '/repairs/phone',
+      '/repairs/tablet',
+      '/repairs/laptop',
+      '/repairs/watch',
+    ]));
+  });
+
   it('includes each quote-only global camera module and logic board master once without query or lastModified', async () => {
     const urls = await sitemap();
     for (const path of [

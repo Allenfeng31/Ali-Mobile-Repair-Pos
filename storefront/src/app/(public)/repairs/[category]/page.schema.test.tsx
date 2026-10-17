@@ -105,5 +105,11 @@ describe('CategoryHubPage service schema', () => {
     if (category === 'watch') {
       expect(html).toContain('Smart Watch Brand and Model Paths');
     }
+
+    if (category === 'tablet') {
+      expect(html).toContain('Many standard tablet repairs take around 1 hour. Timing depends on the model, repair type, diagnosis and parts availability.');
+      expect(html).toContain('Monday–Saturday: 9:00am–5:00pm; Sunday: Closed. Walk-ins are welcome.');
+      expect(html).toContain('iPad screen repairs start from $99 for selected older models. Contact us to confirm pricing and availability for your device.');
+    }
   });
 });

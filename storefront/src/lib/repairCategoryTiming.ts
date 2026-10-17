@@ -17,6 +17,9 @@ const REPAIR_CATEGORY_TIMING: Record<RepairCategoryTimingCategory, {
 export const PHONE_REPAIR_TIMING_QUALIFICATION =
   "This range applies to many common iPhone repairs. Actual timing depends on the model, repair type, diagnosis, parts availability and workshop workload. Complex, board-level or liquid-damage repairs may take longer.";
 
+export const TABLET_STANDARD_REPAIR_TIMING =
+  "Many standard tablet repairs take around 1 hour. Timing depends on the model, repair type, diagnosis and parts availability.";
+
 export const SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION =
   "For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.";
 
