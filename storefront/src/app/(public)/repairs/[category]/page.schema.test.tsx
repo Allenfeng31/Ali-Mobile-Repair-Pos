@@ -139,4 +139,18 @@ describe('CategoryHubPage service schema', () => {
     expect(html).toContain('href="/repairs/laptop/dell"');
     expect(html).toContain('href="/repairs/laptop/macbook"');
   });
+
+  it('uses owner-confirmed Apple Watch starting prices with model, timing and warranty qualifications', async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ category: 'watch' }) });
+    const html = renderToStaticMarkup(await CategoryHubPage({ params: Promise.resolve({ category: 'watch' }) }));
+
+    expect(metadata.title).toBe('Apple Watch Repair Services by Model | Ali Mobile');
+    expect(metadata.description).toBe('Apple Watch repair in Ringwood. Screen repairs from $150, battery from $90 on selected models. Around 45 min for many repairs. 6-month warranty on eligible repairs.');
+    expect(metadata.alternates?.canonical).toBe('/repairs/watch');
+    expect(html).toContain('Apple Watch screen repairs start from $150 and battery replacements from $90 for selected models. Select your exact model and case size to view published options or request a quote.');
+    expect(html).toContain('Many standard smartwatch repairs take around 45 minutes. Timing depends on the model, diagnosis, parts availability and workshop workload. Complex repairs, work requiring diagnosis or parts ordering may take longer.');
+    expect(html).toContain('Eligible standard repairs include a 6-month warranty. Water-damage repairs have no warranty. Factory water resistance cannot be guaranteed after repair.');
+    expect(html).toContain('href="/repairs/watch/apple"');
+    expect(html).not.toMatch(/live pricing|live POS/i);
+  });
 });

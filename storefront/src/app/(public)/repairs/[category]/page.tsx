@@ -12,6 +12,7 @@ import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getRepairCategoryTimingLabel, TABLET_STANDARD_REPAIR_TIMING } from '@/lib/repairCategoryTiming';
 import { BUSINESS_HOURS } from '@/lib/businessHours';
 import { TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE, TABLET_CATEGORY_META_DESCRIPTION } from '@/lib/seo/content/tablet/category-hub';
+import { APPLE_WATCH_CATEGORY_META_DESCRIPTION, APPLE_WATCH_CATEGORY_PRICING_COPY } from '@/lib/seo/content/apple-watch/category-hub-pricing';
 import { STANDARD_WARRANTY_SUMMARY } from '@/lib/repairPolicy';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
@@ -206,7 +207,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   watch: {
     metadata: {
       title: 'Apple Watch Repair Services by Model | Ali Mobile',
-      description: 'Browse supported smart watch repair pathways by model and issue, including screen, battery and diagnostic services where available. Choose your watch model to see supported repair options.',
+      description: APPLE_WATCH_CATEGORY_META_DESCRIPTION,
     },
     hero: {
       pillType: 'accent',
@@ -359,6 +360,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
         ? 'Choose Your Laptop Brand'
         : 'Choose Your Watch Model';
   const phoneTimingLabel = isPhone ? getRepairCategoryTimingLabel('phone', 'hub') : null;
+  const watchTimingLabel = isWatch ? getRepairCategoryTimingLabel('watch', 'hub').replace('min', 'minutes') : null;
   const commonProblems = CATEGORY_COMMON_PROBLEMS[category] ?? [];
   const ringwoodDirectionsHref = 'https://www.google.com/maps/dir/?api=1&destination=Ringwood+Square+Shopping+Centre+Kiosk+C1,+Seymour+St,+Ringwood+VIC+3134';
   const laptopBrandSectionCopy = 'Choose your laptop brand to view supported models, repair options and available pricing. If your model is not listed, contact us for an assessment.';
@@ -1105,6 +1107,13 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
                 <h2 id="pricing-guidance-heading">{isWatch ? 'Select your Apple Watch model to view current pricing' : 'Select your brand and model to view current pricing'}</h2>
                 <p>{isTablet ? 'Tablet repair compatibility and pricing are confirmed from the exact brand and model path. Choose your tablet brand above to view compatible options.' : 'Watch repair compatibility and pricing are confirmed from the exact brand and model path. Choose the available Apple Watch pathway above to view compatible repair options and current pricing.'}</p>
                 {isTablet && <p>{TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE.bodyCopy}</p>}
+                {isWatch && (
+                  <>
+                    <p>{APPLE_WATCH_CATEGORY_PRICING_COPY}</p>
+                    <p>Many standard smartwatch repairs take {watchTimingLabel}. Timing depends on the model, diagnosis, parts availability and workshop workload. Complex repairs, work requiring diagnosis or parts ordering may take longer.</p>
+                    <p>Eligible standard repairs include a 6-month warranty. Water-damage repairs have no warranty. Factory water resistance cannot be guaranteed after repair.</p>
+                  </>
+                )}
               </div>
             </section>
           </ScrollReveal>
