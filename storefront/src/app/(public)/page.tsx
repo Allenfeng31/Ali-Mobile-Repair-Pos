@@ -54,14 +54,14 @@ const popularRepairs = [
 export const metadata: Metadata = {
   title: "Phone, Tablet, MacBook & Apple Watch Repair Ringwood | Ali Mobile",
   description:
-    "Ali Mobile & Repair offers phone, tablet, MacBook and Apple Watch repairs in Ringwood Square with clear quotes, walk-ins welcome, and online booking.",
+    "Phone, tablet, MacBook & Apple Watch repairs in Ringwood. Screen, battery, charging & more. Open Mon–Sat 9am–5pm. Check prices or call 0481 058 514.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Phone, Tablet, MacBook & Apple Watch Repair Ringwood | Ali Mobile",
     description:
-      "Ali Mobile & Repair offers phone, tablet, MacBook and Apple Watch repairs in Ringwood Square with clear quotes, walk-ins welcome, and online booking.",
+      "Phone, tablet, MacBook & Apple Watch repairs in Ringwood. Screen, battery, charging & more. Open Mon–Sat 9am–5pm. Check prices or call 0481 058 514.",
     url: "https://www.alimobile.com.au/",
     type: "website",
     locale: "en_AU",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Phone, Tablet, MacBook & Apple Watch Repair Ringwood | Ali Mobile",
     description:
-      "Ali Mobile & Repair offers phone, tablet, MacBook and Apple Watch repairs in Ringwood Square with clear quotes, walk-ins welcome, and online booking.",
+      "Phone, tablet, MacBook & Apple Watch repairs in Ringwood. Screen, battery, charging & more. Open Mon–Sat 9am–5pm. Check prices or call 0481 058 514.",
   },
 };
 

@@ -20,6 +20,8 @@ export const PHONE_REPAIR_TIMING_QUALIFICATION =
 export const TABLET_STANDARD_REPAIR_TIMING =
   "Many standard tablet repairs take around 1 hour. Timing depends on the model, repair type, diagnosis and parts availability.";
 
+export const TABLET_STANDARD_REPAIR_TIME_LABEL = "Around 1 Hour";
+
 export const SAMSUNG_PHONE_REPAIR_TIMING_QUALIFICATION =
   "For many common Samsung repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.";
 
@@ -30,6 +32,10 @@ export function getRepairCategoryTimingLabel(
   category: RepairCategoryTimingCategory,
   context: RepairCategoryTimingContext,
 ): string {
+  if (category === "tablet") {
+    return TABLET_STANDARD_REPAIR_TIME_LABEL;
+  }
+
   const { duration, unit, approximate } = REPAIR_CATEGORY_TIMING[category];
 
   if (context === "homepage") {

@@ -1,16 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { getRepairCategoryTimingLabel, TABLET_STANDARD_REPAIR_TIMING } from "./repairCategoryTiming";
+import {
+  getRepairCategoryTimingLabel,
+  TABLET_STANDARD_REPAIR_TIME_LABEL,
+  TABLET_STANDARD_REPAIR_TIMING,
+} from "./repairCategoryTiming";
 
 describe("getRepairCategoryTimingLabel", () => {
   it("uses the category timing authority for the homepage and repair hub", () => {
     expect(getRepairCategoryTimingLabel("phone", "homepage")).toBe("15–60 min");
-    expect(getRepairCategoryTimingLabel("tablet", "homepage")).toBe("1–2 hours");
+    expect(getRepairCategoryTimingLabel("tablet", "homepage")).toBe("Around 1 Hour");
     expect(getRepairCategoryTimingLabel("laptop", "homepage")).toBe("1–2 hours");
     expect(getRepairCategoryTimingLabel("watch", "homepage")).toBe("around 45 min");
 
     expect(getRepairCategoryTimingLabel("phone", "hub")).toBe("15–60 Minutes");
-    expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe("1–2 Hours");
+    expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe("Around 1 Hour");
     expect(getRepairCategoryTimingLabel("laptop", "hub")).toBe("1–2 Hours");
     expect(getRepairCategoryTimingLabel("watch", "hub")).toBe("around 45 min");
   });
@@ -19,6 +23,7 @@ describe("getRepairCategoryTimingLabel", () => {
     expect(TABLET_STANDARD_REPAIR_TIMING).toBe(
       "Many standard tablet repairs take around 1 hour. Timing depends on the model, repair type, diagnosis and parts availability.",
     );
-    expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe("1–2 Hours");
+    expect(TABLET_STANDARD_REPAIR_TIME_LABEL).toBe("Around 1 Hour");
+    expect(getRepairCategoryTimingLabel("tablet", "hub")).toBe(TABLET_STANDARD_REPAIR_TIME_LABEL);
   });
 });

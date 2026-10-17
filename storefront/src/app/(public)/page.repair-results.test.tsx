@@ -32,7 +32,7 @@ vi.mock('lucide-react', () => ({
   Wrench: () => null,
 }));
 
-const { default: Home } = await import('./page');
+const { default: Home, metadata } = await import('./page');
 const { default: PublicLayout } = await import('./layout');
 
 beforeEach(() => {
@@ -50,7 +50,8 @@ describe('Homepage Repair Results SSR integration', () => {
     expect(markup).toContain('6-Month Warranty on Standard Repairs');
     expect(markup).toMatch(/<a class="primary-btn" href="\/book-repair">Check Price &amp; Book<\/a>/);
     expect(markup).toContain('Typical repair time: 15–60 min');
-    expect(markup.match(/Typical repair time: 1–2 hours/g)).toHaveLength(2);
+    expect(markup).toContain('Typical repair time: Around 1 Hour');
+    expect(markup.match(/Typical repair time: 1–2 hours/g)).toHaveLength(1);
     expect(markup).toContain('Typical repair time: around 45 min');
     expect(markup).toContain('Expert Phone, Tablet &amp; MacBook Repair');
     expect(markup).toContain('Phone Repair');
@@ -66,6 +67,9 @@ describe('Homepage Repair Results SSR integration', () => {
     expect(markup).toContain('href="/repairs/charging-port-replacement"');
     expect(markup).toContain('href="/repairs/back-glass-replacement"');
     expect(markup).toContain('Ringwood Square');
+    expect(metadata.title).toBe('Phone, Tablet, MacBook & Apple Watch Repair Ringwood | Ali Mobile');
+    expect(metadata.description).toBe('Phone, tablet, MacBook & Apple Watch repairs in Ringwood. Screen, battery, charging & more. Open Mon–Sat 9am–5pm. Check prices or call 0481 058 514.');
+    expect(metadata.alternates?.canonical).toBe('/');
   });
 
   it('renders the homepage inside the public layout with exactly one main landmark', async () => {

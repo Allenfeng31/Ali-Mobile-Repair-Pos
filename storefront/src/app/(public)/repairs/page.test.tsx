@@ -73,7 +73,7 @@ describe("RepairsHubPage privacy FAQs", () => {
 
     const tabletCard = screen.getByRole("link", { name: /Tablet & iPad Repair/i });
     expect(tabletCard).toHaveAttribute("href", "/repairs/tablet");
-    expect(within(tabletCard).getByText("1–2 Hours")).toBeInTheDocument();
+    expect(within(tabletCard).getByText("Around 1 Hour")).toBeInTheDocument();
 
     const laptopCard = screen.getByRole("link", { name: /Laptop & MacBook Repair/i });
     expect(laptopCard).toHaveAttribute("href", "/repairs/laptop");

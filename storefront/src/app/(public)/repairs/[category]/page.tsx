@@ -12,6 +12,7 @@ import { formatDynamicParam, safeSlugSegment } from '@/lib/inventoryUtils';
 import { getRepairCategoryTimingLabel, TABLET_STANDARD_REPAIR_TIMING } from '@/lib/repairCategoryTiming';
 import { BUSINESS_HOURS } from '@/lib/businessHours';
 import { TABLET_CATEGORY_IPAD_SCREEN_PRICE_REFERENCE, TABLET_CATEGORY_META_DESCRIPTION } from '@/lib/seo/content/tablet/category-hub';
+import { STANDARD_WARRANTY_SUMMARY } from '@/lib/repairPolicy';
 import { ArrowRight, Clock, MapPin, MessageCircle, PhoneCall, ShieldCheck, Sparkles } from 'lucide-react';
 import HubRepairResultsSection from '@/components/repair-results/HubRepairResultsSection';
 import { type RepairResultDeviceCategory } from '@/lib/repair-results';
@@ -86,7 +87,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   phone: {
     metadata: {
       title: 'Mobile Phone Repair Services by Brand & Model | Ali Mobile',
-      description: 'Browse mobile phone repair pathways by brand, model and issue, including screen, battery, charging, camera and housing repairs. Choose your phone model to see supported repair options.',
+      description: 'Phone repairs in Ringwood for iPhone, Samsung, Pixel & OPPO. Screen, battery, charging & more. Many repairs take 15–60 min. 6-month warranty on eligible repairs.',
     },
     hero: {
       pillType: 'primary',
@@ -101,10 +102,10 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
     },
     features: [
       { t: "Timing confirmed by model and diagnosis", d: "Contact us before visiting to confirm your model, issue, parts availability and practical timing." },
-      { t: "Model-specific parts and repair options", d: "We confirm compatible parts and repair options after checking your exact model, symptoms and part availability." },
-      { t: "Common screen and battery repair pathways", d: "Supported repair options vary by exact model, parts availability, diagnosis and workshop workload." },
-      { t: "No Fix, No Charge Policy", d: "" },
-      { t: "6-Month Warranty on Standard Repairs", d: "" }
+      { t: "Model-specific parts and repair options", d: "We identify compatible part options for the exact model and explain the available repair path before work begins." },
+      { t: "Common screen and battery repair pathways", d: "Screen and battery repairs use model-specific compatibility checks; the quote reflects the confirmed repair option and any diagnosis needed." },
+      { t: "No Fix, No Charge Policy", d: "If a diagnosed component is replaced and tested but does not resolve the fault, there is no charge." },
+      { t: "6-Month Warranty on Standard Repairs", d: `${STANDARD_WARRANTY_SUMMARY} Water-damage repairs are excluded.` }
     ],
     pricing: {
       title: "Phone Repair Pricing by Model",

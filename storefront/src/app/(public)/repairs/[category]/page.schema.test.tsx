@@ -25,7 +25,7 @@ vi.mock('@/components/FloatingJumpCTA', () => ({ default: () => null }));
 vi.mock('@/components/CategoryHubJumpButton', () => ({ default: ({ children, targetId }: { children: ReactNode; targetId: string }) => <button type="button" aria-controls={targetId}>{children}</button> }));
 vi.mock('@/components/repair-results/HubRepairResultsSection', () => ({ default: () => null }));
 
-const { default: CategoryHubPage } = await import('./page');
+const { default: CategoryHubPage, generateMetadata } = await import('./page');
 
 beforeEach(() => {
   state.serviceProps = [];
@@ -61,6 +61,10 @@ describe('CategoryHubPage service schema', () => {
     expect(html).toContain('Complex faults, liquid damage and board-level repairs may require a different timeframe');
     expect(html).toContain('Model-specific parts and repair options');
     expect(html).toContain('Common screen and battery repair pathways');
+    expect(html).toContain('We identify compatible part options for the exact model and explain the available repair path before work begins.');
+    expect(html).toContain('Screen and battery repairs use model-specific compatibility checks; the quote reflects the confirmed repair option and any diagnosis needed.');
+    expect(html).toContain('If a diagnosed component is replaced and tested but does not resolve the fault, there is no charge.');
+    expect(html).toContain('Completed standard repairs include a 6-month warranty covering the replacement part and labour. Water-damage repairs are excluded.');
     expect(html).not.toContain('live repair options and pricing');
     expect(html).not.toContain('Premium Quality Screens &amp; Parts Available');
     expect(html).not.toContain('Fast repair options for common screens and batteries');
@@ -111,5 +115,13 @@ describe('CategoryHubPage service schema', () => {
       expect(html).toContain('Monday–Saturday: 9:00am–5:00pm; Sunday: Closed. Walk-ins are welcome.');
       expect(html).toContain('iPad screen repairs start from $99 for selected older models. Contact us to confirm pricing and availability for your device.');
     }
+  });
+
+  it('uses the approved phone category metadata without changing its title or canonical', async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ category: 'phone' }) });
+
+    expect(metadata.title).toBe('Mobile Phone Repair Services by Brand & Model | Ali Mobile');
+    expect(metadata.description).toBe('Phone repairs in Ringwood for iPhone, Samsung, Pixel & OPPO. Screen, battery, charging & more. Many repairs take 15–60 min. 6-month warranty on eligible repairs.');
+    expect(metadata.alternates?.canonical).toBe('/repairs/phone');
   });
 });
