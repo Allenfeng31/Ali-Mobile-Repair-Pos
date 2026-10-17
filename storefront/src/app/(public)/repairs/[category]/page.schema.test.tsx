@@ -124,4 +124,19 @@ describe('CategoryHubPage service schema', () => {
     expect(metadata.description).toBe('Phone repairs in Ringwood for iPhone, Samsung, Pixel & OPPO. Screen, battery, charging & more. Many repairs take 15–60 min. 6-month warranty on eligible repairs.');
     expect(metadata.alternates?.canonical).toBe('/repairs/phone');
   });
+
+  it('uses the approved laptop metadata and qualified category timing without changing its canonical or model paths', async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ category: 'laptop' }) });
+    const html = renderToStaticMarkup(await CategoryHubPage({ params: Promise.resolve({ category: 'laptop' }) }));
+
+    expect(metadata.title).toBe('Laptop Repair Services by Brand & Model | Ali Mobile');
+    expect(metadata.description).toBe('Laptop & MacBook repairs in Ringwood. Screen, battery, keyboard, charging & diagnostics. Usually 1–2 hours for standard repairs. 6-month warranty on eligible repairs.');
+    expect(metadata.alternates?.canonical).toBe('/repairs/laptop');
+    expect(html).toContain('Many standard laptop screen, battery and charging repairs take around 1–2 hours, depending on the model, diagnosis and parts availability. Complex faults, liquid damage, board-level repairs or parts that need ordering may take longer. We confirm the expected timing before proceeding.');
+    expect(html).not.toContain('15–45 minutes once work begins');
+    expect(html).toContain('Choose your MacBook model to check available repair options and published pricing, or request a quote.');
+    expect(html).not.toContain('with live pricing where available');
+    expect(html).toContain('href="/repairs/laptop/dell"');
+    expect(html).toContain('href="/repairs/laptop/macbook"');
+  });
 });

@@ -162,7 +162,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
   laptop: {
     metadata: {
       title: 'Laptop Repair Services by Brand & Model | Ali Mobile',
-      description: 'Browse laptop and MacBook repair pathways by brand, model and issue, including screen, battery, charging, keyboard, housing and diagnostic services where supported.',
+      description: 'Laptop & MacBook repairs in Ringwood. Screen, battery, keyboard, charging & diagnostics. Usually 1–2 hours for standard repairs. 6-month warranty on eligible repairs.',
     },
     hero: {
       pillType: 'warning',
@@ -196,7 +196,7 @@ const CATEGORY_SEO_DATA: Record<string, any> = {
       { question: "What laptop brands do you repair?", answer: "We support Windows laptop and MacBook pathways when the current catalogue or parts setup allows. If you are not sure, bring the device in and we can identify the brand and model before you travel." },
       { question: "Do I need the exact model?", answer: "No, but it helps. If you do not know the model, we can inspect the device and identify it at the counter." },
       { question: "Can you repair a laptop that will not turn on?", answer: "Often yes, but we need a diagnostic first to check charging, battery, power and board-level symptoms." },
-      { question: "How long does a laptop repair take?", answer: "Many common laptop screen or battery repairs can sometimes be completed in around 15–45 minutes once work begins when parts are in stock. Larger jobs take longer because we need to inspect, test and sometimes order parts." },
+      { question: "How long does a laptop repair take?", answer: `Many standard laptop screen, battery and charging repairs take around ${getRepairCategoryTimingLabel('laptop', 'hub').toLowerCase()}, depending on the model, diagnosis and parts availability. Complex faults, liquid damage, board-level repairs or parts that need ordering may take longer. We confirm the expected timing before proceeding.` },
       { question: "Do you offer screen and battery replacement?", answer: "Yes, screen and battery work are part of the laptop service pathways we support. The exact option depends on brand, model and what the inspection reveals." },
       { question: "Can liquid-damaged laptops be guaranteed?", answer: "No. Liquid damage is unpredictable, and the outcome depends on corrosion, the affected boards and how quickly the device is brought in." },
       { question: "Should I back up data before repair?", answer: "Yes. We do our best to protect your data, but any repair can carry risk, especially if the device is already unstable or has liquid damage." },
@@ -560,7 +560,7 @@ export default async function CategoryHubPage({ params }: CategoryPageProps) {
               <div className="repair-macbook-card-body">
                 <span className="repair-macbook-card-kicker">MacBook Air &amp; MacBook Pro</span>
                 <h3>MacBook Repair &amp; Price Check</h3>
-                <p>Choose your MacBook model to view available screen, battery, keyboard and other repair options, with live pricing where available.</p>
+                <p>Choose your MacBook model to check available repair options and published pricing, or request a quote.</p>
                 <span className="repair-macbook-card-link">
                   Choose Your MacBook Model
                   <ArrowRight size={18} strokeWidth={2.7} aria-hidden="true" />
