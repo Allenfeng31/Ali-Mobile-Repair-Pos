@@ -8,6 +8,10 @@ import { IPHONE_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/iphone/bra
 import { SAMSUNG_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/samsung/brand-hub-pricing";
 import { GOOGLE_PIXEL_BRAND_HUB_PRICING_REFERENCE } from "@/lib/seo/content/google-pixel/brand-hub-pricing";
 import {
+  OPPO_BRAND_HUB_PRICING_REFERENCE,
+  OPPO_BRAND_HUB_TIMING_REFERENCE,
+} from "@/lib/seo/content/oppo/brand-hub-pricing";
+import {
   IPAD_BRAND_HUB_PRICING_REFERENCE,
   IPAD_BRAND_HUB_TIMING_REFERENCE,
   getIPadBrandHubMetadataDescription,
@@ -1279,7 +1283,7 @@ function getBrandHubHeroDescription(
       case "google-pixel":
         return "Choose your exact Google Pixel model to view available screen, battery, charging and rear-damage repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
       case "oppo":
-        return "Choose your exact OPPO model to view available screen, battery, charging and rear-damage repair options. Our Ringwood Square repair desk supports customers across Melbourne's eastern suburbs, with quotes and parts availability confirmed before work begins.";
+        return "OPPO phone repair in Ringwood for cracked screens, battery problems and charging issues. We repair supported OPPO phone models; choose your exact model to check available repair options, pricing or a quote.";
       default:
         if (isBatchPhoneBrandSlug(brandSlug)) {
           return BATCH_PHONE_BRAND_HUB_CONFIG[brandSlug].heroDescription;
@@ -1439,7 +1443,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const brandHubHeroDescription = getBrandHubHeroDescription(categorySlug, brandSlug, brandName, models.length);
   const otherPhoneBrandLinks = isPhoneHub ? buildOtherPhoneBrandLinks(catalog.brands, brandSlug) : [];
   const otherTabletBrandLinks = isTabletBrandHub ? buildOtherTabletBrandLinks(catalog.brands, brandSlug) : [];
-  const startingRepairPrice = isPhoneHub && !isIPhoneHub && !isSamsungPhoneHub && !isGooglePixelHub ? getStartingRepairPrice(models) : null;
+  const startingRepairPrice = isPhoneHub && !isIPhoneHub && !isSamsungPhoneHub && !isGooglePixelHub && !isOppoPhoneHub ? getStartingRepairPrice(models) : null;
   const sortedModels = smartSortModels(models);
   const flatModelGroup = [{ series: `${brandName} Models`, models: sortedModels }];
   const seriesGroups = isMacBookHub ? buildMacBookFamilyGroups(models) : flatModelGroup;
@@ -1814,6 +1818,24 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             body: "We check compatible parts, confirm repair pricing and explain expected timing for your Pixel before starting any repair work.",
           },
         ]
+      : isOppoPhoneHub
+      ? [
+          {
+            title: "OPPO Repair Pricing",
+            body: OPPO_BRAND_HUB_PRICING_REFERENCE.qualification,
+            priceRows: OPPO_BRAND_HUB_PRICING_REFERENCE.rows,
+          },
+          {
+            title: OPPO_BRAND_HUB_TIMING_REFERENCE.title,
+            value: OPPO_BRAND_HUB_TIMING_REFERENCE.primaryValue,
+            body: OPPO_BRAND_HUB_TIMING_REFERENCE.qualification,
+          },
+          {
+            title: "Opening Hours",
+            scheduleRows: BUSINESS_HOURS.customerFacingSchedule,
+            body: "Walk-ins are welcome.",
+          },
+        ]
       : [
           {
             title: startingRepairPrice ? `${brandName} Repairs from $${formatStartingRepairPrice(startingRepairPrice)}` : `${brandName} Repair Pricing`,
@@ -2017,6 +2039,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               <p>Cracked iPad screen, battery problems or charging issues? We repair supported iPad, iPad Air, iPad mini and iPad Pro models.</p>
               <p>Choose your model to check repair options and pricing, or request a quote. Walk-ins are welcome at our Ringwood store.</p>
             </>
+          ) : isOppoPhoneHub ? (
+            <>
+              <p>Cracked screen, battery problems or charging issues? We repair supported OPPO phone models.</p>
+              <p>Choose your OPPO model to check available repair options and pricing, or request a quote. Walk-ins are welcome at our Ringwood store.</p>
+            </>
           ) : (
             <p>
               {isMacBookHub
@@ -2026,7 +2053,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           )}
           <div className="repair-hero-actions">
             <a href="#models-list" className="repair-primary-action">
-              {isIPhoneHub ? "Choose your iPhone model" : isIPadHub ? "Choose your iPad model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
+              {isIPhoneHub ? "Choose your iPhone model" : isIPadHub ? "Choose your iPad model" : isOppoPhoneHub ? "Choose your OPPO model" : isMacBookHub ? "Choose your MacBook model" : isSamsungTabletHub ? "Choose your Samsung tablet model" : isLenovoTabletHub ? "Choose your Lenovo tablet model" : "View model option"}
             </a>
             <a href="tel:0481058514" className="repair-secondary-action">
               <PhoneCall size={18} strokeWidth={2.7} aria-hidden="true" />
@@ -2043,6 +2070,14 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                   <ul className="repair-hero-brand-proof-price-list">
                     {card.priceRows.map((row) => (
                       <li key={row.service}>{row.service}: {row.range}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {"value" in card && card.value ? <p><strong>{card.value}</strong></p> : null}
+                {"scheduleRows" in card && card.scheduleRows ? (
+                  <ul className="repair-hero-brand-proof-price-list">
+                    {card.scheduleRows.map(({ days, hours }) => (
+                      <li key={days}>{days}: {hours}</li>
                     ))}
                   </ul>
                 ) : null}

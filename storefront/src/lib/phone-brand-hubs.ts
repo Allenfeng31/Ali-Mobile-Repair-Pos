@@ -3,6 +3,11 @@ import { STANDARD_WARRANTY_SUMMARY, WATER_DAMAGE_WARRANTY_SUMMARY } from "@/lib/
 import { getIphoneBrandHubPricingFaqAnswer } from "@/lib/seo/content/iphone/brand-hub-pricing";
 import { getSamsungBrandHubPricingFaqAnswer } from "@/lib/seo/content/samsung/brand-hub-pricing";
 import { getGooglePixelBrandHubPricingFaqAnswer } from "@/lib/seo/content/google-pixel/brand-hub-pricing";
+import { BUSINESS_HOURS } from "@/lib/businessHours";
+import {
+  getOppoBrandHubMetadataDescription,
+  getOppoBrandHubPricingFaqAnswer,
+} from "@/lib/seo/content/oppo/brand-hub-pricing";
 
 export interface PhoneBrandHubContent {
   slug: string;
@@ -52,7 +57,7 @@ function buildBatchPhoneBrandFaqs(brandName: string) {
     },
     {
       question: `How much does a ${brandName} phone repair cost?`,
-      answer: `Cost depends on the exact ${brandName} model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation.`,
+      answer: `Cost depends on the exact ${brandName} model, repair type, fault, device condition and current parts availability. Choose your model to check available repair pricing or request a quote.`,
     },
     {
       question: `How long can a ${brandName} repair take?`,
@@ -195,7 +200,7 @@ export const PHONE_BRAND_HUBS: Record<string, PhoneBrandHubContent> = {
     brandName: 'Oppo',
     metadata: {
       title: 'OPPO Phone Repair | Screen, Battery & Charging | Ali Mobile',
-      description: "OPPO phone repair at Ringwood Square for Melbourne's eastern suburbs. Check screen, battery, charging and rear-damage repair options by exact model."
+      description: getOppoBrandHubMetadataDescription(BUSINESS_HOURS.metadataDisplay),
     },
     timing: {
       screen: 'Many supported Oppo screen replacements take approximately 30 minutes, while some Oppo models may require around 45 minutes once the correct part is available.'
@@ -203,11 +208,11 @@ export const PHONE_BRAND_HUBS: Record<string, PhoneBrandHubContent> = {
     faqs: [
       { question: "Which OPPO phone models do you repair?", answer: "The public model browser lists currently supported OPPO Find, Reno and A Series phones. If your exact model is not shown, contact the Ringwood store and we can confirm whether a repair path is available." },
       { question: "How can I identify my OPPO model?", answer: "If the device works, check Settings, then About device or About phone for the model name or model number. Menu names can vary between OPPO software versions, so contact the store or bring the phone in if you are unsure." },
-      { question: "How much does an OPPO phone repair cost?", answer: "Cost depends on the exact OPPO model, repair type, fault, device condition and current parts availability. Choose your model first to see live pricing where available, or a Quote option when the repair needs confirmation." },
-      { question: "How long can an OPPO repair take?", answer: "Timing depends on the exact model, fault, parts stock, current repair queue and overall device condition. We confirm practical timing before the repair is approved." },
+      { question: "How much does an OPPO phone repair cost?", answer: getOppoBrandHubPricingFaqAnswer() },
+      { question: "How long can an OPPO repair take?", answer: "Many standard repairs take 30–45 minutes. Timing depends on the repair type, diagnosis and parts availability." },
       { question: "Do I need to make a booking?", answer: "Walk-ins are welcome at Ringwood Square. Booking or calling ahead can help us check stock, likely timing and the best next step for your OPPO model." },
       { question: "Will my data normally be affected by an OPPO repair?", answer: "Many hardware services do not intentionally erase data, but a data outcome cannot be guaranteed. Back up important data where possible before bringing the device in." },
-      { question: "Do OPPO phone repairs include a warranty?", answer: "Eligible OPPO phone repairs include a six-month warranty, subject to the warranty conditions and exclusions explained with the repair." },
+      { question: "Do OPPO phone repairs include a warranty?", answer: `${STANDARD_WARRANTY_SUMMARY} ${WATER_DAMAGE_WARRANTY_SUMMARY}` },
       { question: "What happens if the required OPPO part is not in stock?", answer: "We will explain stock availability, ordering options and likely timing before the repair is approved, so you can decide whether to proceed. We do not promise an exact delivery date before the part path is confirmed." },
       { question: "Is it better to repair or replace my OPPO phone?", answer: "That depends on the phone age, overall condition, repair quote, other faults, data needs and replacement cost. After checking the model and fault, we can explain the practical options without automatically recommending repair." },
       { question: "Can water resistance be guaranteed after an OPPO repair?", answer: "New sealing adhesive is applied during reassembly where the device design permits it, providing some protection against everyday splashes. The original factory water-resistance rating cannot be guaranteed, and the repaired phone should not be submerged or intentionally exposed to water." }

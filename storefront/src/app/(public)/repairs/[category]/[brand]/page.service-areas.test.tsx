@@ -376,12 +376,49 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     }
   });
 
+  it("renders OPPO owner-reviewed pricing, timing and opening hours without a live-pricing promise", async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: "oppo" }) });
+    const { container } = render(pageElement);
+    const heroCards = Array.from(container.querySelectorAll(".repair-tech-hero .repair-hero-brand-proof-card"));
+    const pricingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "OPPO Repair Pricing");
+    const timingCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "OPPO Repair Time");
+    const hoursCard = heroCards.find((card) => card.querySelector("h2")?.textContent === "Opening Hours");
+    const pricingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How much does an OPPO phone repair cost?");
+    const timingFaq = Array.from(container.querySelectorAll(".faq-item")).find((item) => item.querySelector("summary")?.textContent === "How long can an OPPO repair take?");
+
+    expect(heroCards).toHaveLength(3);
+    expect(pricingCard?.textContent).toContain("Screen Replacement: $129–$320");
+    expect(pricingCard?.textContent).toContain("Battery Replacement: $79–$149");
+    expect(pricingCard?.textContent).toContain("Charging Port Repair: $70–$149");
+    expect(pricingCard?.textContent).toContain("Indicative AUD prices for applicable models. Select your exact OPPO model for available pricing or a quote.");
+    expect(timingCard?.textContent).toContain("30–45 Minutes");
+    expect(timingCard?.textContent).toContain("Many standard repairs take 30–45 minutes. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(hoursCard?.textContent).toContain("Monday–Saturday: 9:00am–5:00pm");
+    expect(hoursCard?.textContent).toContain("Sunday: Closed");
+    expect(hoursCard?.textContent).toContain("Walk-ins are welcome.");
+    expect(pricingFaq?.textContent).toContain("Screen Replacement: $129–$320; Battery Replacement: $79–$149; Charging Port Repair: $70–$149.");
+    expect(timingFaq?.textContent).toContain("Many standard repairs take 30–45 minutes. Timing depends on the repair type, diagnosis and parts availability.");
+    expect(container.textContent).not.toContain("Oppo Repairs from $79");
+    expect(container.textContent).not.toContain("live pricing");
+    expect(container.textContent).toContain("Completed standard repairs include a 6-month warranty covering the replacement part and labour.");
+    expect(container.textContent).toContain("The service has no warranty.");
+    expect(container.querySelector('a[href="/repairs/phone/oppo/oppo-test-model"]')).not.toBeNull();
+  });
+
+  it("keeps secondary phone pricing FAQs factual without a live-pricing promise", async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: "phone", brand: secondaryPhoneBrands[0][0] }) });
+    const { container } = render(pageElement);
+
+    expect(container.textContent).not.toContain("live pricing");
+    expect(container.textContent).toContain("Choose your model to check available repair pricing or request a quote.");
+  });
+
   it("uses one Call Us phone link for every Brand Hub Hero secondary CTA", async () => {
     const cases = [
       { category: "phone", brand: "iphone", primary: "Choose your iPhone model", secondary: "Call Us", href: "tel:0481058514" },
       { category: "phone", brand: "samsung", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
       { category: "phone", brand: "google-pixel", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
-      { category: "phone", brand: "oppo", primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
+      { category: "phone", brand: "oppo", primary: "Choose your OPPO model", secondary: "Call Us", href: "tel:0481058514" },
       { category: "phone", brand: secondaryPhoneBrands[0][0], primary: "View model option", secondary: "Call Us", href: "tel:0481058514" },
       { category: "tablet", brand: "ipad", primary: "Choose your iPad model", secondary: "Call Us", href: "tel:0481058514" },
       { category: "tablet", brand: "samsung", primary: "Choose your Samsung tablet model", secondary: "Call Us", href: "tel:0481058514" },
@@ -522,6 +559,12 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     });
     await expect(generateMetadata({ params: Promise.resolve({ category: "tablet", brand: "lenovo" }) })).resolves.toMatchObject({
       description: "Lenovo tablet repair in Ringwood. Screen $120–$240, battery $89–$149, charging $79–$150 (indicative). Open Mon–Sat 9am–5pm.",
+    });
+  });
+
+  it("uses owner-reviewed OPPO pricing, timing and opening hours in metadata", async () => {
+    await expect(generateMetadata({ params: Promise.resolve({ category: "phone", brand: "oppo" }) })).resolves.toMatchObject({
+      description: "OPPO phone repair in Ringwood. Screen $129–$320, battery $79–$149, charging $70–$149 (indicative). Repairs often take 30–45 min. Open Mon–Sat 9am–5pm.",
     });
   });
 
