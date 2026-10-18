@@ -1356,8 +1356,8 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
     title = 'Lenovo Tablet Repair | Screen, Battery & Charging | Ali Mobile';
     description = getLenovoTabletBrandHubMetadataDescription(BUSINESS_HOURS.metadataDisplay);
   } else if (isMacBookHub) {
-    title = 'MacBook Repair in Ringwood | Ali Mobile & Repair';
-    description = 'MacBook repair services in Ringwood for supported screen, battery, keyboard or top case, charging and diagnostic issues. Visit Ali Mobile & Repair at Ringwood Square to confirm the model, parts availability and suitable repair options.';
+    title = 'MacBook Repair Services | Ali Mobile & Repair';
+    description = 'MacBook screen, battery, keyboard, charging and diagnostic repair support. Choose your exact model to check compatible repair options, parts availability and a quote.';
   } else {
     title = `${brandName} Repair Services in Ringwood | Fast & Reliable | Ali Mobile`;
     description = `Expert ${brandName} repair services in Ringwood, Melbourne. Screen replacement, battery repair, charging port fix, and more. Fast repair may be available for common jobs when parts are in stock, with warranty support on eligible repairs.`;
@@ -1723,7 +1723,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
     {
       question: "Do MacBook parts need to be ordered?",
       answer:
-        "Many MacBook repairs depend on the exact model and part availability. If the required part is not in stock, we usually need one to two days to order parts before completing the repair.",
+        "Many MacBook repairs depend on the exact model and part availability. Parts availability and ordering time are confirmed before repair.",
     },
     {
       question: "Can you fix MacBook charging port or USB-C problems?",
@@ -1758,8 +1758,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           body: "We check the exact MacBook model, fault and part option before confirming the repair quote.",
         },
         {
-          title: "Standard MacBook Repairs: Around 1 Hour",
-          body: "Screen, battery and charging port repairs use the approved standard repair time once the correct part and repair path are confirmed.",
+          title: `Standard MacBook Repairs: ${getRepairCategoryTimingLabel("laptop", "hub")}`,
+          body: `Many standard MacBook repairs take approximately ${getRepairCategoryTimingLabel("laptop", "hub").toLowerCase()} when the correct part is available and the repair path is confirmed. More complex repairs, diagnosis-led work and parts ordering may take longer.`,
         },
         {
           title: "6-Month Repair Warranty",
@@ -1767,7 +1767,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
         },
         {
           title: "Parts Checked Before Repair",
-          body: "Many MacBook repairs depend on the exact model and part availability. If the required part is not in stock, we usually need 1-2 days to order parts before completing the repair.",
+          body: "Many MacBook repairs depend on the exact model and part availability. Parts availability and ordering time are confirmed before repair.",
         },
       ]
     : [];
@@ -2030,7 +2030,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           </span>
           <h1 id="category-repair-heading">
             {isMacBookHub
-              ? "MacBook Repair in Ringwood"
+              ? "MacBook Repair Services"
               : brandHubHeading}
           </h1>
           {isIPadHub ? (
@@ -2321,7 +2321,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 <article className="repair-signal-card">
                   <span>03</span>
                   <h3>Check part availability</h3>
-                  <p>Parts vary by model year and design. If the required part is not in stock, we usually need 1-2 days to order it.</p>
+                  <p>Parts vary by model year and design. Parts availability and ordering time are confirmed before repair.</p>
                 </article>
                 <article className="repair-signal-card">
                   <span>04</span>

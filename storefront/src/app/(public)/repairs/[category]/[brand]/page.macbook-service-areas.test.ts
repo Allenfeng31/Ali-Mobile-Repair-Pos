@@ -73,24 +73,48 @@ describe('MacBook Brand Hub Service Areas', () => {
     expect(text).toContain('MacBook repair near Mitcham is supported from our Ringwood Square repair desk, with the exact model, fault, parts availability and quote confirmed before work begins.');
     expect(text).toContain('MacBook repair near Croydon starts with model and fault confirmation. Customers can contact our Ringwood Square team before travelling to check parts availability and likely timing.');
     expect(text).toContain('Customers also visit Ali Mobile & Repair at Ringwood Square from Ringwood East, Ringwood North, Heathmont, Mitcham, Croydon, Nunawading, Wantirna and Glen Waverley for MacBook repair assessment and quote support.');
-    expect(text).toContain('MacBook Repair in Ringwood');
+    expect(text).toContain('MacBook Repair Services');
     expect(text).toContain('Ringwood Square Shopping Centre Kiosk C1');
   });
 
-  it('keeps the MacBook metadata and canonical ownership unchanged', async () => {
+  it('uses the approved MacBook metadata and canonical ownership', async () => {
     const metadata = await generateMetadata({ params: Promise.resolve({ category: 'laptop', brand: 'macbook' }) });
 
-    expect(metadata.title).toBe('MacBook Repair in Ringwood | Ali Mobile & Repair');
+    expect(metadata.title).toBe('MacBook Repair Services | Ali Mobile & Repair');
+    expect(metadata.description).toBe('MacBook screen, battery, keyboard, charging and diagnostic repair support. Choose your exact model to check compatible repair options, parts availability and a quote.');
+    expect(metadata.description).not.toMatch(/\$\d/);
     expect(metadata.alternates?.canonical).toBe('/repairs/laptop/macbook');
   });
 
-  it('uses model-led pricing and approved one-hour guidance without a static starting price', async () => {
+  it('uses model-led pricing, qualified shared laptop timing, and no fixed parts-ordering promise', async () => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'laptop', brand: 'macbook' }) });
     const { container } = render(pageElement);
     const text = container.textContent || '';
+    const schemaPayloads = [...container.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]')]
+      .map((script) => JSON.parse(script.textContent || '{}'));
 
+    expect(container.querySelectorAll('main')).toHaveLength(0);
+    expect(container.querySelectorAll('h1')).toHaveLength(1);
+    expect(container.querySelector('h1')?.textContent).toBe('MacBook Repair Services');
     expect(text).toContain('View Current Pricing by Model');
-    expect(text).toContain('Standard MacBook Repairs: Around 1 Hour');
+    expect(text).toContain('Standard MacBook Repairs: 1–2 Hours');
+    expect(text).toContain('Many standard MacBook repairs take approximately 1–2 hours when the correct part is available and the repair path is confirmed. More complex repairs, diagnosis-led work and parts ordering may take longer.');
+    expect(text).toContain('Parts availability and ordering time are confirmed before repair.');
+    expect(text.match(/Parts availability and ordering time are confirmed before repair\./g)).toHaveLength(3);
+    expect(text).not.toMatch(/one to two days|usually need 1-2 days|usually need 1–2 days/i);
+    expect(text).toContain('6-Month Repair Warranty');
+    expect(text).toContain('Water damage assessment');
+    expect(container.querySelector('a[href="/repairs/laptop/macbook/macbook-pro-14-m3"]')).not.toBeNull();
     expect(text).not.toContain('MacBook Repairs from $99');
+    expect(schemaPayloads).toContainEqual(expect.objectContaining({
+      '@type': 'BreadcrumbList',
+      itemListElement: expect.arrayContaining([
+        expect.objectContaining({ item: 'https://www.alimobile.com.au/repairs/laptop/macbook' }),
+      ]),
+    }));
+    expect(schemaPayloads).toContainEqual(expect.objectContaining({
+      '@type': 'Service',
+      url: 'https://www.alimobile.com.au/repairs/laptop/macbook',
+    }));
   });
 });
