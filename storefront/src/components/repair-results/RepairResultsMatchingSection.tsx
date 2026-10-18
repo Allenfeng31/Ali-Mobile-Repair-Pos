@@ -19,6 +19,7 @@ interface RepairResultsMatchingSectionProps {
   repairType?: string;
   context: RepairResultsMatchingContext;
   mobileVariant?: 'iphone15-compact-pilot';
+  suppressSelfLinkedCta?: boolean;
   initialResults?: RepairResultMatchingItem[];
 }
 
@@ -51,6 +52,17 @@ function buildMatchingUrl({
   }
 
   return `/api/public/repair-results/matching?${params.toString()}`;
+}
+
+function isSelfLinkedModelHubResult(
+  relatedRepairUrl: string | null,
+  { category, brand, model }: RepairResultsMatchingSectionProps,
+) {
+  if (!relatedRepairUrl) return false;
+
+  const relatedPath = relatedRepairUrl.split(/[?#]/, 1)[0]?.replace(/\/+$/, "");
+  const modelHubPath = `/repairs/${category}/${brand}/${model}`;
+  return relatedPath === modelHubPath;
 }
 
 export default function RepairResultsMatchingSection(props: RepairResultsMatchingSectionProps) {
@@ -126,6 +138,8 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
   const activeResult = results[Math.min(activeIndex, results.length - 1)];
   const deviceCategory = isDeviceCategory(activeResult.device_category) ? activeResult.device_category : 'phone';
   const isIphone15MobilePilot = props.mobileVariant === 'iphone15-compact-pilot';
+  const canLinkToMatchingRepair = Boolean(activeResult.related_repair_url)
+    && !(props.suppressSelfLinkedCta && isSelfLinkedModelHubResult(activeResult.related_repair_url, props));
 
   return (
     <section
@@ -159,7 +173,7 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
           {activeResult.short_description && <span>{activeResult.short_description}</span>}
         </div>
 
-        {activeResult.related_repair_url && (
+        {canLinkToMatchingRepair && (
           <a className={styles.relatedLink} href={activeResult.related_repair_url}>
             View matching repair page
           </a>

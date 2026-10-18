@@ -79,6 +79,50 @@ describe('RepairResultsMatchingSection initial results', () => {
     expect(screen.queryByRole('tablist', { name: 'Matching repair results' })).toBeNull();
   });
 
+  it('keeps an Apple Watch Repair Result visible without a self-referential matching-page CTA', () => {
+    render(
+      <RepairResultsMatchingSection
+        category="watch"
+        brand="apple"
+        model="apple-watch-series-7-45mm"
+        context="model"
+        suppressSelfLinkedCta
+        initialResults={[{
+          ...seed,
+          device_category: 'watch',
+          model: 'Apple Watch Series 7 45mm',
+          model_slug: 'apple-watch-series-7-45mm',
+          related_repair_url: '/repairs/watch/apple/apple-watch-series-7-45mm',
+        }]}
+      />,
+    );
+
+    expect(screen.getByText('Future repair proof')).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'View matching repair page' })).toBeNull();
+  });
+
+  it('keeps a valid Apple Watch Repair Result Detail CTA when the self-link guard is enabled', () => {
+    render(
+      <RepairResultsMatchingSection
+        category="watch"
+        brand="apple"
+        model="apple-watch-series-7-45mm"
+        context="model"
+        suppressSelfLinkedCta
+        initialResults={[{
+          ...seed,
+          device_category: 'watch',
+          model: 'Apple Watch Series 7 45mm',
+          model_slug: 'apple-watch-series-7-45mm',
+          related_repair_url: '/repairs/watch/apple/apple-watch-series-7-45mm/battery-replacement',
+        }]}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
+      .toBe('/repairs/watch/apple/apple-watch-series-7-45mm/battery-replacement');
+  });
+
   it('keeps the existing lazy matching API fallback when no seed is supplied', async () => {
     let observe: ((entries: IntersectionObserverEntry[]) => void) | undefined;
     vi.stubGlobal('IntersectionObserver', class {

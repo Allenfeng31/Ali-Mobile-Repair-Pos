@@ -32,6 +32,10 @@ import {
   getMacBookModelMetaDescription,
   getMacBookModelMetaTitle,
 } from "@/lib/macbookModelHubPresentation";
+import {
+  getAppleWatchModelMetaDescription,
+  getAppleWatchModelMetaTitle,
+} from "@/lib/appleWatchModelHubPresentation";
 import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 
 export const revalidate = 86400;
@@ -259,12 +263,20 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         description: getMacBookModelMetaDescription(modelName, data.modelCode, data.repairTypes),
       }
     : null;
+  const appleWatchMetadata = isAppleWatchModelPage
+    ? {
+        title: getAppleWatchModelMetaTitle(modelName),
+        description: getAppleWatchModelMetaDescription(modelName, data.repairTypes),
+      }
+    : null;
 
   return {
     title: selectedCrawledModelHubContent?.metaTitle
       ? selectedCrawledModelHubContent.metaTitle
       : isMacBookModelPage
       ? macBookMetadata!.title
+      : isAppleWatchModelPage
+      ? appleWatchMetadata!.title
       : isSamsungTabletModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
       : isIPhoneModelPage
@@ -287,7 +299,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       : isMacBookModelPage
       ? macBookMetadata!.description
       : isAppleWatchModelPage
-      ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
+      ? appleWatchMetadata!.description
       : isSamsungTabletModelPage
       ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
       : isPhoneModelPage
@@ -301,6 +313,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? selectedCrawledModelHubContent.metaTitle
         : isMacBookModelPage
         ? macBookMetadata!.title
+        : isAppleWatchModelPage
+        ? appleWatchMetadata!.title
         : isSamsungTabletModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
         : isIPhoneModelPage
@@ -323,7 +337,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         : isMacBookModelPage
         ? macBookMetadata!.description
         : isAppleWatchModelPage
-        ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
+        ? appleWatchMetadata!.description
         : isSamsungTabletModelPage
         ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
         : isPhoneModelPage
@@ -1932,6 +1946,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             brand={brandSlug}
             model={modelSlug}
             context="model"
+            suppressSelfLinkedCta={isAppleWatchModelPage}
             initialResults={modelInitialResults.length > 0 ? modelInitialResults : undefined}
           />
 
@@ -2281,6 +2296,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             brand={brandSlug}
             model={modelSlug}
             context="model"
+            suppressSelfLinkedCta={isAppleWatchModelPage}
             initialResults={modelInitialResults.length > 0 ? modelInitialResults : undefined}
           />
 
