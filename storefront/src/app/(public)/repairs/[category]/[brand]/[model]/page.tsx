@@ -27,6 +27,12 @@ import {
 } from "@/lib/modelHubRepairPresentation";
 import { getIndefiniteArticle } from "@/lib/grammar";
 import { isGooglePixelBackHousingModel } from "@/lib/seo/content/google-pixel";
+import {
+  getMacBookModelCodeLabel,
+  getMacBookModelMetaDescription,
+  getMacBookModelMetaTitle,
+} from "@/lib/macbookModelHubPresentation";
+import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -247,12 +253,18 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
   const isSamsungTabletModelPage = categorySlug === "tablet" && brandSlug === "samsung";
   const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage || isSamsungTabletModelPage;
+  const macBookMetadata = isMacBookModelPage
+    ? {
+        title: getMacBookModelMetaTitle(modelName, data.modelCode),
+        description: getMacBookModelMetaDescription(modelName, data.modelCode, data.repairTypes),
+      }
+    : null;
 
   return {
     title: selectedCrawledModelHubContent?.metaTitle
       ? selectedCrawledModelHubContent.metaTitle
       : isMacBookModelPage
-      ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+      ? macBookMetadata!.title
       : isSamsungTabletModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
       : isIPhoneModelPage
@@ -273,7 +285,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       : isIPadModelPage
       ? `Choose the available iPad repairs for ${modelName}, view current pricing, confirm the exact iPad family, generation or A-number, and book with Ali Mobile & Repair in Ringwood.`
       : isMacBookModelPage
-      ? `Choose the available MacBook repairs for ${modelName}, view current pricing, confirm the exact model or A-number, and book with Ali Mobile & Repair in Ringwood.`
+      ? macBookMetadata!.description
       : isAppleWatchModelPage
       ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
       : isSamsungTabletModelPage
@@ -288,7 +300,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       title: selectedCrawledModelHubContent?.metaTitle
         ? selectedCrawledModelHubContent.metaTitle
         : isMacBookModelPage
-        ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+        ? macBookMetadata!.title
         : isSamsungTabletModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
         : isIPhoneModelPage
@@ -309,7 +321,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         : isIPadModelPage
         ? `Choose the available iPad repairs for ${modelName}, view current pricing, confirm the exact iPad family, generation or A-number, and book with Ali Mobile & Repair in Ringwood.`
         : isMacBookModelPage
-        ? `Choose the available MacBook repairs for ${modelName}, view current pricing, confirm the exact model or A-number, and book with Ali Mobile & Repair in Ringwood.`
+        ? macBookMetadata!.description
         : isAppleWatchModelPage
         ? `Choose the available Apple Watch repairs for ${modelName}, view current pricing, confirm the exact Series, SE or Ultra model, and book with Ali Mobile & Repair in Ringwood.`
         : isSamsungTabletModelPage
@@ -369,6 +381,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isSamsungTabletModelPage = categorySlug === "tablet" && brandSlug === "samsung";
   const isLenovoTabletModelPage = categorySlug === "tablet" && brandSlug === "lenovo";
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
+  const macBookModelCodeLabel = isMacBookModelPage ? getMacBookModelCodeLabel(data.modelCode) : null;
   const isLaptopModelPage = categorySlug === "laptop";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
   const isEnhancedPhoneModelPage = isPhoneModelPage || isTabletModelPage || isMacBookModelPage || isAppleWatchModelPage;
@@ -503,8 +516,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       }
     : {
         title: "Repair timing by service",
-        body: "Choose the exact repair below for its current service timing.",
+      body: "Choose the exact repair below for its current service timing.",
       };
+  const macBookTimingCard = modelHubTimingSummary
+    ? {
+        title: modelHubTimingSummary.title,
+        body: `${modelHubTimingSummary.primaryLine} Many standard MacBook repairs take around 1 hour when the correct part is available and the repair path is confirmed. More complex diagnosis and parts ordering may take longer.`,
+      }
+    : modelHubTimingCard;
   const hasPublishedScreenOptions = hasScreenRepair && isIPhone12OrNewer(modelName) && (screenRepair?.variants?.length || 0) > 0;
   const screenOptions = hasPublishedScreenOptions ? getIPhoneScreenOptions(screenRepair?.variants || []) : [];
   const nonIPhoneScreenOptions = !isIPhoneModelPage && hasScreenRepair && (screenRepair?.variants?.length || 0) > 0
@@ -1457,10 +1476,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         : `Choose the available MacBook repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
     {
-      title: "A-number and year matter",
-      body: "MacBook repair compatibility, parts selection and quote accuracy depend on the exact model, year, chip generation and A-number.",
+      title: "6-Month Repair Warranty",
+      body: `${STANDARD_WARRANTY_SUMMARY} Water-damage repairs are excluded.`,
     },
-    modelHubTimingCard,
+    macBookTimingCard,
   ];
   const macBookQuickAnswers = [
     { number: "01", title: "How much does the repair cost?", body: startingPrice ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.` : "Choose the repair option for this exact MacBook model to see the current price or quote requirement." },
@@ -1490,7 +1509,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { question: "Why do I need the exact MacBook model?", answer: "MacBook repair compatibility, parts selection and quote accuracy depend on the exact model, year, chip generation and A-number." },
     hasBatteryRepair ? { question: `Can you replace the ${modelName} battery?`, answer: "If battery replacement is available for this model, choose Battery Replacement below for the current price or quote path. We check battery condition and charging response before repair." } : null,
     hasScreenRepair ? { question: `What affects ${modelName} screen repair?`, answer: "Display assembly compatibility, lid-angle symptoms, hinge condition, camera area, liquid signs and impact damage can all affect the repair path." } : null,
-    { question: "How long do MacBook parts usually take to arrive?", answer: "Many MacBook parts commonly take around one to two days to obtain. We confirm timing after checking the exact model and part path." },
+    { question: "How long do MacBook parts usually take to arrive?", answer: "Parts availability and ordering time are confirmed before repair." },
     { question: "Should I back up my MacBook before repair?", answer: "Yes. If the MacBook still powers on, back up important data before bringing it in for service." },
     hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and workmanship. It does not cover liquid damage, new physical damage, misuse or unrelated faults." } : null,
     { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm the likely MacBook part path before you travel." },
@@ -1797,7 +1816,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       };
 
   return (
-    <main className={isEnhancedPhoneModelPage ? "repair-page-shell brand-hub-page" : "repair-page-shell repair-page-shell-narrow"}>
+    <div className={isEnhancedPhoneModelPage ? "repair-page-shell brand-hub-page" : "repair-page-shell repair-page-shell-narrow"}>
       <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
 
       {isEnhancedPhoneModelPage ? (
@@ -1811,6 +1830,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             <h1 id="model-repair-heading">
               {selectedCrawledModelHubContent?.h1 ?? (isMajorPhoneModelPage ? `${entityModelName} Repairs` : `${modelName} repair options`)}
             </h1>
+            {macBookModelCodeLabel ? (
+              <p className="mt-2 text-sm font-semibold text-slate-600">{macBookModelCodeLabel}</p>
+            ) : null}
             <p>
               {selectedCrawledModelHubContent?.heroIntro ?? (isMajorPhoneModelPage
                 ? `Choose a repair for your exact ${entityModelName} to compare current pricing, approved service timing and the repair path that matches the device in front of you.`
@@ -2320,6 +2342,6 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         </>
       )}
       <FloatingJumpCTA targetId="repair-options" label="Choose Your Repair" />
-    </main>
+    </div>
   );
 }

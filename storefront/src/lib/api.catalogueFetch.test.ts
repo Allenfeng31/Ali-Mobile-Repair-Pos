@@ -31,6 +31,7 @@ describe('POS inventory cache boundary', () => {
         models: [{
           slug: 'find-x8-pro',
           model: 'Find X8 Pro',
+          modelCode: 'CPH2659',
           repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' }],
         }],
       }],
@@ -41,6 +42,7 @@ describe('POS inventory cache boundary', () => {
     expect(result).toMatchObject({
       brand: 'OPPO',
       model: 'Find X8 Pro',
+      modelCode: 'CPH2659',
       catalogueSource: 'last-known-good',
       repairTypes: [{ slug: 'screen-replacement', repairOrigin: 'pos' }],
     });

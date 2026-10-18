@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MACBOOK_REPAIRS,
   MACBOOK_MODELS,
+  MACBOOK_BRAND_HUB_TIMING,
   MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES,
   getAliMobileEnhancedMacBookSeoPocket,
   getMacBookCategoryHubLinks,
@@ -25,6 +26,13 @@ describe('getMacBookCategoryHubLinks', () => {
 });
 
 describe('MacBook standard repair timing', () => {
+  it('keeps the Brand Hub wording aligned with the same approved 60-minute repair direction', () => {
+    expect(MACBOOK_BRAND_HUB_TIMING).toEqual({
+      label: 'Around 1 Hour',
+      description: 'Many standard MacBook repairs take around 1 hour when the correct part is available and the repair path is confirmed. More complex repairs and diagnostic work may take longer.',
+    });
+  });
+
   it.each(MACBOOK_REPAIRS)('uses the shared 60-minute semantic source for %s', (repairSlug) => {
     const pocket = getAliMobileEnhancedMacBookSeoPocket({
       modelSlug: 'macbook-air-m2-13-2022',

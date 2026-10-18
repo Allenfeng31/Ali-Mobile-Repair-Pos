@@ -77,6 +77,29 @@ const pixelLogicBoardPolicy = {
   ],
 } as const;
 
+const macBookMetadataFixtures = [
+  ['macbook-air-m3-13-2024', 'MacBook Air M3 13-inch 2024', 'A3113'],
+  ['macbook-air-m3-15-2024', 'MacBook Air M3 15-inch 2024', 'A3114'],
+  ['macbook-air-m2-13-2022', 'MacBook Air M2 13-inch 2022', 'A2681'],
+  ['macbook-air-m2-15-2023', 'MacBook Air M2 15-inch 2023', 'A2941'],
+  ['macbook-air-13-2014-2017', 'MacBook Air 13-inch 2014-2017', 'A1466'],
+  ['macbook-air-13-2018-2020', 'MacBook Air 13-inch 2018-2020', 'A1932 / A2179'],
+  ['macbook-air-11-2014-2015', 'MacBook Air 11-inch 2014-2015', 'A1465'],
+  ['macbook-air-13-m1-2020', 'MacBook Air 13-inch M1 2020', 'A2337'],
+  ['macbook-pro-14-16-m3-pro-max-2024', 'MacBook Pro 14/16-inch M3 Pro/Max 2024', 'A2992 / A2991'],
+  ['macbook-pro-13-m2-2022', 'MacBook Pro 13-inch M2 2022', 'A2686'],
+  ['macbook-pro-14-16-m2-pro-max-2023', 'MacBook Pro 14/16-inch M2 Pro/Max 2023', 'A2779 / A2780'],
+  ['macbook-pro-16-2019', 'MacBook Pro 16-inch 2019', 'A2141'],
+  ['macbook-pro-15-2014-2015', 'MacBook Pro 15-inch 2014-2015', 'A1398'],
+  ['macbook-pro-15-2016-2017', 'MacBook Pro 15-inch 2016-2017', 'A1707'],
+  ['macbook-pro-13-2014-2015', 'MacBook Pro 13-inch 2014-2015', 'A1502'],
+  ['macbook-pro-13-2016-2017', 'MacBook Pro 13-inch 2016-2017', 'A1706 / A1708'],
+  ['macbook-pro-13-2018-2020', 'MacBook Pro 13-inch 2018-2020', 'A1989 / A2251'],
+  ['macbook-pro-13-m1-2020', 'MacBook Pro 13-inch M1 2020', 'A2338'],
+  ['macbook-pro-14-16-m1-pro-max-2021', 'MacBook Pro 14/16-inch M1 Pro/Max 2021', 'A2442 / A2485'],
+  ['macbook-12-2015-2019', 'MacBook 12-inch 2015-2019', 'A1534'],
+] as const;
+
 const pixelModelData = (modelSlug: string, repairTypes = [
   { slug: 'screen-replacement', name: 'Screen Replacement', price: 199, repairOrigin: 'pos' },
   { slug: 'logic-board-repair', name: 'Logic Board Repair', price: 0, repairOrigin: 'pos' },
@@ -203,6 +226,7 @@ describe('Model Hub page-mode Server consumer', () => {
     }));
 
     expect(html).toContain(`<h1 id="model-repair-heading">${expectedH1}</h1>`);
+    expect(html).not.toContain('<main');
     expect(html).toContain(expectedSummary);
     expect(html).toContain('Exact repair time is shown with each service below.');
     expect(html).not.toMatch(/Around 80%|same[ -]day/i);
@@ -255,6 +279,7 @@ describe('Model Hub page-mode Server consumer', () => {
 
     expect(state.gridProps?.showStartingPriceFallback).toBe(false);
     expect(html).toContain('Most standard repairs: 45 Minutes');
+    expect(html).not.toContain('<main');
     expect(html).toContain('Exact repair time is shown with each service below.');
     for (const repairSlug of ['screen-replacement', 'battery-replacement', 'charging-repair']) {
       expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
@@ -481,6 +506,7 @@ describe('Model Hub page-mode Server consumer', () => {
     }));
 
     expect(html).toContain('Most standard repairs for this iPad are completed in around 1 hour.');
+    expect(html).not.toContain('<main');
     expect(html).toContain(expectedGuidance);
     expect(html).toContain('Most standard repairs: 60 Minutes');
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
@@ -511,6 +537,7 @@ describe('Model Hub page-mode Server consumer', () => {
     }));
 
     expect(html).toContain('Most standard repairs: 60 Minutes');
+    expect(html).not.toContain('<main');
     for (const repairSlug of ['screen-replacement', 'battery-replacement', 'charging-port-replacement']) {
       expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
         .toBe('60 Minutes');
@@ -521,6 +548,7 @@ describe('Model Hub page-mode Server consumer', () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'MacBook',
       model: 'MacBook Air M3 13-inch',
+      modelCode: 'A3113',
       repairTypes: [
         { slug: 'screen-replacement', name: 'Screen Replacement', price: 299, repairOrigin: 'pos' },
         { slug: 'battery-replacement', name: 'Battery Replacement', price: 159, repairOrigin: 'pos' },
@@ -534,12 +562,61 @@ describe('Model Hub page-mode Server consumer', () => {
     }));
 
     expect(html).toContain('Most standard repairs: 60 Minutes');
+    expect(html).not.toContain('<main');
+    expect(html).toContain('Many standard MacBook repairs take around 1 hour when the correct part is available and the repair path is confirmed. More complex diagnosis and parts ordering may take longer.');
+    expect(html).toContain('<p class="mt-2 text-sm font-semibold text-slate-600">Model A3113</p>');
+    expect(html).toContain('6-Month Repair Warranty');
+    expect(html).toContain('Water-damage repairs are excluded.');
+    expect(html).toContain('Parts availability and ordering time are confirmed before repair.');
+    expect(html).not.toMatch(/one to two days/i);
     for (const repairSlug of ['screen-replacement', 'battery-replacement', 'charging-port-replacement']) {
       expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
         .toBe('60 Minutes');
     }
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'logic-board-repair')?.timingLabel)
       .toBe('Diagnostic Required');
+  });
+
+  it('uses the catalogue A-number and actual repair availability in MacBook metadata', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'MacBook',
+      model: 'MacBook Air M3 13-inch',
+      modelCode: 'A3113',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 299, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 159, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'laptop', brand: 'macbook', model: 'macbook-air-m3-13-2024' }),
+    });
+
+    expect(metadata.title).toBe('MacBook Air M3 13-inch A3113 Repair | Ali Mobile');
+    expect(metadata.description).toBe('MacBook Air M3 13-inch, model A3113. Screen and battery repairs, plus charging repair quote. View options and quotes. 6-month warranty on eligible repairs. Call 0481 058 514.');
+    expect(metadata.description).not.toMatch(/Ringwood|\$\d|60 Minutes/i);
+  });
+
+  it.each(macBookMetadataFixtures)('uses only the fixture model identity for %s metadata', async (modelSlug, model, modelCode) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'MacBook',
+      model,
+      modelCode,
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 299, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 159, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'laptop', brand: 'macbook', model: modelSlug }),
+    });
+
+    expect(metadata.title).toBe(`${model} ${modelCode} Repair | Ali Mobile`);
+    expect(metadata.description).toBe(`${model}, ${modelCode.includes('/') ? 'models' : 'model'} ${modelCode}. Screen and battery repairs, plus charging repair quote. View options and quotes. 6-month warranty on eligible repairs. Call 0481 058 514.`);
+    expect(metadata.description).not.toMatch(/Ringwood|\$\d|guaranteed|1[–-]2 days/i);
   });
 
   it.each([

@@ -86,7 +86,7 @@ describe('MacBook Brand Hub Service Areas', () => {
     expect(metadata.alternates?.canonical).toBe('/repairs/laptop/macbook');
   });
 
-  it('uses model-led pricing, qualified shared laptop timing, and no fixed parts-ordering promise', async () => {
+  it('uses model-led pricing, owner-approved MacBook timing, and no fixed parts-ordering promise', async () => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'laptop', brand: 'macbook' }) });
     const { container } = render(pageElement);
     const text = container.textContent || '';
@@ -97,12 +97,20 @@ describe('MacBook Brand Hub Service Areas', () => {
     expect(container.querySelectorAll('h1')).toHaveLength(1);
     expect(container.querySelector('h1')?.textContent).toBe('MacBook Repair Services');
     expect(text).toContain('View Current Pricing by Model');
-    expect(text).toContain('Standard MacBook Repairs: 1–2 Hours');
-    expect(text).toContain('Many standard MacBook repairs take approximately 1–2 hours when the correct part is available and the repair path is confirmed. More complex repairs, diagnosis-led work and parts ordering may take longer.');
+    expect(text).toContain('Standard MacBook Repairs: Around 1 Hour');
+    expect(text).toContain('Many standard MacBook repairs take around 1 hour when the correct part is available and the repair path is confirmed. More complex repairs and diagnostic work may take longer.');
     expect(text).toContain('Parts availability and ordering time are confirmed before repair.');
-    expect(text.match(/Parts availability and ordering time are confirmed before repair\./g)).toHaveLength(3);
+    expect(text.match(/Parts availability and ordering time are confirmed before repair\./g)).toHaveLength(2);
     expect(text).not.toMatch(/one to two days|usually need 1-2 days|usually need 1–2 days/i);
     expect(text).toContain('6-Month Repair Warranty');
+    expect(text).not.toContain('Parts Checked Before Repair');
+    const heroCards = [...container.querySelectorAll('[aria-label="MacBook repair pricing, warranty and parts highlights"] .repair-hero-brand-proof-card')];
+    expect(heroCards).toHaveLength(3);
+    expect(heroCards.map((card) => card.querySelector('h2')?.textContent)).toEqual([
+      'View Current Pricing by Model',
+      'Standard MacBook Repairs: Around 1 Hour',
+      '6-Month Repair Warranty',
+    ]);
     expect(text).toContain('Water damage assessment');
     expect(container.querySelector('a[href="/repairs/laptop/macbook/macbook-pro-14-m3"]')).not.toBeNull();
     expect(text).not.toContain('MacBook Repairs from $99');

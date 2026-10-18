@@ -119,6 +119,11 @@ export const MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES: Readonly<Record<MacBook
   'charging-port-replacement': 60,
 };
 
+export const MACBOOK_BRAND_HUB_TIMING = {
+  label: 'Around 1 Hour',
+  description: 'Many standard MacBook repairs take around 1 hour when the correct part is available and the repair path is confirmed. More complex repairs and diagnostic work may take longer.',
+} as const;
+
 export const MACBOOK_MODELS: ReadonlyArray<MacBookModelSlug> = [
   'macbook-air-11-2014-2015',
   'macbook-air-13-2014-2017',

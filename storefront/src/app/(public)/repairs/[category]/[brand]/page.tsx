@@ -34,6 +34,7 @@ import {
   APPLE_WATCH_BRAND_HUB_META_DESCRIPTION,
   APPLE_WATCH_BRAND_HUB_PRICING_COPY,
 } from "@/lib/seo/content/apple-watch/brand-hub-pricing";
+import { MACBOOK_BRAND_HUB_TIMING } from "@/lib/seo/content/macbook";
 import { REPAIR_TYPES } from "@/data/seo-data";
 import { SERVICE_AREAS } from "@/data/serviceAreas";
 import { fetchRepairCatalog, fetchBrandModels, type BrandEntry, type ModelEntry } from "@/lib/api";
@@ -1758,16 +1759,12 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
           body: "We check the exact MacBook model, fault and part option before confirming the repair quote.",
         },
         {
-          title: `Standard MacBook Repairs: ${getRepairCategoryTimingLabel("laptop", "hub")}`,
-          body: `Many standard MacBook repairs take approximately ${getRepairCategoryTimingLabel("laptop", "hub").toLowerCase()} when the correct part is available and the repair path is confirmed. More complex repairs, diagnosis-led work and parts ordering may take longer.`,
+          title: `Standard MacBook Repairs: ${MACBOOK_BRAND_HUB_TIMING.label}`,
+          body: MACBOOK_BRAND_HUB_TIMING.description,
         },
         {
           title: "6-Month Repair Warranty",
           body: "Supported MacBook repairs include a 6-month repair warranty, subject to warranty conditions and exclusions explained with the repair.",
-        },
-        {
-          title: "Parts Checked Before Repair",
-          body: "Many MacBook repairs depend on the exact model and part availability. Parts availability and ordering time are confirmed before repair.",
         },
       ]
     : [];

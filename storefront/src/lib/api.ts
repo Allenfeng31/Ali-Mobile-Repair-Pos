@@ -637,6 +637,7 @@ export async function fetchRepairDetails(
 export type ModelRepairTypesResult = {
   brand: string;
   model: string;
+  modelCode?: string;
   repairTypes: RepairOption[];
   source: RepairCatalog['source'];
   catalogueSource: RepairCatalog['catalogueSource'];
@@ -658,6 +659,7 @@ export function selectModelRepairTypesFromCatalogue(
   return {
     brand: brandEntry.brand,
     model: modelEntry.model,
+    modelCode: modelEntry.modelCode,
     repairTypes: modelEntry.repairTypes,
     source: catalog.source,
     catalogueSource: catalog.catalogueSource,
