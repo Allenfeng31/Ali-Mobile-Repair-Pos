@@ -123,6 +123,72 @@ describe('RepairResultsMatchingSection initial results', () => {
       .toBe('/repairs/watch/apple/apple-watch-series-7-45mm/battery-replacement');
   });
 
+  it('keeps an iPad Repair Result visible while suppressing only a Model Hub self-link CTA', () => {
+    render(
+      <RepairResultsMatchingSection
+        category="tablet"
+        brand="ipad"
+        model="ipad-7th-generation"
+        context="model"
+        suppressSelfLinkedCta
+        initialResults={[{
+          ...seed,
+          device_category: 'tablet',
+          model: 'iPad 7th Generation',
+          model_slug: 'ipad-7th-generation',
+          related_repair_url: '/repairs/tablet/ipad/ipad-7th-generation',
+        }]}
+      />,
+    );
+
+    expect(screen.getByText('Future repair proof')).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'View matching repair page' })).toBeNull();
+  });
+
+  it('keeps a legacy iPad Repair Result CTA when it is not a Model Hub self-link', () => {
+    render(
+      <RepairResultsMatchingSection
+        category="tablet"
+        brand="ipad"
+        model="ipad-pro-11-inch-4th-generation"
+        context="model"
+        suppressSelfLinkedCta
+        initialResults={[{
+          ...seed,
+          device_category: 'tablet',
+          model: 'iPad Pro 11-inch 4th Generation',
+          model_slug: 'ipad-pro-11-inch-4th-generation',
+          related_repair_url: '/repairs/tablet/apple/ipad-pro-11-inch-4th-generation/screen-replacement',
+        }]}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
+      .toBe('/repairs/tablet/apple/ipad-pro-11-inch-4th-generation/screen-replacement');
+  });
+
+  it('keeps a valid MacBook Repair Result Detail CTA when the self-link guard is enabled', () => {
+    render(
+      <RepairResultsMatchingSection
+        category="laptop"
+        brand="macbook"
+        model="macbook-air-m3-13-inch-2024"
+        context="model"
+        suppressSelfLinkedCta
+        initialResults={[{
+          ...seed,
+          device_category: 'laptop',
+          model: 'MacBook Air M3 13-inch (2024)',
+          model_slug: 'macbook-air-m3-13-inch-2024',
+          related_repair_url: '/repairs/laptop/macbook/macbook-air-m3-13-inch-2024/battery-replacement',
+        }]}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
+      .toBe('/repairs/laptop/macbook/macbook-air-m3-13-inch-2024/battery-replacement');
+  });
+
   it('keeps the existing lazy matching API fallback when no seed is supplied', async () => {
     let observe: ((entries: IntersectionObserverEntry[]) => void) | undefined;
     vi.stubGlobal('IntersectionObserver', class {

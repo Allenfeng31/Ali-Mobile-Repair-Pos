@@ -36,6 +36,12 @@ import {
   getAppleWatchModelMetaDescription,
   getAppleWatchModelMetaTitle,
 } from "@/lib/appleWatchModelHubPresentation";
+import {
+  getIpadModelMetaDescription,
+  getIpadModelMetaTitle,
+  getIpadModelNumberLabel,
+  getIpadStartingPriceServiceLabel,
+} from "@/lib/ipadModelHubPresentation";
 import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 
 export const revalidate = 86400;
@@ -269,9 +275,17 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         description: getAppleWatchModelMetaDescription(modelName, data.repairTypes),
       }
     : null;
+  const iPadMetadata = isIPadModelPage
+    ? {
+        title: getIpadModelMetaTitle(modelName),
+        description: getIpadModelMetaDescription(modelName, data.repairTypes),
+      }
+    : null;
 
   return {
-    title: selectedCrawledModelHubContent?.metaTitle
+    title: isIPadModelPage
+      ? iPadMetadata!.title
+      : selectedCrawledModelHubContent?.metaTitle
       ? selectedCrawledModelHubContent.metaTitle
       : isMacBookModelPage
       ? macBookMetadata!.title
@@ -284,7 +298,9 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       : isEnhancedPhoneModelPage
       ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking | Ali Mobile`
       : `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
-    description: selectedCrawledModelHubContent?.metaDescription
+    description: isIPadModelPage
+      ? iPadMetadata!.description
+      : selectedCrawledModelHubContent?.metaDescription
       ? selectedCrawledModelHubContent.metaDescription
       : isIPhoneModelPage
       ? `Choose the available repairs for ${modelName}, view current pricing, check model-level timing, and book with Ali Mobile & Repair in Ringwood.`
@@ -294,8 +310,6 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? `Choose the available Google Pixel repairs for ${modelName}, view current pricing, check Pixel screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
       : isOppoModelPage
       ? `Choose the available Oppo repairs for ${modelName}, view current pricing, check Oppo screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
-      : isIPadModelPage
-      ? `Choose the available iPad repairs for ${modelName}, view current pricing, confirm the exact iPad family, generation or A-number, and book with Ali Mobile & Repair in Ringwood.`
       : isMacBookModelPage
       ? macBookMetadata!.description
       : isAppleWatchModelPage
@@ -309,7 +323,9 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       canonical: canonicalPath,
     },
     openGraph: {
-      title: selectedCrawledModelHubContent?.metaTitle
+      title: isIPadModelPage
+        ? iPadMetadata!.title
+        : selectedCrawledModelHubContent?.metaTitle
         ? selectedCrawledModelHubContent.metaTitle
         : isMacBookModelPage
         ? macBookMetadata!.title
@@ -319,10 +335,12 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
         : isIPhoneModelPage
         ? `${modelName} Repair in Ringwood | Repair Options, Pricing & Booking`
-        : isEnhancedPhoneModelPage
+      : isEnhancedPhoneModelPage
         ? `${modelName} Repair in Ringwood | Pricing, Screen Options & Booking`
         : `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
-      description: selectedCrawledModelHubContent?.metaDescription
+      description: isIPadModelPage
+        ? iPadMetadata!.description
+        : selectedCrawledModelHubContent?.metaDescription
         ? selectedCrawledModelHubContent.metaDescription
         : isIPhoneModelPage
         ? `Choose the available repairs for ${modelName}, view current pricing, check model-level timing, and book with Ali Mobile & Repair in Ringwood.`
@@ -332,8 +350,6 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? `Choose the available Google Pixel repairs for ${modelName}, view current pricing, check Pixel screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
         : isOppoModelPage
         ? `Choose the available Oppo repairs for ${modelName}, view current pricing, check Oppo screen and battery service options, and book with Ali Mobile & Repair in Ringwood.`
-        : isIPadModelPage
-        ? `Choose the available iPad repairs for ${modelName}, view current pricing, confirm the exact iPad family, generation or A-number, and book with Ali Mobile & Repair in Ringwood.`
         : isMacBookModelPage
         ? macBookMetadata!.description
         : isAppleWatchModelPage
@@ -396,6 +412,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isLenovoTabletModelPage = categorySlug === "tablet" && brandSlug === "lenovo";
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
   const macBookModelCodeLabel = isMacBookModelPage ? getMacBookModelCodeLabel(data.modelCode) : null;
+  const iPadModelNumberLabel = isIPadModelPage ? getIpadModelNumberLabel(modelSlug) : null;
   const isLaptopModelPage = categorySlug === "laptop";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
   const isEnhancedPhoneModelPage = isPhoneModelPage || isTabletModelPage || isMacBookModelPage || isAppleWatchModelPage;
@@ -517,6 +534,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     repair.sourceType === "virtual" || repair.repairOrigin === "virtual"
   );
   const publishedStartingPrice = startingPriceUsesVirtualAuthority ? null : startingPrice;
+  const iPadStartingPriceServiceLabel = isIPadModelPage && !startingPriceUsesVirtualAuthority
+    ? getIpadStartingPriceServiceLabel(startingPrice, startingPriceRepairs)
+    : null;
   const modelHubPriceTitle = publishedStartingPrice
     ? `${modelName} repairs from $${formatStartingPrice(publishedStartingPrice)}`
     : `${modelName} repair pricing`;
@@ -1295,15 +1315,18 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const iPadHeroCards = [
     {
-      title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
-      body: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+      title: publishedStartingPrice ? `iPad Repairs From $${formatStartingPrice(publishedStartingPrice)}` : "iPad Repair Pricing",
+      body: publishedStartingPrice
+        ? `${iPadStartingPriceServiceLabel ?? "Starting price applies to the available repair option"}. Select a repair below to view pricing and availability.`
         : `Choose the available iPad repair for ${modelName} below to see the current price or quote requirement for that exact service.`,
     },
-    modelHubTimingCard,
     {
-      title: "Exact iPad generation matters",
-      body: "Compatible parts differ by iPad family, generation, screen size, A-number, and Wi-Fi or Cellular variant where relevant.",
+      title: "Typical Repair Time",
+      body: "Most standard repairs take around 60 minutes. See individual services for details.",
+    },
+    {
+      title: "6-Month Repair Warranty",
+      body: "Eligible iPad repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.",
     },
   ];
   const iPadQuickAnswers = [
@@ -1831,7 +1854,12 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
 
   return (
     <div className={isEnhancedPhoneModelPage ? "repair-page-shell brand-hub-page" : "repair-page-shell repair-page-shell-narrow"}>
-      <Breadcrumbs category={categorySlug} brand={brandSlug} model={modelSlug} />
+      <Breadcrumbs
+        category={categorySlug}
+        brand={brandSlug}
+        model={modelSlug}
+        modelLabel={isIPadModelPage ? modelName : undefined}
+      />
 
       {isEnhancedPhoneModelPage ? (
         <section className="repair-tech-hero repair-tech-hero-compact" aria-labelledby="model-repair-heading">
@@ -1846,6 +1874,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             </h1>
             {macBookModelCodeLabel ? (
               <p className="mt-2 text-sm font-semibold text-slate-600">{macBookModelCodeLabel}</p>
+            ) : null}
+            {iPadModelNumberLabel ? (
+              <p className="mt-2 text-sm font-semibold text-slate-600">{iPadModelNumberLabel}</p>
             ) : null}
             <p>
               {selectedCrawledModelHubContent?.heroIntro ?? (isMajorPhoneModelPage
@@ -1946,7 +1977,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             brand={brandSlug}
             model={modelSlug}
             context="model"
-            suppressSelfLinkedCta={isAppleWatchModelPage}
+            suppressSelfLinkedCta={isAppleWatchModelPage || isIPadModelPage}
             initialResults={modelInitialResults.length > 0 ? modelInitialResults : undefined}
           />
 

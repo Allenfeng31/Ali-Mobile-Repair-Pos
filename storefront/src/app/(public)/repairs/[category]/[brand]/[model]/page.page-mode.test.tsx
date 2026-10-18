@@ -10,7 +10,8 @@ const state = vi.hoisted(() => ({
     showStartingPriceFallback?: boolean;
     useQuoteLedPricingSummary?: boolean;
   } | null,
-  matchingProps: [] as Array<{ initialResults?: unknown[] }>,
+  matchingProps: [] as Array<{ initialResults?: unknown[]; suppressSelfLinkedCta?: boolean }>,
+  breadcrumbProps: null as { modelLabel?: string } | null,
 }));
 const fetchModelRepairResultSeeds = vi.hoisted(() => vi.fn());
 
@@ -27,7 +28,12 @@ vi.mock('@/lib/virtualPhoneRepairs', () => ({
       : repairs,
 }));
 vi.mock('@/lib/seo/content/selectedCrawledRepairPages', () => ({ getSelectedCrawledModelHubContent: () => null }));
-vi.mock('@/components/Breadcrumbs', () => ({ default: () => null }));
+vi.mock('@/components/Breadcrumbs', () => ({
+  default: (props: { modelLabel?: string }) => {
+    state.breadcrumbProps = props;
+    return null;
+  },
+}));
 vi.mock('@/components/BackButton', () => ({ default: () => null }));
 vi.mock('@/components/services/RepairOptionsGrid', () => ({
   default: (props: {
@@ -41,7 +47,7 @@ vi.mock('@/components/services/RepairOptionsGrid', () => ({
 }));
 vi.mock('@/components/services/RepairCTA', () => ({ default: () => null }));
 vi.mock('@/components/repair-results/RepairResultsMatchingSection', () => ({
-  default: (props: { initialResults?: unknown[] }) => {
+  default: (props: { initialResults?: unknown[]; suppressSelfLinkedCta?: boolean }) => {
     state.matchingProps.push(props);
     return null;
   },
@@ -114,6 +120,7 @@ const pixelModelData = (modelSlug: string, repairTypes = [
 beforeEach(() => {
   state.gridProps = null;
   state.matchingProps = [];
+  state.breadcrumbProps = null;
   vi.mocked(fetchRepairCatalog).mockReset();
   vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData() as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
   fetchModelRepairResultSeeds.mockResolvedValue([]);
@@ -529,13 +536,57 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(html).toContain('Most standard repairs for this iPad are completed in around 1 hour.');
     expect(html).not.toContain('<main');
     expect(html).toContain(expectedGuidance);
-    expect(html).toContain('Most standard repairs: 60 Minutes');
+    expect(html).toContain('Typical Repair Time');
+    expect(html).toContain('Most standard repairs take around 60 minutes. See individual services for details.');
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
       .toBe('60 Minutes');
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'charging-port-replacement')?.timingLabel)
       .toBe(chargingTiming);
     expect(html).not.toMatch(/45 minutes|same[ -]day|while you wait|immediate|instant/i);
     expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+  });
+
+  it('uses the iPad-only identity, metadata, breadcrumb and minimum-price source without changing the repair cards', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'iPad',
+      model: 'iPad 10th Generation',
+      repairTypes: [
+        { slug: 'front-camera-replacement', name: 'Front Camera Replacement', price: 90, repairOrigin: 'pos' },
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 149, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 140, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 140, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: 'ipad-10th-generation', model: 'iPad 10th Generation', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'tablet', brand: 'ipad', model: 'ipad-10th-generation' }),
+    });
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'ipad', model: 'ipad-10th-generation' }),
+    }));
+
+    expect(metadata.title).toBe('iPad 10th Generation Repair | Ali Mobile');
+    expect(metadata.description).toBe('iPad 10th Generation screen repair, battery replacement, and charging repair options. 6-month warranty on eligible repairs. Call 0481 058 514.');
+    expect(`${metadata.title} ${metadata.description}`).not.toMatch(/\$\d|A\d{4}|Ringwood/);
+    expect(html).toContain('Model Numbers: A2696 · A2757 · A2777 · A3162');
+    expect(html).toContain('iPad Repairs From $90');
+    expect(html).toContain('Starting price applies to Front Camera Replacement. Select a repair below to view pricing and availability.');
+    expect(html).toContain('Typical Repair Time');
+    expect(html).toContain('Most standard repairs take around 60 minutes. See individual services for details.');
+    expect(html).toContain('6-Month Repair Warranty');
+    expect(html).toContain('Eligible iPad repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.');
+    const identityLine = html.match(/<p class="mt-2 text-sm font-semibold text-slate-600">(Model Numbers:[^<]+)<\/p>/)?.[1];
+    expect(identityLine).toBe('Model Numbers: A2696 · A2757 · A2777 · A3162');
+    expect(identityLine).not.toMatch(/China|North America|Wi-Fi|Cellular|mmWave/);
+    expect(state.breadcrumbProps).toEqual(expect.objectContaining({ modelLabel: 'iPad 10th Generation' }));
+    expect(state.matchingProps).toEqual([expect.objectContaining({ suppressSelfLinkedCta: true })]);
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'front-camera-replacement', price: 90 }),
+      expect.objectContaining({ slug: 'screen-replacement', price: 149 }),
+      expect.objectContaining({ slug: 'battery-replacement', price: 140 }),
+      expect.objectContaining({ slug: 'charging-port-replacement', price: 140 }),
+    ]));
   });
 
   it.each([
