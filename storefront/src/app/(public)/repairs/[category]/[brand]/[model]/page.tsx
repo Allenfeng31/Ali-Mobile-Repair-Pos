@@ -47,6 +47,7 @@ import {
   resolveSamsungTabletModelHubPricing,
   resolveSamsungTabletRepairOptionPricing,
 } from "@/lib/seo/content/samsung-tablet/pricing";
+import { getSamsungTabletModelHubPresentation } from "@/lib/samsungTabletModelHubPresentation";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -441,6 +442,13 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       );
   const samsungTabletModelHubPricing = isSamsungTabletModelPage
     ? resolveSamsungTabletModelHubPricing({ modelSlug, repairTypes: modelHubRepairTypes })
+    : null;
+  const samsungTabletModelHubPresentation = isSamsungTabletModelPage
+    ? getSamsungTabletModelHubPresentation({
+        modelSlug,
+        fallbackModelName: modelName,
+        repairTypes: modelHubRepairTypes,
+      })
     : null;
   const presentedModelHubRepairTypes = modelHubRepairTypes.map((repair) => ({
     ...repair,
@@ -1908,7 +1916,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         category={categorySlug}
         brand={brandSlug}
         model={modelSlug}
-        modelLabel={isIPadModelPage ? modelName : undefined}
+        modelLabel={isIPadModelPage
+          ? modelName
+          : samsungTabletModelHubPresentation?.commercialModelName}
       />
 
       {isEnhancedPhoneModelPage ? (
@@ -1920,7 +1930,11 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               {enhancedMenuLabel}
             </span>
             <h1 id="model-repair-heading">
-              {selectedCrawledModelHubContent?.h1 ?? (isMajorPhoneModelPage ? `${entityModelName} Repairs` : `${modelName} repair options`)}
+              {selectedCrawledModelHubContent?.h1 ?? (isMajorPhoneModelPage
+                ? `${entityModelName} Repairs`
+                : samsungTabletModelHubPresentation
+                ? `${samsungTabletModelHubPresentation.commercialModelName} Repair Options`
+                : `${modelName} repair options`)}
             </h1>
             {macBookModelCodeLabel ? (
               <p className="mt-2 text-sm font-semibold text-slate-600">{macBookModelCodeLabel}</p>
@@ -1928,9 +1942,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             {iPadModelNumberLabel ? (
               <p className="mt-2 text-sm font-semibold text-slate-600">{iPadModelNumberLabel}</p>
             ) : null}
+            {samsungTabletModelHubPresentation?.modelNumbersLabel ? (
+              <p className="mt-2 text-sm font-semibold text-slate-600">{samsungTabletModelHubPresentation.modelNumbersLabel}</p>
+            ) : null}
             <p>
               {selectedCrawledModelHubContent?.heroIntro ?? (isMajorPhoneModelPage
                 ? `Choose a repair for your exact ${entityModelName} to compare current pricing, approved service timing and the repair path that matches the device in front of you.`
+                : samsungTabletModelHubPresentation
+                ? samsungTabletModelHubPresentation.heroDescription
                 : `Choose the available repair for your exact ${modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.`)}
             </p>
             <div className="repair-hero-actions">

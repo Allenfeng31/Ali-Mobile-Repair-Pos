@@ -643,6 +643,11 @@ describe('Model Hub page-mode Server consumer', () => {
     }));
 
     expect(html).toContain('<h2>Repairs From $100</h2>');
+    expect(html).toContain('<h1 id="model-repair-heading">Galaxy Tab A8 Repair Options</h1>');
+    expect(html).toContain('Model Numbers: SM-X200 / SM-X205');
+    expect(html).toContain('We repair Galaxy Tab A8 screens, batteries, and charging ports.');
+    expect(html).not.toContain('Galaxy Tab A8 (SM-X200 / SM-X205) repair options');
+    expect(state.breadcrumbProps).toEqual(expect.objectContaining({ modelLabel: 'Galaxy Tab A8' }));
     expect(html).toContain('Battery Replacement pricing currently starts from $100.');
     expect(html).toContain('6-Month Repair Warranty');
     expect(html).toContain('Eligible Samsung tablet repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.');
