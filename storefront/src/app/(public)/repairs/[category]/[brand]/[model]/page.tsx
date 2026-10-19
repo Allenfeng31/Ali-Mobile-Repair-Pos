@@ -52,7 +52,10 @@ import {
   resolveLenovoTabletModelHubPricing,
   resolveLenovoTabletRepairOptionPricing,
 } from "@/lib/seo/content/lenovo-tablet/pricing";
-import { getLenovoTabletModelHubPresentation } from "@/lib/lenovoTabletModelHubPresentation";
+import {
+  getLenovoTabletModelHubMetadata,
+  getLenovoTabletModelHubPresentation,
+} from "@/lib/lenovoTabletModelHubPresentation";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -272,6 +275,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
   const isSamsungTabletModelPage = categorySlug === "tablet" && brandSlug === "samsung";
+  const isLenovoTabletModelPage = categorySlug === "tablet" && brandSlug === "lenovo";
   const isEnhancedPhoneModelPage = isPhoneModelPage || isIPadModelPage || isMacBookModelPage || isAppleWatchModelPage || isSamsungTabletModelPage;
   const macBookMetadata = isMacBookModelPage
     ? {
@@ -291,6 +295,13 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         description: getIpadModelMetaDescription(modelName, data.repairTypes),
       }
     : null;
+  const lenovoTabletMetadata = isLenovoTabletModelPage
+    ? getLenovoTabletModelHubMetadata({
+        modelSlug,
+        fallbackModelName: modelName,
+        repairTypes: data.repairTypes,
+      })
+    : null;
 
   return {
     title: isIPadModelPage
@@ -303,6 +314,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? appleWatchMetadata!.title
       : isSamsungTabletModelPage
       ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+      : isLenovoTabletModelPage
+      ? lenovoTabletMetadata!.title
       : isIPhoneModelPage
       ? `${modelName} Repair in Ringwood | Repair Options, Pricing & Booking | Ali Mobile`
       : isEnhancedPhoneModelPage
@@ -326,6 +339,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       ? appleWatchMetadata!.description
       : isSamsungTabletModelPage
       ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
+      : isLenovoTabletModelPage
+      ? lenovoTabletMetadata!.description
       : isPhoneModelPage
       ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
       : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — fast repair may be available in Ringwood when parts are in stock, with warranty support on eligible repairs.`,
@@ -343,6 +358,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? appleWatchMetadata!.title
         : isSamsungTabletModelPage
         ? `${modelName} Repair Options & Pricing | Ali Mobile Ringwood`
+        : isLenovoTabletModelPage
+        ? lenovoTabletMetadata!.title
         : isIPhoneModelPage
         ? `${modelName} Repair in Ringwood | Repair Options, Pricing & Booking`
       : isEnhancedPhoneModelPage
@@ -366,6 +383,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         ? appleWatchMetadata!.description
         : isSamsungTabletModelPage
         ? `View available repair options for ${modelName}, confirm the exact model and service required, and check current pricing, parts availability and repair timing with Ali Mobile & Repair in Ringwood.`
+        : isLenovoTabletModelPage
+        ? lenovoTabletMetadata!.description
         : isPhoneModelPage
         ? `Choose the available ${brandName} repairs for ${modelName}, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.`
         : `Choose a repair service for your ${modelName}. ${brandName} screen replacement, battery swap, charging port fix \u0026 more — fast repair may be available in Ringwood when parts are in stock, with warranty support on eligible repairs.`,

@@ -796,6 +796,40 @@ describe('Model Hub page-mode Server consumer', () => {
     },
   );
 
+  it.each(LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST)(
+    'uses commercial, POS-supported metadata for $modelName without changing canonical metadata',
+    async (config) => {
+      const repairTypes = config.supportedRepairTypes.map((slug) => ({
+        slug,
+        name: slug.replace(/-/g, ' '),
+        price: 0,
+        repairOrigin: 'pos' as const,
+      }));
+      vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+        brand: 'Lenovo',
+        model: config.modelName,
+        repairTypes,
+        brandModels: [{ slug: config.modelSlug, model: config.modelName, repairTypes: [] }],
+      }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ category: 'tablet', brand: 'lenovo', model: config.modelSlug }),
+      });
+      const commercialModelName = config.modelName.replace(/\s+\([^)]*\)$/, '');
+      const serviceCopy = config.modelSlug === 'lenovo-tab-m11'
+        ? 'screen, battery and charging port'
+        : 'screen, battery, charging port and camera';
+      const expectedDescription = `Explore ${commercialModelName} ${serviceCopy} repair options. Check available pricing and find the right repair for your tablet.`;
+
+      expect(metadata.title).toBe(`${commercialModelName} Repair & Pricing | Ali Mobile`);
+      expect(metadata.description).toBe(expectedDescription);
+      expect(metadata.openGraph?.title).toBe(`${commercialModelName} Repair & Pricing | Ali Mobile`);
+      expect(metadata.openGraph?.description).toBe(expectedDescription);
+      expect(metadata.alternates?.canonical).toBe(`/repairs/tablet/lenovo/${config.modelSlug}`);
+      expect(`${metadata.title} ${metadata.description}`).not.toMatch(/Fast & Reliable|Ringwood|TB-|YT-|\$\d|minutes|available in stock/i);
+    },
+  );
+
   it('renders 1-hour standard MacBook timing without applying it to Logic Board diagnosis', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'MacBook',
