@@ -17,9 +17,12 @@ const repairDetailPageSource = fs.readFileSync(
 );
 
 describe('repair tier description authority', () => {
-  it('provides the existing screen description through the shared authority', () => {
+  it('provides the approved screen description through the shared authority', () => {
     expect(getRepairTierDescription('Screen Replacement', 'Standard')).toBe(
-      'Industry-standard replacement part with reliable performance.',
+      'A cost-effective repair option using a compatible replacement part.',
+    );
+    expect(getRepairTierDescription('Screen Replacement', 'Premium')).toBe(
+      'A higher-quality replacement part option, where available. Ask us about the differences for your repair.',
     );
   });
 

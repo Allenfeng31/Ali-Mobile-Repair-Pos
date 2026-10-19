@@ -591,8 +591,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
     modelHubTimingCard,
     {
-      title: "Parts availability",
-      body: "Published repair times apply when the correct part is available. Contact Ali Mobile before visiting for uncommon parts or diagnosis-led repairs.",
+      title: "6-Month Repair Warranty",
+      body: "Eligible iPhone repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.",
     },
   ];
   const iPhoneQuickAnswers = [

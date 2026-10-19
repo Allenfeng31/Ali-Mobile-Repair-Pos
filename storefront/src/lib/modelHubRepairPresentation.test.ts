@@ -29,13 +29,14 @@ const categoryPresentation = (category: string, brandSlug: string, modelSlug: st
   resolveModelHubRepairPresentation({ category, brandSlug, modelSlug, repairSlug });
 
 describe('resolveModelHubRepairPresentation', () => {
-  it('keeps iPhone 16 Plus standard repairs at 30 minutes and true Back Glass variable', () => {
+  it('keeps iPhone 16 Plus standard repairs at 30 minutes and Back Glass at 60 minutes', () => {
     expect(presentation('iphone', 'iphone-16-plus', 'screen-replacement')).toMatchObject({
       timingLabel: '30 Minutes',
       turnaroundMinutes: 30,
     });
     expect(presentation('iphone', 'iphone-16-plus', 'back-glass-replacement')).toMatchObject({
-      timingLabel: 'Varies',
+      timingLabel: '60 Minutes',
+      turnaroundMinutes: 60,
     });
     expect(presentation('iphone', 'iphone-16-plus', 'water-damage-repair')).toMatchObject({
       timingLabel: 'Depends on Damage',

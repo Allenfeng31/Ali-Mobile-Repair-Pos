@@ -1081,8 +1081,8 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     ['Pixel 9 Pro XL Charging Port', 'Google Pixel 9 Pro XL', 'pixel-9-pro-xl', 'Charging Port Replacement', 'charging-port-replacement', 30, [], false],
     ['Pixel 10 Front Camera', 'Google Pixel 10', 'pixel-10', 'Front Camera Replacement', 'front-camera-replacement', 30, [], false],
     ['Pixel 8 Pro Back Camera', 'Google Pixel 8 Pro', 'pixel-8-pro', 'Back Camera Replacement', 'back-camera-replacement', 30, [], false],
-    ['Pixel 10 Pro Fold Back Glass', 'Google Pixel 10 Pro Fold', 'pixel-10-pro-fold', 'Back Glass Replacement', 'back-glass-replacement', 60, [], false],
-    ['Pixel 9a Back Glass', 'Google Pixel 9a', 'pixel-9a', 'Back Glass Replacement', 'back-glass-replacement', 60, [{ quality_grade: 'Standard', price: 239 }], true],
+    ['Pixel 10 Pro Fold Back Glass', 'Google Pixel 10 Pro Fold', 'pixel-10-pro-fold', 'Back Glass Replacement', 'back-glass-replacement', 30, [], false],
+    ['Pixel 9a Back Glass', 'Google Pixel 9a', 'pixel-9a', 'Back Glass Replacement', 'back-glass-replacement', 30, [{ quality_grade: 'Standard', price: 239 }], true],
   ] as const)('renders %s with approved timing and catalogue pricing state', async (
     _label,
     model,
@@ -1398,7 +1398,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     );
 
     expect(faq?.answer).toBe(
-      'Current iPhone 16 Pro screen replacement options are: Standard – $321. Industry-standard replacement part with reliable performance. Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability. Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance. Parts availability and device condition are confirmed, and we confirm the final quote before work begins.'
+      'Current iPhone 16 Pro screen replacement options are: Standard – $321. A cost-effective repair option using a compatible replacement part. Premium – $654. A higher-quality replacement part option, where available. Ask us about the differences for your repair. Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance. Parts availability and device condition are confirmed, and we confirm the final quote before work begins.'
     );
     expect(timingFaq?.answer).toBe(
       'iPhone 16 Pro screen replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.'
@@ -1442,8 +1442,8 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(timingFaq?.answer).toBe(
       'iPhone 15 screen replacement usually takes around 30 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.'
     );
-    expect(priceFaq?.answer).toContain('Standard – $321. Industry-standard replacement part with reliable performance.');
-    expect(priceFaq?.answer).toContain('Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability.');
+    expect(priceFaq?.answer).toContain('Standard – $321. A cost-effective repair option using a compatible replacement part.');
+    expect(priceFaq?.answer).toContain('Premium – $654. A higher-quality replacement part option, where available. Ask us about the differences for your repair.');
   });
 
   it('keeps iPhone screen pages without priced tiers quote-first and free of price claims in the hero', async () => {
@@ -1793,7 +1793,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     ['iPhone 14 Pro', 'iphone-14-pro', [{ quality_grade: 'Premium', price: 210 }]],
     ['iPhone 15 Pro', 'iphone-15-pro', [{ quality_grade: 'Premium', price: 150 }]],
     ['iPhone 17 Pro', 'iphone-17-pro', [{ quality_grade: 'Premium', price: 120 }]],
-  ])('renders %s as a variable-time Back Glass service', async (model, slug, variants) => {
+  ])('renders %s as a 60-minute Back Glass service', async (model, slug, variants) => {
     fetchRepairCatalog.mockResolvedValue({ brands: [iphoneBackRepairCatalogue(model, slug, variants)] });
 
     const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: slug, 'repair-type': 'back-glass-replacement' })) });
@@ -1806,12 +1806,13 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).toContain(`${model} back glass replacement at Ali Mobile in Ringwood Square.`);
     expect(html).not.toContain('full rear housing replacement instead of back glass only');
     expect(faqs[0]?.answer).toContain('rear glass component');
-    expect(html).toContain('Repair Time: Varies');
-    expect(html).not.toContain('60 Minutes');
+    expect(html).toContain('Repair Time: 60 Minutes');
+    expect(html).not.toContain('Repair Time: Varies');
+    expect(html).not.toContain('Timeframe Varies');
     expect(html).toContain('6-Month Warranty');
     expect(timingFaqs).toHaveLength(1);
-    expect(timingFaqs[0]?.answer).toContain('varies depending on the repair scope');
-    expect(timingFaqs[0]?.answer).not.toMatch(/30|60|same-day|immediate|while you wait/i);
+    expect(timingFaqs[0]?.answer).toContain('usually takes around 60 minutes');
+    expect(timingFaqs[0]?.answer).toContain('when the correct part is available');
     if (variants.length > 0) {
       expect(html).toContain(`$${variants[0].price}`);
       expect(html).toContain('"offers"');

@@ -1781,8 +1781,8 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
             body: "For many common iPhone repairs. Timing depends on model, parts availability and diagnosis. Complex repairs may take longer.",
           },
           {
-            title: "Parts Checked Before Repair",
-            body: "We check compatible parts, confirm repair pricing and explain expected timing for your iPhone before starting any repair work.",
+            title: "Store Trading Hours",
+            body: `${BUSINESS_HOURS.customerFacingSchedule[0].days}: ${BUSINESS_HOURS.customerFacingSchedule[0].hours}. ${BUSINESS_HOURS.customerFacingSchedule[1].days}: ${BUSINESS_HOURS.customerFacingSchedule[1].hours}. Walk-ins welcome.`,
           },
         ]
       : brandSlug === "samsung"

@@ -11,7 +11,7 @@ export function applyIphoneBackGlassReplacementSeoPocket(
 
   return {
     ...pocket,
-    turnaroundMinutes: isHousing ? 60 : undefined,
+    turnaroundMinutes: 60,
     quickAnswer: isHousing
       ? `Need ${modelName} back housing replacement in Ringwood? Ali Mobile & Repair assesses the rear housing or chassis assembly and confirms the suitable repair path before work begins.`
       : `Need ${modelName} back glass replacement in Ringwood? Ali Mobile & Repair assesses cracked rear glass and confirms the suitable repair path before work begins.`,
@@ -49,9 +49,7 @@ export function applyIphoneBackGlassReplacementSeoPocket(
       },
       {
         question: `How long does ${modelName} ${repairLabel} replacement take?`,
-        answer: isHousing
-          ? 'We confirm the expected turnaround after checking the device and part availability.'
-          : `Turnaround for ${modelName} back glass replacement varies depending on the repair scope, damage found during inspection, and part availability. We confirm the expected turnaround before work begins.`,
+        answer: `${modelName} ${repairLabel} replacement usually takes around 60 minutes when the correct part is available. If additional damage is found during inspection, turnaround may vary.`,
       },
       {
         question: `How much does ${modelName} ${repairLabel} replacement cost?`,

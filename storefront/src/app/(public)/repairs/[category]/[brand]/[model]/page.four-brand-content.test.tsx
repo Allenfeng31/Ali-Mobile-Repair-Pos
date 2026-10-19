@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveModelHubRepairPresentation } from '@/lib/modelHubRepairPresentation';
+import { getRepairTierDescription } from '@/lib/repairTierDescriptions';
 import type { RepairCatalog } from '@/lib/publicRepairCataloguePolicy';
 
 const fetchRepairCatalog = vi.hoisted(() => vi.fn());
@@ -11,16 +12,19 @@ const fetchRepairDetails = vi.hoisted(() => vi.fn());
 const fetchRepairDetailInitialResults = vi.hoisted(() => vi.fn().mockResolvedValue([]));
 const fetchModelRepairResultSeeds = vi.hoisted(() => vi.fn().mockResolvedValue([]));
 const RepairResultsMatchingSection = vi.hoisted(() => vi.fn(() => null));
-const FaqAccordion = vi.hoisted(() => vi.fn(({ items }: { items?: Array<{ question: string; answer: string }> }) => (
-  <div data-testid="faq-accordion">
-    {items?.map((item, idx) => (
-      <div key={idx} data-testid="faq-item">
-        <h3>{item.question}</h3>
-        <p>{item.answer}</p>
-      </div>
-    )) ?? null}
-  </div>
-)));
+const FaqAccordion = vi.hoisted(() => vi.fn(({ items, faqs }: { items?: Array<{ question: string; answer: string }>; faqs?: Array<{ question: string; answer: string }> }) => {
+  const list = items ?? faqs;
+  return (
+    <div data-testid="faq-accordion">
+      {list?.map((item, idx) => (
+        <div key={idx} data-testid="faq-item">
+          <h3>{item.question}</h3>
+          <p>{item.answer}</p>
+        </div>
+      )) ?? null}
+    </div>
+  );
+}));
 const permanentRedirect = vi.hoisted(() => vi.fn());
 const notFound = vi.hoisted(() => vi.fn());
 
@@ -61,8 +65,13 @@ const testCatalogue: RepairCatalog = {
         {
           model: 'iPhone 16 Plus',
           slug: 'iphone-16-plus',
+          repairs: [
+            { type: 'Screen Replacement', slug: 'screen-replacement', price: 299, description: 'Screen replacement' },
+            { type: 'Back Glass Replacement', slug: 'back-glass-replacement', price: 199, description: 'Back glass replacement' },
+          ],
           repairTypes: [
             { slug: 'screen-replacement', name: 'Screen Replacement', price: 299, repairOrigin: 'pos' },
+            { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 199, repairOrigin: 'pos' },
           ],
         },
       ],
@@ -181,6 +190,9 @@ describe('Four-Brand Content & Semantic Parity', () => {
     expect(markup).toContain('Will Face ID or Touch ID still work after an iPhone 16 Plus repair?');
     expect(markup).not.toContain('How much does a iPhone 16 Plus repair cost?');
     expect(markup).not.toContain('How long does a iPhone 16 Plus repair take?');
+    expect(markup).toContain('6-Month Repair Warranty');
+    expect(markup).toContain('Eligible iPhone repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.');
+    expect(markup).not.toContain('Parts availability');
   });
 
   it('uses "a" for Find X3 Pro FAQs in OPPO model hub', async () => {
@@ -354,6 +366,46 @@ describe('Four-Brand Content & Semantic Parity', () => {
     expect(pixel5Metadata.title).toBe('Pixel 5 Back Housing Replacement in Ringwood | Ali Mobile');
     expect(pixel5Metadata.alternates?.canonical).toBe(
       'https://www.alimobile.com.au/repairs/phone/google-pixel/pixel-5/back-glass-replacement'
+    );
+  });
+
+  it('updates iPhone Back Glass to around 60 minutes with 60-minute badge and turnaround FAQ', async () => {
+    const iphoneBackGlassPresentation = resolveModelHubRepairPresentation({
+      category: 'phone',
+      brandSlug: 'iphone',
+      modelSlug: 'iphone-16-plus',
+      repairSlug: 'back-glass-replacement',
+    });
+    expect(iphoneBackGlassPresentation).toMatchObject({
+      timingLabel: '60 Minutes',
+      turnaroundMinutes: 60,
+    });
+
+    const detailPage = await RepairDetailPage({
+      params: Promise.resolve({
+        category: 'phone',
+        brand: 'iphone',
+        model: 'iphone-16-plus',
+        'repair-type': 'back-glass-replacement',
+      }),
+    });
+    const markup = renderToStaticMarkup(detailPage);
+    expect(markup).toContain('Repair Time: 60 Minutes');
+    expect(markup).toContain('iPhone 16 Plus back glass / back housing replacement usually takes around 60 minutes');
+  });
+
+  it('provides neutral, approved tier descriptions for Standard and Premium', () => {
+    expect(getRepairTierDescription('Screen Replacement', 'Standard')).toBe(
+      'A cost-effective repair option using a compatible replacement part.'
+    );
+    expect(getRepairTierDescription('Screen Replacement', 'Premium')).toBe(
+      'A higher-quality replacement part option, where available. Ask us about the differences for your repair.'
+    );
+    expect(getRepairTierDescription('Custom Repair', 'Standard')).toBe(
+      'A cost-effective repair option using a compatible replacement part.'
+    );
+    expect(getRepairTierDescription('Custom Repair', 'Premium')).toBe(
+      'A higher-quality replacement part option, where available. Ask us about the differences for your repair.'
     );
   });
 });

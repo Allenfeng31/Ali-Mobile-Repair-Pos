@@ -1,8 +1,13 @@
+export const SHARED_TIER_DESCRIPTIONS: Record<string, string> = {
+  Standard: 'A cost-effective repair option using a compatible replacement part.',
+  Premium: 'A higher-quality replacement part option, where available. Ask us about the differences for your repair.',
+};
+
 const TIER_DESCRIPTION_OVERRIDES: Record<string, Record<string, string>> = {
   'screen replacement': {
     Budget: 'High-quality aftermarket part. Best for quick, cost-effective fixes.',
-    Standard: 'Industry-standard replacement part with reliable performance.',
-    Premium: 'Top-tier aftermarket display selected for strong colour, touch response and daily reliability.',
+    Standard: SHARED_TIER_DESCRIPTIONS.Standard,
+    Premium: SHARED_TIER_DESCRIPTIONS.Premium,
     Genuine: 'Original equipment display where available, selected for the closest match to factory display performance.',
   },
   'battery replacement': {
@@ -48,5 +53,9 @@ export function getRepairTierDescription(
   tierName: string,
   tierDescriptions: Record<string, string> = {},
 ) {
-  return TIER_DESCRIPTION_OVERRIDES[repairName.toLowerCase().trim()]?.[tierName] ?? tierDescriptions[tierName];
+  return (
+    TIER_DESCRIPTION_OVERRIDES[repairName.toLowerCase().trim()]?.[tierName] ??
+    SHARED_TIER_DESCRIPTIONS[tierName] ??
+    tierDescriptions[tierName]
+  );
 }

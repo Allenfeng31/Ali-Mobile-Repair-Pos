@@ -161,7 +161,7 @@ describe('withResolvedTierPriceFaq', () => {
 
     expect(faqs[1]?.answer).toContain('$321');
     expect(faqs[1]?.answer).toContain('Standard option');
-    expect(faqs[1]?.answer).toContain('Industry-standard replacement part with reliable performance.');
+    expect(faqs[1]?.answer).toContain('A cost-effective repair option using a compatible replacement part.');
   });
 
   it('lists every priced tier using the live resolved price and shared description', () => {
@@ -177,8 +177,8 @@ describe('withResolvedTierPriceFaq', () => {
       ]),
     });
 
-    expect(faqs[1]?.answer).toContain('Standard – $321. Industry-standard replacement part with reliable performance.');
-    expect(faqs[1]?.answer).toContain('Premium – $654. Top-tier aftermarket display selected for strong colour, touch response and daily reliability.');
+    expect(faqs[1]?.answer).toContain('Standard – $321. A cost-effective repair option using a compatible replacement part.');
+    expect(faqs[1]?.answer).toContain('Premium – $654. A higher-quality replacement part option, where available. Ask us about the differences for your repair.');
     expect(faqs[1]?.answer).toContain('Genuine – $987. Original equipment display where available, selected for the closest match to factory display performance.');
   });
 
@@ -196,7 +196,7 @@ describe('withResolvedTierPriceFaq', () => {
     });
 
     const answer = faqs[1]?.answer ?? '';
-    expect(answer).toContain('Standard – $321. Industry-standard replacement part with reliable performance.');
+    expect(answer).toContain('Standard – $321. A cost-effective repair option using a compatible replacement part.');
     expect(answer).toContain('Service Pack – $777. Current screen option for this model. We confirm the suitable option before work begins.');
     expect(answer).toContain('Pulled Genuine – $654. Current screen option for this model. We confirm the suitable option before work begins.');
     expect(answer.indexOf('Standard – $321')).toBeLessThan(answer.indexOf('Service Pack – $777'));
