@@ -1,5 +1,5 @@
 import { getLenovoTabletModelConfig } from './lenovo-tablet/config';
-import { getSamsungTabletModelConfig } from './samsung-tablet/config';
+import { getSamsungTabletIndicativePriceGuidance } from './samsung-tablet/pricing';
 
 type StandardTabletRepairType =
   | 'screen-replacement'
@@ -27,22 +27,6 @@ const REPAIR_LABELS: Record<StandardTabletRepairType, string> = {
   'charging-port-replacement': 'charging port replacement',
   'front-camera-replacement': 'front camera replacement',
   'back-camera-replacement': 'back camera replacement',
-};
-
-const SAMSUNG_TAB_A_RANGES: Record<StandardTabletRepairType, PriceBounds> = {
-  'screen-replacement': { minimum: 150, maximum: 300 },
-  'battery-replacement': { minimum: 110, maximum: 180 },
-  'charging-port-replacement': { minimum: 85, maximum: 150 },
-  'front-camera-replacement': { minimum: 99, maximum: 130 },
-  'back-camera-replacement': { minimum: 99, maximum: 130 },
-};
-
-const SAMSUNG_TAB_S_RANGES: Record<StandardTabletRepairType, PriceBounds> = {
-  'screen-replacement': { minimum: 250, maximum: 550 },
-  'battery-replacement': { minimum: 110, maximum: 230 },
-  'charging-port-replacement': { minimum: 95, maximum: 150 },
-  'front-camera-replacement': { minimum: 109, maximum: 130 },
-  'back-camera-replacement': { minimum: 109, maximum: 130 },
 };
 
 const LENOVO_TABLET_RANGES: Record<StandardTabletRepairType, PriceBounds> = {
@@ -85,31 +69,20 @@ export function getSamsungTabletTypicalPriceGuidance(
   modelSlug: string,
   repairSlug: string,
 ): TabletTypicalPriceGuidance | null {
-  const config = getSamsungTabletModelConfig(modelSlug);
-  if (!config || !isStandardTabletRepairType(repairSlug)) {
+  if (!isStandardTabletRepairType(repairSlug)) {
     return null;
   }
+  const guidance = getSamsungTabletIndicativePriceGuidance(modelSlug, repairSlug);
+  if (!guidance) return null;
 
-  if (config.family === 'galaxy-tab-a') {
-    return buildGuidance({
-      subject: 'Galaxy Tab A',
-      repairType: repairSlug,
-      range: SAMSUNG_TAB_A_RANGES[repairSlug],
-    });
-  }
-
-  if (config.family === 'galaxy-tab-s') {
-    return buildGuidance({
-      subject: 'Galaxy Tab S',
-      repairType: repairSlug,
-      range: SAMSUNG_TAB_S_RANGES[repairSlug],
-      extraContext: repairSlug === 'screen-replacement'
-        ? 'Premium Tab S display assemblies can cost substantially more than Tab A parts.'
-        : undefined,
-    });
-  }
-
-  return null;
+  return buildGuidance({
+    subject: guidance.familyLabel,
+    repairType: repairSlug,
+    range: { minimum: guidance.minimum, maximum: guidance.maximum },
+    extraContext: guidance.family === 'galaxy-tab-s' && repairSlug === 'screen-replacement'
+      ? 'Premium Tab S display assemblies can cost substantially more than Tab A parts.'
+      : undefined,
+  });
 }
 
 export function getLenovoTabletTypicalPriceGuidance(

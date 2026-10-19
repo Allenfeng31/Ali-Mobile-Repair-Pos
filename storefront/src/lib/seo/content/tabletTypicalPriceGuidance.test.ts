@@ -18,9 +18,9 @@ describe('tablet typical price guidance', () => {
 
   it('uses distinct Tab A and Tab S ranges without cross-series leakage', () => {
     expect(getSamsungTabletTypicalPriceGuidance('galaxy-tab-a8-sm-x200-sm-x205', 'screen-replacement')?.amountLabel)
-      .toBe('AUD $150–$300');
+      .toBe('AUD $139–$220');
     expect(getSamsungTabletTypicalPriceGuidance('galaxy-tab-s8-sm-x700-sm-x706', 'screen-replacement')?.amountLabel)
-      .toBe('AUD $250–$550');
+      .toBe('AUD $180–$550');
   });
 
   it('uses Lenovo ranges only for supported standard repairs', () => {

@@ -6,7 +6,7 @@ import { fetchModelRepairTypes, fetchRepairCatalog } from '@/lib/api';
 
 const state = vi.hoisted(() => ({
   gridProps: null as {
-    repairTypes: Array<{ slug: string; href?: string; price?: number; displayName?: string; timingLabel?: string }>;
+    repairTypes: Array<{ slug: string; href?: string; price?: number; displayName?: string; priceLabel?: string; timingLabel?: string }>;
     showStartingPriceFallback?: boolean;
     useQuoteLedPricingSummary?: boolean;
   } | null,
@@ -37,7 +37,7 @@ vi.mock('@/components/Breadcrumbs', () => ({
 vi.mock('@/components/BackButton', () => ({ default: () => null }));
 vi.mock('@/components/services/RepairOptionsGrid', () => ({
   default: (props: {
-    repairTypes: Array<{ slug: string; href?: string; price?: number; displayName?: string; timingLabel?: string }>;
+    repairTypes: Array<{ slug: string; href?: string; price?: number; displayName?: string; priceLabel?: string; timingLabel?: string }>;
     showStartingPriceFallback?: boolean;
     useQuoteLedPricingSummary?: boolean;
   }) => {
@@ -614,6 +614,80 @@ describe('Model Hub page-mode Server consumer', () => {
       expect(state.gridProps?.repairTypes.find((repair) => repair.slug === repairSlug)?.timingLabel)
         .toBe('60 Minutes');
     }
+  });
+
+  it('uses only eligible published POS prices for Samsung Tablet Hero and repair cards', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model: 'Galaxy Tab A8',
+      repairTypes: [
+        {
+          slug: 'screen-replacement',
+          name: 'Screen Replacement',
+          price: 0,
+          repairOrigin: 'pos',
+          variants: [
+            { quality_grade: 'Quote', price: 0 },
+            { quality_grade: 'Standard', price: 220 },
+            { quality_grade: 'Premium', price: 180 },
+          ],
+        },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 100, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: 'galaxy-tab-a8-sm-x200-sm-x205', model: 'Galaxy Tab A8', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'samsung', model: 'galaxy-tab-a8-sm-x200-sm-x205' }),
+    }));
+
+    expect(html).toContain('<h2>Repairs From $100</h2>');
+    expect(html).toContain('Battery Replacement pricing currently starts from $100.');
+    expect(html).toContain('6-Month Repair Warranty');
+    expect(html).toContain('Eligible Samsung tablet repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.');
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.priceLabel).toBe('From $180');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'battery-replacement')?.priceLabel).toBe('From $100');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'charging-port-replacement')?.priceLabel)
+      .toBe('Indicative AUD $85–$150 · Quote on Request');
+  });
+
+  it('uses Samsung Tablet family guidance, then Quote on Request when no guidance exists', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model: 'Galaxy Tab S8',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 0, repairOrigin: 'synthetic-backfill' },
+      ],
+      brandModels: [{ slug: 'galaxy-tab-s8-sm-x700-sm-x706', model: 'Galaxy Tab S8', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const guidedHtml = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'samsung', model: 'galaxy-tab-s8-sm-x700-sm-x706' }),
+    }));
+
+    expect(guidedHtml).toContain('<h2>Indicative Repair Pricing</h2>');
+    expect(guidedHtml).toContain('Screen Replacement: AUD $180–$550');
+    expect(guidedHtml).toContain('Battery Replacement: AUD $90–$220');
+    expect(guidedHtml).toContain('These indicative ranges are not fixed repair quotes.');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.priceLabel)
+      .toBe('Indicative AUD $180–$550 · Quote on Request');
+
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Samsung',
+      model: 'Samsung Tablet',
+      repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' }],
+      brandModels: [{ slug: 'unmapped-samsung-tablet', model: 'Samsung Tablet', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const quoteHtml = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'samsung', model: 'unmapped-samsung-tablet' }),
+    }));
+
+    expect(quoteHtml).toContain('<h2>Quote on Request</h2>');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.priceLabel).toBe('Quote on Request');
   });
 
   it('renders 1-hour standard MacBook timing without applying it to Logic Board diagnosis', async () => {

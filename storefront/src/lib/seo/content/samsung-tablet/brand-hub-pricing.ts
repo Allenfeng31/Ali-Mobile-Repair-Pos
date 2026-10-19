@@ -1,14 +1,11 @@
+import { getSamsungTabletBrandHubPricingRows } from './pricing';
+
 export const SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE = {
-  reviewDate: "2026-10-17",
+  reviewDate: "2026-10-19",
   status: "owner-reviewed",
-  rows: [
-    { service: "Galaxy Tab A Screen Replacement", range: "$139–$220" },
-    { service: "Galaxy Tab S Screen Replacement", range: "$180–$450" },
-    { service: "Battery Replacement", range: "$90–$179" },
-    { service: "Charging Port Repair", range: "$89–$150" },
-  ],
+  rows: getSamsungTabletBrandHubPricingRows(),
   qualification:
-    "Indicative AUD prices for applicable Galaxy Tab A and Galaxy Tab S models. Galaxy Tab Active and other Samsung tablets may need a model-specific price or Quote on Request.",
+    "Prices are a guide and depend on your model. Choose your tablet to check pricing or request a quote.",
 } as const;
 
 export const SAMSUNG_TABLET_BRAND_HUB_TIMING_REFERENCE = {
@@ -27,7 +24,8 @@ export function getSamsungTabletBrandHubPricingFaqAnswer() {
 }
 
 export function getSamsungTabletBrandHubMetadataDescription(openingHours: string) {
-  const [tabA, tabS, battery, charging] = SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE.rows;
+  const tabAScreen = SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE.rows.find((row) => row.service === 'Galaxy Tab A Screen Replacement');
+  const tabSScreen = SAMSUNG_TABLET_BRAND_HUB_PRICING_REFERENCE.rows.find((row) => row.service === 'Galaxy Tab S Screen Replacement');
 
-  return `Samsung tablet repair in Ringwood. Galaxy Tab A screens ${tabA.range}; Tab S screens ${tabS.range}; battery ${battery.range}; charging ${charging.range} (indicative). Open ${openingHours}.`;
+  return `Samsung tablet repair in Ringwood. Galaxy Tab A screens ${tabAScreen?.range}; Tab S screens ${tabSScreen?.range} (indicative). Select your model for applicable pricing or a quote. Open ${openingHours}.`;
 }

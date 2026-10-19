@@ -540,15 +540,16 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(container.textContent).toContain("Samsung Tablet Repair");
     expect(heroCards).toHaveLength(3);
     expect(pricingCard?.textContent).toContain("Galaxy Tab A Screen Replacement: $139–$220");
-    expect(pricingCard?.textContent).toContain("Galaxy Tab S Screen Replacement: $180–$450");
-    expect(pricingCard?.textContent).toContain("Battery Replacement: $90–$179");
-    expect(pricingCard?.textContent).toContain("Charging Port Repair: $89–$150");
-    expect(pricingCard?.textContent).toContain("Galaxy Tab Active and other Samsung tablets may need a model-specific price or Quote on Request.");
+    expect(pricingCard?.textContent).toContain("Galaxy Tab A Battery Replacement: $90–$179");
+    expect(pricingCard?.textContent).toContain("Galaxy Tab S Screen Replacement: $180–$550");
+    expect(pricingCard?.textContent).toContain("Galaxy Tab S Battery Replacement: $90–$220");
+    expect(pricingCard?.textContent).toContain("Prices are a guide and depend on your model. Choose your tablet to check pricing or request a quote.");
+    expect(pricingCard?.textContent).not.toMatch(/Charging Port Repair|Front Camera|Back Camera/);
     expect(timingCard?.textContent).toContain("Around 1 Hour");
     expect(timingCard?.textContent).toContain("Many standard Samsung Tablet repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
     expect(hoursCard?.textContent).toContain("Monday–Saturday: 9:00am–5:00pm");
     expect(hoursCard?.textContent).toContain("Sunday: Closed");
-    expect(pricingFaq?.textContent).toContain("Galaxy Tab A Screen Replacement: $139–$220; Galaxy Tab S Screen Replacement: $180–$450; Battery Replacement: $90–$179; Charging Port Repair: $89–$150.");
+    expect(pricingFaq?.textContent).toContain("Galaxy Tab A Screen Replacement: $139–$220; Galaxy Tab A Battery Replacement: $90–$179; Galaxy Tab S Screen Replacement: $180–$550; Galaxy Tab S Battery Replacement: $90–$220.");
     expect(timingFaq?.textContent).toContain("Many standard Samsung Tablet repairs take around 1 hour. Timing depends on the repair type, diagnosis and parts availability.");
     expect(warrantyFaq?.textContent).toContain("Completed standard repairs include a 6-month warranty covering the replacement part and labour.");
     expect(warrantyFaq?.textContent).toContain("The service has no warranty.");
@@ -587,7 +588,7 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       description: "iPad repair in Ringwood. Screen $99–$420, battery $100–$190, charging $120–$179 (indicative). Around 1 hour for many repairs. Open Mon–Sat 9am–5pm.",
     });
     await expect(generateMetadata({ params: Promise.resolve({ category: "tablet", brand: "samsung" }) })).resolves.toMatchObject({
-      description: "Samsung tablet repair in Ringwood. Galaxy Tab A screens $139–$220; Tab S screens $180–$450; battery $90–$179; charging $89–$150 (indicative). Open Mon–Sat 9am–5pm.",
+      description: "Samsung tablet repair in Ringwood. Galaxy Tab A screens $139–$220; Tab S screens $180–$550 (indicative). Select your model for applicable pricing or a quote. Open Mon–Sat 9am–5pm.",
     });
     await expect(generateMetadata({ params: Promise.resolve({ category: "tablet", brand: "lenovo" }) })).resolves.toMatchObject({
       description: "Lenovo tablet repair in Ringwood. Screen $120–$240, battery $89–$149, charging $79–$150 (indicative). Open Mon–Sat 9am–5pm.",

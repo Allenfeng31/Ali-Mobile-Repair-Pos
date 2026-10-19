@@ -43,6 +43,10 @@ import {
   getIpadStartingPriceServiceLabel,
 } from "@/lib/ipadModelHubPresentation";
 import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
+import {
+  resolveSamsungTabletModelHubPricing,
+  resolveSamsungTabletRepairOptionPricing,
+} from "@/lib/seo/content/samsung-tablet/pricing";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -435,6 +439,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         brandSlug,
         modelSlug,
       );
+  const samsungTabletModelHubPricing = isSamsungTabletModelPage
+    ? resolveSamsungTabletModelHubPricing({ modelSlug, repairTypes: modelHubRepairTypes })
+    : null;
   const presentedModelHubRepairTypes = modelHubRepairTypes.map((repair) => ({
     ...repair,
     ...resolveModelHubRepairPresentation({
@@ -443,6 +450,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       modelSlug,
       repairSlug: repair.slug,
     }),
+    ...(isSamsungTabletModelPage
+      ? { priceLabel: resolveSamsungTabletRepairOptionPricing({ modelSlug, repair }).label }
+      : {}),
   }));
   const modelHubTimingSummary = getModelHubTimingSummary({
     category: categorySlug,
@@ -1431,6 +1441,32 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: tabletExactModelBody,
     },
   ];
+  const samsungTabletPricingAnswer = samsungTabletModelHubPricing?.kind === 'published'
+    ? `Published ${samsungTabletModelHubPricing.repairName} pricing currently starts from $${formatStartingPrice(samsungTabletModelHubPricing.price)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+    : samsungTabletModelHubPricing?.kind === 'indicative'
+    ? `${samsungTabletModelHubPricing.rows.map((row) => `${row.service}: ${row.range}`).join('; ')}. These indicative ranges are not fixed repair quotes. Choose the exact repair below for the current price or Quote on Request.`
+    : 'Quote on Request. Choose the exact repair below so we can confirm the available repair option, pricing and parts availability for this Samsung tablet model.';
+  const samsungTabletHeroCards = [
+    samsungTabletModelHubPricing?.kind === 'published'
+      ? {
+          title: `Repairs From $${formatStartingPrice(samsungTabletModelHubPricing.price)}`,
+          body: samsungTabletPricingAnswer,
+        }
+      : samsungTabletModelHubPricing?.kind === 'indicative'
+      ? {
+          title: 'Indicative Repair Pricing',
+          body: samsungTabletPricingAnswer,
+        }
+      : {
+          title: 'Quote on Request',
+          body: samsungTabletPricingAnswer,
+        },
+    modelHubTimingCard,
+    {
+      title: '6-Month Repair Warranty',
+      body: 'Eligible Samsung tablet repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.',
+    },
+  ];
   const tabletQuickAnswers = [
     {
       number: "01",
@@ -1481,6 +1517,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: "Standard hardware repairs normally do not require access to personal content, but backing up important data before repair is recommended because damaged devices carry data risk.",
     },
   ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const samsungTabletQuickAnswers = [
+    { number: '01', title: 'How much does the repair cost?', body: samsungTabletPricingAnswer },
+    ...tabletQuickAnswers.filter((answer) => answer.number !== '01'),
+  ];
   const tabletProcessSteps = [
     { number: "01", title: "Confirm exact tablet model", body: `We confirm the ${tabletBrandRepairLabel} model, screen size and model code where possible so the repair path matches the correct part.` },
     { number: "02", title: "Inspect symptoms and damage", body: "We check glass, display, touch response, charging behaviour, cameras, frame pressure and liquid or impact signs where practical." },
@@ -1505,6 +1545,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and our workmanship. It does not cover new physical damage, liquid damage, bending, misuse or unrelated faults." } : null,
     { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm tablet part availability before you travel." },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const samsungTabletFaqs = [
+    { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: samsungTabletPricingAnswer },
+    ...tabletFaqs.slice(1),
+  ];
   const macBookHeroCards = [
     {
       title: startingPrice ? `${modelName} repairs from $${formatStartingPrice(startingPrice)}` : `${modelName} repair pricing`,
@@ -1605,6 +1649,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoHeroCards
     : isIPadModelPage
     ? iPadHeroCards
+    : isSamsungTabletModelPage
+    ? samsungTabletHeroCards
     : isTabletModelPage
     ? tabletHeroCards
     : isMacBookModelPage
@@ -1622,6 +1668,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoQuickAnswers
     : isIPadModelPage
     ? iPadQuickAnswers
+    : isSamsungTabletModelPage
+    ? samsungTabletQuickAnswers
     : isTabletModelPage
     ? tabletQuickAnswers
     : isMacBookModelPage
@@ -1673,6 +1721,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? oppoFaqs
     : isIPadModelPage
     ? iPadFaqs
+    : isSamsungTabletModelPage
+    ? samsungTabletFaqs
     : isTabletModelPage
     ? tabletFaqs
     : isMacBookModelPage
@@ -1954,7 +2004,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
-          showStartingPriceFallback={!isIPadModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
+          showStartingPriceFallback={!isIPadModelPage && !isSamsungTabletModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
           useQuoteLedPricingSummary={isMacBookModelPage || isSecondaryPhoneModelPage}
         />
         {isMacBookModelPage && (

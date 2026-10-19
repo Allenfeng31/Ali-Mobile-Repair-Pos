@@ -576,14 +576,14 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
-    ['Galaxy Tab A8 Screen', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $150–$300', 'AUD $250–$550'],
-    ['Galaxy Tab A8 Battery', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $110–$180', 'AUD $110–$230'],
+    ['Galaxy Tab A8 Screen', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $139–$220', 'AUD $180–$550'],
+    ['Galaxy Tab A8 Battery', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $90–$179', 'AUD $90–$220'],
     ['Galaxy Tab A8 Charging Port', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Charging Port Replacement', 'charging-port-replacement', [{ quality_grade: 'Standard', price: 129 }], true, 'AUD $85–$150', 'AUD $95–$150'],
     ['Galaxy Tab A8 Front Camera', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Front Camera Replacement', 'front-camera-replacement', [], false, 'AUD $99–$130', 'AUD $109–$130'],
     ['Galaxy Tab A8 Back Camera', 'Galaxy Tab A8', 'galaxy-tab-a8-sm-x200-sm-x205', 'Back Camera Replacement', 'back-camera-replacement', [], false, 'AUD $99–$130', 'AUD $109–$130'],
-    ['Galaxy Tab S8 Screen', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Screen Replacement', 'screen-replacement', [], false, 'AUD $250–$550', 'AUD $150–$300'],
-    ['Galaxy Tab S8 Battery', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $110–$230', 'AUD $110–$180'],
-    ['Galaxy Tab S8 Charging Port', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $95–$150', 'AUD $85–$150'],
+    ['Galaxy Tab S8 Screen', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Screen Replacement', 'screen-replacement', [], false, 'AUD $180–$550', 'AUD $139–$220'],
+    ['Galaxy Tab S8 Battery', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $90–$220', 'AUD $90–$179'],
+    ['Galaxy Tab S8 Charging Port', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $90–$150', 'AUD $85–$150'],
     ['Galaxy Tab S8 Front Camera', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Front Camera Replacement', 'front-camera-replacement', [], false, 'AUD $109–$130', 'AUD $99–$130'],
     ['Galaxy Tab S8 Back Camera', 'Galaxy Tab S8', 'galaxy-tab-s8-sm-x700-sm-x706', 'Back Camera Replacement', 'back-camera-replacement', [], false, 'AUD $109–$130', 'AUD $99–$130'],
   ] as const)('renders %s with Samsung Tablet standard timing and quote-safe pricing', async (
