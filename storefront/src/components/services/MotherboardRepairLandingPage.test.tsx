@@ -77,4 +77,17 @@ describe('MotherboardRepairLandingPage', () => {
     expect(container.textContent).not.toContain('Around 2–3 Weeks');
     expect(container.textContent).toContain('approved Samsung phone Logic Board service time');
   });
+
+  it('does not render an inner main landmark under PublicLayout', () => {
+    const { container } = render(
+      <MotherboardRepairLandingPage
+        canonicalPath="/repairs/motherboard-repair"
+        eligibleDevices={eligibleDevices}
+        selection={null}
+      />,
+    );
+
+    expect(container.querySelector('main')).toBeNull();
+    expect(container.querySelector('.repair-detail-page-shell')).not.toBeNull();
+  });
 });

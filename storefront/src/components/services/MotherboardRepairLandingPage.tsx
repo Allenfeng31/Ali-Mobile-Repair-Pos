@@ -70,7 +70,7 @@ export default function MotherboardRepairLandingPage({ canonicalPath, eligibleDe
   };
 
   return <>
-    <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
+    <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <ServiceSchema serviceName={MOTHERBOARD_REPAIR_NAME} description="Quote-first motherboard and logic board assessment for supported phones, tablets, MacBooks and Apple Watch models." url={`${SITE_URL}${canonicalPath}`} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600"><ol className="flex flex-wrap items-center justify-center gap-2"><li><Link href="/" className="font-semibold hover:text-blue-700 hover:underline">Home</Link></li><li aria-hidden="true">›</li><li><Link href="/repairs" className="font-semibold hover:text-blue-700 hover:underline">Repairs</Link></li><li aria-hidden="true">›</li><li><span aria-current="page" className="font-bold text-blue-600">Motherboard &amp; Logic Board Repair</span></li></ol></nav>
@@ -124,7 +124,7 @@ export default function MotherboardRepairLandingPage({ canonicalPath, eligibleDe
       </div>
 
       <section data-motherboard-layout-section className={styles.layoutSection} aria-labelledby="motherboard-links-heading"><div className={`${styles.linksPanel} mx-auto flex w-full flex-col gap-6 rounded-[28px] border-[2px] border-slate-800 bg-transparent text-center`}><div className="repair-workbench-heading"><span>Helpful links</span><h2 id="motherboard-links-heading" className="scroll-mt-32">Board-level assessment in Ringwood</h2><p>Visit Ali Mobile &amp; Repair at Kiosk C1 inside Ringwood Square. We inspect the device, explain the assessment outcome and confirm the quote before approved work begins.</p></div><div className="flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row"><Link href="/repairs/phone" className="inline-flex min-h-12 items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-extrabold !text-white transition-colors hover:bg-blue-700">Phone Repair Services</Link><Link href="/repairs/water-damage" className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50">Water Damage Assessment</Link></div></div></section>
-    </main>
+    </div>
     <ReviewsSection />
   </>;
 }

@@ -25,7 +25,7 @@ export default function LogicBoardRepairLandingPage({ canonicalPath, candidates 
   };
 
   return (
-    <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell">
+    <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600">
         <ol className="flex flex-wrap items-center justify-center gap-2">
@@ -62,6 +62,6 @@ export default function LogicBoardRepairLandingPage({ canonicalPath, candidates 
         <article className="rounded-2xl border border-slate-200 bg-slate-50 p-6"><ShieldAlert className="mb-4 text-blue-600" size={25} aria-hidden="true" /><h2 className="text-xl font-black text-slate-950">Outcomes are not guaranteed</h2><p className="mt-3 text-sm font-semibold leading-6 text-slate-700">Logic board repair involves unpredictable variables. We cannot guarantee a successful repair, nor do we guarantee data recovery or fixed timeframes. For some severely damaged devices, board repair may not be economical.</p></article>
       </section>
       <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14"><div className="rounded-2xl border border-slate-200 bg-white p-6 text-center"><ClipboardCheck className="mx-auto text-blue-600" size={26} aria-hidden="true" /><h2 className="mt-3 text-xl font-black text-slate-950">Call ahead for advice</h2><p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-6 text-slate-600">If you suspect a logic board fault, call us before travelling to Ringwood Square. We can advise on the assessment process and whether your device model is suitable for board-level inspection.</p><div className="mt-5 flex flex-wrap justify-center gap-3"><a href="tel:0481058514" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"><PhoneCall size={18} aria-hidden="true" />Call the repair desk</a><Link href="/repairs/water-damage" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 font-bold text-blue-700 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">Water damage repair</Link><Link href="/repairs/phone/charging-port-replacement" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 font-bold text-blue-700 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">Charging port repair</Link></div></div></section>
-    </main>
+    </div>
   );
 }

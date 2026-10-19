@@ -35,4 +35,10 @@ describe('LogicBoardRepairLandingPage', () => {
     expect(schema).toContain('https://www.alimobile.com.au/repairs/phone/logic-board-repair');
     expect(schema).not.toMatch(/Offer|Product|AggregateOffer|priceCurrency|availability|\?|FAQPage/);
   });
+
+  it('does not render an inner main landmark under PublicLayout', () => {
+    const { container } = render(<LogicBoardRepairLandingPage canonicalPath="/repairs/phone/logic-board-repair" candidates={candidates} />);
+    expect(container.querySelector('main')).toBeNull();
+    expect(container.querySelector('.repair-detail-page-shell')).not.toBeNull();
+  });
 });

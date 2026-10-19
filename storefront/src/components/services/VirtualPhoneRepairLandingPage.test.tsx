@@ -325,4 +325,18 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.queryByTestId('generic-peripheral-hierarchy')).toBeNull();
     expect(screen.getByTestId('generic-booking-cta')).toBeTruthy();
   });
+
+  it('does not render an inner main landmark under PublicLayout', () => {
+    const { container } = render(
+      <VirtualPhoneRepairLandingPage
+        repairSlug="earpiece-speaker-replacement"
+        canonicalPath="/repairs/phone/earpiece-speaker-replacement"
+        models={[]}
+        isGeneric
+      />,
+    );
+
+    expect(container.querySelector('main')).toBeNull();
+    expect(container.querySelector('.repair-detail-page-shell')).not.toBeNull();
+  });
 });

@@ -254,7 +254,7 @@ export default function VirtualPhoneRepairLandingPage({
   return (
     <>
       <ServiceSchema serviceName={`${brandName ? `${brandName} ` : 'Phone '}${repair.name}`} description={brandContent?.intro ?? `${repair.summary} Choose a supported model for current repair options and an inspection-led quote.`} url={`https://www.alimobile.com.au${canonicalPath}`} />
-      <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
+      <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
         <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600">
           <ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2">
@@ -339,7 +339,7 @@ export default function VirtualPhoneRepairLandingPage({
         <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="links-heading">
           <div className="mx-auto flex w-full flex-col gap-6 rounded-[28px] border-[2px] border-slate-800 bg-transparent p-6 md:p-[50px] text-center"><div className="repair-workbench-heading"><span>Helpful links</span><h2 id="links-heading" className="scroll-mt-32">Explore related repair pages</h2><p>{isGenericHierarchy ? 'Compare relevant phone repairs or visit our Ringwood repair desk for an inspection-led quote.' : 'Compare relevant phone repairs or return to the appropriate repair hub.'}</p></div><div className="flex flex-col items-center justify-center gap-3 sm:flex-row"><Link href="/repairs/phone" className="inline-flex min-h-12 items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-extrabold !text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">Phone Repair Services</Link><Link href={relatedHref} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">{related.name}</Link><Link href={repairHubHref} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">{brandName ? `${brandName} Repair Hub` : 'Phone Repair Hub'}</Link>{isGeneric && [['Samsung repair', '/repairs/phone/samsung'], ['Google Pixel repair', '/repairs/phone/google-pixel'], ['OPPO repair', '/repairs/phone/oppo']].map(([label, href]) => <Link key={href} href={href} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">{label}</Link>)}</div></div>
         </section>
-      </main>
+      </div>
       <ReviewsSection />
     </>
   );

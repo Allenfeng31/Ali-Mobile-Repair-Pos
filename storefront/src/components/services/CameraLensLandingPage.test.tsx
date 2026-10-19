@@ -109,4 +109,20 @@ describe('Camera Lens selected-device normalization', () => {
     expect(heading.compareDocumentPosition(facts) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByRole('link', { name: /Change model/ })).toHaveAttribute('href', '/repairs/phone/google/camera-lens-replacement');
   });
+
+  it('does not render an inner main landmark under PublicLayout', () => {
+    const { container } = render(
+      <CameraLensLandingPage
+        brandName="Google Pixel"
+        brandSlug="google-pixel"
+        title="Google Pixel Camera Lens Replacement"
+        intro="Inspection first."
+        canonicalPath="/repairs/phone/google/camera-lens-replacement"
+        models={[]}
+      />,
+    );
+
+    expect(container.querySelector('main')).toBeNull();
+    expect(container.querySelector('.repair-detail-page-shell')).not.toBeNull();
+  });
 });

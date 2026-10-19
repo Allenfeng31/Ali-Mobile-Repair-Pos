@@ -191,7 +191,7 @@ export default function CameraLensLandingPage({
   return (
     <>
     {brandName ? <ServiceSchema serviceName={`${brandName} ${CAMERA_LENS_REPAIR_NAME}`} description={intro} url={`https://www.alimobile.com.au${canonicalPath}`} /> : null}
-    <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
+    <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600">
         <ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2">
@@ -434,7 +434,7 @@ export default function CameraLensLandingPage({
           </div>
         </div>
       </section>
-    </main>
+    </div>
     <ReviewsSection />
     </>
   );

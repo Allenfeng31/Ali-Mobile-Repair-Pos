@@ -1835,6 +1835,17 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).not.toContain('"offers"');
   });
 
+  it('does not render an inner main landmark under PublicLayout', async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: [iphoneBackRepairCatalogue('iPhone 15', 'iphone-15', [])] });
+
+    const html = renderToStaticMarkup(
+      await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-15', 'repair-type': 'back-glass-replacement' })) }),
+    );
+
+    expect(html).not.toContain('<main');
+    expect(html).toContain('repair-detail-page-shell');
+  });
+
   it('keeps legacy single-camera Back Camera copy model-safe while using the shared turnaround', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [iphone8BackCamera] });
 

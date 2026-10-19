@@ -5810,7 +5810,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
       />
 
       {/* Repair detail hero */}
-      <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: '0' }}>
+      <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: '0' }}>
         <Breadcrumbs
           category={resolvedParams.category}
           brand={resolvedParams.brand}
@@ -6175,7 +6175,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             />
           </ScrollReveal>
         )}
-      </main>
+      </div>
 
       {/* ─── SOCIAL PROOF ─────────────────────────────── */}
       {!isAliMobileEnhancedRepairPage && !isWaterDamageRepairPage && (

@@ -302,4 +302,18 @@ describe('CameraModuleRepairLandingPage', () => {
     expect(container.textContent).toMatch(/inspect|inspection/i);
     expect(container.textContent).not.toMatch(/starting from \$50/i);
   });
+
+  it('does not render an inner main landmark under PublicLayout', () => {
+    const { container } = render(
+      <CameraModuleRepairLandingPage
+        config={front}
+        canonicalPath="/repairs/phone/front-camera-replacement"
+        candidates={candidates}
+        hierarchy={null}
+      />,
+    );
+
+    expect(container.querySelector('main')).toBeNull();
+    expect(container.querySelector('.repair-detail-page-shell')).not.toBeNull();
+  });
 });

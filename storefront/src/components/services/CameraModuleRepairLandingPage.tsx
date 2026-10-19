@@ -145,7 +145,7 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
 
   return <>
     <ServiceSchema serviceName={config.title} description={config.description} url={`https://www.alimobile.com.au${canonicalPath}`} />
-    <main className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
+    <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600"><ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2">{breadcrumbs.map((item, index) => <li key={item.label} className="flex items-center gap-2">{index > 0 ? <span aria-hidden="true">›</span> : null}{item.href ? <Link href={item.href} className="font-semibold transition-colors hover:text-blue-700 hover:underline">{item.label}</Link> : <span aria-current="page" className="font-bold text-blue-600">{item.label}</span>}</li>)}</ol></nav>
       <div className="repair-detail-topbar"><Link href="/repairs/phone" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:border-blue-300 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"><ArrowLeft size={17} aria-hidden="true" />Back to phone repairs</Link></div>
@@ -194,7 +194,7 @@ export default function CameraModuleRepairLandingPage({ config, canonicalPath, c
         </div>
       </div>
       <section data-camera-module-layout-section data-camera-module-links className={styles.layoutSection} aria-labelledby="camera-links-heading"><div className={`${styles.linksPanel} mx-auto flex w-full flex-col gap-6 rounded-[28px] border-[2px] border-slate-800 bg-transparent text-center`}><div className="repair-workbench-heading"><span>Helpful links</span><h2 id="camera-links-heading" className="scroll-mt-32">Explore related phone repairs</h2><p>Book an assessment at Ali Mobile &amp; Repair in Ringwood. We confirm the model, fault, suitable repair and quote before approved work begins.</p></div><div className="flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row"><Link href="/repairs/phone" className="inline-flex min-h-12 items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-extrabold !text-white transition-colors hover:bg-blue-700">Phone Repair Services</Link><Link href={reciprocalHref} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50">{reciprocalLabel}</Link>{isBackCamera && config.relatedHref && config.relatedLabel ? <Link href={config.relatedHref} className="inline-flex min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-50">{config.relatedLabel}</Link> : null}</div></div></section>
-    </main>
+    </div>
     <ReviewsSection />
   </>;
 }
