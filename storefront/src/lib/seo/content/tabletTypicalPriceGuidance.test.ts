@@ -23,9 +23,14 @@ describe('tablet typical price guidance', () => {
       .toBe('AUD $180–$550');
   });
 
-  it('uses Lenovo ranges only for supported standard repairs', () => {
+  it('uses the owner-approved Lenovo guidance only for screen, battery, and charging repairs', () => {
     expect(getLenovoTabletTypicalPriceGuidance('lenovo-tab-m11', 'screen-replacement')?.amountLabel)
-      .toBe('AUD $100–$250');
+      .toBe('AUD $120–$240');
+    expect(getLenovoTabletTypicalPriceGuidance('lenovo-tab-m11', 'battery-replacement')?.amountLabel)
+      .toBe('AUD $89–$149');
+    expect(getLenovoTabletTypicalPriceGuidance('lenovo-tab-m11', 'charging-port-replacement')?.amountLabel)
+      .toBe('AUD $79–$150');
     expect(getLenovoTabletTypicalPriceGuidance('lenovo-tab-m11', 'front-camera-replacement')).toBeNull();
+    expect(getLenovoTabletTypicalPriceGuidance('lenovo-tab-m11', 'back-camera-replacement')).toBeNull();
   });
 });

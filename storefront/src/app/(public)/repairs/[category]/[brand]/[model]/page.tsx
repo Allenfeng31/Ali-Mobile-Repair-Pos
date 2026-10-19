@@ -48,6 +48,11 @@ import {
   resolveSamsungTabletRepairOptionPricing,
 } from "@/lib/seo/content/samsung-tablet/pricing";
 import { getSamsungTabletModelHubPresentation } from "@/lib/samsungTabletModelHubPresentation";
+import {
+  resolveLenovoTabletModelHubPricing,
+  resolveLenovoTabletRepairOptionPricing,
+} from "@/lib/seo/content/lenovo-tablet/pricing";
+import { getLenovoTabletModelHubPresentation } from "@/lib/lenovoTabletModelHubPresentation";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -450,6 +455,16 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         repairTypes: modelHubRepairTypes,
       })
     : null;
+  const lenovoTabletModelHubPricing = isLenovoTabletModelPage
+    ? resolveLenovoTabletModelHubPricing({ modelSlug, repairTypes: modelHubRepairTypes })
+    : null;
+  const lenovoTabletModelHubPresentation = isLenovoTabletModelPage
+    ? getLenovoTabletModelHubPresentation({
+        modelSlug,
+        fallbackModelName: modelName,
+        repairTypes: modelHubRepairTypes,
+      })
+    : null;
   const presentedModelHubRepairTypes = modelHubRepairTypes.map((repair) => ({
     ...repair,
     ...resolveModelHubRepairPresentation({
@@ -460,6 +475,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     }),
     ...(isSamsungTabletModelPage
       ? { priceLabel: resolveSamsungTabletRepairOptionPricing({ modelSlug, repair }).label }
+      : isLenovoTabletModelPage
+      ? { priceLabel: resolveLenovoTabletRepairOptionPricing({ modelSlug, repair }).label }
       : {}),
   }));
   const modelHubTimingSummary = getModelHubTimingSummary({
@@ -1475,6 +1492,32 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: 'Eligible Samsung tablet repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.',
     },
   ];
+  const lenovoTabletPricingAnswer = lenovoTabletModelHubPricing?.kind === 'published'
+    ? `Published ${lenovoTabletModelHubPricing.repairName} pricing currently starts from $${formatStartingPrice(lenovoTabletModelHubPricing.price)}. Choose the exact repair below to confirm the listed price or quote requirement.`
+    : lenovoTabletModelHubPricing?.kind === 'indicative'
+    ? `${lenovoTabletModelHubPricing.rows.map((row) => `${row.service}: ${row.range}`).join('; ')}. These indicative ranges are not fixed repair quotes. Choose the exact repair below for the current price or Quote on Request.`
+    : 'Quote on Request. Choose the exact repair below so we can confirm the available repair option, pricing and parts availability for this Lenovo tablet model.';
+  const lenovoTabletHeroCards = [
+    lenovoTabletModelHubPricing?.kind === 'published'
+      ? {
+          title: `Repairs From $${formatStartingPrice(lenovoTabletModelHubPricing.price)}`,
+          body: lenovoTabletPricingAnswer,
+        }
+      : lenovoTabletModelHubPricing?.kind === 'indicative'
+      ? {
+          title: 'Indicative Repair Pricing',
+          body: lenovoTabletPricingAnswer,
+        }
+      : {
+          title: 'Quote on Request',
+          body: lenovoTabletPricingAnswer,
+        },
+    modelHubTimingCard,
+    {
+      title: '6-Month Repair Warranty',
+      body: 'Eligible Lenovo tablet repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.',
+    },
+  ];
   const tabletQuickAnswers = [
     {
       number: "01",
@@ -1529,6 +1572,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     { number: '01', title: 'How much does the repair cost?', body: samsungTabletPricingAnswer },
     ...tabletQuickAnswers.filter((answer) => answer.number !== '01'),
   ];
+  const lenovoTabletQuickAnswers = [
+    { number: '01', title: 'How much does the repair cost?', body: lenovoTabletPricingAnswer },
+    ...tabletQuickAnswers.filter((answer) => answer.number !== '01'),
+  ];
   const tabletProcessSteps = [
     { number: "01", title: "Confirm exact tablet model", body: `We confirm the ${tabletBrandRepairLabel} model, screen size and model code where possible so the repair path matches the correct part.` },
     { number: "02", title: "Inspect symptoms and damage", body: "We check glass, display, touch response, charging behaviour, cameras, frame pressure and liquid or impact signs where practical." },
@@ -1555,6 +1602,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
   const samsungTabletFaqs = [
     { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: samsungTabletPricingAnswer },
+    ...tabletFaqs.slice(1),
+  ];
+  const lenovoTabletFaqs = [
+    { question: `How much does ${modelArticle} ${modelName} repair cost?`, answer: lenovoTabletPricingAnswer },
     ...tabletFaqs.slice(1),
   ];
   const macBookHeroCards = [
@@ -1659,6 +1710,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? iPadHeroCards
     : isSamsungTabletModelPage
     ? samsungTabletHeroCards
+    : isLenovoTabletModelPage
+    ? lenovoTabletHeroCards
     : isTabletModelPage
     ? tabletHeroCards
     : isMacBookModelPage
@@ -1678,6 +1731,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? iPadQuickAnswers
     : isSamsungTabletModelPage
     ? samsungTabletQuickAnswers
+    : isLenovoTabletModelPage
+    ? lenovoTabletQuickAnswers
     : isTabletModelPage
     ? tabletQuickAnswers
     : isMacBookModelPage
@@ -1731,6 +1786,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? iPadFaqs
     : isSamsungTabletModelPage
     ? samsungTabletFaqs
+    : isLenovoTabletModelPage
+    ? lenovoTabletFaqs
     : isTabletModelPage
     ? tabletFaqs
     : isMacBookModelPage
@@ -1918,7 +1975,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         model={modelSlug}
         modelLabel={isIPadModelPage
           ? modelName
-          : samsungTabletModelHubPresentation?.commercialModelName}
+          : samsungTabletModelHubPresentation?.commercialModelName
+          ?? lenovoTabletModelHubPresentation?.commercialModelName}
       />
 
       {isEnhancedPhoneModelPage ? (
@@ -1934,6 +1992,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 ? `${entityModelName} Repairs`
                 : samsungTabletModelHubPresentation
                 ? `${samsungTabletModelHubPresentation.commercialModelName} Repair Options`
+                : lenovoTabletModelHubPresentation
+                ? `${lenovoTabletModelHubPresentation.commercialModelName} Repair Options`
                 : `${modelName} repair options`)}
             </h1>
             {macBookModelCodeLabel ? (
@@ -1945,11 +2005,16 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             {samsungTabletModelHubPresentation?.modelNumbersLabel ? (
               <p className="mt-2 text-sm font-semibold text-slate-600">{samsungTabletModelHubPresentation.modelNumbersLabel}</p>
             ) : null}
+            {lenovoTabletModelHubPresentation?.modelNumbersLabel ? (
+              <p className="mt-2 text-sm font-semibold text-slate-600">{lenovoTabletModelHubPresentation.modelNumbersLabel}</p>
+            ) : null}
             <p>
               {selectedCrawledModelHubContent?.heroIntro ?? (isMajorPhoneModelPage
                 ? `Choose a repair for your exact ${entityModelName} to compare current pricing, approved service timing and the repair path that matches the device in front of you.`
                 : samsungTabletModelHubPresentation
                 ? samsungTabletModelHubPresentation.heroDescription
+                : lenovoTabletModelHubPresentation
+                ? lenovoTabletModelHubPresentation.heroDescription
                 : `Choose the available repair for your exact ${modelName} to view current pricing, screen options where published, and the repair path that best matches the device in front of you.`)}
             </p>
             <div className="repair-hero-actions">
@@ -1963,7 +2028,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               </a>
             </div>
           </div>
-          <div className="repair-hero-brand-proof" aria-label={`${modelName} repair pricing and timing highlights`}>
+          <div className="repair-hero-brand-proof" aria-label={`${lenovoTabletModelHubPresentation?.commercialModelName ?? modelName} repair pricing and timing highlights`}>
             {enhancedHeroCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
@@ -2023,7 +2088,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
-          showStartingPriceFallback={!isIPadModelPage && !isSamsungTabletModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
+          showStartingPriceFallback={!isIPadModelPage && !isSamsungTabletModelPage && !isLenovoTabletModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
           useQuoteLedPricingSummary={isMacBookModelPage || isSecondaryPhoneModelPage}
         />
         {isMacBookModelPage && (

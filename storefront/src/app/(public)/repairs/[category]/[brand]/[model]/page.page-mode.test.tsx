@@ -3,6 +3,7 @@ import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchModelRepairTypes, fetchRepairCatalog } from '@/lib/api';
+import { LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST } from '@/lib/seo/content/lenovo-tablet/config';
 
 const state = vi.hoisted(() => ({
   gridProps: null as {
@@ -694,6 +695,106 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(quoteHtml).toContain('<h2>Quote on Request</h2>');
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.priceLabel).toBe('Quote on Request');
   });
+
+  it('uses Lenovo POS pricing before indicative guidance and keeps the commercial M11 presentation', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Lenovo',
+      model: 'Lenovo Tab M11',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 170, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 100, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Repair', price: 100, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: 'lenovo-tab-m11', model: 'Lenovo Tab M11', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'lenovo', model: 'lenovo-tab-m11' }),
+    }));
+
+    expect(html).toContain('<h2>Repairs From $100</h2>');
+    expect(html).toContain('<h1 id="model-repair-heading">Lenovo Tab M11 Repair Options</h1>');
+    expect(html).not.toContain('Model Numbers:');
+    expect(html).toContain('We repair Lenovo Tab M11 screens, batteries, and charging ports.');
+    expect(html).toContain('6-Month Repair Warranty');
+    expect(html).toContain('Eligible Lenovo tablet repairs include a 6-month warranty on parts and labour. Water-damage repairs are excluded.');
+    expect(state.breadcrumbProps).toEqual(expect.objectContaining({ modelLabel: 'Lenovo Tab M11' }));
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.priceLabel).toBe('From $170');
+  });
+
+  it('uses Lenovo indicative ranges and Quote on Request without legacy static pricing', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Lenovo',
+      model: 'Lenovo Tab P12 (TB-370FU)',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: null, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Repair', price: 0, repairOrigin: 'pos' },
+        { slug: 'front-camera-replacement', name: 'Front Camera Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'back-camera-replacement', name: 'Back Camera Replacement', price: 0, repairOrigin: 'synthetic-backfill' },
+      ],
+      brandModels: [{ slug: 'lenovo-tab-p12-tb-370fu', model: 'Lenovo Tab P12 (TB-370FU)', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'tablet', brand: 'lenovo', model: 'lenovo-tab-p12-tb-370fu' }),
+    }));
+
+    expect(html).toContain('<h2>Indicative Repair Pricing</h2>');
+    expect(html).toContain('Screen Replacement: AUD $120–$240');
+    expect(html).toContain('Battery Replacement: AUD $89–$149');
+    expect(html).toContain('<h1 id="model-repair-heading">Lenovo Tab P12 Repair Options</h1>');
+    expect(html).toContain('Model Numbers: TB-370FU');
+    expect(html).toContain('We repair Lenovo Tab P12 screens, batteries, charging ports, front cameras, and back cameras.');
+    expect(state.breadcrumbProps).toEqual(expect.objectContaining({ modelLabel: 'Lenovo Tab P12' }));
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.priceLabel)
+      .toBe('Indicative AUD $120–$240 · Quote on Request');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'battery-replacement')?.priceLabel)
+      .toBe('Indicative AUD $89–$149 · Quote on Request');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'charging-port-replacement')?.priceLabel)
+      .toBe('Indicative AUD $79–$150 · Quote on Request');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'front-camera-replacement')?.priceLabel)
+      .toBe('Quote on Request');
+    expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'back-camera-replacement')?.priceLabel)
+      .toBe('Quote on Request');
+    expect(html).not.toMatch(/\$(?:129|85|65)/);
+  });
+
+  it.each(LENOVO_TABLET_STANDARD_REPAIR_MODEL_CONFIG_LIST)(
+    'renders commercial identity, configured model numbers, and only supported services for $modelName',
+    async (config) => {
+      const repairTypes = config.supportedRepairTypes.map((slug) => ({
+        slug,
+        name: slug.replace(/-/g, ' '),
+        price: 0,
+        repairOrigin: 'pos' as const,
+      }));
+      vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+        brand: 'Lenovo',
+        model: config.modelName,
+        repairTypes,
+        brandModels: [{ slug: config.modelSlug, model: config.modelName, repairTypes: [] }],
+      }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+      const html = renderToStaticMarkup(await ModelHubPage({
+        params: Promise.resolve({ category: 'tablet', brand: 'lenovo', model: config.modelSlug }),
+      }));
+      const commercialModelName = config.modelName.replace(/\s+\([^)]*\)$/, '');
+
+      expect(html).toContain(`<h1 id="model-repair-heading">${commercialModelName} Repair Options</h1>`);
+      expect(state.breadcrumbProps).toEqual(expect.objectContaining({ modelLabel: commercialModelName }));
+      if (config.modelCodes.length) {
+        expect(html).toContain(`Model Numbers: ${config.modelCodes.join(' / ')}`);
+      } else {
+        expect(html).not.toContain('Model Numbers:');
+      }
+      expect(state.gridProps?.repairTypes.map((repair) => repair.slug))
+        .toEqual(expect.arrayContaining([...config.supportedRepairTypes]));
+      expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+    },
+  );
 
   it('renders 1-hour standard MacBook timing without applying it to Logic Board diagnosis', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({

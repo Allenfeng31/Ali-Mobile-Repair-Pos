@@ -894,14 +894,14 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
-    ['Lenovo Tab P12 Screen', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $100–$250'],
-    ['Lenovo Tab P12 Battery', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $80–$150'],
-    ['Lenovo Tab P12 Charging Port', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $80–$150'],
-    ['Lenovo Tab P12 Front Camera', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Front Camera Replacement', 'front-camera-replacement', [], false, 'AUD $70–$150'],
-    ['Lenovo Tab P12 Back Camera', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Back Camera Replacement', 'back-camera-replacement', [], false, 'AUD $70–$150'],
-    ['Lenovo Tab M11 Screen', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Screen Replacement', 'screen-replacement', [], false, 'AUD $100–$250'],
-    ['Lenovo Tab M11 Battery', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $80–$150'],
-    ['Lenovo Tab M11 Charging Port', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $80–$150'],
+    ['Lenovo Tab P12 Screen', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Screen Replacement', 'screen-replacement', [{ quality_grade: 'Standard', price: 249 }], true, 'AUD $120–$240'],
+    ['Lenovo Tab P12 Battery', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $89–$149'],
+    ['Lenovo Tab P12 Charging Port', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $79–$150'],
+    ['Lenovo Tab P12 Front Camera', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Front Camera Replacement', 'front-camera-replacement', [], false, null],
+    ['Lenovo Tab P12 Back Camera', 'Lenovo Tab P12 (TB-370FU)', 'lenovo-tab-p12-tb-370fu', 'Back Camera Replacement', 'back-camera-replacement', [], false, null],
+    ['Lenovo Tab M11 Screen', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Screen Replacement', 'screen-replacement', [], false, 'AUD $120–$240'],
+    ['Lenovo Tab M11 Battery', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Battery Replacement', 'battery-replacement', [], false, 'AUD $89–$149'],
+    ['Lenovo Tab M11 Charging Port', 'Lenovo Tab M11', 'lenovo-tab-m11', 'Charging Port Replacement', 'charging-port-replacement', [], false, 'AUD $79–$150'],
   ] as const)('renders %s with Lenovo Tablet standard timing and quote-safe pricing', async (
     _label,
     model,
@@ -932,16 +932,21 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(heroHtml).not.toMatch(/Fast Turnaround|Timeframe Varies|same-day|same day|while you wait|immediate/i);
     expect(timingFaqs).toHaveLength(1);
     expect(timingFaqs[0].answer).toContain('around 1 Hour');
-    expect(priceFaqs).toHaveLength(1);
-    expect(priceFaqs[0].answer).toContain(expectedRange);
-    expect(priceFaqs[0].answer).toContain('exact price takes priority');
-    expect(html).toContain('Typical Repair Range');
-    expect(html).toContain(expectedRange);
+    if (expectedRange) {
+      expect(priceFaqs).toHaveLength(1);
+      expect(priceFaqs[0].answer).toContain(expectedRange);
+      expect(priceFaqs[0].answer).toContain('exact price takes priority');
+      expect(html).toContain('Typical Repair Range');
+      expect(html).toContain(expectedRange);
+    } else {
+      expect(html).not.toContain('Typical Repair Range');
+      expect(html).not.toMatch(/AUD \$(?:70|80|100)–\$150/);
+    }
 
     if (hasResolvedPrice) {
       expect(pricing?.showStartingPriceFallback).toBe(true);
       expect(html).toContain(`$${variants[0].price}`);
-      expect(html.indexOf(`$${variants[0].price}`)).toBeLessThan(html.indexOf(expectedRange));
+      expect(html.indexOf(`$${variants[0].price}`)).toBeLessThan(html.indexOf(expectedRange!));
       expect(serviceSchema).toContain('"offers"');
     } else {
       expect(pricing?.showStartingPriceFallback).toBe(false);
