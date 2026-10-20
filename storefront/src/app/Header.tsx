@@ -14,6 +14,8 @@ type ThemeMode = 'light' | 'dark';
 const repairMenuItems = [
   { label: 'iPhone Repairs', href: '/repairs/phone/iphone' },
   { label: 'Samsung Repairs', href: '/repairs/phone/samsung' },
+  { label: 'Google Pixel Repairs', href: '/repairs/phone/google-pixel' },
+  { label: 'OPPO Repairs', href: '/repairs/phone/oppo' },
   { label: 'Other Phone Repairs', href: '/repairs/phone' },
   { label: 'iPad Repairs', href: '/repairs/tablet/ipad' },
   { label: 'MacBook Repairs', href: '/repairs/laptop/macbook' },
@@ -24,6 +26,8 @@ const mobileDeviceMenuItems = [
   { label: 'Phone Repair', href: '/repairs/phone' },
   { label: 'iPhone Repair', href: '/repairs/phone/iphone' },
   { label: 'Samsung Repair', href: '/repairs/phone/samsung' },
+  { label: 'Google Pixel Repair', href: '/repairs/phone/google-pixel' },
+  { label: 'OPPO Repair', href: '/repairs/phone/oppo' },
   { label: 'Tablet Repair', href: '/repairs/tablet' },
   { label: 'MacBook Repair', href: '/repairs/laptop/macbook' },
   { label: 'Apple Watch Repair', href: '/repairs/watch/apple' },
