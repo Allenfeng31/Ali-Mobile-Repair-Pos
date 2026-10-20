@@ -8,30 +8,36 @@ import { useCart } from '@/context/CartContext';
 import { analytics } from '@/lib/analytics';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { REPAIR_CATEGORY_NAV_ITEMS } from '@/lib/repairCategoryNavigation';
+import { SECONDARY_PHONE_BRAND_HUB_NAV_ITEMS } from '@/lib/phone-brand-hubs';
 
 type ThemeMode = 'light' | 'dark';
 
-const repairMenuItems = [
+const phoneRepairMenuItems = [
   { label: 'iPhone Repairs', href: '/repairs/phone/iphone' },
-  { label: 'Samsung Repairs', href: '/repairs/phone/samsung' },
-  { label: 'Google Pixel Repairs', href: '/repairs/phone/google-pixel' },
-  { label: 'OPPO Repairs', href: '/repairs/phone/oppo' },
-  { label: 'Other Phone Repairs', href: '/repairs/phone' },
+  { label: 'Samsung Phone Repairs', href: '/repairs/phone/samsung' },
+  { label: 'Google Pixel Phone Repairs', href: '/repairs/phone/google-pixel' },
+  { label: 'OPPO Phone Repairs', href: '/repairs/phone/oppo' },
+];
+
+const tabletRepairMenuItems = [
   { label: 'iPad Repairs', href: '/repairs/tablet/ipad' },
-  { label: 'MacBook Repairs', href: '/repairs/laptop/macbook' },
-  { label: 'Apple Watch Repairs', href: '/repairs/watch/apple' },
+  { label: 'Samsung Tablet Repairs', href: '/repairs/tablet/samsung' },
+  { label: 'Lenovo Tablet Repairs', href: '/repairs/tablet/lenovo' },
 ];
 
 const mobileDeviceMenuItems = [
-  { label: 'Phone Repair', href: '/repairs/phone' },
   { label: 'iPhone Repair', href: '/repairs/phone/iphone' },
-  { label: 'Samsung Repair', href: '/repairs/phone/samsung' },
+  { label: 'Samsung Phone Repair', href: '/repairs/phone/samsung' },
   { label: 'Google Pixel Repair', href: '/repairs/phone/google-pixel' },
-  { label: 'OPPO Repair', href: '/repairs/phone/oppo' },
-  { label: 'Tablet Repair', href: '/repairs/tablet' },
+  { label: 'OPPO Phone Repair', href: '/repairs/phone/oppo' },
+];
+
+const mobileDeviceCategoryMenuItems = [
+  { label: 'iPad Repair', href: '/repairs/tablet/ipad' },
+  { label: 'Samsung Tablet Repair', href: '/repairs/tablet/samsung' },
+  { label: 'Lenovo Tablet Repair', href: '/repairs/tablet/lenovo' },
   { label: 'MacBook Repair', href: '/repairs/laptop/macbook' },
   { label: 'Apple Watch Repair', href: '/repairs/watch/apple' },
-  { label: 'More Brand Repairs', href: '/repairs/phone' },
 ];
 
 const mobileProblemMenuItems = [
@@ -51,11 +57,15 @@ export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openMobileGroup, setOpenMobileGroup] = useState<'service' | 'repair-categories' | null>(null);
-  const [isServiceRepairsMenuOpen, setIsServiceRepairsMenuOpen] = useState(false);
-  const [isRepairCategoriesMenuOpen, setIsRepairCategoriesMenuOpen] = useState(false);
+  const [isMobileMorePhoneBrandsOpen, setIsMobileMorePhoneBrandsOpen] = useState(false);
+  const [openDesktopMenu, setOpenDesktopMenu] = useState<'phone' | 'tablet' | 'repair-categories' | null>(null);
+  const [isDesktopMorePhoneBrandsOpen, setIsDesktopMorePhoneBrandsOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
-  const serviceRepairsMenuRef = useRef<HTMLDivElement | null>(null);
+  const phoneRepairsMenuRef = useRef<HTMLDivElement | null>(null);
+  const tabletRepairsMenuRef = useRef<HTMLDivElement | null>(null);
   const repairCategoriesMenuRef = useRef<HTMLDivElement | null>(null);
+  const desktopMorePhoneBrandsMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -63,7 +73,7 @@ export default function Header() {
   }, [theme]);
 
   useEffect(() => {
-    if (!isServiceRepairsMenuOpen && !isRepairCategoriesMenuOpen) {
+    if (!openDesktopMenu) {
       return;
     }
 
@@ -71,20 +81,21 @@ export default function Header() {
       const target = event.target as Node;
 
       if (
-        serviceRepairsMenuRef.current?.contains(target) ||
+        phoneRepairsMenuRef.current?.contains(target) ||
+        tabletRepairsMenuRef.current?.contains(target) ||
         repairCategoriesMenuRef.current?.contains(target)
       ) {
         return;
       }
 
-      setIsServiceRepairsMenuOpen(false);
-      setIsRepairCategoriesMenuOpen(false);
+      setOpenDesktopMenu(null);
+      setIsDesktopMorePhoneBrandsOpen(false);
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setIsServiceRepairsMenuOpen(false);
-        setIsRepairCategoriesMenuOpen(false);
+        setOpenDesktopMenu(null);
+        setIsDesktopMorePhoneBrandsOpen(false);
       }
     }
 
@@ -95,50 +106,55 @@ export default function Header() {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isServiceRepairsMenuOpen, isRepairCategoriesMenuOpen]);
+  }, [openDesktopMenu]);
 
   // Lock to light mode, ignore toggles
   const toggleTheme = () => {
     setTheme('light');
   };
 
-  const closeMobileMenu = () => {
+  const closeMobileMenu = (restoreFocus = false) => {
     setIsMobileMenuOpen(false);
     setOpenMobileGroup(null);
+    setIsMobileMorePhoneBrandsOpen(false);
+    if (restoreFocus) {
+      mobileMenuTriggerRef.current?.focus();
+    }
   };
 
-  const closeServiceRepairsMenu = () => {
-    setIsServiceRepairsMenuOpen(false);
+  const closePhoneRepairsMenu = () => {
+    setOpenDesktopMenu((current) => (current === 'phone' ? null : current));
+    setIsDesktopMorePhoneBrandsOpen(false);
+  };
+
+  const closeTabletRepairsMenu = () => {
+    setOpenDesktopMenu((current) => (current === 'tablet' ? null : current));
   };
 
   const closeRepairCategoriesMenu = () => {
-    setIsRepairCategoriesMenuOpen(false);
+    setOpenDesktopMenu((current) => (current === 'repair-categories' ? null : current));
   };
 
   const closeAllNavigationMenus = () => {
-    closeServiceRepairsMenu();
-    closeRepairCategoriesMenu();
+    setOpenDesktopMenu(null);
+    setIsDesktopMorePhoneBrandsOpen(false);
     closeMobileMenu();
   };
 
-  const openServiceRepairsMenu = () => {
-    setIsRepairCategoriesMenuOpen(false);
-    setIsServiceRepairsMenuOpen(true);
+  const openPhoneRepairsMenu = () => {
+    setOpenDesktopMenu('phone');
+  };
+
+  const openTabletRepairsMenu = () => {
+    setOpenDesktopMenu('tablet');
   };
 
   const openRepairCategoriesMenu = () => {
-    setIsServiceRepairsMenuOpen(false);
-    setIsRepairCategoriesMenuOpen(true);
+    setOpenDesktopMenu('repair-categories');
   };
 
   const toggleRepairCategoriesMenu = () => {
-    setIsRepairCategoriesMenuOpen((current) => {
-      const nextValue = !current;
-      if (nextValue) {
-        setIsServiceRepairsMenuOpen(false);
-      }
-      return nextValue;
-    });
+    setOpenDesktopMenu((current) => (current === 'repair-categories' ? null : 'repair-categories'));
   };
 
   const handleServiceRepairSelection = () => {
@@ -168,6 +184,24 @@ export default function Header() {
   const toggleMobileGroup = (group: 'service' | 'repair-categories') => {
     setOpenMobileGroup((current) => (current === group ? null : group));
   };
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setOpenMobileGroup(null);
+        setIsMobileMorePhoneBrandsOpen(false);
+        mobileMenuTriggerRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     closeAllNavigationMenus();
@@ -222,31 +256,122 @@ export default function Header() {
           <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <nav className="nav-links nav-links--desktop">
               <div
-                ref={serviceRepairsMenuRef}
-                className={`nav-dropdown nav-dropdown--controlled ${isServiceRepairsMenuOpen ? 'nav-dropdown--open' : ''}`}
-                onMouseEnter={openServiceRepairsMenu}
-                onMouseLeave={closeServiceRepairsMenu}
-                onFocusCapture={openServiceRepairsMenu}
+                ref={phoneRepairsMenuRef}
+                className={`nav-dropdown nav-dropdown--controlled ${openDesktopMenu === 'phone' ? 'nav-dropdown--open' : ''}`}
+                onMouseEnter={openPhoneRepairsMenu}
+                onMouseLeave={closePhoneRepairsMenu}
+                onFocusCapture={openPhoneRepairsMenu}
                 onBlurCapture={(event) => {
-                  if (!serviceRepairsMenuRef.current?.contains(event.relatedTarget as Node | null)) {
-                    closeServiceRepairsMenu();
+                  if (!phoneRepairsMenuRef.current?.contains(event.relatedTarget as Node | null)) {
+                    closePhoneRepairsMenu();
                   }
                 }}
               >
-                <Link href="/repairs" prefetch={true} className="nav-dropdown-trigger" onClick={closeAllNavigationMenus}>
-                  Service &amp; Repairs
+                <Link
+                  href="/repairs/phone"
+                  prefetch={true}
+                  className="nav-dropdown-trigger"
+                  aria-expanded={openDesktopMenu === 'phone'}
+                  aria-controls="desktop-phone-repairs-menu"
+                  onClick={closeAllNavigationMenus}
+                >
+                  Phone Repairs
                 </Link>
-                <div className="nav-dropdown-menu" aria-label="Service and repair categories">
-                  {repairMenuItems.map((item) => (
+                <div
+                  id="desktop-phone-repairs-menu"
+                  className="nav-dropdown-menu nav-dropdown-menu--phone"
+                  aria-label="Phone repair brands"
+                  aria-hidden={openDesktopMenu !== 'phone'}
+                >
+                  {phoneRepairMenuItems.map((item) => (
+                    <Link key={item.href} href={item.href} prefetch={true} onClick={handleServiceRepairSelection}>
+                      {item.label}
+                    </Link>
+                  ))}
+                  <div
+                    ref={desktopMorePhoneBrandsMenuRef}
+                    className={`nav-dropdown nav-dropdown--submenu nav-dropdown--controlled ${isDesktopMorePhoneBrandsOpen ? 'nav-dropdown--open' : ''}`}
+                    onMouseEnter={() => setIsDesktopMorePhoneBrandsOpen(true)}
+                    onMouseLeave={() => setIsDesktopMorePhoneBrandsOpen(false)}
+                    onFocusCapture={() => setIsDesktopMorePhoneBrandsOpen(true)}
+                    onBlurCapture={(event) => {
+                      if (!desktopMorePhoneBrandsMenuRef.current?.contains(event.relatedTarget as Node | null)) {
+                        setIsDesktopMorePhoneBrandsOpen(false);
+                      }
+                    }}
+                  >
+                    <Link
+                      href="/repairs/phone"
+                      prefetch={true}
+                      className="nav-dropdown-submenu-trigger"
+                      aria-expanded={isDesktopMorePhoneBrandsOpen}
+                      aria-controls="desktop-more-phone-brands-menu"
+                      onClick={handleServiceRepairSelection}
+                    >
+                      More Phone Brands
+                      <ChevronDown size={15} aria-hidden="true" />
+                    </Link>
+                    <div
+                      id="desktop-more-phone-brands-menu"
+                      className="nav-dropdown-menu nav-dropdown-menu--submenu"
+                      aria-label="Other phone repair brands"
+                      aria-hidden={!isDesktopMorePhoneBrandsOpen}
+                    >
+                      {SECONDARY_PHONE_BRAND_HUB_NAV_ITEMS.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          prefetch={true}
+                          tabIndex={isDesktopMorePhoneBrandsOpen ? undefined : -1}
+                          onClick={handleServiceRepairSelection}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                ref={tabletRepairsMenuRef}
+                className={`nav-dropdown nav-dropdown--controlled ${openDesktopMenu === 'tablet' ? 'nav-dropdown--open' : ''}`}
+                onMouseEnter={openTabletRepairsMenu}
+                onMouseLeave={closeTabletRepairsMenu}
+                onFocusCapture={openTabletRepairsMenu}
+                onBlurCapture={(event) => {
+                  if (!tabletRepairsMenuRef.current?.contains(event.relatedTarget as Node | null)) {
+                    closeTabletRepairsMenu();
+                  }
+                }}
+              >
+                <Link
+                  href="/repairs/tablet"
+                  prefetch={true}
+                  className="nav-dropdown-trigger"
+                  aria-expanded={openDesktopMenu === 'tablet'}
+                  aria-controls="desktop-tablet-repairs-menu"
+                  onClick={closeAllNavigationMenus}
+                >
+                  Tablet &amp; iPad Repairs
+                </Link>
+                <div
+                  id="desktop-tablet-repairs-menu"
+                  className="nav-dropdown-menu"
+                  aria-label="Tablet repair brands"
+                  aria-hidden={openDesktopMenu !== 'tablet'}
+                >
+                  {tabletRepairMenuItems.map((item) => (
                     <Link key={item.href} href={item.href} prefetch={true} onClick={handleServiceRepairSelection}>
                       {item.label}
                     </Link>
                   ))}
                 </div>
               </div>
+              <Link href="/repairs/laptop/macbook" prefetch={true}>MacBook Repairs</Link>
+              <Link href="/repairs/watch/apple" prefetch={true}>Apple Watch Repairs</Link>
               <div
                 ref={repairCategoriesMenuRef}
-                className={`nav-dropdown nav-dropdown--controlled ${isRepairCategoriesMenuOpen ? 'nav-dropdown--open' : ''}`}
+                className={`nav-dropdown nav-dropdown--controlled ${openDesktopMenu === 'repair-categories' ? 'nav-dropdown--open' : ''}`}
                 onMouseEnter={openRepairCategoriesMenu}
                 onMouseLeave={closeRepairCategoriesMenu}
                 onFocusCapture={openRepairCategoriesMenu}
@@ -259,7 +384,7 @@ export default function Header() {
                 <button
                   type="button"
                   className="nav-dropdown-trigger nav-dropdown-trigger--button"
-                  aria-expanded={isRepairCategoriesMenuOpen}
+                  aria-expanded={openDesktopMenu === 'repair-categories'}
                   aria-controls="desktop-repair-categories-menu"
                   onClick={toggleRepairCategoriesMenu}
                 >
@@ -269,7 +394,7 @@ export default function Header() {
                   id="desktop-repair-categories-menu"
                   className="nav-dropdown-menu nav-dropdown-menu--repair-categories"
                   aria-label="Repair categories"
-                  aria-hidden={!isRepairCategoriesMenuOpen}
+                  aria-hidden={openDesktopMenu !== 'repair-categories'}
                 >
                   {REPAIR_CATEGORY_NAV_ITEMS.map((item) => (
                     <Link
@@ -314,9 +439,12 @@ export default function Header() {
 
             {/* Hamburger button – mobile only */}
             <button 
+              ref={mobileMenuTriggerRef}
               className="md:hidden flex items-center justify-center p-1 text-slate-800 ml-1"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open navigation menu"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-navigation-menu"
             >
               <Menu size={28} />
             </button>
@@ -328,7 +456,7 @@ export default function Header() {
           .navbar's backdrop-filter creates a containing block that traps
           position:fixed children to the header's box instead of the viewport. */}
       {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
+        <div className="mobile-menu-overlay" onClick={() => closeMobileMenu(true)}>
           <div className="mobile-menu-panel" onClick={(event) => event.stopPropagation()}>
             <div className="mobile-menu-header">
               <Link href="/" onClick={handleLogoClick} aria-label="Ali Mobile home" className="mobile-menu-logo">
@@ -342,7 +470,7 @@ export default function Header() {
                 />
               </Link>
               <button
-                onClick={closeMobileMenu}
+                onClick={() => closeMobileMenu(true)}
                 className="mobile-menu-close"
                 aria-label="Close menu"
               >
@@ -350,7 +478,7 @@ export default function Header() {
               </button>
             </div>
 
-            <nav className="mobile-menu-nav" aria-label="Mobile navigation">
+            <nav id="mobile-navigation-menu" className="mobile-menu-nav" aria-label="Mobile navigation">
               <div className="mobile-nav-group">
                 <button
                   type="button"
@@ -367,11 +495,41 @@ export default function Header() {
                   className={openMobileGroup === 'service' ? 'mobile-nav-group-panel mobile-nav-group-panel--open' : 'mobile-nav-group-panel'}
                 >
                   <div className="mobile-nav-group-panel-inner">
-                    <Link href="/repairs" onClick={closeAllNavigationMenus} className="mobile-nav-group-link mobile-nav-group-link--overview">
-                      All Service &amp; Repairs
-                    </Link>
                     <div className="mobile-repair-links" aria-label="Device repair categories">
                       {mobileDeviceMenuItems.map((item) => (
+                        <Link key={`${item.label}-${item.href}`} href={item.href} onClick={handleServiceRepairSelection}>
+                          {item.label}
+                        </Link>
+                      ))}
+                      <button
+                        type="button"
+                        className="mobile-repair-links-submenu-trigger"
+                        aria-expanded={isMobileMorePhoneBrandsOpen}
+                        aria-controls="mobile-more-phone-brands-panel"
+                        onClick={() => setIsMobileMorePhoneBrandsOpen((current) => !current)}
+                      >
+                        <span>More Phone Brands</span>
+                        <ChevronDown size={18} aria-hidden="true" className={isMobileMorePhoneBrandsOpen ? 'mobile-nav-group-icon mobile-nav-group-icon--open' : 'mobile-nav-group-icon'} />
+                      </button>
+                      <div
+                        id="mobile-more-phone-brands-panel"
+                        className={isMobileMorePhoneBrandsOpen ? 'mobile-nav-subgroup-panel mobile-nav-subgroup-panel--open' : 'mobile-nav-subgroup-panel'}
+                        aria-hidden={!isMobileMorePhoneBrandsOpen}
+                      >
+                        <div className="mobile-repair-links mobile-repair-links--nested" aria-label="Other phone repair brands">
+                          {SECONDARY_PHONE_BRAND_HUB_NAV_ITEMS.map((item) => (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              tabIndex={isMobileMorePhoneBrandsOpen ? undefined : -1}
+                              onClick={handleServiceRepairSelection}
+                            >
+                              {item.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                      {mobileDeviceCategoryMenuItems.map((item) => (
                         <Link key={`${item.label}-${item.href}`} href={item.href} onClick={handleServiceRepairSelection}>
                           {item.label}
                         </Link>

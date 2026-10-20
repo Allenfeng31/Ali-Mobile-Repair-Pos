@@ -45,6 +45,13 @@ const BATCH_PHONE_BRAND_NAMES: Record<string, string> = {
   nothing: 'Nothing',
 };
 
+export const SECONDARY_PHONE_BRAND_HUB_NAV_ITEMS = Object.entries(BATCH_PHONE_BRAND_NAMES).map(
+  ([slug, brandName]) => ({
+    label: `${brandName} Phone Repairs`,
+    href: `/repairs/phone/${slug}`,
+  })
+);
+
 function buildBatchPhoneBrandFaqs(brandName: string) {
   return [
     {

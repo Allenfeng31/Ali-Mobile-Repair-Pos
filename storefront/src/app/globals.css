@@ -265,6 +265,54 @@ a {
   display: none;
 }
 
+.nav-dropdown-menu--phone {
+  overflow: visible;
+}
+
+.nav-dropdown--submenu {
+  position: relative;
+}
+
+.nav-dropdown--submenu::after {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 100%;
+  width: 0.65rem;
+  height: auto;
+}
+
+.nav-dropdown-submenu-trigger {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.nav-dropdown-menu--submenu {
+  top: -0.65rem;
+  left: calc(100% + 0.65rem);
+  max-height: min(70vh, 34rem);
+  overflow-y: auto;
+  transform: translateY(8px);
+}
+
+.nav-dropdown--controlled.nav-dropdown--open .nav-dropdown-menu--submenu {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(8px);
+}
+
+.nav-dropdown--submenu.nav-dropdown--open .nav-dropdown-menu--submenu {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  clip-path: inset(0);
+  transform: translateY(0);
+}
+
 .nav-dropdown-menu--repair-categories {
   min-width: 450px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -521,6 +569,62 @@ a {
   background: rgba(37, 99, 235, 0.08);
   color: var(--primary);
   transform: translateX(2px);
+}
+
+.mobile-repair-links-submenu-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 42px;
+  border: none;
+  border-radius: 14px;
+  padding: 0.62rem 0.72rem;
+  background: transparent;
+  color: #475569;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.mobile-repair-links-submenu-trigger:hover,
+.mobile-repair-links-submenu-trigger:focus-visible {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary);
+  outline: none;
+  transform: translateX(2px);
+}
+
+.mobile-nav-subgroup-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    grid-template-rows 220ms ease,
+    opacity 180ms ease;
+}
+
+.mobile-nav-subgroup-panel--open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.mobile-nav-subgroup-panel > * {
+  min-height: 0;
+}
+
+.mobile-repair-links--nested {
+  margin: 0 0.15rem;
+  padding-left: 0.55rem;
+  border-left: 2px solid rgba(37, 99, 235, 0.14);
 }
 
 .mobile-menu-link-grid {
@@ -6853,4 +6957,45 @@ input:checked+.toggle-slider:before {
 .skeleton-card {
   border-radius: 16px;
   height: 120px;
+}
+
+/* Keep the expanded desktop repair navigation clear of the logo and booking CTA. */
+@media (min-width: 768px) and (max-width: 1320px) {
+  .navbar .nav-logo {
+    height: 72px;
+  }
+
+  .nav-links--desktop {
+    gap: 0.85rem;
+  }
+
+  .nav-links--desktop a,
+  .nav-links--desktop button {
+    font-size: 0.78rem;
+  }
+
+  .navbar .primary-btn {
+    padding: 0.55rem 0.9rem !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .navbar .nav-logo {
+    height: 64px;
+  }
+
+  .nav-links--desktop {
+    gap: 0.45rem;
+  }
+
+  .nav-links--desktop a,
+  .nav-links--desktop button {
+    font-size: 0.68rem;
+  }
+
+  .navbar .primary-btn {
+    padding: 0.5rem 0.7rem !important;
+    font-size: 0.68rem !important;
+  }
 }
