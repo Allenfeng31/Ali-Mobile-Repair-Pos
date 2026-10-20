@@ -278,6 +278,10 @@ a {
   overflow: visible;
 }
 
+.nav-dropdown--controlled.nav-dropdown--open .nav-dropdown-menu--phone {
+  clip-path: none;
+}
+
 .nav-dropdown--submenu {
   position: relative;
 }
