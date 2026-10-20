@@ -221,12 +221,18 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(url).toContain('tier=Standard');
   });
 
-  it('uses Starting from for a zero-price scoped repair', () => {
-    mockParams = { 'repair-type': 'earpiece-speaker-replacement' };
-    render(<RepairPricingAndCTA {...defaultProps} variants={[{ quality_grade: 'Genuine', price: 0 }]} />);
+  it('uses Quote on Request for a zero-price iPhone repair when static fallback is disabled', () => {
+    mockParams = { category: 'phone', brand: 'iphone', 'repair-type': 'back-glass-replacement' };
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        variants={[{ quality_grade: 'Genuine', price: 0 }]}
+        showStartingPriceFallback={false}
+      />,
+    );
 
-    expect(screen.getByText('Starting from')).toBeInTheDocument();
-    expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.queryByText('Starting from')).not.toBeInTheDocument();
   });
 
   it('shows an exact base price instead of a static quote fallback when no tier is available', () => {

@@ -2,6 +2,7 @@ import React from 'react';
 import { REPAIR_TYPES } from '@/data/seo-data';
 import { fetchRepairCatalog, fetchRepairDetails, type RepairVariant } from '@/lib/api';
 import { resolveRepairDetailPricing } from '@/lib/repairDetailPricing';
+import { isStartingPriceRepair } from '@/lib/scopedRepairPriceLabel';
 import { slugify, formatDynamicParam, preserveRouteSegment, safeSlugSegment } from '@/lib/inventoryUtils';
 import { RepairServiceSchema } from '@/components/seo/SchemaOrg';
 import RepairPolicySection from '@/components/services/RepairPolicySection';
@@ -5084,6 +5085,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     basePrice: details?.price,
     variants: details?.variants,
   });
+  const isPrimaryPhoneDetailPage = resolvedParams.category === 'phone'
+    && ['iphone', 'samsung', 'google-pixel', 'google', 'googlepixel', 'pixel', 'oppo'].includes(resolvedParams.brand);
+  const isPrimaryPhoneOrdinaryDetailPage = isPrimaryPhoneDetailPage
+    && !isStartingPriceRepair(resolvedParams['repair-type']);
   const isSecondaryPhoneDetailPage = resolvedParams.category === 'phone'
     && classifyPhoneBrand(resolvedParams.brand) === 'secondary-phone';
   const modelCode = details?.modelCode;
@@ -5597,15 +5602,23 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         )
       : finalRepairName;
 
-  const baseFaqs = seoPocket?.faq || generateFaqs(
+  const generatedFaqs = generateFaqs(
     displayModel,
     finalRepairName,
     resolvedParams['repair-type'],
-    price,
+    isPrimaryPhoneOrdinaryDetailPage ? detailPricing.resolvedPrice ?? 0 : price,
     modelCode,
     displayBrand,
     { initialAssessmentCleaningMinutes },
   );
+  const baseFaqs = seoPocket?.faq || (isPrimaryPhoneOrdinaryDetailPage && detailPricing.isQuoteOnly
+    ? generatedFaqs.map((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question)
+      ? {
+          ...faq,
+          answer: `Pricing depends on the exact ${displayModel} model and repair option. Contact us to get a quote.`,
+        }
+      : faq)
+    : generatedFaqs);
   const existingTimingFaq = baseFaqs.find((faq: { question: string }) =>
     /how long/i.test(faq.question) ||
     (Boolean(appleWatchStandardTurnaroundMinutes) && /timing/i.test(faq.question))
@@ -5859,6 +5872,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             bookingHref={bookRepairUrl}
             showBackHousingNotice={showBackHousingNotice}
             showStartingPriceFallback={!(
+              (isPrimaryPhoneDetailPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
               (isAliMobileEnhancedSamsungTabletPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedLenovoTabletPage && detailPricing.isQuoteOnly) ||
@@ -5869,10 +5883,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
             useNeutralQuoteWording={Boolean(
-              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage || isSecondaryPhoneDetailPage) && detailPricing.isQuoteOnly
+              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage || isSecondaryPhoneDetailPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
             )}
             typicalPriceRange={tabletTypicalPriceGuidance ?? undefined}
-            quoteCtaLabel={isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly
+            quoteCtaLabel={(isAliMobileEnhancedMacBookPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
               ? 'Get a Quote'
               : undefined}
             variants={details?.variants || []}

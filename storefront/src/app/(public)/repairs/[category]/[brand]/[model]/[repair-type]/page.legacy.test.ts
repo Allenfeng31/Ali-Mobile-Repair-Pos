@@ -1958,6 +1958,91 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(serviceSchema).not.toContain('"offers"');
   });
 
+  it('uses quote-safe Get a Quote wording for quote-only primary-phone ordinary repairs', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model: 'Galaxy S24 Ultra',
+          slug: 'galaxy-s24-ultra',
+          repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 0, variants: [] }],
+        }],
+      }],
+    });
+
+    const page = await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-s24-ultra', 'repair-type': 'screen-replacement' })),
+    });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const priceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(priceFaq?.answer).toBe('Current price availability is shown above when listed. If no price is shown, we confirm the correct part and quote before work begins.');
+    expect(pricing?.showStartingPriceFallback).toBe(false);
+    expect(pricing?.useNeutralQuoteWording).toBe(true);
+    expect(pricing?.quoteCtaLabel).toBe('Get a Quote');
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('Get a Quote');
+    expect(html).not.toMatch(/Live Quote|instant, accurate price/i);
+    expect(serviceSchema).not.toContain('"offers"');
+  });
+
+  it('uses the resolved eligible tier price in a generic primary-phone Detail FAQ', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model: 'Galaxy Test',
+          slug: 'galaxy-test',
+          repairTypes: [{
+            name: 'Screen Replacement',
+            slug: 'screen-replacement',
+            price: 0,
+            variants: [{ quality_grade: 'Premium', price: 250 }, { quality_grade: 'Genuine', price: 350 }],
+          }],
+        }],
+      }],
+    });
+
+    const page = await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-test', 'repair-type': 'screen-replacement' })),
+    });
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const priceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+
+    expect(priceFaq?.answer).toContain('Starting from $250');
+    expect(priceFaq?.answer).not.toMatch(/Live Quote|instant, accurate price/i);
+  });
+
+  it('uses a neutral quote FAQ for a generic quote-only primary-phone Detail', async () => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model: 'Galaxy Test',
+          slug: 'galaxy-test',
+          repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 0, variants: [] }],
+        }],
+      }],
+    });
+
+    const page = await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: 'galaxy-test', 'repair-type': 'screen-replacement' })),
+    });
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const priceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+
+    expect(priceFaq?.answer).toBe('Pricing depends on the exact Galaxy Test model and repair option. Contact us to get a quote.');
+  });
+
   it.each([
     ['screen-replacement', 'Screen Replacement', 30],
     ['back-glass-replacement', 'Back Glass Replacement', 20],

@@ -163,6 +163,30 @@ describe("RepairOptionsGrid", () => {
     expect(screen.queryByText('Starting from $50')).not.toBeInTheDocument();
   });
 
+  it('keeps the approved Camera Lens $50 price when phone static fallback is disabled', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[{
+          slug: 'camera-lens-replacement',
+          name: 'Camera Lens Replacement',
+          price: 50,
+          sourceType: 'virtual',
+        }]}
+        categorySlug="phone"
+        brandSlug="google-pixel"
+        modelSlug="pixel-9-pro"
+        modelName="Pixel 9 Pro"
+        showStartingPriceFallback={false}
+      />,
+    );
+
+    expect(screen.getByText('From $50')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /camera lens replacement/i })).toHaveAttribute(
+      'href',
+      '/repairs/phone/google/camera-lens-replacement?model=pixel-8-pro',
+    );
+  });
+
   it('uses a quote-led pricing summary for a MacBook model with no resolved catalogue price', () => {
     getStartingPriceMock.mockReturnValue(250);
     const quoteSafeProps = {

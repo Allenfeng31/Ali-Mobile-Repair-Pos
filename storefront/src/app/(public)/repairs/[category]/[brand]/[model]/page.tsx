@@ -26,6 +26,7 @@ import {
   resolveModelHubRepairPresentation,
 } from "@/lib/modelHubRepairPresentation";
 import { getIndefiniteArticle } from "@/lib/grammar";
+import { isStartingPriceRepair } from "@/lib/scopedRepairPriceLabel";
 import { isGooglePixelBackHousingModel } from "@/lib/seo/content/google-pixel";
 import {
   getMacBookModelCodeLabel,
@@ -76,6 +77,17 @@ type RepairTypeEntry = {
   timingLabel?: string;
 };
 
+type HeroPriceRow = {
+  label: "Screen" | "Battery";
+  value: string;
+};
+
+type HeroCard = {
+  title: string;
+  body?: string;
+  priceRows?: HeroPriceRow[];
+};
+
 const RELATED_MODEL_LIMIT = 5;
 
 async function resolveModelRouteParams(rawParams: Awaited<ModelPageProps['params']>) {
@@ -104,6 +116,50 @@ function getStartingPrice(repairTypes: RepairTypeEntry[]): number | null {
   }
 
   return Math.min(...prices);
+}
+
+function getPublishedNormalPhoneStartingPrice(repairTypes: RepairTypeEntry[]): number | null {
+  return getStartingPrice(repairTypes.filter((repair) =>
+    repair.repairOrigin === "pos" && repair.sourceType !== "virtual" && !isStartingPriceRepair(repair.slug)
+  ));
+}
+
+function getPublishedPhoneHeroPrice(
+  repair: RepairTypeEntry | undefined,
+): string {
+  if (!repair || repair.repairOrigin !== "pos" || repair.sourceType === "virtual") {
+    return "Get a Quote";
+  }
+
+  const tierPrices = (repair.variants ?? [])
+    .map((variant) => variant.price)
+    .filter((price) => Number.isFinite(price) && price > 0);
+  const basePrice = Number.isFinite(repair.price) && repair.price > 0 ? repair.price : null;
+  const lowestTierPrice = tierPrices.length > 0 ? Math.min(...tierPrices) : null;
+  const price = lowestTierPrice ?? basePrice;
+
+  if (price === null) return "Get a Quote";
+
+  return tierPrices.length > 1
+    ? `From $${formatStartingPrice(price)}`
+    : `$${formatStartingPrice(price)}`;
+}
+
+function getPrimaryPhoneHeroPriceRows(repairTypes: RepairTypeEntry[]): HeroPriceRow[] {
+  return [
+    {
+      label: "Screen",
+      value: getPublishedPhoneHeroPrice(getRepairBySlugs(repairTypes, ["screen-replacement", "screen-repair"])),
+    },
+    {
+      label: "Battery",
+      value: getPublishedPhoneHeroPrice(getRepairBySlugs(repairTypes, ["battery-replacement", "battery-service", "battery-repair"])),
+    },
+  ];
+}
+
+function getPrimaryPhoneHeroPricingFaqAnswer(rows: HeroPriceRow[]) {
+  return `${rows.map((row) => `${row.label}: ${row.value}`).join(". ")}. Choose the exact repair below to check pricing or get a quote.`;
 }
 
 function formatStartingPrice(price: number) {
@@ -430,6 +486,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
+  const isPrimaryPhoneModelPage = isIPhoneModelPage || isSamsungModelPage || isGooglePixelModelPage || isOppoModelPage;
   const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
   const iPadHardwareConfig = isIPadModelPage ? getIpadHardwareConfig(modelSlug) : null;
   const hasIpadChargingPortTimingException = iPadHardwareConfig?.family === "ipad" || iPadHardwareConfig?.family === "ipad-air";
@@ -580,7 +637,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const iPhoneScreenDetailHref = isIPhoneModelPage && hasScreenRepair
     ? `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/screen-replacement`
     : null;
-  const startingPrice = getStartingPrice(repairTypes);
+  const startingPrice = isPrimaryPhoneModelPage
+    ? getPublishedNormalPhoneStartingPrice(repairTypes)
+    : getStartingPrice(repairTypes);
   const startingPriceRepairs = startingPrice === null
     ? []
     : repairTypes.filter((repair) => repair.price === startingPrice);
@@ -588,15 +647,15 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     repair.sourceType === "virtual" || repair.repairOrigin === "virtual"
   );
   const publishedStartingPrice = startingPriceUsesVirtualAuthority ? null : startingPrice;
+  const primaryPhoneHeroPriceRows = isPrimaryPhoneModelPage
+    ? getPrimaryPhoneHeroPriceRows(repairTypes)
+    : null;
+  const primaryPhoneHeroPricingFaqAnswer = primaryPhoneHeroPriceRows
+    ? getPrimaryPhoneHeroPricingFaqAnswer(primaryPhoneHeroPriceRows)
+    : null;
   const iPadStartingPriceServiceLabel = isIPadModelPage && !startingPriceUsesVirtualAuthority
     ? getIpadStartingPriceServiceLabel(startingPrice, startingPriceRepairs)
     : null;
-  const modelHubPriceTitle = publishedStartingPrice
-    ? `${modelName} repairs from $${formatStartingPrice(publishedStartingPrice)}`
-    : `${modelName} repair pricing`;
-  const modelHubPriceBody = publishedStartingPrice
-    ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(publishedStartingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-    : `Each service below shows its current published price, starting price or Quote on Request.`;
   const modelHubTimingCard = modelHubTimingSummary
     ? {
         title: modelHubTimingSummary.title,
@@ -638,10 +697,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     },
   ];
   const diagnosticSteps = ["Quick test", "Honest quote", "Repair options"];
-  const iPhoneHeroCards = [
+  const iPhoneHeroCards: HeroCard[] = [
     {
-      title: modelHubPriceTitle,
-      body: modelHubPriceBody,
+      title: "Repair Pricing",
+      priceRows: primaryPhoneHeroPriceRows ?? [],
     },
     modelHubTimingCard,
     {
@@ -653,9 +712,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "01",
       title: "How much does the repair cost?",
-      body: startingPrice
-        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : `Choose the repair option for this exact iPhone model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.`,
+      body: primaryPhoneHeroPricingFaqAnswer ?? `Choose the repair option for this exact iPhone model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.`,
     },
     {
       number: "02",
@@ -733,9 +790,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const iPhoneFaqs = [
     {
       question: `How much does ${modelArticle} ${modelName} repair cost?`,
-      answer: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement. Published prices include the fitted part and repair labour unless the page states otherwise.`
-        : `Choose the repair option for this exact iPhone model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.`,
+      answer: primaryPhoneHeroPricingFaqAnswer ?? `Choose the repair option for this exact iPhone model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.`,
     },
     {
       question: `How long does ${modelArticle} ${modelName} repair take?`,
@@ -798,10 +853,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins are welcome at Ali Mobile & Repair in Ringwood Square Shopping Centre Kiosk C1. Calling ahead can still help us confirm parts availability before you travel.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
-  const samsungHeroCards = [
+  const samsungHeroCards: HeroCard[] = [
     {
-      title: modelHubPriceTitle,
-      body: modelHubPriceBody,
+      title: "Repair Pricing",
+      priceRows: primaryPhoneHeroPriceRows ?? [],
     },
     modelHubTimingCard,
     {
@@ -813,9 +868,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "01",
       title: "How much does the repair cost?",
-      body: startingPrice
-        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : "Choose the repair option for this exact Samsung model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.",
+      body: primaryPhoneHeroPricingFaqAnswer ?? "Choose the repair option for this exact Samsung model to see the current price or quote requirement. Published prices include the listed fitted part and repair labour unless the page states otherwise.",
     },
     {
       number: "02",
@@ -893,9 +946,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const samsungFaqs = [
     {
       question: `How much does ${modelArticle} ${modelName} repair cost?`,
-      answer: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : "Choose the repair option for this exact Samsung model to see the current price or quote requirement.",
+      answer: primaryPhoneHeroPricingFaqAnswer ?? "Choose the repair option for this exact Samsung model to see the current price or quote requirement.",
     },
     {
       question: `How long does ${modelArticle} ${modelName} repair take?`,
@@ -938,10 +989,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins are welcome at Ali Mobile & Repair in Ringwood Square Shopping Centre Kiosk C1. Calling ahead can help us confirm Samsung parts availability before you travel.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
-  const googlePixelHeroCards = [
+  const googlePixelHeroCards: HeroCard[] = [
     {
-      title: modelHubPriceTitle,
-      body: modelHubPriceBody,
+      title: "Repair Pricing",
+      priceRows: primaryPhoneHeroPriceRows ?? [],
     },
     modelHubTimingCard,
     {
@@ -953,9 +1004,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "01",
       title: "How much does the repair cost?",
-      body: startingPrice
-        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : "Choose the repair option for this exact Google Pixel model to see the current price or quote requirement.",
+      body: primaryPhoneHeroPricingFaqAnswer ?? "Choose the repair option for this exact Google Pixel model to see the current price or quote requirement.",
     },
     {
       number: "02",
@@ -1033,9 +1082,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const googlePixelFaqs = [
     {
       question: `How much does ${modelArticle} ${modelName} repair cost?`,
-      answer: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : "Choose the repair option for this exact Google Pixel model to see the current price or quote requirement.",
+      answer: primaryPhoneHeroPricingFaqAnswer ?? "Choose the repair option for this exact Google Pixel model to see the current price or quote requirement.",
     },
     {
       question: `How long does ${modelArticle} ${modelName} repair take?`,
@@ -1074,10 +1121,10 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm part availability for your Pixel model before you travel.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
-  const oppoHeroCards = [
+  const oppoHeroCards: HeroCard[] = [
     {
-      title: modelHubPriceTitle,
-      body: modelHubPriceBody,
+      title: "Repair Pricing",
+      priceRows: primaryPhoneHeroPriceRows ?? [],
     },
     modelHubTimingCard,
     {
@@ -1089,9 +1136,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     {
       number: "01",
       title: "How much does the repair cost?",
-      body: startingPrice
-        ? `Published repair options for this ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : "Choose the repair option for this exact Oppo model to see the current price or quote requirement.",
+      body: primaryPhoneHeroPricingFaqAnswer ?? "Choose the repair option for this exact Oppo model to see the current price or quote requirement.",
     },
     {
       number: "02",
@@ -1169,9 +1214,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const oppoFaqs = [
     {
       question: `How much does ${modelArticle} ${modelName} repair cost?`,
-      answer: startingPrice
-        ? `Published repair options for ${modelName} currently start from $${formatStartingPrice(startingPrice)}. Choose the exact repair below to confirm the listed price or quote requirement.`
-        : "Choose the repair option for this exact Oppo model to see the current price or quote requirement.",
+      answer: primaryPhoneHeroPricingFaqAnswer ?? "Choose the repair option for this exact Oppo model to see the current price or quote requirement.",
     },
     {
       question: `How long does ${modelArticle} ${modelName} repair take?`,
@@ -1719,7 +1762,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     hasWarrantyRepair ? { question: "What does the 6-month warranty cover?", answer: "Eligible repairs include a 6-month warranty covering the fitted part and workmanship. It does not cover liquid exposure, new impact damage, misuse or unrelated faults." } : null,
     { question: "Can I walk in without an appointment?", answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm whether assessment or part ordering is the best next step." },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
-  const enhancedHeroCards = isSamsungModelPage
+  const enhancedHeroCards: HeroCard[] = isSamsungModelPage
     ? samsungHeroCards
     : isGooglePixelModelPage
     ? googlePixelHeroCards
@@ -2051,7 +2094,18 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             {enhancedHeroCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
-                <p>{card.body}</p>
+                {card.priceRows ? (
+                  <div className="mt-3 grid gap-2 text-sm font-semibold text-slate-700">
+                    {card.priceRows.map((row) => (
+                      <div key={row.label} className="flex items-center justify-between gap-3">
+                        <span>{row.label}</span>
+                        <span>{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>{card.body}</p>
+                )}
               </article>
             ))}
           </div>
@@ -2107,7 +2161,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
           brandSlug={brandSlug}
           modelSlug={modelSlug}
           modelName={modelName}
-          showStartingPriceFallback={!isIPadModelPage && !isSamsungTabletModelPage && !isLenovoTabletModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
+          showStartingPriceFallback={!isPrimaryPhoneModelPage && !isIPadModelPage && !isSamsungTabletModelPage && !isLenovoTabletModelPage && !isMacBookModelPage && !isAppleWatchModelPage && !isSecondaryPhoneModelPage}
           useQuoteLedPricingSummary={isMacBookModelPage || isSecondaryPhoneModelPage}
         />
         {isMacBookModelPage && (

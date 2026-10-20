@@ -137,6 +137,7 @@ describe('Model Hub page-mode Server consumer', () => {
       modelSlug: 'iphone-16-plus',
       expectedH1: 'iPhone 16 Plus Repairs',
       expectedSummary: 'Most standard repairs: 30 Minutes',
+      expectedHeroPricing: ['$170', '$110'],
       repairs: [
         { slug: 'screen-replacement', name: 'Screen Replacement', price: 170, repairOrigin: 'pos' },
         { slug: 'battery-replacement', name: 'Battery Replacement', price: 110, repairOrigin: 'pos' },
@@ -145,7 +146,7 @@ describe('Model Hub page-mode Server consumer', () => {
       ],
       expectedCards: [
         ['screen-replacement', '30 Minutes', undefined],
-        ['back-glass-replacement', 'Varies', undefined],
+        ['back-glass-replacement', '60 Minutes', undefined],
         ['water-damage-repair', 'Depends on Damage', undefined],
         ['logic-board-repair', 'Diagnostic Required', undefined],
       ],
@@ -158,8 +159,15 @@ describe('Model Hub page-mode Server consumer', () => {
       modelSlug: 'galaxy-s24-ultra',
       expectedH1: 'Samsung Galaxy S24 Ultra Repairs',
       expectedSummary: 'Most standard repairs: 30 Minutes',
+      expectedHeroPricing: ['From $320', '$100'],
       repairs: [
-        { slug: 'screen-replacement', name: 'Screen Replacement', price: 320, repairOrigin: 'pos' },
+        {
+          slug: 'screen-replacement',
+          name: 'Screen Replacement',
+          price: 320,
+          repairOrigin: 'pos',
+          variants: [{ quality_grade: 'Premium', price: 320 }, { quality_grade: 'Genuine', price: 420 }],
+        },
         { slug: 'battery-replacement', name: 'Battery Replacement', price: 100, repairOrigin: 'pos' },
         { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 65, repairOrigin: 'pos' },
         { slug: 'water-damage-repair', name: 'Water Damage', price: 0, repairOrigin: 'synthetic-core' },
@@ -172,13 +180,14 @@ describe('Model Hub page-mode Server consumer', () => {
       ],
     },
     {
-      label: 'Google Pixel 8 Pro',
+      label: 'Google Pixel 9 Pro',
       brand: 'Google Pixel',
       brandSlug: 'google-pixel',
-      model: 'Pixel 8 Pro',
-      modelSlug: 'pixel-8-pro',
-      expectedH1: 'Google Pixel 8 Pro Repairs',
+      model: 'Pixel 9 Pro',
+      modelSlug: 'pixel-9-pro',
+      expectedH1: 'Google Pixel 9 Pro Repairs',
       expectedSummary: 'Most standard repairs: 30 Minutes',
+      expectedHeroPricing: ['$360', '$99'],
       repairs: [
         { slug: 'screen-replacement', name: 'Screen Replacement', price: 360, repairOrigin: 'pos' },
         { slug: 'battery-replacement', name: 'Battery Replacement', price: 99, repairOrigin: 'pos' },
@@ -192,13 +201,14 @@ describe('Model Hub page-mode Server consumer', () => {
       ],
     },
     {
-      label: 'OPPO Find X3 Pro',
+      label: 'OPPO Find X8 Pro',
       brand: 'OPPO',
       brandSlug: 'oppo',
-      model: 'Find X3 Pro',
-      modelSlug: 'find-x3-pro',
-      expectedH1: 'OPPO Find X3 Pro Repairs',
+      model: 'Find X8 Pro',
+      modelSlug: 'find-x8-pro',
+      expectedH1: 'OPPO Find X8 Pro Repairs',
       expectedSummary: 'Most standard repairs: 30–45 Minutes',
+      expectedHeroPricing: ['$320', '$90'],
       repairs: [
         { slug: 'screen-replacement', name: 'Screen Replacement', price: 320, repairOrigin: 'pos' },
         { slug: 'battery-replacement', name: 'Battery Replacement', price: 90, repairOrigin: 'pos' },
@@ -218,6 +228,7 @@ describe('Model Hub page-mode Server consumer', () => {
     modelSlug,
     expectedH1,
     expectedSummary,
+    expectedHeroPricing,
     repairs,
     expectedCards,
   }) => {
@@ -236,8 +247,14 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(html).toContain(`<h1 id="model-repair-heading">${expectedH1}</h1>`);
     expect(html).not.toContain('<main');
     expect(html).toContain(expectedSummary);
+    expect(html).toContain('<h2>Repair Pricing</h2>');
+    expect(html).toContain('Screen');
+    expect(html).toContain(expectedHeroPricing[0]);
+    expect(html).toContain('Battery');
+    expect(html).toContain(expectedHeroPricing[1]);
     expect(html).toContain('Exact repair time is shown with each service below.');
     expect(html).not.toMatch(/Around 80%|same[ -]day/i);
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
 
     for (const [slug, timingLabel, displayName] of expectedCards) {
       expect(state.gridProps?.repairTypes.find((repair) => repair.slug === slug)).toMatchObject({
@@ -248,13 +265,21 @@ describe('Model Hub page-mode Server consumer', () => {
     }
   });
 
-  it('uses neutral top pricing when the lowest value is only a virtual shared-service fallback', async () => {
+  it('uses POS Screen and Battery rows instead of virtual or unrelated repair prices in the Samsung Hero', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'Samsung',
       model: 'Galaxy S24 Ultra',
       catalogueSource: 'live-pos',
       repairTypes: [
-        { slug: 'screen-replacement', name: 'Screen Replacement', price: 320, repairOrigin: 'pos' },
+        {
+          slug: 'screen-replacement',
+          name: 'Screen Replacement',
+          price: 320,
+          repairOrigin: 'pos',
+          variants: [{ quality_grade: 'Premium', price: 320 }, { quality_grade: 'Genuine', price: 420 }],
+        },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 100, repairOrigin: 'pos' },
+        { slug: 'back-glass-replacement', name: 'Back Glass Replacement', price: 65, repairOrigin: 'pos' },
         { slug: 'camera-lens-replacement', name: 'Camera Lens Replacement', price: 50, repairOrigin: 'virtual', sourceType: 'virtual' },
       ],
       brandModels: [{ slug: 'galaxy-s24-ultra', model: 'Galaxy S24 Ultra', repairTypes: [] }],
@@ -264,9 +289,35 @@ describe('Model Hub page-mode Server consumer', () => {
       params: Promise.resolve({ category: 'phone', brand: 'samsung', model: 'galaxy-s24-ultra' }),
     }));
 
-    expect(html).toContain('<h2>Galaxy S24 Ultra repair pricing</h2>');
-    expect(html).toContain('Each service below shows its current published price, starting price or Quote on Request.');
-    expect(html).not.toContain('<h2>Galaxy S24 Ultra repairs from $50</h2>');
+    expect(html).toContain('<h2>Repair Pricing</h2>');
+    expect(html).toContain('From $320');
+    expect(html).toContain('$100');
+    expect(html).not.toContain('Galaxy S24 Ultra repairs from $65');
+    expect(html).not.toContain('Galaxy S24 Ultra repairs from $50');
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
+  });
+
+  it('uses Get a Quote for primary-phone Screen and Battery rows without a valid published POS price', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Google Pixel',
+      model: 'Pixel 9 Pro',
+      catalogueSource: 'live-pos',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 65, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: 'pixel-9-pro', model: 'Pixel 9 Pro', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: 'pixel-9-pro' }),
+    }));
+
+    expect(html).toContain('<span>Screen</span><span>Get a Quote</span>');
+    expect(html).toContain('<span>Battery</span><span>Get a Quote</span>');
+    expect(html).not.toContain('Pixel 9 Pro repairs from $65');
+    expect(state.gridProps?.showStartingPriceFallback).toBe(false);
   });
 
   it('uses approved standard Apple Watch timing and disables static quote fallbacks', async () => {
