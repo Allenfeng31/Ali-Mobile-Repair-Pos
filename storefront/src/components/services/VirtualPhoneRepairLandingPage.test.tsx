@@ -14,6 +14,9 @@ vi.mock('./SharedRepairHierarchySections', () => ({
 
 import VirtualPhoneRepairLandingPage from './VirtualPhoneRepairLandingPage';
 import { getCameraLensPrice } from '@/lib/virtualCameraLens';
+import { GOOGLE_PIXEL_SHARED_REPAIR_CONTENT } from '@/data/googlePixelSharedRepairContent';
+import { OPPO_SHARED_REPAIR_CONTENT } from '@/data/oppoSharedRepairContent';
+import { SAMSUNG_SHARED_REPAIR_CONTENT } from '@/data/samsungSharedRepairContent';
 
 describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
   it.each([
@@ -142,8 +145,8 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(html).toContain('Quote on Request');
     expect(html).toContain('30 Minutes');
     expect(html).toContain('6 Months Warranty');
-    expect(html).toContain(`${repairName}, explained clearly`);
-    expect(html).not.toContain(`${repairName}<!-- -->, explained clearly`);
+    expect(html).toContain(`Before arranging ${repairName}`);
+    expect(html).not.toContain('explained clearly');
     expect(html).not.toMatch(/From \$50|From \$0|\$0/);
   });
 
@@ -318,6 +321,52 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
       hierarchy={{ models: [], selectedBrandSlug: null, selectedModelSlug: null }}
     />);
     expect(screen.getByRole('link', { name: 'Learn when a logic board assessment may be relevant' })).toHaveAttribute('href', '/repairs/phone/logic-board-repair');
+  });
+
+  it.each([
+    ['loudspeaker-replacement', 'Loudspeaker, earpiece or microphone?', 'Dust, moisture, an audio-routing setting'],
+    ['earpiece-speaker-replacement', 'Earpiece speaker or loudspeaker?', 'Audio routing, call settings, network quality'],
+    ['power-button-replacement', 'Power button or a configured side key?', 'A phone that will not start can have a depleted battery'],
+    ['volume-button-replacement', 'What the symptom can mean', 'Accessibility controls, focus or mute modes'],
+  ] as const)('renders generic %s as four SSR guidance stages without losing its substantive explanations', (repairSlug, retainedHeading, retainedDetail) => {
+    const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+      repairSlug={repairSlug}
+      canonicalPath={`/repairs/phone/${repairSlug}`}
+      models={[]}
+      isGeneric
+      hierarchy={{ models: [], selectedBrandSlug: null, selectedModelSlug: null }}
+    />);
+
+    expect(html.match(/data-guidance-stage/g)).toHaveLength(4);
+    for (const stage of ['Symptoms', 'Possible causes', 'Our checks', 'Next steps']) expect(html).toContain(stage);
+    expect(html).toContain(retainedHeading);
+    expect(html).toContain(retainedDetail);
+    expect(html).not.toContain('<main');
+  });
+
+  it.each([
+    ['Samsung', 'samsung', SAMSUNG_SHARED_REPAIR_CONTENT],
+    ['Google Pixel', 'google-pixel', GOOGLE_PIXEL_SHARED_REPAIR_CONTENT],
+    ['OPPO', 'oppo', OPPO_SHARED_REPAIR_CONTENT],
+  ] as const)('%s retains all five-card source details and links across every virtual repair configuration', (brandName, brandSlug, content) => {
+    for (const repairSlug of ['loudspeaker-replacement', 'earpiece-speaker-replacement', 'power-button-replacement', 'volume-button-replacement'] as const) {
+      const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+        repairSlug={repairSlug}
+        canonicalPath={`/repairs/phone/${brandSlug === 'google-pixel' ? 'google' : brandSlug}/${repairSlug}`}
+        brandName={brandName}
+        brandSlug={brandSlug}
+        models={[]}
+        sharedPageV2={{ supportedModels: [], priceCandidates: [], initialResults: [], selectedModelSlug: null, quickAnswers: { repairTime: 'Confirm after inspection.', partsSameDay: 'Call us.', warranty: 'Eligible repairs.' }, pricingStrategy: { mode: 'pos-derived' } }}
+      />);
+
+      expect(html.match(/data-guidance-stage/g)).toHaveLength(4);
+      for (const card of content[repairSlug].cards) {
+        expect(html).toContain(card.title);
+        expect(html).toContain(card.body);
+        if (card.link) expect(html).toContain(`href=\"${card.link.href}\"`);
+      }
+      expect(html).not.toContain('<main');
+    }
   });
 
   it('does not alter legacy Virtual Phone pages when no hierarchy is supplied', () => {

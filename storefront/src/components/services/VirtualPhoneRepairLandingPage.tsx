@@ -11,6 +11,7 @@ import type { SharedRepairSelectedDeviceViewModel } from '@/components/services/
 import SharedRepairHeroSelection from '@/components/services/SharedRepairHeroSelection';
 import SharedRepairHeroFacts from '@/components/services/SharedRepairHeroFacts';
 import SharedRepairPageResultsSection from '@/components/repair-results/SharedRepairPageResultsSection';
+import SharedRepairGuidance, { type SharedRepairGuidanceCard } from '@/components/services/SharedRepairGuidance';
 import { ServiceSchema } from '@/components/services/ServiceSchema';
 import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
@@ -149,12 +150,11 @@ function GenericRepairContent({ repair }: { repair: VirtualPhoneRepair }) {
   ];
 
   return <>
-    <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="repair-guidance-heading">
-      <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{repair.name}, explained clearly</h2><p>{repair.summary}</p></div>
-      <div className={hubStyles.reasonGrid}>
-        {content.cards.map((card) => <article key={card.title} className={`${hubStyles.reasonCard} flex h-full flex-col items-center text-center`}><h3>{card.title}</h3><p>{card.body}</p>{card.link ? <Link href={card.link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 transition-colors hover:text-blue-800">{card.link.label}</Link> : null}</article>)}
-      </div>
-    </section>
+    <SharedRepairGuidance
+      heading={`Before arranging ${repair.name}`}
+      intro={repair.summary}
+      cards={content.cards}
+    />
     <FaqAccordion faqs={faqs} density="comfortable" layout="repair-detail" />
   </>;
 }
@@ -221,14 +221,14 @@ export default function VirtualPhoneRepairLandingPage({
       item: `${baseUrl}${item.href ?? canonicalPath}`,
     })),
   };
-  const contentCards: Array<{ title: string; body: string; icon: string; link?: { href: string; label: string } }> = brandContent ? [...brandContent.cards] : [
-    { title: 'What this repair covers', body: repair.summary, icon: repair.icon },
-    { title: 'Common signs', body: repair.signs, icon: repair.icon },
-    { title: 'Hardware problem or another cause?', body: repair.diagnosis, icon: 'clipboard' },
-    { title: 'Inspection and repair', body: 'We inspect the device, confirm the suitable repair path and quote before work begins. Repair time depends on diagnosis and part availability.', icon: 'wrench' },
+  const contentCards: SharedRepairGuidanceCard[] = brandContent ? [...brandContent.cards] : [
+    { title: 'What this repair covers', body: repair.summary },
+    { title: 'Common signs', body: repair.signs },
+    { title: 'Hardware problem or another cause?', body: repair.diagnosis },
+    { title: 'Inspection and repair', body: 'We inspect the device, confirm the suitable repair path and quote before work begins. Repair time depends on diagnosis and part availability.' },
     ...(sharedContent ? [
-      { title: 'Checks before repair', body: sharedContent.diagnosis, icon: 'clipboard' },
-      { title: 'Testing after suitable repair', body: sharedContent.testing, icon: 'check' },
+      { title: 'Checks before repair', body: sharedContent.diagnosis },
+      { title: 'Testing after suitable repair', body: sharedContent.testing },
     ] : []),
   ];
   const fallbackBookingHref = getSharedRepairBookingHref({
@@ -319,10 +319,11 @@ export default function VirtualPhoneRepairLandingPage({
         {isGenericHierarchy ? <GenericRepairContent repair={repair} /> : <>
         {hierarchy && !usesSharedMaster ? <SharedRepairHierarchySections models={hierarchy.models} selectedBrandSlug={hierarchy.selectedBrandSlug} selectedModelSlug={hierarchy.selectedModelSlug} ariaLabel={`Supported ${repair.name} models`} /> : null}
         {sharedPageV2 ? <SharedRepairPageResultsSection key={sharedPageV2.selectedModelSlug ?? 'all-models'} initialResults={sharedPageV2.initialResults} repairName={repair.name} selectedModelSlug={sharedPageV2.selectedModelSlug} /> : null}
-        <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="repair-guidance-heading">
-          <div className="repair-workbench-heading"><span>Repair guidance</span><h2 id="repair-guidance-heading" className="scroll-mt-32">{samsungContent ? `${repair.name}, explained clearly` : <>{repair.name}, explained clearly</>}</h2><p>{brandContent?.guidanceIntro ?? 'We inspect the device condition first, then provide a clear quote for the suitable repair path.'}</p></div>
-          <div className={hubStyles.reasonGrid}>{contentCards.map(({ title, body, icon, link }) => <article key={title} className={`${hubStyles.reasonCard} flex h-full flex-col items-center text-center`}><span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white"><RepairIcon icon={icon} size={20} strokeWidth={2.5} /></span><h3>{title}</h3><p>{body}</p>{link ? <Link href={link.href} className="mt-4 text-sm font-bold text-blue-700 underline underline-offset-4 hover:text-blue-800">{link.label}</Link> : null}</article>)}</div>
-        </section>
+        <SharedRepairGuidance
+          heading={`Before arranging ${repair.name}`}
+          intro={brandContent?.guidanceIntro ?? 'We inspect the device condition first, then provide a clear quote for the suitable repair path.'}
+          cards={contentCards}
+        />
         <CommonRepairProblemsSection modelName={brandName ?? 'Phone'} repairType={repair.slug} problems={[{ title: 'Inspection before replacement', description: 'We check the relevant speaker or button area and explain the repair options before work begins.' }, { title: 'Clear quote first', description: sharedPageV2 ? 'Model-specific pricing depends on the current repair option, device condition and suitable repair path.' : 'The $50 figure is a starting price. Final pricing depends on the device condition and suitable repair path.' }]} />
         <section className={`${hubStyles.pageContainer} py-10 lg:py-14`} aria-labelledby="why-heading">
           <div className="repair-workbench-heading"><span>Why choose us</span><h2 id="why-heading" className="scroll-mt-32">Why choose Ali Mobile & Repair</h2><p>Our Ringwood repair desk keeps phone repairs inspection-led, quote-first and focused on supported models.</p>{sharedContent ? <p className="mx-auto mt-4 max-w-3xl text-pretty">Warranty applies to eligible standard repairs and the completed repair scope. We confirm the suitable repair path before work begins.</p> : null}</div>

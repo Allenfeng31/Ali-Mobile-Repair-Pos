@@ -92,7 +92,7 @@ describe('all 15 brand-shared routes use the centered Master', () => {
     const { container } = render(page(caseItem, true, [result]).element);
     const hero = container.querySelector('[data-camera-module-hero]') as HTMLElement;
     const resultHeading = screen.getByRole('heading', { level: 2, name: `Real ${repairName} Results` });
-    const guidanceHeading = screen.getByRole('heading', { level: 2, name: /explained clearly/i });
+    const guidanceHeading = screen.getByRole('heading', { level: 2, name: caseItem.service === 'camera-lens-replacement' ? /explained clearly/i : new RegExp(`Before arranging ${repairName}`, 'i') });
     expect(hero.compareDocumentPosition(resultHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(resultHeading.compareDocumentPosition(guidanceHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
@@ -134,7 +134,7 @@ describe('all 15 brand-shared routes use the centered Master', () => {
     expect(modelLink).toHaveAttribute('href', `${caseItem.path}?model=${caseItem.modelSlug}`);
     expect(modelLink.closest('[data-shared-repair-hierarchy-panel][data-expanded="false"]')).toBeNull();
     expect(within(selector).getByRole('heading', { level: 2, name: `${caseItem.name} ${repairName} by Model` })).toBeInTheDocument();
-    expect(selector.compareDocumentPosition(screen.getByRole('heading', { level: 2, name: /explained clearly/i })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(selector.compareDocumentPosition(screen.getByRole('heading', { level: 2, name: caseItem.service === 'camera-lens-replacement' ? /explained clearly/i : new RegExp(`Before arranging ${repairName}`, 'i') })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(container.querySelector('[data-camera-module-hero-price-card]')).toBeNull();
     expect(container.querySelector('[data-shared-repair-selected-device]')).toBeNull();
     expect(screen.queryByLabelText('Commercial repair facts')).toBeNull();
