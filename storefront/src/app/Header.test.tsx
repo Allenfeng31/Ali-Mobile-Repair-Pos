@@ -64,24 +64,34 @@ describe('Header phone brand navigation', () => {
     expect(desktop.getByRole('button', { name: 'Repair Categories' })).not.toBeNull();
   });
 
-  it('opens the desktop secondary-brand flyout with pointer and keyboard focus', () => {
+  it('opens the desktop secondary-brand flyout immediately from the full parent row and keeps it open into the flyout', () => {
     render(<Header />);
 
     fireEvent.mouseEnter(screen.getByRole('link', { name: 'Phone Repairs' }));
     const phoneMenu = screen.getByLabelText('Phone repair brands');
     const morePhoneBrandsLink = within(phoneMenu).getByRole('link', { name: 'More Phone Brands' });
+    const morePhoneBrandsRow = morePhoneBrandsLink.closest('.nav-dropdown--submenu');
 
-    fireEvent.mouseEnter(morePhoneBrandsLink);
+    expect(morePhoneBrandsRow).not.toBeNull();
+    fireEvent.mouseEnter(morePhoneBrandsRow as HTMLElement);
+
     expect(morePhoneBrandsLink.getAttribute('aria-expanded')).toBe('true');
     const flyout = screen.getByLabelText('Other phone repair brands');
+    expect(flyout.getAttribute('aria-hidden')).toBe('false');
     for (const item of SECONDARY_PHONE_BRAND_HUB_NAV_ITEMS) {
       expect(within(flyout).getByRole('link', { name: item.label }).getAttribute('href')).toBe(item.href);
     }
 
-    fireEvent.mouseLeave(morePhoneBrandsLink);
+    fireEvent.mouseLeave(morePhoneBrandsLink, { relatedTarget: flyout });
+    fireEvent.mouseEnter(flyout);
+    expect(morePhoneBrandsLink.getAttribute('aria-expanded')).toBe('true');
+
     morePhoneBrandsLink.focus();
     fireEvent.focus(morePhoneBrandsLink);
     expect(morePhoneBrandsLink.getAttribute('aria-expanded')).toBe('true');
+
+    fireEvent.mouseLeave(morePhoneBrandsRow as HTMLElement);
+    expect(morePhoneBrandsLink.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('keeps the mobile drawer hierarchy, secondary-brand accordion, and close behaviour', () => {

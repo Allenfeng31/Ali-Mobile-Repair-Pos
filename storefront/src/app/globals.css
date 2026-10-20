@@ -114,6 +114,15 @@ a {
   -webkit-backdrop-filter: none !important;
 }
 
+/* Keep desktop navigation readable over page content without changing mobile chrome. */
+@media (min-width: 768px) {
+  .navbar {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+  }
+}
+
 .nav-container {
   display: flex;
   justify-content: space-between;
@@ -251,7 +260,7 @@ a {
   border-radius: 12px;
   color: #1f2937;
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -311,6 +320,7 @@ a {
   visibility: visible;
   clip-path: inset(0);
   transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .nav-dropdown-menu--repair-categories {
