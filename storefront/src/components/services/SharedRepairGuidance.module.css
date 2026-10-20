@@ -150,6 +150,13 @@
   text-underline-offset: 0.2rem;
 }
 
+@media (min-width: 1024px) {
+  .section {
+    /* Keep the guidance flow on the same centre axis as its narrow page shell. */
+    width: 100%;
+  }
+}
+
 @media (min-width: 1200px) {
   .section {
     padding: 3.5rem 0;
