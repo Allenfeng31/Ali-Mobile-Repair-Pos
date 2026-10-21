@@ -12,61 +12,77 @@ const IS_DRY_RUN = process.env.DRY_RUN !== 'false';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const PIXEL_SLUG = 'google-pixel-10-pro-xl-screen-replacement-the-hidden-fingerprint-trap-and-how-we';
-const PIXEL_TITLE = 'Google Pixel 10 Pro XL Screen Replacement in Ringwood | Fingerprint Scanner Explained';
-const PIXEL_DESCRIPTION = 'Need Google Pixel 10 Pro XL screen replacement in Ringwood? Ali Mobile & Repair explains fingerprint scanner testing, original screen options, sealing, and what customers should know before repair.';
+const PIXEL_TITLE = 'Pixel 10 Pro XL Screen Replacement: Fingerprint Calibration & Repair';
+const PIXEL_SEO_TITLE = 'Pixel 10 Pro XL Screen Repair & Fingerprint Calibration | Ali Mobile';
+const PIXEL_DESCRIPTION = 'Pixel 10 Pro XL screen repair in Ringwood. Learn how fingerprint calibration, diagnosis and final testing support a professional screen replacement.';
 
 const PIXEL_CONTENT = `
-<p>If you have dropped your Google Pixel 10 Pro XL and the OLED screen is cracked, the repair is not always just about replacing the display. On this model, the under-display fingerprint scanner is one of the most important parts to check during screen replacement.</p>
+<p>A cracked Google Pixel 10 Pro XL screen can affect more than the display. The under-display fingerprint sensor is an important part of the repair, so it needs to be checked before the device is sealed.</p>
 
-<p>At <strong>Ali Mobile &amp; Repair in Ringwood</strong>, we have repaired many Pixel 10 Pro XL devices. From our repair experience, the fingerprint scanner is the part that needs the most careful testing before the phone is sealed again.</p>
+<p>At <strong>Ali Mobile &amp; Repair in Ringwood</strong>, we assess the screen, touch response and fingerprint function before explaining the available repair options. A professional Pixel screen repair is a process of calibration, diagnosis and final testing—not an automatic sensor transfer.</p>
 
-<h2>The fingerprint scanner issue we see during Pixel 10 Pro XL screen replacement</h2>
+<h2>Why fingerprint recognition matters after a Pixel screen replacement</h2>
 
-<p>Most new Pixel 10 Pro XL replacement screens come with a fingerprint scanner already attached. In theory, this should make the repair simple. In real repairs, it is not always that straightforward.</p>
+<p>Compatible replacement Pixel display assemblies may include a fingerprint sensor. After the screen is installed, the display, touch response, physical connections and fingerprint function all need checking.</p>
 
-<p>Sometimes the new fingerprint scanner on the replacement screen works perfectly with the customer’s phone. Sometimes it does not work properly, even when the screen and scanner are original parts. This is why we do not assume the new scanner will automatically match every phone.</p>
+<h2>Why a replacement fingerprint sensor may require calibration</h2>
 
-<p>Before we seal the phone, we always test the new screen, display, touch response, and fingerprint scanner. If the fingerprint scanner does not work correctly during testing, we do not continue sealing the phone as if everything is fine.</p>
+<p>Google provides an <a href="https://pixelrepair.withgoogle.com/" target="_blank" rel="noopener noreferrer">Update and Software Repair</a> function for fingerprint calibration where supported. After a screen replacement, the replacement sensor may need this software calibration before fingerprint recognition works normally.</p>
 
-<h2>What we do if the new fingerprint scanner does not match</h2>
+<p>The process is not simply a file download that pairs every sensor automatically. It follows Google’s supported connection, installation and restart steps for the device. <a href="https://www.ifixit.com/Guide/How+to+Calibrate+the+Fingerprint+Sensor+in+your+Google+Pixel+Phone/166753" target="_blank" rel="noopener noreferrer">iFixit’s fingerprint calibration guide</a> also describes calibration for eligible Pixel phones with replacement screens.</p>
 
-<p>If the fingerprint scanner that comes with the new screen is not compatible with the phone, we carefully remove the original fingerprint scanner from the customer’s broken screen. We also remove the scanner from the new screen, then transfer the customer’s original scanner onto the replacement screen.</p>
+<h2>Our approach: calibration first, hardware diagnosis second</h2>
 
-<p>This is the difficult part of the repair. Google Pixel OLED screens are extremely thin, and the fingerprint scanner is also very thin. Both parts can be damaged easily if the removal is rushed or handled incorrectly.</p>
+<p>Calibration is the first step when it is supported. If it does not complete or fingerprint recognition still does not work, that does not automatically mean the replacement sensor is defective or incompatible.</p>
 
-<p>Our process is to remove and transfer the scanner carefully so the original fingerprint function can be retained when the customer’s original scanner was working before the screen was damaged.</p>
+<ul>
+  <li>We confirm that the required calibration process and restarts were completed.</li>
+  <li>We inspect sensor connections and physical condition.</li>
+  <li>We confirm the replacement display assembly is compatible with the device.</li>
+  <li>We assess whether another hardware or software fault needs attention.</li>
+</ul>
 
-<h2>Why we test before sealing the phone</h2>
+<h2>When transferring the original fingerprint sensor may be considered</h2>
 
-<p>Once a Pixel screen is fully sealed, opening it again can increase risk and may affect the quality of the final seal. That is why testing before final installation is important.</p>
+<p>If calibration and appropriate troubleshooting do not resolve the issue, the original fingerprint sensor may be considered for transfer only when it is intact, compatible and suitable for reuse. This is a delicate hardware procedure, not a normal requirement for every Pixel screen replacement.</p>
 
-<p>During the repair, we check the display, touch, fingerprint response where applicable, and general device functions before completing the final seal. This helps avoid a situation where the screen looks finished but the fingerprint scanner does not work properly.</p>
+<p>Transfer is not guaranteed to resolve every fingerprint issue, and further calibration may still be needed. We assess the risks before considering it and test the final fingerprint function before completing the repair.</p>
+
+<h2>What we test before completing the repair</h2>
+
+<p>Before final sealing, we test the display, touch response, fingerprint response where applicable, and relevant device functions. This helps ensure that a screen which looks finished has also been checked for the functions customers rely on.</p>
 
 <img class="blog-inline-image" src="https://mmjyjciyhcsjpnbtovag.supabase.co/storage/v1/object/public/blog-images/1777098530515-google-pixel-10-screen-replacement.jpg" style="max-width: 100%; height: auto; border-radius: 12px; margin: 1.5rem 0px;">
 
-<h2>Why we use original Pixel screens</h2>
+<h2>Screen options, warranty and water resistance</h2>
 
-<p>There are different screen grades available for Pixel repairs, including original and aftermarket options. For Pixel screen replacement, we currently use original screens only.</p>
+<p>We confirm compatible screen options, repair pricing and expected timing for the exact device before work begins. <a href="/repairs/phone/google-pixel/pixel-10-pro-xl/screen-replacement">View Pixel 10 Pro XL Screen Replacement Options &amp; Pricing</a> for the current repair path. For a model-specific disassembly reference, see <a href="https://www.ifixit.com/Guide/Google+Pixel+10+Pro+XL+Screen+Replacement/200994" target="_blank" rel="noopener noreferrer">iFixit’s Pixel 10 Pro XL screen replacement guide</a>.</p>
 
-<p>From our experience, lower-grade aftermarket Pixel screens can have noticeable colour difference, larger black borders, and less sensitive touch response. On a premium phone like the Pixel 10 Pro XL, these differences can affect the way the phone feels after repair.</p>
+<p>Eligible standard repairs include a 6-month warranty on relevant parts and labour. Water-damage repairs are excluded from warranty. Opening a phone can affect its factory water resistance, so it cannot be guaranteed after repair.</p>
 
-<h2>What about water resistance after screen replacement?</h2>
+<h2>Common questions</h2>
 
-<p>After replacing the screen, we reseal the phone carefully so it has practical daily protection again. However, it is important to be honest: this is not the same as a brand-new phone assembled in a factory environment with automated sealing conditions.</p>
+<h3>Why does my Pixel fingerprint scanner stop working after screen replacement?</h3>
+<p>A replacement sensor may need software calibration after the screen is fitted. Connections, part compatibility and other device faults can also affect the result, so the cause needs checking before a repair is completed.</p>
 
-<p>We do not recommend using the phone in water after any screen replacement. The seal can help with normal daily use, but it should not be treated as a reason to intentionally expose the phone to water.</p>
+<h3>Does a new Pixel screen need fingerprint calibration?</h3>
+<p>Where supported, Google’s fingerprint calibration process is the first step after fitting a replacement screen with a fingerprint sensor.</p>
 
-<h2>Should you back up your data before repair?</h2>
+<h3>What happens if fingerprint calibration fails?</h3>
+<p>We check that the required process and restarts were completed, inspect the relevant connections and parts, and diagnose other possible faults. A failed calibration alone does not identify the cause.</p>
 
-<p>It is always best to back up important data before any phone repair. A screen replacement normally does not require a data reset, and so far we have not had a customer lose data from this repair, but backing up first is still the safest habit.</p>
+<h3>Is transferring the original fingerprint sensor always necessary?</h3>
+<p>No. It is a conditional repair option only when diagnosis supports it and the original sensor is intact, compatible and suitable for reuse.</p>
 
-<h2>Visit Ali Mobile &amp; Repair in Ringwood</h2>
+<h3>Will my Pixel retain its original water resistance?</h3>
+<p>Factory water resistance cannot be guaranteed after a phone has been opened for repair.</p>
 
-<p>Ali Mobile &amp; Repair is located at <strong>Ringwood Square Shopping Centre, Kiosk C1, Seymour St, Ringwood VIC 3134</strong>. We help customers from Ringwood, Ringwood East, Mitcham, Croydon, Heathmont and nearby suburbs with Pixel screen replacement and other phone repairs.</p>
+<h3>Where can I arrange Pixel 10 Pro XL screen replacement in Ringwood?</h3>
+<p>Ali Mobile &amp; Repair is an independent phone repair shop at <strong>Kiosk C1, Ringwood Square Shopping Centre, Seymour Street, Ringwood VIC 3134</strong>. Walk-ins are welcome; contact us to confirm screen availability, fingerprint concerns and the final repair quote.</p>
 
-<p>If your Pixel 10 Pro XL screen is cracked, you can bring it to our Ringwood kiosk for an inspection. We will check the screen condition, frame condition, touch response, and fingerprint function before explaining the repair options.</p>
+<h2>Pixel 10 Pro XL screen replacement in Ringwood</h2>
 
-<p><strong>Need your Pixel 10 Pro XL checked?</strong> Use our <a target="_blank" rel="noopener noreferrer nofollow" href="https://alimobile.com.au/book-repair" style="color: rgb(37, 99, 235); font-weight: 600; text-decoration: underline;">Repair Quick Drop-off Form</a> or visit us at Ringwood Square Shopping Centre.</p>
+<p>If your Pixel 10 Pro XL screen is cracked or the fingerprint scanner is not working after a repair, <a href="/book-repair">book a repair visit</a> or contact the store. Online booking helps us plan your visit; parts availability, repair timing and the final quote are confirmed for the device.</p>
 `.trim();
 
 async function run() {
@@ -83,7 +99,7 @@ async function run() {
 
   const { data: pixelBefore, error: fetchError } = await supabase
     .from('storefront_blogs')
-    .select('id, slug, title, description, content, cover_image, is_published, published_at, updated_at')
+    .select('id, slug, title, seo_title, description, content, cover_image, is_published, published_at, updated_at')
     .eq('slug', PIXEL_SLUG)
     .single();
 
@@ -91,6 +107,7 @@ async function run() {
 
   report.pixelBefore = {
     title: pixelBefore.title,
+    seo_title: pixelBefore.seo_title,
     description: pixelBefore.description,
     contentLength: pixelBefore.content ? pixelBefore.content.length : 0,
     cover_image: pixelBefore.cover_image,
@@ -100,6 +117,7 @@ async function run() {
   if (IS_DRY_RUN) {
     report.pixelPlanned = {
       title: PIXEL_TITLE,
+      seo_title: PIXEL_SEO_TITLE,
       description: PIXEL_DESCRIPTION,
       contentLength: PIXEL_CONTENT.length,
       cover_image: pixelBefore.cover_image,
@@ -110,18 +128,20 @@ async function run() {
       .from('storefront_blogs')
       .update({
         title: PIXEL_TITLE,
+        seo_title: PIXEL_SEO_TITLE,
         description: PIXEL_DESCRIPTION,
         content: PIXEL_CONTENT,
         updated_at: new Date().toISOString()
       })
       .eq('id', pixelBefore.id)
-      .select('id, slug, title, description, content, cover_image, is_published, published_at, updated_at')
+      .select('id, slug, title, seo_title, description, content, cover_image, is_published, published_at, updated_at')
       .single();
 
     if (updateError) throw updateError;
     
     report.pixelAfter = {
       title: pixelAfter.title,
+      seo_title: pixelAfter.seo_title,
       description: pixelAfter.description,
       contentLength: pixelAfter.content ? pixelAfter.content.length : 0,
       cover_image: pixelAfter.cover_image,
