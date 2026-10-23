@@ -41,7 +41,10 @@ afterEach(() => {
 
 describe("BookRepairPage location map", () => {
   it("shows the shared map only after a booking succeeds", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, appointment: { id: "appointment-1", datetime: "2026-10-02T02:30:00.000Z" } }),
+    }));
     render(<BookRepairPage />);
 
     expect(screen.queryByRole("heading", { name: "How to find us" })).not.toBeInTheDocument();

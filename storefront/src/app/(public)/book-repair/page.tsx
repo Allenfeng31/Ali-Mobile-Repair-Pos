@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import GlobalRepairCart from "@/components/GlobalRepairCart";
 import RingwoodSquareLocationMap from "@/components/RingwoodSquareLocationMap";
@@ -15,6 +15,7 @@ import {
   getMelbourneBookingCalendarDate,
 } from "@/lib/bookingCalendar";
 import Script from "next/script";
+import { sendGAEvent } from "@next/third-parties/google";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -53,6 +54,16 @@ type BookingSuccessData = {
   datetime: string;
   displayDate: string;
 };
+
+const BOOKING_PRICE_VIEW_STABILITY_MS = 250;
+
+function hasVerifiedBookingCreation(result: unknown): result is { success: true; appointment: { id: string | number; datetime?: string } } {
+  if (!result || typeof result !== "object") return false;
+  const booking = result as { success?: unknown; appointment?: { id?: unknown; datetime?: unknown } };
+  return booking.success === true
+    && (typeof booking.appointment?.id === "string" || typeof booking.appointment?.id === "number")
+    && String(booking.appointment.id).trim().length > 0;
+}
 
 function generateICS(booking: BookingSuccessData) {
   const { name, brand, model, service, datetime } = booking;
@@ -186,6 +197,10 @@ export default function BookRepairPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successBooking, setSuccessBooking] = useState<BookingSuccessData | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const bookingPriceSummaryRef = useRef<HTMLDivElement>(null);
+  const viewedPriceKeysRef = useRef(new Set<string>());
+  const pendingPriceViewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const submissionInFlightRef = useRef(false);
 
   // Date/Time Selection
   const [selectedDay, setSelectedDay] = useState("");
@@ -193,6 +208,9 @@ export default function BookRepairPage() {
 
   const TIME_SLOTS = BUSINESS_HOURS.bookingStartSlots;
   const bookingCalendarStart = getMelbourneBookingCalendarDate();
+  const priceViewKey = hasConfirmedDevices && Number.isFinite(totalPrice) && totalPrice > 0
+    ? `${totalPrice}:${qualifyingRepairItemCount}`
+    : null;
 
   // ── VIC Public Holidays 2026/2027 ─────────────────────────────────────────
   const VIC_PUBLIC_HOLIDAYS = [
@@ -245,6 +263,44 @@ export default function BookRepairPage() {
     return () => document.removeEventListener("click", handleBookRepairLinkClick, true);
   }, [resetBookingFlow, successBooking]);
 
+  useEffect(() => {
+    const target = bookingPriceSummaryRef.current;
+    if (!target || !priceViewKey || typeof IntersectionObserver === "undefined") return;
+
+    let disposed = false;
+    const clearPendingTimer = () => {
+      if (pendingPriceViewTimerRef.current !== null) {
+        clearTimeout(pendingPriceViewTimerRef.current);
+        pendingPriceViewTimerRef.current = null;
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) {
+        clearPendingTimer();
+        return;
+      }
+      if (viewedPriceKeysRef.current.has(priceViewKey) || pendingPriceViewTimerRef.current !== null) return;
+
+      pendingPriceViewTimerRef.current = setTimeout(() => {
+        pendingPriceViewTimerRef.current = null;
+        if (disposed || viewedPriceKeysRef.current.has(priceViewKey)) return;
+
+        viewedPriceKeysRef.current.add(priceViewKey);
+        sendGAEvent("event", "booking_price_view", {
+          estimated_total: totalPrice,
+          priced_repair_count: qualifyingRepairItemCount,
+        });
+      }, BOOKING_PRICE_VIEW_STABILITY_MS);
+    }, { threshold: 0.5 });
+
+    observer.observe(target);
+    return () => {
+      disposed = true;
+      clearPendingTimer();
+      observer.disconnect();
+    };
+  }, [priceViewKey, qualifyingRepairItemCount, totalPrice]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hasConfirmedDevices) return alert("Your cart is empty! Please select a device and service first, and click 'Confirm'.");
@@ -253,6 +309,8 @@ export default function BookRepairPage() {
   };
 
   const handleFinalSubmit = async () => {
+    if (submissionInFlightRef.current) return;
+    submissionInFlightRef.current = true;
     setShowDisclaimer(false);
     setIsSubmitting(true);
     try {
@@ -286,6 +344,7 @@ export default function BookRepairPage() {
 
       if (!res.ok) throw new Error("Failed to book");
       const result = await res.json();
+      if (!hasVerifiedBookingCreation(result)) throw new Error("Booking was not confirmed");
 
       setSuccessBooking({
         ...payload,
@@ -298,10 +357,12 @@ export default function BookRepairPage() {
           ? `${getBookingServiceDisplayName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0] || { id: 'fallback', name: 'Repair', price: 0 })} + more`
           : getBookingServiceDisplayName(confirmedDevices[0].category || 'phone', confirmedDevices[0].brand, confirmedDevices[0].services[0] || { id: 'fallback', name: 'Repair', price: 0 })
       });
+      sendGAEvent("event", "booking_submit_success");
       clearCart();
     } catch {
       alert("Something went wrong. Please try again or call us.");
     } finally {
+      submissionInFlightRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -480,7 +541,7 @@ export default function BookRepairPage() {
                         <strong>{formatDeviceTitle(d.brand, d.model)}</strong>: {d.services.map(s => getBookingServiceDisplayName(d.category || 'phone', d.brand, s)).join(', ')}
                       </div>
                     ))}
-                    <div className="booking-total-row">
+                    <div ref={bookingPriceSummaryRef} className="booking-total-row">
                       <span>Estimated Total</span>
                       <strong>
                         {totalPrice > 0 ? (
@@ -582,6 +643,7 @@ export default function BookRepairPage() {
                 <button
                   onClick={handleFinalSubmit}
                   className="booking-primary-action"
+                  disabled={isSubmitting}
                 >
                   Confirm & Book
                   <ArrowRight size={17} strokeWidth={2.6} aria-hidden="true" />

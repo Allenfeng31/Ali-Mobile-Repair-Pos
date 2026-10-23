@@ -36,7 +36,7 @@ describe('BookRepairPage calendar-date submission', () => {
   it('keeps Friday 2 October in the heading and sends date-only booking values', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ success: true, appointment: { datetime: '2026-10-02T02:30:00.000Z' } }),
+      json: async () => ({ success: true, appointment: { id: 'appointment-1', datetime: '2026-10-02T02:30:00.000Z' } }),
     }));
 
     render(<BookRepairPage />);
