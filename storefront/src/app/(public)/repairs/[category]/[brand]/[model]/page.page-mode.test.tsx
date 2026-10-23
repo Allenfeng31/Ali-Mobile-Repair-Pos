@@ -407,6 +407,63 @@ describe('Model Hub page-mode Server consumer', () => {
       .toBeUndefined();
   });
 
+  it('keeps Camera Lens and virtual peripheral pricing out of a quote-only secondary-phone starting-price claim', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Huawei',
+      model: 'P30 Pro',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'camera-lens-replacement', name: 'Camera Lens Replacement', price: 50, repairOrigin: 'pos', sourceType: 'real' },
+        { slug: 'loudspeaker-replacement', name: 'Loudspeaker Replacement', price: 50, repairOrigin: 'virtual', sourceType: 'virtual' },
+      ],
+      brandModels: [{ slug: 'p30-pro', model: 'P30 Pro', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'huawei', model: 'p30-pro' }),
+    }));
+
+    expect(html).toContain('P30 Pro repair pricing');
+    expect(html).toContain('current price or quote requirement');
+    expect(html).not.toContain('P30 Pro repairs from $50');
+    expect(html).not.toContain('currently start from $50');
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        slug: 'camera-lens-replacement',
+        price: 50,
+        href: '/repairs/phone/camera-lens-replacement?brand=huawei&model=p30-pro',
+      }),
+    ]));
+  });
+
+  it('uses the lowest eligible POS price for a secondary-phone starting-price claim', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Motorola',
+      model: 'Moto G04',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 129, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 75, repairOrigin: 'pos' },
+        { slug: 'charging-port-replacement', name: 'Charging Port Replacement', price: 75, repairOrigin: 'pos' },
+        { slug: 'camera-lens-replacement', name: 'Camera Lens Replacement', price: 50, repairOrigin: 'virtual', sourceType: 'virtual' },
+      ],
+      brandModels: [{ slug: 'moto-g04', model: 'Moto G04', repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'motorola', model: 'moto-g04' }),
+    }));
+
+    expect(html).toContain('Moto G04 repairs from $75');
+    expect(html).toContain('Published repair options for Moto G04 currently start from $75');
+    expect(html).not.toContain('Moto G04 repairs from $50');
+    expect(html).not.toContain('currently start from $50');
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'camera-lens-replacement', price: 50 }),
+    ]));
+  });
+
   it('omits hidden taxonomy and renders one conflicting Detail option rather than selecting POS evidence', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       repairTypes: [

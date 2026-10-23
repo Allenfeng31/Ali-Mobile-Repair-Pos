@@ -637,7 +637,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const iPhoneScreenDetailHref = isIPhoneModelPage && hasScreenRepair
     ? `/repairs/${categorySlug}/${brandSlug}/${modelSlug}/screen-replacement`
     : null;
-  const startingPrice = isPrimaryPhoneModelPage
+  const startingPrice = isPhoneModelPage
     ? getPublishedNormalPhoneStartingPrice(repairTypes)
     : getStartingPrice(repairTypes);
   const startingPriceRepairs = startingPrice === null
