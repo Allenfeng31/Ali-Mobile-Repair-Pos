@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { analytics } from "@/lib/analytics";
 import { Battery, Camera, Droplet, Ear, Plug, Power, Smartphone, Volume2, Wrench } from "lucide-react";
@@ -10,6 +10,7 @@ import { getModelHubRepairHref, getModelHubWaterDamageHref } from "@/lib/waterDa
 import { CAMERA_LENS_REPAIR_SLUG, getCameraLensLandingHref } from "@/lib/virtualCameraLens";
 import { getVirtualPhoneRepairLandingHref, getVirtualPhoneRepair, type VirtualPhoneRepairSlug } from "@/lib/virtualPhoneRepairs";
 import { sortRepairOptionsForDisplay } from "@/lib/repairOptionDisplayOrder";
+import { useRepairPricingVisibility, type RepairPricingVisibilityEvent } from "@/components/analytics/useRepairPricingVisibility";
 
 interface RepairVariant {
   quality_grade: string;
@@ -24,6 +25,7 @@ interface RepairOption {
   timingLabel?: string;
   variants?: readonly RepairVariant[];
   sourceType?: 'real' | 'virtual' | 'diagnostic';
+  repairOrigin?: string;
   href?: string;
   priceLabel?: string;
 }
@@ -50,6 +52,50 @@ export default function RepairOptionsGrid({
   useQuoteLedPricingSummary = false,
 }: RepairOptionsGridProps) {
   const displayRepairTypes = sortRepairOptionsForDisplay(repairTypes);
+  const pricingVisibilityEvents = useMemo<RepairPricingVisibilityEvent[]>(() => {
+    const publishedPriceRepairs = displayRepairTypes.filter((repair) =>
+      repair.sourceType === "real" && repair.repairOrigin === "pos" && Number.isFinite(repair.price) && repair.price > 0 && !repair.priceLabel,
+    );
+    const quoteOnlyRepairs = displayRepairTypes.filter((repair) => {
+      const hasPublishedPrice = Number.isFinite(repair.price) && repair.price > 0;
+      const hasStaticFallback = showStartingPriceFallback && Boolean(getStartingPrice(categorySlug, brandSlug, repair.slug));
+      return repair.sourceType === "real" && repair.repairOrigin === "pos" && !hasPublishedPrice && !repair.priceLabel && !hasStaticFallback;
+    });
+    const sharedContext = {
+      pageType: "model_hub" as const,
+      repairBrand: brandSlug,
+      repairModel: modelSlug,
+      placement: "pricing" as const,
+    };
+    const events: RepairPricingVisibilityEvent[] = [];
+
+    if (publishedPriceRepairs.length > 0) {
+      events.push({
+        eventName: "repair_price_view",
+        stateKey: publishedPriceRepairs.map((repair) => `${repair.slug}:${repair.price}`).sort().join("|"),
+        context: {
+          ...sharedContext,
+          repairType: publishedPriceRepairs.length === 1 ? publishedPriceRepairs[0].slug : undefined,
+          pricingState: "numeric",
+          priceSource: "published_pos",
+        },
+      });
+    }
+    if (quoteOnlyRepairs.length > 0) {
+      events.push({
+        eventName: "repair_quote_view",
+        stateKey: quoteOnlyRepairs.map((repair) => repair.slug).sort().join("|"),
+        context: {
+          ...sharedContext,
+          repairType: quoteOnlyRepairs.length === 1 ? quoteOnlyRepairs[0].slug : undefined,
+          pricingState: "quote",
+        },
+      });
+    }
+
+    return events;
+  }, [brandSlug, categorySlug, displayRepairTypes, modelSlug, showStartingPriceFallback]);
+  const pricingVisibilityRef = useRepairPricingVisibility(pricingVisibilityEvents);
 
   const getRepairIcon = (slug: string) => {
     switch (slug) {
@@ -140,7 +186,7 @@ export default function RepairOptionsGrid({
 
   return (
     <>
-      <div className="repair-option-grid items-stretch">
+      <div ref={pricingVisibilityRef} data-ga4-placement="pricing" className="repair-option-grid items-stretch">
         {displayRepairTypes.map((rt) => {
           return (
             <div key={rt.slug} className="flex h-full flex-col">

@@ -10,6 +10,10 @@ import React from 'react';
 // Track router.push calls
 const mockPush = vi.fn();
 let mockParams: Record<string, string> = {};
+const { useRepairPricingVisibilityMock, trackRepairCtaClickMock } = vi.hoisted(() => ({
+  useRepairPricingVisibilityMock: vi.fn(() => ({ current: null })),
+  trackRepairCtaClickMock: vi.fn(),
+}));
 
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
@@ -30,11 +34,19 @@ vi.mock('@/lib/analytics', () => ({
     trackCallNow: vi.fn(),
   },
 }));
+vi.mock('@/components/analytics/useRepairPricingVisibility', () => ({
+  useRepairPricingVisibility: useRepairPricingVisibilityMock,
+}));
+vi.mock('@/lib/ga4RepairEvents', () => ({
+  trackRepairCtaClick: trackRepairCtaClickMock,
+}));
 
 describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
   beforeEach(() => {
     mockParams = {};
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    useRepairPricingVisibilityMock.mockClear();
+    trackRepairCtaClickMock.mockClear();
   });
 
   afterEach(() => {
@@ -55,6 +67,39 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     repairName: 'Screen Replacement',
     variants: mockVariants,
   };
+
+  it('tracks only real published detail prices and explicit Book Repair activation', () => {
+    mockParams = { category: 'phone', brand: 'iphone', 'repair-type': 'screen-replacement' };
+    render(<RepairPricingAndCTA {...defaultProps} sourceType="real" repairOrigin="pos" variants={[{ quality_grade: 'Standard', price: 170 }]} />);
+
+    expect(useRepairPricingVisibilityMock).toHaveBeenCalledWith([
+      expect.objectContaining({
+        eventName: 'repair_price_view',
+        context: expect.objectContaining({
+          pageType: 'repair_detail',
+          priceSource: 'published_pos',
+          pricingState: 'numeric',
+        }),
+      }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /book repair now/i }));
+    expect(trackRepairCtaClickMock).toHaveBeenCalledWith(expect.objectContaining({
+      action: 'book_repair',
+      placement: 'pricing',
+      repairType: 'screen-replacement',
+    }));
+  });
+
+  it('tracks a real quote-only detail without treating diagnostics or virtual services as price states', () => {
+    const quotePricing = { resolvedPrice: null, validVariants: [], source: 'none' as const, isQuoteOnly: true, canEmitOffer: false };
+    const { rerender } = render(<RepairPricingAndCTA {...defaultProps} sourceType="real" repairOrigin="pos" pricing={quotePricing} showStartingPriceFallback={false} />);
+    expect(useRepairPricingVisibilityMock).toHaveBeenLastCalledWith([
+      expect.objectContaining({ eventName: 'repair_quote_view', context: expect.objectContaining({ pricingState: 'quote' }) }),
+    ]);
+
+    rerender(<RepairPricingAndCTA {...defaultProps} sourceType="diagnostic" pricing={quotePricing} />);
+    expect(useRepairPricingVisibilityMock).toHaveBeenLastCalledWith([]);
+  });
 
   // ── Step 1: Interactive Card State ─────────────────────────────────────────
 
@@ -303,7 +348,7 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([
-        { name: 'Standard', description: 'Standard quality' },
+        { name: 'Custom', description: 'Custom quality' },
       ]),
     }));
 
@@ -311,12 +356,12 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
       <RepairPricingAndCTA
         {...defaultProps}
         repairName="Camera Repair"
-        variants={[{ quality_grade: 'Standard', price: 170 }]}
+        variants={[{ quality_grade: 'Custom', price: 170 }]}
       />
     );
 
     expect(global.fetch).toHaveBeenCalledWith('/api/proxy/quality-tiers');
-    expect(await screen.findByText('Standard quality')).toBeInTheDocument();
+    expect(await screen.findByText('Custom quality')).toBeInTheDocument();
   });
 
   // ── Step 3: Nuclear Spacer & Layout ──────────────────────────────────────────

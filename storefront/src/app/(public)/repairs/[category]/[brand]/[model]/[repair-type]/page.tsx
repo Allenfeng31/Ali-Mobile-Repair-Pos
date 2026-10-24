@@ -4845,6 +4845,8 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
     price: number;
     variants: RepairVariant[];
     source: 'pos' | 'fallback';
+    sourceType?: 'real' | 'virtual' | 'diagnostic';
+    repairOrigin?: string;
     isLegacy?: true;
   };
   otherRepairLinks: SameModelRepairLink[];
@@ -4883,7 +4885,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   if (!brandEntry) {
     if (!legacyRepair) return null;
     return {
-      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, isLegacy: true },
+      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, sourceType: legacyRepair.repair.sourceType, repairOrigin: legacyRepair.repair.repairOrigin, isLegacy: true },
       otherRepairLinks: [], crossModelLinks: [], galaxyARelatedRepairLinks: [], galaxyNoteRelatedRepairLinks: [], oppoRelatedRepairLinks: [], iphoneModelHubLinks: [], samsungFamilyModelHubLinks: [], oppoSeriesModelHubLinks: [], categoryHubLinks: [],
     };
   }
@@ -4892,7 +4894,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   if (!modelEntry) {
     if (!legacyRepair) return null;
     return {
-      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, isLegacy: true },
+      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, sourceType: legacyRepair.repair.sourceType, repairOrigin: legacyRepair.repair.repairOrigin, isLegacy: true },
       otherRepairLinks: [], crossModelLinks: [], galaxyARelatedRepairLinks: [], galaxyNoteRelatedRepairLinks: [], oppoRelatedRepairLinks: [], iphoneModelHubLinks: [], samsungFamilyModelHubLinks: [], oppoSeriesModelHubLinks: [], categoryHubLinks: [],
     };
   }
@@ -4901,7 +4903,7 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
   if (!repairEntry) {
     if (!legacyRepair) return null;
     return {
-      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, isLegacy: true },
+      details: { brand: legacyRepair.brand, model: legacyRepair.model, modelCode: legacyRepair.modelCode, repairType: legacyRepair.repair.name, price: legacyRepair.repair.price, variants: legacyRepair.repair.variants || [], source: catalog.source, sourceType: legacyRepair.repair.sourceType, repairOrigin: legacyRepair.repair.repairOrigin, isLegacy: true },
       otherRepairLinks: [], crossModelLinks: [], galaxyARelatedRepairLinks: [], galaxyNoteRelatedRepairLinks: [], oppoRelatedRepairLinks: [], iphoneModelHubLinks: [], samsungFamilyModelHubLinks: [], oppoSeriesModelHubLinks: [], categoryHubLinks: [],
     };
   }
@@ -4996,6 +4998,8 @@ async function fetchRepairPageData(resolvedParams: Awaited<RepairPageProps['para
       price: repairEntry.price,
       variants: repairEntry.variants || [],
       source: catalog.source,
+      sourceType: repairEntry.sourceType,
+      repairOrigin: repairEntry.repairOrigin,
     },
     otherRepairLinks: dedupeRelatedRepairLinks(otherRepairLinks).slice(0, (isEnhancedSamsungFamilyPage || isAliMobileEnhancedOppoRepairPage(resolvedParams)) ? 6 : 4),
     crossModelLinks: dedupeRelatedRepairLinks(crossModelLinks).slice(0, 4),
@@ -5892,6 +5896,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
+            repairOrigin={details?.repairOrigin}
           />
 
           <div className="trust-badges">

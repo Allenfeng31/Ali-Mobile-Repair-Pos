@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { getRepairPageContext, trackContactSubmitSuccess } from '@/lib/ga4RepairEvents';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -44,6 +45,25 @@ interface Message {
   sender: 'customer' | 'staff';
   content: string;
   created_at: string;
+}
+
+export function hasPersistedChatMessage(value: unknown): value is { id: string | number } {
+  return Boolean(
+    value
+    && typeof value === 'object'
+    && 'id' in value
+    && (typeof value.id === 'string' || typeof value.id === 'number')
+    && String(value.id).trim(),
+  );
+}
+
+export function trackPersistedCustomerMessage(value: unknown, pathname: string) {
+  if (!hasPersistedChatMessage(value)) return false;
+  trackContactSubmitSuccess({
+    ...getRepairPageContext(pathname),
+    placement: 'chat',
+  });
+  return true;
 }
 
 export function getRecoveryCustomerIntro(
@@ -165,7 +185,7 @@ export default function ChatWidget() {
         failureCountRef.current = 0;
         backoffUntilRef.current = 0;
         return 'success';
-      } catch (_) {
+      } catch {
         failureCountRef.current += 1;
         if (failureCountRef.current >= MAX_FAILURES) {
           backoffUntilRef.current = Date.now() + COOLDOWN_MS;
@@ -210,7 +230,7 @@ export default function ChatWidget() {
       if (lastMsg?.sender === 'staff' && !isOpen) {
         setHasUnread(true);
       }
-    } catch (_) {}
+    } catch {}
   }, [isOpen, ensureSession]);
 
   useEffect(() => {
@@ -305,9 +325,13 @@ export default function ChatWidget() {
         body: JSON.stringify({ content: text }),
       });
       if (!res.ok) throw new Error('Failed to send');
+      const persistedMessage = await res.json();
+      if (!trackPersistedCustomerMessage(persistedMessage, window.location.pathname)) {
+        throw new Error('Message was not confirmed');
+      }
       await fetchMessages();
-    } catch (err: any) {
-      if (err?.message === 'Chat service temporarily unavailable') {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'Chat service temporarily unavailable') {
         alert('Chat service is temporarily unavailable due to repeated network errors. Please try again later.');
       } else {
         alert('Network error: Message could not be sent. Please try again.');

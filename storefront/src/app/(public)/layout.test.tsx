@@ -8,6 +8,7 @@ import RepairsHubPage from "./repairs/page";
 import BrandHubPage from "./repairs/[category]/[brand]/page";
 
 vi.mock("../ClientChatWidget", () => ({ default: () => null }));
+vi.mock("@/components/analytics/CustomerInteractionTracker", () => ({ default: () => <span data-ga4-customer-interactions="true" /> }));
 vi.mock("../Header", () => ({ default: () => null }));
 vi.mock("@/context/CartContext", () => ({
   CartProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -52,6 +53,13 @@ vi.mock("next/link", () => ({
 }));
 
 describe("PublicLayout footer", () => {
+  it("mounts the single shared customer-interaction tracker without adding a landmark", () => {
+    render(<PublicLayout><section>Public content</section></PublicLayout>);
+
+    expect(document.querySelector('[data-ga4-customer-interactions="true"]')).toBeInTheDocument();
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+  });
+
   it("remains the sole owner of the main landmark for public page content", () => {
     render(<PublicLayout><section aria-label="Category hub content">Phone hub</section></PublicLayout>);
 

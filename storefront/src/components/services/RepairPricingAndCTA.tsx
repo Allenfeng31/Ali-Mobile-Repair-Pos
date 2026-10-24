@@ -12,6 +12,8 @@ import {
 import { formatScopedRepairPriceLabel, isStartingPriceRepair } from '@/lib/scopedRepairPriceLabel';
 import { getRepairTierDescription } from '@/lib/repairTierDescriptions';
 import { orderRepairVariantsForDisplay } from '@/lib/repairTierDisplayOrder';
+import { trackRepairCtaClick } from '@/lib/ga4RepairEvents';
+import { useRepairPricingVisibility, type RepairPricingVisibilityEvent } from '@/components/analytics/useRepairPricingVisibility';
 
 interface TypicalPriceRange {
   label: string;
@@ -39,6 +41,7 @@ interface RepairPricingAndCTAProps {
   variants?: RepairVariant[];
   pricing?: RepairDetailPricing;
   sourceType?: 'real' | 'virtual' | 'diagnostic';
+  repairOrigin?: string;
 }
 
 export default function RepairPricingAndCTA({ 
@@ -54,7 +57,8 @@ export default function RepairPricingAndCTA({
   quoteCtaLabel,
   variants = [],
   pricing,
-  sourceType
+  sourceType,
+  repairOrigin,
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
   const params = useParams();
@@ -72,9 +76,9 @@ export default function RepairPricingAndCTA({
       try {
         const res = await fetch('/api/proxy/quality-tiers');
         if (res.ok) {
-          const tiers = await res.json();
+          const tiers = await res.json() as Array<{ name: string; description: string }>;
           const map: Record<string, string> = {};
-          tiers.forEach((t: any) => { map[t.name] = t.description; });
+          tiers.forEach((tier) => { map[tier.name] = tier.description; });
           setTierDescriptions(map);
         }
       } catch (err) {
@@ -94,6 +98,36 @@ export default function RepairPricingAndCTA({
     ? getStartingPrice(categorySlug, brandSlug, repairSlug)
     : null;
   const zeroPriceLabel = formatScopedRepairPriceLabel(repairSlug, displayVariants[0]?.price, 'Quote on Request', sourceType);
+  const pricingVisibilityEvents: RepairPricingVisibilityEvent[] = [];
+  if (sourceType === 'real' && repairOrigin === 'pos' && hasResolvedPrice && resolvedPricing.resolvedPrice !== null && resolvedPricing.resolvedPrice > 0) {
+    pricingVisibilityEvents.push({
+      eventName: 'repair_price_view',
+      stateKey: displayVariants.map((variant) => `${variant.quality_grade}:${variant.price}`).sort().join('|') || `price:${resolvedPricing.resolvedPrice}`,
+      context: {
+        pageType: 'repair_detail',
+        repairBrand: brandSlug,
+        repairModel: modelName,
+        repairType: repairSlug || repairName,
+        placement: 'pricing',
+        pricingState: 'numeric',
+        priceSource: 'published_pos',
+      },
+    });
+  } else if (sourceType === 'real' && repairOrigin === 'pos' && resolvedPricing.isQuoteOnly) {
+    pricingVisibilityEvents.push({
+      eventName: 'repair_quote_view',
+      stateKey: 'quote',
+      context: {
+        pageType: 'repair_detail',
+        repairBrand: brandSlug,
+        repairModel: modelName,
+        repairType: repairSlug || repairName,
+        placement: 'pricing',
+        pricingState: 'quote',
+      },
+    });
+  }
+  const pricingVisibilityRef = useRepairPricingVisibility(pricingVisibilityEvents);
 
   const handleCardClick = (tierName: string) => {
     setShowValidationHint(false);
@@ -130,6 +164,14 @@ export default function RepairPricingAndCTA({
     const url = `${bookingPath}?${bookingParams.toString()}`;
     
     analytics.trackBookRepair(modelName, repairName);
+    trackRepairCtaClick({
+      pageType: 'repair_detail',
+      repairBrand: brandSlug,
+      repairModel: modelName,
+      repairType: repairSlug || repairName,
+      action: 'book_repair',
+      placement: 'pricing',
+    });
     router.push(url);
   };
 
@@ -146,7 +188,7 @@ export default function RepairPricingAndCTA({
   ) : null;
 
   return (
-    <div className="w-full flex flex-col items-center mt-8">
+    <div ref={pricingVisibilityRef} data-ga4-placement="pricing" className="w-full flex flex-col items-center mt-8">
       {hasResolvedPrice ? (
         <>
           <h2 className="mb-4 text-center text-xl font-bold text-slate-900">

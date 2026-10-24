@@ -18,8 +18,14 @@ const getStartingPriceMock = vi.hoisted(() => vi.fn<(
   brand: string,
   repairSlug: string,
 ) => number | null>(() => null));
+const { useRepairPricingVisibilityMock } = vi.hoisted(() => ({
+  useRepairPricingVisibilityMock: vi.fn(() => ({ current: null })),
+}));
 
 vi.mock("@/lib/repairStartingPrices", () => ({ getStartingPrice: getStartingPriceMock }));
+vi.mock("@/components/analytics/useRepairPricingVisibility", () => ({
+  useRepairPricingVisibility: useRepairPricingVisibilityMock,
+}));
 vi.mock("@/lib/scopedRepairPriceLabel", () => ({
   formatScopedRepairPriceLabel: (_slug: string, _price: number, label: string) => label,
 }));
@@ -50,6 +56,52 @@ describe("RepairOptionsGrid", () => {
   afterEach(() => {
     getStartingPriceMock.mockReset();
     getStartingPriceMock.mockReturnValue(null);
+    useRepairPricingVisibilityMock.mockClear();
+  });
+
+  it('prepares GA4 price and quote visibility only from eligible real catalogue rows', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[
+          { slug: 'screen-replacement', name: 'Screen', price: 120, sourceType: 'real', repairOrigin: 'pos' },
+          { slug: 'battery-replacement', name: 'Battery', price: 0, sourceType: 'real', repairOrigin: 'pos' },
+          { slug: 'camera-repair', name: 'Camera', price: 50, sourceType: 'virtual' },
+          { slug: 'diagnostic', name: 'Diagnostic', price: 0, sourceType: 'diagnostic' },
+        ]}
+        categorySlug="phone"
+        brandSlug="iphone"
+        modelSlug="iphone-15"
+        modelName="iPhone 15"
+      />,
+    );
+
+    expect(useRepairPricingVisibilityMock).toHaveBeenCalledWith([
+      expect.objectContaining({
+        eventName: 'repair_price_view',
+        stateKey: 'screen-replacement:120',
+        context: expect.objectContaining({ priceSource: 'published_pos', repairType: 'screen-replacement' }),
+      }),
+      expect.objectContaining({
+        eventName: 'repair_quote_view',
+        stateKey: 'battery-replacement',
+        context: expect.objectContaining({ pricingState: 'quote', repairType: 'battery-replacement' }),
+      }),
+    ]);
+  });
+
+  it('does not treat a static starting-price fallback as a published price or quote visibility', () => {
+    getStartingPriceMock.mockReturnValue(50);
+    render(
+      <RepairOptionsGrid
+        repairTypes={[{ slug: 'screen-replacement', name: 'Screen', price: 0, sourceType: 'real', repairOrigin: 'pos' }]}
+        categorySlug="phone"
+        brandSlug="iphone"
+        modelSlug="iphone-15"
+        modelName="iPhone 15"
+      />,
+    );
+
+    expect(useRepairPricingVisibilityMock).toHaveBeenCalledWith([]);
   });
 
   it("renders model repair options through the centralized display order", () => {

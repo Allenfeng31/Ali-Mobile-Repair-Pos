@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import ClientChatWidget from "../ClientChatWidget";
+import CustomerInteractionTracker from "@/components/analytics/CustomerInteractionTracker";
 import Header from "../Header";
 import { CartProvider } from "@/context/CartContext";
 import PageTransition from "@/components/PageTransition";
@@ -43,6 +44,7 @@ export default function PublicLayout({
   return (
     <>
       <CartProvider>
+        <CustomerInteractionTracker />
         <Header />
         <main>
           <PageTransition>
