@@ -16,6 +16,8 @@ export function getSamsungFoldableScreenDetailContext(config: SamsungHardwareCon
     description:
       `${config.modelName} screen replacement in Ringwood. We assess inner foldable-display and outer cover-display issues separately, then confirm the repair path, parts availability and quote before work begins.`,
     timingBadge: 'Assessment First',
+    timingFaqAnswer:
+      'Foldable screen repairs are assessed first. We confirm the repair path, parts availability and quote before work begins, so timing depends on the display affected and assessment findings.',
   };
 }
 

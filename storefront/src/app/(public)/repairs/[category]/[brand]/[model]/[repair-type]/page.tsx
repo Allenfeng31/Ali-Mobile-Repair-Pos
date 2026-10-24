@@ -5636,7 +5636,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const faqsWithTimingQuestion = existingTimingFaq || !timingFaq
     ? baseFaqs
     : [...baseFaqs, timingFaq];
-  const faqsWithApprovedTurnaround = timingFaq && ipadDetailTiming?.kind === 'assessment'
+  const faqsWithApprovedTurnaround = timingFaq && samsungFoldableScreenDetailContext
+    ? faqsWithTimingQuestion.map((faq: { question: string; answer: string }) => faq.question === timingFaq.question
+      ? { ...faq, answer: samsungFoldableScreenDetailContext.timingFaqAnswer }
+      : faq)
+    : timingFaq && ipadDetailTiming?.kind === 'assessment'
     ? faqsWithTimingQuestion.map((faq: { question: string; answer: string }) => faq.question === timingFaq.question
       ? { ...faq, answer: ipadDetailTiming.faqAnswer }
       : faq)
@@ -5840,7 +5844,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
         <section className="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">
           <span className="repair-detail-icon">{getRepairIcon(resolvedParams['repair-type'])}</span>
-          <h1>{getRepairDetailHeading(seoDisplayModel, finalRepairName)}</h1>
+          <h1 id="repair-detail-heading">{getRepairDetailHeading(seoDisplayModel, finalRepairName)}</h1>
           {enhancedIpadSeoPocket?.supportLabel ? (
             <p className="mx-auto mt-4 max-w-3xl text-sm font-semibold leading-6 text-slate-600">
               {enhancedIpadSeoPocket.supportLabel}
@@ -5927,6 +5931,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
                   {ipadDetailTiming
                     ? formatRepairTimeBadge(ipadDetailTiming.badgeLabel)
+                    : samsungFoldableScreenDetailContext
+                    ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'].includes('back-glass') || resolvedParams['repair-type'].includes('back-housing'))
                     ? approvedTurnaroundMinutes
                       ? formatRepairTimeBadge(`${approvedTurnaroundMinutes} Minutes`)
@@ -5935,8 +5941,6 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                         : 'Timeframe Varies'
                     : approvedTurnaroundMinutes
                       ? formatRepairTimeBadge(samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? macBookTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`)
-                    : samsungFoldableScreenDetailContext
-                    ? samsungFoldableScreenDetailContext.timingBadge
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
                     ? 'Diagnostic Required'
                     : 'Fast Turnaround'}

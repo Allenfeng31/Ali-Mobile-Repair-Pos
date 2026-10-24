@@ -729,7 +729,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const heroEnd = html.indexOf('<div class="trust-badges">', heroStart);
     const heroHtml = html.slice(heroStart, heroEnd);
 
-    expect(heroHtml).toContain('<h1>Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385) Battery Replacement</h1>');
+    expect(heroHtml).toContain('<h1 id="repair-detail-heading">Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385) Battery Replacement</h1>');
     expect(heroHtml).toContain('Bring your Galaxy Tab A 8.0 2017 (SM-T380 / SM-T385)');
     expect(heroHtml).not.toContain('We confirm model codes such as');
   });
@@ -1025,7 +1025,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
     const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
 
-    expect(html).toContain('<h1>Galaxy A16 Water Damage Cleaning / Assessment</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">Galaxy A16 Water Damage Cleaning / Assessment</h1>');
     expect(html).toContain('Initial Assessment &amp; Cleaning');
     expect(html).toContain('30 Minutes');
     expect(html).not.toContain('Repair Time: 30 Minutes');
@@ -1417,7 +1417,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-16-pro' })) }),
     );
 
-    expect(html).toContain('<h1>iPhone 16 Pro Screen Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 16 Pro Screen Replacement</h1>');
     expect(html).toContain('Screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.');
     expect(html).toContain('30 Minutes');
     expect(html).toContain('6-Month Warranty');
@@ -1441,7 +1441,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       (entry) => entry.question === 'How much will my iPhone 15 screen repair cost?'
     );
 
-    expect(html).toContain('<h1>iPhone 15 Screen Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 15 Screen Replacement</h1>');
     expect(html).toContain('iPhone 15 screen replacement at Ali Mobile in Ringwood Square. Choose from the current screen options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.');
     expect(html).toContain('30 Minutes');
     expect(timingFaq?.answer).toBe(
@@ -1482,7 +1482,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       (entry) => entry.question === 'How much will my iPhone 6 screen repair cost?'
     );
 
-    expect(html).toContain('<h1>iPhone 6 Screen Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 6 Screen Replacement</h1>');
     expect(html).toContain('30 Minutes');
     expect(html).not.toContain('Face ID');
     expect(html).not.toContain('OLED');
@@ -1500,7 +1500,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
     const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
 
-    expect(html).toContain('<h1>iPhone 15 Battery Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 15 Battery Replacement</h1>');
     expect(html).toContain('iPhone 15 battery replacement at Ali Mobile in Ringwood Square. View the current repair options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct battery is available.');
     expect(html).toContain('30 Minutes');
     expect(html).toContain('6-Month Warranty');
@@ -1517,7 +1517,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const page = await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-7', 'repair-type': 'battery-replacement' })) });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain('<h1>iPhone 7 Battery Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 7 Battery Replacement</h1>');
     expect(html).toContain('30 Minutes');
     expect(html).not.toContain('Face ID');
     expect(html).not.toContain('USB-C');
@@ -1558,7 +1558,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
     const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
 
-    expect(html).toContain('<h1>iPhone 15 Charging Port Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 15 Charging Port Replacement</h1>');
     expect(html).toContain('iPhone 15 charging port replacement at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the correct part is available.');
     expect(html).toContain('USB-C');
     expect(html).toContain('30 Minutes');
@@ -1574,7 +1574,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-7', 'repair-type': 'charging-port-replacement' })) }),
     );
 
-    expect(html).toContain('<h1>iPhone 7 Charging Port Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 7 Charging Port Replacement</h1>');
     expect(html).toContain('Lightning');
     expect(html).not.toContain('USB-C');
     expect(html).toContain('30 Minutes');
@@ -1615,7 +1615,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
     const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
 
-    expect(html).toContain('<h1>iPhone 16 Pro Front Camera Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 16 Pro Front Camera Replacement</h1>');
     expect(html).toContain('iPhone 16 Pro front camera replacement at Ali Mobile in Ringwood Square. View the current repair options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct camera part is available.');
     expect(html).toContain('30 Minutes');
     expect(html).toContain('6-Month Warranty');
@@ -1636,7 +1636,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const timingFaq = faqs.find((entry) => /how long/i.test(entry.question));
     const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
 
-    expect(html).toContain('<h1>iPhone 16 Pro Back Camera Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 16 Pro Back Camera Replacement</h1>');
     expect(html).toContain('iPhone 16 Pro back camera replacement at Ali Mobile in Ringwood Square. View the current repair options and prices below. Walk-ins are welcome, and booking is recommended to confirm the correct camera module is available.');
     expect(html).toContain('30 Minutes');
     expect(html).toContain('6-Month Warranty');
@@ -1687,7 +1687,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const priceFaq = faqs.find((entry) => /how much/i.test(entry.question) && /cost/i.test(entry.question));
     const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
 
-    expect(html).toContain(`<h1>iPhone 15 ${repairName}</h1>`);
+    expect(html).toContain(`<h1 id="repair-detail-heading">iPhone 15 ${repairName}</h1>`);
     expect(html).toContain(`iPhone 15 ${repairName.toLowerCase()} at Ali Mobile in Ringwood Square. View the current repair price below. Walk-ins are welcome, and booking is recommended to confirm the ${partLabel} is available.`);
     expect(html).toContain(semanticCopy);
     expect(html).toContain('30 Minutes');
@@ -1779,7 +1779,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const faqs = faqElement?.props.faqs as Array<{ question: string; answer: string }>;
     const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
 
-    expect(html).toContain(`<h1>${model} Back Glass / Back Housing Replacement</h1>`);
+    expect(html).toContain(`<h1 id="repair-detail-heading">${model} Back Glass / Back Housing Replacement</h1>`);
     expect(html).toContain(`${model} back housing replacement at Ali Mobile in Ringwood Square.`);
     expect(faqs[0]?.answer).toContain('rear housing or chassis assembly');
     expect(html).toContain('Repair Time: 60 Minutes');
@@ -1807,7 +1807,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const faqs = faqElement?.props.faqs as Array<{ question: string; answer: string }>;
     const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
 
-    expect(html).toContain(`<h1>${model} Back Glass / Back Housing Replacement</h1>`);
+    expect(html).toContain(`<h1 id="repair-detail-heading">${model} Back Glass / Back Housing Replacement</h1>`);
     expect(html).toContain(`${model} back glass replacement at Ali Mobile in Ringwood Square.`);
     expect(html).not.toContain('full rear housing replacement instead of back glass only');
     expect(faqs[0]?.answer).toContain('rear glass component');
@@ -1858,7 +1858,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       await RepairServicePage({ params: Promise.resolve(params({ brand: 'iphone', model: 'iphone-8', 'repair-type': 'back-camera-replacement' })) }),
     );
 
-    expect(html).toContain('<h1>iPhone 8 Back Camera Replacement</h1>');
+    expect(html).toContain('<h1 id="repair-detail-heading">iPhone 8 Back Camera Replacement</h1>');
     expect(html).toContain('Repair Time: 30 Minutes');
     expect(html).not.toContain('rear camera switching');
     expect(html).not.toContain('supported rear camera modes');
@@ -2129,7 +2129,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
           answer: string;
         }>;
 
-        expect(html).toContain(`<h1>${model} ${repairName}</h1>`);
+        expect(html).toContain(`<h1 id="repair-detail-heading">${model} ${repairName}</h1>`);
         expect(html).toContain(`${turnaroundMinutes} Minutes`);
         expect(html).toContain('6-Month Warranty');
         expect(faqs.map((faq) => `${faq.question} ${faq.answer}`).join(' '))
@@ -2141,7 +2141,6 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   it.each([
     ['Galaxy S24 Ultra', 'galaxy-s24-ultra', 'Screen Replacement', 'screen-replacement', 30],
     ['Galaxy S23 Ultra', 'galaxy-s23-ultra', 'Back Glass Replacement', 'back-glass-replacement', 20],
-    ['Galaxy Z Fold 6', 'galaxy-z-fold-6', 'Screen Replacement', 'screen-replacement', 30],
   ])('keeps non-Note Samsung %s %s server-renderable', async (model, modelSlug, repairName, repairType, turnaroundMinutes) => {
     fetchRepairCatalog.mockResolvedValue({
       brands: [{
@@ -2165,8 +2164,92 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       params: Promise.resolve(params({ brand: 'samsung', model: modelSlug, 'repair-type': repairType })),
     }));
 
-    expect(html).toContain(`<h1>${model} ${repairName}</h1>`);
+    expect(html).toContain(`<h1 id="repair-detail-heading">${model} ${repairName}</h1>`);
     expect(html).toContain(`${turnaroundMinutes} Minutes`);
+  });
+
+  it.each([
+    ['Galaxy Z Fold 5', 'galaxy-z-fold-5'],
+    ['Galaxy Z Flip 5', 'galaxy-z-flip-5'],
+  ])('renders %s screen repair as assessment first without a generic 30-minute promise', async (model, modelSlug) => {
+    fetchRepairCatalog.mockResolvedValue({
+      brands: [{
+        category: 'phone',
+        brand: 'Samsung',
+        slug: 'samsung',
+        models: [{
+          model,
+          slug: modelSlug,
+          repairTypes: [{
+            name: 'Screen Replacement',
+            slug: 'screen-replacement',
+            price: 199,
+            variants: [{ quality_grade: 'Standard', price: 199 }],
+          }],
+        }],
+      }],
+    });
+
+    const page = await RepairServicePage({
+      params: Promise.resolve(params({ brand: 'samsung', model: modelSlug, 'repair-type': 'screen-replacement' })),
+    });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{
+      question: string;
+      answer: string;
+    }>;
+    const timingFaq = faqs.find((faq) => /how long/i.test(faq.question));
+
+    expect(html).toContain('<section class="repair-hero repair-detail-hero relative" aria-labelledby="repair-detail-heading">');
+    expect(html).toContain(`<h1 id="repair-detail-heading">${model} Screen Replacement</h1>`);
+    expect(html.match(/id="repair-detail-heading"/g)).toHaveLength(1);
+    expect(html.match(/<h1\b/g)).toHaveLength(1);
+    expect(html).not.toContain('<main');
+    expect(html).toContain('Assessment First');
+    expect(html).not.toContain('Repair Time: 30 Minutes');
+    expect(timingFaq?.answer).toContain('assessed first');
+    expect(timingFaq?.answer).not.toContain('around 30 minutes');
+  });
+
+  it('keeps standard Samsung timing for non-foldable screens and foldable non-screen repairs', async () => {
+    const cases = [
+      ['Galaxy S25', 'galaxy-s25', 'Screen Replacement', 'screen-replacement'],
+      ['Galaxy Z Fold 5', 'galaxy-z-fold-5', 'Battery Replacement', 'battery-replacement'],
+    ] as const;
+
+    for (const [model, modelSlug, repairName, repairType] of cases) {
+      fetchRepairCatalog.mockResolvedValue({
+        brands: [{
+          category: 'phone',
+          brand: 'Samsung',
+          slug: 'samsung',
+          models: [{
+            model,
+            slug: modelSlug,
+            repairTypes: [{
+              name: repairName,
+              slug: repairType,
+              price: 199,
+              variants: [{ quality_grade: 'Standard', price: 199 }],
+            }],
+          }],
+        }],
+      });
+
+      const page = await RepairServicePage({
+        params: Promise.resolve(params({ brand: 'samsung', model: modelSlug, 'repair-type': repairType })),
+      });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{
+        question: string;
+        answer: string;
+      }>;
+      const timingFaq = faqs.find((faq) => /how long/i.test(faq.question));
+
+      expect(html).toContain('Repair Time: 30 Minutes');
+      expect(html).not.toContain('Assessment First');
+      expect(timingFaq?.answer).toContain('usually takes around 30 minutes');
+    }
   });
 
   it('leaves Galaxy A16 Logic Board on its existing hub redirect', async () => {
