@@ -637,4 +637,25 @@ describe("Phone and tablet Brand Hub local service areas", () => {
       unmount();
     }
   });
+
+  it.each([
+    ['xiaomi', 'Xiaomi'],
+    ['nokia', 'Nokia'],
+    ['vivo', 'Vivo'],
+    ['lg', 'LG'],
+    ['oneplus', 'OnePlus'],
+  ] as const)('keeps the %s hub timing and parts guidance evidence-led', async (brandSlug, brandName) => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'phone', brand: brandSlug }) });
+    const { container } = render(pageElement);
+
+    expect(container.textContent).toContain('Timing Confirmed Before Repair');
+    expect(container.textContent).toContain(
+      `Timing depends on the exact ${brandName} model, fault, parts availability, device condition and current repair queue.`
+    );
+    expect(container.textContent).toContain('Parts Checked Before Repair');
+    expect(container.textContent).toContain(
+      `We confirm compatible parts, repair options and quote status for your exact ${brandName} model before repair work starts.`
+    );
+    expect(container.textContent).not.toMatch(/Fast Screen Repairs|completed quickly|same-day repair may be available/i);
+  });
 });

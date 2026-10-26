@@ -902,6 +902,7 @@ function getAppleWatchServiceAreaDescription(areaName: string, index: number) {
 
 const MAJOR_PHONE_BRAND_HUB_SLUGS = ["iphone", "samsung", "oppo", "google-pixel"];
 const PRIORITY_PHONE_BRAND_HUB_SLUGS = new Set(["iphone", "samsung", "google-pixel", "oppo"]);
+const PHASE_5_BATCH_1_PHONE_BRAND_HUB_SLUGS = new Set(["xiaomi", "nokia", "vivo", "lg", "oneplus"]);
 const HIGH_VALUE_PHONE_REPAIR_SHORTCUTS = [
   { slug: "screen-replacement", label: "screen repair", detail: "Cracked glass, display lines, black screens and touch faults." },
   { slug: "battery-replacement", label: "battery replacement", detail: "Fast drain, shutdowns, swelling and battery-health symptoms." },
@@ -1410,6 +1411,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
   const isPriorityPhoneHub = categorySlug === "phone" && PRIORITY_PHONE_BRAND_HUB_SLUGS.has(brandSlug);
   const phoneHubDisplayName = isSamsungPhoneHub ? "Samsung Galaxy" : isOppoPhoneHub ? "OPPO" : brandName;
   const batchPhoneBrandConfig = getBatchPhoneBrandConfig(categorySlug, brandSlug);
+  const isPhase5Batch1PhoneHub = categorySlug === "phone" && PHASE_5_BATCH_1_PHONE_BRAND_HUB_SLUGS.has(brandSlug);
   const isEnhancedPhoneHub = isIPhoneHub || isSamsungPhoneHub || isGooglePixelHub || isOppoPhoneHub || Boolean(batchPhoneBrandConfig);
   const usesBrandHubDesign = isPhoneHub || isTabletBrandHub || isAppleWatchHub || isMacBookHub;
   const usesFlatBrandHubModels = isPhoneHub && usesBrandHubDesign && !MAJOR_PHONE_BRAND_HUB_SLUGS.includes(brandSlug);
@@ -1843,14 +1845,22 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
               : `Choose your exact ${brandName} model to view current repair options and pricing.`,
           },
           {
-            title: phoneContent?.timing.battery ? "Fast Screen & Battery Repairs" : "Fast Screen Repairs",
-            body: phoneContent?.timing.battery
+            title: isPhase5Batch1PhoneHub
+              ? "Timing Confirmed Before Repair"
+              : phoneContent?.timing.battery
+                ? "Fast Screen & Battery Repairs"
+                : "Fast Screen Repairs",
+            body: isPhase5Batch1PhoneHub
+              ? `Timing depends on the exact ${brandName} model, fault, parts availability, device condition and current repair queue. Contact us before visiting if you want likely timing checked.`
+              : phoneContent?.timing.battery
               ? `${phoneContent.timing.screen} ${phoneContent.timing.battery}`
               : phoneContent?.timing.screen || `Many supported ${brandName} repairs can be completed quickly once the exact model and correct part are confirmed.`,
           },
           {
-            title: "Same-day may be available",
-            body: `Same-day repair may be available for many common ${brandName} models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.`,
+            title: isPhase5Batch1PhoneHub ? "Parts Checked Before Repair" : "Same-day may be available",
+            body: isPhase5Batch1PhoneHub
+              ? `We confirm compatible parts, repair options and quote status for your exact ${brandName} model before repair work starts.`
+              : `Same-day repair may be available for many common ${brandName} models when parts are in stock. Contact us before visiting to confirm your model, issue and timing.`,
           },
         ]
     : [];
