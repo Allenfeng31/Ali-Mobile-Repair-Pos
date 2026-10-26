@@ -201,7 +201,7 @@ export const metadata: Metadata = {
 
 export default function WaterDamagePage() {
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
@@ -388,6 +388,6 @@ export default function WaterDamagePage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

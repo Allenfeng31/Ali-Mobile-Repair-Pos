@@ -93,7 +93,7 @@ export default async function BlogPage() {
 
   if (allPostsData.length === 0) {
     return (
-      <main className={styles.archive}>
+      <div className={styles.archive}>
         <section className={styles.emptyState}>
           <span className={styles.kicker}>Repair Notes</span>
           <h1>No Articles Found</h1>
@@ -102,14 +102,14 @@ export default async function BlogPage() {
             Return Home
           </Link>
         </section>
-      </main>
+      </div>
     );
   }
 
   const [featuredPost, ...remainingPosts] = allPostsData;
 
   return (
-    <main className={styles.archive}>
+    <div className={styles.archive}>
       <section className={styles.hero} aria-labelledby="blog-heading">
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
@@ -202,6 +202,6 @@ export default async function BlogPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

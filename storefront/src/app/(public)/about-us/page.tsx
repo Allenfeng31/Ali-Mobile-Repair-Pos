@@ -117,7 +117,7 @@ const breadcrumbSchema = {
 
 export default function AboutUsPage() {
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
@@ -256,6 +256,6 @@ export default function AboutUsPage() {
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

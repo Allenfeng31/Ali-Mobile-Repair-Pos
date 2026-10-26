@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
+const SESSION_KEY = 'ali_chat_token';
+const SESSION_EXPIRY_KEY = 'ali_chat_token_expiry';
+const INTRO_SENT_KEY = 'ali_chat_intro_sent';
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
 interface QuoteRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,88 +15,120 @@ interface QuoteRequestModalProps {
   repairType: string;
 }
 
-export default function QuoteRequestModal({ 
-  isOpen, 
-  onClose, 
-  deviceModel, 
-  repairType 
+function hasPersistedChatMessage(value: unknown): value is { id: string | number } {
+  return Boolean(
+    value
+    && typeof value === 'object'
+    && 'id' in value
+    && (typeof value.id === 'string' || typeof value.id === 'number')
+    && String(value.id).trim(),
+  );
+}
+
+async function responseJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export default function QuoteRequestModal({
+  isOpen,
+  onClose,
+  deviceModel,
+  repairType,
 }: QuoteRequestModalProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-
+  async function sendSmsNotification() {
     try {
-      const res = await fetch('/api/quote-request', {
+      const response = await fetch('/api/quote-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone, deviceModel, repairType }),
       });
-
-      if (res.ok) {
-        // --- Route "Quick Quote" directly into POS Chat ---
-        try {
-          const SESSION_KEY = 'ali_chat_token';
-          let token = window.localStorage.getItem(SESSION_KEY);
-          if (!token) {
-             token = crypto.randomUUID();
-             window.localStorage.setItem(SESSION_KEY, token);
-             window.localStorage.setItem('ali_chat_token_expiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
-          }
-
-          // Ensure session exists
-          await fetch('/api/proxy/chat/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          }).catch(() => {});
-
-          // Send Customer Intro if not sent
-          const introSent = window.localStorage.getItem('ali_chat_intro_sent');
-          if (!introSent) {
-            const introContent = `[CUSTOMER_INFO]\nName: ${name}\nPhone: ${phone}`;
-            await fetch(`/api/proxy/chat/session/${token}/message`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ content: introContent }),
-            }).catch(() => {});
-            
-            window.localStorage.setItem('ali_chat_name', name);
-            window.localStorage.setItem('ali_chat_phone', phone);
-            window.localStorage.setItem('ali_chat_intro_sent', '1');
-          }
-
-          // Send the Quote Message into Chat
-          const quoteContent = `Hi, I would like to request a quote for my ${deviceModel}. Service needed: ${repairType}.`;
-          await fetch(`/api/proxy/chat/session/${token}/message`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: quoteContent }),
-          }).catch(() => {});
-        } catch (chatError) {
-          console.error("Failed to sync quote to POS chat", chatError);
-        }
-        // ---------------------------------------------------
-
-        setSubmitted(true);
-        setTimeout(() => {
-          onClose();
-          setSubmitted(false);
-          setName('');
-          setPhone('');
-        }, 3000);
-      }
-    } catch (error) {
-      console.error('Failed to submit quote request', error);
-    } finally {
-      setLoading(false);
+      const body = await responseJson(response);
+      return response.ok && body?.success === true && body.delivery === 'sms';
+    } catch {
+      return false;
     }
+  }
+
+  async function persistQuoteInChat() {
+    try {
+      let token = window.localStorage.getItem(SESSION_KEY);
+      if (!token) {
+        token = crypto.randomUUID();
+        window.localStorage.setItem(SESSION_KEY, token);
+        window.localStorage.setItem(SESSION_EXPIRY_KEY, String(Date.now() + SEVEN_DAYS_MS));
+      }
+
+      const sessionResponse = await fetch('/api/proxy/chat/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      if (!sessionResponse.ok) return false;
+
+      if (!window.localStorage.getItem(INTRO_SENT_KEY)) {
+        const introResponse = await fetch(`/api/proxy/chat/session/${token}/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: `[CUSTOMER_INFO]\nName: ${name}\nPhone: ${phone}` }),
+        });
+        if (!introResponse.ok || !hasPersistedChatMessage(await responseJson(introResponse))) return false;
+
+        window.localStorage.setItem('ali_chat_name', name);
+        window.localStorage.setItem('ali_chat_phone', phone);
+        window.localStorage.setItem(INTRO_SENT_KEY, '1');
+      }
+
+      const quoteResponse = await fetch(`/api/proxy/chat/session/${token}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `Hi, I would like to request a quote for my ${deviceModel}. Service needed: ${repairType}.`,
+        }),
+      });
+      return quoteResponse.ok && hasPersistedChatMessage(await responseJson(quoteResponse));
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (loading) return;
+
+    setLoading(true);
+    setError('');
+
+    const [smsDelivered, chatPersisted] = await Promise.all([
+      sendSmsNotification(),
+      persistQuoteInChat(),
+    ]);
+
+    if (!smsDelivered && !chatPersisted) {
+      setError('We could not send your request. Please try again or call us on 0481 058 514.');
+      setLoading(false);
+      return;
+    }
+
+    setSubmitted(true);
+    setLoading(false);
+    setTimeout(() => {
+      onClose();
+      setSubmitted(false);
+      setName('');
+      setPhone('');
+    }, 3000);
   }
 
   return (
@@ -102,15 +139,15 @@ export default function QuoteRequestModal({
         </button>
 
         <div className="modal-header">
-          <h2>Get a Quick Quote</h2>
-          <p>We'll provide an instant price for your {deviceModel} {repairType}.</p>
+          <h2>Request a Quote</h2>
+          <p>We&apos;ll confirm available repair options and a quote for your {deviceModel} {repairType}.</p>
         </div>
 
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
             <h3 style={{ marginBottom: '0.5rem' }}>Request Sent!</h3>
-            <p style={{ opacity: 0.7 }}>We will contact you shortly with the best pricing.</p>
+            <p style={{ opacity: 0.7 }}>We&apos;ll contact you to confirm repair options and pricing.</p>
           </div>
         ) : (
           <form className="modal-form" onSubmit={handleSubmit}>
@@ -123,7 +160,7 @@ export default function QuoteRequestModal({
                 placeholder="John Doe"
                 required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(event) => setName(event.target.value)}
               />
             </div>
 
@@ -136,9 +173,15 @@ export default function QuoteRequestModal({
                 placeholder="0400 000 000"
                 required
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(event) => setPhone(event.target.value)}
               />
             </div>
+
+            {error ? (
+              <p role="alert">
+                {error} <a href="tel:0481058514">Call 0481 058 514</a>
+              </p>
+            ) : null}
 
             <button 
               type="submit" 

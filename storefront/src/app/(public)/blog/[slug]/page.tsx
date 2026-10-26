@@ -169,7 +169,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   }
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -233,6 +233,6 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           </Link>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

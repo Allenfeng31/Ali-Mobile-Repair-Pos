@@ -438,7 +438,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
 
-      <main className="location-page-shell">
+      <div className="location-page-shell">
         <section className="location-hero" aria-labelledby="location-heading">
           <div className="location-hero-copy">
             <span className="location-kicker">
@@ -851,7 +851,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
             </a>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }
