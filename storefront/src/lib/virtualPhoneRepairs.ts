@@ -1,5 +1,6 @@
 import { displayBrand, slugify, type GroupedService, type ParsedItem } from "./inventoryUtils";
 import type { RepairOption } from "./api";
+import { BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS } from './secondaryPhoneModelIdentity';
 
 export const VIRTUAL_PHONE_REPAIRS = [
   {
@@ -68,6 +69,11 @@ export function isEligibleVirtualPhoneRepairBrand(brand: string) {
   return slug !== "iphone" && slug !== "apple";
 }
 
+function isBatchTwoSecondaryPhoneBrand(brand: string) {
+  const brandSlug = normalizeBrandSlug(brand);
+  return BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS.some((candidate) => candidate === brandSlug);
+}
+
 export function getVirtualPhoneRepairId(brand: string, model: string, repairSlug: VirtualPhoneRepairSlug) {
   const repairId = repairSlug.replace("-replacement", "");
   return `virtual-${repairId}-${normalizeBrandSlug(brand)}-${slugify(model)}`;
@@ -93,9 +99,10 @@ export function withVirtualPhoneRepairOptions(repairTypes: RepairOption[], categ
   if (categorySlug !== "phone" || !isEligibleVirtualPhoneRepairBrand(brand)) return repairTypes;
 
   const existing = new Set(repairTypes.map((repair) => repair.slug));
+  const virtualPrice = isBatchTwoSecondaryPhoneBrand(brand) ? 0 : 50;
   const virtualOptions = VIRTUAL_PHONE_REPAIRS
     .filter((repair) => !existing.has(repair.slug))
-    .map((repair) => ({ slug: repair.slug, name: repair.name, price: 50, variants: [], sourceType: 'virtual' as const, repairOrigin: 'virtual' as const }));
+    .map((repair) => ({ slug: repair.slug, name: repair.name, price: virtualPrice, variants: [], sourceType: 'virtual' as const, repairOrigin: 'virtual' as const }));
 
   return virtualOptions.length > 0 ? [...repairTypes, ...virtualOptions] : repairTypes;
 }
@@ -109,6 +116,7 @@ export function withVirtualPhoneRepairGroupedServices(
   if (category !== "phone" || !isEligibleVirtualPhoneRepairBrand(brand)) return services;
 
   const existing = new Set(services.map((service) => slugify(service.service)));
+  const virtualPrice = isBatchTwoSecondaryPhoneBrand(brand) ? 0 : 50;
   const virtualServices = VIRTUAL_PHONE_REPAIRS
     .filter((repair) => !existing.has(repair.slug))
     .map((repair) => {
@@ -116,12 +124,12 @@ export function withVirtualPhoneRepairGroupedServices(
       return {
         id: `grouped-${id}`,
         service: repair.name,
-        price: 50,
+        price: virtualPrice,
         variants: [
           {
             id,
-            quality_grade: "Starting Price",
-            price: 50,
+            quality_grade: virtualPrice > 0 ? "Starting Price" : "Quote",
+            price: virtualPrice,
             originalItem: {
               id,
               name: repair.name,
@@ -129,10 +137,10 @@ export function withVirtualPhoneRepairGroupedServices(
               brand,
               deviceModel: model,
               service: repair.name,
-              price: 50,
+              price: virtualPrice,
               category,
               deviceType: "phone",
-              quality_grade: "Starting Price",
+              quality_grade: virtualPrice > 0 ? "Starting Price" : "Quote",
               is_recommended: false,
               sourceType: 'virtual' as const,
             } as unknown as ParsedItem,

@@ -123,7 +123,10 @@ describe('repair catalogue origin tracing', () => {
 
   it('keeps UI-only options virtual and the Apple Watch charging path diagnostic', () => {
     expect(withVirtualPhoneRepairOptions([], 'phone', 'samsung')).toEqual(
-      expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual' })]),
+      expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual', price: 50 })]),
+    );
+    expect(withVirtualPhoneRepairOptions([], 'phone', 'telstra')).toEqual(
+      expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual', price: 0 })]),
     );
     expect(withVirtualCameraLensRepairOption([], 'phone', 'samsung')).toEqual(
       expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual' })]),

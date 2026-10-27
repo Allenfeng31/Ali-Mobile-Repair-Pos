@@ -23,6 +23,9 @@ export function formatScopedRepairPriceLabel(
   sourceType?: 'real' | 'virtual' | 'diagnostic'
 ) {
   if (sourceType === 'diagnostic') return DIAGNOSTIC_PRICE_LABEL;
+  if (sourceType === 'virtual' && !(typeof price === 'number' && Number.isFinite(price) && price > 0)) {
+    return 'Quote on Request';
+  }
   if (sourceType === 'real' || !isStartingPriceRepair(repairSlug)) return unscopedLabel;
 
   return typeof price === 'number' && Number.isFinite(price) && price > 0

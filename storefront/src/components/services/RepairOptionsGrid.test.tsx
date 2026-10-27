@@ -239,6 +239,27 @@ describe("RepairOptionsGrid", () => {
     );
   });
 
+  it('keeps a virtual peripheral quote-led instead of publishing a model-specific $50 price', () => {
+    render(
+      <RepairOptionsGrid
+        repairTypes={[{
+          slug: 'loudspeaker-replacement',
+          name: 'Loudspeaker Replacement',
+          price: 0,
+          sourceType: 'virtual',
+        }]}
+        categorySlug="phone"
+        brandSlug="telstra"
+        modelSlug="essential-pro"
+        modelName="Essential Pro"
+        showStartingPriceFallback={false}
+      />,
+    );
+
+    expect(screen.getByText('Quote on Request')).toBeInTheDocument();
+    expect(screen.queryByText(/\$50/)).not.toBeInTheDocument();
+  });
+
   it('uses a quote-led pricing summary for a MacBook model with no resolved catalogue price', () => {
     getStartingPriceMock.mockReturnValue(250);
     const quoteSafeProps = {

@@ -196,6 +196,9 @@ describe('resolvePublicBookingSelection', () => {
       category: 'phone', brandSlug: 'huawei', modelSlug: 'mate-20', serviceSlug: 'camera-lens-replacement',
     })).toMatchObject({ service: 'Camera Lens Replacement', price: 50, priceAuthority: 'fixed-camera-lens' });
     expect(resolvePublicBookingSelection(catalog, {
+      category: 'phone', brandSlug: 'huawei', modelSlug: 'mate-20', serviceSlug: 'loudspeaker-replacement',
+    })).toMatchObject({ service: 'Loudspeaker Replacement', price: 0, priceAuthority: 'quote-only' });
+    expect(resolvePublicBookingSelection(catalog, {
       category: 'phone', brandSlug: 'google-pixel', modelSlug: 'pixel-future', serviceSlug: 'loudspeaker-replacement',
     })).toMatchObject({ service: 'Loudspeaker Replacement', priceAuthority: 'quote-only' });
     expect(resolvePublicBookingSelection(catalog, {
