@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS,
+  BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
+  EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS,
   SECONDARY_PHONE_BRAND_NAMES,
   getSecondaryPhoneModelIdentity,
   isBatchOneSecondaryPhoneBrand,
+  isEvidenceQualifiedSecondaryPhoneBrand,
 } from './secondaryPhoneModelIdentity';
 
 describe('secondary phone Model Hub identity', () => {
@@ -54,5 +57,16 @@ describe('secondary phone Model Hub identity', () => {
     expect(BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS).toEqual(['xiaomi', 'nokia', 'vivo', 'lg', 'oneplus']);
     expect(isBatchOneSecondaryPhoneBrand('oneplus')).toBe(true);
     expect(isBatchOneSecondaryPhoneBrand('huawei')).toBe(false);
+  });
+
+  it('limits evidence-qualified content treatment to the ten audited Batch 1 and Batch 2 brands', () => {
+    expect(BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS).toEqual(['huawei', 'htc', 'sony', 'telstra', 'motorola']);
+    expect(EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS).toEqual([
+      'xiaomi', 'nokia', 'vivo', 'lg', 'oneplus',
+      'huawei', 'htc', 'sony', 'telstra', 'motorola',
+    ]);
+    expect(isEvidenceQualifiedSecondaryPhoneBrand('oneplus')).toBe(true);
+    expect(isEvidenceQualifiedSecondaryPhoneBrand('motorola')).toBe(true);
+    expect(isEvidenceQualifiedSecondaryPhoneBrand('nothing')).toBe(false);
   });
 });

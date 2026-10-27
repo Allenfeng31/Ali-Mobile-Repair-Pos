@@ -47,7 +47,7 @@ import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import {
   SECONDARY_PHONE_BRAND_NAMES,
   getSecondaryPhoneModelIdentity,
-  isBatchOneSecondaryPhoneBrand,
+  isEvidenceQualifiedSecondaryPhoneBrand,
 } from "@/lib/secondaryPhoneModelIdentity";
 import {
   resolveSamsungTabletModelHubPricing,
@@ -499,7 +499,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isPhoneModelPage = categorySlug === "phone";
   const isSecondaryPhoneModelPage = isPhoneModelPage && classifyPhoneBrand(brandSlug) === 'secondary-phone';
   const hasSecondaryPhoneModelIdentity = isPhoneModelPage && Boolean(SECONDARY_PHONE_BRAND_NAMES[brandSlug]);
-  const isBatchOneSecondaryPhoneModelPage = hasSecondaryPhoneModelIdentity && isBatchOneSecondaryPhoneBrand(brandSlug);
+  const isEvidenceQualifiedSecondaryPhoneModelPage = hasSecondaryPhoneModelIdentity && isEvidenceQualifiedSecondaryPhoneBrand(brandSlug);
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
@@ -1283,7 +1283,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: "Same-day repair may be available for some common repairs when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
   ];
-  const batchOneSecondaryPhoneHeroCards = [
+  const evidenceQualifiedSecondaryPhoneHeroCards = [
     genericPhoneHeroCards[0],
     {
       title: "Repair timing confirmed first",
@@ -1344,7 +1344,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: "Factory water resistance cannot be guaranteed after a phone has been opened or repaired. New adhesive may help reseal the device, but it does not restore certified factory water resistance.",
     },
   ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
-  const batchOneSecondaryPhoneQuickAnswers = genericPhoneQuickAnswers.map((answer) =>
+  const evidenceQualifiedSecondaryPhoneQuickAnswers = genericPhoneQuickAnswers.map((answer) =>
     answer.number === "04"
       ? {
           number: "04",
@@ -1450,7 +1450,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm part availability before you travel.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
-  const batchOneSecondaryPhoneFaqs = genericPhoneFaqs.map((faq) =>
+  const evidenceQualifiedSecondaryPhoneFaqs = genericPhoneFaqs.map((faq) =>
     faq.question.includes("normally be repaired the same day")
       ? {
           question: `How is ${modelName} repair timing confirmed?`,
@@ -1830,8 +1830,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? appleWatchHeroCards
     : isIPhoneModelPage
     ? iPhoneHeroCards
-    : isBatchOneSecondaryPhoneModelPage
-    ? batchOneSecondaryPhoneHeroCards
+    : isEvidenceQualifiedSecondaryPhoneModelPage
+    ? evidenceQualifiedSecondaryPhoneHeroCards
     : genericPhoneHeroCards;
   const enhancedQuickAnswers = isSamsungModelPage
     ? samsungQuickAnswers
@@ -1853,8 +1853,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? appleWatchQuickAnswers
     : isIPhoneModelPage
     ? iPhoneQuickAnswers
-    : isBatchOneSecondaryPhoneModelPage
-    ? batchOneSecondaryPhoneQuickAnswers
+    : isEvidenceQualifiedSecondaryPhoneModelPage
+    ? evidenceQualifiedSecondaryPhoneQuickAnswers
     : genericPhoneQuickAnswers;
   const enhancedProcessSteps = isSamsungModelPage
     ? samsungProcessSteps
@@ -1910,8 +1910,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? appleWatchFaqs
     : isIPhoneModelPage
     ? iPhoneFaqs
-    : isBatchOneSecondaryPhoneModelPage
-    ? batchOneSecondaryPhoneFaqs
+    : isEvidenceQualifiedSecondaryPhoneModelPage
+    ? evidenceQualifiedSecondaryPhoneFaqs
     : genericPhoneFaqs;
   const enhancedBrandLabel = isSamsungModelPage
     ? "Samsung"

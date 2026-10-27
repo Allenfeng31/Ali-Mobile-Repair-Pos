@@ -644,6 +644,11 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     ['vivo', 'Vivo'],
     ['lg', 'LG'],
     ['oneplus', 'OnePlus'],
+    ['huawei', 'Huawei'],
+    ['htc', 'HTC'],
+    ['sony', 'Sony'],
+    ['telstra', 'Telstra'],
+    ['motorola', 'Motorola'],
   ] as const)('keeps the %s hub timing and parts guidance evidence-led', async (brandSlug, brandName) => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'phone', brand: brandSlug }) });
     const { container } = render(pageElement);

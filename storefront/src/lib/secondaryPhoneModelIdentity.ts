@@ -24,10 +24,28 @@ export const BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS = [
   'oneplus',
 ] as const;
 
+export const BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS = [
+  'huawei',
+  'htc',
+  'sony',
+  'telstra',
+  'motorola',
+] as const;
+
+export const EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS = [
+  ...BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS,
+  ...BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
+] as const;
+
 const batchOneSecondaryPhoneBrands = new Set<string>(BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS);
+const evidenceQualifiedSecondaryPhoneBrands = new Set<string>(EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS);
 
 export function isBatchOneSecondaryPhoneBrand(brandSlug: string): boolean {
   return batchOneSecondaryPhoneBrands.has(brandSlug.toLowerCase());
+}
+
+export function isEvidenceQualifiedSecondaryPhoneBrand(brandSlug: string): boolean {
+  return evidenceQualifiedSecondaryPhoneBrands.has(brandSlug.toLowerCase());
 }
 
 export function getSecondaryPhoneModelIdentity({

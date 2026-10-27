@@ -478,6 +478,35 @@ describe('Model Hub page-mode Server consumer', () => {
     ]));
   });
 
+  it.each([
+    ['huawei', 'Huawei', 'P30 Pro', 'p30-pro'],
+    ['htc', 'HTC', 'One M9', 'one-m9'],
+    ['sony', 'Sony', 'Xperia 5', 'xperia-5'],
+    ['telstra', 'Telstra', 'Essential Pro', 'essential-pro'],
+    ['motorola', 'Motorola', 'Moto G04', 'moto-g04'],
+  ] as const)('keeps the %s Batch 2 Model Hub timing and warranty evidence-led', async (brandSlug, brand, model, modelSlug) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand,
+      model,
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      brandModels: [{ slug: modelSlug, model, repairTypes: [] }],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: brandSlug, model: modelSlug }),
+    }));
+
+    expect(html).toContain(`${brand} ${model} Repair Options`);
+    expect(html).toContain('Repair timing confirmed first');
+    expect(html).toContain('Timing depends on the exact device model, selected repair, parts availability, device condition, diagnosis, additional faults and current repair queue.');
+    expect(html).toContain('6-Month Repair Warranty');
+    expect(html).toContain('Completed standard repairs include a 6-month warranty covering the replacement part and labour. Water-damage repairs are excluded.');
+    expect(html).not.toMatch(/same[ -]day|while you wait|immediate repair/i);
+  });
+
   it('keeps Camera Lens and virtual peripheral pricing out of a quote-only secondary-phone starting-price claim', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'Huawei',
