@@ -45,6 +45,11 @@ import {
 } from "@/lib/ipadModelHubPresentation";
 import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import {
+  SECONDARY_PHONE_BRAND_NAMES,
+  getSecondaryPhoneModelIdentity,
+  isBatchOneSecondaryPhoneBrand,
+} from "@/lib/secondaryPhoneModelIdentity";
+import {
   resolveSamsungTabletModelHubPricing,
   resolveSamsungTabletRepairOptionPricing,
 } from "@/lib/seo/content/samsung-tablet/pricing";
@@ -323,6 +328,9 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   });
   const canonicalPath = `/repairs/${safeSlugSegment(categorySlug)}/${safeSlugSegment(brandSlug)}/${preserveRouteSegment(modelSlug)}`;
   const isPhoneModelPage = categorySlug === "phone";
+  const hasSecondaryPhoneModelIdentity = isPhoneModelPage && Boolean(SECONDARY_PHONE_BRAND_NAMES[brandSlug]);
+  const secondaryPhoneModelIdentity = getSecondaryPhoneModelIdentity({ categorySlug, brandSlug, modelName });
+  const secondaryPhoneMetadataDescription = `Choose available repairs for ${secondaryPhoneModelIdentity}, view current pricing or Quote on Request, check parts and timing conditions, and book with Ali Mobile & Repair in Ringwood.`;
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
@@ -362,6 +370,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   return {
     title: isIPadModelPage
       ? iPadMetadata!.title
+      : hasSecondaryPhoneModelIdentity
+      ? `${secondaryPhoneModelIdentity} Repair Options | Ali Mobile Ringwood`
       : selectedCrawledModelHubContent?.metaTitle
       ? selectedCrawledModelHubContent.metaTitle
       : isMacBookModelPage
@@ -379,6 +389,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
       : `${modelName} Repair in Ringwood | Fast \u0026 Reliable | Ali Mobile`,
     description: isIPadModelPage
       ? iPadMetadata!.description
+      : hasSecondaryPhoneModelIdentity
+      ? secondaryPhoneMetadataDescription
       : selectedCrawledModelHubContent?.metaDescription
       ? selectedCrawledModelHubContent.metaDescription
       : isIPhoneModelPage
@@ -406,6 +418,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
     openGraph: {
       title: isIPadModelPage
         ? iPadMetadata!.title
+        : hasSecondaryPhoneModelIdentity
+        ? `${secondaryPhoneModelIdentity} Repair Options | Ali Mobile Ringwood`
         : selectedCrawledModelHubContent?.metaTitle
         ? selectedCrawledModelHubContent.metaTitle
         : isMacBookModelPage
@@ -423,6 +437,8 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         : `${modelName} Repair in Ringwood | Fast \u0026 Reliable`,
       description: isIPadModelPage
         ? iPadMetadata!.description
+        : hasSecondaryPhoneModelIdentity
+        ? secondaryPhoneMetadataDescription
         : selectedCrawledModelHubContent?.metaDescription
         ? selectedCrawledModelHubContent.metaDescription
         : isIPhoneModelPage
@@ -482,6 +498,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   );
   const isPhoneModelPage = categorySlug === "phone";
   const isSecondaryPhoneModelPage = isPhoneModelPage && classifyPhoneBrand(brandSlug) === 'secondary-phone';
+  const hasSecondaryPhoneModelIdentity = isPhoneModelPage && Boolean(SECONDARY_PHONE_BRAND_NAMES[brandSlug]);
+  const isBatchOneSecondaryPhoneModelPage = hasSecondaryPhoneModelIdentity && isBatchOneSecondaryPhoneBrand(brandSlug);
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
@@ -568,6 +586,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? `Google ${modelName}`
     : isOppoModelPage && !modelName.toLowerCase().startsWith("oppo ")
     ? `OPPO ${modelName}`
+    : hasSecondaryPhoneModelIdentity
+    ? getSecondaryPhoneModelIdentity({ categorySlug, brandSlug, modelName })
     : modelName;
   const visibleRelatedModels = sameBrandModels.slice(0, RELATED_MODEL_LIMIT);
   const relatedModelHubLabel = isIPhoneModelPage
@@ -1263,6 +1283,17 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: "Same-day repair may be available for some common repairs when parts are in stock. Contact us before visiting to confirm your model, issue and timing.",
     },
   ];
+  const batchOneSecondaryPhoneHeroCards = [
+    genericPhoneHeroCards[0],
+    {
+      title: "Repair timing confirmed first",
+      body: "Timing depends on the exact device model, selected repair, parts availability, device condition, diagnosis, additional faults and current repair queue. We confirm the expected timing before work begins.",
+    },
+    {
+      title: "6-Month Repair Warranty",
+      body: `${STANDARD_WARRANTY_SUMMARY} Water-damage repairs are excluded.`,
+    },
+  ];
   const genericPhoneQuickAnswers = [
     {
       number: "01",
@@ -1313,6 +1344,15 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       body: "Factory water resistance cannot be guaranteed after a phone has been opened or repaired. New adhesive may help reseal the device, but it does not restore certified factory water resistance.",
     },
   ].filter(Boolean) as Array<{ number: string; title: string; body: string }>;
+  const batchOneSecondaryPhoneQuickAnswers = genericPhoneQuickAnswers.map((answer) =>
+    answer.number === "04"
+      ? {
+          number: "04",
+          title: "How is repair timing confirmed?",
+          body: "Timing depends on the exact device model, selected repair, parts availability, device condition, diagnosis, additional faults and current repair queue. We confirm the expected timing before work begins.",
+        }
+      : answer
+  );
   const genericPhoneProcessSteps = [
     {
       number: "01",
@@ -1410,6 +1450,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
       answer: "Yes. Walk-ins are welcome at Ringwood Square Kiosk C1. Calling ahead can help us confirm part availability before you travel.",
     },
   ].filter(Boolean) as Array<{ question: string; answer: string }>;
+  const batchOneSecondaryPhoneFaqs = genericPhoneFaqs.map((faq) =>
+    faq.question.includes("normally be repaired the same day")
+      ? {
+          question: `How is ${modelName} repair timing confirmed?`,
+          answer: "Timing depends on the exact device model, selected repair, parts availability, device condition, diagnosis, additional faults and current repair queue. We confirm the expected timing before work begins.",
+        }
+      : faq
+  );
   const iPadHeroCards = [
     {
       title: publishedStartingPrice ? `iPad Repairs From $${formatStartingPrice(publishedStartingPrice)}` : "iPad Repair Pricing",
@@ -1782,6 +1830,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? appleWatchHeroCards
     : isIPhoneModelPage
     ? iPhoneHeroCards
+    : isBatchOneSecondaryPhoneModelPage
+    ? batchOneSecondaryPhoneHeroCards
     : genericPhoneHeroCards;
   const enhancedQuickAnswers = isSamsungModelPage
     ? samsungQuickAnswers
@@ -1803,6 +1853,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? appleWatchQuickAnswers
     : isIPhoneModelPage
     ? iPhoneQuickAnswers
+    : isBatchOneSecondaryPhoneModelPage
+    ? batchOneSecondaryPhoneQuickAnswers
     : genericPhoneQuickAnswers;
   const enhancedProcessSteps = isSamsungModelPage
     ? samsungProcessSteps
@@ -1858,6 +1910,8 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
     ? appleWatchFaqs
     : isIPhoneModelPage
     ? iPhoneFaqs
+    : isBatchOneSecondaryPhoneModelPage
+    ? batchOneSecondaryPhoneFaqs
     : genericPhoneFaqs;
   const enhancedBrandLabel = isSamsungModelPage
     ? "Samsung"
@@ -2035,7 +2089,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         category={categorySlug}
         brand={brandSlug}
         model={modelSlug}
-        modelLabel={isIPadModelPage
+        modelLabel={hasSecondaryPhoneModelIdentity
+          ? entityModelName
+          : isIPadModelPage
           ? modelName
           : samsungTabletModelHubPresentation?.commercialModelName
           ?? lenovoTabletModelHubPresentation?.commercialModelName}
@@ -2050,7 +2106,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               {enhancedMenuLabel}
             </span>
             <h1 id="model-repair-heading">
-              {selectedCrawledModelHubContent?.h1 ?? (isMajorPhoneModelPage
+              {hasSecondaryPhoneModelIdentity
+                ? `${entityModelName} Repair Options`
+                : selectedCrawledModelHubContent?.h1 ?? (isMajorPhoneModelPage
                 ? `${entityModelName} Repairs`
                 : samsungTabletModelHubPresentation
                 ? `${samsungTabletModelHubPresentation.commercialModelName} Repair Options`
@@ -2071,7 +2129,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               <p className="mt-2 text-sm font-semibold text-slate-600">{lenovoTabletModelHubPresentation.modelNumbersLabel}</p>
             ) : null}
             <p>
-              {selectedCrawledModelHubContent?.heroIntro ?? (isMajorPhoneModelPage
+              {selectedCrawledModelHubContent?.heroIntro ?? (hasSecondaryPhoneModelIdentity
+                ? `Choose a repair for your exact ${entityModelName} to see current pricing or Quote on Request, then confirm parts availability and timing before work begins.`
+                : isMajorPhoneModelPage
                 ? `Choose a repair for your exact ${entityModelName} to compare current pricing, approved service timing and the repair path that matches the device in front of you.`
                 : samsungTabletModelHubPresentation
                 ? samsungTabletModelHubPresentation.heroDescription
@@ -2090,7 +2150,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
               </a>
             </div>
           </div>
-          <div className="repair-hero-brand-proof" aria-label={`${lenovoTabletModelHubPresentation?.commercialModelName ?? modelName} repair pricing and timing highlights`}>
+          <div className="repair-hero-brand-proof" aria-label={`${lenovoTabletModelHubPresentation?.commercialModelName ?? entityModelName} repair pricing and timing highlights`}>
             {enhancedHeroCards.map((card) => (
               <article key={card.title} className="repair-hero-brand-proof-card">
                 <h2>{card.title}</h2>
@@ -2152,7 +2212,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
         <div className={isEnhancedPhoneModelPage ? "brand-hub-section-header" : "mb-3"}>
           <span className="repair-kicker repair-kicker-muted">Repair options</span>
           <h2 id="repair-options-heading" className="sr-only">
-            Repair options for {modelName}
+            Repair options for {entityModelName}
           </h2>
         </div>
         <RepairOptionsGrid
@@ -2247,7 +2307,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                       prefetch={false}
                       className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-slate-950 bg-transparent px-5 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
                     >
-                      {relatedModel.model}
+                      {hasSecondaryPhoneModelIdentity
+                        ? getSecondaryPhoneModelIdentity({ categorySlug, brandSlug, modelName: relatedModel.model })
+                        : relatedModel.model}
                     </Link>
                   ))}
                 </div>
@@ -2365,7 +2427,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
             <section className="brand-hub-section" aria-labelledby="model-process-heading">
               <div className="brand-hub-section-header">
                 <span className="repair-kicker repair-kicker-muted">Repair process</span>
-                <h2 id="model-process-heading">How a typical {modelName} repair moves from inspection to handover</h2>
+                <h2 id="model-process-heading">How a typical {entityModelName} repair moves from inspection to handover</h2>
                 <p>
                   We confirm the selected repair, any relevant part choice, expected timing and the likely result before work begins. If the scope changes, we pause and ask first.
                 </p>

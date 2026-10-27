@@ -101,7 +101,7 @@ describe('Vivo Y20s Model Hub Content Refinement', () => {
     const html = renderToStaticMarkup(pageElement);
 
     // Expected H1
-    expect(html).toContain('<h1 id="model-repair-heading">Vivo Y20s Repairs</h1>');
+    expect(html).toContain('<h1 id="model-repair-heading">Vivo Y20s Repair Options</h1>');
     expect(html).not.toContain('<h1 id="model-repair-heading">Y20s repair options</h1>');
 
     // Expected bespoke intro
@@ -121,21 +121,21 @@ describe('Vivo Y20s Model Hub Content Refinement', () => {
     expect(html).toContain('/repairs/phone/vivo/y20s/charging-port-replacement');
   });
 
-  it('preserves existing Vivo Y20s metadata unchanged', async () => {
+  it('uses the shared standalone identity in Vivo Y20s metadata', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(vivoY20sModelData() as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
 
     const metadata = await generateMetadata({
       params: Promise.resolve({ category: 'phone', brand: 'vivo', model: 'y20s' }),
     });
 
-    expect(metadata.title).toBe('Y20s Repair in Ringwood | Pricing, Screen Options & Booking | Ali Mobile');
+    expect(metadata.title).toBe('Vivo Y20s Repair Options | Ali Mobile Ringwood');
     expect(metadata.description).toBe(
-      'Choose the available Vivo repairs for Y20s, view current pricing, check supported repair options, and book with Ali Mobile & Repair in Ringwood.'
+      'Choose available repairs for Vivo Y20s, view current pricing or Quote on Request, check parts and timing conditions, and book with Ali Mobile & Repair in Ringwood.'
     );
     expect(metadata.alternates?.canonical).toBe('/repairs/phone/vivo/y20s');
   });
 
-  it('keeps other Vivo models on generic H1 and intro', async () => {
+  it('applies the shared Vivo identity and qualified opening guidance to other models', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(vivoControlModelData() as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
 
     const pageElement = await ModelHubPage({
@@ -143,8 +143,9 @@ describe('Vivo Y20s Model Hub Content Refinement', () => {
     });
     const html = renderToStaticMarkup(pageElement);
 
-    expect(html).toContain('<h1 id="model-repair-heading">Y70 repair options</h1>');
-    expect(html).not.toContain('<h1 id="model-repair-heading">Vivo Y70 Repair in Ringwood</h1>');
-    expect(html).toContain('Choose the available repair for your exact Y70 to view current pricing');
+    expect(html).toContain('<h1 id="model-repair-heading">Vivo Y70 Repair Options</h1>');
+    expect(html).not.toContain('<h1 id="model-repair-heading">Y70 repair options</h1>');
+    expect(html).toContain('Choose a repair for your exact Vivo Y70 to see current pricing or Quote on Request');
+    expect(html).not.toMatch(/same[ -]day|while you wait|immediate repair/i);
   });
 });

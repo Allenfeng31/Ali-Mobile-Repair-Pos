@@ -407,6 +407,77 @@ describe('Model Hub page-mode Server consumer', () => {
       .toBeUndefined();
   });
 
+  it.each([
+    ['xiaomi', 'Xiaomi', '14C', '14c'],
+    ['nokia', 'Nokia', 'G42', 'g42'],
+    ['vivo', 'Vivo', 'Y52 5G', 'y52-5g'],
+    ['lg', 'LG', 'Velvet', 'velvet'],
+    ['oneplus', 'OnePlus', '9 Pro', '9-pro'],
+    ['huawei', 'Huawei', 'P30 Pro', 'p30-pro'],
+    ['htc', 'HTC', 'U12+', 'u12-plus'],
+    ['sony', 'Sony', 'Xperia 5', 'xperia-5'],
+    ['telstra', 'Telstra', 'T-Pro', 't-pro'],
+    ['motorola', 'Motorola', 'Moto G04', 'moto-g04'],
+    ['microsoft', 'Microsoft', 'Lumia 950', 'lumia-950'],
+    ['realme', 'Realme', 'C55', 'c55'],
+    ['asus', 'Asus', 'ROG Phone 6', 'rog-phone-6'],
+    ['tcl', 'TCL', '20L', '20l'],
+    ['nothing', 'Nothing', 'Phone (2)', 'phone-2'],
+  ])('renders the %s secondary-phone metadata identity', async (brandSlug, brand, model, modelSlug) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({ brand, model }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'phone', brand: brandSlug, model: modelSlug }),
+    });
+
+    const expectedBrand = brandSlug === 'asus' ? 'ASUS' : brand;
+    expect(metadata.title).toBe(`${expectedBrand} ${model} Repair Options | Ali Mobile Ringwood`);
+    expect(metadata.description).toContain(`repairs for ${expectedBrand} ${model}`);
+  });
+
+  it('server-renders a standalone OnePlus identity with qualified timing and warranty while preserving pricing and links', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'OnePlus',
+      model: '9 Pro',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+        { slug: 'battery-replacement', name: 'Battery Replacement', price: 89, repairOrigin: 'pos' },
+      ],
+      brandModels: [
+        { slug: '9-pro', model: '9 Pro', repairTypes: [] },
+        { slug: '10-pro', model: '10 Pro', repairTypes: [] },
+      ],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'phone', brand: 'oneplus', model: '9-pro' }),
+    });
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'oneplus', model: '9-pro' }),
+    }));
+
+    expect(metadata.title).toBe('OnePlus 9 Pro Repair Options | Ali Mobile Ringwood');
+    expect(metadata.description).toBe('Choose available repairs for OnePlus 9 Pro, view current pricing or Quote on Request, check parts and timing conditions, and book with Ali Mobile & Repair in Ringwood.');
+    expect(metadata.openGraph?.title).toBe('OnePlus 9 Pro Repair Options | Ali Mobile Ringwood');
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+    expect(metadata.alternates?.canonical).toBe('/repairs/phone/oneplus/9-pro');
+    expect(html).toContain('<h1 id="model-repair-heading">OnePlus 9 Pro Repair Options</h1>');
+    expect(html).toContain('Choose a repair for your exact OnePlus 9 Pro to see current pricing or Quote on Request, then confirm parts availability and timing before work begins.');
+    expect(html).toContain('Repair options for OnePlus 9 Pro');
+    expect(html).toContain('aria-label="OnePlus 9 Pro repair pricing and timing highlights"');
+    expect(html).toContain('>OnePlus 10 Pro</a>');
+    expect(html).toContain('Repair timing confirmed first');
+    expect(html).toContain('Timing depends on the exact device model, selected repair, parts availability, device condition, diagnosis, additional faults and current repair queue.');
+    expect(html).toContain('6-Month Repair Warranty');
+    expect(html).toContain('Completed standard repairs include a 6-month warranty covering the replacement part and labour. Water-damage repairs are excluded.');
+    expect(html).not.toMatch(/same[ -]day|while you wait|immediate repair/i);
+    expect(state.breadcrumbProps).toEqual(expect.objectContaining({ modelLabel: 'OnePlus 9 Pro' }));
+    expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ slug: 'screen-replacement', price: 0 }),
+      expect.objectContaining({ slug: 'battery-replacement', price: 89 }),
+    ]));
+  });
+
   it('keeps Camera Lens and virtual peripheral pricing out of a quote-only secondary-phone starting-price claim', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'Huawei',
