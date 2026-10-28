@@ -46,6 +46,8 @@ import {
 import { STANDARD_WARRANTY_SUMMARY } from "@/lib/repairPolicy";
 import {
   SECONDARY_PHONE_BRAND_NAMES,
+  getSecondaryPhoneManufacturerIdentifier,
+  getSecondaryPhoneMetadataIdentity,
   getSecondaryPhoneModelIdentity,
   isEvidenceQualifiedSecondaryPhoneBrand,
 } from "@/lib/secondaryPhoneModelIdentity";
@@ -330,7 +332,13 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const isPhoneModelPage = categorySlug === "phone";
   const hasSecondaryPhoneModelIdentity = isPhoneModelPage && Boolean(SECONDARY_PHONE_BRAND_NAMES[brandSlug]);
   const secondaryPhoneModelIdentity = getSecondaryPhoneModelIdentity({ categorySlug, brandSlug, modelName });
-  const secondaryPhoneMetadataDescription = `Choose available repairs for ${secondaryPhoneModelIdentity}, view current pricing or Quote on Request, check parts and timing conditions, and book with Ali Mobile & Repair in Ringwood.`;
+  const secondaryPhoneMetadataIdentity = getSecondaryPhoneMetadataIdentity({
+    categorySlug,
+    brandSlug,
+    modelSlug,
+    modelName,
+  });
+  const secondaryPhoneMetadataDescription = `Choose available repairs for ${secondaryPhoneMetadataIdentity}, view current pricing or Quote on Request, check parts and timing conditions, and book with Ali Mobile & Repair in Ringwood.`;
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
@@ -516,6 +524,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isLenovoTabletModelPage = categorySlug === "tablet" && brandSlug === "lenovo";
   const isMacBookModelPage = categorySlug === "laptop" && brandSlug === "macbook";
   const macBookModelCodeLabel = isMacBookModelPage ? getMacBookModelCodeLabel(data.modelCode) : null;
+  const secondaryPhoneManufacturerIdentifier = getSecondaryPhoneManufacturerIdentifier({ categorySlug, brandSlug, modelSlug });
   const iPadModelNumberLabel = isIPadModelPage ? getIpadModelNumberLabel(modelSlug) : null;
   const isLaptopModelPage = categorySlug === "laptop";
   const isAppleWatchModelPage = categorySlug === "watch" && ["apple", "apple-watch"].includes(brandSlug);
@@ -2116,6 +2125,9 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                 ? `${lenovoTabletModelHubPresentation.commercialModelName} Repair Options`
                 : `${modelName} repair options`)}
             </h1>
+            {secondaryPhoneManufacturerIdentifier ? (
+              <p className="mt-2 text-sm font-semibold text-slate-600">Manufacturer model: {secondaryPhoneManufacturerIdentifier}</p>
+            ) : null}
             {macBookModelCodeLabel ? (
               <p className="mt-2 text-sm font-semibold text-slate-600">{macBookModelCodeLabel}</p>
             ) : null}

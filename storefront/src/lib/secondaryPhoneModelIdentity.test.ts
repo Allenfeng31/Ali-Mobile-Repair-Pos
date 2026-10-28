@@ -5,7 +5,9 @@ import {
   BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
   EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS,
   SECONDARY_PHONE_BRAND_NAMES,
+  getSecondaryPhonePublicModelCode,
   getSecondaryPhoneModelIdentity,
+  getSecondaryPhoneMetadataIdentity,
   isBatchOneSecondaryPhoneBrand,
   isEvidenceQualifiedSecondaryPhoneBrand,
 } from './secondaryPhoneModelIdentity';
@@ -51,6 +53,45 @@ describe('secondary phone Model Hub identity', () => {
       .toBe('MacBook Air M3');
     expect(getSecondaryPhoneModelIdentity({ categorySlug: 'watch', brandSlug: 'apple', modelName: 'Apple Watch Series 9' }))
       .toBe('Apple Watch Series 9');
+  });
+
+  it.each([
+    ['essential-pro', 'ZTE Blade A5 2020', 'ZTE A5 2019T'],
+    ['t-smart', 'T-Smart', undefined],
+    ['evoke-pro-2', 'Evoke Pro 2', undefined],
+    ['essential-smart-21', 'Essential Smart 2.1', undefined],
+    ['tough-max-3', 'ZTE T86', 'ZTE T86'],
+  ])('uses only verified Telstra manufacturer identifiers for %s', (modelSlug, modelCode, expected) => {
+    expect(getSecondaryPhonePublicModelCode({
+      categorySlug: 'phone',
+      brandSlug: 'telstra',
+      modelSlug,
+      modelCode,
+    })).toBe(expected);
+  });
+
+  it('preserves model codes outside the scoped Telstra phone identities', () => {
+    expect(getSecondaryPhonePublicModelCode({
+      categorySlug: 'phone',
+      brandSlug: 'motorola',
+      modelSlug: 'moto-g04',
+      modelCode: 'XT2421-5',
+    })).toBe('XT2421-5');
+    expect(getSecondaryPhonePublicModelCode({
+      categorySlug: 'tablet',
+      brandSlug: 'telstra',
+      modelSlug: 'essential-pro',
+      modelCode: 'Unrelated tablet code',
+    })).toBe('Unrelated tablet code');
+  });
+
+  it('adds the verified ZTE identifier to Essential Pro metadata without changing its commercial identity', () => {
+    expect(getSecondaryPhoneMetadataIdentity({
+      categorySlug: 'phone',
+      brandSlug: 'telstra',
+      modelSlug: 'essential-pro',
+      modelName: 'Essential Pro',
+    })).toBe('Telstra Essential Pro (ZTE A5 2019T)');
   });
 
   it('limits Batch 1 content treatment to the five audited brands', () => {

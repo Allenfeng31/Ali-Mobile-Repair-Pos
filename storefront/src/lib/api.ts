@@ -32,6 +32,10 @@ import {
   getLocalRepairCatalogueFixture,
   isLocalRepairCatalogueOnly,
 } from './localRepairCatalogueFixture';
+import {
+  applySecondaryPhoneModelCodePresentation,
+  getSecondaryPhonePublicModelCode,
+} from './secondaryPhoneModelIdentity';
 
 export type {
   BrandEntry,
@@ -468,10 +472,16 @@ export function transformPOSToCatalog(rawItems: RawItem[]): BrandEntry[] {
     const canonicalBrandSlug = slugify(brandBaseName);
     const models: ModelEntry[] = [];
     for (const [model, { repairTypes, code }] of modelMap) {
+      const modelSlug = slugify(model);
       models.push({
         model,
-        slug: slugify(model),
-        modelCode: code,
+        slug: modelSlug,
+        modelCode: getSecondaryPhonePublicModelCode({
+          categorySlug: category,
+          brandSlug: canonicalBrandSlug,
+          modelSlug,
+          modelCode: code,
+        }),
         repairTypes: ensureCoreRepairTypes(repairTypes, category, canonicalBrandSlug, model),
       });
     }
@@ -536,10 +546,10 @@ function buildFallbackCatalog(): BrandEntry[] {
  * uses live POS or the durable last-known-good snapshot; it never accepts the
  * small development fallback.
  */
-function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
-  if (isLocalRepairCatalogueOnly()) return Promise.resolve(getLocalRepairCatalogueFixture());
+async function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
+  if (isLocalRepairCatalogueOnly()) return applySecondaryPhoneModelCodePresentation(getLocalRepairCatalogueFixture());
 
-  return resolvePublicRepairCatalogue({
+  const catalog = await resolvePublicRepairCatalogue({
     mode: getPublicRepairCatalogueMode(),
     fetchLiveInventory: () => fetchPOSInventory({ forceLive: forceRefresh }),
     transformLiveInventory: (items) => transformPOSToCatalog(items),
@@ -551,6 +561,7 @@ function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetir
     isExplicitRetirement: (category, brand, model, repair) => explicitRetirements.some((entry) => entry.category === category && entry.brand === brand && entry.model === model && entry.repairType === repair),
     onWarning: (message) => console.warn(`[public-catalogue] ${message}`),
   });
+  return applySecondaryPhoneModelCodePresentation(catalog);
 }
 
 export function createPublicRepairCatalogueReader(resolve: () => Promise<RepairCatalog>) {

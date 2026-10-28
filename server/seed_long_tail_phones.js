@@ -67,7 +67,7 @@ const brandsData = [
   {
     brand: "Telstra",
     models: [
-      { name: "Essential Pro", code: "ZTE Blade A5 2020" },
+      { name: "Essential Pro", code: "ZTE A5 2019T" },
       { name: "T-Smart", code: "T-Smart" },
       { name: "Evoke Pro 2", code: "Evoke Pro 2" },
       { name: "Essential Smart 2.1", code: "Essential Smart 2.1" },

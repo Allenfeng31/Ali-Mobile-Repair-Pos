@@ -435,6 +435,34 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(metadata.description).toContain(`repairs for ${expectedBrand} ${model}`);
   });
 
+  it('keeps Essential Pro as the Telstra identity while adding its verified ZTE identifier', async () => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
+      brand: 'Telstra',
+      model: 'Essential Pro',
+      modelCode: 'ZTE A5 2019T',
+      repairTypes: [
+        { slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' },
+      ],
+      brandModels: [
+        { slug: 'essential-pro', model: 'Essential Pro', modelCode: 'ZTE A5 2019T', repairTypes: [] },
+      ],
+    }) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ category: 'phone', brand: 'telstra', model: 'essential-pro' }),
+    });
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'telstra', model: 'essential-pro' }),
+    }));
+
+    expect(metadata.title).toBe('Telstra Essential Pro Repair Options | Ali Mobile Ringwood');
+    expect(metadata.description).toContain('repairs for Telstra Essential Pro (ZTE A5 2019T)');
+    expect(metadata.alternates?.canonical).toBe('/repairs/phone/telstra/essential-pro');
+    expect(html).toContain('<h1 id="model-repair-heading">Telstra Essential Pro Repair Options</h1>');
+    expect(html).toContain('Manufacturer model: ZTE A5 2019T');
+    expect(`${metadata.description} ${html}`).not.toContain('ZTE Blade A5 2020');
+  });
+
   it('server-renders a standalone OnePlus identity with qualified timing and warranty while preserving pricing and links', async () => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand: 'OnePlus',
