@@ -525,7 +525,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   it.each([
     ['MacBook Pro 14/16 M1 Pro/Max 2021', 'macbook-pro-1416-m1-promax-2021'],
     ['MacBook Pro 14/16 M2 Pro/Max 2023', 'macbook-pro-1416-m2-promax-2023'],
-    ['MacBook Pro 14/16 M3 Pro/Max 2024', 'macbook-pro-1416-m3-promax-2024'],
+    ['MacBook Pro 14/16 M3 Pro/Max 2023', 'macbook-pro-1416-m3-promax-2024'],
   ] as const)('renders all standard repairs for %s from the shared one-hour MacBook source', async (model, modelSlug) => {
     for (const [repairName, repairSlug] of [
       ['Screen Replacement', 'screen-replacement'],

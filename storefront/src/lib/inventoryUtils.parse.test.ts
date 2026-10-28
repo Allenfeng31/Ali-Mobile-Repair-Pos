@@ -99,6 +99,34 @@ describe('parseItem', () => {
 
     expect(parsed?.service).toBe('Flex Cable');
   });
+
+  it.each([
+    ['Screen Replacement', 'Screen Replacement'],
+    ['Battery Replacement', 'Battery Replacement'],
+    ['Charging Port Replacement', 'Charging Port Replacement'],
+    ['Water Damage Cleaning / Assessment', 'Water Damage Cleaning / Assessment'],
+    ['Motherboard & Logic Board Repair', 'Logic Board Repair'],
+  ])('correctly parses MacBook M4 repair row for %s', (serviceName, expectedService) => {
+    const parsed = parseItem({
+      id: 4501,
+      name: `MacBook Pro 14" M4 (2024) ${serviceName}`,
+      model: 'C MacBook||MacBook Pro 14" M4 (2024)',
+      device_model: 'A3112',
+      price: 0,
+      category: serviceName,
+      quality_grade: 'Standard',
+      is_recommended: false,
+    });
+
+    expect(parsed).toMatchObject({
+      brand: 'C MacBook',
+      deviceModel: 'MacBook Pro 14" M4 (2024)',
+      service: expectedService,
+      modelCode: 'A3112',
+      deviceType: 'computer',
+      price: 0,
+    });
+  });
 });
 
 describe('formatDeviceTitle', () => {

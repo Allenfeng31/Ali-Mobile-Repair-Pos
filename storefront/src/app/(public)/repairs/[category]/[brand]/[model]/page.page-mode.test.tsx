@@ -93,7 +93,9 @@ const macBookMetadataFixtures = [
   ['macbook-air-13-2018-2020', 'MacBook Air 13-inch 2018-2020', 'A1932 / A2179'],
   ['macbook-air-11-2014-2015', 'MacBook Air 11-inch 2014-2015', 'A1465'],
   ['macbook-air-13-m1-2020', 'MacBook Air 13-inch M1 2020', 'A2337'],
-  ['macbook-pro-14-16-m3-pro-max-2024', 'MacBook Pro 14/16-inch M3 Pro/Max 2024', 'A2992 / A2991'],
+  ['macbook-pro-14-16-m3-pro-max-2024', 'MacBook Pro 14/16-inch M3 Pro/Max 2023', 'A2992 / A2991'],
+  ['macbook-pro-14-m4-2024', 'MacBook Pro 14" M4 (2024)', 'A3112'],
+  ['macbook-pro-1416-m4-promax-2024', 'MacBook Pro 14"/16" M4 Pro/Max (2024)', 'A3185 / A3186'],
   ['macbook-pro-13-m2-2022', 'MacBook Pro 13-inch M2 2022', 'A2686'],
   ['macbook-pro-14-16-m2-pro-max-2023', 'MacBook Pro 14/16-inch M2 Pro/Max 2023', 'A2779 / A2780'],
   ['macbook-pro-16-2019', 'MacBook Pro 16-inch 2019', 'A2141'],
@@ -399,7 +401,7 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
       expect.objectContaining({ slug: 'screen-replacement', price: 0 }),
       expect.objectContaining({ slug: 'battery-replacement', price: 75 }),
-      expect.objectContaining({ slug: 'loudspeaker-replacement', timingLabel: '30 Minutes' }),
+      expect.objectContaining({ slug: 'loudspeaker-replacement', timingLabel: 'Confirmed After Inspection' }),
     ]));
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
       .toBeUndefined();

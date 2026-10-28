@@ -117,6 +117,7 @@ import {
   getMacBookSameModelRepairLinks,
   isAliMobileEnhancedMacBookRepairPage,
 } from '@/lib/seo/content/macbook';
+import { MACBOOK_MODEL_SLUG_ALIASES } from '@/lib/macbookCataloguePresentation';
 import {
   getAliMobileEnhancedAppleWatchRepairType,
   getAliMobileEnhancedAppleWatchSeoPocket,
@@ -4626,6 +4627,13 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
     buildCanonicalModelRepairPath(rawParams.category, canonicalBrand, rawParams.model, canonicalRepairSlug),
   );
   if (phase1Destination) permanentRedirect(phase1Destination);
+
+  if (rawParams.category === 'laptop' && canonicalBrand === 'macbook') {
+    const aliasDestination = MACBOOK_MODEL_SLUG_ALIASES[rawParams.model.toLowerCase()];
+    if (aliasDestination) {
+      permanentRedirect(buildCanonicalModelRepairPath(rawParams.category, canonicalBrand, aliasDestination, canonicalRepairSlug));
+    }
+  }
 
   const catalog = await fetchRepairCatalog();
   const brandEntry = catalog.brands.find(

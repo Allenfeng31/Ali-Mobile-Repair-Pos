@@ -36,6 +36,10 @@ import {
   applySecondaryPhoneModelCodePresentation,
   getSecondaryPhonePublicModelCode,
 } from './secondaryPhoneModelIdentity';
+import {
+  applyMacBookCataloguePresentation,
+  resolveMacBookCanonicalModelSlug,
+} from './macbookCataloguePresentation';
 
 export type {
   BrandEntry,
@@ -159,6 +163,10 @@ const REPAIR_NAME_MAP: Record<string, string> = {
   'Back Camera':      'Back Camera Replacement',
   'Back Glass':       'Back Housing Replacement',
   'Back Housing':     'Back Housing Replacement',
+  'Water Damage':     'Water Damage Cleaning / Assessment',
+  'Water Damage Repair': 'Water Damage Cleaning / Assessment',
+  'Motherboard & Logic Board Repair': 'Logic Board Repair',
+  'Motherboard Repair': 'Logic Board Repair',
 };
 
 /** Apply the standard name map to a raw service name */
@@ -177,7 +185,8 @@ function normalizeRepairSlug(rawName: string): string {
     [/(^|-)back-glass(-(repair|replacement))?$/, 'back-glass-replacement'],
     [/(^|-)front-camera(-(repair|replacement))?$/, 'front-camera-replacement'],
     [/(^|-)back-camera(-(repair|replacement))?$/, 'back-camera-replacement'],
-    [/(^|-)water-damage(-(repair|recovery))?$/, 'water-damage-repair'],
+    [/(^|-)water-damage(-(repair|recovery|cleaning-assessment|assessment))?$/, 'water-damage-repair'],
+    [/(^|-)motherboard(-and)?-logic-board(-(repair|replacement))?$/, 'logic-board-repair'],
     [/(^|-)logic-board(-(repair|replacement))?$/, 'logic-board-repair'],
   ];
 
@@ -547,7 +556,7 @@ function buildFallbackCatalog(): BrandEntry[] {
  * small development fallback.
  */
 async function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
-  if (isLocalRepairCatalogueOnly()) return applySecondaryPhoneModelCodePresentation(getLocalRepairCatalogueFixture());
+  if (isLocalRepairCatalogueOnly()) return applySecondaryPhoneModelCodePresentation(applyMacBookCataloguePresentation(getLocalRepairCatalogueFixture()));
 
   const catalog = await resolvePublicRepairCatalogue({
     mode: getPublicRepairCatalogueMode(),
@@ -555,13 +564,13 @@ async function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explici
     transformLiveInventory: (items) => transformPOSToCatalog(items),
     readSnapshot: readCurrentPublicRepairCatalogueSnapshot,
     writeSnapshot: writeCurrentPublicRepairCatalogueSnapshot,
-    createDevelopmentFallback: () => backfillSamsungCatalogModels(buildFallbackCatalog()),
+    createDevelopmentFallback: () => applyMacBookCataloguePresentation(backfillSamsungCatalogModels(buildFallbackCatalog())),
     allowMajorShrink: allowMajorCatalogueShrink(),
     forceRefresh,
     isExplicitRetirement: (category, brand, model, repair) => explicitRetirements.some((entry) => entry.category === category && entry.brand === brand && entry.model === model && entry.repairType === repair),
     onWarning: (message) => console.warn(`[public-catalogue] ${message}`),
   });
-  return applySecondaryPhoneModelCodePresentation(catalog);
+  return applySecondaryPhoneModelCodePresentation(applyMacBookCataloguePresentation(catalog));
 }
 
 export function createPublicRepairCatalogueReader(resolve: () => Promise<RepairCatalog>) {
@@ -620,15 +629,19 @@ export async function fetchRepairDetails(
     return retired ? { brand: retired.brand, model: retired.model, modelCode: retired.modelCode, repairType: retired.repair.name, price: 0, variants: [], source: catalog.source, sourceType: retired.repair.sourceType } : null;
   }
 
-  const modelEntry = brandEntry.models.find(m => m.slug === modelSlug);
+  const resolvedModelSlug = (categorySlug === 'laptop' && brandSlug === 'macbook')
+    ? resolveMacBookCanonicalModelSlug(modelSlug)
+    : modelSlug;
+
+  const modelEntry = brandEntry.models.find(m => m.slug === resolvedModelSlug || m.slug === modelSlug);
   if (!modelEntry) {
-    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && entry.modelSlug === modelSlug && entry.repair.slug === repairSlug);
+    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && (entry.modelSlug === resolvedModelSlug || entry.modelSlug === modelSlug) && entry.repair.slug === repairSlug);
     return retired ? { brand: retired.brand, model: retired.model, modelCode: retired.modelCode, repairType: retired.repair.name, price: 0, variants: [], source: catalog.source, sourceType: retired.repair.sourceType } : null;
   }
 
   const repairEntry = modelEntry.repairTypes.find(r => r.slug === repairSlug);
   if (!repairEntry) {
-    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && entry.modelSlug === modelSlug && entry.repair.slug === repairSlug);
+    const retired = catalog.retiredRepairs?.find((entry) => entry.category === categorySlug && entry.brandSlug === brandSlug && (entry.modelSlug === resolvedModelSlug || entry.modelSlug === modelSlug) && entry.repair.slug === repairSlug);
     if (!retired) return null;
     return { brand: retired.brand, model: retired.model, modelCode: retired.modelCode, repairType: retired.repair.name, price: 0, variants: [], source: catalog.source, sourceType: retired.repair.sourceType };
   }
@@ -664,7 +677,11 @@ export function selectModelRepairTypesFromCatalogue(
   const brandEntry = catalog.brands.find(b => b.category === categorySlug && b.slug === brandSlug);
   if (!brandEntry) return null;
 
-  const modelEntry = brandEntry.models.find(m => m.slug === modelSlug);
+  const resolvedModelSlug = (categorySlug === 'laptop' && brandSlug === 'macbook')
+    ? resolveMacBookCanonicalModelSlug(modelSlug)
+    : modelSlug;
+
+  const modelEntry = brandEntry.models.find(m => m.slug === resolvedModelSlug || m.slug === modelSlug);
   if (!modelEntry) return null;
 
   return {

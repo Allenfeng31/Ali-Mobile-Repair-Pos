@@ -375,7 +375,7 @@ const MODEL_CONFIGS: Record<MacBookModelSlug, MacBookModelConfig> = {
   },
   'macbook-pro-14-16-m3-pro-max-2024': {
     slug: 'macbook-pro-14-16-m3-pro-max-2024',
-    modelName: 'MacBook Pro 14/16-inch M3 Pro/Max 2024',
+    modelName: 'MacBook Pro 14/16-inch M3 Pro/Max 2023',
     family: 'MacBook Pro',
     generationNote: 'newer M3 Pro/Max family page',
     chargingContext: 'MagSafe 3 and USB-C charging behaviour',
@@ -476,6 +476,7 @@ function isMacBookRepairSlug(value: string): value is MacBookRepairSlug {
 
 function resolveMacBookContentModelSlug(value: string): MacBookModelSlug | null {
   if (isMacBookModelSlug(value)) return value;
+  if (value === 'macbook-pro-1416-m3-promax-2023') return 'macbook-pro-14-16-m3-pro-max-2024';
 
   return PUBLIC_MACBOOK_MODEL_ALIASES[value as keyof typeof PUBLIC_MACBOOK_MODEL_ALIASES] ?? null;
 }

@@ -11,7 +11,11 @@ import { getAliMobileEnhancedLenovoTabletSeoPocket } from '@/lib/seo/content/len
 import { getAliMobileEnhancedMacBookSeoPocket } from '@/lib/seo/content/macbook';
 import { getAliMobileEnhancedSamsungTabletSeoPocket } from '@/lib/seo/content/samsung-tablet';
 import { getAppleWatchStandardTurnaroundMinutes } from '@/lib/seo/content/apple-watch';
-import { SHARED_PHONE_STANDARD_REPAIR_MINUTES } from '@/lib/sharedPhoneRepairTiming';
+import {
+  SECONDARY_PHONE_INSPECTION_TIMING_LABEL,
+  SHARED_PHONE_STANDARD_REPAIR_MINUTES,
+  getSharedPhoneRepairTimingLabel,
+} from '@/lib/sharedPhoneRepairTiming';
 import {
   SAMSUNG_PHONE_WATER_DAMAGE_INITIAL_ASSESSMENT_MINUTES,
   isGooglePixelAliasBrand,
@@ -74,6 +78,13 @@ function withMinutes(turnaroundMinutes: number): ModelHubRepairPresentation {
   return { timingLabel: `${turnaroundMinutes} Minutes`, turnaroundMinutes };
 }
 
+function resolveSharedPhoneTiming(brandSlug: string): ModelHubRepairPresentation {
+  const timingLabel = getSharedPhoneRepairTimingLabel(brandSlug);
+  return timingLabel === SECONDARY_PHONE_INSPECTION_TIMING_LABEL
+    ? { timingLabel }
+    : withMinutes(SHARED_PHONE_STANDARD_REPAIR_MINUTES);
+}
+
 function resolveDetailPocket({ category, brandSlug, modelSlug, repairSlug }: ModelHubRepairPresentationInput) {
   const params = { category, brand: brandSlug, model: modelSlug, repairType: repairSlug, pocket: EMPTY_POCKET };
 
@@ -107,7 +118,7 @@ function resolveCategoryTiming({ category, brandSlug, modelSlug, repairSlug }: M
 
   if (category === 'laptop' && brandSlug === 'macbook' && MACBOOK_STANDARD_REPAIR_SLUGS.has(repairSlug)) {
     const turnaroundMinutes = getAliMobileEnhancedMacBookSeoPocket({ modelSlug, repairSlug })?.turnaroundMinutes;
-    return withMinutes(turnaroundMinutes ?? 60);
+    return turnaroundMinutes ? withMinutes(turnaroundMinutes) : null;
   }
 
   if (category === 'watch') {
@@ -158,7 +169,7 @@ export function resolveModelHubRepairPresentation(
   const basePresentation = turnaroundMinutes
     ? withMinutes(turnaroundMinutes)
     : SHARED_STANDARD_REPAIR_SLUGS.has(repairSlug)
-      ? withMinutes(SHARED_PHONE_STANDARD_REPAIR_MINUTES)
+      ? resolveSharedPhoneTiming(brandSlug)
       : isMajorPhoneBrand && repairSlug === 'back-glass-replacement'
         ? { timingLabel: 'Varies' }
         : {};

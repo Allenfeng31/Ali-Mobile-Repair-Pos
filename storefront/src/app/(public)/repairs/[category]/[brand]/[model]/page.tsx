@@ -33,6 +33,7 @@ import {
   getMacBookModelMetaDescription,
   getMacBookModelMetaTitle,
 } from "@/lib/macbookModelHubPresentation";
+import { MACBOOK_MODEL_SLUG_ALIASES } from "@/lib/macbookCataloguePresentation";
 import {
   getAppleWatchModelMetaDescription,
   getAppleWatchModelMetaTitle,
@@ -98,6 +99,13 @@ type HeroCard = {
 const RELATED_MODEL_LIMIT = 5;
 
 async function resolveModelRouteParams(rawParams: Awaited<ModelPageProps['params']>) {
+  if (rawParams.category === 'laptop' && rawParams.brand === 'macbook') {
+    const aliasDestination = MACBOOK_MODEL_SLUG_ALIASES[rawParams.model.toLowerCase()];
+    if (aliasDestination) {
+      permanentRedirect(`/repairs/laptop/macbook/${aliasDestination}`);
+    }
+  }
+
   if (!isGooglePixelAliasBrand(rawParams.brand)) return rawParams;
 
   const canonicalBrand = getCanonicalBrandSlug(rawParams.brand);
