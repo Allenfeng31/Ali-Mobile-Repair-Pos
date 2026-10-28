@@ -827,6 +827,41 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['Asus', 'asus', 'ROG Phone 3', 'rog-phone-3', 'ASUS ROG Phone 3'],
+    ['Microsoft', 'microsoft', 'Lumia 640', 'lumia-640', 'Microsoft Lumia 640'],
+    ['Nothing', 'nothing', 'CMF Phone 2 Pro 5G', 'cmf-phone-2-pro-5g', 'Nothing CMF Phone 2 Pro 5G'],
+    ['Realme', 'realme', '7 Pro', '7-pro', 'Realme 7 Pro'],
+    ['TCL', 'tcl', '10 Pro', '10-pro', 'TCL 10 Pro'],
+  ] as const)('qualifies Batch 3 %s detail identity without changing its raw booking model', async (
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    publicIdentity,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      brand,
+      brandSlug,
+      model,
+      modelSlug,
+      'Screen Replacement',
+      'screen-replacement',
+    ));
+    const detailParams = params({ brand: brandSlug, model: modelSlug, 'repair-type': 'screen-replacement' });
+
+    const page = await RepairServicePage({ params: Promise.resolve(detailParams) });
+    const html = renderToStaticMarkup(page);
+    const bookingHref = String(findElementByType(page, RepairPricingAndCTA)?.props.bookingHref);
+
+    expect(html).toContain(`<h1 id="repair-detail-heading">${publicIdentity} Screen Replacement</h1>`);
+    expect(bookingHref).toBe(`/book-repair?${new URLSearchParams({
+      brand,
+      model,
+      service: 'Screen Replacement',
+    }).toString()}`);
+  });
+
+  it.each([
     ['Moto G04 Screen', 'Moto G04', 'moto-g04', 'Screen Replacement', 'screen-replacement', 129],
     ['Moto G04 Battery', 'Moto G04', 'moto-g04', 'Battery Replacement', 'battery-replacement', 75],
     ['Moto G04 Charging', 'Moto G04', 'moto-g04', 'Charging Port Replacement', 'charging-port-replacement', 75],

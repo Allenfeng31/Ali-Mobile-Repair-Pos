@@ -512,7 +512,12 @@ describe('Model Hub page-mode Server consumer', () => {
     ['sony', 'Sony', 'Xperia 5', 'xperia-5'],
     ['telstra', 'Telstra', 'Essential Pro', 'essential-pro'],
     ['motorola', 'Motorola', 'Moto G04', 'moto-g04'],
-  ] as const)('keeps the %s Batch 2 Model Hub timing and warranty evidence-led', async (brandSlug, brand, model, modelSlug) => {
+    ['microsoft', 'Microsoft', 'Lumia 640', 'lumia-640'],
+    ['realme', 'Realme', '7 Pro', '7-pro'],
+    ['asus', 'ASUS', 'ROG Phone 3', 'rog-phone-3'],
+    ['tcl', 'TCL', '10 Pro', '10-pro'],
+    ['nothing', 'Nothing', 'CMF Phone 2 Pro 5G', 'cmf-phone-2-pro-5g'],
+  ] as const)('keeps the %s audited secondary Model Hub timing and warranty evidence-led', async (brandSlug, brand, model, modelSlug) => {
     vi.mocked(fetchModelRepairTypes).mockResolvedValue(modelData({
       brand,
       model,

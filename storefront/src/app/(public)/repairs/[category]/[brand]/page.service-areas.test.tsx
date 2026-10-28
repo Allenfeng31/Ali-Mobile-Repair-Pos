@@ -649,6 +649,11 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     ['sony', 'Sony'],
     ['telstra', 'Telstra'],
     ['motorola', 'Motorola'],
+    ['microsoft', 'Microsoft'],
+    ['realme', 'Realme'],
+    ['asus', 'Asus'],
+    ['tcl', 'TCL'],
+    ['nothing', 'Nothing'],
   ] as const)('keeps the %s hub timing and parts guidance evidence-led', async (brandSlug, brandName) => {
     const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'phone', brand: brandSlug }) });
     const { container } = render(pageElement);

@@ -144,6 +144,10 @@ import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from 
 import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 import { classifyPhoneBrand } from '@/lib/publicRepairPageModePolicy';
 import {
+  getSecondaryPhoneModelIdentity,
+  isBatchThreeSecondaryPhoneBrand,
+} from '@/lib/secondaryPhoneModelIdentity';
+import {
   GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS,
   isGrandfatheredSecondaryPhoneDetailRepair,
 } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
@@ -4726,7 +4730,14 @@ export async function generateMetadata({ params }: RepairPageProps) {
     notFound();
   }
 
-  const model = details?.model || formatDynamicParam(resolvedParams.model);
+  const rawModel = details?.model || formatDynamicParam(resolvedParams.model);
+  const model = isBatchThreeSecondaryPhoneBrand(resolvedParams.brand)
+    ? getSecondaryPhoneModelIdentity({
+        categorySlug: resolvedParams.category,
+        brandSlug: resolvedParams.brand,
+        modelName: rawModel,
+      })
+    : rawModel;
   const repairName = getRepairDisplayName(
     resolvedParams.category,
     resolvedParams.brand,
@@ -5079,7 +5090,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
-  let displayModel = details?.model || formatDynamicParam(resolvedParams.model);
+  const rawDisplayModel = details?.model || formatDynamicParam(resolvedParams.model);
+  let displayModel = isBatchThreeSecondaryPhoneBrand(resolvedParams.brand)
+    ? getSecondaryPhoneModelIdentity({
+        categorySlug: resolvedParams.category,
+        brandSlug: resolvedParams.brand,
+        modelName: rawDisplayModel,
+      })
+    : rawDisplayModel;
   if (resolvedParams.brand === 'oppo' && !displayModel.toLowerCase().startsWith('oppo')) {
     displayModel = `OPPO ${displayModel}`;
   }
@@ -5681,8 +5699,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const repairPageUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
   const usesCanonicalBookingIdentity =
     isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || resolvedParams.brand === 'oppo';
-  const bookingModel = resolvedParams.brand === 'oppo'
-    ? (details?.model || formatDynamicParam(resolvedParams.model))
+  const bookingModel = resolvedParams.brand === 'oppo' || isSecondaryPhoneDetailPage
+    ? rawDisplayModel
     : displayModel;
   const bookRepairUrl = `/book-repair?${new URLSearchParams({
     ...(usesCanonicalBookingIdentity ? {

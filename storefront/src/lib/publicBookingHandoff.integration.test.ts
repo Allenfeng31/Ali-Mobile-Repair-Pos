@@ -29,6 +29,11 @@ const catalog = {
       ],
     },
     {
+      category: 'phone', brand: 'ASUS', slug: 'asus', icon: '', models: [
+        { model: 'ROG Phone 3', slug: 'rog-phone-3', repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0, repairOrigin: 'pos' }] },
+      ],
+    },
+    {
       category: 'phone', brand: 'Samsung', slug: 'samsung', icon: '', models: [
         {
           model: 'Galaxy S24', slug: 'galaxy-s24', repairTypes: [
@@ -100,6 +105,25 @@ describe('public booking full handoff', () => {
 
     expect(selection).toMatchObject({ brand: 'Google Pixel', model: 'Pixel 8', service: repairName, serviceSlug: repairSlug, price: 50, priceAuthority: expectedAuthority });
     expect(cart).toMatchObject({ brand: 'Google Pixel', model: 'Pixel 8', serviceToSelect: { name: repairName, price: expectedPrice } });
+  });
+
+  it('keeps a Batch 3 virtual repair quote-only while preserving exact ASUS booking identity', () => {
+    const { query, selection, cart } = handoff(getSharedRepairBookingHref({
+      repairName: 'Loudspeaker Replacement',
+      repairSlug: 'loudspeaker-replacement',
+      selectedModel: { brand: 'ASUS', brandSlug: 'asus', model: 'ROG Phone 3', modelSlug: 'rog-phone-3' },
+    }));
+
+    expect(Object.fromEntries(query.entries())).toMatchObject({
+      brand: 'ASUS', model: 'ROG Phone 3', brandSlug: 'asus', modelSlug: 'rog-phone-3',
+      service: 'Loudspeaker Replacement', serviceSlug: 'loudspeaker-replacement',
+    });
+    expect(selection).toMatchObject({
+      brand: 'ASUS', model: 'ROG Phone 3', price: 0, priceAuthority: 'quote-only',
+    });
+    expect(cart).toMatchObject({
+      brand: 'ASUS', model: 'ROG Phone 3', serviceToSelect: { name: 'Loudspeaker Replacement', price: 0 },
+    });
   });
 
   it.each([

@@ -32,12 +32,22 @@ export const BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS = [
   'motorola',
 ] as const;
 
+export const BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS = [
+  'microsoft',
+  'realme',
+  'asus',
+  'tcl',
+  'nothing',
+] as const;
+
 export const EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS = [
   ...BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS,
   ...BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
+  ...BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS,
 ] as const;
 
 const batchOneSecondaryPhoneBrands = new Set<string>(BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS);
+const batchThreeSecondaryPhoneBrands = new Set<string>(BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS);
 const evidenceQualifiedSecondaryPhoneBrands = new Set<string>(EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS);
 
 const VERIFIED_TELSTRA_MANUFACTURER_IDENTIFIERS: Readonly<Record<string, string>> = Object.freeze({
@@ -53,6 +63,10 @@ const UNVERIFIED_TELSTRA_MODEL_CODE_SLUGS = new Set([
 
 export function isBatchOneSecondaryPhoneBrand(brandSlug: string): boolean {
   return batchOneSecondaryPhoneBrands.has(brandSlug.toLowerCase());
+}
+
+export function isBatchThreeSecondaryPhoneBrand(brandSlug: string): boolean {
+  return batchThreeSecondaryPhoneBrands.has(brandSlug.toLowerCase());
 }
 
 export function isEvidenceQualifiedSecondaryPhoneBrand(brandSlug: string): boolean {

@@ -11,7 +11,7 @@ import {
   type StoredPublicRepairCatalogueSnapshot,
 } from './publicRepairCataloguePolicy';
 import { withVirtualCameraLensRepairOption } from './virtualCameraLens';
-import { withVirtualPhoneRepairOptions } from './virtualPhoneRepairs';
+import { withVirtualPhoneRepairGroupedServices, withVirtualPhoneRepairOptions } from './virtualPhoneRepairs';
 
 /**
  * Literal payload and checksum from the pre-Origin serializer. It deliberately
@@ -127,6 +127,14 @@ describe('repair catalogue origin tracing', () => {
     );
     expect(withVirtualPhoneRepairOptions([], 'phone', 'telstra')).toEqual(
       expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual', price: 0 })]),
+    );
+    for (const brand of ['microsoft', 'realme', 'asus', 'tcl', 'nothing']) {
+      expect(withVirtualPhoneRepairOptions([], 'phone', brand)).toEqual(
+        expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual', price: 0 })]),
+      );
+    }
+    expect(withVirtualPhoneRepairGroupedServices([], 'ASUS', 'ROG Phone 3', 'phone')).toEqual(
+      expect.arrayContaining([expect.objectContaining({ price: 0 })]),
     );
     expect(withVirtualCameraLensRepairOption([], 'phone', 'samsung')).toEqual(
       expect.arrayContaining([expect.objectContaining({ repairOrigin: 'virtual' })]),
