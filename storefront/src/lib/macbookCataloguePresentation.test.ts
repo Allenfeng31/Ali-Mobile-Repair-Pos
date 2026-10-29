@@ -11,7 +11,7 @@ import type { RepairCatalog } from './publicRepairCataloguePolicy';
 
 describe('MacBook Catalogue Presentation', () => {
   const sampleCatalog: RepairCatalog = {
-    source: 'live-pos',
+    source: 'pos',
     catalogueSource: 'live-pos',
     brands: [
       {
@@ -115,11 +115,11 @@ describe('MacBook Catalogue Presentation', () => {
 
   it('verifies exact identifiers for 2025–2026 M5 models without inferring unprinted A-numbers', () => {
     const m5_14 = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === 'macbook-pro-14-m5-2025');
-    expect(m5_14?.modelCode).toBeUndefined();
+    expect(m5_14?.modelCode).toBe('Mac17,2');
     expect(m5_14?.modelIdentifiers).toContain('Mac17,2');
 
     const m5_promax = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === 'macbook-pro-1416-m5-promax-2026');
-    expect(m5_promax?.modelCode).toBeUndefined();
+    expect(m5_promax?.modelCode).toBe('Mac17,6 / Mac17,7 / Mac17,8 / Mac17,9');
     expect(m5_promax?.modelIdentifiers).toEqual(['Mac17,7', 'Mac17,9', 'Mac17,6', 'Mac17,8']);
   });
 

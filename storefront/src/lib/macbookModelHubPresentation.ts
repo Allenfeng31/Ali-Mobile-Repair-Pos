@@ -7,6 +7,7 @@ type MacBookRepairOption = Readonly<{
 }>;
 
 const MACBOOK_A_NUMBER_PATTERN = /^A\d{4}$/i;
+const MACBOOK_IDENTIFIER_PATTERN = /^(A\d{4}|Mac\d+,\d+|MacBook[A-Za-z0-9,]+)$/i;
 
 const REPAIR_SLUGS = {
   screen: new Set(["screen-replacement", "screen-repair"]),
@@ -39,9 +40,9 @@ export function getMacBookModelCodes(modelCode?: string) {
 
   return Array.from(
     new Set(
-      (modelCode.match(/\bA\d{4}\b/gi) ?? [])
-        .map((code) => code.toUpperCase())
-        .filter((code) => MACBOOK_A_NUMBER_PATTERN.test(code)),
+      (modelCode.match(/\b(A\d{4}|Mac\d+,\d+|MacBook[A-Za-z0-9,]+)\b/gi) ?? [])
+        .map((code) => (MACBOOK_A_NUMBER_PATTERN.test(code) ? code.toUpperCase() : code.trim()))
+        .filter((code) => MACBOOK_IDENTIFIER_PATTERN.test(code)),
     ),
   );
 }

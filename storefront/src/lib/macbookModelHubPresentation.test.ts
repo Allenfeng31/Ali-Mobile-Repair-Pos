@@ -73,4 +73,12 @@ describe("MacBook Model Hub presentation", () => {
     expect(getMacBookModelCodeLabel(undefined)).toBeNull();
     expect(getMacBookModelMetaTitle("MacBook Unknown")).toBe("MacBook Unknown Repair | Ali Mobile");
   });
+
+  it("formats Apple Model Identifiers correctly when regulatory A-number is not on chassis", () => {
+    expect(getMacBookModelCodes("Mac17,2")).toEqual(["Mac17,2"]);
+    expect(getMacBookModelCodeLabel("Mac17,2")).toBe("Model Mac17,2");
+    expect(getMacBookModelMetaTitle('MacBook Pro 14" M5 (2025)', "Mac17,2")).toBe(
+      'MacBook Pro 14" M5 (2025) Mac17,2 Repair | Ali Mobile',
+    );
+  });
 });

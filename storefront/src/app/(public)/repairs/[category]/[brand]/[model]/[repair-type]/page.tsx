@@ -5153,6 +5153,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const isAliMobileEnhancedSamsungTabletPage = isAliMobileEnhancedSamsungTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams, isGenuinePosIpadRepair);
   const isAliMobileEnhancedMacBookPage = isAliMobileEnhancedMacBookRepairPage(resolvedParams);
+  const isMacBookDetailPage =
+    resolvedParams.category === 'laptop' &&
+    (resolvedParams.brand === 'macbook' || resolvedParams.brand === 'apple');
   const isAliMobileEnhancedAppleWatchPage = isAliMobileEnhancedAppleWatchRepairPage(resolvedParams);
   const isAliMobileEnhancedIphonePage = isAliMobileEnhancedIphoneRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungPage = isAliMobileEnhancedSamsungRepairPage(resolvedParams);
@@ -5890,7 +5893,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               iphoneCameraModuleFamilyHeroSubtitle ??
               iphoneBackGlassOrHousingFamilyHeroSubtitle ??
               iphoneStandardHardwareFamilyHero ??
-              'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.'}
+              (isMacBookDetailPage
+                ? 'Request an accurate quote from our technicians before booking. Walk-ins are welcome at our Ringwood store.'
+                : 'Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.')}
           </p>
           {isSamsungPhoneWaterDamagePage && (
             <p className="mx-auto mt-3 max-w-3xl text-sm font-semibold text-slate-700">
@@ -5910,6 +5915,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
               (isAliMobileEnhancedSamsungTabletPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedLenovoTabletPage && detailPricing.isQuoteOnly) ||
+              (isMacBookDetailPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedMacBookPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
@@ -5917,10 +5923,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
             useNeutralQuoteWording={Boolean(
-              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isAliMobileEnhancedMacBookPage || isSecondaryPhoneDetailPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
+              (ipadDetailTiming || isAliMobileEnhancedSamsungTabletPage || isAliMobileEnhancedLenovoTabletPage || isMacBookDetailPage || isAliMobileEnhancedMacBookPage || isSecondaryPhoneDetailPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
             )}
             typicalPriceRange={tabletTypicalPriceGuidance ?? undefined}
-            quoteCtaLabel={(isAliMobileEnhancedMacBookPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
+            quoteCtaLabel={(isMacBookDetailPage || isAliMobileEnhancedMacBookPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
               ? 'Get a Quote'
               : undefined}
             variants={details?.variants || []}

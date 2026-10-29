@@ -53,13 +53,13 @@ export const VERIFIED_NEW_MACBOOK_PRO_MODELS: ReadonlyArray<Readonly<{
   {
     model: 'MacBook Pro 14" M5 (2025)',
     slug: 'macbook-pro-14-m5-2025',
-    modelCode: undefined, // Apple Model Identifier: Mac17,2; A-number not officially assigned on chassis
+    modelCode: 'Mac17,2',
     modelIdentifiers: ['Mac17,2'],
   },
   {
     model: 'MacBook Pro 14"/16" M5 Pro/Max (2026)',
     slug: 'macbook-pro-1416-m5-promax-2026',
-    modelCode: undefined, // Apple Model Identifiers: Mac17,7, Mac17,9 (14") / Mac17,6, Mac17,8 (16")
+    modelCode: 'Mac17,6 / Mac17,7 / Mac17,8 / Mac17,9',
     modelIdentifiers: ['Mac17,7', 'Mac17,9', 'Mac17,6', 'Mac17,8'],
   },
 ]);

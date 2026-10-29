@@ -102,13 +102,7 @@ export const TABLET_BRAND_STARTING_PRICES: Record<string, Partial<Record<string,
   },
 };
 
-export const LAPTOP_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {
-  macbook: {
-    "screen-replacement": 250,
-    "battery-replacement": 150,
-    "charging-port-replacement": 99,
-  },
-};
+export const LAPTOP_BRAND_STARTING_PRICES: Record<string, Partial<Record<string, number>>> = {};
 
 const APPLE_WATCH_STANDARD_REPAIR_SLUGS = new Set([
   "screen-replacement",

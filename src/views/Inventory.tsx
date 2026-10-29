@@ -572,7 +572,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 return (
                   <div key={item.id} className="group">
                     <div
-                      onClick={() => editingId === item.id ? setEditingId(null) : handleEdit(item)}
+                      onClick={() => editingId === item.id ? clearForm() : handleEdit(item)}
                       className={cn(
                         "bg-[var(--color-neu-bg)] rounded-[2rem] p-5 sm:p-6 shadow-[var(--shadow-neu-flat)] active:scale-[0.98] transition-all cursor-pointer flex flex-col sm:grid sm:grid-cols-12 items-start sm:items-center gap-4 border border-white/20",
                         isEditingThis && "shadow-[var(--shadow-neu-pressed)] scale-[0.99]"
@@ -741,7 +741,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
                         <div className="flex justify-end gap-4 pt-4">
                           <button
-                            onClick={() => setEditingId(null)}
+                            onClick={clearForm}
                             className="px-6 py-3 bg-[var(--color-neu-bg)] text-black font-bold rounded-2xl shadow-[var(--shadow-neu-flat)] active:shadow-[var(--shadow-neu-pressed)] transition-all"
                           >
                             Cancel
@@ -792,7 +792,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
           <aside className="lg:col-span-4 flex flex-col gap-10 order-last lg:order-first w-full sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-2 gap-3" aria-label="Product creation mode">
               <button
-                onClick={() => { setBulkMode(false); setEditingId(null); }}
+                onClick={() => { setBulkMode(false); clearForm(); }}
                 className={cn(
                   "flex items-center justify-center gap-2 py-4 rounded-[2rem] font-black text-sm transition-all active:scale-[0.98]",
                   !bulkMode ? "text-blue-600 shadow-[var(--shadow-neu-pressed)]" : "text-gray-500 shadow-[var(--shadow-neu-flat)]"
@@ -801,7 +801,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                 <Headphones size={20} strokeWidth={3} /> ACCESSORY PRODUCT
               </button>
               <button
-                onClick={() => { setBulkMode(true); setEditingId(null); }}
+                onClick={() => { setBulkMode(true); clearForm(); }}
                 className={cn(
                   "flex items-center justify-center gap-2 py-4 rounded-[2rem] font-black text-sm transition-all active:scale-[0.98]",
                   bulkMode ? "text-orange-600 shadow-[var(--shadow-neu-pressed)]" : "text-gray-500 shadow-[var(--shadow-neu-flat)]"
