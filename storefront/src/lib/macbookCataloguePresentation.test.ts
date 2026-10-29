@@ -89,10 +89,11 @@ describe('MacBook Catalogue Presentation', () => {
     expect(m3Model?.repairTypes.every((r) => MACBOOK_ALLOWED_REPAIR_SLUGS.has(r.slug))).toBe(true);
   });
 
-  it('appends all four officially verified 2024–2026 MacBook Pro models with Quote on Request behaviour', () => {
+  it('appends all ten officially verified 2024–2026 MacBook Pro models with Quote on Request behaviour', () => {
     const updated = applyMacBookCataloguePresentation(sampleCatalog);
     const macbook = updated.brands.find((b) => b.slug === 'macbook');
 
+    expect(VERIFIED_NEW_MACBOOK_PRO_MODELS).toHaveLength(10);
     for (const newModel of VERIFIED_NEW_MACBOOK_PRO_MODELS) {
       const found = macbook?.models.find((m) => m.slug === newModel.slug);
       expect(found).toBeDefined();
@@ -103,24 +104,24 @@ describe('MacBook Catalogue Presentation', () => {
     }
   });
 
-  it('verifies exact identifiers for 2024 M4 models', () => {
-    const m4_14 = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === 'macbook-pro-14-m4-2024');
-    expect(m4_14?.modelCode).toBe('A3112');
-    expect(m4_14?.modelIdentifiers).toContain('Mac16,1');
+  it('verifies exact A-numbers for all ten 2024–2026 models', () => {
+    const expectedANumbers: Record<string, string> = {
+      'macbook-pro-14-m4-2024': 'A3112',
+      'macbook-pro-14-m4-pro-2024': 'A3401',
+      'macbook-pro-14-m4-max-2024': 'A3185',
+      'macbook-pro-16-m4-pro-2024': 'A3403',
+      'macbook-pro-16-m4-max-2024': 'A3186',
+      'macbook-pro-14-m5-2025': 'A3434',
+      'macbook-pro-14-m5-pro-2026': 'A3426',
+      'macbook-pro-14-m5-max-2026': 'A3427',
+      'macbook-pro-16-m5-pro-2026': 'A3428',
+      'macbook-pro-16-m5-max-2026': 'A3429',
+    };
 
-    const m4_promax = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === 'macbook-pro-1416-m4-promax-2024');
-    expect(m4_promax?.modelCode).toBe('A3185 / A3186');
-    expect(m4_promax?.modelIdentifiers).toEqual(['Mac16,6', 'Mac16,8', 'Mac16,7', 'Mac16,5']);
-  });
-
-  it('verifies exact identifiers for 2025–2026 M5 models without inferring unprinted A-numbers', () => {
-    const m5_14 = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === 'macbook-pro-14-m5-2025');
-    expect(m5_14?.modelCode).toBe('Mac17,2');
-    expect(m5_14?.modelIdentifiers).toContain('Mac17,2');
-
-    const m5_promax = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === 'macbook-pro-1416-m5-promax-2026');
-    expect(m5_promax?.modelCode).toBe('Mac17,6 / Mac17,7 / Mac17,8 / Mac17,9');
-    expect(m5_promax?.modelIdentifiers).toEqual(['Mac17,7', 'Mac17,9', 'Mac17,6', 'Mac17,8']);
+    for (const [slug, code] of Object.entries(expectedANumbers)) {
+      const found = VERIFIED_NEW_MACBOOK_PRO_MODELS.find((m) => m.slug === slug);
+      expect(found?.modelCode).toBe(code);
+    }
   });
 
   it('keeps speculative M6 and PROLED XDR M5 models on HOLD without public routes', () => {
@@ -133,12 +134,12 @@ describe('MacBook Catalogue Presentation', () => {
   });
 
   it.each([
-    ['macbook-pro-1416-m3-promax-2023', 'macbook-pro-1416-m3-promax-2024'],
-    ['macbook-pro-14-m4-pro-2024', 'macbook-pro-1416-m4-promax-2024'],
-    ['macbook-pro-16-m4-max-2024', 'macbook-pro-1416-m4-promax-2024'],
-    ['macbook-pro-14-m5-pro-2026', 'macbook-pro-1416-m5-promax-2026'],
-    ['macbook-pro-16-m5-max-2026', 'macbook-pro-1416-m5-promax-2026'],
+    ['macbook-pro-1416-m3-promax-2023', 'macbook-pro-1416-m3-promax-2024'], // preserved older canonical
+    ['macbook-pro-1416-m4-promax-2024', 'macbook-pro-14-m4-pro-2024'], // legacy combined redirected
+    ['macbook-pro-1416-m5-promax-2026', 'macbook-pro-14-m5-pro-2026'], // legacy combined redirected
     ['macbook-pro-14-m4-2024', 'macbook-pro-14-m4-2024'], // canonical unchanged
+    ['macbook-pro-14-m4-pro-2024', 'macbook-pro-14-m4-pro-2024'], // canonical unchanged
+    ['macbook-pro-14-m5-2025', 'macbook-pro-14-m5-2025'], // canonical unchanged
   ])('resolves slug %s to canonical slug %s', (inputSlug, expectedSlug) => {
     expect(resolveMacBookCanonicalModelSlug(inputSlug)).toBe(expectedSlug);
   });

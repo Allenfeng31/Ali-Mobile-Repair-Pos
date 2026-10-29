@@ -25,6 +25,15 @@ describe("MacBook Model Hub presentation", () => {
     ["MacBook Air 13-inch M1 2020", "A2337"],
     ["MacBook Pro 14/16-inch M3 Pro/Max 2023", "A2992 / A2991"],
     ["MacBook Pro 14-inch M4 2024", "A3112"],
+    ["MacBook Pro 14-inch M4 Pro 2024", "A3401"],
+    ["MacBook Pro 14-inch M4 Max 2024", "A3185"],
+    ["MacBook Pro 16-inch M4 Pro 2024", "A3403"],
+    ["MacBook Pro 16-inch M4 Max 2024", "A3186"],
+    ["MacBook Pro 14-inch M5 2025", "A3434"],
+    ["MacBook Pro 14-inch M5 Pro 2026", "A3426"],
+    ["MacBook Pro 14-inch M5 Max 2026", "A3427"],
+    ["MacBook Pro 16-inch M5 Pro 2026", "A3428"],
+    ["MacBook Pro 16-inch M5 Max 2026", "A3429"],
     ["MacBook Pro 14/16-inch M4 Pro/Max 2024", "A3185 / A3186"],
     ["MacBook Pro 13-inch M2 2022", "A2686"],
     ["MacBook Pro 14/16-inch M2 Pro/Max 2023", "A2779 / A2780"],
@@ -74,11 +83,11 @@ describe("MacBook Model Hub presentation", () => {
     expect(getMacBookModelMetaTitle("MacBook Unknown")).toBe("MacBook Unknown Repair | Ali Mobile");
   });
 
-  it("formats Apple Model Identifiers correctly when regulatory A-number is not on chassis", () => {
-    expect(getMacBookModelCodes("Mac17,2")).toEqual(["Mac17,2"]);
-    expect(getMacBookModelCodeLabel("Mac17,2")).toBe("Model Mac17,2");
-    expect(getMacBookModelMetaTitle('MacBook Pro 14" M5 (2025)', "Mac17,2")).toBe(
-      'MacBook Pro 14" M5 (2025) Mac17,2 Repair | Ali Mobile',
+  it("formats verified A-number for newly added M5 model", () => {
+    expect(getMacBookModelCodes("A3434")).toEqual(["A3434"]);
+    expect(getMacBookModelCodeLabel("A3434")).toBe("Model A3434");
+    expect(getMacBookModelMetaTitle('MacBook Pro 14" M5 (2025)', "A3434")).toBe(
+      'MacBook Pro 14" M5 (2025) A3434 Repair | Ali Mobile',
     );
   });
 });

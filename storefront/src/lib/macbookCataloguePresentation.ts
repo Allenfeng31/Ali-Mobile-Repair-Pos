@@ -18,14 +18,8 @@ export const MACBOOK_ALLOWED_REPAIR_SLUGS = new Set([
  */
 export const MACBOOK_MODEL_SLUG_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   'macbook-pro-1416-m3-promax-2023': 'macbook-pro-1416-m3-promax-2024',
-  'macbook-pro-14-m4-pro-2024': 'macbook-pro-1416-m4-promax-2024',
-  'macbook-pro-14-m4-max-2024': 'macbook-pro-1416-m4-promax-2024',
-  'macbook-pro-16-m4-pro-2024': 'macbook-pro-1416-m4-promax-2024',
-  'macbook-pro-16-m4-max-2024': 'macbook-pro-1416-m4-promax-2024',
-  'macbook-pro-14-m5-pro-2026': 'macbook-pro-1416-m5-promax-2026',
-  'macbook-pro-14-m5-max-2026': 'macbook-pro-1416-m5-promax-2026',
-  'macbook-pro-16-m5-pro-2026': 'macbook-pro-1416-m5-promax-2026',
-  'macbook-pro-16-m5-max-2026': 'macbook-pro-1416-m5-promax-2026',
+  'macbook-pro-1416-m4-promax-2024': 'macbook-pro-14-m4-pro-2024',
+  'macbook-pro-1416-m5-promax-2026': 'macbook-pro-14-m5-pro-2026',
 });
 
 /**
@@ -35,32 +29,57 @@ export const MACBOOK_MODEL_SLUG_ALIASES: Readonly<Record<string, string>> = Obje
 export const VERIFIED_NEW_MACBOOK_PRO_MODELS: ReadonlyArray<Readonly<{
   model: string;
   slug: string;
-  modelCode?: string;
-  modelIdentifiers: readonly string[];
+  modelCode: string;
 }>> = Object.freeze([
   {
     model: 'MacBook Pro 14" M4 (2024)',
     slug: 'macbook-pro-14-m4-2024',
     modelCode: 'A3112',
-    modelIdentifiers: ['Mac16,1'],
   },
   {
-    model: 'MacBook Pro 14"/16" M4 Pro/Max (2024)',
-    slug: 'macbook-pro-1416-m4-promax-2024',
-    modelCode: 'A3185 / A3186',
-    modelIdentifiers: ['Mac16,6', 'Mac16,8', 'Mac16,7', 'Mac16,5'],
+    model: 'MacBook Pro 14" M4 Pro (2024)',
+    slug: 'macbook-pro-14-m4-pro-2024',
+    modelCode: 'A3401',
+  },
+  {
+    model: 'MacBook Pro 14" M4 Max (2024)',
+    slug: 'macbook-pro-14-m4-max-2024',
+    modelCode: 'A3185',
+  },
+  {
+    model: 'MacBook Pro 16" M4 Pro (2024)',
+    slug: 'macbook-pro-16-m4-pro-2024',
+    modelCode: 'A3403',
+  },
+  {
+    model: 'MacBook Pro 16" M4 Max (2024)',
+    slug: 'macbook-pro-16-m4-max-2024',
+    modelCode: 'A3186',
   },
   {
     model: 'MacBook Pro 14" M5 (2025)',
     slug: 'macbook-pro-14-m5-2025',
-    modelCode: 'Mac17,2',
-    modelIdentifiers: ['Mac17,2'],
+    modelCode: 'A3434',
   },
   {
-    model: 'MacBook Pro 14"/16" M5 Pro/Max (2026)',
-    slug: 'macbook-pro-1416-m5-promax-2026',
-    modelCode: 'Mac17,6 / Mac17,7 / Mac17,8 / Mac17,9',
-    modelIdentifiers: ['Mac17,7', 'Mac17,9', 'Mac17,6', 'Mac17,8'],
+    model: 'MacBook Pro 14" M5 Pro (2026)',
+    slug: 'macbook-pro-14-m5-pro-2026',
+    modelCode: 'A3426',
+  },
+  {
+    model: 'MacBook Pro 14" M5 Max (2026)',
+    slug: 'macbook-pro-14-m5-max-2026',
+    modelCode: 'A3427',
+  },
+  {
+    model: 'MacBook Pro 16" M5 Pro (2026)',
+    slug: 'macbook-pro-16-m5-pro-2026',
+    modelCode: 'A3428',
+  },
+  {
+    model: 'MacBook Pro 16" M5 Max (2026)',
+    slug: 'macbook-pro-16-m5-max-2026',
+    modelCode: 'A3429',
   },
 ]);
 
@@ -108,25 +127,33 @@ export function applyMacBookCataloguePresentation(catalog: RepairCatalog): Repai
   const brands = catalog.brands.map((brand) => {
     if (brand.category !== 'laptop' || brand.slug !== 'macbook') return brand;
 
-    const existingModels: ModelEntry[] = brand.models.map((model) => {
-      let updatedModelName = model.model;
-      if (model.model.includes('M3 Pro/Max (2024)')) {
-        updatedModelName = model.model.replace('(2024)', '(2023)');
-      } else if (model.model.includes('M3 Pro/Max 2024')) {
-        updatedModelName = model.model.replace('2024', '2023');
-      }
+    const existingModels: ModelEntry[] = brand.models
+      .filter((model) => model.slug !== 'macbook-pro-1416-m4-promax-2024' && model.slug !== 'macbook-pro-1416-m5-promax-2026')
+      .map((model) => {
+        let updatedModelName = model.model;
+        let updatedModelCode = model.modelCode;
+        if (model.model.includes('M3 Pro/Max (2024)')) {
+          updatedModelName = model.model.replace('(2024)', '(2023)');
+        } else if (model.model.includes('M3 Pro/Max 2024')) {
+          updatedModelName = model.model.replace('2024', '2023');
+        }
 
-      // Restrict repair types to strict 5-service allowlist
-      const filteredRepairs = model.repairTypes.filter((repair) =>
-        MACBOOK_ALLOWED_REPAIR_SLUGS.has(repair.slug)
-      );
+        if (model.slug === 'macbook-pro-14-m5-2025') {
+          updatedModelCode = 'A3434';
+        }
 
-      return {
-        ...model,
-        model: updatedModelName,
-        repairTypes: filteredRepairs,
-      };
-    });
+        // Restrict repair types to strict 5-service allowlist
+        const filteredRepairs = model.repairTypes.filter((repair) =>
+          MACBOOK_ALLOWED_REPAIR_SLUGS.has(repair.slug)
+        );
+
+        return {
+          ...model,
+          model: updatedModelName,
+          modelCode: updatedModelCode,
+          repairTypes: filteredRepairs,
+        };
+      });
 
     // Append verified missing new models if not already present
     for (const newModel of VERIFIED_NEW_MACBOOK_PRO_MODELS) {
