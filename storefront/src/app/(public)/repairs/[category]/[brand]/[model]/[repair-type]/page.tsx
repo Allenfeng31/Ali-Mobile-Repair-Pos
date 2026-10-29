@@ -146,10 +146,12 @@ import { CANONICAL_LOGIC_BOARD_REPAIR_SLUG, resolveLegacyLogicBoardRoute } from 
 import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidationPaths';
 import { classifyPhoneBrand } from '@/lib/publicRepairPageModePolicy';
 import {
+  getSecondaryPhoneManufacturerIdentifier,
   getSecondaryPhoneModelIdentity,
+  isBatchTwoSecondaryPhoneBrand,
   isEvidenceQualifiedSecondaryPhoneBrand,
 } from '@/lib/secondaryPhoneModelIdentity';
-import { getBatch1SecondaryPhoneRepairDetailContent } from '@/lib/seo/content/secondaryPhoneRepairDetail';
+import { getSecondaryPhoneRepairDetailContent } from '@/lib/seo/content/secondaryPhoneRepairDetail';
 import {
   GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS,
   isGrandfatheredSecondaryPhoneDetailRepair,
@@ -4805,7 +4807,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
     : modelCode
       ? `${model} ${metadataRepairName} | Ringwood${priceStr} | ${modelCode}`
       : `${model} ${metadataRepairName} in Ringwood${priceStr} | Ali Mobile`;
-  const description = selectedCrawledRepairContent
+  const baseDescription = selectedCrawledRepairContent
     ? selectedCrawledRepairContent.metaDescription
     : enhancedLenovoTabletSeoPocket
     ? enhancedLenovoTabletSeoPocket.metaDescription
@@ -4825,6 +4827,19 @@ export async function generateMetadata({ params }: RepairPageProps) {
         repairSlug: internalRepairSlug,
         category: resolvedParams.category,
       });
+  const manufacturerIdentifier = resolvedParams.category === 'phone' &&
+    resolvedParams.brand === 'telstra' &&
+    resolvedParams.model === 'essential-pro' &&
+    ['screen-replacement', 'battery-replacement', 'charging-port-replacement'].includes(resolvedParams['repair-type'])
+      ? getSecondaryPhoneManufacturerIdentifier({
+          categorySlug: resolvedParams.category,
+          brandSlug: resolvedParams.brand,
+          modelSlug: resolvedParams.model,
+        })
+      : undefined;
+  const description = manufacturerIdentifier
+    ? `${baseDescription} This model is also identified by ZTE as the ${manufacturerIdentifier}.`
+    : baseDescription;
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   const canonicalUrl = `${baseUrl}/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}/${preserveRouteSegment(resolvedParams.model)}/${preserveRouteSegment(resolvedParams['repair-type'])}`;
@@ -5372,11 +5387,18 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     enhancedMacBookSeoPocket?.modelName ??
     enhancedAppleWatchSeoPocket?.modelName ??
     displayModel;
-  const batch1SecondaryPhoneRepairContent = getBatch1SecondaryPhoneRepairDetailContent({
+  const isBatchTwoSecondaryPhoneBrandDetail = resolvedParams.category === 'phone' &&
+    isBatchTwoSecondaryPhoneBrand(resolvedParams.brand);
+  const secondaryPhoneRepairContent = getSecondaryPhoneRepairDetailContent({
+    categorySlug: resolvedParams.category,
     brandSlug: resolvedParams.brand,
     modelName: seoDisplayModel,
     repairSlug: resolvedParams['repair-type'],
+    isQuoteOnly: detailPricing.isQuoteOnly,
   });
+  const isBatchTwoSecondaryPhoneRepairDetail = Boolean(
+    isBatchTwoSecondaryPhoneBrandDetail && secondaryPhoneRepairContent
+  );
   const sameModelLinks = isAliMobileEnhancedLenovoTabletPage && lenovoTabletEnhancedRepairType
     ? getLenovoTabletSameModelRepairLinks(resolvedParams.model as any, lenovoTabletEnhancedRepairType)
     : isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
@@ -5652,11 +5674,13 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     displayBrand,
     { initialAssessmentCleaningMinutes },
   );
-  const baseFaqs = seoPocket?.faq || (isPrimaryPhoneOrdinaryDetailPage && detailPricing.isQuoteOnly
+  const baseFaqs = seoPocket?.faq || ((isPrimaryPhoneOrdinaryDetailPage || isBatchTwoSecondaryPhoneRepairDetail) && detailPricing.isQuoteOnly
     ? generatedFaqs.map((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question)
       ? {
           ...faq,
-          answer: `Pricing depends on the exact ${displayModel} model and repair option. Contact us to get a quote.`,
+          answer: isBatchTwoSecondaryPhoneRepairDetail
+            ? `Request a quote after confirming the exact ${displayModel}, repair service and symptoms. Parts availability, device condition and any additional damage may affect the final quote. We will confirm the repair options and price before proceeding.`
+            : `Pricing depends on the exact ${displayModel} model and repair option. Contact us to get a quote.`,
         }
       : faq)
     : generatedFaqs);
@@ -5859,7 +5883,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         }
         price={detailPricing.canEmitOffer ? String(detailPricing.resolvedPrice) : undefined}
         url={repairPageUrl}
-        includeCanonicalServiceIdentity={Boolean(batch1SecondaryPhoneRepairContent && detailPricing.isQuoteOnly)}
+        includeCanonicalServiceIdentity={Boolean(
+          secondaryPhoneRepairContent && (isBatchTwoSecondaryPhoneRepairDetail || detailPricing.isQuoteOnly)
+        )}
       />
 
       <RepairTypeClient
@@ -5902,8 +5928,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               iphoneCameraModuleFamilyHeroSubtitle ??
               iphoneBackGlassOrHousingFamilyHeroSubtitle ??
               iphoneStandardHardwareFamilyHero ??
-              (batch1SecondaryPhoneRepairContent && detailPricing.isQuoteOnly
-                ? batch1SecondaryPhoneRepairContent.heroSubtitle
+              (secondaryPhoneRepairContent && (isBatchTwoSecondaryPhoneRepairDetail || detailPricing.isQuoteOnly)
+                ? secondaryPhoneRepairContent.heroSubtitle
                 : undefined) ??
               (isMacBookDetailPage
                 ? 'Request an accurate quote from our technicians before booking. Walk-ins are welcome at our Ringwood store.'
@@ -5941,7 +5967,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             quoteCtaLabel={(isMacBookDetailPage || isAliMobileEnhancedMacBookPage || isPrimaryPhoneOrdinaryDetailPage) && detailPricing.isQuoteOnly
               ? 'Get a Quote'
               : undefined}
-            renderQuoteOnlyBookingLink={Boolean(batch1SecondaryPhoneRepairContent && detailPricing.isQuoteOnly)}
+            renderQuoteOnlyBookingLink={Boolean(secondaryPhoneRepairContent && detailPricing.isQuoteOnly)}
             variants={details?.variants || []}
             pricing={detailPricing}
             sourceType={(details as any)?.sourceType}
@@ -6027,11 +6053,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           <RepairPolicySection variant={repairPolicyVariant} />
         </ScrollReveal>
 
-        {batch1SecondaryPhoneRepairContent && (
+        {secondaryPhoneRepairContent && (
           <ScrollReveal>
             <RepairDetailBulletSection
               headingId="secondary-phone-repair-guide-heading"
-              section={batch1SecondaryPhoneRepairContent.section}
+              section={secondaryPhoneRepairContent.section}
             />
           </ScrollReveal>
         )}

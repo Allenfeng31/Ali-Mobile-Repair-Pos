@@ -1,6 +1,9 @@
-import { isBatchOneSecondaryPhoneBrand } from '@/lib/secondaryPhoneModelIdentity';
+import {
+  isBatchOneSecondaryPhoneBrand,
+  isBatchTwoSecondaryPhoneBrand,
+} from '@/lib/secondaryPhoneModelIdentity';
 
-type Batch1RepairSlug = 'screen-replacement' | 'battery-replacement' | 'charging-port-replacement';
+type SecondaryPhoneRepairSlug = 'screen-replacement' | 'battery-replacement' | 'charging-port-replacement';
 
 interface SecondaryPhoneRepairDetailContent {
   heroSubtitle: string;
@@ -12,10 +15,16 @@ interface SecondaryPhoneRepairDetailContent {
   };
 }
 
-const HERO_SUBTITLE = 'Confirm your device details and request a repair quote. Parts availability and repair options will be confirmed after assessment.';
+const QUOTE_ONLY_HERO_SUBTITLE = 'Confirm your device details and request a repair quote. Parts availability and repair options will be confirmed after assessment.';
+
+const REPAIR_LABELS: Readonly<Record<SecondaryPhoneRepairSlug, string>> = Object.freeze({
+  'screen-replacement': 'screen replacement',
+  'battery-replacement': 'battery replacement',
+  'charging-port-replacement': 'charging port replacement',
+});
 
 function getServiceSection(
-  repairSlug: Batch1RepairSlug,
+  repairSlug: SecondaryPhoneRepairSlug,
   modelName: string,
 ): SecondaryPhoneRepairDetailContent['section'] {
   if (repairSlug === 'screen-replacement') {
@@ -59,20 +68,28 @@ function getServiceSection(
   };
 }
 
-export function getBatch1SecondaryPhoneRepairDetailContent({
+export function getSecondaryPhoneRepairDetailContent({
+  categorySlug,
   brandSlug,
   modelName,
   repairSlug,
+  isQuoteOnly = true,
 }: {
+  categorySlug: string;
   brandSlug: string;
   modelName: string;
   repairSlug: string;
+  isQuoteOnly?: boolean;
 }): SecondaryPhoneRepairDetailContent | null {
-  if (!isBatchOneSecondaryPhoneBrand(brandSlug)) return null;
+  if (categorySlug !== 'phone') return null;
+  if (!isBatchOneSecondaryPhoneBrand(brandSlug) && !isBatchTwoSecondaryPhoneBrand(brandSlug)) return null;
   if (!['screen-replacement', 'battery-replacement', 'charging-port-replacement'].includes(repairSlug)) return null;
 
+  const supportedRepairSlug = repairSlug as SecondaryPhoneRepairSlug;
   return {
-    heroSubtitle: HERO_SUBTITLE,
-    section: getServiceSection(repairSlug as Batch1RepairSlug, modelName),
+    heroSubtitle: isQuoteOnly
+      ? QUOTE_ONLY_HERO_SUBTITLE
+      : `View the current ${modelName} ${REPAIR_LABELS[supportedRepairSlug]} price below, confirm your device details, then book the repair. Parts availability and any additional faults will be confirmed before work begins.`,
+    section: getServiceSection(supportedRepairSlug, modelName),
   };
 }

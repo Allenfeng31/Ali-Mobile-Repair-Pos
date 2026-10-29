@@ -47,6 +47,7 @@ export const EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS = [
 ] as const;
 
 const batchOneSecondaryPhoneBrands = new Set<string>(BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS);
+const batchTwoSecondaryPhoneBrands = new Set<string>(BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS);
 const batchThreeSecondaryPhoneBrands = new Set<string>(BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS);
 const evidenceQualifiedSecondaryPhoneBrands = new Set<string>(EVIDENCE_QUALIFIED_SECONDARY_PHONE_BRAND_SLUGS);
 
@@ -63,6 +64,10 @@ const UNVERIFIED_TELSTRA_MODEL_CODE_SLUGS = new Set([
 
 export function isBatchOneSecondaryPhoneBrand(brandSlug: string): boolean {
   return batchOneSecondaryPhoneBrands.has(brandSlug.toLowerCase());
+}
+
+export function isBatchTwoSecondaryPhoneBrand(brandSlug: string): boolean {
+  return batchTwoSecondaryPhoneBrands.has(brandSlug.toLowerCase());
 }
 
 export function isBatchThreeSecondaryPhoneBrand(brandSlug: string): boolean {

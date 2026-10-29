@@ -7,6 +7,8 @@ import {
   fetchRepairDetails,
   type RepairCatalog,
 } from '@/lib/api';
+import { GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
+import { BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS } from '@/lib/secondaryPhoneModelIdentity';
 import { getSamsungHardwareConfig } from '@/lib/seo/content/samsung/config';
 import { getSamsungFoldableScreenDetailContext } from '@/lib/seo/content/samsung/screen-replacement';
 
@@ -261,6 +263,19 @@ function params(category: string, brand: string, model: string, repairType: stri
   return { params: Promise.resolve({ category, brand, model, 'repair-type': repairType }) };
 }
 
+const batchTwoMetadataModels = {
+  huawei: { brand: 'Huawei', models: { 'mate-20-pro': 'Mate 20 Pro', 'mate-30-pro': 'Mate 30 Pro', 'nova-5t': 'Nova 5T', 'p30-pro': 'P30 Pro', 'p40-pro': 'P40 Pro' } },
+  htc: { brand: 'HTC', models: { 'desire-21-pro-5g': 'Desire 21 Pro 5G', 'one-m8': 'One M8', 'one-m9': 'One M9', u11: 'U11', 'u12-plus': 'U12+' } },
+  sony: { brand: 'Sony', models: { 'xperia-1': 'Xperia 1', 'xperia-1-ii': 'Xperia 1 II', 'xperia-10-ii': 'Xperia 10 II', 'xperia-5': 'Xperia 5', 'xperia-5-ii': 'Xperia 5 II' } },
+  telstra: { brand: 'Telstra', models: { 'essential-pro': 'Essential Pro', 'essential-smart-21': 'Essential Smart 2.1', 'evoke-pro-2': 'Evoke Pro 2', 't-smart': 'T-Smart', 'tough-max-3': 'Tough Max 3' } },
+  motorola: { brand: 'Motorola', models: { 'edge-20': 'Edge 20', 'edge-30-pro': 'Edge 30 Pro', 'moto-g-power': 'Moto G Power', 'moto-g-stylus': 'Moto G Stylus', 'moto-g04': 'Moto G04', 'moto-g24': 'Moto G24', 'moto-g50': 'Moto G50', 'moto-g55': 'Moto G55' } },
+} as const;
+const batchTwoMetadataRepairNames = {
+  'screen-replacement': 'Screen Replacement',
+  'battery-replacement': 'Battery Replacement',
+  'charging-port-replacement': 'Charging Port Replacement',
+} as const;
+
 describe('repair detail metadata', () => {
   beforeEach(() => {
     vi.mocked(fetchRepairCatalog).mockResolvedValue(catalog);
@@ -350,6 +365,97 @@ describe('repair detail metadata', () => {
         url: canonicalUrl,
       });
     }
+  });
+
+  it('keeps complete indexable metadata and exact canonicals across all 84 Batch 2 routes', async () => {
+    const batchTwoBrands = new Set<string>(BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS);
+    const routes = GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS.filter(({ brandSlug }) => batchTwoBrands.has(brandSlug));
+
+    expect(routes).toHaveLength(84);
+    for (const route of routes) {
+      const brandEntry = batchTwoMetadataModels[route.brandSlug as keyof typeof batchTwoMetadataModels];
+      const model = brandEntry.models[route.modelSlug as keyof typeof brandEntry.models];
+      const repairName = batchTwoMetadataRepairNames[route.repairSlug as keyof typeof batchTwoMetadataRepairNames];
+      const publicModel = `${brandEntry.brand} ${model}`;
+      const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${route.brandSlug}/${route.modelSlug}/${route.repairSlug}`;
+      vi.mocked(fetchRepairCatalog).mockResolvedValue({
+        ...catalog,
+        checksum: `batch-2-${route.brandSlug}-${route.modelSlug}-${route.repairSlug}`,
+        inventoryRowCount: 1,
+        publicModelCount: 1,
+        publicRepairCount: 1,
+        brands: [{
+          category: 'phone', brand: brandEntry.brand, slug: route.brandSlug, icon: 'phone',
+          models: [{ model, slug: route.modelSlug, repairTypes: [{ name: repairName, slug: route.repairSlug, price: 0 }] }],
+        }],
+      });
+      vi.mocked(fetchRepairDetails).mockResolvedValue({
+        brand: brandEntry.brand,
+        model,
+        repairType: repairName,
+        price: 0,
+        variants: [],
+        source: 'fallback',
+      });
+
+      const metadata = await generateMetadata(params('phone', route.brandSlug, route.modelSlug, route.repairSlug));
+
+      expect(String(metadata.title), canonicalUrl).toContain(`${publicModel} ${repairName}`);
+      expect(String(metadata.description), canonicalUrl).toContain(publicModel);
+      expect(metadata.alternates?.canonical, canonicalUrl).toBe(canonicalUrl);
+      expect(metadata.openGraph, canonicalUrl).toMatchObject({
+        title: `${publicModel} ${repairName} | Ali Mobile & Repair`,
+        url: canonicalUrl,
+      });
+      expect(metadata.robots, canonicalUrl).toBeUndefined();
+    }
+  });
+
+  it.each([
+    ['Screen Replacement', 'screen-replacement'],
+    ['Battery Replacement', 'battery-replacement'],
+    ['Charging Port Replacement', 'charging-port-replacement'],
+  ] as const)('adds the verified Essential Pro manufacturer identifier to %s metadata only', async (
+    repairName,
+    repairSlug,
+  ) => {
+    vi.mocked(fetchRepairCatalog).mockResolvedValue({
+      ...catalog,
+      checksum: `essential-pro-${repairSlug}`,
+      inventoryRowCount: 1,
+      publicModelCount: 1,
+      publicRepairCount: 1,
+      brands: [{
+        category: 'phone',
+        brand: 'Telstra',
+        slug: 'telstra',
+        icon: 'phone',
+        models: [{
+          model: 'Essential Pro',
+          slug: 'essential-pro',
+          repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [] }],
+        }],
+      }],
+    });
+    vi.mocked(fetchRepairDetails).mockResolvedValue({
+      brand: 'Telstra',
+      model: 'Essential Pro',
+      repairType: repairName,
+      price: 0,
+      variants: [],
+      source: 'fallback',
+    });
+
+    const metadata = await generateMetadata(params('phone', 'telstra', 'essential-pro', repairSlug));
+
+    expect(metadata.title).toContain(`Telstra Essential Pro ${repairName}`);
+    expect(metadata.description).toContain('Telstra Essential Pro');
+    expect(metadata.description).toContain('ZTE A5 2019T');
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+    expect(metadata.twitter?.description).toBe(metadata.description);
+    expect(metadata.alternates?.canonical).toBe(
+      `https://www.alimobile.com.au/repairs/phone/telstra/essential-pro/${repairSlug}`,
+    );
   });
 
   it.each([
@@ -492,7 +598,7 @@ describe('repair detail metadata', () => {
     expect(pageSource.indexOf('<RepairResultsMatchingSection')).toBeLessThan(
       pageSource.indexOf('<RepairPolicySection')
     );
-    const metadataDescriptionStart = pageSource.indexOf('const description =');
+    const metadataDescriptionStart = pageSource.indexOf('const baseDescription =');
     const metadataDescriptionEnd = pageSource.indexOf('const baseUrl =', metadataDescriptionStart);
     const schemaDescriptionStart = pageSource.indexOf('const genericRepairIntentDescription =');
     const schemaDescriptionEnd = pageSource.indexOf('const crossModelSectionRepairName', schemaDescriptionStart);

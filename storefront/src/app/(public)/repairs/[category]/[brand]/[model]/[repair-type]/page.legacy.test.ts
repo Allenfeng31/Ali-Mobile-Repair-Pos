@@ -27,6 +27,8 @@ vi.mock('next/navigation', () => ({
 import RepairServicePage, { generateStaticParams } from './page';
 import FaqAccordionComponent from '@/components/FaqAccordion';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
+import { GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
+import { BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS } from '@/lib/secondaryPhoneModelIdentity';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getAliMobileEnhancedIphoneSeoPocket } from '@/lib/seo/content/iphone';
@@ -38,6 +40,30 @@ import {
 } from '@/lib/seo/content/lenovo-tablet';
 
 const params = (overrides: Record<string, string> = {}) => ({ category: 'phone', brand: 'motorola', model: 'moto-g24', 'repair-type': 'screen-replacement', ...overrides });
+const batchTwoModels = {
+  huawei: { brand: 'Huawei', models: { 'mate-20-pro': 'Mate 20 Pro', 'mate-30-pro': 'Mate 30 Pro', 'nova-5t': 'Nova 5T', 'p30-pro': 'P30 Pro', 'p40-pro': 'P40 Pro' } },
+  htc: { brand: 'HTC', models: { 'desire-21-pro-5g': 'Desire 21 Pro 5G', 'one-m8': 'One M8', 'one-m9': 'One M9', u11: 'U11', 'u12-plus': 'U12+' } },
+  sony: { brand: 'Sony', models: { 'xperia-1': 'Xperia 1', 'xperia-1-ii': 'Xperia 1 II', 'xperia-10-ii': 'Xperia 10 II', 'xperia-5': 'Xperia 5', 'xperia-5-ii': 'Xperia 5 II' } },
+  telstra: { brand: 'Telstra', models: { 'essential-pro': 'Essential Pro', 'essential-smart-21': 'Essential Smart 2.1', 'evoke-pro-2': 'Evoke Pro 2', 't-smart': 'T-Smart', 'tough-max-3': 'Tough Max 3' } },
+  motorola: { brand: 'Motorola', models: { 'edge-20': 'Edge 20', 'edge-30-pro': 'Edge 30 Pro', 'moto-g-power': 'Moto G Power', 'moto-g-stylus': 'Moto G Stylus', 'moto-g04': 'Moto G04', 'moto-g24': 'Moto G24', 'moto-g50': 'Moto G50', 'moto-g55': 'Moto G55' } },
+} as const;
+const batchTwoRepairNames = {
+  'screen-replacement': 'Screen Replacement',
+  'battery-replacement': 'Battery Replacement',
+  'charging-port-replacement': 'Charging Port Replacement',
+} as const;
+const batchTwoPositivePrices = new Map<string, number>([
+  ['motorola/edge-20/screen-replacement', 170],
+  ['motorola/edge-30-pro/screen-replacement', 179],
+  ['motorola/moto-g04/screen-replacement', 129],
+  ['motorola/moto-g04/battery-replacement', 75],
+  ['motorola/moto-g04/charging-port-replacement', 75],
+  ['motorola/moto-g24/screen-replacement', 140],
+  ['motorola/moto-g24/battery-replacement', 75],
+  ['motorola/moto-g55/screen-replacement', 129],
+  ['motorola/moto-g55/battery-replacement', 80],
+  ['motorola/moto-g55/charging-port-replacement', 80],
+]);
 const active = { category: 'phone', brand: 'Motorola', slug: 'motorola', models: [{ model: 'Moto G24', slug: 'moto-g24', repairTypes: [{ name: 'Screen Replacement', slug: 'screen-replacement', price: 149, variants: [] }] }] };
 const activeModelWithoutScreenRepair = {
   ...active,
@@ -931,6 +957,123 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['Huawei Screen', 'Huawei', 'huawei', 'P30 Pro', 'p30-pro', 'Screen Replacement', 'screen-replacement', 'glass damage'],
+    ['Huawei Battery', 'Huawei', 'huawei', 'P30 Pro', 'p30-pro', 'Battery Replacement', 'battery-replacement', 'battery deterioration'],
+    ['Huawei Charging', 'Huawei', 'huawei', 'P30 Pro', 'p30-pro', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging'],
+    ['HTC Screen', 'HTC', 'htc', 'U12+', 'u12-plus', 'Screen Replacement', 'screen-replacement', 'glass damage'],
+    ['HTC Battery', 'HTC', 'htc', 'U12+', 'u12-plus', 'Battery Replacement', 'battery-replacement', 'battery deterioration'],
+    ['HTC Charging', 'HTC', 'htc', 'U12+', 'u12-plus', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging'],
+    ['Sony Screen', 'Sony', 'sony', 'Xperia 5', 'xperia-5', 'Screen Replacement', 'screen-replacement', 'glass damage'],
+    ['Sony Battery', 'Sony', 'sony', 'Xperia 5', 'xperia-5', 'Battery Replacement', 'battery-replacement', 'battery deterioration'],
+    ['Sony Charging', 'Sony', 'sony', 'Xperia 5', 'xperia-5', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging'],
+    ['Telstra Screen', 'Telstra', 'telstra', 'Essential Pro', 'essential-pro', 'Screen Replacement', 'screen-replacement', 'glass damage'],
+    ['Telstra Battery', 'Telstra', 'telstra', 'Essential Pro', 'essential-pro', 'Battery Replacement', 'battery-replacement', 'battery deterioration'],
+    ['Telstra Charging', 'Telstra', 'telstra', 'Essential Pro', 'essential-pro', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging'],
+    ['Motorola Screen', 'Motorola', 'motorola', 'Moto G50', 'moto-g50', 'Screen Replacement', 'screen-replacement', 'glass damage'],
+    ['Motorola Battery', 'Motorola', 'motorola', 'Moto G50', 'moto-g50', 'Battery Replacement', 'battery-replacement', 'battery deterioration'],
+    ['Motorola Charging', 'Motorola', 'motorola', 'Moto G50', 'moto-g50', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging'],
+  ] as const)('renders controlled Batch 2 quote-only detail content for %s', async (
+    _label,
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    expectedPhrase,
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      brand,
+      brandSlug,
+      model,
+      modelSlug,
+      repairName,
+      repairSlug,
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: brandSlug,
+      model: modelSlug,
+      'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${brandSlug}/${modelSlug}/${repairSlug}`;
+    const publicModel = model.toLowerCase().startsWith(brand.toLowerCase()) ? model : `${brand} ${model}`;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain(`<h1 id="repair-detail-heading">${publicModel} ${repairName}</h1>`);
+    expect(html).toContain('Confirm your device details and request a repair quote.');
+    expect(html.toLowerCase()).toContain(expectedPhrase);
+    expect(html).not.toContain('Choose a quality tier');
+    expect(pricing?.renderQuoteOnlyBookingLink).toBe(true);
+    expect(html).toContain('Book Repair Now</a>');
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(serviceSchema).toContain(`"@id":"${canonicalUrl}#service"`);
+    expect(serviceSchema).toContain(`"url":"${canonicalUrl}"`);
+    expect(faqs.find((faq) => /how much/i.test(faq.question))?.answer).toBe(
+      `Request a quote after confirming the exact ${publicModel}, repair service and symptoms. Parts availability, device condition and any additional damage may affect the final quote. We will confirm the repair options and price before proceeding.`,
+    );
+    expect(JSON.stringify(faqs)).not.toMatch(/Live Quote|instant, accurate price/i);
+  });
+
+  it('server-renders all 84 approved Batch 2 routes with the correct identity, authority and schema mode', async () => {
+    const batchTwoBrands = new Set<string>(BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS);
+    const routes = GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS.filter(({ brandSlug }) => batchTwoBrands.has(brandSlug));
+
+    expect(routes).toHaveLength(84);
+    for (const route of routes) {
+      const brandEntry = batchTwoModels[route.brandSlug as keyof typeof batchTwoModels];
+      const model = brandEntry.models[route.modelSlug as keyof typeof brandEntry.models];
+      const repairName = batchTwoRepairNames[route.repairSlug as keyof typeof batchTwoRepairNames];
+      const identity = `${route.brandSlug}/${route.modelSlug}/${route.repairSlug}`;
+      const price = batchTwoPositivePrices.get(identity) ?? 0;
+      fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+        brandEntry.brand,
+        route.brandSlug,
+        model,
+        route.modelSlug,
+        repairName,
+        route.repairSlug,
+        price,
+      ));
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({
+        brand: route.brandSlug,
+        model: route.modelSlug,
+        'repair-type': route.repairSlug,
+      })) });
+      const html = renderToStaticMarkup(page);
+      const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+      const publicModel = `${brandEntry.brand} ${model}`;
+      const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${identity}`;
+      const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+      const bookingQuery = new URL(String(pricing?.bookingHref), 'https://example.test').searchParams;
+
+      expect(html, identity).toContain(`<h1 id="repair-detail-heading">${publicModel} ${repairName}</h1>`);
+      expect(html, identity).not.toContain('Choose a quality tier');
+      expect(html, identity).toMatch(/repair guide/);
+      expect(html, identity).toContain('"@type":"BreadcrumbList"');
+      expect(serviceSchema, identity).toContain(`"@id":"${canonicalUrl}#service"`);
+      expect(serviceSchema, identity).toContain(`"url":"${canonicalUrl}"`);
+      expect(bookingQuery.get('brand'), identity).toBe(brandEntry.brand);
+      expect(bookingQuery.get('model'), identity).toBe(model);
+      expect(bookingQuery.get('service'), identity).toBe(repairName);
+
+      if (price > 0) {
+        expect(pricing?.renderQuoteOnlyBookingLink, identity).toBe(false);
+        expect(serviceSchema, identity).toContain(`"price":"${price.toFixed(2)}"`);
+      } else {
+        expect(pricing?.renderQuoteOnlyBookingLink, identity).toBe(true);
+        expect(html, identity).toContain('Quote on Request');
+        expect(html, identity).toContain('Book Repair Now</a>');
+        expect(serviceSchema, identity).not.toContain('"offers"');
+      }
+    }
+  });
+
+  it.each([
     ['Xiaomi', 'xiaomi', 'Mi 11', 'mi-11', 'Xiaomi Mi 11'],
     ['Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Nokia 8.3 5G'],
     ['Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Vivo Y52 5G'],
@@ -976,6 +1119,8 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['Edge 20 Screen', 'Edge 20', 'edge-20', 'Screen Replacement', 'screen-replacement', 170],
+    ['Edge 30 Pro Screen', 'Edge 30 Pro', 'edge-30-pro', 'Screen Replacement', 'screen-replacement', 179],
     ['Moto G04 Screen', 'Moto G04', 'moto-g04', 'Screen Replacement', 'screen-replacement', 129],
     ['Moto G04 Battery', 'Moto G04', 'moto-g04', 'Battery Replacement', 'battery-replacement', 75],
     ['Moto G04 Charging', 'Moto G04', 'moto-g04', 'Charging Port Replacement', 'charging-port-replacement', 75],
@@ -1018,6 +1163,11 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(serviceSchema).toContain('"offers"');
     expect(serviceSchema).toContain(`"price":"${price.toFixed(2)}"`);
     expect(serviceSchema).toContain('"priceCurrency":"AUD"');
+    expect(serviceSchema).toContain(`"@id":"https://www.alimobile.com.au/repairs/phone/motorola/${modelSlug}/${repairSlug}#service"`);
+    expect(serviceSchema).toContain(`"url":"https://www.alimobile.com.au/repairs/phone/motorola/${modelSlug}/${repairSlug}"`);
+    expect(html).toContain(`View the current Motorola ${model} ${repairName.toLowerCase()} price below`);
+    expect(html).not.toContain('Choose a quality tier');
+    expect(pricing?.renderQuoteOnlyBookingLink).toBe(false);
     expect([...bookingQuery.keys()]).toEqual(['brand', 'model', 'service']);
     expect(bookingQuery.get('brand')).toBe('Motorola');
     expect(bookingQuery.get('model')).toBe(model);
@@ -2013,7 +2163,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).not.toContain('supported rear camera modes');
   });
 
-  it('keeps non-pilot Repair Detail hero copy and timing unchanged', async () => {
+  it('keeps Batch 2 Fast Turnaround and timing FAQ unchanged while correcting the Hero', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [active] });
 
     const page = await RepairServicePage({ params: Promise.resolve(params()) });
@@ -2023,7 +2173,8 @@ describe('Repair Detail active and legacy page-data resolution', () => {
       (entry) => entry.question === 'How long does the Motorola Moto G24 Screen Replacement take?'
     );
 
-    expect(html).toContain('Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.');
+    expect(html).toContain('View the current Motorola Moto G24 screen replacement price below');
+    expect(html).not.toContain('Choose a quality tier');
     expect(html).toContain('Fast Turnaround');
     expect(html).not.toContain('30 Minutes');
     expect(html).not.toContain('Screen replacement at Ali Mobile in Ringwood Square.');
