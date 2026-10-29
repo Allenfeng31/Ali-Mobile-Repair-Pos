@@ -12,9 +12,7 @@ import { getAliMobileEnhancedMacBookSeoPocket } from '@/lib/seo/content/macbook'
 import { getAliMobileEnhancedSamsungTabletSeoPocket } from '@/lib/seo/content/samsung-tablet';
 import { getAppleWatchStandardTurnaroundMinutes } from '@/lib/seo/content/apple-watch';
 import {
-  SECONDARY_PHONE_INSPECTION_TIMING_LABEL,
   SHARED_PHONE_STANDARD_REPAIR_MINUTES,
-  getSharedPhoneRepairTimingLabel,
 } from '@/lib/sharedPhoneRepairTiming';
 import {
   SAMSUNG_PHONE_WATER_DAMAGE_INITIAL_ASSESSMENT_MINUTES,
@@ -76,13 +74,6 @@ const MACBOOK_STANDARD_REPAIR_SLUGS = new Set([
 
 function withMinutes(turnaroundMinutes: number): ModelHubRepairPresentation {
   return { timingLabel: `${turnaroundMinutes} Minutes`, turnaroundMinutes };
-}
-
-function resolveSharedPhoneTiming(brandSlug: string): ModelHubRepairPresentation {
-  const timingLabel = getSharedPhoneRepairTimingLabel(brandSlug);
-  return timingLabel === SECONDARY_PHONE_INSPECTION_TIMING_LABEL
-    ? { timingLabel }
-    : withMinutes(SHARED_PHONE_STANDARD_REPAIR_MINUTES);
 }
 
 function resolveDetailPocket({ category, brandSlug, modelSlug, repairSlug }: ModelHubRepairPresentationInput) {
@@ -172,7 +163,7 @@ export function resolveModelHubRepairPresentation(
   const basePresentation = turnaroundMinutes
     ? withMinutes(turnaroundMinutes)
     : SHARED_STANDARD_REPAIR_SLUGS.has(repairSlug)
-      ? resolveSharedPhoneTiming(brandSlug)
+      ? withMinutes(SHARED_PHONE_STANDARD_REPAIR_MINUTES)
       : isMajorPhoneBrand && repairSlug === 'back-glass-replacement'
         ? { timingLabel: 'Varies' }
         : {};

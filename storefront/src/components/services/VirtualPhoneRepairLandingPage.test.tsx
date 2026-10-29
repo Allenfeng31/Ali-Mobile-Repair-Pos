@@ -239,7 +239,9 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.getByTestId('generic-peripheral-hierarchy').parentElement).toHaveAttribute('hidden');
     expect(screen.getByRole('heading', { level: 2, name: 'Huawei Mate 20' })).toBeTruthy();
     expect(screen.getAllByText('$79')).toHaveLength(1);
-    expect(within(screen.getByLabelText('Repair facts')).getByText('From $50')).toBeInTheDocument();
+    const facts = screen.getByLabelText('Repair facts');
+    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /Book Repair Now/ })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', '/book-repair?category=phone&brandSlug=huawei&modelSlug=mate-20&serviceSlug=loudspeaker-replacement');
     expect(screen.getByRole('button', { name: /Change model/ })).toBeTruthy();
@@ -260,6 +262,41 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.getByRole('button', { name: 'Select your model' })).toBeTruthy();
     expect(screen.getByTestId('generic-peripheral-hierarchy').getAttribute('data-brand')).toBe('huawei');
     expect(screen.getByRole('link', { name: 'Huawei Mate 20' })).toHaveAttribute('href', '/repairs/phone/loudspeaker-replacement?brand=huawei&model=mate-20');
+  });
+
+  it.each([
+    ['xiaomi', 'Xiaomi', '14C', '14c'],
+    ['huawei', 'Huawei', 'P30 Pro', 'p30-pro'],
+    ['nothing', 'Nothing', 'Phone (2)', 'phone-2'],
+  ])('renders the qualified owner-approved timing for selected %s models in SSR', (brandSlug, brand, model, modelSlug) => {
+    for (const [repairSlug, repairName] of [
+      ['loudspeaker-replacement', 'Loudspeaker Replacement'],
+      ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
+      ['power-button-replacement', 'Power Button Replacement'],
+      ['volume-button-replacement', 'Volume Button Replacement'],
+    ] as const) {
+      const html = renderToStaticMarkup(<VirtualPhoneRepairLandingPage
+        repairSlug={repairSlug}
+        canonicalPath={`/repairs/phone/${repairSlug}`}
+        models={[{ brand, brandSlug, model, modelSlug }]}
+        isGeneric
+        hierarchy={{
+          models: [{ brandSlug, brandLabel: brand, modelSlug, modelLabel: `${brand} ${model}`, repairLabel: repairName, priceLabel: null, bookingHref: '/book-repair' }],
+          selectedBrandSlug: brandSlug,
+          selectedModelSlug: modelSlug,
+          selectedDevice: {
+            selectedDevice: { brand, brandSlug, model, modelSlug },
+            selectedRepair: { name: repairName, serviceSlug: repairSlug },
+            booking: { href: `/book-repair?brandSlug=${brandSlug}&modelSlug=${modelSlug}&serviceSlug=${repairSlug}`, isAvailable: true },
+          },
+        }}
+      />);
+
+      expect(html).toContain('30 Minutes');
+      expect(html).toContain('Standard repair time is approximately 30 minutes when the correct part is available and no additional faults are found. Actual turnaround may vary after inspection.');
+      expect(html).toContain(`brandSlug=${brandSlug}`);
+      expect(html).toContain(`serviceSlug=${repairSlug}`);
+    }
   });
 
   it.each([
@@ -297,6 +334,8 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     />);
 
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeTruthy();
+    const facts = screen.getByLabelText('Repair facts');
+    expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(screen.getByText(distinction)).toBeTruthy();
     expect(screen.getByText(faq)).toBeTruthy();
     expect(container.textContent).toContain(evidence);

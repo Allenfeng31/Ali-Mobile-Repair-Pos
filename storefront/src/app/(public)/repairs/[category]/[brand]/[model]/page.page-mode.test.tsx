@@ -401,7 +401,7 @@ describe('Model Hub page-mode Server consumer', () => {
     expect(state.gridProps?.repairTypes).toEqual(expect.arrayContaining([
       expect.objectContaining({ slug: 'screen-replacement', price: 0 }),
       expect.objectContaining({ slug: 'battery-replacement', price: 75 }),
-      expect.objectContaining({ slug: 'loudspeaker-replacement', timingLabel: 'Confirmed After Inspection' }),
+      expect.objectContaining({ slug: 'loudspeaker-replacement', timingLabel: '30 Minutes', turnaroundMinutes: 30 }),
     ]));
     expect(state.gridProps?.repairTypes.find((repair) => repair.slug === 'screen-replacement')?.timingLabel)
       .toBeUndefined();

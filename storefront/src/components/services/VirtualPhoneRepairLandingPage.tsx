@@ -24,6 +24,7 @@ import { OPPO_SHARED_REPAIR_CONTENT } from '@/data/oppoSharedRepairContent';
 import type { SharedRepairPageCandidate, SharedRepairPageSupportedModel, SharedRepairPageV2PricingStrategy, SharedRepairPageV2QuickAnswers } from '@/lib/sharedRepairPageV2';
 import type { SharedRepairHierarchyModel } from '@/lib/sharedRepairHierarchy';
 import type { RepairResultMatchingItem } from '@/lib/repair-results';
+import { SHARED_PHONE_STANDARD_REPAIR_TIMING_QUALIFICATION } from '@/lib/sharedPhoneRepairTiming';
 
 export interface SharedVirtualRepairContent {
   diagnosis: string;
@@ -144,7 +145,7 @@ function GenericRepairContent({ repair }: { repair: VirtualPhoneRepair }) {
   const faqs: FaqItem[] = [
     ...content.faqs,
     { question: `How much does ${repair.name.toLowerCase()} cost?`, answer: 'Choose your supported model to see an exact trusted price, a From price for legitimate repair variants, or Quote on Request when a confirmed price is not available. We confirm the final quote before work begins.' },
-    { question: 'How long will the repair take?', answer: 'Timing depends on the confirmed fault, the correct part and device condition. We explain the expected timing after inspection.' },
+    { question: 'How long will the repair take?', answer: SHARED_PHONE_STANDARD_REPAIR_TIMING_QUALIFICATION },
     { question: 'Will the repair affect my data?', answer: 'A standard hardware repair does not normally require data erasure, but backing up important information before any repair is sensible, especially after impact or liquid exposure.' },
     { question: 'Does the repair include a warranty?', answer: 'Eligible completed standard repairs include a 6-month warranty under Ali Mobile’s normal warranty terms.' },
   ];
@@ -250,7 +251,6 @@ export default function VirtualPhoneRepairLandingPage({
   const samsungHeroPriceContext = samsungContent && (!hierarchy?.selectedDevice || samsungHeroPriceLabel === 'Quote on Request')
     ? ' Typical price range: $50–$150. Final pricing depends on the Galaxy model, required part and any other damage.'
     : '';
-
   return (
     <>
       <ServiceSchema serviceName={`${brandName ? `${brandName} ` : 'Phone '}${repair.name}`} description={brandContent?.intro ?? `${repair.summary} Choose a supported model for current repair options and an inspection-led quote.`} url={`https://www.alimobile.com.au${canonicalPath}`} />

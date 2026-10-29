@@ -80,6 +80,12 @@ describe('Camera Lens selected-device normalization', () => {
     expect(screen.queryByLabelText('Commercial repair facts')).toBeNull();
   });
 
+  it('qualifies the 30-minute Camera Lens estimate when timing is explained in the fallback FAQ', () => {
+    render(<CameraLensLandingPage brandName="Huawei" brandSlug="huawei" title="Huawei Camera Lens Replacement" intro="Inspection first." canonicalPath="/repairs/phone/camera-lens-replacement" models={models} />);
+
+    expect(screen.getByText('Standard repair time is approximately 30 minutes when the correct part is available and no additional faults are found. Actual turnaround may vary after inspection.')).toBeInTheDocument();
+  });
+
   it('keeps Pixel Camera Lens model cards as real selected-query links and preserves their natural order', () => {
     const pixelModels = models.filter((model) => model.brandSlug === 'google-pixel');
     render(<CameraLensLandingPage brandName="Google Pixel" brandSlug="google-pixel" title="Google Pixel Camera Lens Replacement" intro="Inspection first." canonicalPath="/repairs/phone/google/camera-lens-replacement" models={pixelModels} sharedPageV2={{ supportedModels: pixelModels.map((model) => ({ category: 'phone', canonicalBrandSlug: model.brandSlug, ...model })), priceCandidates: [], initialResults: [], selectedModelSlug: null, quickAnswers: { repairTime: 'Contact us.', partsSameDay: 'Call us.', warranty: 'Warranty.' }, pricingStrategy: { mode: 'fixed', fixedPrice: 50 } }} />);

@@ -124,7 +124,7 @@ describe('resolveModelHubRepairPresentation', () => {
     expect(presentation('motorola', 'moto-g04', 'screen-replacement')).toEqual({});
   });
 
-  it('uses inspection-led timing for supported secondary-phone services', () => {
+  it('uses the owner-approved 30-minute estimate for supported secondary-phone services', () => {
     for (const [brandSlug, modelSlug] of [
       ['vivo', 'y20s'],
       ['tcl', '30-plus'],
@@ -132,8 +132,9 @@ describe('resolveModelHubRepairPresentation', () => {
       ['motorola', 'moto-g04'],
       ['asus', 'rog-phone-5'],
     ] as const) {
-      expect(presentation(brandSlug, modelSlug, 'loudspeaker-replacement')).toEqual({
-        timingLabel: 'Confirmed After Inspection',
+      expect(presentation(brandSlug, modelSlug, 'loudspeaker-replacement')).toMatchObject({
+        timingLabel: '30 Minutes',
+        turnaroundMinutes: 30,
       });
       expect(presentation(brandSlug, modelSlug, 'screen-replacement')).toEqual({});
     }
@@ -194,8 +195,9 @@ describe('resolveModelHubRepairPresentation', () => {
         'power-button-replacement',
         'volume-button-replacement',
       ]) {
-        expect(presentation(brandSlug, modelSlug, repairSlug)).toEqual({
-          timingLabel: 'Confirmed After Inspection',
+        expect(presentation(brandSlug, modelSlug, repairSlug)).toMatchObject({
+          timingLabel: '30 Minutes',
+          turnaroundMinutes: 30,
         });
       }
       expect(presentation(brandSlug, modelSlug, 'screen-replacement')).toEqual({});

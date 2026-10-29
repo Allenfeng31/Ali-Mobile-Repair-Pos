@@ -33,6 +33,7 @@ import { GOOGLE_PIXEL_CAMERA_LENS_CONTENT } from "@/data/googlePixelSharedRepair
 import { OPPO_CAMERA_LENS_CONTENT } from "@/data/oppoSharedRepairContent";
 import { resolveSharedRepairContext, type SharedRepairRouteContext } from "@/lib/sharedRepairContext";
 import type { RepairResultMatchingItem } from "@/lib/repair-results";
+import { SHARED_PHONE_STANDARD_REPAIR_TIMING_QUALIFICATION } from "@/lib/sharedPhoneRepairTiming";
 
 interface CameraLensLandingPageProps {
   brandName?: string;
@@ -384,7 +385,7 @@ export default function CameraLensLandingPage({
           { question: `How much is ${brandName} camera lens replacement?`, answer: `${brandName} outer camera lens glass replacement is $50 where the protective lens-glass repair is suitable. We inspect model fitment and camera-area damage before work begins.` },
           { question: 'Can scratched or foggy photos need camera lens repair?', answer: 'They can when damaged outer lens glass, residue, or contamination is affecting the camera opening, but focus failure, shake, or a black preview can indicate a camera-module fault instead.' },
           { question: 'Will camera lens replacement delete my data?', answer: 'Camera lens glass repair does not normally erase data, but backing up important information before any repair is recommended.' },
-          { question: 'How long does camera lens repair take?', answer: 'Timing depends on the exact model, lens fitment, part availability, and whether inspection finds deeper camera-area damage. We confirm timing before work begins.' },
+          { question: 'How long does camera lens repair take?', answer: SHARED_PHONE_STANDARD_REPAIR_TIMING_QUALIFICATION },
         ]}
       /> : null}
       {brandName ? <section className="mx-auto w-full max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-labelledby="camera-lens-location-heading">
