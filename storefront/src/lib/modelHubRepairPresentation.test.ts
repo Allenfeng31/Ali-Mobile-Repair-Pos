@@ -9,6 +9,7 @@ import { LENOVO_TABLET_MODEL_CONFIG_LIST } from './seo/content/lenovo-tablet';
 import {
   MACBOOK_MODELS,
   MACBOOK_REPAIRS,
+  NEW_MACBOOK_PRO_MODELS,
 } from './seo/content/macbook';
 import { SAMSUNG_TABLET_MODEL_CONFIG_LIST } from './seo/content/samsung-tablet';
 import {
@@ -123,7 +124,7 @@ describe('resolveModelHubRepairPresentation', () => {
     expect(presentation('motorola', 'moto-g04', 'screen-replacement')).toEqual({});
   });
 
-  it('uses only the existing shared-phone timing source for supported secondary-phone services', () => {
+  it('uses inspection-led timing for supported secondary-phone services', () => {
     for (const [brandSlug, modelSlug] of [
       ['vivo', 'y20s'],
       ['tcl', '30-plus'],
@@ -131,9 +132,8 @@ describe('resolveModelHubRepairPresentation', () => {
       ['motorola', 'moto-g04'],
       ['asus', 'rog-phone-5'],
     ] as const) {
-      expect(presentation(brandSlug, modelSlug, 'loudspeaker-replacement')).toMatchObject({
-        timingLabel: '30 Minutes',
-        turnaroundMinutes: 30,
+      expect(presentation(brandSlug, modelSlug, 'loudspeaker-replacement')).toEqual({
+        timingLabel: 'Confirmed After Inspection',
       });
       expect(presentation(brandSlug, modelSlug, 'screen-replacement')).toEqual({});
     }
@@ -187,10 +187,17 @@ describe('resolveModelHubRepairPresentation', () => {
       ]),
     );
     for (const { brandSlug, modelSlug } of secondaryPhoneModels.values()) {
-      expect(presentation(brandSlug, modelSlug, 'loudspeaker-replacement')).toMatchObject({
-        timingLabel: '30 Minutes',
-        turnaroundMinutes: 30,
-      });
+      for (const repairSlug of [
+        'camera-lens-replacement',
+        'loudspeaker-replacement',
+        'earpiece-speaker-replacement',
+        'power-button-replacement',
+        'volume-button-replacement',
+      ]) {
+        expect(presentation(brandSlug, modelSlug, repairSlug)).toEqual({
+          timingLabel: 'Confirmed After Inspection',
+        });
+      }
       expect(presentation(brandSlug, modelSlug, 'screen-replacement')).toEqual({});
     }
 
@@ -233,6 +240,24 @@ describe('resolveModelHubRepairPresentation', () => {
       expect(categoryPresentation('laptop', 'macbook', modelSlug, 'logic-board-repair')).toEqual({
         timingLabel: 'Diagnostic Required',
       });
+      expect(categoryPresentation('laptop', 'macbook', modelSlug, 'water-damage-repair')).toEqual({
+        timingLabel: 'Depends on Damage',
+      });
+    }
+
+    for (const modelSlug of NEW_MACBOOK_PRO_MODELS) {
+      for (const repairSlug of MACBOOK_REPAIRS) {
+        expect(categoryPresentation('laptop', 'macbook', modelSlug, repairSlug)).toMatchObject({
+          timingLabel: '60 Minutes',
+          turnaroundMinutes: 60,
+        });
+      }
+      expect(categoryPresentation('laptop', 'macbook', modelSlug, 'logic-board-repair')).toEqual({
+        timingLabel: 'Diagnostic Required',
+      });
+      expect(categoryPresentation('laptop', 'macbook', modelSlug, 'water-damage-repair')).toEqual({
+        timingLabel: 'Depends on Damage',
+      });
     }
 
     for (const modelSlug of APPLE_WATCH_MODELS) {
@@ -270,6 +295,7 @@ describe('getModelHubTimingSummary', () => {
     ['tablet', 'samsung', 'galaxy-tab-a-80-2017-sm-t380-sm-t385', ['screen-replacement', 'battery-replacement'], 'Most standard repairs: 60 Minutes'],
     ['tablet', 'lenovo', 'lenovo-tab-p12-tb-370fu', ['screen-replacement', 'battery-replacement'], 'Most standard repairs: 60 Minutes'],
     ['laptop', 'macbook', 'macbook-air-m3-13-2024', ['screen-replacement', 'battery-replacement', 'charging-port-replacement'], 'Most standard repairs: 60 Minutes'],
+    ['laptop', 'macbook', 'macbook-pro-14-m4-pro-2024', ['screen-replacement', 'battery-replacement', 'charging-port-replacement'], 'Most standard repairs: 60 Minutes'],
     ['watch', 'apple-watch', 'apple-watch-series-9-45mm', ['screen-replacement', 'battery-replacement', 'charging-repair'], 'Most standard repairs: 45 Minutes'],
   ])('builds the compact %s %s timing summary from the existing category authority', (category, brandSlug, modelSlug, repairSlugs, primaryLine) => {
     expect(getModelHubTimingSummary({ category, brandSlug, modelSlug, repairSlugs })).toEqual({

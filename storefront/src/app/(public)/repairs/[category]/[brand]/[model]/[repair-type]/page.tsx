@@ -116,6 +116,7 @@ import {
   getMacBookRepairLabel,
   getMacBookSameModelRepairLinks,
   isAliMobileEnhancedMacBookRepairPage,
+  isNewMacBookProModel,
 } from '@/lib/seo/content/macbook';
 import { MACBOOK_MODEL_SLUG_ALIASES } from '@/lib/macbookCataloguePresentation';
 import {
@@ -5284,9 +5285,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     isAliMobileEnhancedLenovoTabletPage && approvedTurnaroundMinutes === 60
       ? '1 Hour'
       : undefined;
+  const isNewMacBookPro = isNewMacBookProModel(resolvedParams.model);
   const macBookTurnaroundLabel =
     isAliMobileEnhancedMacBookPage && approvedTurnaroundMinutes === 60
-      ? '1 Hour'
+      ? isNewMacBookPro ? '60 minutes' : '1 Hour'
       : undefined;
   const tabletTypicalPriceGuidance = isAliMobileEnhancedSamsungTabletPage
     ? getSamsungTabletTypicalPriceGuidance(resolvedParams.model, resolvedParams['repair-type'])
@@ -5942,6 +5944,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   <span className="trust-badge-icon"><Zap size={20} strokeWidth={2.5} aria-hidden="true" /></span>
                   {isSamsungPhoneWaterDamagePage
                     ? `Initial Assessment & Cleaning — ${initialAssessmentCleaningMinutes} Minutes`
+                    : isNewMacBookProModel(resolvedParams.model)
+                    ? 'Timing Confirmed After Assessment'
                     : 'Timeframe Depends on Damage'}
                 </div>
                 <div className="trust-badge">
@@ -5971,6 +5975,10 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       : isAliMobileEnhancedIphonePage
                         ? formatRepairTimeBadge('Varies')
                         : 'Timeframe Varies'
+                    : isNewMacBookProModel(resolvedParams.model) && (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'water-damage-repair')
+                    ? 'Timing Confirmed After Assessment'
+                    : isNewMacBookProModel(resolvedParams.model) && approvedTurnaroundMinutes
+                    ? 'Around 60 Minutes'
                     : approvedTurnaroundMinutes
                       ? formatRepairTimeBadge(samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? macBookTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`)
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')

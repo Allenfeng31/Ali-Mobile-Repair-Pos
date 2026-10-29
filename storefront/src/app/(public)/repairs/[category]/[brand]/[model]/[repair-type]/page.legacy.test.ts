@@ -553,6 +553,46 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     }
   });
 
+  it.each([
+    ['MacBook Pro 14" M4 Pro (2024)', 'macbook-pro-14-m4-pro-2024'],
+    ['MacBook Pro 14" M5 (2025)', 'macbook-pro-14-m5-2025'],
+  ] as const)('renders all standard repairs for %s with Around 60 Minutes trust badge and consistent 60-minute FAQ', async (model, modelSlug) => {
+    for (const [repairName, repairSlug] of [
+      ['Screen Replacement', 'screen-replacement'],
+      ['Battery Replacement', 'battery-replacement'],
+      ['Charging Port Repair', 'charging-port-replacement'],
+    ] as const) {
+      fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(model, modelSlug, repairName, repairSlug));
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({
+        category: 'laptop', brand: 'macbook', model: modelSlug, 'repair-type': repairSlug,
+      })) });
+      const html = renderToStaticMarkup(page);
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const timingFaqs = faqs.filter((faq) => /how long/i.test(faq.question));
+
+      expect(html).toContain('Around 60 Minutes');
+      expect(html).not.toContain('Fast Turnaround');
+      expect(timingFaqs).toHaveLength(1);
+      expect(timingFaqs[0].answer).toContain('around 60 minutes');
+    }
+  });
+
+  it.each([
+    ['MacBook Pro 14" M4 Pro (2024)', 'macbook-pro-14-m4-pro-2024'],
+    ['MacBook Pro 14" M5 (2025)', 'macbook-pro-14-m5-2025'],
+  ] as const)('renders logic board repair for %s with Timing Confirmed After Assessment badge', async (model, modelSlug) => {
+    fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(model, modelSlug, 'Motherboard & Logic Board Repair', 'logic-board-repair'));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'laptop', brand: 'macbook', model: modelSlug, 'repair-type': 'logic-board-repair',
+    })) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Timing Confirmed After Assessment');
+    expect(html).not.toContain('Fast Turnaround');
+  });
+
   it('preserves a resolved MacBook catalogue price and its AUD Offer', async () => {
     fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(
       'MacBook Air M2 13-inch 2022',

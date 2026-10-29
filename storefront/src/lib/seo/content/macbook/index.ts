@@ -613,6 +613,10 @@ export const NEW_MACBOOK_PRO_MODELS: ReadonlyArray<MacBookModelSlug> = [
   'macbook-pro-16-m5-max-2026',
 ];
 
+export function isNewMacBookProModel(modelSlug: string): boolean {
+  return (NEW_MACBOOK_PRO_MODELS as readonly string[]).includes(modelSlug);
+}
+
 const NEW_PAGE_KEYS = NEW_MACBOOK_PRO_MODELS.flatMap((slug) =>
   MACBOOK_REPAIRS.map((repairSlug) => `${slug}|${repairSlug}` as MacBookPageKey)
 );
@@ -715,8 +719,8 @@ function buildMacBookPocket(
           answer: `If the ${config.modelName} still powers on, back up important files first. Screen repair is hardware work, so data retention is not guaranteed.`,
         },
         {
-          question: `Can you confirm timing for ${config.modelName} screen replacement before seeing it?`,
-          answer: `No fixed timing is promised for the ${config.modelName} before inspection. We confirm quote, part availability, and likely timing after the bench check.`,
+          question: `How long does ${config.modelName} screen replacement take?`,
+          answer: `Standard ${config.modelName} screen replacement usually takes around 60 minutes when the correct part is available and no additional faults are found. Timing is confirmed after the bench check.`,
         },
       ],
       serviceSection: {
@@ -6800,10 +6804,7 @@ export function getAliMobileEnhancedMacBookSeoPocket({
   const pocket = MACBOOK_PAGE_CONTENT[`${contentModelSlug}|${repairSlug}` as MacBookPageKey];
   if (!pocket) return null;
 
-  const isStandardLegacyModel = (MACBOOK_MODELS as readonly string[]).includes(contentModelSlug);
-  const turnaroundMinutes = isStandardLegacyModel
-    ? MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES[repairSlug]
-    : undefined;
+  const turnaroundMinutes = MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES[repairSlug];
 
   return {
     ...pocket,

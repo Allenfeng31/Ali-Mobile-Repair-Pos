@@ -7,6 +7,7 @@ import {
   getAliMobileEnhancedMacBookSeoPocket,
   getMacBookCategoryHubLinks,
   isAliMobileEnhancedMacBookRepairPage,
+  isNewMacBookProModel,
 } from './index';
 
 describe('getMacBookCategoryHubLinks', () => {
@@ -116,8 +117,8 @@ describe('MacBook M4/M5 Enhanced Repair Details', () => {
       expect(pocket?.localService.items.length).toBe(3);
       expect(pocket?.finalCta.bullets.length).toBe(3);
 
-      // Crucial: no unsupported fixed repair times claimed for new models
-      expect(pocket?.turnaroundMinutes).toBeUndefined();
+      expect(isNewMacBookProModel(modelSlug)).toBe(true);
+      expect(pocket?.turnaroundMinutes).toBe(60);
     }
   });
 

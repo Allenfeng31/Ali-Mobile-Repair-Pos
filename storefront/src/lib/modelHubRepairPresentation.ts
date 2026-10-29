@@ -149,6 +149,9 @@ export function resolveModelHubRepairPresentation(
     isGooglePixelAliasBrand(brandSlug)
   );
   if (category !== 'phone') {
+    if (isWaterDamageRepairSlug(repairSlug)) {
+      return { timingLabel: 'Depends on Damage' };
+    }
     return repairSlug === 'logic-board-repair' ? { timingLabel: 'Diagnostic Required' } : {};
   }
 
