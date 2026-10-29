@@ -81,3 +81,59 @@ describe('MacBook standard repair timing', () => {
     })).toBeNull();
   });
 });
+
+describe('MacBook M4/M5 Enhanced Repair Details', () => {
+  const NEW_MODELS = [
+    'macbook-pro-14-m4-2024',
+    'macbook-pro-14-m4-pro-2024',
+    'macbook-pro-14-m4-max-2024',
+    'macbook-pro-16-m4-pro-2024',
+    'macbook-pro-16-m4-max-2024',
+    'macbook-pro-14-m5-2025',
+    'macbook-pro-14-m5-pro-2026',
+    'macbook-pro-14-m5-max-2026',
+    'macbook-pro-16-m5-pro-2026',
+    'macbook-pro-16-m5-max-2026',
+  ];
+
+  it.each(NEW_MODELS)('enables enhanced repair page and full pocket structure for %s', (modelSlug) => {
+    for (const repairSlug of MACBOOK_REPAIRS) {
+      expect(isAliMobileEnhancedMacBookRepairPage({
+        category: 'laptop',
+        brand: 'macbook',
+        model: modelSlug,
+        'repair-type': repairSlug,
+      })).toBe(true);
+
+      const pocket = getAliMobileEnhancedMacBookSeoPocket({ modelSlug, repairSlug });
+      expect(pocket).not.toBeNull();
+      expect(pocket?.quickAnswer).toBeTruthy();
+      expect(pocket?.repairOptions.length).toBeGreaterThanOrEqual(2);
+      expect(pocket?.commonProblems.length).toBeGreaterThanOrEqual(3);
+      expect(pocket?.diagnosticSteps.length).toBeGreaterThanOrEqual(3);
+      expect(pocket?.faq.length).toBe(6);
+      expect(pocket?.serviceSection.cards.length).toBe(3);
+      expect(pocket?.localService.items.length).toBe(3);
+      expect(pocket?.finalCta.bullets.length).toBe(3);
+
+      // Crucial: no unsupported fixed repair times claimed for new models
+      expect(pocket?.turnaroundMinutes).toBeUndefined();
+    }
+  });
+
+  it.each([
+    ['macbook-pro-1416-m4-promax-2024', 'macbook-pro-14-m4-pro-2024'],
+    ['macbook-pro-1416-m5-promax-2026', 'macbook-pro-14-m5-pro-2026'],
+  ])('resolves transitional combined slug %s to canonical %s', (transitionalSlug) => {
+    for (const repairSlug of MACBOOK_REPAIRS) {
+      expect(isAliMobileEnhancedMacBookRepairPage({
+        category: 'laptop',
+        brand: 'macbook',
+        model: transitionalSlug,
+        'repair-type': repairSlug,
+      })).toBe(true);
+      expect(getAliMobileEnhancedMacBookSeoPocket({ modelSlug: transitionalSlug, repairSlug })).not.toBeNull();
+    }
+  });
+});
+

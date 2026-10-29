@@ -23,7 +23,17 @@ type MacBookModelSlug =
   | 'macbook-pro-13-m2-2022'
   | 'macbook-pro-14-16-m2-pro-max-2023'
   | 'macbook-pro-14-16-m3-pro-max-2024'
-  | 'macbook-12-2015-2019';
+  | 'macbook-12-2015-2019'
+  | 'macbook-pro-14-m4-2024'
+  | 'macbook-pro-14-m4-pro-2024'
+  | 'macbook-pro-14-m4-max-2024'
+  | 'macbook-pro-16-m4-pro-2024'
+  | 'macbook-pro-16-m4-max-2024'
+  | 'macbook-pro-14-m5-2025'
+  | 'macbook-pro-14-m5-pro-2026'
+  | 'macbook-pro-14-m5-max-2026'
+  | 'macbook-pro-16-m5-pro-2026'
+  | 'macbook-pro-16-m5-max-2026';
 
 interface MacBookModelConfig {
   slug: MacBookModelSlug;
@@ -168,6 +178,18 @@ const PUBLIC_MACBOOK_MODEL_ALIASES = {
   'macbook-pro-1416-m2-promax-2023': 'macbook-pro-14-16-m2-pro-max-2023',
   'macbook-pro-1416-m3-promax-2024': 'macbook-pro-14-16-m3-pro-max-2024',
   'macbook-12-inch-2015-2019': 'macbook-12-2015-2019',
+  'macbook-pro-14-m4-2024': 'macbook-pro-14-m4-2024',
+  'macbook-pro-14-m4-pro-2024': 'macbook-pro-14-m4-pro-2024',
+  'macbook-pro-14-m4-max-2024': 'macbook-pro-14-m4-max-2024',
+  'macbook-pro-16-m4-pro-2024': 'macbook-pro-16-m4-pro-2024',
+  'macbook-pro-16-m4-max-2024': 'macbook-pro-16-m4-max-2024',
+  'macbook-pro-14-m5-2025': 'macbook-pro-14-m5-2025',
+  'macbook-pro-14-m5-pro-2026': 'macbook-pro-14-m5-pro-2026',
+  'macbook-pro-14-m5-max-2026': 'macbook-pro-14-m5-max-2026',
+  'macbook-pro-16-m5-pro-2026': 'macbook-pro-16-m5-pro-2026',
+  'macbook-pro-16-m5-max-2026': 'macbook-pro-16-m5-max-2026',
+  'macbook-pro-1416-m4-promax-2024': 'macbook-pro-14-m4-pro-2024',
+  'macbook-pro-1416-m5-promax-2026': 'macbook-pro-14-m5-pro-2026',
 } as const satisfies Record<string, MacBookModelSlug>;
 
 const PUBLIC_MACBOOK_MODEL_SLUGS_BY_CONTENT_KEY = Object.fromEntries(
@@ -395,6 +417,116 @@ const MODEL_CONFIGS: Record<MacBookModelSlug, MacBookModelConfig> = {
     portCaution: 'single USB-C port seating and cable angle behaviour',
     localContext: 'often brought in as a compact travel MacBook',
   },
+  'macbook-pro-14-m4-2024': {
+    slug: 'macbook-pro-14-m4-2024',
+    modelName: 'MacBook Pro 14" M4 (2024)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M4 14-inch platform',
+    chargingContext: 'MagSafe 3 and Thunderbolt / USB4 charging behaviour',
+    screenCaution: 'Liquid Retina XDR display assembly condition, lid alignment, and camera-notch area checks',
+    batteryCaution: 'M4 power efficiency and runtime symptoms checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 seating plus Thunderbolt / USB4 port consistency',
+    localContext: 'often brought in for study, business, and portable work use',
+  },
+  'macbook-pro-14-m4-pro-2024': {
+    slug: 'macbook-pro-14-m4-pro-2024',
+    modelName: 'MacBook Pro 14" M4 Pro (2024)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M4 Pro 14-inch platform',
+    chargingContext: 'MagSafe 3 and Thunderbolt 5 charging behaviour',
+    screenCaution: 'Liquid Retina XDR display assembly condition, lid alignment, and camera-notch area checks',
+    batteryCaution: 'M4 Pro workload runtime symptoms checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 seating plus Thunderbolt 5 port consistency',
+    localContext: 'often used for demanding development, creative, and professional workflows',
+  },
+  'macbook-pro-14-m4-max-2024': {
+    slug: 'macbook-pro-14-m4-max-2024',
+    modelName: 'MacBook Pro 14" M4 Max (2024)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M4 Max 14-inch platform',
+    chargingContext: 'MagSafe 3 and Thunderbolt 5 charging behaviour',
+    screenCaution: 'Liquid Retina XDR display assembly condition, lid alignment, and camera-notch area checks',
+    batteryCaution: 'high-demand M4 Max power draw checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 seating plus Thunderbolt 5 port consistency',
+    localContext: 'often used for intensive 3D rendering, video editing, and heavy compute workloads',
+  },
+  'macbook-pro-16-m4-pro-2024': {
+    slug: 'macbook-pro-16-m4-pro-2024',
+    modelName: 'MacBook Pro 16" M4 Pro (2024)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M4 Pro 16-inch platform',
+    chargingContext: 'high-wattage MagSafe 3 and Thunderbolt 5 charging behaviour',
+    screenCaution: 'larger 16-inch Liquid Retina XDR display assembly condition, hinge travel, and lid alignment',
+    batteryCaution: 'large-capacity battery runtime symptoms checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 connector fit and Thunderbolt 5 port consistency',
+    localContext: 'often used as a desktop-replacement workstation for design and development',
+  },
+  'macbook-pro-16-m4-max-2024': {
+    slug: 'macbook-pro-16-m4-max-2024',
+    modelName: 'MacBook Pro 16" M4 Max (2024)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M4 Max 16-inch platform',
+    chargingContext: 'high-wattage MagSafe 3 and Thunderbolt 5 charging behaviour',
+    screenCaution: 'larger 16-inch Liquid Retina XDR display assembly condition, hinge travel, and lid alignment',
+    batteryCaution: 'high-output M4 Max power demand checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 connector fit and Thunderbolt 5 port consistency',
+    localContext: 'often used for studio production, heavy compilation, and demanding creative workloads',
+  },
+  'macbook-pro-14-m5-2025': {
+    slug: 'macbook-pro-14-m5-2025',
+    modelName: 'MacBook Pro 14" M5 (2025)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M5 14-inch platform',
+    chargingContext: 'MagSafe 3 and Thunderbolt / USB4 charging behaviour',
+    screenCaution: 'Liquid Retina XDR display assembly condition, lid alignment, and camera-notch area checks',
+    batteryCaution: 'newer M5 runtime symptoms checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 seating plus Thunderbolt / USB4 port consistency',
+    localContext: 'often brought in soon after drops, travel impacts, or charging accidents',
+  },
+  'macbook-pro-14-m5-pro-2026': {
+    slug: 'macbook-pro-14-m5-pro-2026',
+    modelName: 'MacBook Pro 14" M5 Pro (2026)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M5 Pro 14-inch platform',
+    chargingContext: 'MagSafe 3 and Thunderbolt charging behaviour',
+    screenCaution: 'Liquid Retina XDR display assembly condition, lid alignment, and camera-notch area checks',
+    batteryCaution: 'newer M5 Pro workload runtime symptoms checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 seating plus Thunderbolt port consistency',
+    localContext: 'often used for professional engineering, creative, and business workloads',
+  },
+  'macbook-pro-14-m5-max-2026': {
+    slug: 'macbook-pro-14-m5-max-2026',
+    modelName: 'MacBook Pro 14" M5 Max (2026)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M5 Max 14-inch platform',
+    chargingContext: 'MagSafe 3 and Thunderbolt charging behaviour',
+    screenCaution: 'Liquid Retina XDR display assembly condition, lid alignment, and camera-notch area checks',
+    batteryCaution: 'high-demand M5 Max power draw checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 seating plus Thunderbolt port consistency',
+    localContext: 'often used for intensive compute, animation, and multi-stream production workloads',
+  },
+  'macbook-pro-16-m5-pro-2026': {
+    slug: 'macbook-pro-16-m5-pro-2026',
+    modelName: 'MacBook Pro 16" M5 Pro (2026)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M5 Pro 16-inch platform',
+    chargingContext: 'high-wattage MagSafe 3 and Thunderbolt charging behaviour',
+    screenCaution: 'larger 16-inch Liquid Retina XDR display assembly condition, hinge travel, and lid alignment',
+    batteryCaution: 'large-capacity battery runtime symptoms checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 connector fit and Thunderbolt port consistency',
+    localContext: 'often used as a high-performance mobile workstation for studio and office use',
+  },
+  'macbook-pro-16-m5-max-2026': {
+    slug: 'macbook-pro-16-m5-max-2026',
+    modelName: 'MacBook Pro 16" M5 Max (2026)',
+    family: 'MacBook Pro',
+    generationNote: 'Apple M5 Max 16-inch platform',
+    chargingContext: 'high-wattage MagSafe 3 and Thunderbolt charging behaviour',
+    screenCaution: 'larger 16-inch Liquid Retina XDR display assembly condition, hinge travel, and lid alignment',
+    batteryCaution: 'high-output M5 Max power demand checked against actual charger behaviour',
+    portCaution: 'MagSafe 3 connector fit and Thunderbolt port consistency',
+    localContext: 'often used for extreme performance computing, VFX, and heavy rendering workloads',
+  },
 };
 
 const REPAIR_LABELS: Record<MacBookRepairSlug, string> = {
@@ -403,7 +535,9 @@ const REPAIR_LABELS: Record<MacBookRepairSlug, string> = {
   'charging-port-replacement': 'charging port repair',
 };
 
-const PAGE_KEYS: ReadonlyArray<`${MacBookModelSlug}|${MacBookRepairSlug}`> = [
+type MacBookPageKey = `${MacBookModelSlug}|${MacBookRepairSlug}`;
+
+const STATIC_PAGE_KEYS: ReadonlyArray<MacBookPageKey> = [
   'macbook-air-11-2014-2015|screen-replacement',
   'macbook-air-11-2014-2015|battery-replacement',
   'macbook-air-11-2014-2015|charging-port-replacement',
@@ -466,6 +600,28 @@ const PAGE_KEYS: ReadonlyArray<`${MacBookModelSlug}|${MacBookRepairSlug}`> = [
   'macbook-12-2015-2019|charging-port-replacement',
 ];
 
+export const NEW_MACBOOK_PRO_MODELS: ReadonlyArray<MacBookModelSlug> = [
+  'macbook-pro-14-m4-2024',
+  'macbook-pro-14-m4-pro-2024',
+  'macbook-pro-14-m4-max-2024',
+  'macbook-pro-16-m4-pro-2024',
+  'macbook-pro-16-m4-max-2024',
+  'macbook-pro-14-m5-2025',
+  'macbook-pro-14-m5-pro-2026',
+  'macbook-pro-14-m5-max-2026',
+  'macbook-pro-16-m5-pro-2026',
+  'macbook-pro-16-m5-max-2026',
+];
+
+const NEW_PAGE_KEYS = NEW_MACBOOK_PRO_MODELS.flatMap((slug) =>
+  MACBOOK_REPAIRS.map((repairSlug) => `${slug}|${repairSlug}` as MacBookPageKey)
+);
+
+const PAGE_KEYS: ReadonlyArray<MacBookPageKey> = [
+  ...STATIC_PAGE_KEYS,
+  ...NEW_PAGE_KEYS,
+];
+
 function isMacBookModelSlug(value: string): value is MacBookModelSlug {
   return Object.prototype.hasOwnProperty.call(MODEL_CONFIGS, value);
 }
@@ -481,9 +637,371 @@ function resolveMacBookContentModelSlug(value: string): MacBookModelSlug | null 
   return PUBLIC_MACBOOK_MODEL_ALIASES[value as keyof typeof PUBLIC_MACBOOK_MODEL_ALIASES] ?? null;
 }
 
-type MacBookPageKey = `${MacBookModelSlug}|${MacBookRepairSlug}`;
+function buildMacBookPocket(
+  config: MacBookModelConfig,
+  repairSlug: MacBookRepairSlug,
+): MacBookEnhancedSeoPocket {
+  if (repairSlug === 'screen-replacement') {
+    return {
+      modelName: config.modelName,
+      repairSlug: 'screen-replacement',
+      metaTitle: `${config.modelName} screen replacement in Ringwood | Ali Mobile`,
+      metaDescription: `Screen damage on this ${config.generationNote} is checked carefully around the lid and display assembly before quoting.`,
+      quickAnswer: `A ${config.generationNote} display fault is inspected carefully before quoting, especially around the lid and camera-notch area.`,
+      repairOptions: [
+        {
+          name: 'Display and lid assessment',
+          shortDescription: `Start with the symptom, not the part. We test brightness, lines, flicker, external output, and ${config.screenCaution} on this ${config.generationNote}.`,
+          bestFor: 'Cracked displays, black image, line faults, flicker, or faults that change when the lid moves.',
+          notes: 'Quote, part path, and fit risk are confirmed before approved repair work starts.',
+        },
+        {
+          name: 'Handover screen checks',
+          shortDescription: `After approved work, we retest display output, camera area, sleep/wake response, hinge feel, and charging behaviour on the ${config.modelName}.`,
+          bestFor: 'Customers who want the main screen-related functions checked before handover.',
+          notes: 'Any unrelated housing, battery, or board concern is explained separately before extra work.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Cracked display or dark image',
+          description: `A hit to the lid can leave the ${config.modelName} with black sections, lines, or unstable image even when it still powers on.`,
+        },
+        {
+          title: 'Fault changes when the lid moves',
+          description: `We pay attention to lid angle because ${config.screenCaution} can affect the final repair scope.`,
+        },
+        {
+          title: 'Housing pressure near the hinge',
+          description: `Corner dents, hinge stiffness, or lid pressure on this ${config.generationNote} can change how cleanly a replacement display sits.`,
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Inspect the lid and panel',
+          description: `We check visible damage, hinge movement, lid alignment, camera area, and ${config.screenCaution}.`,
+        },
+        {
+          step: '02',
+          title: 'Confirm display symptoms',
+          description: 'We test brightness, lines, flicker, external display behaviour, and sleep/wake response where they apply.',
+        },
+        {
+          step: '03',
+          title: 'Retest before handover',
+          description: `After approved work, we check display output, hinge travel, startup, and normal use on the ${config.modelName}.`,
+        },
+      ],
+      faq: [
+        {
+          question: `What does Ali Mobile check when the ${config.modelName} screen changes as the lid moves?`,
+          answer: `We test the ${config.modelName} panel output, lid angle, hinge feel, and ${config.screenCaution}. Any housing risk is explained before quoting.`,
+        },
+        {
+          question: `Could ${config.modelName} screen repair uncover another fault?`,
+          answer: `Yes. During ${config.modelName} screen inspection, charging, battery, camera-area, or board symptoms stay separate from the approved screen scope until you choose the next step.`,
+        },
+        {
+          question: `Do you test the ${config.modelName} with an external display?`,
+          answer: `Where it helps the ${config.modelName} diagnosis, yes. External-display behaviour can separate a display assembly problem from startup or deeper graphics symptoms.`,
+        },
+        {
+          question: `Will you check the ${config.modelName} lid, hinge, frame, and camera area?`,
+          answer: `Yes. The ${config.generationNote} is checked for ${config.screenCaution}, because fit issues can affect the repair scope.`,
+        },
+        {
+          question: `Should I back up the ${config.modelName} before screen work?`,
+          answer: `If the ${config.modelName} still powers on, back up important files first. Screen repair is hardware work, so data retention is not guaranteed.`,
+        },
+        {
+          question: `Can you confirm timing for ${config.modelName} screen replacement before seeing it?`,
+          answer: `No fixed timing is promised for the ${config.modelName} before inspection. We confirm quote, part availability, and likely timing after the bench check.`,
+        },
+      ],
+      serviceSection: {
+        eyebrow: 'Model-aware MacBook repair',
+        heading: `${config.modelName} screen replacement in Ringwood`,
+        intro: `${config.modelName} screen assessment starts with the customer-visible symptom, then checks ${config.screenCaution} before a quote is confirmed.`,
+        cards: [
+          {
+            title: 'Exact MacBook identified',
+            description: `We confirm the exact ${config.family} and visible condition before quoting.`,
+          },
+          {
+            title: 'Repair risk explained',
+            description: `We explain how ${config.screenCaution} can affect the scope before any approved work starts.`,
+          },
+          {
+            title: 'Practical handover checks',
+            description: `Startup, charging response, and the reported fault are checked again before the ${config.modelName} is handed back.`,
+          },
+        ],
+      },
+      localService: {
+        kicker: 'Ringwood MacBook support',
+        heading: `Bring your ${config.modelName} to Ringwood Square for screen replacement`,
+        intro: `The counter check is practical: reproduce the fault where possible, explain the likely path, then confirm the quote. Ali Mobile & Repair checks the screen replacement scope before approved work begins.`,
+        items: [
+          'Bring the charger setup connected when the symptom appeared.',
+          'If the display still works enough to use, back up important files before visiting.',
+          `Tell us whether the ${config.modelName} fault changes when the lid moves or after startup.`,
+        ],
+      },
+      finalCta: {
+        kicker: 'Next step',
+        heading: `Ready to organise ${config.modelName} screen replacement?`,
+        body: `Book the ${config.modelName} screen check when the display fault is visible; we inspect the lid, explain the quote, and avoid starting work until the scope is approved.`,
+        bullets: [
+          `Use the booking path for this ${config.modelName} screen replacement.`,
+          `Tell us if the ${config.modelName} display changes with lid movement, pressure, startup, or external output.`,
+          `The ${config.modelName} screen scope stays separate from unrelated power or board findings.`,
+        ],
+      },
+    };
+  }
 
-const MACBOOK_PAGE_CONTENT = {
+  if (repairSlug === 'battery-replacement') {
+    return {
+      modelName: config.modelName,
+      repairSlug: 'battery-replacement',
+      metaTitle: `${config.modelName} battery replacement in Ringwood | Ali Mobile`,
+      metaDescription: `Power and runtime issues on ${config.modelName} are checked carefully before any battery replacement is approved.`,
+      quickAnswer: `A ${config.generationNote} with runtime issues gets a careful power check before any battery replacement is approved.`,
+      repairOptions: [
+        {
+          name: 'Battery and power diagnosis',
+          shortDescription: `The bench check is practical and model-aware. We compare runtime, percentage jumps, shutdowns, heat, trackpad feel, and ${config.batteryCaution}.`,
+          bestFor: 'Short runtime, sudden shutdowns, service warnings, swelling concern, or poor charge hold.',
+          notes: 'Charging response is checked as well, because a power issue is not always only the battery.',
+        },
+        {
+          name: 'Approved battery repair path',
+          shortDescription: `Once the fault matches battery wear on this ${config.generationNote}, we confirm availability, quote, and the practical handover checks.`,
+          bestFor: 'MacBooks with confirmed battery wear and stable charging behaviour.',
+          notes: 'Timing is confirmed after inspection and part availability, not promised before assessment.',
+        },
+      ],
+      commonProblems: [
+        {
+          title: 'Fast drain or sudden shutdown',
+          description: `${config.modelName} battery wear may show as percentage jumps, short runtime, or shutdowns during normal use.`,
+        },
+        {
+          title: 'Swelling or trackpad pressure',
+          description: `Battery swelling can press into the top case, so we check ${config.batteryCaution} before the MacBook is used further.`,
+        },
+        {
+          title: 'Charging fault mistaken for battery wear',
+          description: `${config.chargingContext} can make a weak adapter, cable, or port fault look like a tired battery.`,
+        },
+      ],
+      diagnosticSteps: [
+        {
+          step: '01',
+          title: 'Review power symptoms',
+          description: `We ask about runtime, shutdown timing, heat, charger behaviour, and how the ${config.modelName} is normally used.`,
+        },
+        {
+          step: '02',
+          title: 'Check charging and swelling',
+          description: 'We compare charging paths with swelling signs before confirming battery replacement.',
+        },
+        {
+          step: '03',
+          title: 'Run handover power checks',
+          description: 'Before handover, we check charging response, startup stability, trackpad feel, and practical battery behaviour.',
+        },
+      ],
+      faq: [
+        {
+          question: `What makes ${config.modelName} battery wear different from a charger problem?`,
+          answer: `We compare runtime, shutdown timing, pressure signs, and ${config.chargingContext} on the ${config.modelName} before recommending battery replacement.`,
+        },
+        {
+          question: `What should I do before bringing in the ${config.modelName} for battery service?`,
+          answer: `Back up important files first if the ${config.modelName} still starts, then bring the charger setup. We confirm timing and scope only after inspection and part availability.`,
+        },
+        {
+          question: `Is swelling or trackpad pressure serious on the ${config.modelName}?`,
+          answer: `Yes. Pressure around the ${config.modelName} top case or trackpad is checked carefully, and we explain the safe repair path before further use.`,
+        },
+        {
+          question: `How do you separate ${config.modelName} battery wear from charger or board faults?`,
+          answer: `We test ${config.modelName} charger response, battery reporting, shutdown history, and visible pressure signs before treating the battery as the confirmed fault.`,
+        },
+        {
+          question: `Should I bring the charger for ${config.modelName} battery diagnosis?`,
+          answer: `Yes. Bring the charger or cable you normally use, because ${config.chargingContext} can make charger issues look like battery failure.`,
+        },
+        {
+          question: `Do I need a backup before ${config.modelName} battery replacement?`,
+          answer: `Back up important files if the ${config.modelName} still starts. Timing, quote, and part availability are confirmed after inspection, without a guaranteed data outcome.`,
+        },
+      ],
+      serviceSection: {
+        eyebrow: 'Model-aware MacBook repair',
+        heading: `${config.modelName} battery replacement in Ringwood`,
+        intro: `${config.modelName} battery diagnosis links real runtime behaviour with ${config.chargingContext} and pressure checks before replacement is recommended.`,
+        cards: [
+          {
+            title: 'Exact MacBook identified',
+            description: 'The MacBook Pro model and outer condition are checked before the quote is confirmed.',
+          },
+          {
+            title: 'Repair risk explained',
+            description: `We explain how ${config.batteryCaution} can affect the scope before any approved work starts.`,
+          },
+          {
+            title: 'Practical handover checks',
+            description: `Startup, charging response, and the reported fault are checked again before the ${config.modelName} is handed back.`,
+          },
+        ],
+      },
+      localService: {
+        kicker: 'Ringwood MacBook support',
+        heading: `Bring your ${config.modelName} to Ringwood Square for battery replacement`,
+        intro: `The counter check is practical: reproduce the fault where possible, explain the likely path, then confirm the quote. Ali Mobile & Repair checks the battery replacement scope before approved work begins.`,
+        items: [
+          'Bring the charger setup connected when the symptom appeared.',
+          'If it powers on, save important work before battery or power testing begins.',
+          `Note when the ${config.modelName} shuts down, heats up, or loses charge fastest.`,
+        ],
+      },
+      finalCta: {
+        kicker: 'Next step',
+        heading: `Ready to organise ${config.modelName} battery replacement?`,
+        body: `Bring the ${config.modelName} in with its charger so the battery and power symptoms can be tested together before any battery replacement is approved.`,
+        bullets: [
+          `Use the booking path for this ${config.modelName} battery replacement.`,
+          `Bring the charger used most often with the ${config.modelName} so power behaviour can be checked properly.`,
+          `The ${config.modelName} battery quote is confirmed after inspection, not before part availability is checked.`,
+        ],
+      },
+    };
+  }
+
+  // charging-port-replacement
+  return {
+    modelName: config.modelName,
+    repairSlug: 'charging-port-replacement',
+    metaTitle: `${config.modelName} charging port repair in Ringwood | Ali Mobile`,
+    metaDescription: `Charging faults on ${config.modelName} are checked at the bench before repair scope is confirmed.`,
+    quickAnswer: `A ${config.generationNote} charging issue gets ${config.chargingContext} checks before any approved repair begins.`,
+    repairOptions: [
+      {
+        name: 'Cable, adapter, and port check',
+        shortDescription: `We keep the diagnosis plain and tied to how you use the MacBook. We test known-good charging gear, inspect debris or damage, and check ${config.portCaution}.`,
+        bestFor: 'No charge response, loose cable fit, charging at one angle, or intermittent power.',
+        notes: 'If the cable, adapter, or debris is the cause, we do not push unnecessary port work.',
+      },
+      {
+        name: 'Charging-path repair decision',
+        shortDescription: `We confirm whether the ${config.modelName} fault suits port-level repair, cleaning, battery checks, or further power-path diagnosis.`,
+        bestFor: 'Repeated charger dropouts, unstable power delivery, or visible connector wear.',
+        notes: 'A port repair is not promised to fix board-level or battery-related no-power faults.',
+      },
+    ],
+    commonProblems: [
+      {
+        title: 'Cable only works at an angle',
+        description: `A worn, dirty, or damaged charging connection on the ${config.modelName} can cut in and out as the cable moves.`,
+      },
+      {
+        title: 'No charge or no power response',
+        description: 'The cause can be the adapter, cable, battery, port, or deeper power path, so we test before quoting.',
+      },
+      {
+        title: 'Loose or unreliable fit',
+        description: `${config.portCaution} can decide whether the connector sits firmly enough for stable charging.`,
+      },
+    ],
+    diagnosticSteps: [
+      {
+        step: '01',
+        title: 'Inspect the charging area',
+        description: `We check cable fit, visible damage, debris, liquid signs, and ${config.portCaution}.`,
+      },
+      {
+        step: '02',
+        title: 'Test known-good gear',
+        description: `Chargers, cables, and ${config.chargingContext} are compared before the repair path is confirmed.`,
+      },
+      {
+        step: '03',
+        title: 'Retest charging stability',
+        description: `After approved work, we check cable fit, startup response, and battery reporting on the ${config.modelName}.`,
+      },
+    ],
+    faq: [
+      {
+        question: `How do you tell whether the ${config.modelName} charging fault is the port or the charger?`,
+        answer: `We test the ${config.modelName} with known-good gear, inspect ${config.portCaution}, and compare battery reporting before quoting port-level work.`,
+      },
+      {
+        question: `What helps most when I bring in the ${config.modelName} for charging repair?`,
+        answer: 'Bring the charger setup connected when the symptom appeared. That lets us reproduce the charging behaviour instead of guessing from a clean bench cable.',
+      },
+      {
+        question: `What if one ${config.modelName} port works but another does not?`,
+        answer: `We compare the available charging points for this ${config.generationNote} and note whether the problem follows the cable, charger, port, or accessory.`,
+      },
+      {
+        question: `How do MagSafe and USB-C checks apply to the ${config.modelName}?`,
+        answer: `Because this model can involve ${config.chargingContext}, we check both paths when your symptoms point that way.`,
+      },
+      {
+        question: `Can debris or physical damage stop the ${config.modelName} charging?`,
+        answer: `Yes. We check the ${config.modelName} charging area for lint, movement, bent contact signs, corrosion, and visible impact before quoting parts.`,
+      },
+      {
+        question: `Could a ${config.modelName} no-power fault be board-level instead of the port?`,
+        answer: `Yes. ${config.modelName} port repair is not promised as a blanket no-power fix. Back up first if it still starts; quote, parts, and timing follow inspection.`,
+      },
+    ],
+    serviceSection: {
+      eyebrow: 'Model-aware MacBook repair',
+      heading: `${config.modelName} charging port repair in Ringwood`,
+      intro: `${config.modelName} charging repair is scoped from the charger setup first, then ${config.portCaution}, battery response, and startup behaviour.`,
+      cards: [
+        {
+          title: 'Exact MacBook identified',
+          description: 'We identify the Pro generation first, then inspect the visible condition before quoting.',
+        },
+        {
+          title: 'Repair risk explained',
+          description: `We explain how ${config.portCaution} can affect the scope before any approved work starts.`,
+        },
+        {
+          title: 'Practical handover checks',
+          description: `Startup, charging response, and the reported fault are checked again before the ${config.modelName} is handed back.`,
+        },
+      ],
+    },
+    localService: {
+      kicker: 'Ringwood MacBook support',
+      heading: `Bring your ${config.modelName} to Ringwood Square for charging port repair`,
+      intro: `The counter check is practical: reproduce the fault where possible, explain the likely path, then confirm the quote. Ali Mobile & Repair checks the charging port repair scope before approved work begins.`,
+      items: [
+        'Bring the charger setup connected when the symptom appeared.',
+        'If it still turns on, back up first; charging repairs are still hardware work.',
+        `Show us the cable angle, charger, or port behaviour that makes the ${config.modelName} fail.`,
+      ],
+    },
+    finalCta: {
+      kicker: 'Next step',
+      heading: `Ready to organise ${config.modelName} charging port repair?`,
+      body: `Bring the ${config.modelName} with the charger or cable that fails, and we will confirm whether the charging path suits port repair before work begins.`,
+      bullets: [
+        `Use the booking path for this ${config.modelName} charging port repair.`,
+        `Bring the cable, adapter, dock, or MagSafe lead that shows the ${config.modelName} charging fault.`,
+        `The ${config.modelName} charging quote is tied to the inspected fault, not a blanket no-power promise.`,
+      ],
+    },
+  };
+}
+
+const STATIC_MACBOOK_PAGE_CONTENT: Record<string, MacBookEnhancedSeoPocket> = {
   "macbook-air-11-2014-2015|screen-replacement": {
     modelName: "MacBook Air 11-inch 2014-2015",
     repairSlug: "screen-replacement",
@@ -6184,7 +6702,22 @@ description: "Startup, charging response, and the reported fault are checked aga
       ]
     },
   }
-} satisfies Record<MacBookPageKey, MacBookEnhancedSeoPocket>;
+};
+
+const NEW_MACBOOK_PAGE_CONTENT: Record<string, MacBookEnhancedSeoPocket> = Object.fromEntries(
+  NEW_MACBOOK_PRO_MODELS.flatMap((slug) => {
+    const config = MODEL_CONFIGS[slug];
+    return MACBOOK_REPAIRS.map((repairSlug) => [
+      `${slug}|${repairSlug}`,
+      buildMacBookPocket(config, repairSlug),
+    ]);
+  })
+);
+
+const MACBOOK_PAGE_CONTENT: Record<MacBookPageKey, MacBookEnhancedSeoPocket> = {
+  ...STATIC_MACBOOK_PAGE_CONTENT,
+  ...NEW_MACBOOK_PAGE_CONTENT,
+} as Record<MacBookPageKey, MacBookEnhancedSeoPocket>;
 
 const PUBLIC_MACBOOK_ALIAS_COUNT = Object.keys(PUBLIC_MACBOOK_MODEL_ALIASES).length;
 const PUBLIC_MACBOOK_ROUTE_COUNT = Object.keys(PUBLIC_MACBOOK_MODEL_ALIASES).reduce((count, publicSlug) => {
@@ -6196,11 +6729,11 @@ const PUBLIC_MACBOOK_ROUTE_COUNT = Object.keys(PUBLIC_MACBOOK_MODEL_ALIASES).red
 }, 0);
 
 if (
-  PUBLIC_MACBOOK_ALIAS_COUNT !== 20 ||
+  PUBLIC_MACBOOK_ALIAS_COUNT !== 32 ||
   MACBOOK_MODELS.length !== 20 ||
-  PUBLIC_MACBOOK_ROUTE_COUNT !== 60
+  PUBLIC_MACBOOK_ROUTE_COUNT !== 96
 ) {
-  throw new Error('MacBook enhanced content alias coverage must remain 20 public aliases, 20 content models, and 60 public repair routes.');
+  throw new Error('MacBook enhanced content alias coverage must remain 32 public aliases, 20 standard timing models, and 96 public repair routes.');
 }
 
 export function isAliMobileEnhancedMacBookRepairPage({
@@ -6265,13 +6798,17 @@ export function getAliMobileEnhancedMacBookSeoPocket({
   }
 
   const pocket = MACBOOK_PAGE_CONTENT[`${contentModelSlug}|${repairSlug}` as MacBookPageKey];
+  if (!pocket) return null;
 
-  return pocket
-    ? {
-        ...pocket,
-        turnaroundMinutes: MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES[repairSlug],
-      }
-    : null;
+  const isStandardLegacyModel = (MACBOOK_MODELS as readonly string[]).includes(contentModelSlug);
+  const turnaroundMinutes = isStandardLegacyModel
+    ? MACBOOK_STANDARD_REPAIR_TURNAROUND_MINUTES[repairSlug]
+    : undefined;
+
+  return {
+    ...pocket,
+    ...(turnaroundMinutes ? { turnaroundMinutes } : {}),
+  };
 }
 
 export function getMacBookRepairLabel(repairSlug: MacBookRepairSlug) {
