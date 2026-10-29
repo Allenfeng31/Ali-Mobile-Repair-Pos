@@ -69,11 +69,13 @@ export function RepairServiceSchema({
   description,
   price,
   url,
+  includeCanonicalServiceIdentity = false,
 }: {
   serviceName: string;
   description: string;
   price?: string;
   url?: string;
+  includeCanonicalServiceIdentity?: boolean;
 }) {
   const serviceData: any = {
     "name": serviceName,
@@ -82,6 +84,11 @@ export function RepairServiceSchema({
       "@id": "https://www.alimobile.com.au/#localbusiness"
     },
   };
+
+  if (includeCanonicalServiceIdentity && url) {
+    serviceData['@id'] = `${url}#service`;
+    serviceData.url = url;
+  }
 
   const parsedPrice = typeof price === 'string' ? parseFloat(price) : Number(price);
   const hasNumericPrice = !isNaN(parsedPrice) && parsedPrice > 0;

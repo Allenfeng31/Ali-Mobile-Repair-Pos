@@ -867,6 +867,70 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['Xiaomi Screen', 'Xiaomi', 'xiaomi', '14C', '14c', 'Screen Replacement', 'screen-replacement', 'glass damage', 'display failure', 'touch issues'],
+    ['Xiaomi Battery', 'Xiaomi', 'xiaomi', '14C', '14c', 'Battery Replacement', 'battery-replacement', 'battery deterioration', 'charging fault', 'power fault'],
+    ['Xiaomi Charging', 'Xiaomi', 'xiaomi', '14C', '14c', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging', 'charging accessories', 'further diagnosis'],
+    ['Nokia Screen', 'Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Screen Replacement', 'screen-replacement', 'glass damage', 'display failure', 'touch issues'],
+    ['Nokia Battery', 'Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Battery Replacement', 'battery-replacement', 'battery deterioration', 'charging fault', 'power fault'],
+    ['Nokia Charging', 'Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging', 'charging accessories', 'further diagnosis'],
+    ['Vivo Screen', 'Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Screen Replacement', 'screen-replacement', 'glass damage', 'display failure', 'touch issues'],
+    ['Vivo Battery', 'Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Battery Replacement', 'battery-replacement', 'battery deterioration', 'charging fault', 'power fault'],
+    ['Vivo Charging', 'Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging', 'charging accessories', 'further diagnosis'],
+    ['LG Screen', 'LG', 'lg', 'Velvet', 'velvet', 'Screen Replacement', 'screen-replacement', 'glass damage', 'display failure', 'touch issues'],
+    ['LG Battery', 'LG', 'lg', 'Velvet', 'velvet', 'Battery Replacement', 'battery-replacement', 'battery deterioration', 'charging fault', 'power fault'],
+    ['LG Charging', 'LG', 'lg', 'Velvet', 'velvet', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging', 'charging accessories', 'further diagnosis'],
+    ['OnePlus Screen', 'OnePlus', 'oneplus', '9 Pro', '9-pro', 'Screen Replacement', 'screen-replacement', 'glass damage', 'display failure', 'touch issues'],
+    ['OnePlus Battery', 'OnePlus', 'oneplus', '9 Pro', '9-pro', 'Battery Replacement', 'battery-replacement', 'battery deterioration', 'charging fault', 'power fault'],
+    ['OnePlus Charging', 'OnePlus', 'oneplus', '9 Pro', '9-pro', 'Charging Port Replacement', 'charging-port-replacement', 'intermittent charging', 'charging accessories', 'further diagnosis'],
+  ] as const)('renders quote-led, service-specific SSR guidance for Batch 1 %s', async (
+    _label,
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    repairName,
+    repairSlug,
+    ...expectedPhrases
+  ) => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      brand,
+      brandSlug,
+      model,
+      modelSlug,
+      repairName,
+      repairSlug,
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: brandSlug,
+      model: modelSlug,
+      'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${brandSlug}/${modelSlug}/${repairSlug}`;
+    const publicModel = model.toLowerCase().startsWith(brand.toLowerCase()) ? model : `${brand} ${model}`;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain(`<h1 id="repair-detail-heading">${publicModel} ${repairName}</h1>`);
+    expect(html).toContain('Confirm your device details and request a repair quote.');
+    expect(html).not.toContain('Choose a quality tier');
+    expectedPhrases.forEach((phrase) => expect(html.toLowerCase()).toContain(phrase));
+    expect(pricing?.renderQuoteOnlyBookingLink).toBe(true);
+    expect(pricing?.bookingHref).toBe(`/book-repair?${new URLSearchParams({
+      brand,
+      model,
+      service: repairName,
+    }).toString()}`);
+    expect(html).toContain('Quote on Request');
+    expect(html).toContain('Book Repair Now</a>');
+    expect(serviceSchema).toContain(`"name":"${publicModel} ${repairName} in Ringwood"`);
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(html).toContain(`"@id":"${canonicalUrl}#service"`);
+    expect(html).toContain(`"url":"${canonicalUrl}"`);
+  });
+
+  it.each([
     ['Xiaomi', 'xiaomi', 'Mi 11', 'mi-11', 'Xiaomi Mi 11'],
     ['Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Nokia 8.3 5G'],
     ['Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Vivo Y52 5G'],

@@ -295,6 +295,64 @@ describe('repair detail metadata', () => {
   });
 
   it.each([
+    ['Xiaomi', 'xiaomi', '14C', '14c', 'Xiaomi 14C'],
+    ['Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Nokia 8.3 5G'],
+    ['Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Vivo Y52 5G'],
+    ['LG', 'lg', 'Velvet', 'velvet', 'LG Velvet'],
+    ['OnePlus', 'oneplus', '9 Pro', '9-pro', 'OnePlus 9 Pro'],
+  ] as const)('keeps Batch 1 %s commercial metadata identity across all three services', async (
+    brand,
+    brandSlug,
+    model,
+    modelSlug,
+    publicModel,
+  ) => {
+    for (const [repairName, repairSlug] of [
+      ['Screen Replacement', 'screen-replacement'],
+      ['Battery Replacement', 'battery-replacement'],
+      ['Charging Port Replacement', 'charging-port-replacement'],
+    ] as const) {
+      vi.mocked(fetchRepairCatalog).mockResolvedValue({
+        ...catalog,
+        checksum: `batch-1-${brandSlug}-${repairSlug}`,
+        inventoryRowCount: 1,
+        publicModelCount: 1,
+        publicRepairCount: 1,
+        brands: [{
+          category: 'phone',
+          brand,
+          slug: brandSlug,
+          icon: 'phone',
+          models: [{
+            model,
+            slug: modelSlug,
+            repairTypes: [{ name: repairName, slug: repairSlug, price: 0, variants: [] }],
+          }],
+        }],
+      });
+      vi.mocked(fetchRepairDetails).mockResolvedValue({
+        brand,
+        model,
+        repairType: repairName,
+        price: 0,
+        variants: [],
+        source: 'fallback',
+      });
+
+      const metadata = await generateMetadata(params('phone', brandSlug, modelSlug, repairSlug));
+      const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${brandSlug}/${modelSlug}/${repairSlug}`;
+
+      expect(metadata.title).toContain(`${publicModel} ${repairName}`);
+      expect(metadata.description).toContain(publicModel);
+      expect(metadata.alternates?.canonical).toBe(canonicalUrl);
+      expect(metadata.openGraph).toMatchObject({
+        title: `${publicModel} ${repairName} | Ali Mobile & Repair`,
+        url: canonicalUrl,
+      });
+    }
+  });
+
+  it.each([
     ['galaxy-z-fold-7', 'Galaxy Z Fold 7'],
     ['galaxy-z-flip-7', 'Galaxy Z Flip 7'],
   ])('uses foldable assessment-first metadata for %s without changing the exact title', async (model, modelName) => {

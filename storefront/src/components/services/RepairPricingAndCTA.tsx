@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { analytics } from '@/lib/analytics';
 import { ClipboardCheck, PhoneCall, ThumbsUp } from 'lucide-react';
@@ -42,6 +43,7 @@ interface RepairPricingAndCTAProps {
   pricing?: RepairDetailPricing;
   sourceType?: 'real' | 'virtual' | 'diagnostic';
   repairOrigin?: string;
+  renderQuoteOnlyBookingLink?: boolean;
 }
 
 export default function RepairPricingAndCTA({ 
@@ -59,6 +61,7 @@ export default function RepairPricingAndCTA({
   pricing,
   sourceType,
   repairOrigin,
+  renderQuoteOnlyBookingLink = false,
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
   const params = useParams();
@@ -142,27 +145,7 @@ export default function RepairPricingAndCTA({
     }
   };
 
-  const handleBookRepair = () => {
-    // If there are multiple tiers and none is selected, block navigation
-    if (isMultiple && !selectedTier) {
-      setShowValidationHint(true);
-      setShowError(true);
-      return;
-    }
-
-    const tierToUse = selectedTier || (displayVariants.length === 1 ? displayVariants[0].quality_grade : null);
-    
-    const fallbackParams = new URLSearchParams();
-    fallbackParams.set('brand', brandName);
-    fallbackParams.set('model', modelName);
-    fallbackParams.set('service', bookingRepairName || repairName);
-    const [bookingPath, bookingQuery = ''] = (bookingHref ?? `/book-repair?${fallbackParams.toString()}`).split('?');
-    const bookingParams = new URLSearchParams(bookingQuery);
-    if (tierToUse) {
-      bookingParams.set('tier', tierToUse);
-    }
-    const url = `${bookingPath}?${bookingParams.toString()}`;
-    
+  const trackBookingActivation = () => {
     analytics.trackBookRepair(modelName, repairName);
     trackRepairCtaClick({
       pageType: 'repair_detail',
@@ -172,7 +155,29 @@ export default function RepairPricingAndCTA({
       action: 'book_repair',
       placement: 'pricing',
     });
-    router.push(url);
+  };
+
+  const handleBookRepair = () => {
+    // If there are multiple tiers and none is selected, block navigation
+    if (isMultiple && !selectedTier) {
+      setShowValidationHint(true);
+      setShowError(true);
+      return;
+    }
+
+    const tierToUse = selectedTier || (displayVariants.length === 1 ? displayVariants[0].quality_grade : null);
+    const fallbackParams = new URLSearchParams();
+    fallbackParams.set('brand', brandName);
+    fallbackParams.set('model', modelName);
+    fallbackParams.set('service', bookingRepairName || repairName);
+    const [bookingPath, bookingQuery = ''] = (bookingHref ?? `/book-repair?${fallbackParams.toString()}`).split('?');
+    const bookingParams = new URLSearchParams(bookingQuery);
+    if (tierToUse) {
+      bookingParams.set('tier', tierToUse);
+    }
+
+    trackBookingActivation();
+    router.push(`${bookingPath}?${bookingParams.toString()}`);
   };
 
   const getTierDescription = (tierName: string) => {
@@ -186,6 +191,9 @@ export default function RepairPricingAndCTA({
       <p className="mt-1 text-sm leading-relaxed text-slate-600">{typicalPriceRange.explanation}</p>
     </div>
   ) : null;
+  const bookingCtaLabel = !hasResolvedPrice && quoteCtaLabel ? quoteCtaLabel : 'Book Repair Now';
+  const primaryCtaClassName = 'w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200';
+  const shouldRenderQuoteOnlyBookingLink = renderQuoteOnlyBookingLink && resolvedPricing.isQuoteOnly && Boolean(bookingHref);
 
   return (
     <div ref={pricingVisibilityRef} data-ga4-placement="pricing" className="w-full flex flex-col items-center mt-8">
@@ -327,13 +335,24 @@ export default function RepairPricingAndCTA({
             Please select a screen quality tier to proceed.
           </div>
         )}
-        <button 
-          type="button"
-          onClick={handleBookRepair}
-          className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
-        >
-          {!hasResolvedPrice && quoteCtaLabel ? quoteCtaLabel : 'Book Repair Now'}
-        </button>
+        {shouldRenderQuoteOnlyBookingLink ? (
+          <Link
+            href={bookingHref!}
+            prefetch={false}
+            onClick={trackBookingActivation}
+            className={primaryCtaClassName}
+          >
+            {bookingCtaLabel}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handleBookRepair}
+            className={primaryCtaClassName}
+          >
+            {bookingCtaLabel}
+          </button>
+        )}
         <a 
           href="tel:0481058514" 
           className="w-full text-lg md:text-xl font-bold py-4 md:py-5 px-8 text-center bg-white dark:bg-white border border-slate-200 dark:border-white text-slate-700 dark:text-black rounded-2xl hover:bg-slate-50 dark:hover:bg-gray-100 hover:border-slate-300 transition-all duration-200"

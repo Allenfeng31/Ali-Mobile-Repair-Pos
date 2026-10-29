@@ -101,6 +101,45 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(useRepairPricingVisibilityMock).toHaveBeenLastCalledWith([]);
   });
 
+  it('renders an SSR booking link for an explicitly enabled deterministic quote-only route', () => {
+    const bookingHref = '/book-repair?brand=Xiaomi&model=14C&service=Screen+Replacement';
+
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        brandName="Xiaomi"
+        modelName="14C"
+        variants={[]}
+        pricing={{
+          resolvedPrice: null,
+          validVariants: [],
+          source: 'none',
+          isQuoteOnly: true,
+          canEmitOffer: false,
+        }}
+        bookingHref={bookingHref}
+        renderQuoteOnlyBookingLink
+        showStartingPriceFallback={false}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Book Repair Now' })).toHaveAttribute('href', bookingHref);
+    expect(screen.queryByRole('button', { name: 'Book Repair Now' })).not.toBeInTheDocument();
+  });
+
+  it('keeps priced and tiered repairs on the existing selection button flow', () => {
+    render(
+      <RepairPricingAndCTA
+        {...defaultProps}
+        bookingHref="/book-repair?brand=iPhone&model=iPhone+13+Pro+Max&service=Screen+Replacement"
+        renderQuoteOnlyBookingLink
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Book Repair Now' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Book Repair Now' })).not.toBeInTheDocument();
+  });
+
   // ── Step 1: Interactive Card State ─────────────────────────────────────────
 
   it('renders all pricing cards as interactive buttons with role="button"', () => {

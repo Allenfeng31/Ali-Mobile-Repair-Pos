@@ -15,6 +15,18 @@ function repairServiceData(price?: string) {
   return element.props.data;
 }
 
+function quoteOnlyServiceWithCanonicalIdentity() {
+  const url = 'https://www.alimobile.com.au/repairs/phone/xiaomi/14c/screen-replacement';
+  const element = RepairServiceSchema({
+    serviceName: 'Xiaomi 14C Screen Replacement in Ringwood',
+    description: 'Repair description',
+    url,
+    includeCanonicalServiceIdentity: true,
+  }) as ReactElement<{ data: Record<string, unknown> }>;
+
+  return { data: element.props.data, url };
+}
+
 describe('RepairServiceSchema offer policy', () => {
   it('keeps a numeric AUD Offer without an unsupported availability claim', () => {
     const data = repairServiceData('249');
@@ -35,6 +47,11 @@ describe('RepairServiceSchema offer policy', () => {
     expect(repairServiceData(price)).not.toHaveProperty('offers');
   });
 
+  it('does not add Service url or id unless the page explicitly opts in', () => {
+    expect(repairServiceData()).not.toHaveProperty('url');
+    expect(repairServiceData()).not.toHaveProperty('@id');
+  });
+
   it.each(['250', '85'])('keeps the resolved OPPO Find X8 Pro price as the Offer amount', (price) => {
     expect(repairServiceData(price)).toMatchObject({
       offers: {
@@ -42,6 +59,16 @@ describe('RepairServiceSchema offer policy', () => {
         priceCurrency: 'AUD',
       },
     });
+  });
+
+  it('adds canonical Service identity without creating an Offer for an opted-in quote-only page', () => {
+    const { data, url } = quoteOnlyServiceWithCanonicalIdentity();
+
+    expect(data).toMatchObject({
+      '@id': `${url}#service`,
+      url,
+    });
+    expect(data).not.toHaveProperty('offers');
   });
 });
 
