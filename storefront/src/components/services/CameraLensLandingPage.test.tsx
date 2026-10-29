@@ -71,13 +71,24 @@ describe('Camera Lens selected-device normalization', () => {
   });
 
   it('shows generic Camera Lens fixed pricing in the compact facts without a selected card or a separate large price card', () => {
-    render(<CameraLensLandingPage title="Phone Camera Lens Replacement" intro="Inspection first." canonicalPath="/repairs/phone/camera-lens-replacement" models={models} isGeneric />);
+    const { container } = render(<CameraLensLandingPage title="Phone Camera Lens Replacement" intro="Eligible external camera lens glass replacement is $50." canonicalPath="/repairs/phone/camera-lens-replacement" models={models} isGeneric />);
     const facts = screen.getByLabelText('Repair facts');
     for (const text of ['$50', '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(within(facts).getByText(text)).toBeInTheDocument();
     expect(screen.getAllByText('$50')).toHaveLength(1);
     expect(screen.queryByText('Selected device')).toBeNull();
     expect(screen.queryByText('Inspection first')).toBeNull();
     expect(screen.queryByLabelText('Commercial repair facts')).toBeNull();
+    expect(screen.getByText('Standard repair time is approximately 30 minutes when the correct part is available and no additional faults are found. Actual turnaround may vary after inspection.')).toBeInTheDocument();
+    const serviceSchema = Array.from(container.querySelectorAll('script[type="application/ld+json"]'))
+      .map((script) => JSON.parse(script.textContent ?? '{}'))
+      .find((schema) => schema['@type'] === 'Service');
+    expect(serviceSchema).toMatchObject({
+      name: 'Phone Camera Lens Replacement',
+      description: 'Eligible external camera lens glass replacement is $50.',
+      url: 'https://www.alimobile.com.au/repairs/phone/camera-lens-replacement',
+      provider: { '@id': 'https://www.alimobile.com.au/#localbusiness' },
+    });
+    expect(JSON.stringify(serviceSchema)).not.toMatch(/AggregateRating|Offer|offers|price/);
   });
 
   it('qualifies the 30-minute Camera Lens estimate when timing is explained in the fallback FAQ', () => {

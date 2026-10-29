@@ -147,7 +147,7 @@ import { getPhase1DniConsolidationDestination } from '@/data/phase1DniConsolidat
 import { classifyPhoneBrand } from '@/lib/publicRepairPageModePolicy';
 import {
   getSecondaryPhoneModelIdentity,
-  isBatchThreeSecondaryPhoneBrand,
+  isEvidenceQualifiedSecondaryPhoneBrand,
 } from '@/lib/secondaryPhoneModelIdentity';
 import {
   GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIR_SLUGS,
@@ -4740,7 +4740,7 @@ export async function generateMetadata({ params }: RepairPageProps) {
   }
 
   const rawModel = details?.model || formatDynamicParam(resolvedParams.model);
-  const model = isBatchThreeSecondaryPhoneBrand(resolvedParams.brand)
+  const model = isEvidenceQualifiedSecondaryPhoneBrand(resolvedParams.brand)
     ? getSecondaryPhoneModelIdentity({
         categorySlug: resolvedParams.category,
         brandSlug: resolvedParams.brand,
@@ -5100,7 +5100,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
   const rawDisplayModel = details?.model || formatDynamicParam(resolvedParams.model);
-  let displayModel = isBatchThreeSecondaryPhoneBrand(resolvedParams.brand)
+  let displayModel = isEvidenceQualifiedSecondaryPhoneBrand(resolvedParams.brand)
     ? getSecondaryPhoneModelIdentity({
         categorySlug: resolvedParams.category,
         brandSlug: resolvedParams.brand,

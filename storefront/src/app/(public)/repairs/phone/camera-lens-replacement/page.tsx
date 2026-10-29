@@ -6,11 +6,15 @@ import { fetchSharedRepairPageResultSeeds } from "@/lib/repair-results.server";
 
 const PAGE_PATH = "/repairs/phone/camera-lens-replacement";
 const EXCLUDED_BRANDS = new Set(["iphone", "samsung", "google-pixel", "oppo"]);
+const PAGE_TITLE = "Phone Camera Lens Replacement in Ringwood | Ali Mobile";
+const PAGE_DESCRIPTION = "Eligible external phone camera lens glass replacement is $50 in Ringwood. Camera-module, housing or additional damage requires assessment and a separate quote.";
 
 export const metadata: Metadata = {
-  title: "Phone Camera Lens Replacement in Ringwood | Ali Mobile",
-  description: "Outer phone camera lens glass replacement in Ringwood. We inspect the device and model fitment before providing a clear repair quote.",
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
   alternates: { canonical: PAGE_PATH },
+  openGraph: { title: PAGE_TITLE, description: PAGE_DESCRIPTION, url: PAGE_PATH },
+  twitter: { title: PAGE_TITLE, description: PAGE_DESCRIPTION },
 };
 
 export default async function GenericCameraLensReplacementPage({ searchParams }: { searchParams: Promise<{ brand?: string | string[]; model?: string | string[]; service?: string | string[] }> }) {
@@ -41,7 +45,7 @@ export default async function GenericCameraLensReplacementPage({ searchParams }:
   return (
     <CameraLensLandingPage
       title="Phone Camera Lens Replacement in Ringwood"
-      intro="Camera lens glass replacement for supported non-iPhone phone brands at Ali Mobile & Repair in Ringwood. Pricing is confirmed after inspection."
+      intro={PAGE_DESCRIPTION}
       canonicalPath={PAGE_PATH}
       models={models}
       isGeneric

@@ -238,9 +238,10 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
     expect(screen.queryByTestId('generic-booking-cta')).toBeNull();
     expect(screen.getByTestId('generic-peripheral-hierarchy').parentElement).toHaveAttribute('hidden');
     expect(screen.getByRole('heading', { level: 2, name: 'Huawei Mate 20' })).toBeTruthy();
-    expect(screen.getAllByText('$79')).toHaveLength(1);
+    expect(screen.getAllByText('$79')).toHaveLength(2);
     const facts = screen.getByLabelText('Repair facts');
-    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText('$79')).toBeInTheDocument();
+    expect(within(facts).queryByText('From $50')).not.toBeInTheDocument();
     expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /Book Repair Now/ })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /Book Repair Now/ })).toHaveAttribute('href', '/book-repair?category=phone&brandSlug=huawei&modelSlug=mate-20&serviceSlug=loudspeaker-replacement');
@@ -293,6 +294,8 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
       />);
 
       expect(html).toContain('30 Minutes');
+      expect(html).toContain('Quote on Request');
+      expect(html).not.toContain('From $50');
       expect(html).toContain('Standard repair time is approximately 30 minutes when the correct part is available and no additional faults are found. Actual turnaround may vary after inspection.');
       expect(html).toContain(`brandSlug=${brandSlug}`);
       expect(html).toContain(`serviceSlug=${repairSlug}`);

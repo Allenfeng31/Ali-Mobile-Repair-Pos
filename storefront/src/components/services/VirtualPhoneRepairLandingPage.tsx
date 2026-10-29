@@ -273,6 +273,7 @@ export default function VirtualPhoneRepairLandingPage({
         </div>
         {usesSharedMaster ? <CameraModuleRepairSelectionExperience
           useMasterFacts
+          useSelectedPriceInFacts={isGenericHierarchy}
           brandOnlySelection={Boolean(sharedPageV2)}
           title={pageTitle}
           description={brandContent ? `${brandContent.intro}${samsungHeroPriceContext}` : (sharedPageV2 ? `${repair.summary} Ali Mobile & Repair in Ringwood confirms final pricing after inspection if additional damage or parts are involved.` : `${repair.summary} Choose a supported model to view its current repair option before booking.`)}

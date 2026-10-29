@@ -191,7 +191,7 @@ export default function CameraLensLandingPage({
 
   return (
     <>
-    {brandName ? <ServiceSchema serviceName={`${brandName} ${CAMERA_LENS_REPAIR_NAME}`} description={intro} url={`https://www.alimobile.com.au${canonicalPath}`} /> : null}
+    <ServiceSchema serviceName={`${brandName ? `${brandName} ` : 'Phone '}${CAMERA_LENS_REPAIR_NAME}`} description={intro} url={`https://www.alimobile.com.au${canonicalPath}`} />
     <div className="repair-page-shell repair-page-shell-narrow repair-detail-page-shell" style={{ paddingBottom: 0 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <nav aria-label="Breadcrumb" className="mb-8 flex justify-center text-center text-sm text-slate-600">
@@ -275,7 +275,10 @@ export default function CameraLensLandingPage({
 
         {selectedLensDevice ? <SharedRepairSelectedDevice selection={selectedLensDevice} changeModelHref={`${canonicalPath}#shared-repair-model-selection`} /> : null}
 
-        {isGeneric ? <SharedRepairHeroFacts priceLabel={price} /> : <div className="trust-badges mt-8">
+        {isGeneric ? <>
+          <SharedRepairHeroFacts priceLabel={price} />
+          <p className="mx-auto mt-5 max-w-3xl text-pretty text-center text-sm font-semibold leading-6 text-slate-600">{SHARED_PHONE_STANDARD_REPAIR_TIMING_QUALIFICATION}</p>
+        </> : <div className="trust-badges mt-8">
           <div className="trust-badge">
             <span className="trust-badge-icon text-blue-600"><ClipboardCheck size={20} strokeWidth={2.5} aria-hidden="true" /></span>
             Inspection Before Work
@@ -303,7 +306,9 @@ export default function CameraLensLandingPage({
           <h2 id="camera-lens-guidance-heading" className="scroll-mt-32">
             Camera lens glass repair, explained clearly
           </h2>
-          <p>{brandContent?.guidanceIntro ?? "We inspect the camera area first, confirm model fitment, then quote the lens glass repair before work begins."}</p>
+          <p>{brandContent?.guidanceIntro ?? (isGeneric
+            ? "Eligible external camera lens glass replacement is $50. We inspect model fitment and the camera area first; camera-module, housing or additional damage may require further assessment and a separate quote."
+            : "We inspect the camera area first, confirm model fitment, then quote the lens glass repair before work begins.")}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:auto-rows-fr md:grid-cols-2 lg:gap-6">

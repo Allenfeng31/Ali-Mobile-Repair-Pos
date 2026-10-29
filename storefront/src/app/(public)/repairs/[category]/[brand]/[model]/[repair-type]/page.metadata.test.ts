@@ -54,6 +54,19 @@ const catalog: RepairCatalog = {
     },
     {
       category: 'phone',
+      slug: 'oneplus',
+      brand: 'OnePlus',
+      icon: 'phone',
+      models: [
+        {
+          slug: '9-pro',
+          model: '9 Pro',
+          repairTypes: [{ slug: 'screen-replacement', name: 'Screen Replacement', price: 0 }],
+        },
+      ],
+    },
+    {
+      category: 'phone',
       slug: 'samsung',
       brand: 'Samsung',
       icon: 'phone',
@@ -151,6 +164,14 @@ const catalog: RepairCatalog = {
 type RepairDetails = Exclude<Awaited<ReturnType<typeof fetchRepairDetails>>, null>;
 
 const repairDetails: Record<string, RepairDetails> = {
+  'phone/oneplus/9-pro/screen-replacement': {
+    brand: 'OnePlus',
+    model: '9 Pro',
+    repairType: 'Screen Replacement',
+    price: 0,
+    variants: [],
+    source: 'fallback',
+  },
   'phone/iphone/iphone-15/screen-replacement': {
     brand: 'iPhone',
     model: 'iPhone 15',
@@ -259,6 +280,18 @@ describe('repair detail metadata', () => {
     expect(metadata.description).toContain('cracked glass');
     expect(metadata.openGraph?.description).toBe(metadata.description);
     expect(metadata.twitter?.description).toBe(metadata.description);
+  });
+
+  it('uses the complete commercial secondary-phone identity in metadata', async () => {
+    const metadata = await generateMetadata(params('phone', 'oneplus', '9-pro', 'screen-replacement'));
+
+    expect(metadata.title).toBe('OnePlus 9 Pro Screen Replacement in Ringwood | Ali Mobile');
+    expect(metadata.description).toContain('OnePlus 9 Pro');
+    expect(metadata.openGraph?.title).toBe('OnePlus 9 Pro Screen Replacement | Ali Mobile & Repair');
+    expect(metadata.twitter?.title).toBe('OnePlus 9 Pro Screen Replacement | Ali Mobile & Repair');
+    expect(metadata.alternates?.canonical).toBe(
+      'https://www.alimobile.com.au/repairs/phone/oneplus/9-pro/screen-replacement'
+    );
   });
 
   it.each([

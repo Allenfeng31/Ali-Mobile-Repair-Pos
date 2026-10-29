@@ -17,6 +17,7 @@ type CameraModuleRepairSelectionExperienceProps = Readonly<{
   bookingService: string;
   canonicalPath: string;
   useMasterFacts?: boolean;
+  useSelectedPriceInFacts?: boolean;
   brandOnlySelection?: boolean;
   heroFacts?: ReactNode;
   selectorContent?: ReactNode;
@@ -92,6 +93,7 @@ function SelectionExperience({
   bookingService,
   canonicalPath,
   useMasterFacts = false,
+  useSelectedPriceInFacts = false,
   brandOnlySelection = false,
   heroFacts,
   selectorContent,
@@ -106,6 +108,9 @@ function SelectionExperience({
   const selectedPriceLabel = displayedSelectedDevice
     ? (useMasterFacts ? displayedSelectedDevice.priceLabel : null) ?? hierarchy.models.find((model) => model.brandSlug === displayedSelectedDevice.selectedDevice.brandSlug && model.modelSlug === displayedSelectedDevice.selectedDevice.modelSlug)?.priceLabel ?? null
     : null;
+  const masterFactsPriceLabel = useSelectedPriceInFacts && displayedSelectedDevice
+    ? selectedPriceLabel ?? 'Quote on Request'
+    : 'From $50';
   const genericStartingPrice = getCameraModuleStartingPrice(hierarchy.models);
   const selectorModels = hierarchy.models.map((model) => ({
     ...model,
@@ -189,7 +194,7 @@ function SelectionExperience({
           </button> : null}
         </div>
       </div>
-      {heroFacts ?? (useMasterFacts ? <SharedRepairHeroFacts priceLabel="From $50" /> : <RepairTrustBadges />)}
+      {heroFacts ?? (useMasterFacts ? <SharedRepairHeroFacts priceLabel={masterFactsPriceLabel} /> : <RepairTrustBadges />)}
     </section>
 
     <div

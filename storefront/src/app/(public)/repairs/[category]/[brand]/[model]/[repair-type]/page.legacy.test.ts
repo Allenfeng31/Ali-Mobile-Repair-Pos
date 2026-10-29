@@ -867,12 +867,22 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['Xiaomi', 'xiaomi', 'Mi 11', 'mi-11', 'Xiaomi Mi 11'],
+    ['Nokia', 'nokia', 'Nokia 8.3 5G', '83-5g', 'Nokia 8.3 5G'],
+    ['Vivo', 'vivo', 'Y52 5G', 'y52-5g', 'Vivo Y52 5G'],
+    ['LG', 'lg', 'Velvet', 'velvet', 'LG Velvet'],
+    ['OnePlus', 'oneplus', '9 Pro', '9-pro', 'OnePlus 9 Pro'],
+    ['Huawei', 'huawei', 'P30 Pro', 'p30-pro', 'Huawei P30 Pro'],
+    ['HTC', 'htc', 'U12+', 'u12-plus', 'HTC U12+'],
+    ['Sony', 'sony', 'Xperia 5', 'xperia-5', 'Sony Xperia 5'],
+    ['Telstra', 'telstra', 'Essential Pro', 'essential-pro', 'Telstra Essential Pro'],
+    ['Motorola', 'motorola', 'Moto G04', 'moto-g04', 'Motorola Moto G04'],
     ['Asus', 'asus', 'ROG Phone 3', 'rog-phone-3', 'ASUS ROG Phone 3'],
     ['Microsoft', 'microsoft', 'Lumia 640', 'lumia-640', 'Microsoft Lumia 640'],
     ['Nothing', 'nothing', 'CMF Phone 2 Pro 5G', 'cmf-phone-2-pro-5g', 'Nothing CMF Phone 2 Pro 5G'],
     ['Realme', 'realme', '7 Pro', '7-pro', 'Realme 7 Pro'],
     ['TCL', 'tcl', '10 Pro', '10-pro', 'TCL 10 Pro'],
-  ] as const)('qualifies Batch 3 %s detail identity without changing its raw booking model', async (
+  ] as const)('qualifies audited secondary-brand %s detail identity without changing its raw booking model', async (
     brand,
     brandSlug,
     model,
@@ -1946,7 +1956,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     const html = renderToStaticMarkup(page);
     const faqElement = findElementByType(page, FaqAccordionComponent);
     const timingFaq = (faqElement?.props.faqs as Array<{ question: string; answer: string }>).find(
-      (entry) => entry.question === 'How long does the Moto G24 Screen Replacement take?'
+      (entry) => entry.question === 'How long does the Motorola Moto G24 Screen Replacement take?'
     );
 
     expect(html).toContain('Choose a quality tier, confirm the quote, then book the repair path that fits your device and budget.');
@@ -1954,7 +1964,7 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(html).not.toContain('30 Minutes');
     expect(html).not.toContain('Screen replacement at Ali Mobile in Ringwood Square.');
     expect(timingFaq?.answer).toBe(
-      'Many Moto G24 screen replacement jobs are completed quickly at Ringwood Square Shopping Centre when the correct part is in stock. Walk-ins are welcome on weekdays, and we confirm timing after checking the model, fault and queue.'
+      'Many Motorola Moto G24 screen replacement jobs are completed quickly at Ringwood Square Shopping Centre when the correct part is in stock. Walk-ins are welcome on weekdays, and we confirm timing after checking the model, fault and queue.'
     );
   });
 

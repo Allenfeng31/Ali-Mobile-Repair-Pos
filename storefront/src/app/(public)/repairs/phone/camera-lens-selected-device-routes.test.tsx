@@ -12,7 +12,7 @@ vi.mock('@/components/services/CameraLensLandingPage', async (importOriginal) =>
   return { ...actual, default: () => null };
 });
 
-import GenericCameraLensReplacementPage from './camera-lens-replacement/page';
+import GenericCameraLensReplacementPage, { metadata as genericMetadata } from './camera-lens-replacement/page';
 import GoogleCameraLensReplacementPage from './google/camera-lens-replacement/page';
 import SamsungCameraLensReplacementPage from './samsung/camera-lens-replacement/page';
 import OppoCameraLensReplacementPage from './oppo/camera-lens-replacement/page';
@@ -63,6 +63,22 @@ describe('Camera Lens route server selection', () => {
 
     expect(fetchResultsMock).toHaveBeenCalledWith({
       category: 'phone', brandSlug: 'huawei', repairTypeSlug: 'camera-lens-replacement', selectedModelSlug: 'p30-pro',
+    });
+  });
+
+  it('keeps generic Camera Lens metadata aligned with the fixed-price external lens-glass scope', () => {
+    const description = 'Eligible external phone camera lens glass replacement is $50 in Ringwood. Camera-module, housing or additional damage requires assessment and a separate quote.';
+
+    expect(genericMetadata.description).toBe(description);
+    expect(genericMetadata.alternates?.canonical).toBe('/repairs/phone/camera-lens-replacement');
+    expect(genericMetadata.openGraph).toMatchObject({
+      title: 'Phone Camera Lens Replacement in Ringwood | Ali Mobile',
+      description,
+      url: '/repairs/phone/camera-lens-replacement',
+    });
+    expect(genericMetadata.twitter).toMatchObject({
+      title: 'Phone Camera Lens Replacement in Ringwood | Ali Mobile',
+      description,
     });
   });
 });
