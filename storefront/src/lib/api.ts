@@ -564,7 +564,7 @@ async function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explici
     transformLiveInventory: (items) => transformPOSToCatalog(items),
     readSnapshot: readCurrentPublicRepairCatalogueSnapshot,
     writeSnapshot: writeCurrentPublicRepairCatalogueSnapshot,
-    createDevelopmentFallback: () => applyMacBookCataloguePresentation(backfillSamsungCatalogModels(buildFallbackCatalog())),
+    createDevelopmentFallback: () => backfillSamsungCatalogModels(buildFallbackCatalog()),
     allowMajorShrink: allowMajorCatalogueShrink(),
     forceRefresh,
     isExplicitRetirement: (category, brand, model, repair) => explicitRetirements.some((entry) => entry.category === category && entry.brand === brand && entry.model === model && entry.repairType === repair),

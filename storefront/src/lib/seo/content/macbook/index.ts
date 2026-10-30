@@ -188,8 +188,6 @@ const PUBLIC_MACBOOK_MODEL_ALIASES = {
   'macbook-pro-14-m5-max-2026': 'macbook-pro-14-m5-max-2026',
   'macbook-pro-16-m5-pro-2026': 'macbook-pro-16-m5-pro-2026',
   'macbook-pro-16-m5-max-2026': 'macbook-pro-16-m5-max-2026',
-  'macbook-pro-1416-m4-promax-2024': 'macbook-pro-14-m4-pro-2024',
-  'macbook-pro-1416-m5-promax-2026': 'macbook-pro-14-m5-pro-2026',
 } as const satisfies Record<string, MacBookModelSlug>;
 
 const PUBLIC_MACBOOK_MODEL_SLUGS_BY_CONTENT_KEY = Object.fromEntries(
@@ -6733,11 +6731,11 @@ const PUBLIC_MACBOOK_ROUTE_COUNT = Object.keys(PUBLIC_MACBOOK_MODEL_ALIASES).red
 }, 0);
 
 if (
-  PUBLIC_MACBOOK_ALIAS_COUNT !== 32 ||
+  PUBLIC_MACBOOK_ALIAS_COUNT !== 30 ||
   MACBOOK_MODELS.length !== 20 ||
-  PUBLIC_MACBOOK_ROUTE_COUNT !== 96
+  PUBLIC_MACBOOK_ROUTE_COUNT !== 90
 ) {
-  throw new Error('MacBook enhanced content alias coverage must remain 32 public aliases, 20 standard timing models, and 96 public repair routes.');
+  throw new Error('MacBook enhanced content alias coverage must remain 30 public aliases, 20 standard timing models, and 90 public repair routes.');
 }
 
 export function isAliMobileEnhancedMacBookRepairPage({

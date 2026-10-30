@@ -42,7 +42,7 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
 
     const heading = screen.getByRole('heading', { level: 1, name: `${brandName} Loudspeaker Replacement` });
     const facts = screen.getByLabelText('Repair facts');
-    expect(within(facts).getByText(brandSlug === 'samsung' ? 'Typical $50–$150' : 'From $50')).toBeInTheDocument();
+    expect(within(facts).getByText(brandSlug === 'samsung' ? 'Typical $50–$150' : 'Quote on Request')).toBeInTheDocument();
     expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
     expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();
@@ -215,6 +215,34 @@ describe('VirtualPhoneRepairLandingPage generic hierarchy integration', () => {
 
   it('retains Samsung Camera Lens fixed-price authority outside the shared range rule', () => {
     expect(getCameraLensPrice('Samsung')).toBe(50);
+  });
+
+  it.each([
+    ['loudspeaker-replacement', 'Loudspeaker Replacement'],
+    ['earpiece-speaker-replacement', 'Earpiece Speaker Replacement'],
+    ['power-button-replacement', 'Power Button Replacement'],
+    ['volume-button-replacement', 'Volume Button Replacement'],
+  ] as const)('uses Quote on Request for the unselected generic %s page without an Offer', (repairSlug, repairName) => {
+    const { container } = render(<VirtualPhoneRepairLandingPage
+      repairSlug={repairSlug}
+      canonicalPath={`/repairs/phone/${repairSlug}`}
+      models={[{ brand: 'Huawei', brandSlug: 'huawei', model: 'Mate 20', modelSlug: 'mate-20' }]}
+      isGeneric
+      hierarchy={{
+        models: [{ brandSlug: 'huawei', brandLabel: 'Huawei', modelSlug: 'mate-20', modelLabel: 'Huawei Mate 20', repairLabel: repairName, priceLabel: null, bookingHref: '/book-repair' }],
+        selectedBrandSlug: null,
+        selectedModelSlug: null,
+      }}
+    />);
+
+    const facts = screen.getByLabelText('Repair facts');
+    expect(within(facts).getByText('Quote on Request')).toBeInTheDocument();
+    expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
+    expect(within(facts).queryByText('From $50')).not.toBeInTheDocument();
+    const serviceSchema = Array.from(container.querySelectorAll('script[type="application/ld+json"]'))
+      .map((script) => JSON.parse(script.textContent ?? '{}'))
+      .find((schema) => schema['@type'] === 'Service');
+    expect(JSON.stringify(serviceSchema)).not.toMatch(/Offer|price|availability/);
   });
 
   it('uses the Camera master selected state without a virtual fallback price or duplicate selected-device card', () => {

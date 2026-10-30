@@ -123,18 +123,17 @@ describe('MacBook M4/M5 Enhanced Repair Details', () => {
   });
 
   it.each([
-    ['macbook-pro-1416-m4-promax-2024', 'macbook-pro-14-m4-pro-2024'],
-    ['macbook-pro-1416-m5-promax-2026', 'macbook-pro-14-m5-pro-2026'],
-  ])('resolves transitional combined slug %s to canonical %s', (transitionalSlug) => {
+    'macbook-pro-1416-m4-promax-2024',
+    'macbook-pro-1416-m5-promax-2026',
+  ])('does not assign enhanced model content to ambiguous combined slug %s', (transitionalSlug) => {
     for (const repairSlug of MACBOOK_REPAIRS) {
       expect(isAliMobileEnhancedMacBookRepairPage({
         category: 'laptop',
         brand: 'macbook',
         model: transitionalSlug,
         'repair-type': repairSlug,
-      })).toBe(true);
-      expect(getAliMobileEnhancedMacBookSeoPocket({ modelSlug: transitionalSlug, repairSlug })).not.toBeNull();
+      })).toBe(false);
+      expect(getAliMobileEnhancedMacBookSeoPocket({ modelSlug: transitionalSlug, repairSlug })).toBeNull();
     }
   });
 });
-

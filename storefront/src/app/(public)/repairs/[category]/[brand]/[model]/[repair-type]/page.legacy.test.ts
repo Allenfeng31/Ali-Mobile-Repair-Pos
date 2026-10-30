@@ -29,8 +29,10 @@ import FaqAccordionComponent from '@/components/FaqAccordion';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import { GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 import {
+  BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS,
   BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS,
   BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
+  SECONDARY_PHONE_BRAND_NAMES,
 } from '@/lib/secondaryPhoneModelIdentity';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
@@ -964,6 +966,58 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(serviceSchema).not.toContain('"offers"');
     expect(html).toContain(`"@id":"${canonicalUrl}#service"`);
     expect(html).toContain(`"url":"${canonicalUrl}"`);
+  });
+
+  it('server-renders neutral quote FAQs for all 378 approved Batch 1 routes', async () => {
+    const batchOneBrands = new Set<string>(BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS);
+    const routes = GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS.filter(({ brandSlug }) => batchOneBrands.has(brandSlug));
+
+    expect(routes).toHaveLength(378);
+    for (const route of routes) {
+      const brand = SECONDARY_PHONE_BRAND_NAMES[route.brandSlug];
+      const repairName = batchTwoRepairNames[route.repairSlug as keyof typeof batchTwoRepairNames];
+      const identity = `${route.brandSlug}/${route.modelSlug}/${route.repairSlug}`;
+      fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+        brand,
+        route.brandSlug,
+        route.modelSlug,
+        route.modelSlug,
+        repairName,
+        route.repairSlug,
+      ));
+
+      const page = await RepairServicePage({ params: Promise.resolve(params({
+        brand: route.brandSlug,
+        model: route.modelSlug,
+        'repair-type': route.repairSlug,
+      })) });
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const priceFaq = faqs.find((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question));
+
+      expect(priceFaq?.answer, identity).toMatch(/^Request a quote after confirming the exact /);
+      expect(JSON.stringify(faqs), identity).not.toMatch(/Live Quote|instant, accurate price/i);
+    }
+  }, 45_000);
+
+  it.each([
+    'macbook-pro-1416-m4-promax-2024',
+    'macbook-pro-1416-m5-promax-2026',
+  ] as const)('redirects every ambiguous %s repair URL to the neutral MacBook hub', async (modelSlug) => {
+    for (const repairSlug of [
+      'screen-replacement',
+      'battery-replacement',
+      'charging-port-replacement',
+      'water-damage-repair',
+      'logic-board-repair',
+    ]) {
+      await expect(RepairServicePage({ params: Promise.resolve(params({
+        category: 'laptop',
+        brand: 'macbook',
+        model: modelSlug,
+        'repair-type': repairSlug,
+      })) })).rejects.toThrow('NEXT_REDIRECT_TEST:/repairs/laptop/macbook');
+      expect(permanentRedirect).toHaveBeenLastCalledWith('/repairs/laptop/macbook');
+    }
   });
 
   it.each([

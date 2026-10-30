@@ -125,7 +125,12 @@ describe('all 15 brand-shared routes use the centered Master', () => {
 
     expect(within(hero).getByRole('heading', { level: 1, name: `${caseItem.name} ${repairName}` })).toBeInTheDocument();
     expect(hero).toHaveClass('repair-hero', 'repair-detail-hero');
-    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    const expectedPrice = caseItem.service === 'camera-lens-replacement'
+      ? 'From $50'
+      : caseItem.slug === 'samsung'
+        ? 'Typical $50–$150'
+        : 'Quote on Request';
+    expect(within(facts).getByText(expectedPrice)).toBeInTheDocument();
     expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
     expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();
@@ -152,7 +157,7 @@ describe('all 15 brand-shared routes use the centered Master', () => {
     expect(within(card).getByRole('heading', { level: 2, name: `${caseItem.name} ${caseItem.model}` })).toBeInTheDocument();
     expect(within(card).getByText(repairName)).toBeInTheDocument();
     expect(within(card).getByText(caseItem.service === 'camera-lens-replacement' ? '$50' : 'Quote on Request')).toBeInTheDocument();
-    expect(within(facts).getByText('From $50')).toBeInTheDocument();
+    expect(within(facts).getByText(caseItem.service === 'camera-lens-replacement' ? 'From $50' : 'Quote on Request')).toBeInTheDocument();
     expect(within(facts).getByText('30 Minutes')).toBeInTheDocument();
     expect(within(facts).getByText('6 Months Warranty')).toBeInTheDocument();
     expect(within(facts).getByText('Ringwood Square')).toBeInTheDocument();

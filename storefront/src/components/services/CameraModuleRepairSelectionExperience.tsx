@@ -18,6 +18,7 @@ type CameraModuleRepairSelectionExperienceProps = Readonly<{
   canonicalPath: string;
   useMasterFacts?: boolean;
   useSelectedPriceInFacts?: boolean;
+  unselectedPriceLabel?: string;
   brandOnlySelection?: boolean;
   heroFacts?: ReactNode;
   selectorContent?: ReactNode;
@@ -94,6 +95,7 @@ function SelectionExperience({
   canonicalPath,
   useMasterFacts = false,
   useSelectedPriceInFacts = false,
+  unselectedPriceLabel = 'From $50',
   brandOnlySelection = false,
   heroFacts,
   selectorContent,
@@ -110,7 +112,7 @@ function SelectionExperience({
     : null;
   const masterFactsPriceLabel = useSelectedPriceInFacts && displayedSelectedDevice
     ? selectedPriceLabel ?? 'Quote on Request'
-    : 'From $50';
+    : unselectedPriceLabel;
   const genericStartingPrice = getCameraModuleStartingPrice(hierarchy.models);
   const selectorModels = hierarchy.models.map((model) => ({
     ...model,

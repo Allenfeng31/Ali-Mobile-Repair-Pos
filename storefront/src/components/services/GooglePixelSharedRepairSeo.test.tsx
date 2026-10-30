@@ -66,7 +66,8 @@ describe('Google Pixel shared-page content in initial server HTML', () => {
 
     expect(document.querySelector('h1')?.textContent).toBe(`Google Pixel ${repairName}`);
     expect(document.querySelector('h1')?.textContent).not.toContain('Ringwood');
-    for (const fact of ['From $50', '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(facts?.textContent).toContain(fact);
+    const expectedPrice = service === 'camera-lens-replacement' ? 'From $50' : 'Quote on Request';
+    for (const fact of [expectedPrice, '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(facts?.textContent).toContain(fact);
     expect(document.querySelectorAll('.faq-item')).toHaveLength(6);
     expect(modelLinks).toHaveLength(1);
     expect(document.querySelector('a[href*="unsupported-fixture"]')).toBeNull();

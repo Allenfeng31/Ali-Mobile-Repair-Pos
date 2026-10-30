@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyMacBookCataloguePresentation,
   HELD_SPECULATIVE_MACBOOK_MODELS,
+  isAmbiguousLegacyMacBookModelSlug,
   MACBOOK_ALLOWED_REPAIR_SLUGS,
   MACBOOK_MODEL_SLUG_ALIASES,
   resolveMacBookCanonicalModelSlug,
@@ -135,12 +136,20 @@ describe('MacBook Catalogue Presentation', () => {
 
   it.each([
     ['macbook-pro-1416-m3-promax-2023', 'macbook-pro-1416-m3-promax-2024'], // preserved older canonical
-    ['macbook-pro-1416-m4-promax-2024', 'macbook-pro-14-m4-pro-2024'], // legacy combined redirected
-    ['macbook-pro-1416-m5-promax-2026', 'macbook-pro-14-m5-pro-2026'], // legacy combined redirected
+    ['macbook-pro-1416-m4-promax-2024', 'macbook-pro-1416-m4-promax-2024'], // ambiguous legacy route handled by the hub redirect
+    ['macbook-pro-1416-m5-promax-2026', 'macbook-pro-1416-m5-promax-2026'], // ambiguous legacy route handled by the hub redirect
     ['macbook-pro-14-m4-2024', 'macbook-pro-14-m4-2024'], // canonical unchanged
     ['macbook-pro-14-m4-pro-2024', 'macbook-pro-14-m4-pro-2024'], // canonical unchanged
     ['macbook-pro-14-m5-2025', 'macbook-pro-14-m5-2025'], // canonical unchanged
   ])('resolves slug %s to canonical slug %s', (inputSlug, expectedSlug) => {
     expect(resolveMacBookCanonicalModelSlug(inputSlug)).toBe(expectedSlug);
+  });
+
+  it.each([
+    'macbook-pro-1416-m4-promax-2024',
+    'macbook-pro-1416-m5-promax-2026',
+  ])('classifies %s as an ambiguous legacy model identity', (modelSlug) => {
+    expect(isAmbiguousLegacyMacBookModelSlug(modelSlug)).toBe(true);
+    expect(MACBOOK_MODEL_SLUG_ALIASES[modelSlug]).toBeUndefined();
   });
 });

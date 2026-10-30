@@ -283,7 +283,7 @@ describe('Samsung shared repair metadata and model state', () => {
       expect(sharedPage).not.toContain('We confirm parts availability and provide a clear quote before work begins.');
     }
 
-    expect(virtualPage).toContain("formatScopedRepairPriceLabel(repair.slug, 50, 'From $50', 'virtual')");
+    expect(virtualPage).toContain("const priceLabel = 'Quote on Request'");
     expect(cameraPage).toContain('getCameraLensPrice(brandName ?? "")');
     expect(cameraPage).toContain('Camera lens glass or camera module?');
     expect(cameraPage).toContain('photo and video clarity');

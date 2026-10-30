@@ -118,7 +118,7 @@ import {
   isAliMobileEnhancedMacBookRepairPage,
   isNewMacBookProModel,
 } from '@/lib/seo/content/macbook';
-import { MACBOOK_MODEL_SLUG_ALIASES } from '@/lib/macbookCataloguePresentation';
+import { isAmbiguousLegacyMacBookModelSlug, MACBOOK_MODEL_SLUG_ALIASES } from '@/lib/macbookCataloguePresentation';
 import {
   getAliMobileEnhancedAppleWatchRepairType,
   getAliMobileEnhancedAppleWatchSeoPocket,
@@ -4621,6 +4621,13 @@ async function resolveRepairRouteParams(rawParams: Awaited<RepairPageProps['para
   const canonicalRepairSlug = isWaterDamageRepairSlug(rawParams['repair-type'])
     ? 'water-damage-repair'
     : rawParams['repair-type'];
+  if (
+    rawParams.category === 'laptop' &&
+    canonicalBrand === 'macbook' &&
+    isAmbiguousLegacyMacBookModelSlug(rawParams.model)
+  ) {
+    permanentRedirect('/repairs/laptop/macbook');
+  }
   if (isNonGrandfatheredSecondaryPhoneProtectedRepair(
     rawParams.category,
     canonicalBrand,
@@ -5681,11 +5688,11 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     publicDisplayBrand,
     { initialAssessmentCleaningMinutes },
   );
-  const baseFaqs = seoPocket?.faq || ((isPrimaryPhoneOrdinaryDetailPage || isBatchTwoOrThreeSecondaryPhoneRepairDetail) && detailPricing.isQuoteOnly
+  const baseFaqs = seoPocket?.faq || ((isPrimaryPhoneOrdinaryDetailPage || secondaryPhoneRepairContent) && detailPricing.isQuoteOnly
     ? generatedFaqs.map((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question)
       ? {
           ...faq,
-          answer: isBatchTwoOrThreeSecondaryPhoneRepairDetail
+          answer: secondaryPhoneRepairContent
             ? `Request a quote after confirming the exact ${displayModel}, repair service and symptoms. Parts availability, device condition and any additional damage may affect the final quote. We will confirm the repair options and price before proceeding.`
             : `Pricing depends on the exact ${displayModel} model and repair option. Contact us to get a quote.`,
         }

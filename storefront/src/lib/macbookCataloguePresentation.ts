@@ -18,9 +18,16 @@ export const MACBOOK_ALLOWED_REPAIR_SLUGS = new Set([
  */
 export const MACBOOK_MODEL_SLUG_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   'macbook-pro-1416-m3-promax-2023': 'macbook-pro-1416-m3-promax-2024',
-  'macbook-pro-1416-m4-promax-2024': 'macbook-pro-14-m4-pro-2024',
-  'macbook-pro-1416-m5-promax-2026': 'macbook-pro-14-m5-pro-2026',
 });
+
+export const AMBIGUOUS_LEGACY_MACBOOK_MODEL_SLUGS = new Set([
+  'macbook-pro-1416-m4-promax-2024',
+  'macbook-pro-1416-m5-promax-2026',
+]);
+
+export function isAmbiguousLegacyMacBookModelSlug(modelSlug: string): boolean {
+  return AMBIGUOUS_LEGACY_MACBOOK_MODEL_SLUGS.has(modelSlug.toLowerCase());
+}
 
 /**
  * Officially verified missing MacBook Pro models from 2024–2026 releases.

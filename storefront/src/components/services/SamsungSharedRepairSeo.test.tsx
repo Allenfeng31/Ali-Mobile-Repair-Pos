@@ -66,7 +66,8 @@ describe('Samsung shared-page content in initial server HTML', () => {
 
     expect(document.querySelector('h1')?.textContent).toBe(`Samsung ${repairName}`);
     expect(document.querySelector('h1')?.textContent).not.toContain('Ringwood');
-    for (const fact of ['From $50', '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(facts?.textContent).toContain(fact);
+    const expectedPrice = service === 'camera-lens-replacement' ? '$50' : 'Typical $50–$150';
+    for (const fact of [expectedPrice, '30 Minutes', '6 Months Warranty', 'Ringwood Square']) expect(facts?.textContent).toContain(fact);
     expect(document.querySelectorAll('.faq-item').length).toBeGreaterThanOrEqual(6);
     expect(document.querySelector('.faq-section')?.textContent).toContain('Samsung');
     expect(modelLinks).toHaveLength(1);

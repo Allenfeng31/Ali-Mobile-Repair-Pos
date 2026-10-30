@@ -16,7 +16,6 @@ import { ServiceSchema } from '@/components/services/ServiceSchema';
 import hubStyles from '@/components/repair-type-hubs/RepairTypeHub.module.css';
 import { getSharedRepairBookingHref } from '@/lib/sharedRepairBooking';
 import { getVirtualPhoneRepair, type VirtualPhoneRepair, type VirtualPhoneRepairModelOption, type VirtualPhoneRepairSlug } from '@/lib/virtualPhoneRepairs';
-import { formatScopedRepairPriceLabel } from '@/lib/scopedRepairPriceLabel';
 import { buildBrandSharedMasterModels } from '@/lib/brandSharedMasterModels';
 import { SAMSUNG_SHARED_REPAIR_CONTENT } from '@/data/samsungSharedRepairContent';
 import { GOOGLE_PIXEL_SHARED_REPAIR_CONTENT } from '@/data/googlePixelSharedRepairContent';
@@ -192,7 +191,7 @@ export default function VirtualPhoneRepairLandingPage({
   const googlePixelContent = brandSlug === 'google-pixel' && sharedPageV2 ? GOOGLE_PIXEL_SHARED_REPAIR_CONTENT[repair.slug] : null;
   const oppoContent = brandSlug === 'oppo' && sharedPageV2 ? OPPO_SHARED_REPAIR_CONTENT[repair.slug] : null;
   const brandContent = samsungContent ?? googlePixelContent ?? oppoContent;
-  const priceLabel = formatScopedRepairPriceLabel(repair.slug, 50, 'From $50', 'virtual');
+  const priceLabel = 'Quote on Request';
   const repairHubHref = brandSlug ? `/repairs/phone/${brandSlug === 'google-pixel' ? 'google-pixel' : brandSlug}` : '/repairs/phone';
   const repairHubLabel = brandName ? `${brandName} Repairs` : null;
   const pageTitle = getVirtualPhoneRepairHeading({ brandName, brandSlug, repairName: repair.name });
@@ -274,6 +273,7 @@ export default function VirtualPhoneRepairLandingPage({
         {usesSharedMaster ? <CameraModuleRepairSelectionExperience
           useMasterFacts
           useSelectedPriceInFacts={isGenericHierarchy}
+          unselectedPriceLabel={priceLabel}
           brandOnlySelection={Boolean(sharedPageV2)}
           title={pageTitle}
           description={brandContent ? `${brandContent.intro}${samsungHeroPriceContext}` : (sharedPageV2 ? `${repair.summary} Ali Mobile & Repair in Ringwood confirms final pricing after inspection if additional damage or parts are involved.` : `${repair.summary} Choose a supported model to view its current repair option before booking.`)}

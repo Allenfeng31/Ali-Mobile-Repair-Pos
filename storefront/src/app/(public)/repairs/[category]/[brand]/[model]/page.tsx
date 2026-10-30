@@ -33,7 +33,7 @@ import {
   getMacBookModelMetaDescription,
   getMacBookModelMetaTitle,
 } from "@/lib/macbookModelHubPresentation";
-import { MACBOOK_MODEL_SLUG_ALIASES } from "@/lib/macbookCataloguePresentation";
+import { isAmbiguousLegacyMacBookModelSlug, MACBOOK_MODEL_SLUG_ALIASES } from "@/lib/macbookCataloguePresentation";
 import {
   getAppleWatchModelMetaDescription,
   getAppleWatchModelMetaTitle,
@@ -100,6 +100,9 @@ const RELATED_MODEL_LIMIT = 5;
 
 async function resolveModelRouteParams(rawParams: Awaited<ModelPageProps['params']>) {
   if (rawParams.category === 'laptop' && rawParams.brand === 'macbook') {
+    if (isAmbiguousLegacyMacBookModelSlug(rawParams.model)) {
+      permanentRedirect('/repairs/laptop/macbook');
+    }
     const aliasDestination = MACBOOK_MODEL_SLUG_ALIASES[rawParams.model.toLowerCase()];
     if (aliasDestination) {
       permanentRedirect(`/repairs/laptop/macbook/${aliasDestination}`);

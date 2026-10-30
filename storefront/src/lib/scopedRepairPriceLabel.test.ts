@@ -26,7 +26,7 @@ describe('formatScopedRepairPriceLabel', () => {
     ['camera-lens-replacement', 50, quote, 'real'], // Real POS product (iPhone camera lens) should preserve the quote label
     ['camera-lens-replacement', 0, quote, 'real'],
     ['camera-lens-replacement', 50, 'Starting from $50', 'virtual'], // Virtual Android should return starting from
-    ['camera-lens-replacement', 0, 'Starting from', 'virtual'],
+    ['camera-lens-replacement', 0, 'Quote on Request', 'virtual'],
   ])('handles sourceType for %s with price %s appropriately', (slug, price, expected, sourceType) => {
     expect(formatScopedRepairPriceLabel(slug, price, quote, sourceType as 'real' | 'virtual')).toBe(expected);
   });
