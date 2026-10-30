@@ -28,7 +28,10 @@ import RepairServicePage, { generateStaticParams } from './page';
 import FaqAccordionComponent from '@/components/FaqAccordion';
 import RepairPricingAndCTA from '@/components/services/RepairPricingAndCTA';
 import { GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
-import { BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS } from '@/lib/secondaryPhoneModelIdentity';
+import {
+  BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS,
+  BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
+} from '@/lib/secondaryPhoneModelIdentity';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getAliMobileEnhancedGooglePixelRepairType } from '@/lib/seo/content/google-pixel';
 import { getAliMobileEnhancedIphoneSeoPocket } from '@/lib/seo/content/iphone';
@@ -46,6 +49,13 @@ const batchTwoModels = {
   sony: { brand: 'Sony', models: { 'xperia-1': 'Xperia 1', 'xperia-1-ii': 'Xperia 1 II', 'xperia-10-ii': 'Xperia 10 II', 'xperia-5': 'Xperia 5', 'xperia-5-ii': 'Xperia 5 II' } },
   telstra: { brand: 'Telstra', models: { 'essential-pro': 'Essential Pro', 'essential-smart-21': 'Essential Smart 2.1', 'evoke-pro-2': 'Evoke Pro 2', 't-smart': 'T-Smart', 'tough-max-3': 'Tough Max 3' } },
   motorola: { brand: 'Motorola', models: { 'edge-20': 'Edge 20', 'edge-30-pro': 'Edge 30 Pro', 'moto-g-power': 'Moto G Power', 'moto-g-stylus': 'Moto G Stylus', 'moto-g04': 'Moto G04', 'moto-g24': 'Moto G24', 'moto-g50': 'Moto G50', 'moto-g55': 'Moto G55' } },
+} as const;
+const batchThreeModels = {
+  microsoft: { brand: 'Microsoft', publicBrand: 'Microsoft', models: { 'lumia-640': 'Lumia 640', 'lumia-950': 'Lumia 950', 'lumia-950-xl': 'Lumia 950 XL', 'surface-duo': 'Surface Duo', 'surface-duo-2': 'Surface Duo 2' } },
+  realme: { brand: 'Realme', publicBrand: 'Realme', models: { '7-pro': '7 Pro', '8-5g': '8 5G', c21y: 'C21Y', 'gt-master-edition': 'GT Master Edition', 'x3-superzoom': 'X3 SuperZoom' } },
+  asus: { brand: 'Asus', publicBrand: 'ASUS', models: { 'rog-phone-3': 'ROG Phone 3', 'rog-phone-5': 'ROG Phone 5', 'rog-phone-6': 'ROG Phone 6', 'zenfone-8': 'Zenfone 8', 'zenfone-9': 'Zenfone 9' } },
+  tcl: { brand: 'TCL', publicBrand: 'TCL', models: { '10-pro': '10 Pro', '20-5g': '20 5G', '20-pro-5g': '20 Pro 5G', '30-plus': '30+', '30-se': '30 SE' } },
+  nothing: { brand: 'Nothing', publicBrand: 'Nothing', models: { 'cmf-phone-2-pro-5g': 'CMF Phone 2 Pro 5G', 'phone-1': 'Phone 1', 'phone-2': 'Phone 2', 'phone-3a-5g': 'Phone 3a 5G', 'phone-3a-pro-5g': 'Phone 3a Pro 5G' } },
 } as const;
 const batchTwoRepairNames = {
   'screen-replacement': 'Screen Replacement',
@@ -1071,6 +1081,178 @@ describe('Repair Detail active and legacy page-data resolution', () => {
         expect(serviceSchema, identity).not.toContain('"offers"');
       }
     }
+  });
+
+  it('renders the approved quote-led Batch 3 experience for Microsoft Lumia 640 Screen', async () => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      'Microsoft',
+      'microsoft',
+      'Lumia 640',
+      'lumia-640',
+      'Screen Replacement',
+      'screen-replacement',
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'microsoft',
+      model: 'lumia-640',
+      'repair-type': 'screen-replacement',
+    })) });
+    const html = renderToStaticMarkup(page);
+    const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    expect(html).toContain('<h1 id="repair-detail-heading">Microsoft Lumia 640 Screen Replacement</h1>');
+    expect(html).toContain('Confirm your device details and request a repair quote.');
+    expect(html).toContain('Microsoft Lumia 640 screen symptoms and assessment');
+    expect(html).not.toContain('Choose a quality tier');
+    expect(pricing?.renderQuoteOnlyBookingLink).toBe(true);
+    expect(html).toContain('Book Repair Now</a>');
+    expect(serviceSchema).toContain('"@id":"https://www.alimobile.com.au/repairs/phone/microsoft/lumia-640/screen-replacement#service"');
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(JSON.stringify(faqs)).not.toMatch(/Live Quote|instant, accurate price/i);
+  });
+
+  it('keeps the Realme 8 5G Screen workbench authoritative without a duplicate shared guide', async () => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      'Realme',
+      'realme',
+      '8 5G',
+      '8-5g',
+      'Screen Replacement',
+      'screen-replacement',
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'realme',
+      model: '8-5g',
+      'repair-type': 'screen-replacement',
+    })) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Which Realme 8 5G screen repair path fits the fault?');
+    expect(html).toContain('What is checked before Realme 8 5G screen repair?');
+    expect(html).not.toContain('Realme 8 5G screen symptoms and assessment');
+    expect(html).not.toContain('secondary-phone-repair-guide-heading');
+  });
+
+  it('uses ASUS publicly while preserving the raw Asus booking identity', async () => {
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      'Asus',
+      'asus',
+      'ROG Phone 5',
+      'rog-phone-5',
+      'Battery Replacement',
+      'battery-replacement',
+    ));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'asus',
+      model: 'rog-phone-5',
+      'repair-type': 'battery-replacement',
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const bookingQuery = new URL(String(pricing?.bookingHref), 'https://example.test').searchParams;
+
+    expect(html).toContain('href="/repairs/phone/asus">ASUS</a>');
+    expect(pricing?.brandName).toBe('ASUS');
+    expect(bookingQuery.get('brand')).toBe('Asus');
+    expect(bookingQuery.get('model')).toBe('ROG Phone 5');
+  });
+
+  it('server-renders all 75 approved Batch 3 routes with quote, identity, schema and booking authority intact', async () => {
+    const batchThreeBrands = new Set<string>(BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS);
+    const routes = GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS.filter(({ brandSlug }) => batchThreeBrands.has(brandSlug));
+
+    expect(routes).toHaveLength(75);
+    for (const route of routes) {
+      const brandEntry = batchThreeModels[route.brandSlug as keyof typeof batchThreeModels];
+      const model = brandEntry.models[route.modelSlug as keyof typeof brandEntry.models];
+      const repairName = batchTwoRepairNames[route.repairSlug as keyof typeof batchTwoRepairNames];
+      const identity = `${route.brandSlug}/${route.modelSlug}/${route.repairSlug}`;
+      const publicModel = `${brandEntry.publicBrand} ${model}`;
+      const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${identity}`;
+      const routeParams = params({
+        brand: route.brandSlug,
+        model: route.modelSlug,
+        'repair-type': route.repairSlug,
+      });
+      fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+        brandEntry.brand,
+        route.brandSlug,
+        model,
+        route.modelSlug,
+        repairName,
+        route.repairSlug,
+      ));
+
+      const page = await RepairServicePage({ params: Promise.resolve(routeParams) });
+      const html = renderToStaticMarkup(page);
+      const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+      const faqs = findElementByType(page, FaqAccordionComponent)?.props.faqs as Array<{ question: string; answer: string }>;
+      const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+      const bookingQuery = new URL(String(pricing?.bookingHref), 'https://example.test').searchParams;
+
+      expect(html, identity).toContain(`<h1 id="repair-detail-heading">${publicModel} ${repairName}</h1>`);
+      expect(html, identity).toContain(`href="/repairs/phone/${route.brandSlug}">${brandEntry.publicBrand}</a>`);
+      expect(html, identity).not.toContain('Choose a quality tier');
+      expect(html, identity).toContain('Quote on Request');
+      expect(html, identity).toContain('Book Repair Now</a>');
+      expect(html, identity).toContain('6-Month Warranty');
+      expect(html, identity).toContain('Fast Turnaround');
+      expect(html, identity).not.toContain('30 Minutes');
+      expect(pricing?.renderQuoteOnlyBookingLink, identity).toBe(true);
+      expect(pricing?.pricing, identity).toMatchObject({ resolvedPrice: null, canEmitOffer: false, isQuoteOnly: true });
+      expect(bookingQuery.get('brand'), identity).toBe(brandEntry.brand);
+      expect(bookingQuery.get('model'), identity).toBe(model);
+      expect(bookingQuery.get('service'), identity).toBe(repairName);
+      expect(serviceSchema, identity).toContain(`"name":"${publicModel} ${repairName} in Ringwood"`);
+      expect(serviceSchema, identity).toContain(`"@id":"${canonicalUrl}#service"`);
+      expect(serviceSchema, identity).toContain(`"url":"${canonicalUrl}"`);
+      expect(serviceSchema, identity).not.toContain('"offers"');
+      expect(JSON.stringify(faqs), identity).not.toMatch(/Live Quote|instant, accurate price/i);
+
+      if (identity === 'realme/8-5g/screen-replacement') {
+        expect(html).toContain('Which Realme 8 5G screen repair path fits the fault?');
+        expect(html).not.toContain('secondary-phone-repair-guide-heading');
+      } else {
+        expect(html, identity).toContain('secondary-phone-repair-guide-heading');
+      }
+    }
+  }, 15_000);
+
+  it('preserves the matched Nothing Phone 3a Pro 5G Charging Port Repair Result', async () => {
+    const initialResults = [{
+      id: 'nothing-phone-3a-pro-charging-result', device_category: 'phone' as const, brand: 'Nothing', brand_slug: 'nothing',
+      model: 'Phone 3a Pro 5G', model_slug: 'phone-3a-pro-5g', repair_type: 'Charging Port Replacement', repair_type_slug: 'charging-port-replacement',
+      image_pair_alt_text: 'Nothing Phone 3a Pro 5G charging port repair', title: 'Nothing Phone 3a Pro 5G Charging Port Replacement', short_description: 'Published repair result.',
+      related_repair_url: '/repairs/phone/nothing/phone-3a-pro-5g/charging-port-replacement',
+    }];
+    fetchRepairCatalog.mockResolvedValue(secondaryPhoneRepairCatalogue(
+      'Nothing',
+      'nothing',
+      'Phone 3a Pro 5G',
+      'phone-3a-pro-5g',
+      'Charging Port Replacement',
+      'charging-port-replacement',
+    ));
+    fetchRepairDetailInitialResults.mockResolvedValue(initialResults);
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      brand: 'nothing',
+      model: 'phone-3a-pro-5g',
+      'repair-type': 'charging-port-replacement',
+    })) });
+    const matchingElement = findElementByType(page, RepairResultsMatchingSection);
+
+    expect(fetchRepairDetailInitialResults).toHaveBeenCalledWith({
+      category: 'phone', brandSlug: 'nothing', modelSlug: 'phone-3a-pro-5g', repairTypeSlug: 'charging-port-replacement',
+    });
+    expect(matchingElement?.props).toEqual(expect.objectContaining({
+      category: 'phone', brand: 'nothing', model: 'phone-3a-pro-5g', repairType: 'charging-port-replacement', context: 'detail', initialResults,
+    }));
   });
 
   it.each([

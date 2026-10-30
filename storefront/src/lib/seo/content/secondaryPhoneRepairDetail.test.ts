@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 import {
   BATCH_ONE_SECONDARY_PHONE_BRAND_SLUGS,
+  BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS,
   BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
   getSecondaryPhoneModelIdentity,
   SECONDARY_PHONE_BRAND_NAMES,
@@ -38,7 +39,7 @@ describe('Batch 1 secondary-phone repair detail content', () => {
   });
 
   it.each([
-    ['microsoft', 'screen-replacement'],
+    ['samsung', 'screen-replacement'],
     ['xiaomi', 'back-glass-replacement'],
   ])('does not expand outside the approved cohort: %s/%s', (brandSlug, repairSlug) => {
     expect(getSecondaryPhoneRepairDetailContent({
@@ -153,6 +154,31 @@ describe('Batch 1 secondary-phone repair detail content', () => {
     expect(positivePriceRoutes).toHaveLength(10);
     expect(positive).toHaveLength(10);
     expect(quoteOnly).toHaveLength(74);
+  });
+
+  it.each(BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS)('supports the Batch 3 brand %s', (brandSlug) => {
+    expect(getSecondaryPhoneRepairDetailContent({
+      categorySlug: 'phone',
+      brandSlug,
+      modelName: 'Commercial Model',
+      repairSlug: 'screen-replacement',
+    })).not.toBeNull();
+  });
+
+  it('covers exactly the 75 existing Batch 3 canonical route identities', () => {
+    const batch3Brands = new Set<string>(BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS);
+    const routes = GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS.filter(({ brandSlug }) => batch3Brands.has(brandSlug));
+
+    expect(routes).toHaveLength(75);
+    for (const route of routes) {
+      const content = getSecondaryPhoneRepairDetailContent({
+        categorySlug: 'phone',
+        brandSlug: route.brandSlug,
+        modelName: 'Commercial Model',
+        repairSlug: route.repairSlug,
+      });
+      expect(content).not.toBeNull();
+    }
   });
 
   it('does not apply phone content to another device category', () => {

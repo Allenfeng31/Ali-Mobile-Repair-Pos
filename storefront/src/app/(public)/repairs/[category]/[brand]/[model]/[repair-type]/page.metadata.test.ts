@@ -8,7 +8,10 @@ import {
   type RepairCatalog,
 } from '@/lib/api';
 import { GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
-import { BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS } from '@/lib/secondaryPhoneModelIdentity';
+import {
+  BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS,
+  BATCH_TWO_SECONDARY_PHONE_BRAND_SLUGS,
+} from '@/lib/secondaryPhoneModelIdentity';
 import { getSamsungHardwareConfig } from '@/lib/seo/content/samsung/config';
 import { getSamsungFoldableScreenDetailContext } from '@/lib/seo/content/samsung/screen-replacement';
 
@@ -275,6 +278,13 @@ const batchTwoMetadataRepairNames = {
   'battery-replacement': 'Battery Replacement',
   'charging-port-replacement': 'Charging Port Replacement',
 } as const;
+const batchThreeMetadataModels = {
+  microsoft: { brand: 'Microsoft', publicBrand: 'Microsoft', models: { 'lumia-640': 'Lumia 640', 'lumia-950': 'Lumia 950', 'lumia-950-xl': 'Lumia 950 XL', 'surface-duo': 'Surface Duo', 'surface-duo-2': 'Surface Duo 2' } },
+  realme: { brand: 'Realme', publicBrand: 'Realme', models: { '7-pro': '7 Pro', '8-5g': '8 5G', c21y: 'C21Y', 'gt-master-edition': 'GT Master Edition', 'x3-superzoom': 'X3 SuperZoom' } },
+  asus: { brand: 'Asus', publicBrand: 'ASUS', models: { 'rog-phone-3': 'ROG Phone 3', 'rog-phone-5': 'ROG Phone 5', 'rog-phone-6': 'ROG Phone 6', 'zenfone-8': 'Zenfone 8', 'zenfone-9': 'Zenfone 9' } },
+  tcl: { brand: 'TCL', publicBrand: 'TCL', models: { '10-pro': '10 Pro', '20-5g': '20 5G', '20-pro-5g': '20 Pro 5G', '30-plus': '30+', '30-se': '30 SE' } },
+  nothing: { brand: 'Nothing', publicBrand: 'Nothing', models: { 'cmf-phone-2-pro-5g': 'CMF Phone 2 Pro 5G', 'phone-1': 'Phone 1', 'phone-2': 'Phone 2', 'phone-3a-5g': 'Phone 3a 5G', 'phone-3a-pro-5g': 'Phone 3a Pro 5G' } },
+} as const;
 
 describe('repair detail metadata', () => {
   beforeEach(() => {
@@ -407,6 +417,51 @@ describe('repair detail metadata', () => {
         title: `${publicModel} ${repairName} | Ali Mobile & Repair`,
         url: canonicalUrl,
       });
+      expect(metadata.robots, canonicalUrl).toBeUndefined();
+    }
+  });
+
+  it('keeps complete indexable metadata and exact canonicals across all 75 Batch 3 routes', async () => {
+    const batchThreeBrands = new Set<string>(BATCH_THREE_SECONDARY_PHONE_BRAND_SLUGS);
+    const routes = GRANDFATHERED_SECONDARY_PHONE_DETAIL_REPAIRS.filter(({ brandSlug }) => batchThreeBrands.has(brandSlug));
+
+    expect(routes).toHaveLength(75);
+    for (const route of routes) {
+      const brandEntry = batchThreeMetadataModels[route.brandSlug as keyof typeof batchThreeMetadataModels];
+      const model = brandEntry.models[route.modelSlug as keyof typeof brandEntry.models];
+      const repairName = batchTwoMetadataRepairNames[route.repairSlug as keyof typeof batchTwoMetadataRepairNames];
+      const publicModel = `${brandEntry.publicBrand} ${model}`;
+      const canonicalUrl = `https://www.alimobile.com.au/repairs/phone/${route.brandSlug}/${route.modelSlug}/${route.repairSlug}`;
+      vi.mocked(fetchRepairCatalog).mockResolvedValue({
+        ...catalog,
+        checksum: `batch-3-${route.brandSlug}-${route.modelSlug}-${route.repairSlug}`,
+        inventoryRowCount: 1,
+        publicModelCount: 1,
+        publicRepairCount: 1,
+        brands: [{
+          category: 'phone', brand: brandEntry.brand, slug: route.brandSlug, icon: 'phone',
+          models: [{ model, slug: route.modelSlug, repairTypes: [{ name: repairName, slug: route.repairSlug, price: 0 }] }],
+        }],
+      });
+      vi.mocked(fetchRepairDetails).mockResolvedValue({
+        brand: brandEntry.brand,
+        model,
+        repairType: repairName,
+        price: 0,
+        variants: [],
+        source: 'fallback',
+      });
+
+      const metadata = await generateMetadata(params('phone', route.brandSlug, route.modelSlug, route.repairSlug));
+
+      expect(String(metadata.title), canonicalUrl).toContain(`${publicModel} ${repairName}`);
+      expect(String(metadata.description), canonicalUrl).toContain(publicModel);
+      expect(metadata.alternates?.canonical, canonicalUrl).toBe(canonicalUrl);
+      expect(metadata.openGraph, canonicalUrl).toMatchObject({
+        title: `${publicModel} ${repairName} | Ali Mobile & Repair`,
+        url: canonicalUrl,
+      });
+      expect(metadata.twitter?.title, canonicalUrl).toBe(`${publicModel} ${repairName} | Ali Mobile & Repair`);
       expect(metadata.robots, canonicalUrl).toBeUndefined();
     }
   });

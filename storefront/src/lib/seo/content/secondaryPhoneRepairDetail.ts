@@ -1,5 +1,6 @@
 import {
   isBatchOneSecondaryPhoneBrand,
+  isBatchThreeSecondaryPhoneBrand,
   isBatchTwoSecondaryPhoneBrand,
 } from '@/lib/secondaryPhoneModelIdentity';
 
@@ -82,7 +83,11 @@ export function getSecondaryPhoneRepairDetailContent({
   isQuoteOnly?: boolean;
 }): SecondaryPhoneRepairDetailContent | null {
   if (categorySlug !== 'phone') return null;
-  if (!isBatchOneSecondaryPhoneBrand(brandSlug) && !isBatchTwoSecondaryPhoneBrand(brandSlug)) return null;
+  if (
+    !isBatchOneSecondaryPhoneBrand(brandSlug) &&
+    !isBatchTwoSecondaryPhoneBrand(brandSlug) &&
+    !isBatchThreeSecondaryPhoneBrand(brandSlug)
+  ) return null;
   if (!['screen-replacement', 'battery-replacement', 'charging-port-replacement'].includes(repairSlug)) return null;
 
   const supportedRepairSlug = repairSlug as SecondaryPhoneRepairSlug;

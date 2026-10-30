@@ -148,8 +148,10 @@ import { classifyPhoneBrand } from '@/lib/publicRepairPageModePolicy';
 import {
   getSecondaryPhoneManufacturerIdentifier,
   getSecondaryPhoneModelIdentity,
+  isBatchThreeSecondaryPhoneBrand,
   isBatchTwoSecondaryPhoneBrand,
   isEvidenceQualifiedSecondaryPhoneBrand,
+  SECONDARY_PHONE_BRAND_NAMES,
 } from '@/lib/secondaryPhoneModelIdentity';
 import { getSecondaryPhoneRepairDetailContent } from '@/lib/seo/content/secondaryPhoneRepairDetail';
 import {
@@ -5115,6 +5117,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
 
   // Use POS data if available, otherwise derive from URL params
   const displayBrand = details?.brand || formatDynamicParam(resolvedParams.brand);
+  const publicDisplayBrand = isEvidenceQualifiedSecondaryPhoneBrand(resolvedParams.brand)
+    ? SECONDARY_PHONE_BRAND_NAMES[resolvedParams.brand] ?? displayBrand
+    : displayBrand;
   const rawDisplayModel = details?.model || formatDynamicParam(resolvedParams.model);
   let displayModel = isEvidenceQualifiedSecondaryPhoneBrand(resolvedParams.brand)
     ? getSecondaryPhoneModelIdentity({
@@ -5389,6 +5394,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     displayModel;
   const isBatchTwoSecondaryPhoneBrandDetail = resolvedParams.category === 'phone' &&
     isBatchTwoSecondaryPhoneBrand(resolvedParams.brand);
+  const isBatchThreeSecondaryPhoneBrandDetail = resolvedParams.category === 'phone' &&
+    isBatchThreeSecondaryPhoneBrand(resolvedParams.brand);
   const secondaryPhoneRepairContent = getSecondaryPhoneRepairDetailContent({
     categorySlug: resolvedParams.category,
     brandSlug: resolvedParams.brand,
@@ -5396,8 +5403,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     repairSlug: resolvedParams['repair-type'],
     isQuoteOnly: detailPricing.isQuoteOnly,
   });
-  const isBatchTwoSecondaryPhoneRepairDetail = Boolean(
-    isBatchTwoSecondaryPhoneBrandDetail && secondaryPhoneRepairContent
+  const isBatchTwoOrThreeSecondaryPhoneRepairDetail = Boolean(
+    (isBatchTwoSecondaryPhoneBrandDetail || isBatchThreeSecondaryPhoneBrandDetail) && secondaryPhoneRepairContent
   );
   const sameModelLinks = isAliMobileEnhancedLenovoTabletPage && lenovoTabletEnhancedRepairType
     ? getLenovoTabletSameModelRepairLinks(resolvedParams.model as any, lenovoTabletEnhancedRepairType)
@@ -5671,14 +5678,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     resolvedParams['repair-type'],
     isPrimaryPhoneOrdinaryDetailPage ? detailPricing.resolvedPrice ?? 0 : price,
     modelCode,
-    displayBrand,
+    publicDisplayBrand,
     { initialAssessmentCleaningMinutes },
   );
-  const baseFaqs = seoPocket?.faq || ((isPrimaryPhoneOrdinaryDetailPage || isBatchTwoSecondaryPhoneRepairDetail) && detailPricing.isQuoteOnly
+  const baseFaqs = seoPocket?.faq || ((isPrimaryPhoneOrdinaryDetailPage || isBatchTwoOrThreeSecondaryPhoneRepairDetail) && detailPricing.isQuoteOnly
     ? generatedFaqs.map((faq) => /how much/i.test(faq.question) && /cost/i.test(faq.question)
       ? {
           ...faq,
-          answer: isBatchTwoSecondaryPhoneRepairDetail
+          answer: isBatchTwoOrThreeSecondaryPhoneRepairDetail
             ? `Request a quote after confirming the exact ${displayModel}, repair service and symptoms. Parts availability, device condition and any additional damage may affect the final quote. We will confirm the repair options and price before proceeding.`
             : `Pricing depends on the exact ${displayModel} model and repair option. Contact us to get a quote.`,
         }
@@ -5814,7 +5821,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                 ? `More Galaxy A models for ${crossModelSectionRepairName}`
                 : isGalaxyNoteEnhancedPage
                   ? `More Galaxy Note models for ${crossModelSectionRepairName}`
-                  : `More ${displayBrand} models for ${finalRepairName}`}
+                  : `More ${publicDisplayBrand} models for ${finalRepairName}`}
             </h2>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
@@ -5847,7 +5854,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                   href={`/repairs/${safeSlugSegment(resolvedParams.category)}/${safeSlugSegment(resolvedParams.brand)}`}
                   className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                 >
-                  {isAliMobileEnhancedRepairPage ? `View all ${displayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && displayBrand === 'Apple' ? 'Apple Watch' : displayBrand} models`} &rarr;
+                  {isAliMobileEnhancedRepairPage ? `View all ${publicDisplayBrand} repairs` : `View all ${resolvedParams.category === 'watch' && publicDisplayBrand === 'Apple' ? 'Apple Watch' : publicDisplayBrand} models`} &rarr;
                 </Link>
 
                 {isAliMobileEnhancedIphonePage && enhancedRepairType && repairTypeHub && ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT[enhancedRepairType as keyof typeof ENHANCED_REPAIR_TYPE_HUB_LINK_TEXT] && (
@@ -5884,7 +5891,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
         price={detailPricing.canEmitOffer ? String(detailPricing.resolvedPrice) : undefined}
         url={repairPageUrl}
         includeCanonicalServiceIdentity={Boolean(
-          secondaryPhoneRepairContent && (isBatchTwoSecondaryPhoneRepairDetail || detailPricing.isQuoteOnly)
+          secondaryPhoneRepairContent && (isBatchTwoOrThreeSecondaryPhoneRepairDetail || detailPricing.isQuoteOnly)
         )}
       />
 
@@ -5901,7 +5908,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           brand={resolvedParams.brand}
           model={resolvedParams.model}
           service={resolvedParams['repair-type']}
-          brandLabel={displayBrand}
+          brandLabel={publicDisplayBrand}
           modelLabel={seoDisplayModel}
           serviceLabel={finalRepairName}
         />
@@ -5928,7 +5935,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               iphoneCameraModuleFamilyHeroSubtitle ??
               iphoneBackGlassOrHousingFamilyHeroSubtitle ??
               iphoneStandardHardwareFamilyHero ??
-              (secondaryPhoneRepairContent && (isBatchTwoSecondaryPhoneRepairDetail || detailPricing.isQuoteOnly)
+              (secondaryPhoneRepairContent && (isBatchTwoOrThreeSecondaryPhoneRepairDetail || detailPricing.isQuoteOnly)
                 ? secondaryPhoneRepairContent.heroSubtitle
                 : undefined) ??
               (isMacBookDetailPage
@@ -5942,7 +5949,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           )}
 
           <RepairPricingAndCTA
-            brandName={displayBrand}
+            brandName={publicDisplayBrand}
             modelName={displayModel}
             repairName={finalRepairName}
             bookingRepairName={bookingRepairName}
@@ -6053,7 +6060,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
           <RepairPolicySection variant={repairPolicyVariant} />
         </ScrollReveal>
 
-        {secondaryPhoneRepairContent && (
+        {secondaryPhoneRepairContent && !selectedCrawledRepairContent && (
           <ScrollReveal>
             <RepairDetailBulletSection
               headingId="secondary-phone-repair-guide-heading"
