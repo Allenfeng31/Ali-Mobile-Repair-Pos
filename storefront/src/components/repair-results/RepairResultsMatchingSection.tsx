@@ -144,6 +144,7 @@ export default function RepairResultsMatchingSection(props: RepairResultsMatchin
   return (
     <section
       className={`${styles.section} ${isIphone15MobilePilot ? styles.iphone15CompactPilot : ''}`}
+      data-device-category={deviceCategory}
       aria-labelledby="matching-repair-results-heading"
     >
       <div className={styles.copy}>

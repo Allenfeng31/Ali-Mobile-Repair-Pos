@@ -46,9 +46,12 @@
 
 .slider[data-device='laptop'] {
   --slider-aspect-ratio: 16 / 10;
-  --slider-max-width: 660px;
+  --slider-max-width: 760px;
   --slider-max-height: 500px;
+  --slider-mobile-max-height: 475px;
   --slider-height-factor: 0.625;
+  /* Keep laptop height width-driven; percentage height resolves against the grid row. */
+  height: auto;
   background:
     radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.92) 42%, rgba(226, 232, 240, 0.82) 100%);
 }

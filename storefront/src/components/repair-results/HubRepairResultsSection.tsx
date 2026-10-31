@@ -209,7 +209,12 @@ export default function HubRepairResultsSection({
 
   if (showResultSummary) {
     return (
-      <section ref={sectionRef} className={styles.section} aria-labelledby={`hub-repair-results-heading-${scope}`}>
+      <section
+        ref={sectionRef}
+        className={styles.section}
+        data-device-category={activeResult.device_category}
+        aria-labelledby={`hub-repair-results-heading-${scope}`}
+      >
         <div className={styles.compactShell}>
           <div className={styles.compactHeader}>
             <span className={styles.kicker}>Workshop Proof</span>
@@ -320,7 +325,12 @@ export default function HubRepairResultsSection({
   }
 
   return (
-    <section ref={sectionRef} className={styles.section} aria-labelledby={`hub-repair-results-heading-${scope}`}>
+    <section
+      ref={sectionRef}
+      className={styles.section}
+      data-device-category={activeResult.device_category}
+      aria-labelledby={`hub-repair-results-heading-${scope}`}
+    >
       <div className={styles.shell}>
         <div className={styles.copyCard}>
           <div className={styles.copyHeader}>

@@ -172,6 +172,15 @@
   padding: clamp(0.35rem, 1.4vw, 0.75rem);
 }
 
+.section[data-device-category='laptop'] {
+  grid-template-columns: minmax(300px, 0.7fr) minmax(0, 1.3fr);
+  width: min(100%, 1240px);
+}
+
+.section[data-device-category='laptop'] .visual {
+  padding-inline: 0;
+}
+
 @keyframes repairResultsReveal {
   from {
     opacity: 0;
@@ -193,12 +202,20 @@
   .visual {
     order: -1;
   }
+
+  .section[data-device-category='laptop'] {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
   .section {
     border-radius: 22px;
     padding: 0.85rem;
+  }
+
+  .section[data-device-category='laptop'] {
+    padding: 0.55rem;
   }
 
   .section.iphone15CompactPilot {

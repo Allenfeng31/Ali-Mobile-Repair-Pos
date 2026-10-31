@@ -128,10 +128,10 @@ export function getRepairResultFrameConfig(deviceCategory: RepairResultDeviceCat
     case 'laptop':
       return {
         aspectRatio: '16 / 10',
-        maxWidth: '660px',
+        maxWidth: '760px',
         maxHeight: '500px',
-        mobileMaxHeight: '420px',
-        sizes: '(min-width: 1024px) 660px, (min-width: 640px) 92vw, 100vw',
+        mobileMaxHeight: '475px',
+        sizes: '(min-width: 1280px) 760px, (min-width: 1024px) 68vw, (min-width: 640px) 92vw, 100vw',
       };
     case 'watch':
     default:

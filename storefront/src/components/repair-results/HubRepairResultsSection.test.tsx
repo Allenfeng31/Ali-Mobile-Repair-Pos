@@ -86,4 +86,23 @@ describe('HubRepairResultsSection initial results contract', () => {
     expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
       .toBe('/repairs/phone/iphone/iphone-15/screen-replacement');
   });
+
+  it('exposes the active laptop category for a scoped hub layout', () => {
+    render(
+      <HubRepairResultsSection
+        category="laptop"
+        brand="macbook"
+        scope="brand-hub"
+        initialResults={[{
+          ...seed,
+          id: 'macbook-result',
+          device_category: 'laptop',
+          brand: 'MacBook',
+          model: 'MacBook Air M4',
+        }]}
+      />,
+    );
+
+    expect(document.querySelector('section[data-device-category="laptop"]')).not.toBeNull();
+  });
 });

@@ -187,6 +187,7 @@ describe('RepairResultsMatchingSection initial results', () => {
 
     expect(screen.getByRole('link', { name: 'View matching repair page' }).getAttribute('href'))
       .toBe('/repairs/laptop/macbook/macbook-air-m3-13-inch-2024/battery-replacement');
+    expect(document.querySelector('section[data-device-category="laptop"]')).not.toBeNull();
   });
 
   it('keeps the existing lazy matching API fallback when no seed is supplied', async () => {
