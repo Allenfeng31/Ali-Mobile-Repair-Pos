@@ -1,14 +1,15 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { createServiceRoleClient, fetchRepairCatalog, revalidateRepairResultPaths } = vi.hoisted(() => ({
+const { createServiceRoleClient, fetchRepairCatalog, getSession, revalidateRepairResultPaths } = vi.hoisted(() => ({
   createServiceRoleClient: vi.fn(),
   fetchRepairCatalog: vi.fn(),
+  getSession: vi.fn(),
   revalidateRepairResultPaths: vi.fn(),
 }));
 
 vi.mock('next/headers', () => ({ cookies: vi.fn(async () => new Map()) }));
 vi.mock('@supabase/auth-helpers-nextjs', () => ({
-  createRouteHandlerClient: vi.fn(() => ({ auth: { getSession: vi.fn(async () => ({ data: { session: { user: { id: 'staff' } } }, error: null })) } })),
+  createRouteHandlerClient: vi.fn(() => ({ auth: { getSession } })),
 }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
 vi.mock('@/utils/supabase/service-role', () => ({ createServiceRoleClient }));
@@ -63,10 +64,15 @@ const replayResult = {
 };
 
 describe('admin repair result taxonomy route', () => {
+  beforeEach(() => {
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'staff' } } }, error: null });
+  });
+
   afterEach(() => {
     createServiceRoleClient.mockReset();
     fetchRepairCatalog.mockReset();
     revalidateRepairResultPaths.mockReset();
+    getSession.mockReset();
   });
 
   it('returns the authenticated serialized canonical taxonomy', async () => {
@@ -82,7 +88,7 @@ describe('admin repair result taxonomy route', () => {
     });
   });
 
-  it('keeps the latest-results list capped while returning authoritative global counts', async () => {
+  it('loads the full current result inventory for editing while returning authoritative global counts', async () => {
     const latestResults = [{ id: 'latest-result' }];
     const limit = vi.fn(async () => ({ data: latestResults, error: null }));
     const order = vi.fn(() => ({ limit }));
@@ -106,10 +112,44 @@ describe('admin repair result taxonomy route', () => {
       stats: { total: 137, published: 126 },
     });
     expect(order).toHaveBeenCalledWith('created_at', { ascending: false });
-    expect(limit).toHaveBeenCalledWith(100);
+    expect(limit).toHaveBeenCalledWith(1000);
     expect(totalSelect).toHaveBeenCalledWith('id', { count: 'exact', head: true });
     expect(publishedStatus).toHaveBeenCalledWith('status', 'published');
     expect(publishedPrivacyChecked).toHaveBeenCalledWith('privacy_checked', true);
+  });
+
+  it('returns an authenticated read-only legacy-description audit without writing records', async () => {
+    const records = [{
+      id: 'legacy',
+      model: 'iPhone 13',
+      repair_type: 'Screen Replacement',
+      repair_type_slug: 'screen-replacement',
+      short_description: 'Before and after result from a iPhone 13 Screen Replacement completed by Ali Mobile Repairs in Ringwood.',
+    }];
+    const limit = vi.fn(async () => ({ data: records, error: null }));
+    const order = vi.fn(() => ({ limit }));
+    const select = vi.fn(() => ({ order }));
+    const from = vi.fn(() => ({ select }));
+    createServiceRoleClient.mockReturnValue({ from });
+
+    const response = await GET(new Request('http://localhost/api/admin/repair-results?view=description-audit'));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data).toMatchObject({ total: 1, likelyLegacy: 1, userAuthoredOrUnknown: 0, dryRun: true, truncated: false });
+    expect(body.data.proposals[0]).toMatchObject({ id: 'legacy', before: records[0].short_description });
+    expect(body.data.proposals[0].replacement).not.toContain('Ringwood');
+    expect(limit).toHaveBeenCalledWith(1000);
+    expect(from).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not expose the description audit without an authenticated POS session', async () => {
+    getSession.mockResolvedValueOnce({ data: { session: null }, error: null });
+
+    const response = await GET(new Request('http://localhost/api/admin/repair-results?view=description-audit'));
+
+    expect(response.status).toBe(401);
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid taxonomy selection before uploads or database writes', async () => {
@@ -200,6 +240,7 @@ describe('admin repair result taxonomy route', () => {
       '/repairs/phone/iphone',
       '/repairs/phone',
       '/',
+      '/repairs/screen-replacement',
     ]);
   });
 
@@ -268,6 +309,7 @@ describe('admin repair result taxonomy route', () => {
       '/repairs/phone/iphone',
       '/repairs/phone',
       '/',
+      '/repairs/screen-replacement',
     ]);
   });
 
@@ -299,6 +341,7 @@ describe('admin repair result taxonomy route', () => {
       '/repairs/phone/iphone',
       '/repairs/phone',
       '/',
+      '/repairs/screen-replacement',
     ]);
   });
 

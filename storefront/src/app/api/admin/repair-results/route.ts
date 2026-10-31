@@ -8,6 +8,7 @@ import { fetchRepairCatalog } from '@/lib/api';
 import { repairResultAffectedPathsForMutation } from '@/lib/repairResultRevalidation';
 import { revalidateRepairResultPaths } from '@/lib/repairResultRevalidation.server';
 import { buildRepairResultTaxonomy, resolveRepairResultTaxonomy } from '@/lib/repairResultTaxonomy';
+import { auditRepairResultDescriptions } from '@/lib/repairResultDescriptions';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
   REPAIR_RESULT_BUCKET,
@@ -179,7 +180,30 @@ export async function GET(request: Request) {
       return jsonWithCors(request, { error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (new URL(request.url).searchParams.get('view') === 'taxonomy') {
+    const view = new URL(request.url).searchParams.get('view');
+    if (view === 'description-audit') {
+      const supabase = createServiceRoleClient();
+      const { data, error } = await supabase
+        .from('repair_results')
+        .select('id,model,repair_type,repair_type_slug,short_description')
+        .order('created_at', { ascending: false })
+        .limit(1000);
+      if (error) throw error;
+
+      const audit = auditRepairResultDescriptions(data || []);
+      return jsonWithCors(request, {
+        status: 'SUCCESS',
+        data: {
+          ...audit,
+          proposals: audit.proposals.slice(0, 20),
+          scannedLimit: 1000,
+          truncated: (data || []).length === 1000,
+          dryRun: true,
+        },
+      }, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } });
+    }
+
+    if (view === 'taxonomy') {
       const taxonomy = buildRepairResultTaxonomy(await fetchRepairCatalog());
       return jsonWithCors(
         request,
@@ -194,7 +218,7 @@ export async function GET(request: Request) {
         .from('repair_results')
         .select(PUBLIC_REPAIR_RESULT_SELECT)
         .order('created_at', { ascending: false })
-        .limit(100),
+        .limit(1000),
       supabase
         .from('repair_results')
         .select('id', { count: 'exact', head: true }),

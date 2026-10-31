@@ -1,4 +1,5 @@
 import type { RepairResultDeviceCategory, RepairResultStatus } from './repair-results';
+import { getNeutralRepairResultDescription } from './repairResultDescriptions';
 
 export interface RepairResultTaxonomyRepair { name: string; slug: string; relatedRepairUrl: string; }
 export interface RepairResultTaxonomyModel { name: string; slug: string; repairTypes: RepairResultTaxonomyRepair[]; }
@@ -44,8 +45,12 @@ export function getRepairResultTaxonomyOptions(taxonomy: RepairResultTaxonomy, f
   return { brands: category?.brands || [], models: brand?.models || [], repairTypes: model?.repairTypes || [] };
 }
 
-export function generateRepairResultSeo(model: string, repairType: string): GeneratedRepairResultSeo {
-  return { title: `${model} ${repairType} in Ringwood`, short_description: `Before and after result from a ${model} ${repairType} completed by Ali Mobile Repairs in Ringwood.`, image_pair_alt_text: `Before and after photos of a ${model} ${repairType} completed in Ringwood.` };
+export function generateRepairResultSeo(model: string, repairType: string, repairTypeSlug = ''): GeneratedRepairResultSeo {
+  return {
+    title: `${model} ${repairType} in Ringwood`,
+    short_description: getNeutralRepairResultDescription({ deviceName: model, repairType, repairTypeSlug }),
+    image_pair_alt_text: `Before and after photos of a ${model} ${repairType}.`,
+  };
 }
 
 export function applyRepairResultTaxonomyChange(current: RepairResultFormState, taxonomy: RepairResultTaxonomy, field: 'device_category' | 'brand_slug' | 'model_slug' | 'repair_type_slug', value: string) {
@@ -64,7 +69,7 @@ export function applyRepairResultTaxonomyChange(current: RepairResultFormState, 
     form = brand && model && repair ? { ...current, brand: brand.name, brand_slug: brand.slug, model: model.name, model_slug: model.slug, repair_type: repair.name, repair_type_slug: repair.slug, related_repair_url: repair.relatedRepairUrl } : { ...current, repair_type: '', repair_type_slug: '', related_repair_url: '' };
   }
   const resolved = getResolvedTaxonomy(taxonomy, form);
-  return { form, generatedSeo: resolved ? generateRepairResultSeo(resolved.model.name, resolved.repair.name) : null };
+  return { form, generatedSeo: resolved ? generateRepairResultSeo(resolved.model.name, resolved.repair.name, resolved.repair.slug) : null };
 }
 
 export function validateRepairResultSubmission(form: RepairResultFormState, taxonomy: RepairResultTaxonomy) {

@@ -3,6 +3,7 @@ import {
   applyRepairResultTaxonomyChange,
   createInitialRepairResultForm,
   getRepairResultDestinationPreview,
+  getRepairResultDescriptionPresets,
   getRepairResultTaxonomyOptions,
   toRepairResultSubmissionFields,
   validateRepairResultSubmission,
@@ -81,12 +82,22 @@ describe('Repair Result taxonomy workflow', () => {
     form = applyRepairResultTaxonomyChange(form, taxonomy, 'model_slug', 'macbook-air-m2-13-2022').form;
     const { form: completed, generatedSeo } = applyRepairResultTaxonomyChange(form, taxonomy, 'repair_type_slug', 'screen-replacement');
 
-    expect(generatedSeo).toEqual({
-      title: 'MacBook Air M2 13-inch 2022 Screen Replacement in Ringwood',
-      short_description: 'Before and after result from a MacBook Air M2 13-inch 2022 Screen Replacement completed by Ali Mobile Repairs in Ringwood.',
-      image_pair_alt_text: 'Before and after photos of a MacBook Air M2 13-inch 2022 Screen Replacement completed in Ringwood.',
-    });
+    expect(generatedSeo?.title).toBe('MacBook Air M2 13-inch 2022 Screen Replacement in Ringwood');
+    expect(generatedSeo?.short_description).toContain('MacBook Air M2 13-inch 2022');
+    expect(generatedSeo?.short_description).not.toContain('Ringwood');
+    expect(generatedSeo?.image_pair_alt_text).toBe('Before and after photos of a MacBook Air M2 13-inch 2022 Screen Replacement.');
     expect(completed.related_repair_url).toBe('/repairs/laptop/macbook/macbook-air-m2-13-2022/screen-replacement');
+  });
+
+  it('uses the shared preset catalogue for Vite POS consumers', () => {
+    const presets = getRepairResultDescriptionPresets({
+      deviceName: 'Galaxy S24',
+      repairType: 'Screen Replacement',
+      repairTypeSlug: 'screen-replacement',
+    });
+
+    expect(presets).toHaveLength(10);
+    expect(presets[0]).toMatchObject({ id: 'no-display', label: 'No Display' });
   });
 
   it('keeps manual SEO text while taxonomy changes regenerate only auto-generated fields', () => {

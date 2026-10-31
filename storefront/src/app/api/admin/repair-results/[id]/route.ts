@@ -4,6 +4,8 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { fetchRepairCatalog } from '@/lib/api';
+import { resolveRepairResultTaxonomy } from '@/lib/repairResultTaxonomy';
 import { repairResultAffectedPathsForMutation } from '@/lib/repairResultRevalidation';
 import { revalidateRepairResultPaths } from '@/lib/repairResultRevalidation.server';
 import {
@@ -107,8 +109,6 @@ async function isAuthorizedRequest(request: Request) {
   return assertAuthenticated(sessionClient);
 }
 
-import { randomUUID } from 'crypto';
-
 async function copyToApprovedPath(
   supabase: SupabaseClient,
   currentPath: string,
@@ -151,7 +151,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return jsonWithCors(request, { error: 'Unauthorized' }, { status: 401 });
     }
 
-    let body: Record<string, any> = {};
+    let body: Record<string, unknown> = {};
     let beforeImage: File | null = null;
     let afterImage: File | null = null;
 
@@ -165,12 +165,15 @@ export async function PATCH(request: Request, context: RouteContext) {
           afterImage = value;
         } else if (typeof value === 'string') {
           if (value === 'true' || value === 'false') body[key] = value === 'true';
-          else if (/^\d+$/.test(value)) body[key] = parseInt(value, 10);
+          else if (/^-?\d+$/.test(value)) body[key] = parseInt(value, 10);
           else body[key] = value;
         }
       });
     } else {
-      body = await request.json().catch(() => ({}));
+      const jsonBody: unknown = await request.json().catch(() => ({}));
+      body = jsonBody && typeof jsonBody === 'object' && !Array.isArray(jsonBody)
+        ? jsonBody as Record<string, unknown>
+        : {};
     }
 
     const nextStatus = typeof body.status === 'string' ? body.status.trim() as RepairResultStatus : undefined;
@@ -209,6 +212,34 @@ export async function PATCH(request: Request, context: RouteContext) {
       published_at: status === 'published' ? (record.published_at || new Date().toISOString()) : record.published_at,
     };
 
+    const requestedSelection = {
+      deviceCategory: typeof body.device_category === 'string' ? body.device_category.trim() : record.device_category,
+      brandSlug: typeof body.brand_slug === 'string' ? body.brand_slug.trim() : record.brand_slug,
+      modelSlug: typeof body.model_slug === 'string' ? body.model_slug.trim() : record.model_slug,
+      repairTypeSlug: typeof body.repair_type_slug === 'string' ? body.repair_type_slug.trim() : record.repair_type_slug,
+    };
+    const identityChanged = requestedSelection.deviceCategory !== record.device_category
+      || requestedSelection.brandSlug !== record.brand_slug
+      || requestedSelection.modelSlug !== record.model_slug
+      || requestedSelection.repairTypeSlug !== record.repair_type_slug;
+
+    if (identityChanged) {
+      const canonicalTaxonomy = resolveRepairResultTaxonomy(await fetchRepairCatalog(), requestedSelection);
+      if (!canonicalTaxonomy) {
+        return jsonWithCors(request, { error: 'Selected repair taxonomy does not have a valid Storefront destination.' }, { status: 400 });
+      }
+      Object.assign(updates, {
+        device_category: canonicalTaxonomy.deviceCategory,
+        brand: canonicalTaxonomy.brand,
+        brand_slug: canonicalTaxonomy.brandSlug,
+        model: canonicalTaxonomy.model,
+        model_slug: canonicalTaxonomy.modelSlug,
+        repair_type: canonicalTaxonomy.repairType,
+        repair_type_slug: canonicalTaxonomy.repairTypeSlug,
+        related_repair_url: canonicalTaxonomy.relatedRepairUrl,
+      });
+    }
+
     if (nextFeaturedOnHomepage !== undefined) {
       updates.featured_on_homepage = nextFeaturedOnHomepage;
     }
@@ -222,9 +253,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     // Process generic content edits if provided
-    const stringFields = ['title', 'short_description', 'image_pair_alt_text', 'related_repair_url'];
+    const stringFields = ['title', 'short_description', 'image_pair_alt_text', 'image_aspect_ratio'];
     for (const field of stringFields) {
       if (typeof body[field] === 'string') updates[field] = body[field];
+    }
+    if (typeof body.sort_order === 'number' && Number.isInteger(body.sort_order)) {
+      updates.sort_order = body.sort_order;
     }
 
     const hasImageReplacement = Boolean(beforeImage || afterImage);

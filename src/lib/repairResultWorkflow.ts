@@ -1,3 +1,5 @@
+import { getNeutralRepairResultDescription } from '../../storefront/src/lib/repairResultDescriptions';
+
 export type RepairResultDeviceCategory = 'phone' | 'tablet' | 'laptop' | 'watch';
 export type RepairResultStatus = 'draft' | 'approved' | 'published' | 'archived';
 
@@ -160,11 +162,11 @@ export function getRepairResultTaxonomyOptions(taxonomy: RepairResultTaxonomy, f
   };
 }
 
-export function generateRepairResultSeo(model: string, repairType: string): GeneratedRepairResultSeo {
+export function generateRepairResultSeo(model: string, repairType: string, repairTypeSlug = ''): GeneratedRepairResultSeo {
   return {
     title: `${model} ${repairType} in Ringwood`,
-    short_description: `Before and after result from a ${model} ${repairType} completed by Ali Mobile Repairs in Ringwood.`,
-    image_pair_alt_text: `Before and after photos of a ${model} ${repairType} completed in Ringwood.`,
+    short_description: getNeutralRepairResultDescription({ deviceName: model, repairType, repairTypeSlug }),
+    image_pair_alt_text: `Before and after photos of a ${model} ${repairType}.`,
   };
 }
 
@@ -209,7 +211,7 @@ export function applyRepairResultTaxonomyChange(
   const resolved = getResolvedTaxonomy(taxonomy, form);
   return {
     form,
-    generatedSeo: resolved ? generateRepairResultSeo(resolved.model.name, resolved.repair.name) : null,
+    generatedSeo: resolved ? generateRepairResultSeo(resolved.model.name, resolved.repair.name, resolved.repair.slug) : null,
   };
 }
 
@@ -247,3 +249,11 @@ export function getRepairResultDestinationPreview(
 
   return destinations;
 }
+export {
+  findMatchingRepairResultPreset,
+  getNeutralRepairResultDescription,
+  getRepairResultDescriptionPresets,
+  isNeutralRepairResultDescription,
+  type RepairResultDescriptionInput,
+  type RepairResultDescriptionPreset,
+} from '../../storefront/src/lib/repairResultDescriptions';
