@@ -30,6 +30,7 @@ import {
 } from './publicRepairCatalogueSnapshot.server';
 import {
   getLocalRepairCatalogueFixture,
+  isLocalReadOnlySnapshotCatalogueOnly,
   isLocalRepairCatalogueOnly,
 } from './localRepairCatalogueFixture';
 import {
@@ -556,17 +557,30 @@ function buildFallbackCatalog(): BrandEntry[] {
  * small development fallback.
  */
 async function resolveCurrentPublicRepairCatalogue(forceRefresh = false, explicitRetirements: Array<{ category: string; brand: string; model: string; repairType: string }> = []): Promise<RepairCatalog> {
-  if (isLocalRepairCatalogueOnly()) return applySecondaryPhoneModelCodePresentation(applyMacBookCataloguePresentation(getLocalRepairCatalogueFixture()));
+  const isSnapshotOnly = isLocalReadOnlySnapshotCatalogueOnly();
+  if (!isSnapshotOnly && isLocalRepairCatalogueOnly()) {
+    return applySecondaryPhoneModelCodePresentation(applyMacBookCataloguePresentation(getLocalRepairCatalogueFixture()));
+  }
 
   const catalog = await resolvePublicRepairCatalogue({
-    mode: getPublicRepairCatalogueMode(),
-    fetchLiveInventory: () => fetchPOSInventory({ forceLive: forceRefresh }),
+    mode: isSnapshotOnly ? 'development' : getPublicRepairCatalogueMode(),
+    readOnlySnapshotOnly: isSnapshotOnly,
+    fetchLiveInventory: () => {
+      if (isSnapshotOnly) throw new Error('Live POS inventory fetch is unreachable in snapshot-only mode.');
+      return fetchPOSInventory({ forceLive: forceRefresh });
+    },
     transformLiveInventory: (items) => transformPOSToCatalog(items),
     readSnapshot: readCurrentPublicRepairCatalogueSnapshot,
-    writeSnapshot: writeCurrentPublicRepairCatalogueSnapshot,
-    createDevelopmentFallback: () => backfillSamsungCatalogModels(buildFallbackCatalog()),
+    writeSnapshot: (snapshot) => {
+      if (isSnapshotOnly) throw new Error('Snapshot write is unreachable in snapshot-only mode.');
+      return writeCurrentPublicRepairCatalogueSnapshot(snapshot);
+    },
+    createDevelopmentFallback: () => {
+      if (isSnapshotOnly) throw new Error('Development fallback is unreachable in snapshot-only mode.');
+      return backfillSamsungCatalogModels(buildFallbackCatalog());
+    },
     allowMajorShrink: allowMajorCatalogueShrink(),
-    forceRefresh,
+    forceRefresh: isSnapshotOnly ? false : forceRefresh,
     isExplicitRetirement: (category, brand, model, repair) => explicitRetirements.some((entry) => entry.category === category && entry.brand === brand && entry.model === model && entry.repairType === repair),
     onWarning: (message) => console.warn(`[public-catalogue] ${message}`),
   });

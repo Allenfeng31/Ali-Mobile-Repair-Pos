@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { parseItem } from './inventoryUtils';
 import { formatScopedRepairPriceLabel } from './scopedRepairPriceLabel';
 import {
+  checksumPublicRepairCatalogue,
   createSharedPublicRepairCatalogueLoader,
   mergeMissingPublicRepairEntries,
   resolvePublicRepairCatalogue,
@@ -37,8 +38,9 @@ function snapshotFor(brands: BrandEntry[]): StoredPublicRepairCatalogueSnapshot 
   const payload = serializePublicRepairCatalogue(brands);
   const repairs = brands.reduce((total, brand) => total + brand.models.reduce((sum, model) => sum + model.repairTypes.length, 0), 0);
   return {
+    schemaVersion: 2,
     payload,
-    checksum: 'placeholder',
+    checksum: checksumPublicRepairCatalogue(payload),
     fetchedAt: now().toISOString(),
     validatedAt: now().toISOString(),
     inventoryRowCount: repairs,
@@ -265,5 +267,66 @@ describe('public repair catalogue safety policy', () => {
     candidate[0].models[0].repairTypes = [];
     expect(mergeMissingPublicRepairEntries(previous, candidate, () => false).retainedMissingEntries).toBe(1);
     expect(mergeMissingPublicRepairEntries(previous, candidate, () => true).brands.find((brand) => brand.category === 'phone')?.models[0].repairTypes).toEqual([]);
+  });
+
+  describe('read-only snapshot-only mode', () => {
+    it('returns the hydrated snapshot directly without live fetch or writes even if window elapsed', async () => {
+      const liveFetch = vi.fn(async () => { throw new Error('Live fetch must not be called'); });
+      const writes = vi.fn();
+      const fallback = vi.fn(() => completeBrands());
+      const warnings: string[] = [];
+      const testSnapshot = stale(snapshotFor(completeBrands(2)));
+
+      const catalog = await resolvePublicRepairCatalogue({
+        mode: 'development',
+        readOnlySnapshotOnly: true,
+        fetchLiveInventory: liveFetch,
+        transformLiveInventory: () => [],
+        readSnapshot: async () => testSnapshot,
+        writeSnapshot: writes,
+        createDevelopmentFallback: fallback,
+        now,
+        onWarning: (msg) => warnings.push(msg),
+      });
+
+      expect(catalog.brands).toHaveLength(4);
+      expect(catalog.publicRepairCount).toBe(8);
+      expect(liveFetch).not.toHaveBeenCalled();
+      expect(writes).not.toHaveBeenCalled();
+      expect(fallback).not.toHaveBeenCalled();
+      expect(warnings).toContainEqual('Using strictly read-only public catalogue snapshot mode.');
+    });
+
+    it('rejects readOnlySnapshotOnly in production mode', async () => {
+      await expect(
+        resolvePublicRepairCatalogue({
+          mode: 'production',
+          readOnlySnapshotOnly: true,
+          fetchLiveInventory: async () => [],
+          transformLiveInventory: () => [],
+          readSnapshot: async () => snapshotFor(completeBrands()),
+          writeSnapshot: async () => {},
+          createDevelopmentFallback: completeBrands,
+          now,
+        }),
+      ).rejects.toThrow('Development snapshot-only catalogue mode cannot be enabled in production.');
+    });
+
+    it('fails closed when snapshot is missing in readOnlySnapshotOnly mode', async () => {
+      const fallback = vi.fn(() => completeBrands());
+      await expect(
+        resolvePublicRepairCatalogue({
+          mode: 'development',
+          readOnlySnapshotOnly: true,
+          fetchLiveInventory: async () => [],
+          transformLiveInventory: () => [],
+          readSnapshot: async () => null,
+          writeSnapshot: async () => {},
+          createDevelopmentFallback: fallback,
+          now,
+        }),
+      ).rejects.toThrow('Snapshot-only catalogue resolution failed: durable snapshot not found in storage.');
+      expect(fallback).not.toHaveBeenCalled();
+    });
   });
 });

@@ -85,9 +85,19 @@ function createLocalRepairCatalogueFixture(): RepairCatalog {
 
 const LOCAL_REPAIR_CATALOGUE_FIXTURE = createLocalRepairCatalogueFixture();
 
-export function isLocalRepairCatalogueOnly() {
-  if (process.env.ALI_MOBILE_LOCAL_CATALOG_ONLY !== 'true') return false;
-  if (process.env.NODE_ENV === 'production') {
+export function isLocalReadOnlySnapshotCatalogueOnly(environment = process.env): boolean {
+  const isEnabled = environment.ALI_MOBILE_READ_ONLY_SNAPSHOT_CATALOG === 'true'
+    || environment.ALI_MOBILE_LOCAL_SNAPSHOT_ONLY === 'true';
+  if (isEnabled && environment.NODE_ENV === 'production') {
+    throw new Error('Local read-only snapshot catalogue mode cannot be enabled in production.');
+  }
+  return isEnabled;
+}
+
+export function isLocalRepairCatalogueOnly(environment = process.env) {
+  if (isLocalReadOnlySnapshotCatalogueOnly(environment)) return false;
+  if (environment.ALI_MOBILE_LOCAL_CATALOG_ONLY !== 'true') return false;
+  if (environment.NODE_ENV === 'production') {
     throw new Error('ALI_MOBILE_LOCAL_CATALOG_ONLY cannot be enabled in production.');
   }
   return true;

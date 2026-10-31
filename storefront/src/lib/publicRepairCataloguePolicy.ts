@@ -104,6 +104,7 @@ export interface PublicRepairCatalogueResolverDependencies<RawItem> {
   now?: () => Date;
   onWarning?: (message: string) => void;
   isExplicitRetirement?: (category: string, brand: string, model: string, repair: string) => boolean;
+  readOnlySnapshotOnly?: boolean;
 }
 
 export function createSharedPublicRepairCatalogueLoader<T>(
@@ -481,6 +482,18 @@ function snapshotFromCatalog(catalog: RepairCatalog): StoredPublicRepairCatalogu
 export async function resolvePublicRepairCatalogue<RawItem>(
   dependencies: PublicRepairCatalogueResolverDependencies<RawItem>,
 ): Promise<RepairCatalog> {
+  if (dependencies.readOnlySnapshotOnly) {
+    if (dependencies.mode === 'production') {
+      throw new Error('Development snapshot-only catalogue mode cannot be enabled in production.');
+    }
+    const previousSnapshot = await dependencies.readSnapshot();
+    if (!previousSnapshot) {
+      throw new Error('Snapshot-only catalogue resolution failed: durable snapshot not found in storage.');
+    }
+    dependencies.onWarning?.('Using strictly read-only public catalogue snapshot mode.');
+    return hydratePublicRepairCatalogueSnapshot(previousSnapshot);
+  }
+
   const now = dependencies.now ?? (() => new Date());
   const minRepairRatio = dependencies.minRepairRatio ?? PUBLIC_REPAIR_CATALOGUE_DEFAULT_MIN_REPAIR_RATIO;
   const refreshWindowMilliseconds = dependencies.refreshWindowMilliseconds ?? PUBLIC_REPAIR_CATALOGUE_REFRESH_SECONDS * 1_000;
