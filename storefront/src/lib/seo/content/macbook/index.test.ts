@@ -137,3 +137,74 @@ describe('MacBook M4/M5 Enhanced Repair Details', () => {
     }
   });
 });
+
+describe('catalogue-backed MacBook enhanced repair details', () => {
+  const catalogueModelName = 'MacBook Air 13-inch M4 (2025)';
+
+  it.each(MACBOOK_REPAIRS)('reuses the enhanced %s template for the approved M4 Air catalogue route', (repairSlug) => {
+    const params = {
+      category: 'laptop',
+      brand: 'macbook',
+      model: 'macbook-air-m4-132025',
+      'repair-type': repairSlug,
+      catalogueModelName,
+    };
+    const pocket = getAliMobileEnhancedMacBookSeoPocket({
+      modelSlug: params.model,
+      repairSlug,
+      catalogueModelName,
+    });
+
+    expect(isAliMobileEnhancedMacBookRepairPage(params)).toBe(true);
+    expect(pocket?.modelName).toBe(catalogueModelName);
+    expect(pocket?.repairSlug).toBe(repairSlug);
+    expect(pocket?.metaTitle).toContain(catalogueModelName);
+    expect(pocket?.metaDescription).toContain(catalogueModelName);
+    expect(pocket?.commonProblems.length).toBeGreaterThanOrEqual(3);
+    expect(pocket?.diagnosticSteps.length).toBeGreaterThanOrEqual(3);
+    expect(pocket?.turnaroundMinutes).toBeUndefined();
+    expect(JSON.stringify(pocket)).not.toMatch(/60 minutes|MacBook Pro model|Pro generation|camera-notch/i);
+  });
+
+  it('keeps shared and unsupported M4 Air repairs outside the enhanced independent-page template', () => {
+    for (const repairSlug of ['water-damage-repair', 'logic-board-repair']) {
+      expect(isAliMobileEnhancedMacBookRepairPage({
+        category: 'laptop',
+        brand: 'macbook',
+        model: 'macbook-air-m4-132025',
+        'repair-type': repairSlug,
+        catalogueModelName,
+      })).toBe(false);
+      expect(getAliMobileEnhancedMacBookSeoPocket({
+        modelSlug: 'macbook-air-m4-132025',
+        repairSlug,
+        catalogueModelName,
+      })).toBeNull();
+    }
+  });
+
+  it('requires a resolved catalogue identity before an unconfigured future model inherits the template', () => {
+    const modelSlug = 'future-approved-macbook';
+
+    expect(isAliMobileEnhancedMacBookRepairPage({
+      category: 'laptop',
+      brand: 'macbook',
+      model: modelSlug,
+      'repair-type': 'screen-replacement',
+    })).toBe(false);
+    expect(getAliMobileEnhancedMacBookSeoPocket({
+      modelSlug,
+      repairSlug: 'screen-replacement',
+    })).toBeNull();
+
+    const pocket = getAliMobileEnhancedMacBookSeoPocket({
+      modelSlug,
+      repairSlug: 'charging-port-replacement',
+      catalogueModelName: 'MacBook Future Approved Model',
+    });
+
+    expect(pocket?.modelName).toBe('MacBook Future Approved Model');
+    expect(pocket?.quickAnswer).toMatch(/charging/i);
+    expect(pocket?.turnaroundMinutes).toBeUndefined();
+  });
+});

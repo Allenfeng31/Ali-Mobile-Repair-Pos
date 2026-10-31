@@ -36,12 +36,13 @@ type MacBookModelSlug =
   | 'macbook-pro-16-m5-max-2026';
 
 interface MacBookModelConfig {
-  slug: MacBookModelSlug;
+  slug: string;
   modelName: string;
   family: 'MacBook Air' | 'MacBook Pro' | 'MacBook';
   generationNote: string;
   chargingContext: string;
   screenCaution: string;
+  screenArea?: string;
   batteryCaution: string;
   portCaution: string;
   localContext: string;
@@ -642,14 +643,15 @@ function resolveMacBookContentModelSlug(value: string): MacBookModelSlug | null 
 function buildMacBookPocket(
   config: MacBookModelConfig,
   repairSlug: MacBookRepairSlug,
+  useApprovedStandardTiming = true,
 ): MacBookEnhancedSeoPocket {
   if (repairSlug === 'screen-replacement') {
     return {
       modelName: config.modelName,
       repairSlug: 'screen-replacement',
       metaTitle: `${config.modelName} screen replacement in Ringwood | Ali Mobile`,
-      metaDescription: `Screen damage on this ${config.generationNote} is checked carefully around the lid and display assembly before quoting.`,
-      quickAnswer: `A ${config.generationNote} display fault is inspected carefully before quoting, especially around the lid and camera-notch area.`,
+      metaDescription: `${config.modelName} screen damage is checked carefully around the lid and display assembly before quoting.`,
+      quickAnswer: `A ${config.generationNote} display fault is inspected carefully before quoting, especially around the lid and ${config.screenArea ?? 'camera-notch area'}.`,
       repairOptions: [
         {
           name: 'Display and lid assessment',
@@ -718,7 +720,9 @@ function buildMacBookPocket(
         },
         {
           question: `How long does ${config.modelName} screen replacement take?`,
-          answer: `Standard ${config.modelName} screen replacement usually takes around 60 minutes when the correct part is available and no additional faults are found. Timing is confirmed after the bench check.`,
+          answer: useApprovedStandardTiming
+            ? `Standard ${config.modelName} screen replacement usually takes around 60 minutes when the correct part is available and no additional faults are found. Timing is confirmed after the bench check.`
+            : `Timing for ${config.modelName} screen replacement is confirmed after inspection and part availability. Additional faults can change the turnaround.`,
         },
       ],
       serviceSection: {
@@ -848,7 +852,7 @@ function buildMacBookPocket(
         cards: [
           {
             title: 'Exact MacBook identified',
-            description: 'The MacBook Pro model and outer condition are checked before the quote is confirmed.',
+            description: `The exact ${config.family} model and outer condition are checked before the quote is confirmed.`,
           },
           {
             title: 'Repair risk explained',
@@ -968,7 +972,7 @@ function buildMacBookPocket(
       cards: [
         {
           title: 'Exact MacBook identified',
-          description: 'We identify the Pro generation first, then inspect the visible condition before quoting.',
+          description: `We identify the exact ${config.family} model first, then inspect the visible condition before quoting.`,
         },
         {
           title: 'Repair risk explained',
@@ -1000,6 +1004,27 @@ function buildMacBookPocket(
         `The ${config.modelName} charging quote is tied to the inspected fault, not a blanket no-power promise.`,
       ],
     },
+  };
+}
+
+function buildCatalogueMacBookConfig(modelSlug: string, modelName: string): MacBookModelConfig {
+  const family = /macbook air/i.test(modelName)
+    ? 'MacBook Air'
+    : /macbook pro/i.test(modelName)
+      ? 'MacBook Pro'
+      : 'MacBook';
+
+  return {
+    slug: modelSlug,
+    modelName: modelName.trim(),
+    family,
+    generationNote: 'catalogue-identified MacBook',
+    chargingContext: 'the charger, cable, and available charging connections',
+    screenCaution: 'lid alignment, hinge movement, and visible housing damage',
+    screenArea: 'camera area',
+    batteryCaution: 'runtime, charging response, heat, and possible case pressure',
+    portCaution: 'connector seating, cable response, and visible port condition',
+    localContext: 'used for study, work, and everyday computing',
   };
 }
 
@@ -6743,20 +6768,25 @@ export function isAliMobileEnhancedMacBookRepairPage({
   brand,
   model,
   'repair-type': repairType,
+  catalogueModelName,
 }: {
   category: string;
   brand: string;
   model: string;
   'repair-type': string;
+  /** Only pass after the catalogue resolver confirms this exact model and repair route. */
+  catalogueModelName?: string;
 }) {
   const contentModelSlug = resolveMacBookContentModelSlug(model);
+  const isExplicitEnhancedRoute = Boolean(
+    contentModelSlug && PAGE_KEYS.includes(`${contentModelSlug}|${repairType}` as MacBookPageKey)
+  );
 
   return (
     category === 'laptop' &&
     brand === 'macbook' &&
-    Boolean(contentModelSlug) &&
     isMacBookRepairSlug(repairType) &&
-    PAGE_KEYS.includes(`${contentModelSlug}|${repairType}` as MacBookPageKey)
+    (isExplicitEnhancedRoute || Boolean(catalogueModelName?.trim()))
   );
 }
 
@@ -6776,6 +6806,7 @@ export function getAliMobileEnhancedMacBookRepairType(params: {
   brand: string;
   model: string;
   'repair-type': string;
+  catalogueModelName?: string;
 }): MacBookRepairSlug | null {
   return isAliMobileEnhancedMacBookRepairPage(params)
     ? (params['repair-type'] as MacBookRepairSlug)
@@ -6785,19 +6816,31 @@ export function getAliMobileEnhancedMacBookRepairType(params: {
 export function getAliMobileEnhancedMacBookSeoPocket({
   modelSlug,
   repairSlug,
+  catalogueModelName,
 }: {
   modelSlug: string;
   repairSlug: string;
+  /** Only pass after the catalogue resolver confirms this exact model and repair route. */
+  catalogueModelName?: string;
 }): MacBookEnhancedSeoPocket | null {
   const contentModelSlug = resolveMacBookContentModelSlug(modelSlug);
 
-  if (!contentModelSlug || !isMacBookRepairSlug(repairSlug)) {
+  if (!isMacBookRepairSlug(repairSlug)) {
     return null;
   }
 
-  if (!PAGE_KEYS.includes(`${contentModelSlug}|${repairSlug}` as MacBookPageKey)) {
-    return null;
+  if (!contentModelSlug) {
+    const resolvedModelName = catalogueModelName?.trim();
+    return resolvedModelName
+      ? buildMacBookPocket(
+          buildCatalogueMacBookConfig(modelSlug, resolvedModelName),
+          repairSlug,
+          false,
+        )
+      : null;
   }
+
+  if (!PAGE_KEYS.includes(`${contentModelSlug}|${repairSlug}` as MacBookPageKey)) return null;
 
   const pocket = MACBOOK_PAGE_CONTENT[`${contentModelSlug}|${repairSlug}` as MacBookPageKey];
   if (!pocket) return null;

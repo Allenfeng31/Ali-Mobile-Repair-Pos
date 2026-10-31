@@ -608,13 +608,13 @@ describe('repair detail metadata', () => {
     );
   });
 
-  it('passes laptop category to generic metadata and social descriptions', async () => {
+  it('uses catalogue-backed enhanced MacBook metadata without phone terminology', async () => {
     const metadata = await generateMetadata(
       params('laptop', 'macbook', 'macbook-unlisted-13', 'screen-replacement')
     );
 
     expect(metadata.description).toContain('MacBook Unlisted 13');
-    expect(metadata.description).toContain('cracked display');
+    expect(metadata.description).toContain('screen damage');
     expect(metadata.description).not.toMatch(/touch-screen|touchscreen|phone/i);
     expect(metadata.openGraph?.description).toBe(metadata.description);
     expect(metadata.twitter?.description).toBe(metadata.description);

@@ -79,8 +79,11 @@ describe("MacBook Model Hub presentation", () => {
   });
 
   it("does not infer an A-number when the catalogue has none", () => {
+    const modelName = "MacBook Air 13-inch M4 (2025)";
+
     expect(getMacBookModelCodeLabel(undefined)).toBeNull();
-    expect(getMacBookModelMetaTitle("MacBook Unknown")).toBe("MacBook Unknown Repair | Ali Mobile");
+    expect(getMacBookModelMetaTitle(modelName)).toBe(`${modelName} Repair | Ali Mobile`);
+    expect(getMacBookModelMetaDescription(modelName, undefined, standardRepairs)).toContain(modelName);
   });
 
   it("formats verified A-number for newly added M5 model", () => {

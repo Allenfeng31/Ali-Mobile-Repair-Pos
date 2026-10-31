@@ -4782,6 +4782,10 @@ export async function generateMetadata({ params }: RepairPageProps) {
   const enhancedMacBookSeoPocket = getAliMobileEnhancedMacBookSeoPocket({
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
+    catalogueModelName:
+      resolvedParams.category === 'laptop' && resolvedParams.brand === 'macbook'
+        ? model
+        : undefined,
   });
   const enhancedAppleWatchSeoPocket = getAliMobileEnhancedAppleWatchSeoPocket({
     modelSlug: resolvedParams.model,
@@ -5162,7 +5166,14 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const lenovoTabletEnhancedRepairType = getAliMobileEnhancedLenovoTabletRepairType(resolvedParams);
   const samsungTabletEnhancedRepairType = getAliMobileEnhancedSamsungTabletRepairType(resolvedParams);
   const ipadEnhancedRepairType = getAliMobileEnhancedIpadRepairType(resolvedParams, isGenuinePosIpadRepair);
-  const macBookEnhancedRepairType = getAliMobileEnhancedMacBookRepairType(resolvedParams);
+  const resolvedMacBookParams = {
+    ...resolvedParams,
+    catalogueModelName:
+      resolvedParams.category === 'laptop' && resolvedParams.brand === 'macbook'
+        ? displayModel
+        : undefined,
+  };
+  const macBookEnhancedRepairType = getAliMobileEnhancedMacBookRepairType(resolvedMacBookParams);
   const appleWatchEnhancedRepairType = getAliMobileEnhancedAppleWatchRepairType(resolvedParams);
   const iphoneEnhancedRepairType = getAliMobileEnhancedIphoneRepairType(resolvedParams);
   const samsungEnhancedRepairType = getAliMobileEnhancedSamsungRepairType(resolvedParams);
@@ -5181,7 +5192,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const isAliMobileEnhancedLenovoTabletPage = isAliMobileEnhancedLenovoTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedSamsungTabletPage = isAliMobileEnhancedSamsungTabletRepairPage(resolvedParams);
   const isAliMobileEnhancedIpadPage = isAliMobileEnhancedIpadRepairPage(resolvedParams, isGenuinePosIpadRepair);
-  const isAliMobileEnhancedMacBookPage = isAliMobileEnhancedMacBookRepairPage(resolvedParams);
+  const isAliMobileEnhancedMacBookPage = isAliMobileEnhancedMacBookRepairPage(resolvedMacBookParams);
   const isMacBookDetailPage =
     resolvedParams.category === 'laptop' &&
     (resolvedParams.brand === 'macbook' || resolvedParams.brand === 'apple');
@@ -5248,6 +5259,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const enhancedMacBookSeoPocket = getAliMobileEnhancedMacBookSeoPocket({
     modelSlug: resolvedParams.model,
     repairSlug: resolvedParams['repair-type'],
+    catalogueModelName: resolvedMacBookParams.catalogueModelName,
   });
   const enhancedAppleWatchSeoPocket = getAliMobileEnhancedAppleWatchSeoPocket({
     modelSlug: resolvedParams.model,
@@ -5413,6 +5425,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
   const isBatchTwoOrThreeSecondaryPhoneRepairDetail = Boolean(
     (isBatchTwoSecondaryPhoneBrandDetail || isBatchThreeSecondaryPhoneBrandDetail) && secondaryPhoneRepairContent
   );
+  const configuredMacBookSameModelLinks = isAliMobileEnhancedMacBookPage && macBookEnhancedRepairType
+    ? getMacBookSameModelRepairLinks(resolvedParams.model as any, macBookEnhancedRepairType)
+    : [];
   const sameModelLinks = isAliMobileEnhancedLenovoTabletPage && lenovoTabletEnhancedRepairType
     ? getLenovoTabletSameModelRepairLinks(resolvedParams.model as any, lenovoTabletEnhancedRepairType)
     : isAliMobileEnhancedSamsungTabletPage && samsungTabletEnhancedRepairType
@@ -5420,7 +5435,9 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
     : isAliMobileEnhancedIpadPage && ipadEnhancedRepairType
     ? getIpadSameModelRepairLinks(resolvedParams.model as any, ipadEnhancedRepairType, pageData.ipadGenuineRepairSlugs ?? [])
     : isAliMobileEnhancedMacBookPage && macBookEnhancedRepairType
-    ? getMacBookSameModelRepairLinks(resolvedParams.model as any, macBookEnhancedRepairType)
+    ? configuredMacBookSameModelLinks.length > 0
+      ? configuredMacBookSameModelLinks
+      : otherRepairLinks
     : isAliMobileEnhancedAppleWatchPage && appleWatchEnhancedRepairType
     ? getAppleWatchSameModelRepairLinks(resolvedParams.model as any, appleWatchEnhancedRepairType)
     : otherRepairLinks;
@@ -6034,6 +6051,8 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
                       ? formatRepairTimeBadge(samsungTabletTurnaroundLabel ?? lenovoTabletTurnaroundLabel ?? macBookTurnaroundLabel ?? `${approvedTurnaroundMinutes} Minutes`)
                     : (resolvedParams['repair-type'] === 'logic-board-repair' || resolvedParams['repair-type'] === 'data-recovery' || resolvedParams['repair-type'] === 'no-power')
                     ? 'Diagnostic Required'
+                    : isAliMobileEnhancedMacBookPage
+                    ? 'Timing Confirmed After Inspection'
                     : 'Fast Turnaround'}
                 </div>
                 <div className="trust-badge">

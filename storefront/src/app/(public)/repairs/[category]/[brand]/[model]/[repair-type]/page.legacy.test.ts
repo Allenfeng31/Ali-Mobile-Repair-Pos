@@ -617,6 +617,44 @@ describe('Repair Detail active and legacy page-data resolution', () => {
   });
 
   it.each([
+    ['Screen Replacement', 'screen-replacement', 'display'],
+    ['Battery Replacement', 'battery-replacement', 'battery'],
+    ['Charging Port Repair', 'charging-port-replacement', 'charging'],
+  ] as const)('renders the catalogue-backed MacBook Air M4 %s route with enhanced, timing-neutral content', async (
+    repairName,
+    repairSlug,
+    serviceEvidence,
+  ) => {
+    const model = 'MacBook Air 13-inch M4 (2025)';
+    const modelSlug = 'macbook-air-m4-132025';
+    fetchRepairCatalog.mockResolvedValue(macBookRepairCatalogue(model, modelSlug, repairName, repairSlug));
+
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'laptop', brand: 'macbook', model: modelSlug, 'repair-type': repairSlug,
+    })) });
+    const html = renderToStaticMarkup(page);
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+    const bookingQuery = new URL(String(pricing?.bookingHref), 'https://example.test').searchParams;
+    const serviceSchema = html.match(/<script id="schema-service"[^>]*>(.*?)<\/script>/)?.[1] ?? '';
+
+    const publicRepairName = repairSlug === 'charging-port-replacement'
+      ? 'Charging Port Replacement'
+      : repairName;
+    expect(html).toContain(`<h1 id="repair-detail-heading">${model} ${publicRepairName}`);
+    expect(html).toContain('macbook-quick-answer-heading');
+    expect(html.toLowerCase()).toContain(serviceEvidence);
+    expect(html).toContain('Timing Confirmed After Inspection');
+    expect(html).not.toMatch(/Repair Time: 1 Hour|Around 60 Minutes|around 60 minutes/i);
+    expect(pricing?.showStartingPriceFallback).toBe(false);
+    expect(pricing?.useNeutralQuoteWording).toBe(true);
+    expect(serviceSchema).toContain(`${model} ${publicRepairName} in Ringwood`);
+    expect(serviceSchema).not.toContain('"offers"');
+    expect(bookingQuery.get('brand')).toBe('MacBook');
+    expect(bookingQuery.get('model')).toBe(model);
+    expect(bookingQuery.get('service')).toBe(publicRepairName);
+  });
+
+  it.each([
     ['MacBook Pro 14" M4 Pro (2024)', 'macbook-pro-14-m4-pro-2024'],
     ['MacBook Pro 14" M5 (2025)', 'macbook-pro-14-m5-2025'],
   ] as const)('renders logic board repair for %s with Timing Confirmed After Assessment badge', async (model, modelSlug) => {
