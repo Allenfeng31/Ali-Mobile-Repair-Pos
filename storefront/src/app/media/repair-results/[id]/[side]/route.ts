@@ -48,7 +48,7 @@ export async function GET(_request: Request, context: MediaRouteContext) {
     return new NextResponse(file, {
       headers: {
         'Content-Type': file.type || 'image/jpeg',
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
         'X-Robots-Tag': 'index, follow',
       },
     });

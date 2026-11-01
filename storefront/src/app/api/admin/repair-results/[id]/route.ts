@@ -1,13 +1,12 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { fetchRepairCatalog } from '@/lib/api';
 import { resolveRepairResultTaxonomy } from '@/lib/repairResultTaxonomy';
 import { repairResultAffectedPathsForMutation } from '@/lib/repairResultRevalidation';
 import { revalidateRepairResultPaths } from '@/lib/repairResultRevalidation.server';
+import { authorizeRepairResultsAdminRequest } from '@/lib/repairResultsAdminAuth.server';
 import {
   PUBLIC_REPAIR_RESULT_SELECT,
   REPAIR_RESULT_BUCKET,
@@ -28,27 +27,6 @@ interface RouteContext {
   params: Promise<{
     id: string;
   }>;
-}
-
-async function createSessionClient() {
-  const cookieStore = await cookies();
-
-  return createRouteHandlerClient({
-    cookies: (() => cookieStore) as unknown as typeof cookies,
-  });
-}
-
-async function assertAuthenticated(supabase: ReturnType<typeof createRouteHandlerClient>) {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-
-  if (error) {
-    console.error('[repair-results] Failed to read admin session:', error);
-  }
-
-  return Boolean(session?.user);
 }
 
 function buildCorsHeaders(request: Request, extraHeaders?: HeadersInit) {
@@ -72,41 +50,6 @@ function jsonWithCors(request: Request, body: unknown, init?: ResponseInit) {
     ...init,
     headers: buildCorsHeaders(request, init?.headers),
   });
-}
-
-async function assertBearerAuthenticated(request: Request) {
-  const authHeader = request.headers.get('authorization') || '';
-  const tokenMatch = authHeader.match(/^Bearer\s+(.+)$/i);
-  const token = tokenMatch?.[1];
-
-  if (!token) return false;
-
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) return false;
-
-  const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  const { data, error } = await authClient.auth.getUser(token);
-  if (error) {
-    console.error('[repair-results] Failed to read bearer session:', error);
-  }
-
-  return Boolean(data.user);
-}
-
-async function isAuthorizedRequest(request: Request) {
-  if (await assertBearerAuthenticated(request)) {
-    return true;
-  }
-
-  const sessionClient = await createSessionClient();
-  return assertAuthenticated(sessionClient);
 }
 
 async function copyToApprovedPath(
@@ -145,10 +88,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   try {
-    const authorized = await isAuthorizedRequest(request);
+    const authorization = await authorizeRepairResultsAdminRequest(request);
 
-    if (!authorized) {
-      return jsonWithCors(request, { error: 'Unauthorized' }, { status: 401 });
+    if (!authorization.authorized) {
+      return jsonWithCors(request, { error: authorization.error }, { status: authorization.status });
     }
 
     let body: Record<string, unknown> = {};

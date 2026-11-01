@@ -1,20 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { createServiceRoleClient, fetchRepairCatalog, getSession, revalidateRepairResultPaths } = vi.hoisted(() => ({
+const { authorizeRepairResultsAdminRequest, createServiceRoleClient, fetchRepairCatalog, revalidateRepairResultPaths } = vi.hoisted(() => ({
+  authorizeRepairResultsAdminRequest: vi.fn(),
   createServiceRoleClient: vi.fn(),
   fetchRepairCatalog: vi.fn(),
-  getSession: vi.fn(),
   revalidateRepairResultPaths: vi.fn(),
 }));
 
-vi.mock('next/headers', () => ({ cookies: vi.fn(async () => new Map()) }));
-vi.mock('@supabase/auth-helpers-nextjs', () => ({
-  createRouteHandlerClient: vi.fn(() => ({ auth: { getSession } })),
-}));
-vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
 vi.mock('@/utils/supabase/service-role', () => ({ createServiceRoleClient }));
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog }));
 vi.mock('@/lib/repairResultRevalidation.server', () => ({ revalidateRepairResultPaths }));
+vi.mock('@/lib/repairResultsAdminAuth.server', () => ({ authorizeRepairResultsAdminRequest }));
 
 import { GET, POST } from './route';
 
@@ -65,14 +61,35 @@ const replayResult = {
 
 describe('admin repair result taxonomy route', () => {
   beforeEach(() => {
-    getSession.mockResolvedValue({ data: { session: { user: { id: 'staff' } } }, error: null });
+    authorizeRepairResultsAdminRequest.mockResolvedValue({ authorized: true, userId: 'super-admin' });
   });
 
   afterEach(() => {
     createServiceRoleClient.mockReset();
     fetchRepairCatalog.mockReset();
     revalidateRepairResultPaths.mockReset();
-    getSession.mockReset();
+    authorizeRepairResultsAdminRequest.mockReset();
+  });
+
+  it.each([
+    [{ authorized: false, status: 401, error: 'Unauthorized' }, 401],
+    [{ authorized: false, status: 403, error: 'Forbidden' }, 403],
+  ] as const)('rejects a request that is not authorized as a super admin', async (authorization, status) => {
+    authorizeRepairResultsAdminRequest.mockResolvedValueOnce(authorization);
+
+    const response = await GET(new Request('http://localhost/api/admin/repair-results'));
+
+    expect(response.status).toBe(status);
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-admin POST before parsing uploads or creating the service-role client', async () => {
+    authorizeRepairResultsAdminRequest.mockResolvedValueOnce({ authorized: false, status: 403, error: 'Forbidden' });
+
+    const response = await POST(new Request('http://localhost/api/admin/repair-results', { method: 'POST' }));
+
+    expect(response.status).toBe(403);
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
   });
 
   it('returns the authenticated serialized canonical taxonomy', async () => {
@@ -144,7 +161,7 @@ describe('admin repair result taxonomy route', () => {
   });
 
   it('does not expose the description audit without an authenticated POS session', async () => {
-    getSession.mockResolvedValueOnce({ data: { session: null }, error: null });
+    authorizeRepairResultsAdminRequest.mockResolvedValueOnce({ authorized: false, status: 401, error: 'Unauthorized' });
 
     const response = await GET(new Request('http://localhost/api/admin/repair-results?view=description-audit'));
 

@@ -264,6 +264,6 @@ describe('public Repair Results matching route', () => {
 
     expect((await response.json()).data.map((item: { id: string }) => item.id))
       .toEqual(['screen-alias', 'screen-current', 'screen-third']);
-    expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=300, stale-while-revalidate=86400');
+    expect(response.headers.get('Cache-Control')).toBe('no-store, max-age=0, must-revalidate');
   });
 });

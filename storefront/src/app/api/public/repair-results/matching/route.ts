@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const CACHE_HEADERS = {
-  'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=86400',
+  'Cache-Control': 'no-store, max-age=0, must-revalidate',
 };
 
 const VALID_CATEGORIES = new Set(REPAIR_RESULT_CATEGORIES.map((category) => category.value));

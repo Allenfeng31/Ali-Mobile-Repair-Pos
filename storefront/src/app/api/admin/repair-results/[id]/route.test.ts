@@ -1,21 +1,18 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { createServiceRoleClient, fetchRepairCatalog, resolveRepairResultTaxonomy, revalidateRepairResultPaths } = vi.hoisted(() => ({
+const { authorizeRepairResultsAdminRequest, createServiceRoleClient, fetchRepairCatalog, resolveRepairResultTaxonomy, revalidateRepairResultPaths } = vi.hoisted(() => ({
+  authorizeRepairResultsAdminRequest: vi.fn(),
   createServiceRoleClient: vi.fn(),
   fetchRepairCatalog: vi.fn(),
   resolveRepairResultTaxonomy: vi.fn(),
   revalidateRepairResultPaths: vi.fn(),
 }));
 
-vi.mock('next/headers', () => ({ cookies: vi.fn(async () => new Map()) }));
-vi.mock('@supabase/auth-helpers-nextjs', () => ({
-  createRouteHandlerClient: vi.fn(() => ({ auth: { getSession: vi.fn(async () => ({ data: { session: { user: { id: 'staff' } } }, error: null })) } })),
-}));
-vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
 vi.mock('@/utils/supabase/service-role', () => ({ createServiceRoleClient }));
 vi.mock('@/lib/api', () => ({ fetchRepairCatalog }));
 vi.mock('@/lib/repairResultTaxonomy', () => ({ resolveRepairResultTaxonomy }));
 vi.mock('@/lib/repairResultRevalidation.server', () => ({ revalidateRepairResultPaths }));
+vi.mock('@/lib/repairResultsAdminAuth.server', () => ({ authorizeRepairResultsAdminRequest }));
 
 import { PATCH } from './route';
 import type { PublicRepairResult } from '@/lib/repair-results';
@@ -71,8 +68,25 @@ function mockPatchClient(nextResult: typeof existingResult, updateError: Error |
 }
 
 describe('PATCH /api/admin/repair-results/[id]', () => {
+  beforeEach(() => {
+    authorizeRepairResultsAdminRequest.mockResolvedValue({ authorized: true, userId: 'super-admin' });
+  });
+
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('returns 403 before reading a Repair Result for an authenticated non-admin', async () => {
+    authorizeRepairResultsAdminRequest.mockResolvedValueOnce({ authorized: false, status: 403, error: 'Forbidden' });
+
+    const response = await PATCH(new Request('http://localhost/api/admin/repair-results/result', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    }), { params: Promise.resolve({ id: 'result' }) });
+
+    expect(response.status).toBe(403);
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
   });
 
   it('uses persisted old and new states so unpublish, privacy, content, and removed placements clear affected SSR paths', async () => {
