@@ -174,6 +174,36 @@
   display: block;
 }
 
+.phoneChargingHero {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.phoneChargingHero .heroCopy {
+  min-height: 0;
+  justify-content: flex-start;
+}
+
+.phoneChargingHero .heroCopy h1 {
+  max-width: 58rem;
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  line-height: 1;
+}
+
+.phoneChargingHero .heroCopy p {
+  max-width: 52rem;
+}
+
+.phoneChargingHero .coverWrapper {
+  width: min(100%, 960px) !important;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  margin-inline: auto;
+}
+
+.phoneChargingHero .coverImage {
+  object-position: center;
+}
+
 .articleCard {
   border-radius: 2rem;
   padding: clamp(1.6rem, 4vw, 4rem);

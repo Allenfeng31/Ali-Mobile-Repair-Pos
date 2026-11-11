@@ -1,0 +1,412 @@
+.article {
+  --ink: #0f172a;
+  --muted: #475569;
+  --blue: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --line: #cbd5e1;
+  --warning: #92400e;
+  color: var(--muted);
+}
+
+.article > section,
+.sources {
+  margin-top: clamp(2.75rem, 7vw, 4.5rem);
+}
+
+.article > section:first-child {
+  margin-top: 0;
+}
+
+.sectionLabel {
+  margin: 0 0 0.45rem;
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.045em;
+}
+
+.sectionIntro {
+  max-width: 42rem;
+  margin-bottom: 1.4rem;
+}
+
+.sectionIntro h2,
+.quickAnswer h2,
+.sources h2 {
+  margin: 0;
+}
+
+.sectionIntro p:last-child {
+  margin: 0.75rem 0 0;
+}
+
+.quickAnswer {
+  padding: clamp(1.35rem, 4vw, 2.1rem);
+  border: 1px solid #bfdbfe;
+  border-top: 4px solid #2563eb;
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, #ffffff 0%, var(--blue-soft) 100%);
+}
+
+.quickAnswer > div:first-child > p:last-child {
+  margin-bottom: 0;
+}
+
+.answerFacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 1.5rem 0 0;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.85rem;
+  background: #bfdbfe;
+}
+
+.answerFacts div {
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.answerFacts dt {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.answerFacts dd {
+  margin: 0.2rem 0 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.qualifier {
+  margin: 0.8rem 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.processList {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.processList > li {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 1rem;
+  margin: 0;
+  padding: clamp(1.2rem, 3vw, 1.6rem);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.stepNumber {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.processList h3 {
+  margin: 0;
+}
+
+.processList p {
+  margin: 0.7rem 0 0;
+}
+
+.processList a {
+  display: inline-block;
+  margin-top: 0.75rem;
+}
+
+.processSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem 0.8rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 0.88rem;
+}
+
+.processSummary span {
+  color: #93c5fd;
+}
+
+.tableFrame {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+
+.symptomTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  line-height: 1.55;
+}
+
+.symptomTable caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.symptomTable th,
+.symptomTable td {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.symptomTable thead th {
+  border-top: 0;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 0.85rem;
+}
+
+.symptomTable thead th:first-child,
+.symptomTable tbody th {
+  width: 36%;
+}
+
+.symptomTable tbody th {
+  color: var(--ink);
+  font-size: 0.94rem;
+}
+
+.symptomTable tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.checkList {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  counter-reset: safe-check;
+  list-style: none;
+}
+
+.checkList li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  margin: 0;
+  counter-increment: safe-check;
+}
+
+.checkList li::before {
+  content: counter(safe-check);
+  display: grid;
+  width: 1.85rem;
+  height: 1.85rem;
+  place-items: center;
+  border: 1px solid #93c5fd;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.warning {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: clamp(1.1rem, 3vw, 1.45rem);
+  border: 1px solid #f59e0b;
+  border-radius: 1rem;
+  background: #fffbeb;
+  color: #78350f;
+}
+
+.warningMark {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #451a03;
+  font-weight: 950;
+}
+
+.warning h3 {
+  margin: 0;
+  color: #78350f;
+}
+
+.warning p {
+  margin: 0.65rem 0 0;
+}
+
+.tipGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.tipGrid article {
+  padding: 1.15rem;
+  border-top: 3px solid #60a5fa;
+  background: #f8fafc;
+}
+
+.tipGrid h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.tipGrid p {
+  margin: 0.65rem 0 0;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.faqList {
+  border-top: 1px solid var(--line);
+}
+
+.faqList details {
+  border-bottom: 1px solid var(--line);
+}
+
+.faqList summary {
+  position: relative;
+  padding: 1rem 2.2rem 1rem 0;
+  color: var(--ink);
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqList summary::-webkit-details-marker {
+  display: none;
+}
+
+.faqList summary::after {
+  content: "+";
+  position: absolute;
+  top: 0.85rem;
+  right: 0;
+  color: var(--blue);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.faqList details[open] summary::after {
+  content: "−";
+}
+
+.faqList p {
+  margin: -0.25rem 0 1rem;
+}
+
+.sources {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.sources h2 {
+  font-size: 1.15rem;
+}
+
+.sources p {
+  margin: 0.65rem 0 0;
+}
+
+@media (max-width: 720px) {
+  .answerFacts,
+  .tipGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .processList > li,
+  .warning {
+    grid-template-columns: 1fr;
+  }
+
+  .processSummary {
+    justify-content: flex-start;
+  }
+
+  .tableFrame {
+    overflow: visible;
+    border: 0;
+  }
+
+  .symptomTable,
+  .symptomTable tbody,
+  .symptomTable tr,
+  .symptomTable th,
+  .symptomTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .symptomTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+  }
+
+  .symptomTable tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .symptomTable tbody tr {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    background: #ffffff;
+  }
+
+  .symptomTable tbody th {
+    padding-bottom: 0.45rem;
+    border-top: 0;
+    background: #f8fafc;
+  }
+
+  .symptomTable tbody td {
+    padding-top: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faqList summary {
+    scroll-behavior: auto;
+  }
+}

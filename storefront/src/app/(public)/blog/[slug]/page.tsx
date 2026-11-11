@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { BlogImage } from "@/components/BlogImage";
 import { IphoneBatteryHealthArticle } from "@/components/blog/IphoneBatteryHealthArticle";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
+import { PhoneNotChargingArticle } from "@/components/blog/PhoneNotChargingArticle";
 import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
 import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
 import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
@@ -15,8 +16,11 @@ import styles from "./BlogPost.module.css";
 
 export const dynamic = "force-dynamic";
 
+const PHONE_NOT_CHARGING_SLUG = "why-is-my-phone-not-charging";
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  const isPhoneNotChargingArticle = slug === PHONE_NOT_CHARGING_SLUG;
 
   if (slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG) {
     return {
@@ -63,6 +67,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         locale: "en_AU",
         siteName: "Ali Mobile & Repair",
         images: postData.image ? [{ url: postData.image, alt: postData.cover_image_alt || postData.title }] : undefined,
+        ...(isPhoneNotChargingArticle ? {
+          publishedTime: postData.date,
+          modifiedTime: postData.updated_at || postData.date,
+          authors: [postData.author_name || "Ali Mobile & Repair"],
+        } : {}),
       },
       twitter: {
         card: "summary_large_image",
@@ -84,6 +93,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
 
   const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
   const isIphoneBatteryHealthArticle = slug === "when-should-you-replace-iphone-battery";
+  const isPhoneNotChargingArticle = slug === PHONE_NOT_CHARGING_SLUG;
   const isSamsungGalaxySScreenCostArticle = slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG;
   let postData: BlogPost;
   if (isSamsungGalaxySScreenCostArticle) {
@@ -179,7 +189,10 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           Back to Blog
         </Link>
 
-        <section className={styles.hero} aria-labelledby="article-title">
+        <section
+          className={`${styles.hero} ${isPhoneNotChargingArticle ? styles.phoneChargingHero : ""}`}
+          aria-labelledby="article-title"
+        >
           <div className={styles.heroCopy}>
             <span className={styles.kicker}>Repair Guide</span>
             <div className={styles.metaRow}>
@@ -212,6 +225,8 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
             <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
           ) : isIphoneBatteryHealthArticle ? (
             <div className={styles.articleBody}><IphoneBatteryHealthArticle /></div>
+          ) : isPhoneNotChargingArticle ? (
+            <div className={styles.articleBody}><PhoneNotChargingArticle /></div>
           ) : (
             <div
               className={styles.articleBody}
