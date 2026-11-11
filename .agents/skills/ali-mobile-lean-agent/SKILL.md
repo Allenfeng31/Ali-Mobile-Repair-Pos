@@ -38,11 +38,7 @@ Mark any check requiring a browser as manual user review instead of attempting b
 
 Batch commands and avoid repeated exploratory work to conserve Codex quota.
 
-Every Ali Mobile execution prompt must begin with:
-
-Use Codex with RTK first.
-Use ali-mobile-lean-agent.
-Use UI/UX skill, SEO skill, design-system consistency skill, component-reuse skill, internal-linking skill, booking-flow safety skill, and concise-edit skill.
+Select only the task-specific skills that are available and improve the requested work. Do not require broad, generic, or overlapping skills merely because the repository is involved.
 
 ## Validation rules
 

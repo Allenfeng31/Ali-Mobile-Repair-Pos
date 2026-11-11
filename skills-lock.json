@@ -7,11 +7,29 @@
       "skillPath": "skills/productivity/caveman/SKILL.md",
       "computedHash": "934433479903febc585bf6deb5f0cebc63137e3f86b7babe0aab1ecb94d6d7a4"
     },
+    "content-brief": {
+      "source": "DarynaRodriguez/seo-skills",
+      "sourceType": "github",
+      "skillPath": "skills/content-brief/SKILL.md",
+      "computedHash": "843518841ad3b401926dc1d0b8e2fe14df68a0d16b753bc8a1a3c7a4bcc3edc0"
+    },
+    "copy-editing": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/copy-editing/SKILL.md",
+      "computedHash": "de0433a91b4a517b2b83c6bb05fb4ef5896ca34b46dbc4d3f672c3ed3e6652d7"
+    },
     "diagnose": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/diagnose/SKILL.md",
       "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
     },
     "grill-me": {
       "source": "mattpocock/skills",
@@ -25,11 +43,23 @@
       "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
       "computedHash": "ea225e10406dbb6a18ba97af34e4e9313424438195cd16e657635f841b6e7a2f"
     },
+    "heading-architect": {
+      "source": "DarynaRodriguez/seo-skills",
+      "sourceType": "github",
+      "skillPath": "skills/heading-architect/SKILL.md",
+      "computedHash": "b2321d1eb816978a89dfa7b65f9229769821449cf8812e638c8ba095a285d1c6"
+    },
     "improve-codebase-architecture": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "c77b86b4332919499608f9af1880074e1fec65a59b95c70c27a9f39cd137865e"
+    },
+    "internal-linking": {
+      "source": "DarynaRodriguez/seo-skills",
+      "sourceType": "github",
+      "skillPath": "skills/internal-linking/SKILL.md",
+      "computedHash": "e20c735f6f7ab60ef0e981a12d2bc0ecc5efb159ecc194b9606ca479c1b0abb0"
     },
     "setup-matt-pocock-skills": {
       "source": "mattpocock/skills",
