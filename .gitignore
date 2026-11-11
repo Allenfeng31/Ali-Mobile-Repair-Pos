@@ -6,6 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+.local-secrets/
 seed-macbook.js
 seed-*.js
 migrate-*
@@ -26,3 +27,4 @@ debug_page.html
 scraper/debug_screenshot.png
 scraper/debug_page.html
 .vercel
+.local-backups/
