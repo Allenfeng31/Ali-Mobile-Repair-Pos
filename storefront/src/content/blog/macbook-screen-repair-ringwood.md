@@ -7,7 +7,7 @@ description: 'See current MacBook Air screen replacement prices, what the comple
 excerpt: 'Current MacBook Air screen prices, complete display assembly details, repair process, real workshop results and booking guidance from Ali Mobile in Ringwood.'
 hero_intro: 'Current MacBook Air screen prices, what the complete display assembly includes, real workshop results and practical advice before you book.'
 author: 'Ali Mobile & Repair'
-image: '/images/blog/macbook-screen-repair/a2337-after.webp'
+image: '/images/blog/macbook-screen-repair/cover.webp'
 cover_image_alt: 'MacBook Air showing a working display after complete screen assembly replacement'
 tags: ['MacBook Repair', 'Screen Replacement', 'Ringwood']
 ---
