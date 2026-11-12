@@ -1,0 +1,561 @@
+.article {
+  --ink: #111827;
+  --muted: #4b5563;
+  --blue: #155eef;
+  --blue-soft: #edf4ff;
+  --line: #d8dee9;
+  color: var(--muted);
+}
+
+.article > section,
+.sources {
+  margin-top: clamp(3rem, 7vw, 5rem);
+}
+
+.article > section:first-child {
+  margin-top: 0;
+}
+
+.article h2,
+.article h3 {
+  color: var(--ink);
+  letter-spacing: -0.025em;
+}
+
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--blue);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quickAnswer {
+  padding: clamp(1.4rem, 4vw, 2.4rem);
+  border: 1px solid #bfd3ff;
+  border-top: 5px solid var(--blue);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, #fff 0%, var(--blue-soft) 100%);
+}
+
+.quickAnswer h2 {
+  max-width: 44rem;
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.7rem);
+  line-height: 1.08;
+}
+
+.lead {
+  max-width: 50rem;
+  margin: 1rem 0 0;
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+.factGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 1.5rem 0 0;
+  border: 1px solid #bfd3ff;
+  border-radius: 0.85rem;
+  background: #bfd3ff;
+}
+
+.factGrid div {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.factGrid dt {
+  color: #667085;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.factGrid dd {
+  margin: 0.25rem 0 0;
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.finePrint,
+.priceNote {
+  margin: 0.85rem 0 0;
+  color: #667085;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.sectionHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(18rem, 1.1fr);
+  gap: 2rem;
+  align-items: end;
+  margin-bottom: 1.35rem;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  font-size: clamp(1.65rem, 3.8vw, 2.45rem);
+  line-height: 1.08;
+}
+
+.sectionHeading > p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.tableFrame {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+  scrollbar-width: thin;
+}
+
+.priceTable,
+.symptomTable {
+  width: 100%;
+  border-collapse: collapse;
+  line-height: 1.45;
+}
+
+.priceTable {
+  min-width: 46rem;
+}
+
+.priceTable caption,
+.symptomTable caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.priceTable th,
+.priceTable td,
+.symptomTable th,
+.symptomTable td {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+.priceTable thead th,
+.symptomTable thead th {
+  border-top: 0;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.priceTable tbody th {
+  min-width: 16rem;
+}
+
+.priceTable tbody tr:nth-child(even),
+.symptomTable tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.priceTable a {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.priceTable td {
+  color: var(--ink);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.quote {
+  color: #7c2d12;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.catalogueNotice {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid #f2cf73;
+  border-radius: 0.85rem;
+  background: #fffbeb;
+  color: #713f12;
+}
+
+.proCta {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: var(--ink);
+  color: #dbeafe;
+}
+
+.proCta h3,
+.proCta p {
+  margin: 0;
+}
+
+.proCta h3 {
+  color: #fff;
+}
+
+.proCta div > p:last-child {
+  margin-top: 0.4rem;
+}
+
+.proCta > a,
+.actions a {
+  display: inline-flex;
+  min-height: 2.9rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 0.7rem;
+  background: #fff;
+  color: #174ea6;
+  font-size: 0.88rem;
+  font-weight: 850;
+  text-align: center;
+  text-decoration: none;
+}
+
+.splitCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.splitCards article {
+  padding: 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.splitCards h3,
+.splitCards ul {
+  margin-top: 0;
+}
+
+.splitCards ul {
+  margin-bottom: 0;
+}
+
+.boundaryCard {
+  background: #f8fafc !important;
+}
+
+.resultGrid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.resultGrid figure {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.imagePair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.imagePair > div {
+  position: relative;
+  min-width: 0;
+}
+
+.imagePair span {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.88);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.imagePair img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+}
+
+.resultGrid figcaption {
+  padding: 0.9rem 1rem;
+  color: #667085;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.symptomTable {
+  table-layout: fixed;
+}
+
+.symptomTable tbody th {
+  width: 34%;
+  color: var(--ink);
+}
+
+.processGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.processGrid li {
+  margin: 0;
+  padding: 1.2rem;
+  border-top: 3px solid var(--blue);
+  border-radius: 0.85rem;
+  background: #f8fafc;
+}
+
+.processGrid span {
+  color: var(--blue);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.processGrid h3 {
+  margin: 0.65rem 0 0;
+  font-size: 1.05rem;
+}
+
+.processGrid p {
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.safetySection {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: clamp(1.4rem, 4vw, 2.2rem);
+  border-left: 5px solid #d97706;
+  border-radius: 0.9rem;
+  background: #fffbeb;
+}
+
+.safetySection h2,
+.safetySection p:last-child {
+  margin-bottom: 0;
+}
+
+.safetySection > a {
+  color: #92400e;
+  font-weight: 850;
+}
+
+.bookingCard {
+  padding: clamp(1.5rem, 5vw, 2.7rem);
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, #111827, #172554);
+  color: #dbeafe;
+}
+
+.bookingCard h2 {
+  max-width: 40rem;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
+
+.bookingCard > p:not(.eyebrow) {
+  max-width: 46rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.actions a:last-child {
+  border: 1px solid #6687c7;
+  background: transparent;
+  color: #fff;
+}
+
+.faqList {
+  border-top: 1px solid var(--line);
+}
+
+.faqList details {
+  border-bottom: 1px solid var(--line);
+}
+
+.faqList summary {
+  padding: 1rem 2rem 1rem 0;
+  color: var(--ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.faqList p {
+  max-width: 48rem;
+  margin: 0 0 1.1rem;
+}
+
+.sources {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.sources h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.sources ul {
+  margin-bottom: 0.8rem;
+}
+
+.sources p {
+  margin-bottom: 0;
+  color: #667085;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  .factGrid,
+  .processGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sectionHeading {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .safetySection {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .factGrid,
+  .splitCards,
+  .imagePair,
+  .processGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .proCta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .priceTable,
+  .priceTable tbody,
+  .priceTable tr,
+  .priceTable th,
+  .priceTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .priceTable {
+    min-width: 0;
+  }
+
+  .priceTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .priceTable tbody tr {
+    padding: 0.35rem 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .priceTable tbody tr:first-child {
+    border-top: 0;
+  }
+
+  .priceTable tbody th {
+    min-width: 0;
+    border-top: 0;
+  }
+
+  .priceTable td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    border-top: 0;
+    white-space: normal;
+  }
+
+  .priceTable td::before {
+    content: attr(data-label);
+    color: #667085;
+    font-size: 0.76rem;
+    font-weight: 750;
+  }
+
+  .imagePair img {
+    aspect-ratio: 16 / 8;
+  }
+
+  .symptomTable,
+  .symptomTable tbody,
+  .symptomTable tr,
+  .symptomTable th,
+  .symptomTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .symptomTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .symptomTable tbody th {
+    padding-bottom: 0.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .symptomTable td {
+    padding-top: 0.25rem;
+    border-top: 0;
+  }
+}
