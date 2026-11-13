@@ -23,6 +23,7 @@ interface BlogPost {
   cover_image: string;
   is_published: boolean;
   published_at: string | null;
+  updated_at?: string | null;
 }
 
 interface BlogEditorProps {
@@ -214,15 +215,19 @@ export default function BlogEditor({ post, onSave, onCancel }: BlogEditorProps) 
     setSaving(true);
     setError(null);
 
+    const content = editor?.getHTML() || '';
+    const changed = !post || post.title !== title.trim() || post.slug !== slug.trim()
+      || post.content !== content || post.description !== description.trim()
+      || post.cover_image !== coverImage.trim();
     const postData = {
       title: title.trim(),
       slug: slug.trim(),
-      content: editor?.getHTML() || '',
+      content,
       description: description.trim(),
       cover_image: coverImage.trim(),
       is_published: publish,
-      published_at: publish ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
+      published_at: post?.published_at || (publish ? new Date().toISOString() : null),
+      ...(changed ? { updated_at: new Date().toISOString() } : {}),
     };
 
     try {

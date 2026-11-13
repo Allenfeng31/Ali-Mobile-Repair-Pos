@@ -71,13 +71,20 @@ function formatPostDate(date: string) {
   return new Date(date).toLocaleDateString("en-AU", {
     month: "short",
     day: "numeric",
+    timeZone: "Australia/Melbourne",
+  });
+}
+
+function melbourneDay(date: string) {
+  return new Date(date).toLocaleDateString("en-AU", {
+    year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Australia/Melbourne",
   });
 }
 
 function formatPostFreshness(post: BlogPostSummary) {
   const published = `Published ${formatPostDate(post.date)}`;
 
-  return post.updated_at && post.updated_at.slice(0, 10) !== post.date.slice(0, 10)
+  return post.updated_at && melbourneDay(post.updated_at) !== melbourneDay(post.date)
     ? `${published} · Updated ${formatPostDate(post.updated_at)}`
     : published;
 }

@@ -2,14 +2,6 @@ import { resolveRepairDetailPricing } from "@/lib/repairDetailPricing";
 
 export const IPHONE_SCREEN_REPAIR_COST_SLUG = "how-much-does-iphone-screen-repair-cost-australia";
 
-export const IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA = {
-  datePublished: "2026-07-29",
-  dateModified: "2026-10-08",
-} as const;
-
-// Retained for sitemap consumers; these are editorial dates, not price freshness.
-export const IPHONE_SCREEN_REPAIR_COST_STATIC_METADATA = IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA;
-
 type CatalogueVariant = {
   quality_grade: string;
   price: number;

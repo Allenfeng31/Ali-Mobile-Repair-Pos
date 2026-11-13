@@ -12,9 +12,6 @@ export const SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA = {
   image: "/images/blog/samsung-screen-repair-cost/samsung-galaxy-s-screen-replacement-cost-guide.webp",
   coverImageAlt:
     "Samsung Galaxy S phones on a repair bench showing a damaged display, working display and screen assembly",
-  datePublished: "2026-09-08",
-  dateModified: "2026-09-08",
-  displayDateModified: "8 September 2026",
 } as const;
 
 export type SamsungGalaxySScreenRepairPrice = {

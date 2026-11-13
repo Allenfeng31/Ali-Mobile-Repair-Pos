@@ -77,12 +77,14 @@ describe('sitemap lastModified policy', () => {
       lastModified: new Date('2026-02-03T04:05:06.000Z'),
     });
     expect(urls.find((entry) => pathname(entry) === '/blog/how-much-does-iphone-screen-repair-cost-australia')).toMatchObject({
-      lastModified: new Date('2026-10-08T00:00:00.000Z'),
+      lastModified: new Date('2000-01-01T00:00:00.000Z'),
     });
     expect(urls.find((entry) => pathname(entry) === '/blog/how-much-does-samsung-galaxy-s-screen-replacement-cost-australia')).toMatchObject({
-      lastModified: new Date('2026-09-08T00:00:00.000Z'),
+      lastModified: new Date('2000-01-01T00:00:00.000Z'),
     });
-    expect(urls.find((entry) => pathname(entry) === '/blog/published-only-post')).not.toHaveProperty('lastModified');
+    expect(urls.find((entry) => pathname(entry) === '/blog/published-only-post')).toMatchObject({
+      lastModified: new Date('2026-01-02T00:00:00.000Z'),
+    });
     expect(urls.find((entry) => pathname(entry) === '/blog/missing-date-post')).not.toHaveProperty('lastModified');
   });
 

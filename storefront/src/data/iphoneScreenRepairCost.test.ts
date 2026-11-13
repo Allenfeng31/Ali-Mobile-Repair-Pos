@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildIphoneScreenRepairPriceTable,
-  IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA,
   IPHONE_SCREEN_REPAIR_COST_SLUG,
   SCREEN_OPTION_SAMPLE,
   SCREEN_OPTION_SAMPLE_TOTAL,
@@ -175,10 +174,6 @@ describe("iPhone screen repair cost article data", () => {
     expect(post.hero_intro).not.toMatch(/\$\d+/);
     expect(post.date).toBe("2026-07-29");
     expect(post.updated_at).toBe("2026-10-08");
-    expect(IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA).toEqual({
-      datePublished: "2026-07-29",
-      dateModified: "2026-10-08",
-    });
   });
 
   it("keeps the supplied customer-choice sample accessible and internally consistent", () => {

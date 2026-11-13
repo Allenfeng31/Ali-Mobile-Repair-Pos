@@ -15,23 +15,35 @@ import BlogArticlePage, { generateMetadata } from "./page";
 const slug = "how-much-does-samsung-galaxy-s-screen-replacement-cost-australia";
 
 describe("Samsung Galaxy S screen cost blog route", () => {
-  it("uses static article metadata and SSR content without consulting a stale blog record", async () => {
-    getPostDataMock.mockRejectedValue(new Error("stale blog source should not be read"));
+  it("uses the article date for metadata and SSR content", async () => {
+    getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-09-08" });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug }) });
     const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
 
-    expect(getPostDataMock).not.toHaveBeenCalled();
+    expect(getPostDataMock).toHaveBeenCalledWith(slug);
     expect(metadata.title).toBe("How Much Does Samsung Galaxy S Screen Replacement Cost in Australia? | Ali Mobile");
     expect(metadata.alternates?.canonical).toBe(`/blog/${slug}`);
     expect(JSON.stringify(metadata.openGraph?.images)).toContain("samsung-galaxy-s-screen-replacement-cost-guide.webp");
     expect(JSON.stringify(metadata.twitter?.images)).toContain("samsung-galaxy-s-screen-replacement-cost-guide.webp");
     expect(html).toContain('"datePublished":"2026-09-08"');
     expect(html).toContain('"dateModified":"2026-09-08"');
+    expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-09-08"');
     expect(html).toContain('"image":["https://www.alimobile.com.au/images/blog/samsung-screen-repair-cost/samsung-galaxy-s-screen-replacement-cost-guide.webp"]');
     expect(html).not.toContain("Updated 8 September 2026");
     expect(html).toContain("Samsung Galaxy S screen replacement prices");
     expect(html).toContain("Galaxy S26 Ultra");
+  });
+
+  it("shares a changed editorial date across visible copy, JSON-LD and Open Graph", async () => {
+    getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-11-13" });
+    const metadata = await generateMetadata({ params: Promise.resolve({ slug }) });
+    const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
+    expect(html).toContain("Updated 13 November 2026");
+    expect(html).toContain('"datePublished":"2026-09-08"');
+    expect(html).toContain('"dateModified":"2026-11-13"');
+    expect(html).toContain("checked on 13 November 2026");
+    expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-11-13"');
   });
 
   it("shows an iPhone publication date and a distinct later update date without changing schema dates", async () => {

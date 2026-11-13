@@ -16,7 +16,7 @@ const articleStyles = readFileSync(
 
 describe("SamsungGalaxySScreenRepairCostArticle", () => {
   it("renders the complete static price table and its customer-facing option contract", () => {
-    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle updatedDate="2026-09-08" />);
 
     expect(html).toContain("Samsung Galaxy S screen replacement prices");
     expect(html).toContain("Samsung Service Pack + Frame");
@@ -32,7 +32,7 @@ describe("SamsungGalaxySScreenRepairCostArticle", () => {
   });
 
   it("keeps first-party observations bounded and does not promise water, biometric, S Pen, or refresh outcomes", () => {
-    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle updatedDate="2026-09-08" />);
 
     expect(html).toContain("In our repair experience");
     expect(html).toContain("does not restore factory water resistance");
@@ -41,7 +41,7 @@ describe("SamsungGalaxySScreenRepairCostArticle", () => {
   });
 
   it("renders real Galaxy S before-and-after screen repair examples with accessible local WebP evidence", () => {
-    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle updatedDate="2026-09-08" />);
 
     expect(html).toContain("Real Samsung Screen Repair Examples");
     expect(html).toContain("Galaxy S22 Ultra");
@@ -67,7 +67,7 @@ describe("SamsungGalaxySScreenRepairCostArticle", () => {
   });
 
   it("keeps the guide navigation, decision order, and contextual repair links concise", () => {
-    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle />);
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle updatedDate="2026-09-08" />);
 
     expect(html).toContain("In this guide");
     [

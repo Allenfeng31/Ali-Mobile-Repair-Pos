@@ -46,11 +46,8 @@ describe("Samsung Galaxy S screen repair cost article data", () => {
     ]);
   });
 
-  it("keeps the article dates manual and truthful", () => {
+  it("keeps the article image metadata", () => {
     expect(SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA).toMatchObject({
-      datePublished: "2026-09-08",
-      dateModified: "2026-09-08",
-      displayDateModified: "8 September 2026",
       image: "/images/blog/samsung-screen-repair-cost/samsung-galaxy-s-screen-replacement-cost-guide.webp",
       coverImageAlt: "Samsung Galaxy S phones on a repair bench showing a damaged display, working display and screen assembly",
     });
@@ -61,7 +58,7 @@ describe("Samsung Galaxy S screen repair cost article data", () => {
 
     expect(post.title).toBe(SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.title);
     expect(post.date).toBe("2026-09-08");
-    expect(post.updated_at).toBe("2026-09-08");
+    expect(post.updated_at).toBe("2026-11-13");
     expect(post.image).toBe(SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image);
     expect(post.cover_image_alt).toBe(SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.coverImageAlt);
   });

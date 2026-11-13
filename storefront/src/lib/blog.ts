@@ -187,7 +187,8 @@ export async function getSortedPostsData() {
 
   // 3. Merge both sources
   try {
-    const allPosts = [...markdownPosts, ...supabasePosts];
+    const markdownSlugs = new Set(markdownPosts.map((post) => post.slug));
+    const allPosts = [...markdownPosts, ...supabasePosts.filter((post) => !markdownSlugs.has(post.slug))];
 
     // Filter out posts with empty titles or invalid dates
     const filteredPosts = allPosts.filter(post => {
@@ -219,8 +220,9 @@ export async function getPostData(slug: string): Promise<BlogPost> {
     throw new Error(`Removed blog slug: ${slug}`);
   }
 
-  // Try Supabase first
-  if (supabaseServer) {
+  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  // Repository articles use committed Markdown dates; CMS-only articles use Supabase.
+  if (supabaseServer && !fs.existsSync(fullPath)) {
     try {
       const { data, error } = await supabaseServer
         .from('storefront_blogs')
@@ -251,7 +253,6 @@ export async function getPostData(slug: string): Promise<BlogPost> {
   }
 
   // Fall back to markdown file
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const matterResult = matter(fileContents);
 

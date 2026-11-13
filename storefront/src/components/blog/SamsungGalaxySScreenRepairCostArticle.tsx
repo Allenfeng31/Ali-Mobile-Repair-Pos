@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
-  SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA,
   SAMSUNG_GALAXY_S_SCREEN_REPAIR_PRICES,
   type SamsungGalaxySScreenRepairPrice,
 } from "@/data/samsungGalaxySScreenRepairCost";
@@ -148,7 +147,10 @@ const faqs = [
   },
 ];
 
-export function SamsungGalaxySScreenRepairCostArticle() {
+export function SamsungGalaxySScreenRepairCostArticle({ updatedDate }: { updatedDate: string }) {
+  const displayDateModified = new Date(`${updatedDate.slice(0, 10)}T12:00:00Z`).toLocaleDateString("en-AU", {
+    day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Melbourne",
+  });
   return (
     <div className={styles.article}>
       <section className={styles.guideNav} aria-labelledby="samsung-guide-heading">
@@ -165,7 +167,7 @@ export function SamsungGalaxySScreenRepairCostArticle() {
       <section className={styles.wideSection} aria-labelledby="samsung-price-table-heading">
         <h2 id="samsung-price-table-heading">Samsung Galaxy S screen replacement prices</h2>
         <p>
-          Ali Mobile generally recommends a Samsung Service Pack assembly for customers who want the display experience to stay as close as practical to the original phone. Browse supported <Link href="/repairs/phone/samsung">Samsung repair options</Link> before confirming the current option for your exact model. This is a static Ali Mobile price guide checked on {SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.displayDateModified}.
+          Ali Mobile generally recommends a Samsung Service Pack assembly for customers who want the display experience to stay as close as practical to the original phone. Browse supported <Link href="/repairs/phone/samsung">Samsung repair options</Link> before confirming the current option for your exact model. This is a static Ali Mobile price guide checked on {displayDateModified}.
         </p>
         <PriceTable />
         <p className={styles.optionNote}><strong>—</strong> means Ali Mobile does not currently list an aftermarket display + frame option for that exact model.</p>

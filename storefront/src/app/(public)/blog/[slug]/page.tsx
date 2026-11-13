@@ -8,7 +8,7 @@ import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRep
 import { MacbookScreenRepairArticle } from "@/components/blog/MacbookScreenRepairArticle";
 import { PhoneNotChargingArticle } from "@/components/blog/PhoneNotChargingArticle";
 import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
-import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
+import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from "@/data/macbookScreenRepairBlog";
 import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
 import { fetchRepairCatalog } from "@/lib/api";
@@ -22,10 +22,9 @@ const PHONE_NOT_CHARGING_SLUG = "why-is-my-phone-not-charging";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const isPhoneNotChargingArticle = slug === PHONE_NOT_CHARGING_SLUG;
-  const isMacbookScreenRepairArticle = slug === MACBOOK_SCREEN_REPAIR_BLOG_SLUG;
 
   if (slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG) {
+    const postData = await getPostData(slug);
     return {
       title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
       description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
@@ -37,6 +36,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         type: "article",
         locale: "en_AU",
         siteName: "Ali Mobile & Repair",
+        publishedTime: postData.date,
+        modifiedTime: postData.updated_at || postData.date,
         images: [{
           url: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image,
           alt: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.coverImageAlt,
@@ -70,11 +71,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         locale: "en_AU",
         siteName: "Ali Mobile & Repair",
         images: postData.image ? [{ url: postData.image, alt: postData.cover_image_alt || postData.title }] : undefined,
-        ...(isPhoneNotChargingArticle || isMacbookScreenRepairArticle ? {
-          publishedTime: postData.date,
-          modifiedTime: postData.updated_at || postData.date,
-          authors: [postData.author_name || "Ali Mobile & Repair"],
-        } : {}),
+        publishedTime: postData.date,
+        modifiedTime: postData.updated_at || postData.date,
+        authors: [postData.author_name || "Ali Mobile & Repair"],
       },
       twitter: {
         card: "summary_large_image",
@@ -101,10 +100,11 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   const isSamsungGalaxySScreenCostArticle = slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG;
   let postData: BlogPost;
   if (isSamsungGalaxySScreenCostArticle) {
+    const editorialPost = await getPostData(slug);
     postData = {
         slug,
         title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.title,
-        date: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.datePublished,
+        date: editorialPost.date,
         description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
         contentHtml: "",
         image: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image,
@@ -113,7 +113,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         cover_image_alt: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.coverImageAlt,
         author_name: "Ali Mobile & Repair",
         hero_intro: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.heroIntro,
-        updated_at: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified,
+        updated_at: editorialPost.updated_at,
     };
   } else {
     try {
@@ -143,25 +143,18 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     }
   }
 
-  const datePublished = isSamsungGalaxySScreenCostArticle
-    ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.datePublished
-    : isIphoneScreenCostArticle
-    ? IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA.datePublished
-    : postData.date;
-  const dateModified = isSamsungGalaxySScreenCostArticle
-    ? SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.dateModified
-    : isIphoneScreenCostArticle
-    ? IPHONE_SCREEN_REPAIR_COST_EDITORIAL_METADATA.dateModified
-    : postData.updated_at || postData.date;
+  const datePublished = postData.date;
+  const dateModified = postData.updated_at || postData.date;
   const formatDate = (date: string) => new Date(date).toLocaleDateString("en-AU", {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Australia/Melbourne",
   });
   const formattedDatePublished = datePublished
     ? formatDate(datePublished)
     : "";
-  const hasDistinctUpdatedDate = Boolean(dateModified && dateModified.slice(0, 10) !== datePublished.slice(0, 10));
+  const hasDistinctUpdatedDate = Boolean(dateModified && formatDate(dateModified) !== formattedDatePublished);
   const formattedDateModified = hasDistinctUpdatedDate ? formatDate(dateModified) : "";
 
   const authorName = postData.author_name || "Ali Mobile & Repair";
@@ -234,7 +227,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
 
         <article className={styles.articleCard}>
           {isSamsungGalaxySScreenCostArticle ? (
-          <SamsungGalaxySScreenRepairCostArticle />
+          <SamsungGalaxySScreenRepairCostArticle updatedDate={dateModified} />
           ) : isIphoneScreenCostArticle ? (
             <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
           ) : isIphoneBatteryHealthArticle ? (
