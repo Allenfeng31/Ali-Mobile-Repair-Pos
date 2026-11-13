@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Clock3, MapPin, Navigation, PhoneCall } from "lucide-react";
 import { LocalBusinessSchema } from "@/components/seo/SchemaOrg";
 import RealRepairResultsSection from "@/components/repair-results/RealRepairResultsSection";
+import HomeRepairGuides from "@/components/HomeRepairGuides";
 import { fetchHomepageRepairResultSeed } from "@/lib/repair-results.server";
 import { REPAIR_RESULT_CATEGORIES } from "@/lib/repair-results";
 import { REPAIR_CATEGORY_NAV_ITEMS } from "@/lib/repairCategoryNavigation";
@@ -245,6 +246,8 @@ export default async function Home() {
       <ScrollReveal>
         <ReviewsSection />
       </ScrollReveal>
+
+      <HomeRepairGuides />
 
       <ScrollReveal>
         <HomeFAQ />

@@ -7,7 +7,25 @@ const state = vi.hoisted(() => ({ repairResultsProps: [] as Array<Record<string,
 
 vi.mock('next/link', () => ({ default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock('next/image', () => ({ default: () => null }));
-vi.mock('next/dynamic', () => ({ default: () => () => null }));
+vi.mock('next/dynamic', () => ({
+  default: (loader: () => Promise<unknown>) => {
+    const source = loader.toString();
+
+    if (source.includes('ReviewsSection')) {
+      return function ReviewsPlaceholder() {
+        return <section><h2>Customer Reviews</h2></section>;
+      };
+    }
+
+    if (source.includes('HomeFAQ')) {
+      return function HomeFaqPlaceholder() {
+        return <section><h2>Frequently Asked Questions</h2></section>;
+      };
+    }
+
+    return () => null;
+  },
+}));
 vi.mock('@/components/seo/SchemaOrg', () => ({ LocalBusinessSchema: () => null }));
 vi.mock('@/components/ScrollReveal', () => ({ default: ({ children }: { children: ReactNode }) => <>{children}</> }));
 vi.mock('@/components/RingwoodSquareLocationMap', () => ({ default: () => null }));
@@ -41,6 +59,22 @@ beforeEach(() => {
 });
 
 describe('Homepage Repair Results SSR integration', () => {
+  it('renders repair guides after reviews and before FAQ in the server markup', async () => {
+    fetchHomepageRepairResultSeed.mockResolvedValue({ resultsByCategory: {}, latestPublishedAt: null });
+
+    const markup = renderToStaticMarkup(await Home());
+    const reviewsIndex = markup.indexOf('Customer Reviews');
+    const guidesIndex = markup.indexOf('Repair Tips &amp; Guides');
+    const faqIndex = markup.indexOf('Frequently Asked Questions');
+
+    expect(reviewsIndex).toBeGreaterThan(-1);
+    expect(guidesIndex).toBeGreaterThan(reviewsIndex);
+    expect(faqIndex).toBeGreaterThan(guidesIndex);
+    expect(markup).toContain('href="/blog/why-is-my-phone-not-charging"');
+    expect(markup).toContain('href="/blog/how-much-does-iphone-screen-repair-cost-australia"');
+    expect(markup).toContain('href="/blog/macbook-screen-repair-ringwood"');
+  });
+
   it('keeps approved homepage trust, price-path, timing, and repair-category content visible', async () => {
     fetchHomepageRepairResultSeed.mockResolvedValue({ resultsByCategory: {}, latestPublishedAt: null });
 
