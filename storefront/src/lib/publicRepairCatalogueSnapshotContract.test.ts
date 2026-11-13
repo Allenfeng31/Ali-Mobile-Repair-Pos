@@ -9,6 +9,7 @@ import {
   type PublicRepairCataloguePayload,
   type StoredPublicRepairCatalogueSnapshot,
 } from './publicRepairCataloguePolicy';
+import { displayedBlogPriceFingerprints } from './blogPriceFreshness';
 
 function hash(payload: unknown) {
   return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
@@ -109,5 +110,22 @@ describe('versioned public repair catalogue snapshot contract', () => {
     const valid = snapshot(2, payload, checksumPublicRepairCatalogue(payload));
     expect(hydratePublicRepairCatalogueSnapshot(valid).retiredRepairs).toHaveLength(1);
     expect(() => hydratePublicRepairCatalogueSnapshot({ ...valid, publicRepairCount: 5 })).toThrow('counts do not match');
+  });
+
+  it('retains verified Blog price dates through persisted snapshot hydration and rejects future dates', () => {
+    const payload = serializePublicRepairCatalogue(brands('pos'));
+    const stored = snapshot(2, payload, checksumPublicRepairCatalogue(payload));
+    stored.blogPriceFreshness = {
+      'macbook-screen-repair-ringwood': {
+        fingerprint: displayedBlogPriceFingerprints(payload.brands)['macbook-screen-repair-ringwood'],
+        priceChangedAt: '2026-08-28T12:00:00Z',
+      },
+    };
+    const restored = hydratePublicRepairCatalogueSnapshot(JSON.parse(JSON.stringify(stored)));
+    expect(restored.blogPriceFreshness?.['macbook-screen-repair-ringwood']?.priceChangedAt)
+      .toBe('2026-08-28T12:00:00Z');
+    const future = structuredClone(stored);
+    future.blogPriceFreshness!['macbook-screen-repair-ringwood']!.priceChangedAt = '2026-08-30T00:00:00Z';
+    expect(() => hydratePublicRepairCatalogueSnapshot(future)).toThrow('freshness is invalid');
   });
 });

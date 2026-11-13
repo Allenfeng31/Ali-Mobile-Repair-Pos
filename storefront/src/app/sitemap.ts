@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next';
 
-import { fetchRepairCatalog } from '@/lib/api';
+import { fetchRepairCatalog, type RepairCatalog } from '@/lib/api';
+import { effectiveBlogDateModified } from '@/lib/blogPriceFreshness';
+import { IPHONE_SCREEN_REPAIR_COST_SLUG } from '@/data/iphoneScreenRepairCost';
+import { MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { isConfiguredAppleWatchModel } from '@/lib/seo/content/apple-watch';
@@ -16,6 +19,7 @@ import {
 } from '@/data/grandfatheredSecondaryPhoneDetailRepairs';
 
 const CATEGORY_HUB_SLUGS = ['phone', 'tablet', 'laptop', 'watch'] as const;
+export const dynamic = 'force-dynamic';
 
 function getReliableBlogLastModified(updatedAt?: string): Date | undefined {
   if (!updatedAt) return undefined;
@@ -40,8 +44,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.alimobile.com.au';
   
   const blogPosts = await getSortedPostsData();
+  let catalog: RepairCatalog | null = null;
+  try { catalog = await fetchRepairCatalog(); } catch { /* Editorial URLs remain available. */ }
   const blogUrls: MetadataRoute.Sitemap = blogPosts.map((post) => {
-    const lastModified = getReliableBlogLastModified(post.updated_at || post.date);
+    const priceChangedAt = post.slug === IPHONE_SCREEN_REPAIR_COST_SLUG || post.slug === MACBOOK_SCREEN_REPAIR_BLOG_SLUG
+      ? catalog?.blogPriceFreshness?.[post.slug]?.priceChangedAt : null;
+    const lastModified = getReliableBlogLastModified(
+      effectiveBlogDateModified(post.updated_at || post.date, priceChangedAt),
+    );
 
     return {
       url: `${baseUrl}/blog/${post.slug}`,
@@ -103,7 +113,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const catalog = await fetchRepairCatalog();
+    if (!catalog) throw new Error('Public repair catalogue unavailable.');
 
     // Brand sub-hub URLs
     const brandUrls: MetadataRoute.Sitemap = catalog.brands.map(brand => ({

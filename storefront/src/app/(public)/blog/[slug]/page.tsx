@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -13,10 +14,22 @@ import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG 
 import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
 import { fetchRepairCatalog } from "@/lib/api";
 import { getPostData, isRemovedBlogSlug, type BlogPost } from "@/lib/blog";
+import { effectiveBlogDateModified } from "@/lib/blogPriceFreshness";
 
 import styles from "./BlogPost.module.css";
 
 export const dynamic = "force-dynamic";
+const getBlogCatalogue = cache(fetchRepairCatalog);
+
+async function priceChangedAtForSlug(slug: string) {
+  if (slug !== IPHONE_SCREEN_REPAIR_COST_SLUG && slug !== MACBOOK_SCREEN_REPAIR_BLOG_SLUG) return null;
+  try {
+    const catalogue = await getBlogCatalogue();
+    return catalogue.blogPriceFreshness?.[slug]?.priceChangedAt ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const PHONE_NOT_CHARGING_SLUG = "why-is-my-phone-not-charging";
 
@@ -72,7 +85,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         siteName: "Ali Mobile & Repair",
         images: postData.image ? [{ url: postData.image, alt: postData.cover_image_alt || postData.title }] : undefined,
         publishedTime: postData.date,
-        modifiedTime: postData.updated_at || postData.date,
+        modifiedTime: effectiveBlogDateModified(
+          postData.updated_at || postData.date, await priceChangedAtForSlug(slug),
+        ),
         authors: [postData.author_name || "Ali Mobile & Repair"],
       },
       twitter: {
@@ -124,9 +139,12 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   }
 
   let iphoneScreenPriceTable = null;
+  let priceChangedAt: string | null = null;
   if (isIphoneScreenCostArticle) {
     try {
-      iphoneScreenPriceTable = buildIphoneScreenRepairPriceTable(await fetchRepairCatalog());
+      const catalogue = await getBlogCatalogue();
+      iphoneScreenPriceTable = buildIphoneScreenRepairPriceTable(catalogue);
+      priceChangedAt = catalogue.blogPriceFreshness?.[IPHONE_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt ?? null;
     } catch {
       // The article must not substitute stale fixed prices when the catalogue is unavailable.
       iphoneScreenPriceTable = null;
@@ -136,7 +154,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   let macbookAirScreenPriceTable = null;
   if (isMacbookScreenRepairArticle) {
     try {
-      macbookAirScreenPriceTable = buildMacbookAirScreenRepairPriceTable(await fetchRepairCatalog());
+      const catalogue = await getBlogCatalogue();
+      macbookAirScreenPriceTable = buildMacbookAirScreenRepairPriceTable(catalogue);
+      priceChangedAt = catalogue.blogPriceFreshness?.[MACBOOK_SCREEN_REPAIR_BLOG_SLUG]?.priceChangedAt ?? null;
     } catch {
       // Do not show a fixed fallback amount when the public catalogue is unavailable.
       macbookAirScreenPriceTable = null;
@@ -144,7 +164,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   }
 
   const datePublished = postData.date;
-  const dateModified = postData.updated_at || postData.date;
+  const dateModified = effectiveBlogDateModified(postData.updated_at || postData.date, priceChangedAt);
   const formatDate = (date: string) => new Date(date).toLocaleDateString("en-AU", {
     year: "numeric",
     month: "long",

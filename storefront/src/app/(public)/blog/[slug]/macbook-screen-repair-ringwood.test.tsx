@@ -90,6 +90,21 @@ describe("MacBook screen repair blog route", () => {
     expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-11-12"');
   });
 
+  it("shares a verified price date across SSR, JSON-LD and Open Graph", async () => {
+    vi.mocked(fetchRepairCatalog).mockResolvedValue({
+      ...catalogFixture,
+      blogPriceFreshness: {
+        "macbook-screen-repair-ringwood": { fingerprint: "a".repeat(64), priceChangedAt: "2026-11-14T03:00:00Z" },
+      },
+    } as Awaited<ReturnType<typeof fetchRepairCatalog>>);
+    const html = renderToStaticMarkup(await BlogArticlePage({ params }));
+    const metadata = await generateMetadata({ params });
+    expect(html).toContain("Updated 14 November 2026");
+    expect(html).toContain('"datePublished":"2026-07-07"');
+    expect(html).toContain('"dateModified":"2026-11-14T03:00:00Z"');
+    expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-11-14T03:00:00Z"');
+  });
+
   it("renders the answer-first guide, repair evidence, safety advice, links and ten FAQs", async () => {
     const html = renderToStaticMarkup(await BlogArticlePage({ params }));
     const css = readFileSync(

@@ -59,6 +59,11 @@ describe("Samsung Galaxy S screen cost blog route", () => {
     });
     fetchRepairCatalogMock.mockResolvedValue({
       fetchedAt: "2026-10-08T01:23:00.000Z",
+      blogPriceFreshness: {
+        "how-much-does-iphone-screen-repair-cost-australia": {
+          fingerprint: "b".repeat(64), priceChangedAt: "2026-11-14T03:00:00Z",
+        },
+      },
       brands: [{
         category: "phone",
         slug: "iphone",
@@ -82,10 +87,14 @@ describe("Samsung Galaxy S screen cost blog route", () => {
     }));
 
     expect(html).toContain("Published 29 July 2026");
-    expect(html).toContain("Updated 8 October 2026");
+    expect(html).toContain("Updated 14 November 2026");
     expect(html).toContain('"datePublished":"2026-07-29"');
-    expect(html).toContain('"dateModified":"2026-10-08"');
-    expect(fetchRepairCatalogMock).toHaveBeenCalledOnce();
+    expect(html).toContain('"dateModified":"2026-11-14T03:00:00Z"');
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ slug: "how-much-does-iphone-screen-repair-cost-australia" }),
+    });
+    expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-11-14T03:00:00Z"');
+    expect(fetchRepairCatalogMock).toHaveBeenCalledTimes(2);
     expect(html).toContain("current iPhone screen replacement prices range from $190 to $570");
     expect(html).toContain('aria-label="iPhone 17 Pro Max, Premium, $299"');
     expect(html).not.toContain("$599");

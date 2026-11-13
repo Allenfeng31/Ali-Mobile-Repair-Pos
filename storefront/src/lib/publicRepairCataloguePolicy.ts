@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { isApprovedPublicRepairRetirement } from './publicRepairCatalogueRetirements';
 import { compareDeterministicStrings } from './deterministicStrings';
+import { displayedBlogPriceFingerprints, nextBlogPriceFreshness, type BlogPriceFreshness } from './blogPriceFreshness';
 
 export const PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION = 2;
 export const PREVIOUS_PUBLIC_REPAIR_CATALOGUE_SCHEMA_VERSION = 1;
@@ -61,6 +62,7 @@ export interface LegacyRepairDetail {
 }
 
 export interface RepairCatalog extends PublicRepairCataloguePayload {
+  blogPriceFreshness?: BlogPriceFreshness;
   /** Legacy consumer compatibility. Use catalogueSource for durable-source reporting. */
   source: 'pos' | 'fallback';
   catalogueSource: PublicRepairCatalogueSource;
@@ -73,6 +75,7 @@ export interface RepairCatalog extends PublicRepairCataloguePayload {
 }
 
 export interface StoredPublicRepairCatalogueSnapshot {
+  blogPriceFreshness?: BlogPriceFreshness;
   /** Missing only for persisted pre-v2 test/legacy inputs; it is treated as v1. */
   schemaVersion?: number;
   payload: PublicRepairCataloguePayload;
@@ -418,6 +421,17 @@ export function hydratePublicRepairCatalogueSnapshot(snapshot: StoredPublicRepai
   if (validationError || checksum !== snapshot.checksum) {
     throw new Error('Last-known-good public repair catalogue snapshot is invalid.');
   }
+  if (snapshot.blogPriceFreshness) {
+    const expected = displayedBlogPriceFingerprints(snapshot.payload.brands);
+    if (!Number.isFinite(Date.parse(snapshot.validatedAt))
+      || Object.entries(snapshot.blogPriceFreshness).some(([slug, entry]) =>
+      !Object.hasOwn(expected, slug) || !entry
+      || entry.fingerprint !== expected[slug as keyof typeof expected]
+      || (entry.priceChangedAt !== null && (!Number.isFinite(Date.parse(entry.priceChangedAt))
+        || Date.parse(entry.priceChangedAt) > Date.parse(snapshot.validatedAt))))) {
+      throw new Error('Public repair catalogue blog price freshness is invalid.');
+    }
+  }
   const payload = { ...serializePublicRepairCatalogue(checksumPayload.brands), ...(checksumPayload.retiredRepairs?.length ? { retiredRepairs: serializeLegacyRepairDetails(checksumPayload.retiredRepairs) } : {}) };
   const counts = countPublicRepairCatalogue(payload.brands);
   if (counts.publicModelCount !== snapshot.publicModelCount || counts.publicRepairCount !== snapshot.publicRepairCount) {
@@ -431,6 +445,7 @@ export function hydratePublicRepairCatalogueSnapshot(snapshot: StoredPublicRepai
     validatedAt: snapshot.validatedAt,
     checksum: checksumPublicRepairCatalogue(payload),
     inventoryRowCount: snapshot.inventoryRowCount,
+    ...(snapshot.blogPriceFreshness ? { blogPriceFreshness: snapshot.blogPriceFreshness } : {}),
     ...counts,
   };
 }
@@ -476,6 +491,7 @@ function snapshotFromCatalog(catalog: RepairCatalog): StoredPublicRepairCatalogu
     inventoryRowCount: catalog.inventoryRowCount,
     publicModelCount: catalog.publicModelCount,
     publicRepairCount: catalog.publicRepairCount,
+    ...(catalog.blogPriceFreshness ? { blogPriceFreshness: catalog.blogPriceFreshness } : {}),
   };
 }
 
@@ -535,6 +551,9 @@ export async function resolvePublicRepairCatalogue<RawItem>(
     const newlyRetired = previous ? collectExplicitRetirements(previous.brands, candidate.brands, isRetired) : [];
     const retiredRepairs = [...(previous?.retiredRepairs || []), ...newlyRetired].filter((entry, index, entries) => entries.findIndex((other) => `${other.category}/${other.brandSlug}/${other.modelSlug}/${other.repair.slug}` === `${entry.category}/${entry.brandSlug}/${entry.modelSlug}/${entry.repair.slug}`) === index);
     const accepted = createCatalog(merged.brands, 'live-pos', candidate.inventoryRowCount, now(), retiredRepairs);
+    accepted.blogPriceFreshness = nextBlogPriceFreshness(
+      accepted.brands, previous?.blogPriceFreshness, accepted.validatedAt,
+    );
     await dependencies.writeSnapshot(snapshotFromCatalog(accepted));
     return accepted;
   } catch (error) {

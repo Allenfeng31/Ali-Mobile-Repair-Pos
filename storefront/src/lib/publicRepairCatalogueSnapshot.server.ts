@@ -20,6 +20,7 @@ type SnapshotRow = {
   inventory_row_count: number;
   public_model_count: number;
   public_repair_count: number;
+  blog_price_freshness: StoredPublicRepairCatalogueSnapshot['blogPriceFreshness'] | null;
 };
 
 function asStoredSnapshot(row: SnapshotRow): StoredPublicRepairCatalogueSnapshot {
@@ -38,6 +39,7 @@ function asStoredSnapshot(row: SnapshotRow): StoredPublicRepairCatalogueSnapshot
     inventoryRowCount: row.inventory_row_count,
     publicModelCount: row.public_model_count,
     publicRepairCount: row.public_repair_count,
+    ...(row.blog_price_freshness ? { blogPriceFreshness: row.blog_price_freshness } : {}),
   };
 }
 
@@ -46,7 +48,7 @@ export async function readCurrentPublicRepairCatalogueSnapshot(): Promise<Stored
   const client = createServiceRoleClient();
   const { data, error } = await client
     .from('public_repair_catalogue_snapshots')
-    .select('snapshot_key, schema_version, payload, checksum, source, fetched_at, validated_at, inventory_row_count, public_model_count, public_repair_count')
+    .select('snapshot_key, schema_version, payload, checksum, source, fetched_at, validated_at, inventory_row_count, public_model_count, public_repair_count, blog_price_freshness')
     .eq('snapshot_key', SNAPSHOT_KEY)
     .maybeSingle();
 
@@ -71,6 +73,7 @@ export async function writeCurrentPublicRepairCatalogueSnapshot(snapshot: Stored
         inventory_row_count: snapshot.inventoryRowCount,
         public_model_count: snapshot.publicModelCount,
         public_repair_count: snapshot.publicRepairCount,
+        blog_price_freshness: snapshot.blogPriceFreshness ?? null,
       },
       { onConflict: 'snapshot_key' },
     );

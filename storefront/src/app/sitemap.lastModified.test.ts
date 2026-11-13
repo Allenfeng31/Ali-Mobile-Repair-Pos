@@ -13,6 +13,14 @@ vi.mock('@/lib/blog', () => ({ getSortedPostsData: getSortedPostsDataMock }));
 import sitemap from './sitemap';
 
 const catalogue = {
+  blogPriceFreshness: {
+    'how-much-does-iphone-screen-repair-cost-australia': {
+      fingerprint: 'b'.repeat(64), priceChangedAt: '2026-11-14T03:00:00Z',
+    },
+    'macbook-screen-repair-ringwood': {
+      fingerprint: 'a'.repeat(64), priceChangedAt: '2026-11-14T03:00:00Z',
+    },
+  },
   brands: [{
     category: 'phone',
     slug: 'iphone',
@@ -32,6 +40,7 @@ describe('sitemap lastModified policy', () => {
       { slug: 'edited-post', date: '2026-01-01T00:00:00.000Z', updated_at: '2026-02-03T04:05:06.000Z' },
       { slug: 'how-much-does-iphone-screen-repair-cost-australia', date: '2026-07-29', updated_at: '2000-01-01T00:00:00.000Z' },
       { slug: 'how-much-does-samsung-galaxy-s-screen-replacement-cost-australia', date: '2026-09-08', updated_at: '2000-01-01T00:00:00.000Z' },
+      { slug: 'macbook-screen-repair-ringwood', date: '2026-07-07', updated_at: '2026-11-12' },
       { slug: 'published-only-post', date: '2026-01-02T00:00:00.000Z' },
       { slug: 'missing-date-post', date: '' },
     ]);
@@ -77,7 +86,10 @@ describe('sitemap lastModified policy', () => {
       lastModified: new Date('2026-02-03T04:05:06.000Z'),
     });
     expect(urls.find((entry) => pathname(entry) === '/blog/how-much-does-iphone-screen-repair-cost-australia')).toMatchObject({
-      lastModified: new Date('2000-01-01T00:00:00.000Z'),
+      lastModified: new Date('2026-11-14T03:00:00Z'),
+    });
+    expect(urls.find((entry) => pathname(entry) === '/blog/macbook-screen-repair-ringwood')).toMatchObject({
+      lastModified: new Date('2026-11-14T03:00:00Z'),
     });
     expect(urls.find((entry) => pathname(entry) === '/blog/how-much-does-samsung-galaxy-s-screen-replacement-cost-australia')).toMatchObject({
       lastModified: new Date('2000-01-01T00:00:00.000Z'),

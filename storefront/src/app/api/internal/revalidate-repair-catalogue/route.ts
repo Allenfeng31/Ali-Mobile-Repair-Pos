@@ -2,6 +2,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 
 import { PUBLIC_REPAIR_CATALOGUE_SOURCE_TAG, refreshPublicRepairCatalogue, fetchRepairCatalog } from '@/lib/api';
 import type { RepairCatalog } from '@/lib/api';
+import { PRICE_BLOG_SLUGS } from '@/lib/blogPriceFreshness';
 import {
   isAuthorizedRepairCatalogueRevalidation,
   isIgnoredCatalogueMutation,
@@ -108,6 +109,16 @@ export async function POST(request: Request) {
   }));
 
   const paths = new Set(repairCataloguePathsForMutations(updatedMutations));
+  let blogPriceChanged = false;
+  for (const slug of PRICE_BLOG_SLUGS) {
+    const beforeDate = beforeCatalogue?.blogPriceFreshness?.[slug]?.priceChangedAt;
+    const afterDate = catalogue.blogPriceFreshness?.[slug]?.priceChangedAt;
+    if (afterDate && afterDate !== beforeDate) {
+      paths.add(`/blog/${slug}`);
+      blogPriceChanged = true;
+    }
+  }
+  if (blogPriceChanged) paths.add('/sitemap.xml');
 
   for (const deleted of deletedPaths) {
     paths.add(`/repairs/${deleted}`);

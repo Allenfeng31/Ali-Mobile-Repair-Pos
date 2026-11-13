@@ -67,6 +67,22 @@ describe('repair catalogue revalidation webhook', () => {
     expect(revalidatePath).not.toHaveBeenCalledWith('/sitemap.xml');
   });
 
+  it('invalidates only the price Blog and sitemap after a confirmed displayed change', async () => {
+    vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
+    const before = { catalogueSource: 'last-known-good', brands: [], blogPriceFreshness: {
+      'macbook-screen-repair-ringwood': { fingerprint: 'a'.repeat(64), priceChangedAt: null },
+    } };
+    const after = { catalogueSource: 'live-pos', brands: [], blogPriceFreshness: {
+      'macbook-screen-repair-ringwood': { fingerprint: 'b'.repeat(64), priceChangedAt: '2026-11-14T03:00:00Z' },
+    } };
+    fetchRepairCatalog.mockResolvedValueOnce(before);
+    refreshPublicRepairCatalogue.mockResolvedValueOnce(after);
+    expect((await POST(request(payload()))).status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith('/blog/macbook-screen-repair-ringwood');
+    expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/blog/how-much-does-iphone-screen-repair-cost-australia');
+  });
+
   it('invalidates canonical OPPO detail paths for raw POS repair aliases', async () => {
     vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
     refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });
