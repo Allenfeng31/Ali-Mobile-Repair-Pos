@@ -1,9 +1,7 @@
 import { MetadataRoute } from 'next';
 
 import { fetchRepairCatalog, type RepairCatalog } from '@/lib/api';
-import { effectiveBlogDateModified } from '@/lib/blogPriceFreshness';
-import { IPHONE_SCREEN_REPAIR_COST_SLUG } from '@/data/iphoneScreenRepairCost';
-import { MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog';
+import { effectiveBlogDateModified, isPriceBlogSlug } from '@/lib/blogPriceFreshness';
 import { getGooglePixelHardwareConfig } from '@/lib/seo/content/google-pixel/config';
 import { getOppoModelConfig } from '@/lib/seo/content/oppo/shared';
 import { isConfiguredAppleWatchModel } from '@/lib/seo/content/apple-watch';
@@ -47,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let catalog: RepairCatalog | null = null;
   try { catalog = await fetchRepairCatalog(); } catch { /* Editorial URLs remain available. */ }
   const blogUrls: MetadataRoute.Sitemap = blogPosts.map((post) => {
-    const priceChangedAt = post.slug === IPHONE_SCREEN_REPAIR_COST_SLUG || post.slug === MACBOOK_SCREEN_REPAIR_BLOG_SLUG
+    const priceChangedAt = isPriceBlogSlug(post.slug)
       ? catalog?.blogPriceFreshness?.[post.slug]?.priceChangedAt : null;
     const lastModified = getReliableBlogLastModified(
       effectiveBlogDateModified(post.updated_at || post.date, priceChangedAt),

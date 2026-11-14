@@ -1833,6 +1833,33 @@ describe('Repair Detail active and legacy page-data resolution', () => {
     expect(getIpadDetailTiming('ipad-10th-generation', 'logic-board-repair')).toBeNull();
   });
 
+  it('scopes the iPad 11 screen price to glass and digitiser while preserving its POS tier', async () => {
+    fetchRepairCatalog.mockResolvedValue(ipadRepairCatalogue(
+      'iPad 11th Generation', 'ipad-11th-generation', 'Screen Replacement', 'screen-replacement',
+      [{ quality_grade: 'Genuine', price: 149 }],
+    ));
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: 'ipad', model: 'ipad-11th-generation', 'repair-type': 'screen-replacement',
+    })) });
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+
+    expect(pricing?.isStandardIpadGlassRepair).toBe(true);
+    expect(pricing?.variants).toEqual(expect.arrayContaining([expect.objectContaining({ quality_grade: 'Genuine', price: 149 })]));
+  });
+
+  it('does not show a generic starting price for quote-only iPad Pro 11-inch M4 screen repair', async () => {
+    fetchRepairCatalog.mockResolvedValue(ipadRepairCatalogue(
+      'iPad Pro 11-inch M4', 'ipad-pro-11-inch-m4', 'Screen Replacement', 'screen-replacement', [],
+    ));
+    const page = await RepairServicePage({ params: Promise.resolve(params({
+      category: 'tablet', brand: 'ipad', model: 'ipad-pro-11-inch-m4', 'repair-type': 'screen-replacement',
+    })) });
+    const pricing = findElementByType(page, RepairPricingAndCTA)?.props;
+
+    expect(renderToStaticMarkup(page)).toContain('Quote on Request');
+    expect(pricing?.showStartingPriceFallback).toBe(false);
+  });
+
   it('keeps the Google-brand Pixel 4 Water alias consolidating to shared Water', async () => {
     fetchRepairCatalog.mockResolvedValue({ brands: [pixel4WithWaterRepair], retiredRepairs: [] });
 

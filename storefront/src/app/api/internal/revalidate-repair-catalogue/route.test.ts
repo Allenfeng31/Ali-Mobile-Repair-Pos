@@ -83,6 +83,22 @@ describe('repair catalogue revalidation webhook', () => {
     expect(revalidatePath).not.toHaveBeenCalledWith('/blog/how-much-does-iphone-screen-repair-cost-australia');
   });
 
+  it('invalidates the iPad price Blog when its verified displayed fingerprint changes', async () => {
+    vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
+    const slug = 'how-much-does-ipad-screen-repair-cost-australia';
+    fetchRepairCatalog.mockResolvedValueOnce({ catalogueSource: 'last-known-good', brands: [], blogPriceFreshness: {
+      [slug]: { fingerprint: 'a'.repeat(64), priceChangedAt: null },
+    } });
+    refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [], blogPriceFreshness: {
+      [slug]: { fingerprint: 'b'.repeat(64), priceChangedAt: '2026-11-16T03:00:00Z' },
+    } });
+
+    expect((await POST(request(payload()))).status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith(`/blog/${slug}`);
+    expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/blog/macbook-screen-repair-ringwood');
+  });
+
   it('invalidates canonical OPPO detail paths for raw POS repair aliases', async () => {
     vi.stubEnv('CATALOGUE_REVALIDATION_SECRET', 'test-secret');
     refreshPublicRepairCatalogue.mockResolvedValueOnce({ catalogueSource: 'live-pos', brands: [] });

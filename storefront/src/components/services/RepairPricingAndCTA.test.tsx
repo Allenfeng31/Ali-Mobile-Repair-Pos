@@ -361,6 +361,24 @@ describe('RepairPricingAndCTA Interactive Pricing Cards', () => {
     expect(screen.queryByText('Quote on Request')).not.toBeInTheDocument();
   });
 
+  it('describes the standard iPad screen service as glass and digitiser only without changing the POS grade', () => {
+    mockParams = { category: 'tablet', brand: 'ipad', 'repair-type': 'screen-replacement' };
+    render(
+      <RepairPricingAndCTA
+        brandName="iPad"
+        modelName="iPad 11th Generation"
+        repairName="Screen Replacement"
+        variants={[{ quality_grade: 'Genuine', price: 149 }]}
+        isStandardIpadGlassRepair
+      />,
+    );
+
+    expect(screen.getByText('Front Glass & Digitiser Only — LCD Not Included. LCD damage requires a separate quote.')).toBeInTheDocument();
+    expect(screen.getByText(/Front glass and touchscreen digitiser only/)).toBeInTheDocument();
+    expect(screen.queryByText(/Original equipment display/)).not.toBeInTheDocument();
+    expect(screen.getByText('Genuine')).toBeInTheDocument();
+  });
+
   it('renders the Apple Watch diagnostic quote wording and passes Charging Repair to booking', () => {
     mockParams = { category: 'watch', brand: 'apple', 'repair-type': 'charging-repair' };
     render(

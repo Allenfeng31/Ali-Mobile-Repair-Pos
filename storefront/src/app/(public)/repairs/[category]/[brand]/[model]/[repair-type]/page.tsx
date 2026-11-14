@@ -5979,6 +5979,12 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
             bookingRepairName={bookingRepairName}
             bookingHref={bookRepairUrl}
             showBackHousingNotice={showBackHousingNotice}
+            isStandardIpadGlassRepair={Boolean(
+              resolvedParams.category === 'tablet' &&
+              resolvedParams.brand === 'ipad' &&
+              resolvedParams['repair-type'] === 'screen-replacement' &&
+              /^ipad-(?:5th|6th|7th|8th|9th|10th|11th)-generation$/.test(resolvedParams.model)
+            )}
             showStartingPriceFallback={!(
               (isPrimaryPhoneDetailPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedSamsungPage && detailPricing.isQuoteOnly && !isNoteBackGlass) ||
@@ -5989,6 +5995,7 @@ export default async function RepairServicePage({ params }: RepairPageProps) {
               (isAliMobileEnhancedGooglePixelPage && detailPricing.isQuoteOnly) ||
               (isAliMobileEnhancedOppoPage && Boolean(approvedTurnaroundMinutes) && detailPricing.isQuoteOnly) ||
               (isSecondaryPhoneDetailPage && detailPricing.isQuoteOnly) ||
+              (resolvedParams.category === 'tablet' && resolvedParams.brand === 'ipad' && resolvedParams['repair-type'] === 'screen-replacement' && detailPricing.isQuoteOnly) ||
               (Boolean(ipadDetailTiming) && detailPricing.isQuoteOnly)
             )}
             useNeutralQuoteWording={Boolean(

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clock3, ShieldCheck } from "lucide-react";
 import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -6,15 +7,17 @@ import { notFound } from "next/navigation";
 import { BlogImage } from "@/components/BlogImage";
 import { IphoneBatteryHealthArticle } from "@/components/blog/IphoneBatteryHealthArticle";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
+import { IpadScreenRepairCostArticle } from "@/components/blog/IpadScreenRepairCostArticle";
 import { MacbookScreenRepairArticle } from "@/components/blog/MacbookScreenRepairArticle";
 import { PhoneNotChargingArticle } from "@/components/blog/PhoneNotChargingArticle";
 import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
 import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
+import { buildIpadScreenRepairPriceTable, IPAD_SCREEN_REPAIR_COST_SLUG } from "@/data/ipadScreenRepairCost";
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from "@/data/macbookScreenRepairBlog";
 import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
 import { fetchRepairCatalog } from "@/lib/api";
 import { getPostData, isRemovedBlogSlug, type BlogPost } from "@/lib/blog";
-import { effectiveBlogDateModified } from "@/lib/blogPriceFreshness";
+import { effectiveBlogDateModified, isPriceBlogSlug } from "@/lib/blogPriceFreshness";
 
 import styles from "./BlogPost.module.css";
 
@@ -22,7 +25,7 @@ export const dynamic = "force-dynamic";
 const getBlogCatalogue = cache(fetchRepairCatalog);
 
 async function priceChangedAtForSlug(slug: string) {
-  if (slug !== IPHONE_SCREEN_REPAIR_COST_SLUG && slug !== MACBOOK_SCREEN_REPAIR_BLOG_SLUG) return null;
+  if (!isPriceBlogSlug(slug)) return null;
   try {
     const catalogue = await getBlogCatalogue();
     return catalogue.blogPriceFreshness?.[slug]?.priceChangedAt ?? null;
@@ -109,6 +112,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   }
 
   const isIphoneScreenCostArticle = slug === IPHONE_SCREEN_REPAIR_COST_SLUG;
+  const isIpadScreenCostArticle = slug === IPAD_SCREEN_REPAIR_COST_SLUG;
   const isIphoneBatteryHealthArticle = slug === "when-should-you-replace-iphone-battery";
   const isPhoneNotChargingArticle = slug === PHONE_NOT_CHARGING_SLUG;
   const isMacbookScreenRepairArticle = slug === MACBOOK_SCREEN_REPAIR_BLOG_SLUG;
@@ -160,6 +164,18 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     } catch {
       // Do not show a fixed fallback amount when the public catalogue is unavailable.
       macbookAirScreenPriceTable = null;
+    }
+  }
+
+  let ipadScreenPriceTable = null;
+  if (isIpadScreenCostArticle) {
+    try {
+      const catalogue = await getBlogCatalogue();
+      ipadScreenPriceTable = buildIpadScreenRepairPriceTable(catalogue);
+      priceChangedAt = catalogue.blogPriceFreshness?.[IPAD_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt ?? null;
+    } catch {
+      // Do not show a fixed fallback amount when the public catalogue is unavailable.
+      ipadScreenPriceTable = null;
     }
   }
 
@@ -217,7 +233,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         </Link>
 
         <section
-          className={`${styles.hero} ${isPhoneNotChargingArticle ? styles.phoneChargingHero : ""}`}
+          className={`${styles.hero} ${isPhoneNotChargingArticle ? styles.phoneChargingHero : ""} ${isIpadScreenCostArticle ? styles.ipadCostHero : ""}`}
           aria-labelledby="article-title"
         >
           <div className={styles.heroCopy}>
@@ -231,9 +247,15 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
             </div>
             <h1 id="article-title">{postData.title}</h1>
             {(postData.hero_intro || postData.description) && <p>{postData.hero_intro || postData.description}</p>}
+            {isIpadScreenCostArticle && (
+              <div className={styles.ipadHeroFacts} aria-label="iPad repair information">
+                <span><Clock3 size={18} aria-hidden="true" /> Approx. 1 Hour Repair</span>
+                <span><ShieldCheck size={18} aria-hidden="true" /> 6-Month Warranty</span>
+              </div>
+            )}
           </div>
 
-          {postData.image && !isIphoneScreenCostArticle && (
+          {postData.image && !isIphoneScreenCostArticle && !isIpadScreenCostArticle && (
             <div className={styles.coverWrapper} style={{ objectFit: 'cover', width: '100%', maxHeight: '600px', overflow: 'hidden' }}>
               <BlogImage
                 src={postData.image}
@@ -250,6 +272,8 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           <SamsungGalaxySScreenRepairCostArticle updatedDate={dateModified} />
           ) : isIphoneScreenCostArticle ? (
             <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
+          ) : isIpadScreenCostArticle ? (
+            <IpadScreenRepairCostArticle priceTable={ipadScreenPriceTable} />
           ) : isIphoneBatteryHealthArticle ? (
             <div className={styles.articleBody}><IphoneBatteryHealthArticle /></div>
           ) : isPhoneNotChargingArticle ? (
@@ -268,7 +292,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           <span className={styles.kicker}>Ringwood Repairs</span>
           <h2>Need a hands-on diagnosis?</h2>
           <p>
-            {isMacbookScreenRepairArticle
+            {isIpadScreenCostArticle
+              ? "Bring your iPad to Ali Mobile & Repair for model confirmation, screen testing and frame assessment. Parts availability and timing are confirmed before work begins."
+              : isMacbookScreenRepairArticle
               ? "Bring your MacBook to Ali Mobile & Repair for model confirmation and display assessment. Parts availability and timing are confirmed before work begins."
               : isIphoneBatteryHealthArticle
               ? "Bring your iPhone to Ali Mobile & Repair for an assessment. Contact us first to confirm your model, issue and timing."

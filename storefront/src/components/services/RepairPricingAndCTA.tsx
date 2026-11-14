@@ -44,6 +44,7 @@ interface RepairPricingAndCTAProps {
   sourceType?: 'real' | 'virtual' | 'diagnostic';
   repairOrigin?: string;
   renderQuoteOnlyBookingLink?: boolean;
+  isStandardIpadGlassRepair?: boolean;
 }
 
 export default function RepairPricingAndCTA({ 
@@ -62,6 +63,7 @@ export default function RepairPricingAndCTA({
   sourceType,
   repairOrigin,
   renderQuoteOnlyBookingLink = false,
+  isStandardIpadGlassRepair = false,
 }: RepairPricingAndCTAProps) {
   const router = useRouter();
   const params = useParams();
@@ -181,6 +183,9 @@ export default function RepairPricingAndCTA({
   };
 
   const getTierDescription = (tierName: string) => {
+    if (isStandardIpadGlassRepair) {
+      return 'Front glass and touchscreen digitiser only. LCD replacement is not included; display damage needs a separate assessment and quote.';
+    }
     return getRepairTierDescription(bookingRepairName || repairName, tierName, tierDescriptions);
   };
 
@@ -202,6 +207,11 @@ export default function RepairPricingAndCTA({
           <h2 className="mb-4 text-center text-xl font-bold text-slate-900">
             {modelName} {repairName} options and pricing
           </h2>
+          {isStandardIpadGlassRepair && (
+            <p className="mb-4 max-w-2xl text-center text-sm font-semibold leading-relaxed text-slate-700">
+              Front Glass &amp; Digitiser Only — LCD Not Included. LCD damage requires a separate quote.
+            </p>
+          )}
           {displayVariants.length > 0 ? (
             <div className={`grid gap-4 md:gap-6 w-full max-w-4xl justify-center ${isMultiple ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md'}`}>
               {displayVariants.map((variant) => {

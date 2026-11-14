@@ -82,6 +82,8 @@ function capitalizeTitle(title: string): string {
     if (index > 0 && lowerCaseWords.has(word)) return word;
     if (word === 'iphone') return 'iPhone';
     if (word === 'ipad') return 'iPad';
+    if (word === 'lcd') return 'LCD';
+    if (word === 'vs') return 'vs';
     if (word === 'faq' || word.startsWith('faq:')) return `FAQ${word.slice(3)}`;
     if (word === 'samsung') return 'Samsung';
     if (word === 'google') return 'Google';
