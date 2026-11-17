@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } from '@/data/iphoneScreenRepairCost';
 import { buildIpadScreenRepairPriceTable, IPAD_SCREEN_REPAIR_COST_SLUG } from '@/data/ipadScreenRepairCost';
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog';
+import { buildPhoneScreenBrandPriceTable, PHONE_SCREEN_BLACK_BLOG_SLUG } from '@/data/phoneScreenBlackArticle';
 import type { BrandEntry } from './publicRepairCataloguePolicy';
 import { applyMacBookCataloguePresentation } from './macbookCataloguePresentation';
 import type { RepairCatalog } from './publicRepairCataloguePolicy';
@@ -11,6 +12,7 @@ export const PRICE_BLOG_SLUGS = [
   IPHONE_SCREEN_REPAIR_COST_SLUG,
   MACBOOK_SCREEN_REPAIR_BLOG_SLUG,
   IPAD_SCREEN_REPAIR_COST_SLUG,
+  PHONE_SCREEN_BLACK_BLOG_SLUG,
 ] as const;
 export type PriceBlogSlug = typeof PRICE_BLOG_SLUGS[number];
 export type BlogPriceFreshness = Partial<Record<PriceBlogSlug, { fingerprint: string; priceChangedAt: string | null }>>;
@@ -26,10 +28,18 @@ export function displayedBlogPriceFingerprints(brands: BrandEntry[]): Record<Pri
     [IPHONE_SCREEN_REPAIR_COST_SLUG]: buildIphoneScreenRepairPriceTable({ brands: displayedBrands }),
     [MACBOOK_SCREEN_REPAIR_BLOG_SLUG]: buildMacbookAirScreenRepairPriceTable({ brands: displayedBrands }),
     [IPAD_SCREEN_REPAIR_COST_SLUG]: buildIpadScreenRepairPriceTable({ brands: displayedBrands }),
+    [PHONE_SCREEN_BLACK_BLOG_SLUG]: buildPhoneScreenBrandPriceTable({ brands: displayedBrands }),
   };
   return Object.fromEntries(PRICE_BLOG_SLUGS.map((slug) => {
     const table = tables[slug];
     const normalized = table.rows.map((row) => {
+      if ('range' in row) {
+        return {
+          brand: row.brand,
+          min: row.range.min,
+          max: row.range.max,
+        };
+      }
       if ('price' in row) {
         return { model: row.model, scope: row.scope, price: row.price, isQuote: row.isQuote };
       }
