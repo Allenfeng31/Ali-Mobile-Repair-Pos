@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Clock3, Database, ShieldCheck } from "lucide-react";
 
 import type { PhoneScreenBrandPriceTable } from "@/data/phoneScreenBlackArticle";
 
@@ -31,11 +32,31 @@ const symptoms = [
 ] as const;
 
 const diagnosticSteps = [
-  ["Check the response", "We call the phone and check whether it rings, vibrates or makes a sound."],
-  ["Check charging and power", "If appropriate and safe, we check charging behaviour and current draw, allow time for a flat battery to respond, and attempt a model-appropriate restart."],
-  ["Test with a known-good display", "When the cause remains unclear, a compatible working test display may be connected using the correct professional procedure."],
-  ["Inspect the display and connection", "Using a strong inspection light where helpful, we look for internal panel damage, display bleeding, layer separation, pressure damage and visible connector problems."],
-  ["Reconnect, replace or investigate further", "A loose connector may be reseated; a damaged panel generally needs a display assembly; other results may require board-level or power diagnosis."],
+  {
+    title: "Check the response",
+    emphasis: "Ringing, vibration or sound.",
+    description: "We call the phone and check whether it still responds.",
+  },
+  {
+    title: "Check charging and power",
+    emphasis: "Charging current / approximately 10 minutes.",
+    description: "When it is safe, we check charging behaviour and current draw, allow a flat battery time to respond, and attempt a model-appropriate restart.",
+  },
+  {
+    title: "Test with a known-good display",
+    emphasis: "Known-good test display.",
+    description: "When the cause remains unclear, we may connect a compatible working display using the correct professional procedure.",
+  },
+  {
+    title: "Inspect the display and connection",
+    emphasis: "Internal cracks, ink bleed and loose connections.",
+    description: "Using a strong inspection light where helpful, we check for internal panel damage, display bleeding, layer separation, pressure damage and visible connector problems.",
+  },
+  {
+    title: "Reconnect, replace or investigate further",
+    emphasis: "Loose connector: usually $35.",
+    description: "This conditional price applies only when a loose display connector is confirmed and reconnecting it restores normal operation; it is not a universal diagnostic fee or guaranteed solution. A damaged panel generally needs a display assembly; other results may require board-level or power diagnosis.",
+  },
 ] as const;
 
 const causes = [
@@ -116,12 +137,15 @@ export function PhoneScreenBlackArticle({ priceTable }: Props) {
           <p>We confirm what the phone is doing before recommending a screen. A test display can support the diagnosis, but it does not independently prove every underlying cause.</p>
         </div>
         <ol className={styles.processList}>
-          {diagnosticSteps.map(([title, description]) => <li key={title}><div><h3>{title}</h3><p>{description}</p></div></li>)}
+          {diagnosticSteps.map(({ title, emphasis, description }) => (
+            <li key={title}>
+              <div>
+                <h3>{title}</h3>
+                <p><strong>{emphasis}</strong> {description}</p>
+              </div>
+            </li>
+          ))}
         </ol>
-        <p className={styles.connectorNote}>
-          If a loose display connector is confirmed and reconnecting it restores normal operation, Ali Mobile
-          usually charges <strong>$35</strong>. This conditional price is not a universal diagnostic fee or a guaranteed solution.
-        </p>
         <figure className={styles.infographic}>
           <a href="/images/blog/phone-screen-black/ali-mobile-no-display-diagnostic-process.webp" target="_blank" rel="noreferrer" aria-label="Open the no-display phone diagnostic infographic at full size">
             <Image
@@ -206,10 +230,21 @@ export function PhoneScreenBlackArticle({ priceTable }: Props) {
       </section>
 
       <section className={styles.serviceFacts} aria-labelledby="repair-time-data-warranty">
-        <div><p className={styles.eyebrow}>What to expect</p><h2 id="repair-time-data-warranty">Data, timing and warranty</h2></div>
-        <article><h3>Your data</h3><p>A standard screen replacement normally does not require a factory reset, and Ali Mobile does not normally erase photos, apps or other personal data for this repair. Back up important data where possible; data safety cannot be guaranteed for every damaged or liquid-exposed device.</p></article>
-        <article><h3>Repair time</h3><p>Many straightforward screen replacements on common models take approximately 30–60 minutes when the fault is confirmed and the correct part is available. Model design, further diagnostics, damage and parts availability can extend the time.</p></article>
-        <article><h3>Six-month warranty</h3><p>Eligible completed screen replacements include a six-month parts and labour warranty, subject to the applicable terms and exclusions. Warranty coverage does not limit rights under Australian Consumer Law.</p></article>
+        <div className={styles.serviceFactsHeading}><p className={styles.eyebrow}>What to expect</p><h2 id="repair-time-data-warranty">Data, timing and warranty</h2></div>
+        <div className={styles.serviceFactList}>
+          <article>
+            <span className={styles.factIcon} aria-hidden="true"><Database size={22} /></span>
+            <div><h3>Your Data</h3><p className={styles.keyStatement}>Standard screen replacement <strong>normally does not require a factory reset</strong>.</p><p>Ali Mobile does not normally erase photos, apps or other personal data for this repair. Back up important data where possible; data safety cannot be guaranteed for every damaged or liquid-exposed device.</p></div>
+          </article>
+          <article>
+            <span className={styles.factIcon} aria-hidden="true"><Clock3 size={22} /></span>
+            <div><h3>Repair Time</h3><p className={styles.keyStatement}><strong>Approximately 30–60 minutes</strong> for straightforward screen replacements when the fault is confirmed and the correct part is available.</p><p>Model design, further diagnostics, complex damage and parts availability can extend the repair time.</p></div>
+          </article>
+          <article>
+            <span className={styles.factIcon} aria-hidden="true"><ShieldCheck size={22} /></span>
+            <div><h3>Warranty</h3><p className={styles.keyStatement}><strong>6-Month Warranty</strong> for eligible completed screen repairs.</p><p>Parts and labour warranty terms and exclusions apply. Warranty coverage does not limit rights under Australian Consumer Law.</p></div>
+          </article>
+        </div>
       </section>
 
       <section aria-labelledby="black-screen-faq">

@@ -58,8 +58,7 @@
 
 .symptomGrid article,
 .causeList article,
-.repairCase,
-.serviceFacts article {
+.repairCase {
   padding: 1.25rem;
   border: 1px solid var(--line);
   border-radius: 1rem;
@@ -69,17 +68,14 @@
 .symptomGrid article:last-child { grid-column: 1 / -1; }
 .symptomGrid h3,
 .causeList h3,
-.repairCase h3,
-.serviceFacts h3 { margin: 0; font-size: 1.05rem; }
+.repairCase h3 { margin: 0; font-size: 1.05rem; }
 .symptomGrid p,
 .causeList p,
-.repairCase > p,
-.serviceFacts p { margin: 0.6rem 0 0; line-height: 1.68; }
+.repairCase > p { margin: 0.6rem 0 0; line-height: 1.68; }
 
 .processList {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.65rem;
+  gap: 0.6rem;
   margin: 0;
   padding: 0;
   counter-reset: diagnostic;
@@ -87,8 +83,11 @@
 }
 
 .processList li {
-  min-width: 0;
-  padding: 1rem;
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  padding: 0.85rem 1rem;
   border: 1px solid #c9d9ee;
   border-radius: 0.9rem;
   background: #f8fbff;
@@ -101,7 +100,6 @@
   width: 2rem;
   height: 2rem;
   place-items: center;
-  margin-bottom: 0.75rem;
   border-radius: 999px;
   background: #0b6bdc;
   color: #fff;
@@ -109,17 +107,9 @@
   font-weight: 900;
 }
 
-.processList h3 { margin: 0; font-size: 0.98rem; }
-.processList p { margin: 0.45rem 0 0; font-size: 0.9rem; line-height: 1.58; }
-
-.connectorNote {
-  margin: 1rem 0 0;
-  padding: 0.95rem 1.1rem;
-  border-left: 4px solid var(--blue);
-  border-radius: 0.3rem 0.8rem 0.8rem 0.3rem;
-  background: var(--blue-soft);
-  line-height: 1.65;
-}
+.processList h3 { margin: 0; font-size: 1rem; }
+.processList p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.55; }
+.processList strong { color: #174ea6; }
 
 .infographic {
   margin: 1.25rem 0 0;
@@ -195,16 +185,37 @@
 .textLink { display: inline-flex; margin-top: 0.25rem; }
 
 .serviceFacts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
   padding: clamp(1.2rem, 3vw, 1.7rem);
   border: 1px solid #bcd4f7;
   border-radius: 1.1rem;
   background: var(--blue-soft);
 }
-.serviceFacts > div { grid-column: 1 / -1; }
+.serviceFactsHeading { margin-bottom: 1rem; }
 .serviceFacts h2 { margin: 0; }
+.serviceFactList { display: grid; gap: 0.65rem; }
+.serviceFactList article {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid #c9d9ee;
+  border-radius: 0.85rem;
+  background: #fff;
+}
+.factIcon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: #e7f0ff;
+  color: #0b6bdc;
+}
+.serviceFactList h3 { margin: 0; font-size: 1rem; }
+.serviceFactList p { margin: 0.4rem 0 0; line-height: 1.6; }
+.serviceFactList .keyStatement { margin-top: 0.25rem; color: #334155; }
+.keyStatement strong { color: #174ea6; }
 
 .faqList { border-top: 1px solid var(--line); }
 .faqList details { border-bottom: 1px solid var(--line); }
@@ -227,10 +238,6 @@
 .finalCta > a { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; padding: 0.7rem 1rem; border-radius: 0.7rem; background: #fff; color: #174ea6; font-weight: 850; text-decoration: none; }
 
 @media (max-width: 900px) {
-  .processList { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .processList li:last-child { grid-column: 1 / -1; }
-  .serviceFacts { grid-template-columns: 1fr; }
-  .serviceFacts > div { grid-column: auto; }
   .finalCta { grid-template-columns: 1fr; }
 }
 
@@ -244,8 +251,16 @@
 
 @media (max-width: 480px) {
   .quickAnswer { padding: 1.15rem; }
-  .processList { grid-template-columns: 1fr; }
-  .processList li:last-child { grid-column: auto; }
+  .processList li { grid-template-columns: 1.85rem minmax(0, 1fr); gap: 0.7rem; padding: 0.8rem; }
+  .processList li::before { width: 1.75rem; height: 1.75rem; font-size: 0.78rem; }
+  .processList li > div { display: contents; }
+  .processList li p { grid-column: 1 / -1; margin-top: 0; }
+  .serviceFacts { padding: 1rem; }
+  .serviceFactList article { grid-template-columns: 2.35rem minmax(0, 1fr); gap: 0.7rem; padding: 0.85rem; }
+  .factIcon { width: 2.2rem; height: 2.2rem; }
+  .serviceFactList article > div { display: contents; }
+  .serviceFactList article p { grid-column: 1 / -1; margin-top: 0; }
+  .serviceFactList article .keyStatement { margin-top: 0.1rem; }
   .infographic { margin-inline: -0.55rem; padding: 0.4rem; }
   .photoPair { gap: 0.5rem; }
   .photoPair figcaption { font-size: 0.73rem; }
