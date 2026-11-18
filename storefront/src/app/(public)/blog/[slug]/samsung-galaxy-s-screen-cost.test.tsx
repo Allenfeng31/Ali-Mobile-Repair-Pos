@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { getPostDataMock, fetchRepairCatalogMock } = vi.hoisted(() => ({ getPostDataMock: vi.fn(), fetchRepairCatalogMock: vi.fn() }));
 
@@ -14,9 +14,45 @@ import BlogArticlePage, { generateMetadata } from "./page";
 
 const slug = "how-much-does-samsung-galaxy-s-screen-replacement-cost-australia";
 
+function samsungCatalogue(genuineS24UltraPrice = 399) {
+  return {
+    fetchedAt: "2026-11-18T01:00:00.000Z",
+    blogPriceFreshness: {
+      [slug]: { fingerprint: "a".repeat(64), priceChangedAt: "2026-11-18T01:00:00.000Z" as string | null },
+    },
+    brands: [{
+      category: "phone",
+      slug: "samsung",
+      models: [
+        { model: "Galaxy S25 Ultra", slug: "galaxy-s25-ultra", repairTypes: [{ slug: "screen-replacement", price: 320, variants: [
+          { quality_grade: "Genuine", price: 420 }, { quality_grade: "Premium", price: 320 },
+        ] }] },
+        { model: "Galaxy S24 Ultra", slug: "galaxy-s24-ultra", repairTypes: [{ slug: "screen-replacement", price: 320, variants: [
+          { quality_grade: "Genuine", price: genuineS24UltraPrice }, { quality_grade: "Premium", price: 320 },
+        ] }] },
+        { model: "Galaxy S23 Ultra", slug: "galaxy-s23-ultra", repairTypes: [{ slug: "screen-replacement", price: 298, variants: [
+          { quality_grade: "Genuine", price: 390 }, { quality_grade: "Premium", price: 298 },
+        ] }] },
+        { model: "Galaxy S23", slug: "galaxy-s23", repairTypes: [{ slug: "screen-replacement", price: 290, variants: [
+          { quality_grade: "Genuine", price: 290 },
+        ] }] },
+      ],
+    }],
+  };
+}
+
+beforeEach(() => {
+  getPostDataMock.mockReset();
+  fetchRepairCatalogMock.mockReset();
+  fetchRepairCatalogMock.mockResolvedValue(samsungCatalogue());
+});
+
 describe("Samsung Galaxy S screen cost blog route", () => {
   it("uses the article date for metadata and SSR content", async () => {
     getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-09-08" });
+    const catalogue = samsungCatalogue();
+    catalogue.blogPriceFreshness[slug]!.priceChangedAt = null;
+    fetchRepairCatalogMock.mockResolvedValue(catalogue);
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug }) });
     const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
@@ -33,17 +69,52 @@ describe("Samsung Galaxy S screen cost blog route", () => {
     expect(html).not.toContain("Updated 8 September 2026");
     expect(html).toContain("Samsung Galaxy S screen replacement prices");
     expect(html).toContain("Galaxy S26 Ultra");
+    expect(html).toContain('aria-label="Galaxy S24 Ultra, Genuine, $399"');
   });
 
   it("shares a changed editorial date across visible copy, JSON-LD and Open Graph", async () => {
     getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-11-13" });
+    const catalogue = samsungCatalogue();
+    catalogue.blogPriceFreshness[slug]!.priceChangedAt = null;
+    fetchRepairCatalogMock.mockResolvedValue(catalogue);
     const metadata = await generateMetadata({ params: Promise.resolve({ slug }) });
     const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
     expect(html).toContain("Updated 13 November 2026");
     expect(html).toContain('"datePublished":"2026-09-08"');
     expect(html).toContain('"dateModified":"2026-11-13"');
-    expect(html).toContain("checked on 13 November 2026");
+    expect(html).toContain("Catalogue snapshot refreshed 18 November 2026");
     expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-11-13"');
+  });
+
+  it("renders a changed POS price and never falls back to the removed static amount", async () => {
+    getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-11-18" });
+    fetchRepairCatalogMock.mockResolvedValue(samsungCatalogue(409));
+
+    const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
+
+    expect(html).toContain('aria-label="Galaxy S24 Ultra, Genuine, $409"');
+    expect(html).not.toContain('aria-label="Galaxy S24 Ultra, Genuine, $420"');
+  });
+
+  it("uses price freshness for visible, JSON-LD and Open Graph modified dates", async () => {
+    getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-11-17" });
+    const metadata = await generateMetadata({ params: Promise.resolve({ slug }) });
+    const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
+
+    expect(html).toContain("Updated 18 November 2026");
+    expect(html).toContain('"dateModified":"2026-11-18T01:00:00.000Z"');
+    expect(JSON.stringify(metadata.openGraph)).toContain('"modifiedTime":"2026-11-18T01:00:00.000Z"');
+  });
+
+  it("shows no stale price table when the public catalogue is unavailable", async () => {
+    getPostDataMock.mockResolvedValue({ date: "2026-09-08", updated_at: "2026-11-18" });
+    fetchRepairCatalogMock.mockRejectedValue(new Error("catalogue unavailable"));
+
+    const html = renderToStaticMarkup(await BlogArticlePage({ params: Promise.resolve({ slug }) }));
+
+    expect(html).toContain("Current fixed Samsung Galaxy S screen prices are not available");
+    expect(html).not.toContain("<table");
+    expect(html).not.toContain("$420");
   });
 
   it("shows an iPhone publication date and a distinct later update date without changing schema dates", async () => {

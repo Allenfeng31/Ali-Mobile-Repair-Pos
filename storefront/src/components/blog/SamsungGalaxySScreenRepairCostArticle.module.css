@@ -87,6 +87,19 @@
   background: var(--secondary);
 }
 
+.modelLink {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.modelLink:focus-visible {
+  border-radius: 0.15rem;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
 .optionNote {
   margin-top: 0.75rem;
 }

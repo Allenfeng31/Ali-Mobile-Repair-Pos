@@ -2,42 +2,55 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
-  SAMSUNG_GALAXY_S_SCREEN_REPAIR_PRICES,
-  type SamsungGalaxySScreenRepairPrice,
+  type SamsungGalaxySScreenRepairPriceTable,
 } from "@/data/samsungGalaxySScreenRepairCost";
 
 import styles from "./SamsungGalaxySScreenRepairCostArticle.module.css";
 
-function priceLabel(price: number | null) {
-  return price === null ? "—" : `$${price}`;
+function priceLabel(price: number | undefined, isQuote: boolean) {
+  if (price !== undefined) return `$${price}`;
+  return isQuote ? "Quote" : "—";
 }
 
-function PriceTable() {
-  const columns: Array<{
-    key: keyof Pick<SamsungGalaxySScreenRepairPrice, "servicePackWithFrame" | "aftermarketWithFrame">;
-    label: string;
-  }> = [
-    { key: "servicePackWithFrame", label: "Samsung Service Pack + Frame" },
-    { key: "aftermarketWithFrame", label: "Aftermarket Display + Frame" },
-  ];
+function catalogueFreshnessLabel(fetchedAt: string | null) {
+  if (!fetchedAt || Number.isNaN(new Date(fetchedAt).getTime())) return null;
 
+  return new Date(fetchedAt).toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Australia/Melbourne",
+  });
+}
+
+const screenRepairLinks: Readonly<Record<string, string>> = {
+  "Galaxy S24 Ultra": "/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement",
+  "Galaxy S23 Ultra": "/repairs/phone/samsung/galaxy-s23-ultra/screen-replacement",
+  "Galaxy S22 Ultra": "/repairs/phone/samsung/galaxy-s22-ultra/screen-replacement",
+};
+
+function PriceTable({ priceTable }: { priceTable: SamsungGalaxySScreenRepairPriceTable }) {
   return (
     <div className={styles.tableScroll} tabIndex={0} aria-label="Samsung Galaxy S screen replacement price table">
       <table className={styles.priceTable}>
-        <caption>Ali Mobile Samsung Galaxy S screen replacement prices by model and complete display assembly</caption>
+        <caption>Current Ali Mobile Samsung Galaxy S screen replacement prices by model and available quality tier</caption>
         <thead>
           <tr>
             <th scope="col">Model</th>
-            {columns.map((column) => <th key={column.key} scope="col">{column.label}</th>)}
+            {priceTable.columns.map((column) => <th key={column} scope="col">{column}</th>)}
           </tr>
         </thead>
         <tbody>
-          {SAMSUNG_GALAXY_S_SCREEN_REPAIR_PRICES.map((row) => (
+          {priceTable.rows.map((row) => (
             <tr key={row.model}>
-              <th scope="row">{row.model}</th>
-              {columns.map((column) => {
-                const price = priceLabel(row[column.key]);
-                return <td key={column.key} aria-label={`${row.model}, ${column.label}, ${price}`}>{price}</td>;
+              <th scope="row">
+                {screenRepairLinks[row.model]
+                  ? <Link className={styles.modelLink} href={screenRepairLinks[row.model]}>{row.model}</Link>
+                  : row.model}
+              </th>
+              {priceTable.columns.map((column) => {
+                const price = priceLabel(row.prices[column], row.quoteTiers.includes(column));
+                return <td key={column} aria-label={`${row.model}, ${column}, ${price}`}>{price}</td>;
               })}
             </tr>
           ))}
@@ -106,20 +119,20 @@ const repairExamples = [
 
 const faqs = [
   {
-    question: "What is a Samsung Service Pack screen?",
-    answer: "At Ali Mobile, Samsung Service Pack means a genuine Samsung display assembly supplied through Samsung service channels. For these repairs, we use the complete display + frame assembly.",
+    question: "What does Genuine mean in the Samsung repair price table?",
+    answer: "Genuine is the current POS quality-tier name for the original-equipment display option listed for a supported repair. It does not mean Ali Mobile is Samsung or an authorised Samsung Service Centre.",
   },
   {
     question: "Does Samsung screen replacement include the frame?",
-    answer: "The options in this guide are complete display + frame assemblies. We inspect the device first because impact damage, liquid exposure or another fault can still change the suitable repair path.",
+    answer: "Genuine and Premium are quality-tier names, not guarantees that a replacement frame is included. We confirm the exact part scope and inspect the existing frame before the repair is approved.",
   },
   {
     question: "Will fingerprint still work after replacement?",
     answer: "Fingerprint behaviour can overlap with the original screen damage, the replacement panel, frame condition and any calibration requirement. We test relevant functions where applicable, but no screen repair guarantees every biometric symptom will be resolved.",
   },
   {
-    question: "Will 120Hz still work with an aftermarket screen?",
-    answer: "Aftermarket quality varies. Some lower-grade panels may be limited to 60Hz, while others can support higher refresh rates. An aftermarket panel may not reproduce Samsung's original adaptive refresh behaviour in exactly the same way.",
+    question: "Will 120Hz still work with a Premium screen?",
+    answer: "Premium is the current catalogue tier name, but compatible aftermarket panel characteristics can vary. Some panels may be limited to 60Hz, while others can support higher refresh rates, and they may not reproduce Samsung's original adaptive refresh behaviour in exactly the same way.",
   },
   {
     question: "Can screen replacement affect S Pen use?",
@@ -147,17 +160,20 @@ const faqs = [
   },
 ];
 
-export function SamsungGalaxySScreenRepairCostArticle({ updatedDate }: { updatedDate: string }) {
-  const displayDateModified = new Date(`${updatedDate.slice(0, 10)}T12:00:00Z`).toLocaleDateString("en-AU", {
-    day: "numeric", month: "long", year: "numeric", timeZone: "Australia/Melbourne",
-  });
+export function SamsungGalaxySScreenRepairCostArticle({
+  priceTable,
+}: {
+  priceTable: SamsungGalaxySScreenRepairPriceTable | null;
+}) {
+  const freshnessLabel = catalogueFreshnessLabel(priceTable?.fetchedAt ?? null);
+
   return (
     <div className={styles.article}>
       <section className={styles.guideNav} aria-labelledby="samsung-guide-heading">
         <h2 id="samsung-guide-heading">In this guide</h2>
         <nav aria-label="Samsung Galaxy S screen repair guide">
           <a href="#samsung-price-table-heading">Prices</a>
-          <a href="#comparison-heading">Service Pack vs aftermarket</a>
+          <a href="#comparison-heading">Genuine vs Premium</a>
           <a href="#frame-heading">Why the frame matters</a>
           <a href="#real-repair-examples-heading">Real repair examples</a>
           <a href="#samsung-screen-faq-heading">FAQs</a>
@@ -167,34 +183,40 @@ export function SamsungGalaxySScreenRepairCostArticle({ updatedDate }: { updated
       <section className={styles.wideSection} aria-labelledby="samsung-price-table-heading">
         <h2 id="samsung-price-table-heading">Samsung Galaxy S screen replacement prices</h2>
         <p>
-          Ali Mobile generally recommends a Samsung Service Pack assembly for customers who want the display experience to stay as close as practical to the original phone. Browse supported <Link href="/repairs/phone/samsung">Samsung repair options</Link> before confirming the current option for your exact model. This is a static Ali Mobile price guide checked on {displayDateModified}.
+          Ali Mobile generally recommends the Genuine tier for customers who want the display experience to stay as close as practical to the original phone. Browse supported <Link href="/repairs/phone/samsung">Samsung repair options</Link> before confirming the current option for your exact model.
         </p>
-        <PriceTable />
-        <p className={styles.optionNote}><strong>—</strong> means Ali Mobile does not currently list an aftermarket display + frame option for that exact model.</p>
+        {priceTable
+          ? <PriceTable priceTable={priceTable} />
+          : <p>Current fixed Samsung Galaxy S screen prices are not available in our online repair catalogue. Contact us for a quote for your model.</p>}
+        <p className={styles.optionNote}><strong>—</strong> means the tier is not currently listed in the online catalogue. <strong>Quote</strong> means a current fixed online price is unavailable.</p>
+        <p className={styles.optionNote}>
+          Prices shown are sourced from Ali Mobile&apos;s current online repair catalogue.
+          {freshnessLabel ? ` Catalogue snapshot refreshed ${freshnessLabel}.` : ""} Prices may change as parts pricing changes.
+        </p>
       </section>
 
-      <section className={styles.readingSection} aria-labelledby="service-pack-heading">
-        <h2 id="service-pack-heading">What is a Samsung Service Pack screen?</h2>
+      <section className={styles.readingSection} aria-labelledby="genuine-tier-heading">
+        <h2 id="genuine-tier-heading">What does Genuine mean for Samsung screen repair?</h2>
         <p>
-          At Ali Mobile, Samsung Service Pack refers to the genuine Samsung display assembly supplied through Samsung service channels. For these repairs, Ali Mobile uses the complete display + frame assembly. This describes the part option we fit; it does not mean Ali Mobile is Samsung or an authorised Samsung Service Centre. See our <Link href="/repairs/screen-replacement">screen replacement service</Link> for the broader repair path.
+          Genuine is the current POS quality-tier name for the original-equipment display option listed for a supported repair. It describes the part option; it does not mean Ali Mobile is Samsung or an authorised Samsung Service Centre. Genuine and Premium tier names do not by themselves confirm whether a replacement frame is included, so we verify the exact part scope before work. See our <Link href="/repairs/screen-replacement">screen replacement service</Link> for the broader repair path.
         </p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="comparison-heading">
-        <h2 id="comparison-heading">Samsung Service Pack vs aftermarket screen</h2>
+        <h2 id="comparison-heading">Genuine vs Premium Samsung screen repair</h2>
         <h3>Display quality and brightness</h3>
-        <p>Aftermarket OLED quality varies. In our repair experience, some panels can have a slightly smaller active display area, a more noticeable lower black border, lower brightness or subtly different colour. That does not mean every aftermarket screen is poor.</p>
+        <p>Premium is the current catalogue tier name. Compatible aftermarket OLED quality can vary; in our repair experience, some panels can have a slightly smaller active display area, a more noticeable lower black border, lower brightness or subtly different colour. That does not mean every Premium or aftermarket screen is poor.</p>
         <h3>Fingerprint sensitivity</h3>
-        <p>Samsung ultrasonic fingerprint can still work with some aftermarket screens. Depending on the specific replacement panel, sensitivity may feel lower or require more deliberate placement than with the original Samsung display.</p>
+        <p>Samsung ultrasonic fingerprint can still work with some Premium replacement screens. Depending on the specific panel, sensitivity may feel lower or require more deliberate placement than with the original Samsung display.</p>
         <h3>Refresh rate and display response</h3>
-        <p>Some lower-grade aftermarket panels may be limited to 60Hz, while better panels may support higher refresh rates. Newer Samsung phones use more sophisticated adaptive behaviour, which an aftermarket panel may not reproduce exactly. We have also seen variation in display wake and response; this is observed variability, not a universal defect.</p>
+        <p>Some aftermarket panels in the broader market may be limited to 60Hz, while others can support higher refresh rates. Newer Samsung phones use more sophisticated adaptive behaviour, which a replacement panel may not reproduce exactly. We have also seen variation in display wake and response; this is observed variability, not a universal defect or a promise about every Premium option.</p>
         <h3>S Pen on Galaxy Ultra models</h3>
-        <p>For customers who use S Pen frequently, Ali Mobile generally recommends Service Pack. In one Galaxy S25 Ultra case we encountered, S Pen state detection behaved incorrectly after a refurbished display and aftermarket frame had been fitted. That does not mean every aftermarket assembly will cause the same issue, but it is one reason we test relevant S Pen functions carefully.</p>
+        <p>For customers who use S Pen frequently, Ali Mobile generally recommends Genuine. In one Galaxy S25 Ultra case we encountered, S Pen state detection behaved incorrectly after a refurbished display and aftermarket frame had been fitted. That does not mean every Premium or aftermarket assembly will cause the same issue, but it is one reason we test relevant S Pen functions carefully.</p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="decision-heading">
-        <h2 id="decision-heading">When is an aftermarket screen worth considering?</h2>
-        <p>Aftermarket can be a legitimate budget choice for some older phones, particularly where the genuine repair cost is close to the phone&apos;s value and display demands are lower. Customers prioritising display quality, fingerprint sensitivity, S Pen use, original-like behaviour or longer-term ownership may prefer Service Pack.</p>
+        <h2 id="decision-heading">When is a Premium screen worth considering?</h2>
+        <p>Premium can be a legitimate lower-cost choice for some older phones, particularly where the Genuine repair cost is close to the phone&apos;s value and display demands are lower. Customers prioritising display quality, fingerprint sensitivity, S Pen use, original-like behaviour or longer-term ownership may prefer Genuine.</p>
         <h3>Is it worth repairing an older Galaxy S phone?</h3>
         <p>Consider the phone&apos;s overall condition, other hardware faults, battery condition, repair cost, value and expected remaining use. If the phone is otherwise in good condition, a screen repair can still make sense; if it has several significant faults, replacement can be the more practical choice.</p>
       </section>
@@ -204,7 +226,7 @@ export function SamsungGalaxySScreenRepairCostArticle({ updatedDate }: { updated
         <p>Samsung OLED panels are fragile during installation. In our repair experience, even a small hard fragment beneath a panel can create a pressure point, while a phone that has been dropped may have a subtly distorted or dented frame.</p>
         <p>Reattaching a fragile display to an old damaged frame can make fit, adhesive contact, sealing and long-term stability less predictable. A replacement OLED may not sit under perfectly even conditions, which can contribute to panel lifting, debris around a poor fit, local pressure, black spots, ink-like spreading or increased vulnerability after another impact.</p>
         <aside className={styles.callout}>
-          Ali Mobile now prefers complete display + frame assemblies because they reduce the variables involved in fitting a fragile OLED to an old impact-damaged frame. This does not mean every display-only repair will fail.
+          The Genuine or Premium tier name does not guarantee frame inclusion. Ali Mobile confirms the exact part scope and existing frame condition before work because fitting a fragile OLED to an impact-damaged frame can introduce additional risk.
         </aside>
       </section>
 
