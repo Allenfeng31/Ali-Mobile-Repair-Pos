@@ -405,6 +405,9 @@ export default async function LocationPage({ params }: LocationPageProps) {
         { href: "/repairs/phone", title: "Phone Repair", detail: "Screen, battery, charging, camera", Icon: Wrench },
         { href: "/repairs/tablet", title: "Tablet Repair", detail: "iPad and Samsung Tab support", Icon: Wrench },
         { href: "/repairs/watch", title: "Watch Repair", detail: "Screen and battery options", Icon: ShieldCheck },
+        ...(["mitcham", "glenwaverley"].includes(area.slug)
+          ? [{ href: "/repairs/laptop/macbook", title: "MacBook Hardware Repair", detail: "Screen, battery, keyboard and charging assessment", Icon: Wrench }]
+          : []),
       ];
 
   const schema = [
