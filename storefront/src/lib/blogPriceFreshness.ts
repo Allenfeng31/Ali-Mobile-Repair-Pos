@@ -4,6 +4,7 @@ import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } fro
 import { buildIpadScreenRepairPriceTable, IPAD_SCREEN_REPAIR_COST_SLUG } from '@/data/ipadScreenRepairCost';
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog';
 import { buildPhoneScreenBrandPriceTable, PHONE_SCREEN_BLACK_BLOG_SLUG } from '@/data/phoneScreenBlackArticle';
+import { buildSamsungGalaxySScreenRepairPriceTable, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from '@/data/samsungGalaxySScreenRepairCost';
 import type { BrandEntry } from './publicRepairCataloguePolicy';
 import { applyMacBookCataloguePresentation } from './macbookCataloguePresentation';
 import type { RepairCatalog } from './publicRepairCataloguePolicy';
@@ -13,6 +14,7 @@ export const PRICE_BLOG_SLUGS = [
   MACBOOK_SCREEN_REPAIR_BLOG_SLUG,
   IPAD_SCREEN_REPAIR_COST_SLUG,
   PHONE_SCREEN_BLACK_BLOG_SLUG,
+  SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG,
 ] as const;
 export type PriceBlogSlug = typeof PRICE_BLOG_SLUGS[number];
 export type BlogPriceFreshness = Partial<Record<PriceBlogSlug, { fingerprint: string; priceChangedAt: string | null }>>;
@@ -29,6 +31,7 @@ export function displayedBlogPriceFingerprints(brands: BrandEntry[]): Record<Pri
     [MACBOOK_SCREEN_REPAIR_BLOG_SLUG]: buildMacbookAirScreenRepairPriceTable({ brands: displayedBrands }),
     [IPAD_SCREEN_REPAIR_COST_SLUG]: buildIpadScreenRepairPriceTable({ brands: displayedBrands }),
     [PHONE_SCREEN_BLACK_BLOG_SLUG]: buildPhoneScreenBrandPriceTable({ brands: displayedBrands }),
+    [SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]: buildSamsungGalaxySScreenRepairPriceTable({ brands: displayedBrands }),
   };
   return Object.fromEntries(PRICE_BLOG_SLUGS.map((slug) => {
     const table = tables[slug];

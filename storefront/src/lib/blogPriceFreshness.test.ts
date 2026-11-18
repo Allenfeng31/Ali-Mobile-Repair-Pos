@@ -4,6 +4,7 @@ import { MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog'
 import { IPHONE_SCREEN_REPAIR_COST_SLUG } from '@/data/iphoneScreenRepairCost';
 import { IPAD_SCREEN_REPAIR_COST_SLUG } from '@/data/ipadScreenRepairCost';
 import { PHONE_SCREEN_BLACK_BLOG_SLUG } from '@/data/phoneScreenBlackArticle';
+import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from '@/data/samsungGalaxySScreenRepairCost';
 import { displayedBlogPriceFingerprints, effectiveBlogDateModified, nextBlogPriceFreshness } from './blogPriceFreshness';
 import type { BrandEntry } from './publicRepairCataloguePolicy';
 
@@ -38,8 +39,11 @@ const brands: BrandEntry[] = [
     ] },
   ] },
   { category: 'phone', brand: 'Samsung', slug: 'samsung', icon: '', models: [{
-    model: 'Galaxy A15', slug: 'galaxy-a15', repairTypes: [
-      { name: 'Screen', slug: 'screen-replacement', price: 179, repairOrigin: 'pos' },
+    model: 'Galaxy S24 Ultra', slug: 'galaxy-s24-ultra', repairTypes: [
+      { name: 'Screen', slug: 'screen-replacement', price: 320, repairOrigin: 'pos', variants: [
+        { quality_grade: 'Genuine', price: 399, is_recommended: true },
+        { quality_grade: 'Premium', price: 320, is_recommended: false },
+      ] },
     ],
   }] },
 ];
@@ -52,6 +56,7 @@ describe('verified displayed Blog price freshness', () => {
     expect(initial[MACBOOK_SCREEN_REPAIR_BLOG_SLUG]?.priceChangedAt).toBeNull();
     expect(initial[IPAD_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBeNull();
     expect(initial[PHONE_SCREEN_BLACK_BLOG_SLUG]?.priceChangedAt).toBeNull();
+    expect(initial[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBeNull();
   });
 
   it('keeps dates through a no-op refresh, input reordering and a restart', () => {
@@ -74,16 +79,31 @@ describe('verified displayed Blog price freshness', () => {
     expect(next[MACBOOK_SCREEN_REPAIR_BLOG_SLUG]).toEqual(initial[MACBOOK_SCREEN_REPAIR_BLOG_SLUG]);
   });
 
-  it('updates only the four-brand article date for a displayed Samsung range change', () => {
+  it('updates the four-brand and Samsung article dates for a displayed Samsung price change', () => {
     const initial = nextBlogPriceFreshness(brands, undefined, confirmedAt);
     const changed = clone();
-    changed[3]!.models[0]!.repairTypes[0]!.price = 189;
+    changed[3]!.models[0]!.repairTypes[0]!.price = 330;
+    changed[3]!.models[0]!.repairTypes[0]!.variants![1]!.price = 330;
     const next = nextBlogPriceFreshness(changed, initial, '2026-11-14T03:00:00Z');
 
     expect(next[PHONE_SCREEN_BLACK_BLOG_SLUG]?.priceChangedAt).toBe('2026-11-14T03:00:00Z');
+    expect(next[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-14T03:00:00Z');
     expect(next[IPHONE_SCREEN_REPAIR_COST_SLUG]).toEqual(initial[IPHONE_SCREEN_REPAIR_COST_SLUG]);
     expect(next[IPAD_SCREEN_REPAIR_COST_SLUG]).toEqual(initial[IPAD_SCREEN_REPAIR_COST_SLUG]);
     expect(next[MACBOOK_SCREEN_REPAIR_BLOG_SLUG]).toEqual(initial[MACBOOK_SCREEN_REPAIR_BLOG_SLUG]);
+  });
+
+  it('updates Samsung freshness for a displayed Genuine price or canonical grade-label change', () => {
+    const initial = nextBlogPriceFreshness(brands, undefined, confirmedAt);
+    const priceChanged = clone();
+    priceChanged[3]!.models[0]!.repairTypes[0]!.variants![0]!.price = 409;
+    const priced = nextBlogPriceFreshness(priceChanged, initial, '2026-11-14T03:00:00Z');
+    expect(priced[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-14T03:00:00Z');
+
+    const labelChanged = clone();
+    labelChanged[3]!.models[0]!.repairTypes[0]!.variants![1]!.quality_grade = 'Aftermarket';
+    const renamed = nextBlogPriceFreshness(labelChanged, initial, '2026-11-15T03:00:00Z');
+    expect(renamed[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-15T03:00:00Z');
   });
 
   it('updates only the MacBook date for an Air price or Quote Required transition', () => {

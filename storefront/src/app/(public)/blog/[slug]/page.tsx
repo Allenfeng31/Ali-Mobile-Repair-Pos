@@ -16,7 +16,7 @@ import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } fro
 import { buildIpadScreenRepairPriceTable, IPAD_SCREEN_REPAIR_COST_SLUG } from "@/data/ipadScreenRepairCost";
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from "@/data/macbookScreenRepairBlog";
 import { buildPhoneScreenBrandPriceTable, PHONE_SCREEN_BLACK_BLOG_SLUG } from "@/data/phoneScreenBlackArticle";
-import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
+import { buildSamsungGalaxySScreenRepairPriceTable, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA, SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from "@/data/samsungGalaxySScreenRepairCost";
 import { fetchRepairCatalog } from "@/lib/api";
 import { getPostData, isRemovedBlogSlug, type BlogPost } from "@/lib/blog";
 import { effectiveBlogDateModified, isPriceBlogSlug } from "@/lib/blogPriceFreshness";
@@ -43,6 +43,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG) {
     const postData = await getPostData(slug);
+    const dateModified = effectiveBlogDateModified(
+      postData.updated_at || postData.date, await priceChangedAtForSlug(slug),
+    );
     return {
       title: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.seoTitle,
       description: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.description,
@@ -55,7 +58,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         locale: "en_AU",
         siteName: "Ali Mobile & Repair",
         publishedTime: postData.date,
-        modifiedTime: postData.updated_at || postData.date,
+        modifiedTime: dateModified,
         images: [{
           url: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.image,
           alt: SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_METADATA.coverImageAlt,
@@ -194,6 +197,18 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     }
   }
 
+  let samsungGalaxySScreenPriceTable = null;
+  if (isSamsungGalaxySScreenCostArticle) {
+    try {
+      const catalogue = await getBlogCatalogue();
+      samsungGalaxySScreenPriceTable = buildSamsungGalaxySScreenRepairPriceTable(catalogue);
+      priceChangedAt = catalogue.blogPriceFreshness?.[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt ?? null;
+    } catch {
+      // Do not substitute stale fixed prices when the public catalogue is unavailable.
+      samsungGalaxySScreenPriceTable = null;
+    }
+  }
+
   const datePublished = postData.date;
   const dateModified = effectiveBlogDateModified(postData.updated_at || postData.date, priceChangedAt);
   const formatDate = (date: string) => new Date(date).toLocaleDateString("en-AU", {
@@ -284,7 +299,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
 
         <article className={styles.articleCard}>
           {isSamsungGalaxySScreenCostArticle ? (
-          <SamsungGalaxySScreenRepairCostArticle updatedDate={dateModified} />
+          <SamsungGalaxySScreenRepairCostArticle priceTable={samsungGalaxySScreenPriceTable} />
           ) : isIphoneScreenCostArticle ? (
             <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
           ) : isIpadScreenCostArticle ? (
