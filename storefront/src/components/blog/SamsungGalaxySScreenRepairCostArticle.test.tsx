@@ -31,6 +31,36 @@ describe("SamsungGalaxySScreenRepairCostArticle", () => {
     expect(html).toContain("8 September 2026");
   });
 
+  it("links only the verified priority models from their table row headings", () => {
+    const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle updatedDate="2026-09-08" />);
+    const document = new DOMParser().parseFromString(html, "text/html");
+    const table = document.querySelector("table");
+
+    expect(table).not.toBeNull();
+
+    const linkedModels = Array.from(table?.querySelectorAll<HTMLAnchorElement>('tbody th[scope="row"] a') ?? [])
+      .map((link) => ({ model: link.textContent, href: link.getAttribute("href") }));
+
+    expect(linkedModels).toEqual([
+      {
+        model: "Galaxy S24 Ultra",
+        href: "/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement",
+      },
+      {
+        model: "Galaxy S23 Ultra",
+        href: "/repairs/phone/samsung/galaxy-s23-ultra/screen-replacement",
+      },
+      {
+        model: "Galaxy S22 Ultra",
+        href: "/repairs/phone/samsung/galaxy-s22-ultra/screen-replacement",
+      },
+    ]);
+    expect(table?.querySelector('a[href*="galaxy-s25-ultra"]')).toBeNull();
+    expect(table?.querySelector('a[href*="galaxy-s24/screen-replacement"]')).toBeNull();
+    expect(articleStyles).toContain(".modelLink");
+    expect(articleStyles).toContain(".modelLink:focus-visible");
+  });
+
   it("keeps first-party observations bounded and does not promise water, biometric, S Pen, or refresh outcomes", () => {
     const html = renderToStaticMarkup(<SamsungGalaxySScreenRepairCostArticle updatedDate="2026-09-08" />);
 

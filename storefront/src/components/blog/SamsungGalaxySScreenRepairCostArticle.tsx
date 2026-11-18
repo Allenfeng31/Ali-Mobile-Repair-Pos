@@ -12,6 +12,12 @@ function priceLabel(price: number | null) {
   return price === null ? "—" : `$${price}`;
 }
 
+const screenRepairLinks: Readonly<Record<string, string>> = {
+  "Galaxy S24 Ultra": "/repairs/phone/samsung/galaxy-s24-ultra/screen-replacement",
+  "Galaxy S23 Ultra": "/repairs/phone/samsung/galaxy-s23-ultra/screen-replacement",
+  "Galaxy S22 Ultra": "/repairs/phone/samsung/galaxy-s22-ultra/screen-replacement",
+};
+
 function PriceTable() {
   const columns: Array<{
     key: keyof Pick<SamsungGalaxySScreenRepairPrice, "servicePackWithFrame" | "aftermarketWithFrame">;
@@ -34,7 +40,11 @@ function PriceTable() {
         <tbody>
           {SAMSUNG_GALAXY_S_SCREEN_REPAIR_PRICES.map((row) => (
             <tr key={row.model}>
-              <th scope="row">{row.model}</th>
+              <th scope="row">
+                {screenRepairLinks[row.model]
+                  ? <Link className={styles.modelLink} href={screenRepairLinks[row.model]}>{row.model}</Link>
+                  : row.model}
+              </th>
               {columns.map((column) => {
                 const price = priceLabel(row[column.key]);
                 return <td key={column.key} aria-label={`${row.model}, ${column.label}, ${price}`}>{price}</td>;
